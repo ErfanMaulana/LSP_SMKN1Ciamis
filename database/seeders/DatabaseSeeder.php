@@ -21,5 +21,14 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Run all seeders
+        $this->call([
+            AdminSeeder::class,
+            JurusanSeeder::class,
+            MitraSeeder::class,
+            AsesorSeeder::class,
+            AsesiSeeder::class,
+        ]);
     }
 }
