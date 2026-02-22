@@ -18,7 +18,8 @@
 
 
     {{-- CONTENT --}}
-    <div class="relative z-10 container mx-auto px-6 py-24 text-white ml-10">
+    <div class="relative z-10 w-full">
+        <div class="max-w-6xl mx-auto px-6 py-24 text-white">
 
         @foreach($carousels as $index => $slide)
         <div class="content-slide {{ $index==0?'block':'hidden' }}">
@@ -49,6 +50,7 @@
         </div>
         @endforeach
 
+        </div>
     </div>
 
 

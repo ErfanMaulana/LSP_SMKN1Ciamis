@@ -30,8 +30,8 @@
 @endphp
 
 
-<section class="bg-gray-100 py-16">
-    <div class="max-w-6xl mx-auto px-4">
+<section id="kompetensi" class="bg-gray-100 py-16">
+    <div class="max-w-6xl mx-auto px-6">
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
 

@@ -23,11 +23,13 @@ class AsesorSeeder extends Seeder
         ];
 
         foreach ($asesorData as $data) {
-            Asesor::create([
-                'nama' => $data['nama'],
-                'ID_skema' => rand(1000, 9999),
-                'no_mou' => $mitra->isNotEmpty() ? $mitra->random()->no_mou : null,
-            ]);
+            if (!Asesor::where('nama', $data['nama'])->exists()) {
+                Asesor::create([
+                    'nama' => $data['nama'],
+                    'ID_skema' => rand(1000, 9999),
+                    'no_mou' => $mitra->isNotEmpty() ? $mitra->random()->no_mou : null,
+                ]);
+            }
         }
 
         $this->command->info('Asesor seeder completed successfully!');

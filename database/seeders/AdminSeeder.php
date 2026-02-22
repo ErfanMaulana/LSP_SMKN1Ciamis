@@ -13,11 +13,13 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        Admin::create([
-            'name' => 'Administrator',
-            'email' => 'admin@smkn1ciamis.sch.id',
-            'username' => 'admin',
-            'password' => Hash::make('admin123'),
-        ]);
+        if (!Admin::where('username', 'admin')->exists()) {
+            Admin::create([
+                'name' => 'Administrator',
+                'email' => 'admin@smkn1ciamis.sch.id',
+                'username' => 'admin',
+                'password' => Hash::make('admin123'),
+            ]);
+        }
     }
 }

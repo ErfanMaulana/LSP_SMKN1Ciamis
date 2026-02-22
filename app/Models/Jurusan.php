@@ -10,15 +10,18 @@ class Jurusan extends Model
     use HasFactory;
 
     protected $table = 'jurusan';
-    protected $primaryKey = 'ID_jurusan';
+    protected $primaryKey = 'id_jurusan'; // lowercase
 
     protected $fillable = [
+        'Nama_Jurusan', // sesuai dengan database
         'nama_jurusan',
         'kode_jurusan',
+        'visi',
+        'misi',
     ];
 
     public function asesi()
     {
-        return $this->hasMany(Asesi::class, 'ID_jurusan', 'ID_jurusan');
+        return $this->hasMany(Asesi::class, 'ID_jurusan', 'id_jurusan');
     }
 }

@@ -1,8 +1,8 @@
 <footer class="bg-gray-900 text-gray-300 mt-16">
-    <div class="max-w-7xl mx-auto px-6 py-12 grid md:grid-cols-3 gap-10">
+    <div class="max-w-6xl mx-auto px-6 py-12 flex flex-row justify-between gap-10">
 
         {{-- Tentang --}}
-        <div class="ml-20">
+        <div>
             <h2 class="text-white text-lg font-semibold mb-4">LSP SMKN 1 Ciamis</h2>
             <p class="text-sm leading-relaxed">
                 Lembaga Sertifikasi Profesi P1 SMKN 1 Ciamis yang melaksanakan sertifikasi kompetensi
@@ -11,7 +11,7 @@
         </div>
 
         {{-- Kontak --}}
-        <div class="ml-20">
+        <div>
             <h2 class="text-white text-lg font-semibold mb-4">Kontak</h2>
             <ul class="space-y-2 text-sm">
                 <li>📍 Jl. Jenderal Sudirman No.269, Sindangrasa</li>
@@ -21,7 +21,7 @@
         </div>
 
         {{-- Navigasi --}}
-        <div class="ml-20">
+        <div>
             <h2 class="text-white text-lg font-semibold mb-4">Navigasi</h2>
             <ul class="space-y-2 text-sm">
                 <li><a href="/" class="hover:text-white transition">Beranda</a></li>

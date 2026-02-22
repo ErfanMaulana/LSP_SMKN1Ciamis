@@ -12,5 +12,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::name('front.')->group(function () {
-    // Front-end routes will be defined here
+    Route::view('/profil', 'asesi.profil')->name('profil');
+    Route::redirect('/kompetensi-skema', '/#kompetensi')->name('kompetensi');
+    Route::redirect('/daftar-lsp', '/#daftar-lsp')->name('daftar');
+    Route::redirect('/kontak', '/#kontak')->name('kontak');
 });

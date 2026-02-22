@@ -1,9 +1,9 @@
-@extends('front.layouts.app')
+@extends('front.layout.app')
 
 @section('content')
 
 @include('front.sections.hero')
-@include('front.sections.maps')
+@include('front.sections.map')
 @include('front.sections.stats')
 
 @endsection

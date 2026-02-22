@@ -22,6 +22,8 @@ class AsesiSeeder extends Seeder
             return;
         }
 
+        $this->command->info('Found ' . $jurusan->count() . ' jurusan records');
+
         $asesiData = [
             ['nama' => 'Andi Saputra', 'email' => 'andi.saputra@student.smkn1ciamis.sch.id'],
             ['nama' => 'Siti Aminah', 'email' => 'siti.aminah@student.smkn1ciamis.sch.id'],
@@ -33,11 +35,22 @@ class AsesiSeeder extends Seeder
         foreach ($asesiData as $index => $data) {
             $nik = '3207' . str_pad($index + 1, 12, '0', STR_PAD_LEFT);
             
+            // Skip if NIK already exists
+            if (Asesi::where('NIK', $nik)->exists()) {
+                $this->command->info('Skipping existing NIK: ' . $nik);
+                continue;
+            }
+            
+            $randomJurusan = $jurusan->random();
+            $idJurusan = $randomJurusan->id_jurusan; // lowercase
+            
+            $this->command->info('Creating asesi with ID_jurusan: ' . $idJurusan);
+            
             Asesi::create([
                 'NIK' => $nik,
                 'nama' => $data['nama'],
                 'email' => $data['email'],
-                'ID_jurusan' => $jurusan->random()->ID_jurusan,
+                'ID_jurusan' => $idJurusan,
                 'kelas' => 'XII ' . ['RPL', 'TKJ', 'MM'][array_rand(['RPL', 'TKJ', 'MM'])],
                 'tempat_lahir' => $faker->city,
                 'tanggal_lahir' => $faker->dateTimeBetween('-18 years', '-16 years')->format('Y-m-d'),

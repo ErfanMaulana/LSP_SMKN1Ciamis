@@ -38,7 +38,10 @@ class MitraSeeder extends Seeder
         ];
 
         foreach ($mitra as $data) {
-            Mitra::create($data);
+            Mitra::firstOrCreate(
+                ['no_mou' => $data['no_mou']],
+                $data
+            );
         }
     }
 }
