@@ -12,19 +12,19 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $carousels = Carousel::where('is_active', 1)->latest()->get();
+        $carousels = Carousel::active()->get();
         if ($carousels->isEmpty()) {
-        $carousels = collect([
-            (object)[
-                'title' => 'Sertifikasi Kompetensi Siswa Kejuruan',
-                'subtitle' => 'Lembaga Sertifikasi Profesi (LSP P1)',
-                'description' => 'Pengujian kompetensi berbasis standar industri dan BNSP untuk memastikan lulusan siap kerja dan profesional.',
-                'image' => 'images/jellyfish.jpg',
-                'button_text' => 'Lihat Skema',
-                'button_link' => '#skema'
-            ]
-        ]);
-    }
+            $carousels = collect([
+                (object)[
+                    'title' => 'Sertifikasi Kompetensi Siswa Kejuruan',
+                    'subtitle' => 'Lembaga Sertifikasi Profesi (LSP P1)',
+                    'description' => 'Pengujian kompetensi berbasis standar industri dan BNSP untuk memastikan lulusan siap kerja dan profesional.',
+                    'image' => 'images/jellyfish.jpg',
+                    'button_text' => 'Lihat Skema',
+                    'button_link' => '#skema'
+                ]
+            ]);
+        }
 
         // sementara dummy dulu biar ga error
         $totalMurid  = 1200;

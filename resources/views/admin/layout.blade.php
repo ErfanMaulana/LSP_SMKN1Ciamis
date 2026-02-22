@@ -307,6 +307,19 @@
                     <span>Dashboard</span>
                 </a>
 
+                <!-- WEBSITE Section -->
+                <div class="menu-section-title">WEBSITE</div>
+
+                <a href="{{ route('admin.carousel.index') }}" class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
+                    <i class="bi bi-images"></i>
+                    <span>Banner Carousel</span>
+                </a>
+
+                <a href="{{ route('admin.socialmedia.index') }}" class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
+                    <i class="bi bi-share"></i>
+                    <span>Sosial Media</span>
+                </a>
+
                 <!-- ADMINISTRASI Section -->
                 <div class="menu-section-title">ADMINISTRASI</div>
                 
@@ -315,50 +328,49 @@
                     <span>Asesor</span>
                 </a>
                 
-                <a href="{{ route('admin.asesi.index') }}" class="menu-item {{ request()->routeIs('admin.asesi.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.asesi.index') }}" class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
                     <i class="bi bi-people"></i>
                     <span>Asesi</span>
+                </a>
+
+                <a href="{{ route('admin.asesi.verifikasi') }}" class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span>Verifikasi Asesi</span>
+                    @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
+                    @if($pendingCount > 0)
+                        <span style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
+                    @endif
                 </a>
                 
                 <a href="{{ route('admin.jurusan.index') }}" class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
                     <i class="bi bi-mortarboard"></i>
                     <span>Jurusan</span>
                 </a>
-                
-                <a href="#" class="menu-item">
-                    <i class="bi bi-journal-text"></i>
-                    <span>Siswa</span>
+
+                <a href="{{ route('admin.skema.index') }}" class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
+                    <i class="bi bi-patch-check"></i>
+                    <span>Skema</span>
                 </a>
-                
-                <a href="#" class="menu-item">
+
+                <a href="{{ route('admin.mitra.index') }}" class="menu-item {{ request()->routeIs('admin.mitra.*') ? 'active' : '' }}">
                     <i class="bi bi-building"></i>
-                    <span>Unit</span>
-                </a>
-                
-                <a href="#" class="menu-item">
-                    <i class="bi bi-list-check"></i>
-                    <span>Elemen</span>
-                </a>
-                
-                <a href="#" class="menu-item">
-                    <i class="bi bi-clipboard-check"></i>
-                    <span>KUK</span>
+                    <span>Mitra</span>
                 </a>
 
                 <!-- ASESOR Section -->
                 <div class="menu-section-title">ASESOR</div>
                 
-                <a href="#" class="menu-item">
+                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
                     <i class="bi bi-pencil-square"></i>
                     <span>Entry Penilaian</span>
                 </a>
                 
-                <a href="#" class="menu-item">
+                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>Hasil Ujian</span>
                 </a>
                 
-                <a href="#" class="menu-item">
+                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
                     <i class="bi bi-bar-chart"></i>
                     <span>Rekap Nilai Akhir</span>
                 </a>

@@ -5,6 +5,10 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AsesiController;
 use App\Http\Controllers\AsesorController;
 use App\Http\Controllers\Admin\JurusanController;
+use App\Http\Controllers\Admin\CarouselController;
+use App\Http\Controllers\Admin\SkemaController;
+use App\Http\Controllers\Admin\MitraController;
+use App\Http\Controllers\Admin\SocialMediaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +36,12 @@ Route::prefix('admin')->group(function () {
         Route::get('/asesi/{nik}/edit', [AsesiController::class, 'edit'])->name('admin.asesi.edit');
         Route::put('/asesi/{nik}', [AsesiController::class, 'update'])->name('admin.asesi.update');
         Route::delete('/asesi/{nik}', [AsesiController::class, 'destroy'])->name('admin.asesi.destroy');
+
+        // Verifikasi Asesi
+        Route::get('/asesi-verifikasi', [AsesiController::class, 'verifikasi'])->name('admin.asesi.verifikasi');
+        Route::get('/asesi-verifikasi/{nik}', [AsesiController::class, 'showVerifikasi'])->name('admin.asesi.verifikasi.show');
+        Route::post('/asesi-verifikasi/{nik}/approve', [AsesiController::class, 'approve'])->name('admin.asesi.approve');
+        Route::post('/asesi-verifikasi/{nik}/reject', [AsesiController::class, 'reject'])->name('admin.asesi.reject');
         
         // Asesor CRUD
         Route::get('/asesor', [AsesorController::class, 'index'])->name('admin.asesor.index');
@@ -48,5 +58,39 @@ Route::prefix('admin')->group(function () {
         Route::get('/jurusan/{id}/edit', [JurusanController::class, 'edit'])->name('admin.jurusan.edit');
         Route::put('/jurusan/{id}', [JurusanController::class, 'update'])->name('admin.jurusan.update');
         Route::delete('/jurusan/{id}', [JurusanController::class, 'destroy'])->name('admin.jurusan.destroy');
+
+        // Skema CRUD
+        Route::get('/skema', [SkemaController::class, 'index'])->name('admin.skema.index');
+        Route::get('/skema/create', [SkemaController::class, 'create'])->name('admin.skema.create');
+        Route::post('/skema', [SkemaController::class, 'store'])->name('admin.skema.store');
+        Route::get('/skema/{id}/edit', [SkemaController::class, 'edit'])->name('admin.skema.edit');
+        Route::put('/skema/{id}', [SkemaController::class, 'update'])->name('admin.skema.update');
+        Route::delete('/skema/{id}', [SkemaController::class, 'destroy'])->name('admin.skema.destroy');
+
+        // Mitra CRUD
+        Route::get('/mitra', [MitraController::class, 'index'])->name('admin.mitra.index');
+        Route::get('/mitra/create', [MitraController::class, 'create'])->name('admin.mitra.create');
+        Route::post('/mitra', [MitraController::class, 'store'])->name('admin.mitra.store');
+        Route::get('/mitra/{no_mou}/edit', [MitraController::class, 'edit'])->name('admin.mitra.edit');
+        Route::put('/mitra/{no_mou}', [MitraController::class, 'update'])->name('admin.mitra.update');
+        Route::delete('/mitra/{no_mou}', [MitraController::class, 'destroy'])->name('admin.mitra.destroy');
+
+        // Carousel CRUD
+        Route::get('/carousel', [CarouselController::class, 'index'])->name('admin.carousel.index');
+        Route::get('/carousel/create', [CarouselController::class, 'create'])->name('admin.carousel.create');
+        Route::post('/carousel', [CarouselController::class, 'store'])->name('admin.carousel.store');
+        Route::get('/carousel/{id}/edit', [CarouselController::class, 'edit'])->name('admin.carousel.edit');
+        Route::put('/carousel/{id}', [CarouselController::class, 'update'])->name('admin.carousel.update');
+        Route::delete('/carousel/{id}', [CarouselController::class, 'destroy'])->name('admin.carousel.destroy');
+        Route::patch('/carousel/{id}/toggle', [CarouselController::class, 'toggleStatus'])->name('admin.carousel.toggle');
+
+        // Social Media CRUD
+        Route::get('/social-media', [SocialMediaController::class, 'index'])->name('admin.socialmedia.index');
+        Route::get('/social-media/create', [SocialMediaController::class, 'create'])->name('admin.socialmedia.create');
+        Route::post('/social-media', [SocialMediaController::class, 'store'])->name('admin.socialmedia.store');
+        Route::get('/social-media/{id}/edit', [SocialMediaController::class, 'edit'])->name('admin.socialmedia.edit');
+        Route::put('/social-media/{id}', [SocialMediaController::class, 'update'])->name('admin.socialmedia.update');
+        Route::delete('/social-media/{id}', [SocialMediaController::class, 'destroy'])->name('admin.socialmedia.destroy');
+        Route::patch('/social-media/{id}/toggle', [SocialMediaController::class, 'toggleStatus'])->name('admin.socialmedia.toggle');
     });
 });
