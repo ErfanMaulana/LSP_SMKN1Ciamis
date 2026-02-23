@@ -26,7 +26,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">TOTAL SKEMA</div>
-                <div class="stat-value">{{ $skemas->total() }}</div>
+                <div class="stat-value">{{ $stats['total'] }}</div>
             </div>
         </div>
 
@@ -36,7 +36,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">SKEMA KKNI</div>
-                <div class="stat-value">{{ $skemas->where('jenis_skema', 'KKNI')->count() }}</div>
+                <div class="stat-value">{{ $stats['kkni'] }}</div>
             </div>
         </div>
 
@@ -46,7 +46,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">SKEMA OKUPASI</div>
-                <div class="stat-value">{{ $skemas->where('jenis_skema', 'Okupasi')->count() }}</div>
+                <div class="stat-value">{{ $stats['okupasi'] }}</div>
             </div>
         </div>
 
@@ -56,7 +56,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">SKEMA KLASTER</div>
-                <div class="stat-value">{{ $skemas->where('jenis_skema', 'Klaster')->count() }}</div>
+                <div class="stat-value">{{ $stats['klaster'] }}</div>
             </div>
         </div>
     </div>
@@ -77,6 +77,43 @@
     <!-- Main Content Card -->
     <div class="card">
         <div class="card-body">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <form method="GET" action="{{ route('admin.skema.index') }}" class="search-form">
+                    <input type="hidden" name="jenis_skema" value="{{ request('jenis_skema', 'all') }}">
+                    <input type="hidden" name="sort" value="{{ request('sort', 'created_at') }}">
+                    <input type="hidden" name="order" value="{{ request('order', 'desc') }}">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau nomor skema...">
+                    <button type="submit"><i class="bi bi-search"></i> Cari</button>
+                    @if(request('search'))
+                        <a href="{{ route('admin.skema.index') }}" class="btn-clear" title="Clear">
+                            <i class="bi bi-x"></i>
+                        </a>
+                    @endif
+                </form>
+
+                <div class="filters">
+                    <form method="GET" action="{{ route('admin.skema.index') }}" class="filter-form" id="filterForm">
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                        <select name="jenis_skema" onchange="document.getElementById('filterForm').submit()">
+                            <option value="all" {{ request('jenis_skema', 'all') === 'all' ? 'selected' : '' }}>Semua Jenis</option>
+                            <option value="KKNI" {{ request('jenis_skema') === 'KKNI' ? 'selected' : '' }}>KKNI</option>
+                            <option value="Okupasi" {{ request('jenis_skema') === 'Okupasi' ? 'selected' : '' }}>Okupasi</option>
+                            <option value="Klaster" {{ request('jenis_skema') === 'Klaster' ? 'selected' : '' }}>Klaster</option>
+                        </select>
+                        <select name="sort" onchange="document.getElementById('filterForm').submit()">
+                            <option value="created_at" {{ request('sort', 'created_at') === 'created_at' ? 'selected' : '' }}>Tanggal Dibuat</option>
+                            <option value="nama_skema" {{ request('sort') === 'nama_skema' ? 'selected' : '' }}>Nama Skema</option>
+                            <option value="nomor_skema" {{ request('sort') === 'nomor_skema' ? 'selected' : '' }}>Nomor Skema</option>
+                        </select>
+                        <select name="order" onchange="document.getElementById('filterForm').submit()">
+                            <option value="asc" {{ request('order', 'desc') === 'asc' ? 'selected' : '' }}>A → Z</option>
+                            <option value="desc" {{ request('order', 'desc') === 'desc' ? 'selected' : '' }}>Z → A</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+
             <!-- Table -->
             <div class="table-container">
                 <table class="data-table">
@@ -121,7 +158,7 @@
                                     </button>
                                     <div class="action-dropdown">
                                         <a href="{{ route('admin.skema.edit', $skema->id) }}">
-                                            <i class="bi bi-pencil"></i> Edit
+                                            <i class="bi bi-eye"></i> View
                                         </a>
                                         <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;">
                                             @csrf
@@ -327,6 +364,109 @@
 
     .card-body {
         padding: 24px;
+    }
+
+    /* Toolbar */
+    .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 8px;
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .search-form input[type="text"] {
+        flex: 1;
+        padding: 9px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .search-form input[type="text"]:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .search-form button {
+        padding: 9px 16px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s;
+    }
+
+    .search-form button:hover {
+        background: #2563eb;
+    }
+
+    .btn-clear {
+        padding: 9px;
+        background: #f3f4f6;
+        color: #6b7280;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        text-decoration: none;
+        width: 38px;
+        height: 38px;
+    }
+
+    .btn-clear:hover {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .filters {
+        display: flex;
+        gap: 8px;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 8px;
+    }
+
+    .filter-form select {
+        padding: 8px 32px 8px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13px;
+        background: white;
+        cursor: pointer;
+        outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        transition: border-color 0.2s;
+    }
+
+    .filter-form select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
     /* Table */

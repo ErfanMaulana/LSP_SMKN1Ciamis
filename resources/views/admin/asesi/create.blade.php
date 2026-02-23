@@ -51,7 +51,7 @@
                         <select id="ID_jurusan" name="ID_jurusan" class="form-control @error('ID_jurusan') is-invalid @enderror" required>
                             <option value="">Pilih Jurusan</option>
                             @foreach($jurusan as $item)
-                                <option value="{{ $item->ID_jurusan }}" {{ old('ID_jurusan') == $item->ID_jurusan ? 'selected' : '' }}>
+                                <option value="{{ $item->id_jurusan }}" {{ old('ID_jurusan') == $item->id_jurusan ? 'selected' : '' }}>
                                     {{ $item->nama_jurusan }}
                                 </option>
                             @endforeach

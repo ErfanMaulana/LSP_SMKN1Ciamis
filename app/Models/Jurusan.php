@@ -10,15 +10,23 @@ class Jurusan extends Model
     use HasFactory;
 
     protected $table = 'jurusan';
-    protected $primaryKey = 'id_jurusan'; // lowercase
+    protected $primaryKey = 'id_jurusan';
 
     protected $fillable = [
-        'Nama_Jurusan', // sesuai dengan database
+        'Nama_Jurusan',
         'nama_jurusan',
         'kode_jurusan',
         'visi',
         'misi',
     ];
+
+    /**
+     * Accessor so $model->nama_jurusan works regardless of DB column case.
+     */
+    public function getNamaJurusanAttribute($value)
+    {
+        return $value ?? ($this->attributes['Nama_Jurusan'] ?? null);
+    }
 
     public function asesi()
     {

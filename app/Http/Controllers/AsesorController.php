@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asesor;
 use App\Models\Mitra;
+use App\Models\Skema;
 use Illuminate\Http\Request;
 
 class AsesorController extends Controller
@@ -14,7 +15,16 @@ class AsesorController extends Controller
     public function index()
     {
         $asesor = Asesor::with('mitra')->paginate(10);
-        return view('admin.asesor.index', compact('asesor'));
+        
+        // Dynamic statistics
+        $stats = [
+            'total' => Asesor::count(),
+            'with_mitra' => Asesor::whereNotNull('no_mou')->count(),
+            'with_skema' => Asesor::whereNotNull('ID_skema')->count(),
+            'without_skema' => Asesor::whereNull('ID_skema')->count(),
+        ];
+        
+        return view('admin.asesor.index', compact('asesor', 'stats'));
     }
 
     /**
@@ -23,7 +33,8 @@ class AsesorController extends Controller
     public function create()
     {
         $mitra = Mitra::all();
-        return view('admin.asesor.create', compact('mitra'));
+        $skema = Skema::all();
+        return view('admin.asesor.create', compact('mitra', 'skema'));
     }
 
     /**
@@ -49,7 +60,8 @@ class AsesorController extends Controller
     {
         $asesor = Asesor::findOrFail($id);
         $mitra = Mitra::all();
-        return view('admin.asesor.edit', compact('asesor', 'mitra'));
+        $skema = Skema::all();
+        return view('admin.asesor.edit', compact('asesor', 'mitra', 'skema'));
     }
 
     /**

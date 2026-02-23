@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
-@section('title', 'Edit Skema Sertifikasi')
-@section('page-title', 'Edit Skema Sertifikasi')
+@section('title', 'View Skema Sertifikasi')
+@section('page-title', 'View Skema Sertifikasi')
 
 @section('styles')
 <style>
@@ -137,21 +137,59 @@
         margin: 0 0 16px;
     }
 
+    .unit-filter {
+        position: relative;
+    }
+
+    .unit-filter input {
+        width: 100%;
+        padding: 10px 14px 10px 40px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13px;
+        transition: all 0.2s;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 12px center;
+    }
+
+    .unit-filter input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
     .unit-card {
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 16px;
+        transition: all 0.3s ease;
     }
 
     .unit-card:hover { border-color: #cbd5e1; }
+    .unit-card.collapsed .unit-content { display: none; }
+    .unit-card.collapsed .toggle-icon { transform: rotate(-90deg); }
 
     .unit-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 16px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .unit-header:hover .unit-title {
+        color: #0F172A;
+    }
+
+    .toggle-icon {
+        font-size: 16px;
+        color: #64748b;
+        transition: transform 0.2s;
+        margin-left: 8px;
     }
 
     .unit-number {
@@ -185,11 +223,20 @@
         margin-left: 16px;
     }
 
+    .elemen-card.collapsed .elemen-content { display: none; }
+    .elemen-card.collapsed .toggle-icon { transform: rotate(-90deg); }
+
     .elemen-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 12px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .elemen-header:hover .elemen-title {
+        color: #0F172A;
     }
 
     .elemen-number {
@@ -328,8 +375,8 @@
 <div class="form-container">
     <div class="form-header">
         <div>
-            <h2>Edit Skema Sertifikasi</h2>
-            <p class="subtitle">Perbarui data skema beserta unit kompetensi, elemen, dan kriteria</p>
+            <h2>View Skema Sertifikasi</h2>
+            <p class="subtitle">Lihat dan kelola data skema beserta unit kompetensi, elemen, dan kriteria</p>
         </div>
         <a href="{{ route('admin.skema.index') }}" class="btn btn-outline">
             <i class="bi bi-arrow-left"></i> Kembali
@@ -411,19 +458,27 @@
                 </div>
                 <p class="section-desc">Kelola unit kompetensi beserta elemen dan kriteria unjuk kerja (KUK).</p>
 
+                <!-- Filter Unit -->
+                <div class="unit-filter" style="margin-bottom:20px;">
+                    <input type="text" id="unitFilter" class="form-control" placeholder="Cari unit berdasarkan kode atau judul..." onkeyup="filterUnits()">
+                </div>
+
                 <div id="units-container">
                     @php $units = old('units', $skema->units->toArray()); @endphp
                     @foreach($units as $uIdx => $unit)
                     <div class="unit-card" data-unit-index="{{ $uIdx }}">
-                        <div class="unit-header">
+                        <div class="unit-header" onclick="toggleUnit(this)">
                             <div class="unit-title">
                                 <span class="unit-number">{{ $uIdx + 1 }}</span>
                                 Unit Kompetensi #{{ $uIdx + 1 }}
+                                <i class="bi bi-chevron-down toggle-icon"></i>
                             </div>
-                            <button type="button" class="remove-btn remove-unit-btn" title="Hapus unit" style="{{ count($units) <= 1 ? 'display:none;' : '' }}">
+                            <button type="button" class="remove-btn remove-unit-btn" onclick="event.stopPropagation(); confirmDeleteUnit(event)" title="Hapus unit" style="{{ count($units) <= 1 ? 'display:none;' : '' }}">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </div>
+
+                        <div class="unit-content">
 
                         <div class="form-grid-3">
                             <div class="form-group">
@@ -449,15 +504,18 @@
                             @php $elemens = $unit['elemens'] ?? []; @endphp
                             @foreach($elemens as $eIdx => $elemen)
                             <div class="elemen-card" data-elemen-index="{{ $eIdx }}">
-                                <div class="elemen-header">
+                                <div class="elemen-header" onclick="toggleElemen(this)">
                                     <div class="elemen-title">
                                         <span class="elemen-number">{{ $eIdx + 1 }}</span>
                                         Elemen #{{ $eIdx + 1 }}
+                                        <i class="bi bi-chevron-down toggle-icon"></i>
                                     </div>
-                                    <button type="button" class="remove-btn remove-elemen-btn" title="Hapus elemen" style="{{ count($elemens) <= 1 ? 'display:none;' : '' }}">
+                                    <button type="button" class="remove-btn remove-elemen-btn" onclick="event.stopPropagation(); confirmDeleteElemen(event)" title="Hapus elemen" style="{{ count($elemens) <= 1 ? 'display:none;' : '' }}">
                                         <i class="bi bi-x-lg"></i>
                                     </button>
                                 </div>
+
+                                <div class="elemen-content">
 
                                 <div class="form-group">
                                     <label>Nama Elemen <span class="required">*</span></label>
@@ -475,7 +533,7 @@
                                         <span class="kriteria-number">{{ $kIdx + 1 }}</span>
                                         <input type="text" name="units[{{ $uIdx }}][elemens][{{ $eIdx }}][kriteria][{{ $kIdx }}][deskripsi_kriteria]" class="form-control" 
                                                value="{{ $kriteria['deskripsi_kriteria'] ?? '' }}" placeholder="Deskripsi kriteria unjuk kerja..." required>
-                                        <button type="button" class="remove-btn remove-kriteria-btn" title="Hapus kriteria" style="{{ count($kriterias) <= 1 ? 'display:none;' : '' }}">
+                                        <button type="button" class="remove-btn remove-kriteria-btn" onclick="confirmDeleteKriteria(event)" title="Hapus kriteria" style="{{ count($kriterias) <= 1 ? 'display:none;' : '' }}">
                                             <i class="bi bi-x"></i>
                                         </button>
                                     </div>
@@ -495,19 +553,22 @@
                                 <button type="button" class="add-btn add-kriteria-btn" style="margin-left:16px;">
                                     <i class="bi bi-plus"></i> Tambah KUK
                                 </button>
+                                </div>
                             </div>
                             @endforeach
                             @if(count($elemens) === 0)
                             <div class="elemen-card" data-elemen-index="0">
-                                <div class="elemen-header">
+                                <div class="elemen-header" onclick="toggleElemen(this)">
                                     <div class="elemen-title">
                                         <span class="elemen-number">1</span>
                                         Elemen #1
+                                        <i class="bi bi-chevron-down toggle-icon"></i>
                                     </div>
-                                    <button type="button" class="remove-btn remove-elemen-btn" title="Hapus elemen" style="display:none;">
+                                    <button type="button" class="remove-btn remove-elemen-btn" onclick="event.stopPropagation(); confirmDeleteElemen(event)" title="Hapus elemen" style="display:none;">
                                         <i class="bi bi-x-lg"></i>
                                     </button>
                                 </div>
+                                <div class="elemen-content">
                                 <div class="form-group">
                                     <label>Nama Elemen <span class="required">*</span></label>
                                     <input type="text" name="units[{{ $uIdx }}][elemens][0][nama_elemen]" class="form-control" placeholder="Contoh: Mengidentifikasi konsep data" required>
@@ -527,6 +588,7 @@
                                 <button type="button" class="add-btn add-kriteria-btn" style="margin-left:16px;">
                                     <i class="bi bi-plus"></i> Tambah KUK
                                 </button>
+                                </div>
                             </div>
                             @endif
                         </div>
@@ -534,6 +596,7 @@
                         <button type="button" class="add-btn add-elemen">
                             <i class="bi bi-plus-circle"></i> Tambah Elemen
                         </button>
+                        </div>
                     </div>
                     @endforeach
                 </div>
@@ -564,6 +627,56 @@
 @section('scripts')
 <script>
     let unitIndex = {{ count($units ?? []) }};
+
+    // ===== TOGGLE FUNCTIONS =====
+    function toggleUnit(header) {
+        const unitCard = header.closest('.unit-card');
+        unitCard.classList.toggle('collapsed');
+    }
+
+    function toggleElemen(header) {
+        const elemenCard = header.closest('.elemen-card');
+        elemenCard.classList.toggle('collapsed');
+    }
+
+    // ===== DELETE CONFIRMATIONS =====
+    function confirmDeleteUnit(event) {
+        if (!confirm('Apakah Anda yakin ingin menghapus unit kompetensi ini beserta semua elemen dan kriteria di dalamnya?')) {
+            event.stopPropagation();
+            return false;
+        }
+        const unitCard = event.target.closest('.unit-card');
+        unitCard.remove();
+        reindexAll();
+        updateNumbers();
+        updateRemoveButtons();
+    }
+
+    function confirmDeleteElemen(event) {
+        if (!confirm('Apakah Anda yakin ingin menghapus elemen ini beserta semua kriteria unjuk kerja di dalamnya?')) {
+            event.stopPropagation();
+            return false;
+        }
+        const elemenCard = event.target.closest('.elemen-card');
+        const unitCard = elemenCard.closest('.unit-card');
+        elemenCard.remove();
+        reindexUnit(unitCard);
+        updateNumbers();
+        updateRemoveButtons();
+    }
+
+    function confirmDeleteKriteria(event) {
+        if (!confirm('Apakah Anda yakin ingin menghapus kriteria unjuk kerja ini?')) {
+            return false;
+        }
+        const kriteriaItem = event.target.closest('.kriteria-item');
+        const elemenCard = kriteriaItem.closest('.elemen-card');
+        const unitCard = elemenCard.closest('.unit-card');
+        kriteriaItem.remove();
+        reindexElemen(elemenCard, unitCard);
+        updateNumbers();
+        updateRemoveButtons();
+    }
 
     // ===== ADD UNIT =====
     document.getElementById('addUnitBtn').addEventListener('click', function() {
@@ -598,48 +711,23 @@
             updateNumbers();
             updateRemoveButtons();
         }
-
-        if (e.target.closest('.remove-unit-btn')) {
-            const unitCard = e.target.closest('.unit-card');
-            unitCard.remove();
-            reindexAll();
-            updateNumbers();
-            updateRemoveButtons();
-        }
-
-        if (e.target.closest('.remove-elemen-btn')) {
-            const elemenCard = e.target.closest('.elemen-card');
-            const unitCard = elemenCard.closest('.unit-card');
-            elemenCard.remove();
-            reindexUnit(unitCard);
-            updateNumbers();
-            updateRemoveButtons();
-        }
-
-        if (e.target.closest('.remove-kriteria-btn')) {
-            const kriteriaItem = e.target.closest('.kriteria-item');
-            const elemenCard = kriteriaItem.closest('.elemen-card');
-            const unitCard = elemenCard.closest('.unit-card');
-            kriteriaItem.remove();
-            reindexElemen(elemenCard, unitCard);
-            updateNumbers();
-            updateRemoveButtons();
-        }
     });
 
     // ===== HTML GENERATORS =====
     function createUnitHtml(uIdx) {
         return `
         <div class="unit-card" data-unit-index="${uIdx}">
-            <div class="unit-header">
+            <div class="unit-header" onclick="toggleUnit(this)">
                 <div class="unit-title">
                     <span class="unit-number">${uIdx + 1}</span>
                     Unit Kompetensi #${uIdx + 1}
+                    <i class="bi bi-chevron-down toggle-icon"></i>
                 </div>
-                <button type="button" class="remove-btn remove-unit-btn" title="Hapus unit">
+                <button type="button" class="remove-btn remove-unit-btn" onclick="event.stopPropagation(); confirmDeleteUnit(event)" title="Hapus unit">
                     <i class="bi bi-trash"></i>
                 </button>
             </div>
+            <div class="unit-content">
             <div class="form-grid-3">
                 <div class="form-group">
                     <label>Kode Unit <span class="required">*</span></label>
@@ -661,21 +749,24 @@
             <button type="button" class="add-btn add-elemen">
                 <i class="bi bi-plus-circle"></i> Tambah Elemen
             </button>
+            </div>
         </div>`;
     }
 
     function createElemenHtml(uIdx, eIdx) {
         return `
         <div class="elemen-card" data-elemen-index="${eIdx}">
-            <div class="elemen-header">
+            <div class="elemen-header" onclick="toggleElemen(this)">
                 <div class="elemen-title">
                     <span class="elemen-number">${eIdx + 1}</span>
                     Elemen #${eIdx + 1}
+                    <i class="bi bi-chevron-down toggle-icon"></i>
                 </div>
-                <button type="button" class="remove-btn remove-elemen-btn" title="Hapus elemen">
+                <button type="button" class="remove-btn remove-elemen-btn" onclick="event.stopPropagation(); confirmDeleteElemen(event)" title="Hapus elemen">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
+            <div class="elemen-content">
             <div class="form-group">
                 <label>Nama Elemen <span class="required">*</span></label>
                 <input type="text" name="units[${uIdx}][elemens][${eIdx}][nama_elemen]" class="form-control" placeholder="Contoh: Mengidentifikasi konsep data" required>
@@ -689,6 +780,7 @@
             <button type="button" class="add-btn add-kriteria-btn" style="margin-left:16px;">
                 <i class="bi bi-plus"></i> Tambah KUK
             </button>
+            </div>
         </div>`;
     }
 
@@ -697,7 +789,7 @@
         <div class="kriteria-item">
             <span class="kriteria-number">${kIdx + 1}</span>
             <input type="text" name="units[${uIdx}][elemens][${eIdx}][kriteria][${kIdx}][deskripsi_kriteria]" class="form-control" placeholder="Deskripsi kriteria unjuk kerja..." required>
-            <button type="button" class="remove-btn remove-kriteria-btn" title="Hapus kriteria">
+            <button type="button" class="remove-btn remove-kriteria-btn" onclick="confirmDeleteKriteria(event)" title="Hapus kriteria">
                 <i class="bi bi-x"></i>
             </button>
         </div>`;
@@ -763,11 +855,17 @@
     function updateNumbers() {
         const units = document.querySelectorAll('#units-container .unit-card');
         units.forEach((unit, uIdx) => {
-            unit.querySelector('.unit-title').innerHTML = `<span class="unit-number">${uIdx + 1}</span> Unit Kompetensi #${uIdx + 1}`;
+            const titleDiv = unit.querySelector('.unit-title');
+            const toggleIcon = titleDiv.querySelector('.toggle-icon');
+            const iconHtml = toggleIcon ? '<i class="bi bi-chevron-down toggle-icon"></i>' : '';
+            titleDiv.innerHTML = `<span class="unit-number">${uIdx + 1}</span> Unit Kompetensi #${uIdx + 1} ${iconHtml}`;
 
             const elemens = unit.querySelectorAll('.elemen-card');
             elemens.forEach((elemen, eIdx) => {
-                elemen.querySelector('.elemen-title').innerHTML = `<span class="elemen-number">${eIdx + 1}</span> Elemen #${eIdx + 1}`;
+                const elTitleDiv = elemen.querySelector('.elemen-title');
+                const elToggleIcon = elTitleDiv.querySelector('.toggle-icon');
+                const elIconHtml = elToggleIcon ? '<i class="bi bi-chevron-down toggle-icon"></i>' : '';
+                elTitleDiv.innerHTML = `<span class="elemen-number">${eIdx + 1}</span> Elemen #${eIdx + 1} ${elIconHtml}`;
 
                 const kriterias = elemen.querySelectorAll('.kriteria-number');
                 kriterias.forEach((num, kIdx) => {
@@ -796,6 +894,44 @@
                 });
             });
         });
+    }
+
+    // ===== FILTER UNITS =====
+    function filterUnits() {
+        const input = document.getElementById('unitFilter');
+        const filter = input.value.toLowerCase();
+        const units = document.querySelectorAll('#units-container .unit-card');
+        
+        let visibleCount = 0;
+        units.forEach(unit => {
+            const kodeInput = unit.querySelector('input[name*="[kode_unit]"]');
+            const judulInput = unit.querySelector('input[name*="[judul_unit]"]');
+            
+            const kode = kodeInput ? kodeInput.value.toLowerCase() : '';
+            const judul = judulInput ? judulInput.value.toLowerCase() : '';
+            
+            if (kode.includes(filter) || judul.includes(filter)) {
+                unit.style.display = '';
+                visibleCount++;
+            } else {
+                unit.style.display = 'none';
+            }
+        });
+
+        // Show message if no results
+        let noResultMsg = document.getElementById('noUnitResults');
+        if (visibleCount === 0 && filter !== '') {
+            if (!noResultMsg) {
+                noResultMsg = document.createElement('div');
+                noResultMsg.id = 'noUnitResults';
+                noResultMsg.className = 'alert alert-error';
+                noResultMsg.style.marginTop = '20px';
+                noResultMsg.innerHTML = '<i class="bi bi-info-circle"></i> Tidak ada unit yang sesuai dengan pencarian "' + filter + '"';
+                document.getElementById('units-container').parentElement.insertBefore(noResultMsg, document.getElementById('addUnitBtn'));
+            }
+        } else if (noResultMsg) {
+            noResultMsg.remove();
+        }
     }
 
     // Init

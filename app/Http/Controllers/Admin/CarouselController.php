@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Carousel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class CarouselController extends Controller
 {
@@ -40,7 +41,8 @@ class CarouselController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('carousels', 'public');
+            // Konversi ke WebP untuk optimasi ukuran file
+            $validated['image'] = $this->convertToWebP($request->file('image'));
         }
 
         $validated['is_active']   = $request->has('is_active') ? 1 : 0;
@@ -84,7 +86,8 @@ class CarouselController extends Controller
             if ($carousel->image && Storage::disk('public')->exists($carousel->image)) {
                 Storage::disk('public')->delete($carousel->image);
             }
-            $validated['image'] = $request->file('image')->store('carousels', 'public');
+            // Konversi ke WebP untuk optimasi ukuran file
+            $validated['image'] = $this->convertToWebP($request->file('image'));
         }
 
         $validated['is_active']   = $request->has('is_active') ? 1 : 0;
@@ -121,5 +124,84 @@ class CarouselController extends Controller
 
         $status = $carousel->is_active ? 'diaktifkan' : 'dinonaktifkan';
         return redirect()->route('admin.carousel.index')->with('success', "Banner berhasil {$status}!");
+    }
+
+    /**
+     * Konversi gambar ke format WebP dengan kualitas tinggi
+     * 
+     * @param \Illuminate\Http\UploadedFile $file
+     * @return string Path file yang disimpan
+     */
+    private function convertToWebP($file)
+    {
+        // Cek apakah fungsi imagewebp tersedia
+        if (!function_exists('imagewebp')) {
+            // Jika GD WebP tidak tersedia, simpan file asli
+            return $file->store('carousels', 'public');
+        }
+
+        try {
+            // Generate nama file unik
+            $filename = Str::random(40) . '.webp';
+            $path = 'carousels/' . $filename;
+            $fullPath = storage_path('app/public/' . $path);
+
+            // Pastikan direktori ada
+            $directory = dirname($fullPath);
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            // Baca file gambar berdasarkan MIME type
+            $mimeType = $file->getMimeType();
+            $image = null;
+            
+            switch ($mimeType) {
+                case 'image/jpeg':
+                case 'image/jpg':
+                    $image = @imagecreatefromjpeg($file->getRealPath());
+                    break;
+                case 'image/png':
+                    $image = @imagecreatefrompng($file->getRealPath());
+                    if ($image) {
+                        // Preserve transparency untuk PNG
+                        imagealphablending($image, false);
+                        imagesavealpha($image, true);
+                    }
+                    break;
+                case 'image/webp':
+                    $image = @imagecreatefromwebp($file->getRealPath());
+                    break;
+                case 'image/gif':
+                    $image = @imagecreatefromgif($file->getRealPath());
+                    break;
+                default:
+                    // Format tidak didukung, simpan file asli
+                    return $file->store('carousels', 'public');
+            }
+
+            if (!$image) {
+                // Jika gagal membuat image, simpan file asli
+                return $file->store('carousels', 'public');
+            }
+
+            // Konversi ke WebP dengan kualitas tinggi (90 = kualitas sangat baik)
+            $success = @imagewebp($image, $fullPath, 90);
+            
+            // Bersihkan memory
+            imagedestroy($image);
+
+            if ($success && file_exists($fullPath)) {
+                return $path;
+            }
+
+            // Jika gagal konversi, gunakan metode default
+            return $file->store('carousels', 'public');
+            
+        } catch (\Exception $e) {
+            // Log error dan fallback ke metode default
+            \Log::error('WebP conversion failed: ' . $e->getMessage());
+            return $file->store('carousels', 'public');
+        }
     }
 }

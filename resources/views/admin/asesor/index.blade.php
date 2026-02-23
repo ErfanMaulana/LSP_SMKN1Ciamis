@@ -23,38 +23,42 @@
                 <i class="bi bi-people"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">TOTAL ASESORS</div>
-                <div class="stat-value">{{ $asesor->total() }} <span class="stat-change positive">+2% this month</span></div>
+                <div class="stat-label">TOTAL ASESOR</div>
+                <div class="stat-value">{{ $stats['total'] }}</div>
+                <div class="stat-subtitle">Terdaftar dalam sistem</div>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon green">
-                <i class="bi bi-activity"></i>
+                <i class="bi bi-building"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">ACTIVE NOW</div>
-                <div class="stat-value">18 <span class="stat-subtitle">Full availability</span></div>
+                <div class="stat-label">ASESOR BERMITRA</div>
+                <div class="stat-value">{{ $stats['with_mitra'] }}</div>
+                <div class="stat-subtitle">Memiliki kemitraan aktif</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon purple">
+                <i class="bi bi-patch-check"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">DENGAN SKEMA</div>
+                <div class="stat-value">{{ $stats['with_skema'] }}</div>
+                <div class="stat-subtitle">Telah ditugaskan skema</div>
             </div>
         </div>
 
         <div class="stat-card">
             <div class="stat-icon orange">
-                <i class="bi bi-award"></i>
+                <i class="bi bi-exclamation-triangle"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">PENDING CERTIFICATIONS</div>
-                <div class="stat-value">42 <span class="stat-subtitle">Action required</span></div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon yellow">
-                <i class="bi bi-star"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">ASESOR RATING</div>
-                <div class="stat-value">4.8 <span class="stat-subtitle">92% Satisfaction</span></div>
+                <div class="stat-label">TANPA SKEMA</div>
+                <div class="stat-value">{{ $stats['without_skema'] }}</div>
+                <div class="stat-subtitle">Perlu penugasan skema</div>
             </div>
         </div>
     </div>
@@ -265,6 +269,7 @@
 
     .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
     .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+    .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
     .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
     .stat-icon.yellow { background: linear-gradient(135deg, #eab308, #ca8a04); }
 

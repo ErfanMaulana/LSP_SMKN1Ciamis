@@ -29,12 +29,19 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="ID_skema">ID Skema</label>
-                        <input type="number" id="ID_skema" name="ID_skema" class="form-control @error('ID_skema') is-invalid @enderror" value="{{ old('ID_skema') }}">
+                        <label for="ID_skema">Skema</label>
+                        <select id="ID_skema" name="ID_skema" class="form-control @error('ID_skema') is-invalid @enderror">
+                            <option value="">Pilih Skema</option>
+                            @foreach($skema as $item)
+                                <option value="{{ $item->id }}" {{ old('ID_skema') == $item->id ? 'selected' : '' }}>
+                                    {{ $item->nama_skema }} ({{ $item->nomor_skema }})
+                                </option>
+                            @endforeach
+                        </select>
                         @error('ID_skema')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
-                        <small class="form-text">Masukkan ID skema sertifikasi (opsional)</small>
+                        <small class="form-text">Pilih skema sertifikasi (opsional)</small>
                     </div>
 
                     <div class="form-group">

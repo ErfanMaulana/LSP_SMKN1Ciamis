@@ -15,10 +15,40 @@ class SkemaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $skemas = Skema::withCount('units')->latest()->paginate(10);
-        return view('admin.skema.index', compact('skemas'));
+        $query = Skema::withCount('units');
+        
+        // Filter by jenis_skema
+        if ($request->filled('jenis_skema') && $request->jenis_skema !== 'all') {
+            $query->where('jenis_skema', $request->jenis_skema);
+        }
+        
+        // Search by nama or nomor
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_skema', 'like', "%{$search}%")
+                  ->orWhere('nomor_skema', 'like', "%{$search}%");
+            });
+        }
+        
+        // Sort
+        $sort = $request->get('sort', 'created_at');
+        $order = $request->get('order', 'desc');
+        $query->orderBy($sort, $order);
+        
+        $skemas = $query->paginate(10)->withQueryString();
+        
+        // Stats
+        $stats = [
+            'total' => Skema::count(),
+            'kkni' => Skema::where('jenis_skema', 'KKNI')->count(),
+            'okupasi' => Skema::where('jenis_skema', 'Okupasi')->count(),
+            'klaster' => Skema::where('jenis_skema', 'Klaster')->count(),
+        ];
+        
+        return view('admin.skema.index', compact('skemas', 'stats'));
     }
 
     /**

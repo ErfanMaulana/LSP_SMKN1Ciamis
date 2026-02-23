@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
             MitraSeeder::class,
             AsesorSeeder::class,
             AsesiSeeder::class,
+            SkemaSeederRPL::class,
         ]);
     }
 }
