@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login Admin - LSP SMKN 1 Ciamis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * {
@@ -14,7 +14,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f0f2f5;
             min-height: 100vh;
             display: flex;
@@ -90,7 +90,7 @@
             width: 60px;
             height: 60px;
             margin: 0 auto 20px;
-            background: #4a90e2;
+            background: #ffffff;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -142,7 +142,7 @@
         }
 
         .forgot-password {
-            color: #4a90e2;
+            color: #0061A5;
             font-size: 12px;
             text-decoration: none;
             font-weight: 500;
@@ -165,6 +165,27 @@
             font-size: 18px;
         }
 
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover {
+            color: #0061A5;
+        }
+
         .form-group input {
             width: 100%;
             padding: 12px 14px 12px 40px;
@@ -177,9 +198,9 @@
 
         .form-group input:focus {
             outline: none;
-            border-color: #4a90e2;
+            border-color: #0061A5;
             background: white;
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            box-shadow: 0 0 0 3px rgba(0, 97, 165, 0.1);
         }
 
         .form-group input::placeholder {
@@ -203,7 +224,7 @@
             height: 16px;
             margin-right: 8px;
             cursor: pointer;
-            accent-color: #4a90e2;
+            accent-color: #0061A5;
         }
 
         .remember-me label {
@@ -283,13 +304,13 @@
 <body>
     <div class="login-wrapper">
         <div class="left-panel">
-            <h1>Welcome</h1>
-            <p>LSP SMKN 1 Ciamis provides competency assessment and certification aligned with national and industry standards.</p>
+            <h1>Selamat Datang</h1>
+            <p>LSP SMKN 1 Ciamis adalah Lembaga Sertifikasi Profesional yang berkomitmen pada standar kompetensi nasional dan industri.</p>
         </div>
 
         <div class="right-panel">
             <div class="logo">
-                <i class="bi bi-shield-lock-fill"></i>
+                <img src="{{ asset('images/lsp.png') }}" alt="LSP Logo" style="width:80px;height:80px;object-fit:contain;display:block;" />
             </div>
 
             <div class="login-header">
@@ -347,6 +368,9 @@
                             required
                             placeholder="Enter your password"
                         >
+                        <button type="button" class="toggle-password" id="togglePassword" onclick="togglePasswordVisibility()">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
                     </div>
                     @error('password')
                         <div class="error">{{ $message }}</div>
@@ -362,5 +386,23 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.getElementById('togglePassword');
+            const icon = toggleButton.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye-fill');
+                icon.classList.add('bi-eye-slash-fill');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash-fill');
+                icon.classList.add('bi-eye-fill');
+            }
+        }
+    </script>
 </body>
 </html>

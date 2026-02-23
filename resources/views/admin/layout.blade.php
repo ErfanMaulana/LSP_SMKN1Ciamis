@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard') - Admin LSP SMKN 1 Ciamis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * {
@@ -14,7 +14,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f7fa;
             overflow-x: hidden;
         }
@@ -58,7 +58,7 @@
         .sidebar-header .admin-icon {
             width: 50px;
             height: 50px;
-            background: #3498db;
+            background: #0061A5;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -112,14 +112,14 @@
         }
 
         .menu-item:hover {
-            background: rgba(52, 152, 219, 0.1);
+            background: rgba(0, 97, 165, 0.1);
             color: #fff;
         }
 
         .menu-item.active {
-            background: rgba(52, 152, 219, 0.15);
+            background: rgba(0, 97, 165, 0.15);
             color: #fff;
-            border-left: 3px solid #3498db;
+            border-left: 3px solid #0061A5;
         }
 
         .menu-item i {

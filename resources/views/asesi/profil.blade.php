@@ -3,7 +3,7 @@
 @section('title', 'Profil LSP – LSP SMKN1 Ciamis')
 
 @push('head')
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('css/profil.css') }}">
 @endpush
@@ -47,14 +47,14 @@
                 </div>
               </div>
               <div class="milestone-item">
-                <div class="milestone-dot m-teal"><i class="bi bi-patch-check-fill" style="font-size:.7rem"></i></div>
+                <div class="milestone-dot m-blue"><i class="bi bi-patch-check-fill" style="font-size:.7rem"></i></div>
                 <div>
                   <h6>Lisensi BNSP</h6>
                   <p>Resmi memperoleh lisensi dari BNSP sebagai Lembaga Sertifikasi Profesi untuk menyelenggarakan uji kompetensi 5 skema.</p>
                 </div>
               </div>
               <div class="milestone-item">
-                <div class="milestone-dot m-orange"><i class="bi bi-arrow-repeat" style="font-size:.7rem"></i></div>
+                <div class="milestone-dot m-blue"><i class="bi bi-arrow-repeat" style="font-size:.7rem"></i></div>
                 <div>
                   <h6>Re-Akreditasi</h6>
                   <p>Keberhasilan melewati proses re-akreditasi BNSP dengan penambahan ruang lingkup skema baru.</p>
@@ -157,19 +157,19 @@
         <span class="skema-badge">3 Skema</span>
       </div>
       <div class="scope-card">
-        <div class="scope-icon ic-green"><i class="bi bi-calculator-fill"></i></div>
+        <div class="scope-icon ic-blue"><i class="bi bi-calculator-fill"></i></div>
         <h6>Akuntansi & Keuangan</h6>
         <p>Akuntansi Junior, Pengelolaan Kas, dan Teknis Akuntansi.</p>
         <span class="skema-badge">2 Skema</span>
       </div>
       <div class="scope-card">
-        <div class="scope-icon ic-orange"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="scope-icon ic-blue"><i class="bi bi-graph-up-arrow"></i></div>
         <h6>Bisnis & Pemasaran</h6>
         <p>Administrasi, Bisnis, dan Digital Marketing Level 3.</p>
         <span class="skema-badge">2 Skema</span>
       </div>
       <div class="scope-card">
-        <div class="scope-icon ic-purple"><i class="bi bi-briefcase-fill"></i></div>
+        <div class="scope-icon ic-blue"><i class="bi bi-briefcase-fill"></i></div>
         <h6>Manajemen Perkantoran</h6>
         <p>Sekretaris Junior dan Staf Administrasi Perkantoran.</p>
         <span class="skema-badge">3 Skema</span>

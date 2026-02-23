@@ -300,7 +300,7 @@ document.addEventListener('click', function(e) {
         flex-shrink: 0;
     }
 
-    .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .stat-icon.blue { background: linear-gradient(135deg, #0073bd, #0073bd); }
     .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
     .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
     .stat-icon.yellow { background: linear-gradient(135deg, #eab308, #ca8a04); }
@@ -405,7 +405,7 @@ document.addEventListener('click', function(e) {
         height: 40px;
         border-radius: 50%;
         background: #dbeafe;
-        color: #1e40af;
+        color: #004a7a;
         display: flex;
         align-items: center;
         justify-content: center;

@@ -307,7 +307,7 @@
         flex-shrink: 0;
     }
 
-    .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .stat-icon.blue { background: linear-gradient(135deg, #0073bd, #0073bd); }
     .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
     .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
     .stat-icon.yellow { background: linear-gradient(135deg, #eab308, #ca8a04); }
@@ -394,13 +394,13 @@
     }
 
     .search-form input[type="text"]:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     .search-form button {
         padding: 9px 16px;
-        background: #3b82f6;
+        background: #0073bd;
         color: white;
         border: none;
         border-radius: 8px;
@@ -414,7 +414,7 @@
     }
 
     .search-form button:hover {
-        background: #2563eb;
+        background: #0073bd;
     }
 
     .btn-clear {
@@ -465,8 +465,8 @@
     }
 
     .filter-form select:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     /* Table */
@@ -523,7 +523,7 @@
 
     .skema-icon.kkni {
         background: #dbeafe;
-        color: #1e40af;
+        color: #004a7a;
     }
 
     .skema-icon.okupasi {
@@ -575,7 +575,7 @@
 
     .badge-kkni {
         background: #dbeafe;
-        color: #1e40af;
+        color: #004a7a;
     }
 
     .badge-okupasi {

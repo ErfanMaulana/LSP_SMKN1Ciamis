@@ -82,8 +82,8 @@
 
     .form-control:focus {
         outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     .form-control.is-invalid { border-color: #ef4444; }
@@ -155,8 +155,8 @@
 
     .unit-filter input:focus {
         outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     .unit-card {
@@ -198,7 +198,7 @@
         justify-content: center;
         width: 28px;
         height: 28px;
-        background: #3b82f6;
+        background: #0073bd;
         color: white;
         border-radius: 8px;
         font-size: 13px;
@@ -320,7 +320,7 @@
         margin-top: 8px;
     }
 
-    .add-btn:hover { border-color: #3b82f6; color: #3b82f6; background: #eff6ff; }
+    .add-btn:hover { border-color: #0073bd; color: #0073bd; background: #eff6ff; }
 
     .add-btn.add-unit {
         width: 100%;
@@ -411,7 +411,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="section-label">
-                    <i class="bi bi-patch-check" style="color:#3b82f6;"></i> Informasi Skema
+                    <i class="bi bi-patch-check" style="color:#0073bd;"></i> Informasi Skema
                 </div>
                 <p class="section-desc">Data dasar skema sertifikasi kompetensi.</p>
 

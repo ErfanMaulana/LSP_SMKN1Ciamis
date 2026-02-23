@@ -149,8 +149,8 @@
     .card-body { padding: 30px; }
 
     .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
-    .btn-primary { background: #3b82f6; color: white; }
-    .btn-primary:hover { background: #2563eb; }
+    .btn-primary { background: #0073bd; color: white; }
+    .btn-primary:hover { background: #0073bd; }
     .btn-secondary { background: #e2e8f0; color: #475569; }
     .btn-secondary:hover { background: #cbd5e1; }
     .btn-outline { background: transparent; border: 2px solid #e2e8f0; color: #475569; }
@@ -166,7 +166,7 @@
         width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px;
         font-size: 14px; color: #334155; transition: all 0.2s; font-family: inherit;
     }
-    .form-control:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .form-control:focus { outline: none; border-color: #0073bd; box-shadow: 0 0 0 3px rgba(0,115,189,0.1); }
     .form-control.is-invalid { border-color: #ef4444; }
     .invalid-feedback { color: #ef4444; font-size: 12px; margin-top: 6px; }
 
@@ -176,7 +176,7 @@
         background: #f8fafc; position: relative; overflow: hidden;
         aspect-ratio: 16/9; max-height: 320px; display: flex; align-items: center; justify-content: center;
     }
-    .upload-area:hover { border-color: #3b82f6; background: #eff6ff; }
+    .upload-area:hover { border-color: #0073bd; background: #eff6ff; }
     .upload-placeholder i { font-size: 48px; color: #94a3b8; }
     .upload-placeholder h4 { font-size: 16px; color: #475569; margin-top: 12px; }
     .upload-placeholder p { font-size: 12px; color: #94a3b8; margin-top: 6px; }
@@ -193,7 +193,7 @@
         content: ''; position: absolute; width: 20px; height: 20px; border-radius: 50%;
         background: white; top: 3px; left: 3px; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
-    .toggle input:checked + .toggle-slider { background: #3b82f6; }
+    .toggle input:checked + .toggle-slider { background: #0073bd; }
     .toggle input:checked + .toggle-slider::before { transform: translateX(22px); }
     .toggle-label { font-size: 14px; color: #475569; }
 

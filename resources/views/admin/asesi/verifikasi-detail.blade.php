@@ -22,7 +22,7 @@
     }
 
     .back-link:hover {
-        color: #2563eb;
+        color: #0073bd;
     }
 
     .profile-header {
@@ -168,7 +168,7 @@
     }
 
     .doc-item:hover {
-        border-color: #3b82f6;
+        border-color: #0073bd;
         background: #eff6ff;
     }
 
@@ -183,7 +183,7 @@
         flex-shrink: 0;
     }
 
-    .doc-icon.image { background: #dbeafe; color: #2563eb; }
+    .doc-icon.image { background: #dbeafe; color: #0073bd; }
     .doc-icon.pdf { background: #fee2e2; color: #dc2626; }
 
     .doc-details {
@@ -202,7 +202,7 @@
 
     .doc-link {
         font-size: 11px;
-        color: #2563eb;
+        color: #0073bd;
         text-decoration: none;
         font-weight: 500;
     }
@@ -299,8 +299,8 @@
     }
 
     textarea.catatan:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0,115,189,0.1);
     }
 
     .catatan-label {
@@ -520,7 +520,7 @@
     <!-- Data Pribadi -->
     <div class="section-card">
         <div class="section-title">
-            <i class="bi bi-person" style="color:#2563eb;"></i> Data Pribadi
+            <i class="bi bi-person" style="color:#0073bd;"></i> Data Pribadi
         </div>
         <div class="section-body">
             <div class="info-grid">
@@ -706,7 +706,7 @@
         <!-- Already Verified -->
         <div class="section-card">
             <div class="section-title">
-                <i class="bi bi-info-circle" style="color:#2563eb;"></i> Informasi Verifikasi
+                <i class="bi bi-info-circle" style="color:#0073bd;"></i> Informasi Verifikasi
             </div>
             <div class="section-body">
                 <div class="verified-info {{ $asesi->status === 'rejected' ? 'rejected-info' : '' }}">

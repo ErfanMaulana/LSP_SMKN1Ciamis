@@ -92,7 +92,7 @@
     label { display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px; }
     .required { color: #ef4444; }
     .form-control { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #1e293b; outline: none; transition: border 0.2s; background: white; }
-    .form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .form-control:focus { border-color: #0073bd; box-shadow: 0 0 0 3px rgba(0,115,189,0.1); }
     .form-control.is-error { border-color: #ef4444; }
     .error-msg { color: #ef4444; font-size: 12px; margin-top: 4px; display: block; }
     .form-hint { font-size: 12px; color: #94a3b8; margin-top: 4px; }
@@ -102,7 +102,7 @@
     .toggle input { opacity: 0; width: 0; height: 0; }
     .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #e2e8f0; border-radius: 24px; transition: 0.3s; }
     .toggle-slider:before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
-    .toggle input:checked + .toggle-slider { background: #3b82f6; }
+    .toggle input:checked + .toggle-slider { background: #0073bd; }
     .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
     .toggle-label { font-size: 14px; color: #374151; font-weight: 400; }
 
@@ -112,8 +112,8 @@
 
     .form-actions { display: flex; justify-content: flex-end; gap: 12px; padding-top: 24px; border-top: 1px solid #f1f5f9; margin-top: 8px; }
     .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
-    .btn-primary { background: #3b82f6; color: white; }
-    .btn-primary:hover { background: #2563eb; }
+    .btn-primary { background: #0073bd; color: white; }
+    .btn-primary:hover { background: #0073bd; }
     .btn-cancel { background: #f8fafc; color: #64748b; border: 1.5px solid #e2e8f0; }
     .btn-cancel:hover { background: #f1f5f9; }
 </style>

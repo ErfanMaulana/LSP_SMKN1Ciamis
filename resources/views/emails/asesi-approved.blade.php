@@ -7,7 +7,7 @@
 <body style="margin:0;padding:0;background-color:#f5f7fa;font-family:'Segoe UI',Roboto,Arial,sans-serif;">
     <div style="max-width:600px;margin:30px auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
         <!-- Header -->
-        <div style="background:linear-gradient(135deg,#2563eb 0%,#1e40af 100%);padding:30px 40px;text-align:center;">
+        <div style="background:linear-gradient(135deg,#0073bd 0%,#004a7a 100%);padding:30px 40px;text-align:center;">
             <h1 style="color:#ffffff;font-size:22px;margin:0 0 6px;">LSP SMKN 1 Ciamis</h1>
             <p style="color:rgba(255,255,255,0.8);font-size:13px;margin:0;">Lembaga Sertifikasi Profesi</p>
         </div>

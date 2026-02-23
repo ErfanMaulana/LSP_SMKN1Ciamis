@@ -267,7 +267,7 @@
         color: white;
     }
 
-    .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .stat-icon.blue { background: linear-gradient(135deg, #0073bd, #0073bd); }
     .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
     .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
     .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
@@ -356,8 +356,8 @@
 
     .search-box input:focus {
         outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     .filter-group {

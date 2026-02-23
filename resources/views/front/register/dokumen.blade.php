@@ -24,7 +24,7 @@
         }
 
         .upload-card:hover {
-            border-color: #3b82f6;
+            border-color: #0073bd;
             box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
         }
 

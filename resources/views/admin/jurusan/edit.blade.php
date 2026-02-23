@@ -19,7 +19,7 @@
         transition: color .2s;
         width: auto;
     }
-    .back-link:hover { color: #2563eb; }
+    .back-link:hover { color: #0073bd; }
     .card {
         background: #fff;
         flex: 1;
@@ -47,8 +47,8 @@
         padding: 14px 16px; background: #eff6ff; border: 1px solid #bfdbfe;
         border-radius: 8px; margin-bottom: 24px;
     }
-    .info-banner i { font-size: 18px; color: #2563eb; flex-shrink: 0; }
-    .info-banner p { font-size: 13px; color: #1e40af; margin: 0; }
+    .info-banner i { font-size: 18px; color: #0073bd; flex-shrink: 0; }
+    .info-banner p { font-size: 13px; color: #004a7a; margin: 0; }
     .form-row {
         display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;
     }
@@ -61,7 +61,7 @@
         font-size: 13px; width: 100%; transition: border-color .2s; outline: none;
         font-family: inherit;
     }
-    .form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+    .form-control:focus { border-color: #0073bd; box-shadow: 0 0 0 3px rgba(0,115,189,.1); }
     .form-control.is-invalid { border-color: #ef4444; }
     .form-control.is-invalid:focus { box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
     .invalid-feedback { font-size: 12px; color: #ef4444; }

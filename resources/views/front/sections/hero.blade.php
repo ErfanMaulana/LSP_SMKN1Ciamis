@@ -53,8 +53,16 @@
 
 
     {{-- NAV --}}
-    <button onclick="prevSlide()" class="absolute left-6 text-white text-3xl z-20 bg-black/30 hover:bg-black/50 w-12 h-12 rounded-full flex items-center justify-center transition">‹</button>
-    <button onclick="nextSlide()" class="absolute right-6 text-white text-3xl z-20 bg-black/30 hover:bg-black/50 w-12 h-12 rounded-full flex items-center justify-center transition">›</button>
+    <button onclick="prevSlide()" class="absolute left-6 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 w-12 h-12 rounded-full flex items-center justify-center transition cursor-pointer group" title="Slide sebelumnya">
+        <svg class="w-6 h-6 text-white group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+    <button onclick="nextSlide()" class="absolute right-6 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 w-12 h-12 rounded-full flex items-center justify-center transition cursor-pointer group" title="Slide berikutnya">
+        <svg class="w-6 h-6 text-white group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+        </svg>
+    </button>
 
     {{-- NAV sudah ditangani di atas --}}
 
@@ -66,8 +74,8 @@
     <button onclick="goToSlide({{ $index }})"
             class="dot"
             style="display:inline-block; width:12px; height:12px; border-radius:50%; cursor:pointer; transition: all 0.3s;
-                   background: {{ $index==0 ? '#3b82f6' : 'rgba(255,255,255,0.6)' }};
-                   border: 2px solid {{ $index==0 ? '#3b82f6' : 'rgba(255,255,255,0.9)' }};
+                   background: {{ $index==0 ? '#0073bd' : 'rgba(255,255,255,0.6)' }};
+                   border: 2px solid {{ $index==0 ? '#0073bd' : 'rgba(255,255,255,0.9)' }};
                    transform: {{ $index==0 ? 'scale(1.25)' : 'scale(1)' }};"
             title="Slide {{ $index + 1 }}"></button>
     @endforeach
@@ -98,8 +106,8 @@ function showSlide(i){
 
     contents[i].classList.remove('hidden');
 
-    dots[i].style.background = '#3b82f6';
-    dots[i].style.borderColor = '#3b82f6';
+    dots[i].style.background = '#0073bd';
+    dots[i].style.borderColor = '#0073bd';
     dots[i].style.transform = 'scale(1.25)';
 }
 

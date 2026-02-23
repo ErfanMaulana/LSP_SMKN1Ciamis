@@ -1,7 +1,7 @@
 :root {
-  --blue: #1a4fa0;
+  --blue: #0061A5;
   --blue-light: #e8f0fe;
-  --blue-accent: #2d6be4;
+  --blue-accent: #0073bd;
   --gray-bg: #f4f6fb;
   --text-dark: #1a2340;
   --text-muted: #6b7a99;
@@ -9,7 +9,7 @@
 }
 
 /* ===================== HERO ===================== */
-.hero-section { background: linear-gradient(135deg, #1a4fa0 0%, #2d6be4 100%); padding: 3rem 0 3.5rem; }
+.hero-section { background: linear-gradient(135deg, #0061A5 0%, #0073bd 100%); padding: 3rem 0 3.5rem; }
 .card-hero { background: #fff; border-radius: 14px; box-shadow: 0 4px 24px rgba(0,0,0,.12); }
 .section-icon { width: 36px; height: 36px; background: var(--blue-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--blue-accent); font-size: 1rem; flex-shrink: 0; }
 .card-title-h { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0; }
@@ -29,7 +29,7 @@
 .vm-section { background: #f7f9ff; padding: 4rem 0; }
 .section-title { font-size: 1.6rem; font-weight: 800; color: var(--text-dark); text-align: center; }
 .section-underline { width: 50px; height: 4px; background: var(--blue-accent); border-radius: 4px; margin: .6rem auto 2.5rem; }
-.card-visi { background: linear-gradient(145deg, #1a4fa0, #2d6be4); border-radius: 16px; padding: 2.2rem; color: #fff; height: 100%; text-align: center; }
+.card-visi { background: linear-gradient(145deg, #0061A5, #0073bd); border-radius: 16px; padding: 2.2rem; color: #fff; height: 100%; text-align: center; }
 .visi-icon { font-size: 2.2rem; margin-bottom: 1rem; }
 .card-visi h5 { font-weight: 700; font-size: 1rem; margin-bottom: 1rem; }
 .card-visi p { font-size: .82rem; line-height: 1.8; font-style: italic; opacity: .92; }
@@ -56,7 +56,7 @@
 .scope-card { background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,.06); border: 1px solid var(--border); height: 100%; transition: transform .2s, box-shadow .2s; }
 .scope-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(30,92,191,.13); }
 .scope-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: .9rem; }
-.ic-blue { background: #dbeafe; color: #2563eb; }
+.ic-blue { background: #dbeafe; color: #0073bd; }
 .ic-green { background: #d1fae5; color: #059669; }
 .ic-orange { background: #ffedd5; color: #ea580c; }
 .ic-purple { background: #ede9fe; color: #7c3aed; }

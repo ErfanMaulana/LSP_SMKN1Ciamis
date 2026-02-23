@@ -38,7 +38,7 @@
         display: flex; align-items: center; justify-content: center;
         font-size: 22px; color: #fff; flex-shrink: 0;
     }
-    .stat-icon.blue   { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+    .stat-icon.blue   { background: linear-gradient(135deg,#0073bd,#0073bd); }
     .stat-icon.green  { background: linear-gradient(135deg,#10b981,#059669); }
     .stat-icon.purple { background: linear-gradient(135deg,#8b5cf6,#7c3aed); }
     .stat-icon.orange { background: linear-gradient(135deg,#f59e0b,#d97706); }
@@ -54,13 +54,13 @@
         flex: 1; padding: 9px 14px; border: 1px solid #d1d5db;
         border-radius: 8px; font-size: 13px; outline: none; transition: border-color .2s;
     }
-    .search-form input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+    .search-form input:focus { border-color: #0073bd; box-shadow: 0 0 0 3px rgba(0,115,189,.1); }
     .search-form button {
-        padding: 9px 16px; background: #3b82f6; color: #fff; border: none;
+        padding: 9px 16px; background: #0073bd; color: #fff; border: none;
         border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s;
         display: inline-flex; align-items: center; gap: 6px;
     }
-    .search-form button:hover { background: #2563eb; }
+    .search-form button:hover { background: #0073bd; }
 
     .sort-form { display: flex; align-items: center; gap: 8px; }
     .sort-form select {
@@ -77,7 +77,7 @@
     .btn-primary { background: #0F172A; color: #fff; }
     .btn-primary:hover { background: #1e293b; color: #fff; }
     .btn-xs { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
-    .btn-edit { background: #eff6ff; color: #2563eb; }
+    .btn-edit { background: #eff6ff; color: #0073bd; }
     .btn-edit:hover { background: #dbeafe; }
     .btn-delete { background: #fef2f2; color: #dc2626; }
     .btn-delete:hover { background: #fee2e2; }
@@ -205,7 +205,7 @@
 
 <div class="page-header">
     <div>
-        <h2><i class="bi bi-mortarboard" style="color:#3b82f6;margin-right:8px;"></i>Manajemen Jurusan</h2>
+        <h2><i class="bi bi-mortarboard" style="color:#0073bd;margin-right:8px;"></i>Manajemen Jurusan</h2>
         <p>Kelola semua program keahlian yang tersedia di LSP.</p>
     </div>
     <a href="{{ route('admin.jurusan.create') }}" class="btn btn-primary">

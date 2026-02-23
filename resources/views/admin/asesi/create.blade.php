@@ -211,7 +211,7 @@
         content: '';
         width: 4px;
         height: 20px;
-        background: #3b82f6;
+        background: #0073bd;
         border-radius: 2px;
     }
 
@@ -254,9 +254,9 @@
 
     .form-control:focus {
         outline: none;
-        border-color: #3b82f6;
+        border-color: #0073bd;
         background: white;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     .form-control.is-invalid {
@@ -292,12 +292,12 @@
     }
 
     .btn-primary {
-        background: #3b82f6;
+        background: #0073bd;
         color: white;
     }
 
     .btn-primary:hover {
-        background: #2563eb;
+        background: #0073bd;
         transform: translateY(-1px);
     }
 

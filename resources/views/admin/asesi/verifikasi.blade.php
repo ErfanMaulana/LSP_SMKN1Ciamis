@@ -27,8 +27,8 @@
     }
 
     .verifikasi-page .stat-card:hover {
-        border-color: #3b82f6;
-        box-shadow: 0 4px 12px rgba(59,130,246,0.1);
+        border-color: #0073bd;
+        box-shadow: 0 4px 12px rgba(0,115,189,0.1);
     }
 
     .verifikasi-page .stat-card.active-pending {
@@ -59,7 +59,7 @@
     .stat-icon-box.pending { background: #fef3c7; color: #d97706; }
     .stat-icon-box.approved { background: #d1fae5; color: #059669; }
     .stat-icon-box.rejected { background: #fee2e2; color: #dc2626; }
-    .stat-icon-box.total { background: #dbeafe; color: #2563eb; }
+    .stat-icon-box.total { background: #dbeafe; color: #0073bd; }
 
     .stat-info .stat-label {
         font-size: 12px;
@@ -117,13 +117,13 @@
     }
 
     .search-form input:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0,115,189,0.1);
     }
 
     .search-form button {
         padding: 8px 16px;
-        background: #3b82f6;
+        background: #0073bd;
         color: #fff;
         border: none;
         border-radius: 8px;
@@ -134,7 +134,7 @@
     }
 
     .search-form button:hover {
-        background: #2563eb;
+        background: #0073bd;
     }
 
     .data-table {
@@ -210,7 +210,7 @@
 
     .btn-view {
         background: #eff6ff;
-        color: #2563eb;
+        color: #0073bd;
     }
 
     .btn-view:hover {

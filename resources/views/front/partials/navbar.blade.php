@@ -3,9 +3,9 @@
 
         <div class="flex items-center gap-3">
             <div class="bg-white p-1 rounded">
-                <img src="{{ asset('images/lsp.png') }}" class="w-9 h-9 object-contain">
+                <img src="{{ asset('images/lsp.png') }}" class="w-10 h-10 object-contain">
             </div>
-            <span class="font-semibold">LSP SMKN1 Ciamis</span>
+            <span class="font-semibold">LSP SMKN 1 CIAMIS</span>
         </div>
 
         <nav class="hidden md:flex gap-1 text-sm font-medium">
