@@ -72,7 +72,7 @@
 
 <style>
     .welcome-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
         padding: 35px;
         border-radius: 12px;
         margin-bottom: 30px;
@@ -117,7 +117,7 @@
     .stat-icon {
         width: 60px;
         height: 60px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -128,15 +128,15 @@
     }
 
     .stat-icon.asesor {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
     }
 
     .stat-icon.siswa {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
     }
 
     .stat-icon.unit {
-        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
     }
 
     .stat-content {
@@ -179,12 +179,12 @@
     }
 
     .action-card {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
         padding: 20px;
         border-radius: 10px;
         text-align: center;
         text-decoration: none;
-        color: #2c3e50;
+        color: white;
         transition: all 0.3s;
         display: flex;
         flex-direction: column;
@@ -199,7 +199,7 @@
 
     .action-card i {
         font-size: 32px;
-        color: #667eea;
+        color: white;
     }
 
     .action-card span {
