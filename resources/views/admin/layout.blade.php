@@ -296,7 +296,7 @@
                 <div class="admin-icon">
                     <i class="bi bi-person-circle"></i>
                 </div>
-                <h3>ADMIN</h3>
+                <h4>Admin LSP</h4>
                 <p>{{ Auth::guard('admin')->user()->name }}</p>
             </div>
 
@@ -394,7 +394,7 @@
                         </div>
                         <div class="user-details">
                             <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
-                            <span class="user-role">Administrator</span>
+                            <span class="user-role">Admin LSP</span>
                         </div>
                     </div>
                     <form method="POST" action="{{ route('admin.logout') }}" style="display: inline;">

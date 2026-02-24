@@ -23,14 +23,18 @@
         margin-bottom: 24px;
     }
     .stat-card {
-        background: #fff;
+        background: white;
         border-radius: 12px;
-        padding: 18px 20px;
+        padding: 20px;
         display: flex;
         align-items: center;
-        gap: 14px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-        border: 1px solid #e5e7eb;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+    }
+     .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
     }
     .stat-icon {
         width: 50px; height: 50px;
@@ -71,11 +75,11 @@
 
     .btn {
         display: inline-flex; align-items: center; gap: 6px;
-        padding: 9px 18px; border-radius: 8px; font-size: 13px;
+        padding: 9px 18px; border-radius: 8px; font-size: 14px;
         font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: all .2s;
     }
     .btn-primary { background: #0061A5; color: #fff; }
-    .btn-primary:hover { background: #003961; color: #fff; }
+    .btn-primary:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
     .btn-xs { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
     .btn-edit { background: #eff6ff; color: #0073bd; }
     .btn-edit:hover { background: #dbeafe; }

@@ -250,25 +250,26 @@
     }
 
     .btn-primary {
-        background: #0F172A;
+        background: #0073bd;
         color: white;
     }
 
     .btn-primary:hover {
-        background: #1e293b;
+        background: #003961;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
     }
 
     .btn-outline {
-        background: white;
-        color: #0F172A;
-        border: 1px solid #e2e8f0;
+        background: #0073bd;
+        color: white;
     }
 
     .btn-outline:hover {
-        background: #f8fafc;
+        background: #003961;
         border-color: #cbd5e1;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
     }
 
     /* Statistics Cards */

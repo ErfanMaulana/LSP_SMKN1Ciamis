@@ -254,12 +254,12 @@ document.addEventListener('click', function(e) {
     }
 
     .btn-primary {
-        background: #0F172A;
+        background: #0061A5;
         color: white;
     }
 
     .btn-primary:hover {
-        background: #1e293b;
+        background: #003961;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
     }

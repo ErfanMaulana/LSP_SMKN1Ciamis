@@ -24,14 +24,14 @@
                    class="px-4 py-2 rounded-lg transition-colors duration-150
                           {{ $active
                               ? 'bg-blue-600 text-white'
-                              : 'text-gray-700 hover:bg-blue-600 hover:text-white' }}">
+                              : 'text-gray-700 hover:bg-blue-700 hover:text-white' }}">
                     {{ $link['label'] }}
                 </a>
             @endforeach
         </nav>
 
         <a href="{{ route('admin.login') }}"
-           class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm">
+           class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors duration-150">
            Login
         </a>
 

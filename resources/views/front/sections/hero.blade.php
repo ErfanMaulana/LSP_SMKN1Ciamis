@@ -38,7 +38,7 @@
 
                 <div class="mt-8 flex gap-4">
                     <a href="{{ $slide->button_link }}"
-                       class="bg-blue-500 hover:bg-blue-600 px-6 py-3 rounded-lg font-semibold shadow-lg transition">
+                       class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold shadow-lg transition">
                         {{ $slide->button_text }}
                     </a>
                 </div>
