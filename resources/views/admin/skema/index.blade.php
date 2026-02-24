@@ -31,7 +31,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon green">
+            <div class="stat-icon blue">
                 <i class="bi bi-award"></i>
             </div>
             <div class="stat-content">
@@ -41,7 +41,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon purple">
+            <div class="stat-icon blue">
                 <i class="bi bi-briefcase"></i>
             </div>
             <div class="stat-content">
@@ -51,7 +51,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon yellow">
+            <div class="stat-icon blue">
                 <i class="bi bi-diagram-3"></i>
             </div>
             <div class="stat-content">

@@ -74,8 +74,8 @@
         padding: 9px 18px; border-radius: 8px; font-size: 13px;
         font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: all .2s;
     }
-    .btn-primary { background: #0F172A; color: #fff; }
-    .btn-primary:hover { background: #1e293b; color: #fff; }
+    .btn-primary { background: #0061A5; color: #fff; }
+    .btn-primary:hover { background: #003961; color: #fff; }
     .btn-xs { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
     .btn-edit { background: #eff6ff; color: #0073bd; }
     .btn-edit:hover { background: #dbeafe; }
@@ -220,15 +220,15 @@
         <div><div class="stat-label">Total Jurusan</div><div class="stat-value">{{ $stats['total'] }}</div></div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green"><i class="bi bi-people"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-people"></i></div>
         <div><div class="stat-label">Total Asesi</div><div class="stat-value">{{ $stats['total_asesi'] }}</div></div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon purple"><i class="bi bi-person-check"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-person-check"></i></div>
         <div><div class="stat-label">Jurusan Aktif</div><div class="stat-value">{{ $stats['with_asesi'] }}</div></div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon orange"><i class="bi bi-graph-up"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-graph-up"></i></div>
         <div><div class="stat-label">Rata-rata Asesi</div><div class="stat-value">{{ $stats['avg_asesi'] }}</div></div>
     </div>
 </div>

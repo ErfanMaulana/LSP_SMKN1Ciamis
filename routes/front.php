@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\RegisterController;
+use App\Http\Controllers\Front\KompetensiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,9 +15,12 @@ use App\Http\Controllers\Front\RegisterController;
 
 Route::name('front.')->group(function () {
     Route::view('/profil', 'asesi.profil')->name('profil');
-    Route::redirect('/kompetensi-skema', '/#kompetensi')->name('kompetensi');
     Route::redirect('/daftar-lsp', '/#daftar-lsp')->name('daftar');
     Route::redirect('/kontak', '/#kontak')->name('kontak');
+
+    // Kompetensi Routes
+    Route::get('/kompetensi-dan-data-skema', [KompetensiController::class, 'index'])->name('kompetensi.index');
+    Route::get('/kompetensi-dan-data-skema/{slug}', [KompetensiController::class, 'detail'])->name('kompetensi.detail');
 
     // Registration Routes
     Route::prefix('register')->name('register.')->group(function () {

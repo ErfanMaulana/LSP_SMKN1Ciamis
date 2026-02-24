@@ -31,7 +31,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon green">
+            <div class="stat-icon blue">
                 <i class="bi bi-file-earmark-text"></i>
             </div>
             <div class="stat-content">
@@ -41,7 +41,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon purple">
+            <div class="stat-icon blue">
                 <i class="bi bi-person-badge"></i>
             </div>
             <div class="stat-content">
@@ -51,7 +51,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon yellow">
+            <div class="stat-icon blue">
                 <i class="bi bi-clock-history"></i>
             </div>
             <div class="stat-content">

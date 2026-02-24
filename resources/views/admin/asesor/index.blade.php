@@ -30,7 +30,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon green">
+            <div class="stat-icon blue">
                 <i class="bi bi-building"></i>
             </div>
             <div class="stat-content">
@@ -41,7 +41,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon purple">
+            <div class="stat-icon blue">
                 <i class="bi bi-patch-check"></i>
             </div>
             <div class="stat-content">
@@ -52,7 +52,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon orange">
+            <div class="stat-icon blue">
                 <i class="bi bi-exclamation-triangle"></i>
             </div>
             <div class="stat-content">

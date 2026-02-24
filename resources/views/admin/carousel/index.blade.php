@@ -25,14 +25,14 @@
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon bg-green"><i class="bi bi-check-circle"></i></div>
+            <div class="stat-icon bg-blue"><i class="bi bi-check-circle"></i></div>
             <div class="stat-info">
                 <h3>{{ $carousels->where('is_active', true)->count() }}</h3>
                 <p>Aktif</p>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon bg-red"><i class="bi bi-x-circle"></i></div>
+            <div class="stat-icon bg-blue"><i class="bi bi-x-circle"></i></div>
             <div class="stat-info">
                 <h3>{{ $carousels->where('is_active', false)->count() }}</h3>
                 <p>Nonaktif</p>

@@ -78,9 +78,8 @@
 
       <div class="lg:col-span-5">
         <div class="card-visi">
-          <div class="visi-icon"><i class="bi bi-eye-fill"></i></div>
           <h5>Visi Kami</h5>
-          <p>"Menjadi Lembaga Sertifikasi Profesi yang unggul, profesional, dan akuntabel dalam mencetak tenaga kerja kompeten berstandar nasional dan Internasional pada tahun 2028."</p>
+          <p>"Menjadi platform digital resmi LSP SMKN 1 Ciamis yang terintegrasi, modern, dan profesional dalam mendukung seluruh proses sertifikasi kompetensi secara transparan, akurat, dan efisien, serta mampu meningkatkan kualitas layanan, kredibilitas lembaga, dan daya saing lulusan di dunia usaha dan dunia industri melalui pemanfaatan teknologi informasi."</p>
         </div>
       </div>
 

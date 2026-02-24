@@ -174,7 +174,7 @@
         .user-avatar {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0061A5;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -201,7 +201,7 @@
         }
 
         .btn-logout {
-            background: #e74c3c;
+            background: #0061A5;
             color: white;
             border: none;
             padding: 8px 20px;
@@ -213,7 +213,7 @@
         }
 
         .btn-logout:hover {
-            background: #c0392b;
+            background: #003961;
             transform: translateY(-1px);
         }
 

@@ -11,11 +11,11 @@
         <nav class="hidden md:flex gap-1 text-sm font-medium">
             @php
                 $navLinks = [
-                    ['route' => 'front.home',       'label' => 'Beranda'],
-                    ['route' => 'front.profil',      'label' => 'Profil LSP'],
-                    ['route' => 'front.kompetensi',  'label' => 'Kompetensi & Data Skema'],
-                    ['route' => 'front.daftar',      'label' => 'Daftar LSP'],
-                    ['route' => 'front.kontak',      'label' => 'Kontak'],
+                    ['route' => 'front.home',           'label' => 'Beranda'],
+                    ['route' => 'front.profil',         'label' => 'Profil LSP'],
+                    ['route' => 'front.kompetensi.index',  'label' => 'Kompetensi & Data Skema'],
+                    ['route' => 'front.daftar',         'label' => 'Daftar LSP'],
+                    ['route' => 'front.kontak',         'label' => 'Kontak'],
                 ];
             @endphp
             @foreach($navLinks as $link)

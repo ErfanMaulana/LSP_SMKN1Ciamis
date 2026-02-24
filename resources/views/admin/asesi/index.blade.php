@@ -44,7 +44,7 @@
         </div> -->
 
         <div class="stat-card">
-            <div class="stat-icon green">
+            <div class="stat-icon blue">
                 <i class="bi bi-person-plus"></i>
             </div>
             <div class="stat-content">
@@ -54,7 +54,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon orange">
+            <div class="stat-icon blue">
                 <i class="bi bi-clipboard-check"></i>
             </div>
             <div class="stat-content">
@@ -64,7 +64,7 @@
         </div>
 
         <div class="stat-card">
-            <div class="stat-icon yellow">
+            <div class="stat-icon blue">
                 <i class="bi bi-award"></i>
             </div>
             <div class="stat-content">

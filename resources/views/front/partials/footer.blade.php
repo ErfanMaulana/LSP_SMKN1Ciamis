@@ -3,7 +3,7 @@
 
         {{-- Tentang --}}
         <div>
-            <h2 class="text-white text-lg font-semibold mb-4">LSP SMKN 1 Ciamis</h2>
+            <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">LSP SMKN 1 Ciamis</h2>
             <p class="text-sm leading-relaxed">
                 Lembaga Sertifikasi Profesi P1 SMKN 1 Ciamis yang melaksanakan sertifikasi kompetensi
                 bagi siswa sesuai standar industri dan BNSP.
@@ -12,7 +12,7 @@
 
         {{-- Kontak --}}
         <div>
-            <h2 class="text-white text-lg font-semibold mb-4">Kontak</h2>
+            <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Kontak</h2>
             <ul class="space-y-2 text-sm">
                 <li>📍 Jl. Jenderal Sudirman No.269, Sindangrasa</li>
                 <li>📞 (0265) 771204</li>
@@ -22,7 +22,7 @@
 
         {{-- Sosial Media --}}
         <div>
-            <h2 class="text-white text-lg font-semibold mb-4">Sosial Media</h2>
+            <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Sosial Media</h2>
             @php
                 $socialMedias = \App\Models\SocialMedia::active()->get();
                 $smIcons = [
