@@ -16,10 +16,21 @@ class Asesor extends Model
         'ID_skema',
         'no_mou',
         'nama',
+        'no_reg',
     ];
 
     public function mitra()
     {
         return $this->belongsTo(Mitra::class, 'no_mou', 'no_mou');
+    }
+
+    public function skema()
+    {
+        return $this->belongsTo(Skema::class, 'ID_skema');
+    }
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class, 'no_reg', 'no_reg');
     }
 }

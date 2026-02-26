@@ -16,6 +16,7 @@ class Asesi extends Model
 
     protected $fillable = [
         'NIK',
+        'no_reg',
         'nama',
         'email',
         'ID_jurusan',
@@ -52,7 +53,7 @@ class Asesi extends Model
     ];
 
     protected $casts = [
-        'tanggal_lahir' => 'date',
+        'tanggal_lahir' => 'datetime',
         'verified_at'   => 'datetime',
     ];
 
@@ -87,5 +88,17 @@ class Asesi extends Model
     {
         return $this->hasMany(BuktiPendukung::class, 'NIK', 'NIK')
                     ->where('jenis_dokumen', 'bukti_kompetensi');
+    }
+
+    public function skemas()
+    {
+        return $this->belongsToMany(Skema::class, 'asesi_skema', 'asesi_nik', 'skema_id')
+                    ->withPivot('status', 'tanggal_mulai', 'tanggal_selesai')
+                    ->withTimestamps();
+    }
+
+    public function jawabanElemen()
+    {
+        return $this->hasMany(JawabanElemen::class, 'asesi_nik', 'NIK');
     }
 }

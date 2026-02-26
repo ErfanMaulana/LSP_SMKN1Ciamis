@@ -16,7 +16,6 @@
         <form action="{{ route('admin.asesor.update', $asesor->ID_asesor) }}" method="POST">
             @csrf
             @method('PUT')
-            
             <div class="form-section">
                 <h3>Informasi Asesor</h3>
                 
@@ -60,6 +59,27 @@
                         @enderror
                         <small class="form-text">Pilih mitra yang bekerja sama (opsional)</small>
                     </div>
+                </div>
+
+                {{-- Akun Login --}}
+                <div class="form-group" style="margin-top:8px;">
+                    <label for="no_reg">No. Registrasi (Login)</label>
+                    <input type="text" id="no_reg" name="no_reg"
+                           class="form-control @error('no_reg') is-invalid @enderror"
+                           value="{{ old('no_reg', $asesor->no_reg) }}"
+                           placeholder="Contoh: ASR001">
+                    @error('no_reg')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    @if($asesor->no_reg)
+                        <small class="form-text" style="color:#059669;">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Akun aktif dengan No. Reg <strong>{{ $asesor->no_reg }}</strong>.
+                            Kosongkan untuk tidak mengubah.
+                        </small>
+                    @else
+                        <small class="form-text">Isi untuk membuat akun login asesor. Password awal = No. Reg.</small>
+                    @endif
                 </div>
             </div>
 

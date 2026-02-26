@@ -187,14 +187,27 @@
 
                                 <!-- Jenis Kelamin -->
                                 <div>
-                                    <label for="jenis_kelamin"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Jenis Kelamin</label>
-                                    <select name="jenis_kelamin" id="jenis_kelamin" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-gray-700 bg-white">
-                                        <option value="">Laki-Laki / Perempuan</option>
-                                        <option value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                                        <option value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
-                                    </select>
+                                    <label class="block text-xs font-medium text-gray-600 mb-2">Jenis Kelamin</label>
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer transition-all text-sm
+                                            {{ old('jenis_kelamin') == 'Laki-laki' ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold' : 'border-gray-300 text-gray-700' }}"
+                                            id="label-laki">
+                                            <input type="radio" name="jenis_kelamin" value="Laki-laki" required
+                                                class="accent-blue-500"
+                                                {{ old('jenis_kelamin') == 'Laki-laki' ? 'checked' : '' }}
+                                                onchange="updateRadioStyle()">
+                                            ♂ Laki-laki
+                                        </label>
+                                        <label class="flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer transition-all text-sm
+                                            {{ old('jenis_kelamin') == 'Perempuan' ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold' : 'border-gray-300 text-gray-700' }}"
+                                            id="label-perempuan">
+                                            <input type="radio" name="jenis_kelamin" value="Perempuan"
+                                                class="accent-blue-500"
+                                                {{ old('jenis_kelamin') == 'Perempuan' ? 'checked' : '' }}
+                                                onchange="updateRadioStyle()">
+                                            ♀ Perempuan
+                                        </label>
+                                    </div>
                                 </div>
 
                                 <!-- Kewarganegaraan -->
@@ -421,6 +434,23 @@
         </div>
     </div>
 
+    <script>
+        function updateRadioStyle() {
+            document.querySelectorAll('input[name="jenis_kelamin"]').forEach(function(radio) {
+                const label = radio.closest('label');
+                if (radio.checked) {
+                    label.classList.add('border-blue-500', 'bg-blue-50', 'text-blue-700', 'font-semibold');
+                    label.classList.remove('border-gray-300', 'text-gray-700');
+                } else {
+                    label.classList.remove('border-blue-500', 'bg-blue-50', 'text-blue-700', 'font-semibold');
+                    label.classList.add('border-gray-300', 'text-gray-700');
+                }
+            });
+        }
+
+        // Run on page load to reflect old() values
+        document.addEventListener('DOMContentLoaded', updateRadioStyle);
+    </script>
 </body>
 
 </html>

@@ -60,6 +60,25 @@
                         <small class="form-text">Pilih mitra yang bekerja sama (opsional)</small>
                     </div>
                 </div>
+
+                {{-- Akun Login Asesor --}}
+                <div class="form-group" style="margin-top:8px;">
+                    <label for="no_reg">No. Registrasi (Login) <span class="required">*</span></label>
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="no_reg" name="no_reg"
+                               class="form-control @error('no_reg') is-invalid @enderror"
+                               value="{{ old('no_reg') }}"
+                               placeholder="Contoh: ASR001">
+                        <button type="button" onclick="generateNoReg()"
+                                style="white-space:nowrap;padding:8px 14px;border-radius:6px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;font-size:13px;">
+                            ⚡ Auto
+                        </button>
+                    </div>
+                    @error('no_reg')
+                        <div class="invalid-feedback" style="display:block;">{{ $message }}</div>
+                    @enderror
+                    <small class="form-text">Digunakan sebagai username login ke panel asesor. Password awal = No. Reg.</small>
+                </div>
             </div>
 
             <div class="form-actions">
@@ -73,6 +92,13 @@
         </form>
     </div>
 </div>
+
+<script>
+function generateNoReg() {
+    const ts = Date.now().toString().slice(-6);
+    document.getElementById('no_reg').value = 'ASR' + ts;
+}
+</script>
 
 <style>
     .page-header {
