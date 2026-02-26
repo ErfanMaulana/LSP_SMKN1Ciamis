@@ -14,10 +14,14 @@ class AsesiApprovedMail extends Mailable
     use Queueable, SerializesModels;
 
     public Asesi $asesi;
+    public string $noReg;
+    public string $password;
 
-    public function __construct(Asesi $asesi)
+    public function __construct(Asesi $asesi, string $noReg, string $password)
     {
         $this->asesi = $asesi;
+        $this->noReg = $noReg;
+        $this->password = $password;
     }
 
     public function envelope(): Envelope
