@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use App\Models\Jurusan;
 use App\Models\Skema;
 use App\Models\Unit;
 use App\Models\Elemen;
@@ -12,12 +13,16 @@ class SkemaSeederRPL extends Seeder
 {
     public function run(): void
     {
+        // ── Jurusan RPL ────────────────────────────────────────
+        $jurusan = Jurusan::where('kode_jurusan', 'RPL')->first();
+
         // ── Skema ──────────────────────────────────────────────
         $skema = Skema::updateOrCreate(
             ['nomor_skema' => 'SKM/BNSP/00010/2/2023/1324'],
             [
                 'nama_skema'  => 'Okupasi Pemrogram Junior (Junior Coder)',
                 'jenis_skema' => 'Okupasi',
+                'jurusan_id'  => $jurusan ? $jurusan->ID_jurusan : null,
             ]
         );
 

@@ -19,11 +19,10 @@ use App\Http\Controllers\Admin\SocialMediaController;
 |
 */
 
+// Redirect old /admin/login → /login for backward compatibility
+Route::get('/admin/login', fn () => redirect()->route('login'))->name('admin.login');
+
 Route::prefix('admin')->group(function () {
-    // Login routes (guest only)
-    Route::get('/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('/login', [AdminController::class, 'login'])->name('admin.login.submit');
-    
     // Protected admin routes
     Route::middleware('auth:admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
