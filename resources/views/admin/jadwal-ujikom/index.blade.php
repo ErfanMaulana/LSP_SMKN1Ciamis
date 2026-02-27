@@ -20,6 +20,11 @@
         background: white; border-radius: 12px; padding: 18px 20px;
         display: flex; align-items: center; gap: 14px;
         box-shadow: 0 1px 3px rgba(0,0,0,.08);
+        transition: all 0.2s;
+    }
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
     }
     .stat-icon {
         width: 46px; height: 46px; border-radius: 10px;
@@ -50,11 +55,11 @@
         border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
     .btn-add {
-        padding: 9px 18px; background: #16a34a; color: #fff; border: none;
+        padding: 9px 18px; background: #0061a5; color: #fff; border: none;
         border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
         text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
     }
-    .btn-add:hover { background: #15803d; color: #fff; }
+    .btn-add:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
 
     .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
@@ -112,7 +117,7 @@
 <!-- Header -->
 <div class="page-header">
     <div>
-        <h2><i class="bi bi-calendar-event" style="color:#0061a5;"></i> Jadwal Uji Kompetensi</h2>
+        <h2>Jadwal Uji Kompetensi</h2>
         <p>Kelola jadwal pelaksanaan uji kompetensi dan penempatan TUK</p>
     </div>
     <a href="{{ route('admin.jadwal-ujikom.create') }}" class="btn-add">
@@ -130,28 +135,28 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon yellow"><i class="bi bi-clock-history"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-clock-history"></i></div>
         <div>
             <div class="stat-label">Dijadwalkan</div>
             <div class="stat-value">{{ $stats['dijadwalkan'] }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon orange"><i class="bi bi-play-circle"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-play-circle"></i></div>
         <div>
             <div class="stat-label">Berlangsung</div>
             <div class="stat-value">{{ $stats['berlangsung'] }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-check-circle"></i></div>
         <div>
             <div class="stat-label">Selesai</div>
             <div class="stat-value">{{ $stats['selesai'] }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon purple"><i class="bi bi-calendar-check"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-calendar-check"></i></div>
         <div>
             <div class="stat-label">Bulan Ini</div>
             <div class="stat-value">{{ $stats['bulan_ini'] }}</div>

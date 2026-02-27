@@ -7,10 +7,20 @@
     <title>Formulir Pendaftaran - LSP SMKN1 Ciamis</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #334155;
         }
 
         input:focus,
@@ -19,389 +29,714 @@
             outline: none;
         }
 
-        .border-b-3 {
-            border-bottom-width: 3px;
+        .container-main {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        navbar {
+            background-color: #ffffff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            width: 100%;
+        }
+
+        .navbar-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: auto;
+            padding-top: 12px;
+            padding-bottom: 12px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .navbar-logo {
+            width: 40px;
+            height: 40px;
+            background: white;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navbar-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .navbar-brand span {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0F172A;
+            white-space: nowrap;
+        }
+
+        .navbar-nav {
+            display: none;
+            gap: 4px;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        @media (min-width: 768px) {
+            .navbar-nav {
+                display: flex;
+            }
+        }
+
+        .navbar-nav a {
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #334155;
+            transition: all 0.2s;
+        }
+
+        .navbar-nav a:hover {
+            background: #0073bd;
+            color: white;
+        }
+
+        .navbar-nav a.active {
+            background: #0073bd;
+            color: white;
+        }
+
+        .btn-login {
+            background: #0073bd;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #0061A5;
+        }
+
+        .container-main {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: 60px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 32px 24px;
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 32px;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .step-number {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #0073bd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .step.inactive .step-number {
+            background: #cbd5e1;
+            color: #64748b;
+        }
+
+        .step-label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #0073bd;
+        }
+
+        .step.inactive .step-label {
+            color: #94a3b8;
+        }
+
+        .step-line {
+            width: 50px;
+            height: 1px;
+            background: #cbd5e1;
+        }
+
+        .form-title {
+            margin-bottom: 20px;
+        }
+
+        .form-title h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0F172A;
+            margin-bottom: 6px;
+            line-height: 1.4;
+        }
+
+        .form-title p {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .alert-box {
+            padding: 14px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            color: #991b1b;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            border-left: 4px solid #0073bd;
+            color: #1e3a8a;
+        }
+
+        .alert-box i {
+            flex-shrink: 0;
+            margin-top: 2px;
+            font-size: 15px;
+        }
+
+        .form-section {
+            margin-bottom: 28px;
+        }
+
+        .form-section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .section-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #0073bd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
+        .form-section-title h3 {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0F172A;
+            margin: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            padding: 9px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #334155;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-control:focus {
+            border-color: #0073bd;
+            box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: #cbd5e1;
+        }
+
+        textarea.form-control {
+            resize: none;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        select.form-control {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 32px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            background: white;
+        }
+
+        .radio-label:hover {
+            border-color: #0073bd;
+            background: #f8fafc;
+        }
+
+        .radio-label input[type="radio"] {
+            cursor: pointer;
+            accent-color: #0073bd;
+        }
+
+        .radio-label input[type="radio"]:checked + span {
+            color: #0073bd;
+            font-weight: 600;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #0073bd;
+            color: white;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            background: #0061A5;
+            box-shadow: 0 4px 12px rgba(0, 115, 189, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .error-list {
+            list-style: none;
+            margin: 6px 0 0 0;
+            padding-left: 20px;
+        }
+
+        .error-list li {
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .error-list li:before {
+            content: "• ";
+            margin-right: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px 16px;
+            }
+
+            .form-card {
+                padding: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-title h2 {
+                font-size: 16px;
+            }
+
+            .step-indicator {
+                gap: 12px;
+            }
+
+            .step-line {
+                width: 35px;
+            }
+
+            .navbar-brand span {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-card {
+                padding: 16px;
+            }
+
+            .form-grid {
+                gap: 12px;
+            }
+
+            .form-title h2 {
+                font-size: 14px;
+            }
+
+            .navbar-container {
+                padding: 0 16px;
+            }
+
+            .navbar-brand span {
+                display: none;
+            }
         }
     </style>
 </head>
 
-<body class="bg-gray-50">
+<body>
+    <!-- Navbar -->
+    <navbar>
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <div class="navbar-logo">
+                    <img src="{{ asset('images/lsp.png') }}" alt="LSP Logo">
+                </div>
+                <span>LSP SMKN 1 CIAMIS</span>
+            </div>
 
-    <div class="min-h-screen py-6 px-4">
-        <div class="max-w-5xl mx-auto">
-            <!-- Header -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <!-- Blue Header -->
-                <div class="bg-blue-600 text-white px-6 py-4 flex items-center">
-                    <div class="flex items-center space-x-3">
-                        <div class="bg-white rounded-full p-2">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                                </path>
-                            </svg>
-                        </div>
-                        <h1 class="text-lg font-bold">LSP SMKN 1 Ciamis</h1>
+            <nav class="navbar-nav">
+                <a href="{{ route('front.home') }}" class="{{ request()->routeIs('front.home') ? 'active' : '' }}">Beranda</a>
+                <a href="{{ route('front.profil') }}" class="{{ request()->routeIs('front.profil') ? 'active' : '' }}">Profil LSP</a>
+                <a href="{{ route('front.kompetensi.index') }}" class="{{ request()->routeIs('front.kompetensi.index') ? 'active' : '' }}">Kompetensi & Data Skema</a>
+                <a href="{{ route('front.daftar') }}" class="{{ request()->routeIs('front.daftar') ? 'active' : '' }}">Daftar LSP</a>
+                <a href="{{ route('front.kontak') }}" class="{{ request()->routeIs('front.kontak') ? 'active' : '' }}">Kontak</a>
+            </nav>
+
+            <a href="{{ route('admin.login') }}" class="btn-login">Login</a>
+        </div>
+    </navbar>
+
+    <div class="container-main">
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="form-card">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <span class="step-label">Formulir</span>
+                    </div>
+                    <div class="step-line"></div>
+                    <div class="step inactive">
+                        <div class="step-number">2</div>
+                        <span class="step-label">Dokumen/Berkas</span>
                     </div>
                 </div>
 
-                <!-- Navigation Tabs -->
-                <div class="bg-white border-b border-gray-200">
-                    <div class="flex overflow-x-auto">
-                        <a href="#"
-                            class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 whitespace-nowrap">Beranda</a>
-                        <a href="#"
-                            class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 whitespace-nowrap">Profil
-                            LSP</a>
-                        <a href="#"
-                            class="px-6 py-3 text-sm font-medium text-white bg-blue-600 whitespace-nowrap">Kepesertaan &
-                            Daftar Skema</a>
-                        <a href="#"
-                            class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 whitespace-nowrap">Daftar
-                            LSP</a>
-                        <a href="#"
-                            class="px-6 py-3 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 whitespace-nowrap">Kontak</a>
-                    </div>
+                <!-- Form Title -->
+                <div class="form-title">
+                    <h2>FR.-APL-01. FORMULIR PERMOHONAN SERTIFIKASI</h2>
+                    <p>Bidang Sertifikasi yang akan diuji skema-industri-terkait</p>
                 </div>
 
-                <!-- Form Container -->
-                <div class="px-8 py-6">
-                    <!-- Step Indicator -->
-                    <div class="flex items-center justify-center space-x-4 mb-6">
-                        <!-- Step 1 - Active -->
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">1</div>
-                            <span class="ml-2 text-xs font-semibold text-blue-600">Formulir</span>
-                        </div>
-                        <div class="w-16 h-0.5 bg-gray-300"></div>
-                        <!-- Step 2 - Upcoming -->
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center text-xs font-bold">2</div>
-                            <span class="ml-2 text-xs font-medium text-gray-400">Dokumen/Berkas</span>
-                        </div>
-                        <!-- <div class="w-16 h-0.5 bg-gray-300"></div> -->
-                        <!-- Step 3 - Upcoming -->
-                        <!-- <div class="flex items-center">
-                            <div class="w-8 h-8 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center text-xs font-bold">3</div>
-                            <span class="ml-2 text-xs font-medium text-gray-400">Upload Berkas</span>
-                        </div> -->
-                    </div>
-
-                    <!-- Form Title -->
-                    <div class="mb-6">
-                        <h2 class="text-xl font-bold text-gray-900 mb-1">FR.-APL-01. FORMULIR PERMOHONAN SERTIFIKASI
-                        </h2>
-                        <p class="text-xs text-gray-600">Bidang Sertifikasi yang akan diuji skema-industri-terkait</p>
-                    </div>
-
-                    @if ($errors->any())
-                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd"
-                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="ml-2.5">
-                                    <h3 class="text-xs font-semibold text-red-800 mb-1.5">Terdapat kesalahan dalam pengisian
-                                        form:</h3>
-                                    <ul class="text-xs text-red-700 list-disc list-inside space-y-0.5">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-
-                    <!-- Info Box -->
-                    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-                        <div class="flex items-start">
-                            <svg class="h-5 w-5 text-blue-500 mt-0.5 mr-2.5 flex-shrink-0" fill="currentColor"
-                                viewBox="0 0 20 20">
-                                <path fill-rule="evenodd"
-                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <p class="text-xs text-blue-700 leading-relaxed">Melakukan aplikasi dengan mengisi formulir
-                                aplikasi pada halaman berikutnya dan melengkapi form FR.AKL.03 (ASESMEN MANDIRI)</p>
+                <!-- Error Alert -->
+                @if ($errors->any())
+                    <div class="alert-box alert-error">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <div>
+                            <strong>Terdapat kesalahan dalam pengisian form:</strong>
+                            <ul class="error-list">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
                         </div>
                     </div>
+                @endif
 
-                    <form action="{{ route('front.register.asesi.store') }}" method="POST" class="space-y-8">
-                        @csrf
+                <!-- Info Alert -->
+                <div class="alert-box alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <p>Melakukan aplikasi dengan mengisi formulir aplikasi pada halaman berikutnya dan melengkapi form FR.AKL.03 (ASESMEN MANDIRI)</p>
+                </div>
 
-                        <!-- Data Pribadi Section -->
-                        <div class="bg-gray-50 rounded-md p-6 mb-6">
-                            <div class="flex items-center mb-5">
-                                <div class="bg-blue-600 rounded-full p-2 mr-2.5">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
-                                        </path>
-                                    </svg>
-                                </div>
-                                <h3 class="text-sm font-semibold text-gray-900">Data Pribadi</h3>
+                <!-- Form -->
+                <form action="{{ route('front.register.asesi.store') }}" method="POST">
+                    @csrf
+
+                    <!-- Data Pribadi Section -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <div class="section-icon">
+                                <i class="bi bi-person"></i>
                             </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                <!-- Nama Lengkap -->
-                                <div>
-                                    <label for="nama" class="block text-xs font-semibold text-blue-600 mb-1">Nama
-                                        Lengkap</label>
-                                    <input type="text" name="nama" id="nama" value="{{ old('nama') }}" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="Masukkan nama lengkap">
-                                </div>
-                                <!-- NIK -->
-                                <div>
-                                    <label for="NIK" class="block text-xs font-medium text-gray-600 mb-1">NIK / Kode
-                                        NIM</label>
-                                    <input type="text" name="NIK" id="NIK" value="{{ old('NIK') }}" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="Masukkan NIK">
-                                </div>
-
-                                <!-- Tempat Lahir -->
-                                <div>
-                                    <label for="tempat_lahir"
-                                        class="block text-xs font-semibold text-blue-600 mb-1">Tempat Lahir</label>
-                                    <input type="text" name="tempat_lahir" id="tempat_lahir"
-                                        value="{{ old('tempat_lahir') }}" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="Masukkan tempat lahir">
-                                </div>
-
-                                <!-- Tanggal Lahir -->
-                                <div>
-                                    <label for="tanggal_lahir"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Tanggal Lahir</label>
-                                    <input type="date" name="tanggal_lahir" id="tanggal_lahir"
-                                        value="{{ old('tanggal_lahir') }}" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <!-- Jenis Kelamin -->
-                                <div>
-                                    <label class="block text-xs font-medium text-gray-600 mb-2">Jenis Kelamin</label>
-                                    <div class="flex gap-4">
-                                        <label class="flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer transition-all text-sm
-                                            {{ old('jenis_kelamin') == 'Laki-laki' ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold' : 'border-gray-300 text-gray-700' }}"
-                                            id="label-laki">
-                                            <input type="radio" name="jenis_kelamin" value="Laki-laki" required
-                                                class="accent-blue-500"
-                                                {{ old('jenis_kelamin') == 'Laki-laki' ? 'checked' : '' }}
-                                                onchange="updateRadioStyle()">
-                                            ♂ Laki-laki
-                                        </label>
-                                        <label class="flex items-center gap-2 px-4 py-2 border rounded-md cursor-pointer transition-all text-sm
-                                            {{ old('jenis_kelamin') == 'Perempuan' ? 'border-blue-500 bg-blue-50 text-blue-700 font-semibold' : 'border-gray-300 text-gray-700' }}"
-                                            id="label-perempuan">
-                                            <input type="radio" name="jenis_kelamin" value="Perempuan"
-                                                class="accent-blue-500"
-                                                {{ old('jenis_kelamin') == 'Perempuan' ? 'checked' : '' }}
-                                                onchange="updateRadioStyle()">
-                                            ♀ Perempuan
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- Kewarganegaraan -->
-                                <div>
-                                    <label for="kewarganegaraan"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Kewarganegaraan</label>
-                                    <input type="text" name="kewarganegaraan" id="kewarganegaraan"
-                                        value="{{ old('kewarganegaraan', 'Indonesia') }}" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="Indonesia">
-                                </div>
-
-                                <!-- Alamat (Full Width) -->
-                                <div class="md:col-span-2">
-                                    <label for="alamat" class="block text-xs font-medium text-gray-600 mb-1">Alamat
-                                        Lengkap</label>
-                                    <textarea name="alamat" id="alamat" rows="2" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 resize-none"
-                                        placeholder="Jl. Nama jalan RT/RW - Desa - Kecamatan">{{ old('alamat') }}</textarea>
-                                </div>
-
-                                <!-- Kode Pos -->
-                                <div>
-                                    <label for="kode_pos" class="block text-xs font-medium text-gray-600 mb-1">Kode
-                                        POS</label>
-                                    <input type="text" name="kode_pos" id="kode_pos" value="{{ old('kode_pos') }}"
-                                        required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="XXXXX">
-                                </div>
-
-                                <!-- No. Telepon/HP -->
-                                <div>
-                                    <label for="telepon_hp" class="block text-xs font-medium text-gray-600 mb-1">No
-                                        Telepon/HP</label>
-                                    <input type="text" name="telepon_hp" id="telepon_hp" value="{{ old('telepon_hp') }}"
-                                        required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="0812XXXXXXXX">
-                                </div>
-
-                                <!-- Email -->
-                                <div>
-                                    <label for="email" class="block text-xs font-medium text-gray-600 mb-1">Email
-                                        Asal</label>
-                                    <input type="email" name="email" id="email" value="{{ old('email') }}" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="contoh@email.com">
-                                </div>
-
-                                <!-- Pekerjaan -->
-                                <div>
-                                    <label for="pekerjaan"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Pekerjaan / Profesi</label>
-                                    <select name="pekerjaan" id="pekerjaan" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-gray-700 bg-white">
-                                        <option value="">Pilih</option>
-                                        <option value="Pelajar" {{ old('pekerjaan') == 'Pelajar' ? 'selected' : '' }}>
-                                            Pelajar</option>
-                                        <option value="Mahasiswa" {{ old('pekerjaan') == 'Mahasiswa' ? 'selected' : '' }}>
-                                            Mahasiswa</option>
-                                        <option value="Karyawan Swasta" {{ old('pekerjaan') == 'Karyawan Swasta' ? 'selected' : '' }}>Karyawan Swasta</option>
-                                        <option value="PNS" {{ old('pekerjaan') == 'PNS' ? 'selected' : '' }}>PNS</option>
-                                        <option value="Wiraswasta" {{ old('pekerjaan') == 'Wiraswasta' ? 'selected' : '' }}>Wiraswasta</option>
-                                        <option value="Lainnya" {{ old('pekerjaan') == 'Lainnya' ? 'selected' : '' }}>
-                                            Lainnya</option>
-                                    </select>
-                                </div>
-
-                                <!-- Pendidikan Terakhir -->
-                                <div>
-                                    <label for="pendidikan_terakhir"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Pendidikan Terakhir</label>
-                                    <select name="pendidikan_terakhir" id="pendidikan_terakhir" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-gray-700 bg-white">
-                                        <option value="">Pilih</option>
-                                        <option value="SD" {{ old('pendidikan_terakhir') == 'SD' ? 'selected' : '' }}>SD
-                                        </option>
-                                        <option value="SMP" {{ old('pendidikan_terakhir') == 'SMP' ? 'selected' : '' }}>
-                                            SMP</option>
-                                        <option value="SMA/SMK" {{ old('pendidikan_terakhir') == 'SMA/SMK' ? 'selected' : '' }}>SMA/SMK</option>
-                                        <option value="D3" {{ old('pendidikan_terakhir') == 'D3' ? 'selected' : '' }}>D3
-                                        </option>
-                                        <option value="S1" {{ old('pendidikan_terakhir') == 'S1' ? 'selected' : '' }}>S1
-                                        </option>
-                                        <option value="S2" {{ old('pendidikan_terakhir') == 'S2' ? 'selected' : '' }}>S2
-                                        </option>
-                                        <option value="S3" {{ old('pendidikan_terakhir') == 'S3' ? 'selected' : '' }}>S3
-                                        </option>
-                                    </select>
-                                </div>
-
-                                <!-- Jurusan/Skema -->
-                                <div>
-                                    <label for="ID_jurusan" class="block text-xs font-medium text-gray-600 mb-1">Jurusan / Skema Sertifikasi</label>
-                                    <select name="ID_jurusan" id="ID_jurusan" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-gray-700 bg-white">
-                                        <option value="">Pilih Jurusan</option>
-                                        @foreach($jurusanList as $jurusan)
-                                            <option value="{{ $jurusan->ID_jurusan }}" {{ old('ID_jurusan') == $jurusan->ID_jurusan ? 'selected' : '' }}>
-                                                {{ $jurusan->nama_jurusan }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+                            <h3>Data Pribadi</h3>
                         </div>
 
-                        <!-- Data Pekerjaan/Sekolah Section -->
-                        <div class="bg-gray-50 rounded-md p-6 mb-6">
-                            <div class="flex items-center mb-5">
-                                <div class="bg-emerald-500 rounded-full p-2 mr-2.5">
-                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                                        </path>
-                                    </svg>
-                                </div>
-                                <h3 class="text-sm font-semibold text-gray-900">Data Pekerjaan / Sekolah</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nama">Nama Lengkap <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required class="form-control" placeholder="Masukkan nama lengkap">
                             </div>
 
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                <!-- Nama Lembaga -->
-                                <div>
-                                    <label for="nama_lembaga" class="block text-xs font-medium text-gray-600 mb-1">Nama
-                                        Lembaga / Perusahaan</label>
-                                    <input type="text" name="nama_lembaga" id="nama_lembaga"
-                                        value="{{ old('nama_lembaga', 'SMKN 1 Ciamis') }}" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="SMKN 1 Ciamis">
-                                </div>
+                            <div class="form-group">
+                                <label for="NIK">NIK / Kode NIM <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="NIK" name="NIK" value="{{ old('NIK') }}" required class="form-control" placeholder="Masukkan NIK">
+                            </div>
 
-                                <!-- Jabatan -->
-                                <div>
-                                    <label for="jabatan"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Jabatan</label>
-                                    <input type="text" name="jabatan" id="jabatan" value="{{ old('jabatan') }}" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="Siswa / Staff">
-                                </div>
+                            <div class="form-group">
+                                <label for="tempat_lahir">Tempat Lahir <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="tempat_lahir" name="tempat_lahir" value="{{ old('tempat_lahir') }}" required class="form-control" placeholder="Masukkan tempat lahir">
+                            </div>
 
-                                <!-- Alamat Lembaga (Full Width) -->
-                                <div class="md:col-span-2">
-                                    <label for="alamat_lembaga"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Alamat Lembaga</label>
-                                    <textarea name="alamat_lembaga" id="alamat_lembaga" rows="2" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400 resize-none"
-                                        placeholder="Jl. Lembaga No. 123...">{{ old('alamat_lembaga') }}</textarea>
-                                </div>
+                            <div class="form-group">
+                                <label for="tanggal_lahir">Tanggal Lahir <span style="color: #ef4444;">*</span></label>
+                                <input type="date" id="tanggal_lahir" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" required class="form-control">
+                            </div>
 
-                                <!-- No. Telepon Lembaga -->
-                                <div>
-                                    <label for="no_telepon_lembaga" class="block text-xs font-medium text-gray-600 mb-1">No. Telepon Lembaga</label>
-                                    <input type="text" name="no_fax_lembaga" id="no_telepon_lembaga"
-                                        value="{{ old('no_fax_lembaga') }}"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="[Oxxx] ...">
+                            <div class="form-group">
+                                <label>Jenis Kelamin <span style="color: #ef4444;">*</span></label>
+                                <div class="radio-group">
+                                    <label class="radio-label">
+                                        <input type="radio" name="jenis_kelamin" value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'checked' : '' }} required>
+                                        <span>♂ Laki-laki</span>
+                                    </label>
+                                    <label class="radio-label">
+                                        <input type="radio" name="jenis_kelamin" value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'checked' : '' }} required>
+                                        <span>♀ Perempuan</span>
+                                    </label>
                                 </div>
+                            </div>
 
-                                <!-- No. Fax Lembaga -->
-                                <div>
-                                    <label for="no_fax_lembaga_alt" class="block text-xs font-medium text-gray-600 mb-1">No. Fax Lembaga</label>
-                                    <input type="text" name="telepon_rumah" id="no_fax_lembaga_alt"
-                                        value="{{ old('telepon_rumah') }}"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="[Oxxx] ...">
-                                </div>
+                            <div class="form-group">
+                                <label for="kewarganegaraan">Kewarganegaraan <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="kewarganegaraan" name="kewarganegaraan" value="{{ old('kewarganegaraan', 'Indonesia') }}" required class="form-control" placeholder="Indonesia">
+                            </div>
 
-                                <!-- Email Lembaga -->
-                                <div>
-                                    <label for="email_lembaga"
-                                        class="block text-xs font-medium text-gray-600 mb-1">Email Lembaga</label>
-                                    <input type="email" name="email_lembaga" id="email_lembaga"
-                                        value="{{ old('email_lembaga') }}" required
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="info@lembaga.com">
-                                </div>
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label for="alamat">Alamat Lengkap <span style="color: #ef4444;">*</span></label>
+                                <textarea id="alamat" name="alamat" rows="3" required class="form-control" placeholder="Jl. Nama jalan RT/RW - Desa - Kecamatan">{{ old('alamat') }}</textarea>
+                            </div>
 
-                                <!-- Kode POS Lembaga -->
-                                <div>
-                                    <label for="unit_lembaga" class="block text-xs font-medium text-gray-600 mb-1">Kode POS Lembaga</label>
-                                    <input type="text" name="unit_lembaga" id="unit_lembaga"
-                                        value="{{ old('unit_lembaga') }}"
-                                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-                                        placeholder="XXXXX">
-                                </div>
+                            <div class="form-group">
+                                <label for="kode_pos">Kode POS <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="kode_pos" name="kode_pos" value="{{ old('kode_pos') }}" required class="form-control" placeholder="XXXXX">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="telepon_hp">No Telepon/HP <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="telepon_hp" name="telepon_hp" value="{{ old('telepon_hp') }}" required class="form-control" placeholder="0812XXXXXXXX">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="email" name="email" value="{{ old('email') }}" required class="form-control" placeholder="contoh@email.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pekerjaan">Pekerjaan / Profesi <span style="color: #ef4444;">*</span></label>
+                                <select id="pekerjaan" name="pekerjaan" required class="form-control">
+                                    <option value="">Pilih</option>
+                                    <option value="Pelajar" {{ old('pekerjaan') == 'Pelajar' ? 'selected' : '' }}>Pelajar</option>
+                                    <option value="Mahasiswa" {{ old('pekerjaan') == 'Mahasiswa' ? 'selected' : '' }}>Mahasiswa</option>
+                                    <option value="Karyawan Swasta" {{ old('pekerjaan') == 'Karyawan Swasta' ? 'selected' : '' }}>Karyawan Swasta</option>
+                                    <option value="PNS" {{ old('pekerjaan') == 'PNS' ? 'selected' : '' }}>PNS</option>
+                                    <option value="Wiraswasta" {{ old('pekerjaan') == 'Wiraswasta' ? 'selected' : '' }}>Wiraswasta</option>
+                                    <option value="Lainnya" {{ old('pekerjaan') == 'Lainnya' ? 'selected' : '' }}>Lainnya</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pendidikan_terakhir">Pendidikan Terakhir <span style="color: #ef4444;">*</span></label>
+                                <select id="pendidikan_terakhir" name="pendidikan_terakhir" required class="form-control">
+                                    <option value="">Pilih</option>
+                                    <option value="SD" {{ old('pendidikan_terakhir') == 'SD' ? 'selected' : '' }}>SD</option>
+                                    <option value="SMP" {{ old('pendidikan_terakhir') == 'SMP' ? 'selected' : '' }}>SMP</option>
+                                    <option value="SMA/SMK" {{ old('pendidikan_terakhir') == 'SMA/SMK' ? 'selected' : '' }}>SMA/SMK</option>
+                                    <option value="D3" {{ old('pendidikan_terakhir') == 'D3' ? 'selected' : '' }}>D3</option>
+                                    <option value="S1" {{ old('pendidikan_terakhir') == 'S1' ? 'selected' : '' }}>S1</option>
+                                    <option value="S2" {{ old('pendidikan_terakhir') == 'S2' ? 'selected' : '' }}>S2</option>
+                                    <option value="S3" {{ old('pendidikan_terakhir') == 'S3' ? 'selected' : '' }}>S3</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ID_jurusan">Jurusan / Skema Sertifikasi <span style="color: #ef4444;">*</span></label>
+                                <select id="ID_jurusan" name="ID_jurusan" required class="form-control">
+                                    <option value="">Pilih Jurusan</option>
+                                    @foreach($jurusanList as $jurusan)
+                                        <option value="{{ $jurusan->ID_jurusan }}" {{ old('ID_jurusan') == $jurusan->ID_jurusan ? 'selected' : '' }}>
+                                            {{ $jurusan->nama_jurusan }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Submit Button -->
-                        <div class="flex justify-center pt-2">
-                            <button type="submit"
-                                class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm px-8 py-3 rounded-full shadow-sm transition duration-200 flex items-center justify-center space-x-2">
+                    <!-- Data Pekerjaan/Sekolah Section -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <div class="section-icon">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <h3>Data Pekerjaan / Sekolah</h3>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nama_lembaga">Nama Lembaga / Perusahaan <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="nama_lembaga" name="nama_lembaga" value="{{ old('nama_lembaga', 'SMKN 1 Ciamis') }}" required class="form-control" placeholder="SMKN 1 Ciamis">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="jabatan">Jabatan <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="jabatan" name="jabatan" value="{{ old('jabatan') }}" required class="form-control" placeholder="Siswa / Staff">
+                            </div>
+
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label for="alamat_lembaga">Alamat Lembaga <span style="color: #ef4444;">*</span></label>
+                                <textarea id="alamat_lembaga" name="alamat_lembaga" rows="3" required class="form-control" placeholder="Jl. Lembaga No. 123...">{{ old('alamat_lembaga') }}</textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="no_telepon_lembaga">No. Telepon Lembaga</label>
+                                <input type="text" id="no_telepon_lembaga" name="no_fax_lembaga" value="{{ old('no_fax_lembaga') }}" class="form-control" placeholder="[Oxxx] ...">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="no_fax_lembaga_alt">No. Fax Lembaga</label>
+                                <input type="text" id="no_fax_lembaga_alt" name="telepon_rumah" value="{{ old('telepon_rumah') }}" class="form-control" placeholder="[Oxxx] ...">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email_lembaga">Email Lembaga <span style="color: #ef4444;">*</span></label>
+                                <input type="email" id="email_lembaga" name="email_lembaga" value="{{ old('email_lembaga') }}" required class="form-control" placeholder="info@lembaga.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="unit_lembaga">Kode POS Lembaga</label>
+                                <input type="text" id="unit_lembaga" name="unit_lembaga" value="{{ old('unit_lembaga') }}" class="form-control" placeholder="XXXXX">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span>Selanjutnya</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
                                 <span>Selanjutnya (Langkah 2)</span>
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
