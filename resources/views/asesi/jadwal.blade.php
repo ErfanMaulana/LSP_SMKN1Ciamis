@@ -88,6 +88,11 @@
         box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
     }
 
+    .countdown-box.started {
+        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+        box-shadow: 0 8px 32px rgba(20, 83, 45, 0.3);
+    }
+
     .countdown-number {
         font-size: 48px;
         font-weight: 700;
@@ -520,7 +525,7 @@ document.querySelectorAll('[id^="countdown-"]').forEach(countdownEl => {
         const diff = targetDate - now;
 
         if (diff <= 0) {
-            countdownEl.innerHTML = '<div class="countdown-box"><span class="countdown-number" style="font-size:24px;">Waktu Dimulai!</span></div>';
+            countdownEl.innerHTML = '<div class="countdown-box started"><span class="countdown-number" style="font-size:24px;">Waktu Dimulai!</span></div>';
             return;
         }
 
