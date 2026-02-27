@@ -29,24 +29,11 @@
         min-height: calc(100vh - 80px);
         display: flex;
         flex-direction: column;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #ffffff;
         position: relative;
         overflow: hidden;
         padding: 40px;
-        color: white;
-    }
-
-    .jadwal-fullscreen.status-dijadwalkan {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    .jadwal-fullscreen.status-berlangsung {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-    .jadwal-fullscreen.status-selesai {
-        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    }
-    .jadwal-fullscreen.status-dibatalkan {
-        background: linear-gradient(135deg, #666 0%, #999 100%);
+        color: #1e293b;
     }
 
     .jadwal-fullscreen::before {
@@ -57,8 +44,8 @@
         right: 0;
         bottom: 0;
         background: 
-            radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
-            radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(102, 126, 234, 0.03) 0%, transparent 50%);
         pointer-events: none;
     }
 
@@ -80,7 +67,7 @@
     .countdown-label {
         font-size: 18px;
         font-weight: 600;
-        opacity: 0.9;
+        color: #64748b;
         margin-bottom: 15px;
         text-transform: uppercase;
         letter-spacing: 2px;
@@ -94,12 +81,11 @@
     }
 
     .countdown-box {
-        background: rgba(255,255,255,0.2);
-        backdrop-filter: blur(10px);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         border-radius: 16px;
         padding: 20px;
         min-width: 100px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.2);
     }
 
     .countdown-number {
@@ -107,12 +93,13 @@
         font-weight: 700;
         line-height: 1;
         display: block;
+        color: white;
     }
 
     .countdown-unit {
         font-size: 13px;
         text-transform: uppercase;
-        opacity: 0.8;
+        color: rgba(255,255,255,0.9);
         margin-top: 8px;
         letter-spacing: 1px;
     }
@@ -126,7 +113,7 @@
         font-size: 32px;
         font-weight: 700;
         margin-bottom: 10px;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        color: #1e293b;
     }
 
     .jadwal-badge {
@@ -137,8 +124,9 @@
         border-radius: 30px;
         font-size: 14px;
         font-weight: 600;
-        background: rgba(255,255,255,0.25);
-        backdrop-filter: blur(10px);
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
     }
 
     /* Info Grid */
@@ -150,24 +138,24 @@
     }
 
     .info-card {
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(10px);
+        background: #f8fafc;
         border-radius: 14px;
         padding: 20px;
-        border: 1px solid rgba(255,255,255,0.2);
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
     .info-card-icon {
         font-size: 24px;
         margin-bottom: 10px;
         display: block;
-        opacity: 0.9;
+        color: #667eea;
     }
 
     .info-card-label {
         font-size: 12px;
         text-transform: uppercase;
-        opacity: 0.8;
+        color: #64748b;
         letter-spacing: 1px;
         margin-bottom: 6px;
     }
@@ -176,15 +164,16 @@
         font-size: 16px;
         font-weight: 600;
         line-height: 1.4;
+        color: #1e293b;
     }
 
     /* Peserta Section */
     .peserta-section {
-        background: rgba(255,255,255,0.15);
-        backdrop-filter: blur(10px);
+        background: #f8fafc;
         border-radius: 16px;
         padding: 25px;
-        border: 1px solid rgba(255,255,255,0.2);
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
 
     .peserta-header {
@@ -193,7 +182,7 @@
         justify-content: space-between;
         margin-bottom: 20px;
         padding-bottom: 15px;
-        border-bottom: 1px solid rgba(255,255,255,0.2);
+        border-bottom: 1px solid #e2e8f0;
     }
 
     .peserta-title {
@@ -202,10 +191,12 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        color: #1e293b;
     }
 
     .peserta-count {
-        background: rgba(255,255,255,0.25);
+        background: #667eea;
+        color: white;
         padding: 6px 16px;
         border-radius: 20px;
         font-size: 14px;
@@ -226,43 +217,47 @@
     }
 
     .peserta-grid::-webkit-scrollbar-track {
-        background: rgba(255,255,255,0.1);
+        background: #f1f5f9;
         border-radius: 10px;
     }
 
     .peserta-grid::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.3);
+        background: #cbd5e1;
         border-radius: 10px;
     }
 
     .peserta-item {
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.15);
+        background: white;
+        border: 1px solid #e2e8f0;
         border-radius: 10px;
         padding: 14px;
         display: flex;
         align-items: center;
         gap: 12px;
         transition: all 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
 
     .peserta-item:hover {
-        background: rgba(255,255,255,0.2);
+        background: #f8fafc;
+        border-color: #667eea;
         transform: translateX(3px);
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
     }
 
     .peserta-avatar {
         width: 42px;
         height: 42px;
         border-radius: 50%;
-        background: rgba(255,255,255,0.25);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 18px;
         font-weight: 700;
         flex-shrink: 0;
-        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+        border: 2px solid #e2e8f0;
     }
 
     .peserta-info {
@@ -277,11 +272,12 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        color: #1e293b;
     }
 
     .peserta-details {
         font-size: 12px;
-        opacity: 0.85;
+        color: #64748b;
     }
 
     /* Navigation untuk multiple jadwal */
@@ -300,19 +296,19 @@
         width: 12px;
         height: 12px;
         border-radius: 50%;
-        background: rgba(255,255,255,0.4);
+        background: #cbd5e1;
         cursor: pointer;
         transition: all 0.3s;
         border: 2px solid transparent;
     }
 
     .jadwal-nav-dot.active {
-        background: white;
+        background: #667eea;
         transform: scale(1.3);
     }
 
     .jadwal-nav-dot:hover {
-        background: rgba(255,255,255,0.7);
+        background: #94a3b8;
     }
 
     @media (max-width: 768px) {
