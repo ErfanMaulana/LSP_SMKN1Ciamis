@@ -342,6 +342,16 @@
             padding-right: 32px;
         }
 
+        .form-control.is-invalid {
+            border-color: #ef4444;
+            background-color: #fef2f2;
+        }
+
+        .form-control.is-invalid:focus {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
         .radio-group {
             display: flex;
             gap: 10px;
@@ -580,9 +590,17 @@
                                 <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required class="form-control" placeholder="Masukkan nama lengkap">
                             </div>
 
-                            <div class="form-group">
-                                <label for="NIK">NIK / Kode NIM <span style="color: #ef4444;">*</span></label>
-                                <input type="text" id="NIK" name="NIK" value="{{ old('NIK') }}" required class="form-control" placeholder="Masukkan NIK">
+                            <div class="form-group" id="nik-group">
+                                <label for="NIK">NIK <span style="color: #ef4444;">*</span></label>
+                                <input type="text" id="NIK" name="NIK" value="{{ old('NIK') }}" required minlength="16" maxlength="16" class="form-control" placeholder="Masukkan NIK (16 digit)">
+                                <div id="nik-error" style="font-size: 12px; color: #ef4444; margin-top: 4px; display: none; align-items: center; gap: 6px;">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    <span id="nik-error-message"></span>
+                                </div>
+                                <div id="nik-success" style="font-size: 12px; color: #16a34a; margin-top: 4px; display: none; align-items: center; gap: 6px;">
+                                    <i class="bi bi-check-circle"></i>
+                                    <span>NIK valid (16 digit)</span>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -598,13 +616,13 @@
                             <div class="form-group">
                                 <label>Jenis Kelamin <span style="color: #ef4444;">*</span></label>
                                 <div class="radio-group">
-                                    <label class="radio-label">
+                                    <label class="radio-label" class="border: none;">
                                         <input type="radio" name="jenis_kelamin" value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'checked' : '' }} required>
-                                        <span>♂ Laki-laki</span>
+                                        <span>Laki-laki</span>
                                     </label>
-                                    <label class="radio-label">
+                                    <label class="radio-label" class="border : none;">
                                         <input type="radio" name="jenis_kelamin" value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'checked' : '' }} required>
-                                        <span>♀ Perempuan</span>
+                                        <span>Perempuan</span>
                                     </label>
                                 </div>
                             </div>
@@ -629,9 +647,17 @@
                                 <input type="text" id="telepon_hp" name="telepon_hp" value="{{ old('telepon_hp') }}" required class="form-control" placeholder="0812XXXXXXXX">
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group" id="email-group">
                                 <label for="email">Email <span style="color: #ef4444;">*</span></label>
-                                <input type="email" id="email" name="email" value="{{ old('email') }}" required class="form-control" placeholder="contoh@email.com">
+                                <input type="email" id="email" name="email" value="{{ old('email') }}" required class="form-control" placeholder="nama@gmail.com atau nama@yahoo.com">
+                                <div id="email-error" style="font-size: 12px; color: #ef4444; margin-top: 4px; display: none; align-items: center; gap: 6px;">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    <span id="email-error-message"></span>
+                                </div>
+                                <div id="email-success" style="font-size: 12px; color: #16a34a; margin-top: 4px; display: none; align-items: center; gap: 6px;">
+                                    <i class="bi bi-check-circle"></i>
+                                    <span>Email valid</span>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -710,9 +736,17 @@
                                 <input type="text" id="no_fax_lembaga_alt" name="telepon_rumah" value="{{ old('telepon_rumah') }}" class="form-control" placeholder="[Oxxx] ...">
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group" id="email_lembaga-group">
                                 <label for="email_lembaga">Email Lembaga <span style="color: #ef4444;">*</span></label>
-                                <input type="email" id="email_lembaga" name="email_lembaga" value="{{ old('email_lembaga') }}" required class="form-control" placeholder="info@lembaga.com">
+                                <input type="email" id="email_lembaga" name="email_lembaga" value="{{ old('email_lembaga') }}" required class="form-control" placeholder="nama@gmail.com atau nama@yahoo.com">
+                                <div id="email_lembaga-error" style="font-size: 12px; color: #ef4444; margin-top: 4px; display: none; align-items: center; gap: 6px;">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    <span id="email_lembaga-error-message"></span>
+                                </div>
+                                <div id="email_lembaga-success" style="font-size: 12px; color: #16a34a; margin-top: 4px; display: none; align-items: center; gap: 6px;">
+                                    <i class="bi bi-check-circle"></i>
+                                    <span>Email valid</span>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -783,8 +817,242 @@
             });
         }
 
+        // Validasi NIK real-time dan sinkronisasi dengan tanggal lahir
+        function validateNIK() {
+            const nikInput = document.getElementById('NIK');
+            const nikError = document.getElementById('nik-error');
+            const nikSuccess = document.getElementById('nik-success');
+            const nikErrorMsg = document.getElementById('nik-error-message');
+            const nikGroup = document.getElementById('nik-group');
+            let nikValue = nikInput.value;
+            
+            // Filter: hanya izinkan angka
+            nikValue = nikValue.replace(/[^0-9]/g, '');
+            nikInput.value = nikValue;
+            
+            if (nikValue.length === 0) {
+                nikError.style.display = 'none';
+                nikSuccess.style.display = 'none';
+                nikGroup.classList.remove('has-error');
+                nikInput.classList.remove('is-invalid');
+                return;
+            }
+            
+            if (nikValue.length < 16) {
+                nikErrorMsg.textContent = `NIK kurang (${nikValue.length}/16 digit)`;
+                nikError.style.display = 'flex';
+                nikSuccess.style.display = 'none';
+                nikGroup.classList.add('has-error');
+                nikInput.classList.add('is-invalid');
+            } else if (nikValue.length === 16) {
+                // Check format dan sinkronisasi tanggal lahir
+                const tanggalLahirInput = document.getElementById('tanggal_lahir');
+                const warningDiv = document.getElementById('nik-warning') || createNIKWarningDiv();
+                
+                // Ambil jenis kelamin dari radio button
+                const jenisKelaminRadios = document.querySelectorAll('input[name="jenis_kelamin"]');
+                let jenisKelamin = '';
+                jenisKelaminRadios.forEach(radio => {
+                    if (radio.checked) {
+                        jenisKelamin = radio.value;
+                    }
+                });
+                
+                let tanggalLahirMatch = checkNIKTanggalLahir(nikValue, tanggalLahirInput.value, jenisKelamin);
+                
+                nikError.style.display = 'none';
+                nikInput.classList.remove('is-invalid');
+                nikGroup.classList.remove('has-error');
+                
+                if (tanggalLahirMatch) {
+                    nikSuccess.style.display = 'flex';
+                    if (warningDiv) warningDiv.style.display = 'none';
+                } else {
+                    // Tampilkan warning, bukan error
+                    nikSuccess.style.display = 'flex';
+                    if (warningDiv) {
+                        warningDiv.style.display = 'flex';
+                    }
+                }
+            } else {
+                nikErrorMsg.textContent = 'NIK maksimal 16 digit';
+                nikError.style.display = 'flex';
+                nikSuccess.style.display = 'none';
+                nikGroup.classList.add('has-error');
+                nikInput.classList.add('is-invalid');
+            }
+        }
+        
+        // Helper function untuk membuat warning div
+        function createNIKWarningDiv() {
+            const nikGroup = document.getElementById('nik-group');
+            if (document.getElementById('nik-warning')) {
+                return document.getElementById('nik-warning');
+            }
+            
+            const warningDiv = document.createElement('div');
+            warningDiv.id = 'nik-warning';
+            warningDiv.style.cssText = 'font-size: 12px; color: #f59e0b; margin-top: 4px; display: none; align-items: center; gap: 6px;';
+            warningDiv.innerHTML = '<i class="bi bi-exclamation-triangle"></i><span>Apakah ini benar NIK Anda? Tanggal lahir di NIK tidak sesuai dengan tanggal lahir dan jenis kelamin yang diinputkan.</span>';
+            
+            const successDiv = document.getElementById('nik-success');
+            successDiv.parentNode.insertBefore(warningDiv, successDiv.nextSibling);
+            
+            return warningDiv;
+        }
+        
+        // Check apakah tanggal lahir di NIK sesuai dengan input tanggal lahir dan jenis kelamin
+        function checkNIKTanggalLahir(nik, tanggalLahir, jenisKelamin) {
+            if (!tanggalLahir) return true; // Skip jika belum ada input tanggal lahir
+            if (!jenisKelamin) return true; // Skip jika belum pilih jenis kelamin
+            
+            // Extract 6 digit kedua (posisi 6-11): DDMMYY
+            const digitKedua = nik.substring(6, 12);
+            let dd = parseInt(digitKedua.substring(0, 2), 10);
+            const mm = parseInt(digitKedua.substring(2, 4), 10);
+            let yy = parseInt(digitKedua.substring(4, 6), 10);
+            
+            // Debug info
+            console.log('NIK Validation Debug:', {
+                nik: nik,
+                digitKedua: digitKedua,
+                ddOriginal: dd,
+                mm: mm,
+                yy: yy,
+                jenisKelamin: jenisKelamin,
+                tanggalLahir: tanggalLahir
+            });
+            
+            // Handle jenis kelamin
+            // Jika perempuan dan DD > 40, kurangi 40
+            // Jika laki-laki dan DD > 40, itu invalid format untuk laki-laki
+            if (jenisKelamin === 'Perempuan') {
+                if (dd > 40) {
+                    dd = dd - 40;
+                    console.log('Perempuan: DD dikurangi 40, sekarang:', dd);
+                }
+            } else if (jenisKelamin === 'Laki-laki') {
+                // Untuk laki-laki, DD seharusnya <= 31, jika > 40 maka itu mungkin untuk perempuan
+                if (dd > 40) {
+                    console.log('Laki-laki tapi DD > 40, invalid!');
+                    // Invalid - tanggal di NIK terlihat untuk perempuan tapi jenis kelamin dipilih laki-laki
+                    return false;
+                }
+            }
+            
+            // Parse tanggal dari input
+            const [tahun, bulan, tanggal] = tanggalLahir.split('-').map(Number);
+            
+            // Konversi YY menjadi YYYY
+            // Jika YY <= 30 (misalnya 00-30), asumsi 2000-2030
+            // Jika YY > 30 (misalnya 31-99), asumsi 1931-1999
+            let tahunLengkap = yy > 30 ? 1900 + yy : 2000 + yy;
+            
+            // Check match
+            const match = dd === tanggal && mm === bulan && tahunLengkap === tahun;
+            
+            console.log('Comparison:', {
+                NIK_DD: dd,
+                Input_Tanggal: tanggal,
+                NIK_MM: mm,
+                Input_Bulan: bulan,
+                NIK_Tahun: tahunLengkap,
+                Input_Tahun: tahun,
+                match: match
+            });
+            
+            return match;
+        }
+        
+        // Validasi email - hanya @gmail.com dan @yahoo.com
+        function validateEmail(emailInputId) {
+            const emailInput = document.getElementById(emailInputId);
+            const errorDiv = document.getElementById(emailInputId + '-error');
+            const successDiv = document.getElementById(emailInputId + '-success');
+            const errorMsg = document.getElementById(emailInputId + '-error-message');
+            const emailGroup = document.getElementById(emailInputId + '-group');
+            const emailValue = emailInput.value.trim();
+            
+            if (emailValue.length === 0) {
+                errorDiv.style.display = 'none';
+                successDiv.style.display = 'none';
+                emailGroup.classList.remove('has-error');
+                emailInput.classList.remove('is-invalid');
+                return;
+            }
+            
+            // Check format email dasar
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailValue)) {
+                errorMsg.textContent = 'Format email tidak valid';
+                errorDiv.style.display = 'flex';
+                successDiv.style.display = 'none';
+                emailGroup.classList.add('has-error');
+                emailInput.classList.add('is-invalid');
+                return;
+            }
+            
+            // Check domain hanya @gmail.com atau @yahoo.com
+            const allowedDomains = ['gmail.com', 'yahoo.com'];
+            const domain = emailValue.split('@')[1].toLowerCase();
+            
+            if (!allowedDomains.includes(domain)) {
+                errorMsg.textContent = 'Email hanya boleh menggunakan @gmail.com atau @yahoo.com';
+                errorDiv.style.display = 'flex';
+                successDiv.style.display = 'none';
+                emailGroup.classList.add('has-error');
+                emailInput.classList.add('is-invalid');
+                return;
+            }
+            
+            // Valid
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'flex';
+            emailGroup.classList.remove('has-error');
+            emailInput.classList.remove('is-invalid');
+        }
+
         // Run on page load to reflect old() values
-        document.addEventListener('DOMContentLoaded', updateRadioStyle);
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRadioStyle();
+            
+            // Setup NIK validation
+            const nikInput = document.getElementById('NIK');
+            const tanggalLahirInput = document.getElementById('tanggal_lahir');
+            const jenisKelaminRadios = document.querySelectorAll('input[name="jenis_kelamin"]');
+            
+            if (nikInput && tanggalLahirInput) {
+                nikInput.addEventListener('input', validateNIK);
+                nikInput.addEventListener('change', validateNIK);
+                
+                // Juga validasi ulang ketika tanggal lahir berubah
+                tanggalLahirInput.addEventListener('change', validateNIK);
+                
+                // Juga validasi ulang ketika jenis kelamin berubah
+                jenisKelaminRadios.forEach(radio => {
+                    radio.addEventListener('change', validateNIK);
+                });
+                
+                // Validasi awal saat loading
+                validateNIK();
+            }
+            
+            // Setup Email validation
+            const emailInput = document.getElementById('email');
+            const emailLembagaInput = document.getElementById('email_lembaga');
+            
+            if (emailInput) {
+                emailInput.addEventListener('input', function() { validateEmail('email'); });
+                emailInput.addEventListener('change', function() { validateEmail('email'); });
+                validateEmail('email');
+            }
+            
+            if (emailLembagaInput) {
+                emailLembagaInput.addEventListener('input', function() { validateEmail('email_lembaga'); });
+                emailLembagaInput.addEventListener('change', function() { validateEmail('email_lembaga'); });
+                validateEmail('email_lembaga');
+            }
+        });
     </script>
 </body>
 

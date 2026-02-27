@@ -71,6 +71,12 @@
     .kuota-warning { background:#fef3c7; border:1px solid #fcd34d; border-radius:8px; padding:8px 14px; font-size:12px; color:#92400e; margin-top:8px; display:none; }
     .kuota-warning.show { display:block; }
 
+    .validation-error { font-size: 12px; color: #ef4444; margin-top: 4px; display: none; align-items: center; gap: 6px; }
+    .validation-error.show { display: flex; }
+    .validation-error i { font-size: 14px; }
+    .form-group.has-error { position: relative; }
+    .form-group.has-error .form-control { border-color: #ef4444; }
+
     .form-actions { display: flex; gap: 12px; margin-top: 24px; }
     .btn-submit {
         padding: 10px 24px; background: #0061a5; color: #fff; border: none;
@@ -156,19 +162,23 @@
             <div class="form-section-title"><i class="bi bi-clock"></i> Tanggal & Waktu</div>
 
             <!-- Tanggal Mulai -->
-            <div class="form-group">
+            <div class="form-group" id="tanggal_mulai_group">
                 <label>Tanggal Mulai <span class="required">*</span></label>
-                <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}"
+                <input type="date" name="tanggal_mulai" id="tanggal_mulai" value="{{ old('tanggal_mulai') }}"
                        class="form-control {{ $errors->has('tanggal_mulai') ? 'is-invalid' : '' }}">
                 @error('tanggal_mulai')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
             <!-- Tanggal Selesai -->
-            <div class="form-group">
+            <div class="form-group" id="tanggal_selesai_group">
                 <label>Tanggal Selesai <span class="required">*</span></label>
-                <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}"
+                <input type="date" name="tanggal_selesai" id="tanggal_selesai" value="{{ old('tanggal_selesai') }}"
                        class="form-control {{ $errors->has('tanggal_selesai') ? 'is-invalid' : '' }}">
                 <span class="hint">Bisa sama dengan tanggal mulai jika ujikom hanya 1 hari</span>
+                <div class="validation-error" id="tanggal_error">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span id="tanggal_error_message"></span>
+                </div>
                 @error('tanggal_selesai')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
@@ -438,6 +448,35 @@ function filterPeserta(q) {
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// Validasi tanggal real-time
+function validateTanggal() {
+    const tanggalMulai = document.getElementById('tanggal_mulai').value;
+    const tanggalSelesai = document.getElementById('tanggal_selesai').value;
+    const errorMsg = document.getElementById('tanggal_error');
+    const errorText = document.getElementById('tanggal_error_message');
+    const submitBtn = document.querySelector('[name="submit"]') || document.querySelector('button[type="submit"]');
+    const tanggalGroup = document.getElementById('tanggal_selesai_group');
+    
+    if (tanggalMulai && tanggalSelesai) {
+        if (new Date(tanggalSelesai) < new Date(tanggalMulai)) {
+            errorText.textContent = 'Tanggal selesai harus sama atau lebih besar dari tanggal mulai';
+            errorMsg.classList.add('show');
+            tanggalGroup.classList.add('has-error');
+            if (submitBtn) submitBtn.disabled = true;
+            return false;
+        } else {
+            errorMsg.classList.remove('show');
+            tanggalGroup.classList.remove('has-error');
+            if (submitBtn) submitBtn.disabled = false;
+            return true;
+        }
+    }
+    errorMsg.classList.remove('show');
+    tanggalGroup.classList.remove('has-error');
+    if (submitBtn) submitBtn.disabled = false;
+    return true;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const tukSel = document.getElementById('tuk_select');
     if (tukSel.value) showTukPreview(tukSel);
@@ -446,6 +485,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (skemaSel.value) loadAsesiRekomendasi(skemaSel.value);
 
     document.querySelector('[name=kuota]')?.addEventListener('input', () => { updateCounter(); refreshDisabled(); });
+    
+    // Event listeners untuk validasi tanggal real-time
+    const tanggalMulaiInput = document.getElementById('tanggal_mulai');
+    const tanggalSelesaiInput = document.getElementById('tanggal_selesai');
+    
+    if (tanggalMulaiInput && tanggalSelesaiInput) {
+        tanggalMulaiInput.addEventListener('change', validateTanggal);
+        tanggalMulaiInput.addEventListener('input', validateTanggal);
+        tanggalSelesaiInput.addEventListener('change', validateTanggal);
+        tanggalSelesaiInput.addEventListener('input', validateTanggal);
+        
+        // Validasi awal saat loading page
+        validateTanggal();
+    }
 });
 </script>
 <style>@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }</style>
