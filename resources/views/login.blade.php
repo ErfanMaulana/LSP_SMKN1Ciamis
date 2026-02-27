@@ -302,7 +302,6 @@
                         <i class="bi bi-people-fill input-icon"></i>
                         <select id="role" name="role" required>
                             <option value="" disabled {{ old('role') ? '' : 'selected' }}>-- Pilih Role --</option>
-                            <option value="admin"  {{ old('role') === 'admin'  ? 'selected' : '' }}>Admin</option>
                             <option value="asesi"  {{ old('role') === 'asesi'  ? 'selected' : '' }}>Asesi</option>
                             <option value="asesor" {{ old('role') === 'asesor' ? 'selected' : '' }}>Asesor</option>
                         </select>
@@ -369,13 +368,6 @@
 
     <script>
         const roleConfig = {
-            admin: {
-                panelTitle:            'Admin Panel',
-                panelDesc:             'Kelola seluruh data LSP SMKN 1 Ciamis melalui panel administrator.',
-                identifierLabel:       'USERNAME',
-                identifierIcon:        'bi-person-fill',
-                identifierPlaceholder: 'Masukkan username',
-            },
             asesi: {
                 panelTitle:            'Portal Asesi',
                 panelDesc:             'Akses portal uji kompetensi dan kelola berkas pendaftaran Anda.',

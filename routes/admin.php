@@ -22,10 +22,11 @@ use App\Http\Controllers\Admin\JadwalUjikomController;
 |
 */
 
-// Redirect old /admin/login → /login for backward compatibility
-Route::get('/admin/login', fn () => redirect()->route('login'))->name('admin.login');
-
 Route::prefix('admin')->group(function () {
+    // Admin login routes (not protected)
+    Route::get('/login', [AdminController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/login', [AdminController::class, 'login'])->name('admin.login.submit');
+
     // Protected admin routes
     Route::middleware('auth:admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');

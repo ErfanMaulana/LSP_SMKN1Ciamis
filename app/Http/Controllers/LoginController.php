@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
-use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,9 +15,6 @@ class LoginController extends Controller
     public function showLoginForm()
     {
         // Jika sudah login, redirect ke dashboard masing-masing
-        if (Auth::guard('admin')->check()) {
-            return redirect()->route('admin.dashboard');
-        }
         if (Auth::guard('account')->check()) {
             $account = Auth::guard('account')->user();
             if ($account->isAsesor()) {
@@ -36,26 +32,12 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'role'       => 'required|in:admin,asesi,asesor',
+            'role'       => 'required|in:asesi,asesor',
             'identifier' => 'required|string',
             'password'   => 'required|string',
         ]);
 
         $role = $request->role;
-
-        // ── Login Admin ──────────────────────────────────────────────
-        if ($role === 'admin') {
-            $admin = Admin::where('username', $request->identifier)->first();
-
-            if ($admin && Hash::check($request->password, $admin->password)) {
-                Auth::guard('admin')->login($admin, $request->filled('remember'));
-                return redirect()->intended(route('admin.dashboard'))->with('success', 'Login berhasil!');
-            }
-
-            return back()->withErrors(['identifier' => 'Username atau password salah.'])
-                         ->withInput($request->only('identifier', 'role'));
-        }
-
 
         // ── Login Asesi / Asesor ─────────────────────────────────────
         $account = Account::where('no_reg', $request->identifier)
