@@ -22,11 +22,8 @@
         gap: 16px;
         margin-bottom: 24px;
     }
-    .stat-card {
-        background: white; border-radius: 12px; padding: 20px;
-        display: flex; align-items: center; gap: 16px;
-        box-shadow: 0 1px 3px rgba(0,0,0,.08);
-    }
+    .stat-card { background: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s; }
+    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
     .stat-icon {
         width: 50px; height: 50px; border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
@@ -54,12 +51,12 @@
         border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
     .btn-add {
-        padding: 9px 18px; background: #16a34a; color: #fff;
+        padding: 9px 18px; background: #0061a5; color: #fff;
         border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
         cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
         white-space: nowrap;
     }
-    .btn-add:hover { background: #15803d; color: #fff; }
+    .btn-add:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
 
     .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
@@ -112,7 +109,7 @@
 <!-- Header -->
 <div class="page-header">
     <div>
-        <h2><i class="bi bi-building" style="color:#0061a5;"></i> Tempat Uji Kompetensi (TUK)</h2>
+        <h2>Tempat Uji Kompetensi (TUK)</h2>
         <p>Kelola data tempat uji kompetensi untuk pelaksanaan ujian sertifikasi</p>
     </div>
     <a href="{{ route('admin.tuk.create') }}" class="btn-add">
@@ -130,14 +127,14 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-check-circle"></i></div>
         <div>
             <div class="stat-label">TUK Aktif</div>
             <div class="stat-value">{{ $stats['aktif'] }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon red"><i class="bi bi-x-circle"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-x-circle"></i></div>
         <div>
             <div class="stat-label">Non-Aktif</div>
             <div class="stat-value">{{ $stats['nonaktif'] }}</div>

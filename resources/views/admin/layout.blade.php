@@ -200,21 +200,156 @@
             color: #95a5a6;
         }
 
-        .btn-logout {
-            background: #0061A5;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: relative;
         }
 
-        .btn-logout:hover {
-            background: #003961;
-            transform: translateY(-1px);
+        .profile-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-toggle:hover {
+            background: #f5f7fa;
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            min-width: 260px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .profile-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-avatar-lg {
+            width: 48px;
+            height: 48px;
+            background: #0061A5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .profile-header-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-header-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0F172A;
+            margin: 0;
+        }
+
+        .profile-header-role {
+            font-size: 12px;
+            color: #64748b;
+            margin: 2px 0 0 0;
+        }
+
+        .profile-body {
+            padding: 8px 0;
+        }
+
+        .profile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .profile-menu-item:hover {
+            background: #f8fafc;
+            color: #0F172A;
+        }
+
+        .profile-menu-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .profile-menu-item:hover i {
+            color: #0061A5;
+        }
+
+        .profile-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 8px 0;
+        }
+
+        .profile-logout {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #dc2626;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .profile-logout:hover {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .profile-logout i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
         }
 
         .content-wrapper {
@@ -406,21 +541,49 @@
                 </div>
                 
                 <div class="topbar-right">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
-                        </div>
-                        <div class="user-details">
-                            <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
-                            <span class="user-role">Admin LSP</span>
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-toggle" onclick="toggleProfileMenu(event)">
+                            <div class="user-avatar">
+                                {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
+                            </div>
+                            <div class="user-details">
+                                <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
+                                <span class="user-role">Admin LSP</span>
+                            </div>
+                            <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
+                        </button>
+
+                        <div class="profile-menu" id="profileMenu">
+                            <div class="profile-header">
+                                <div class="profile-avatar-lg">
+                                    {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
+                                </div>
+                                <div class="profile-header-info">
+                                    <h4 class="profile-header-name">{{ Auth::guard('admin')->user()->name }}</h4>
+                                    <p class="profile-header-role">Administrator</p>
+                                </div>
+                            </div>
+
+                            <div class="profile-body">
+                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                    <i class="bi bi-person"></i>
+                                    <span>Profil</span>
+                                </a>
+                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                    <i class="bi bi-gear"></i>
+                                    <span>Pengaturan</span>
+                                </a>
+                                <div class="profile-divider"></div>
+                                <form method="POST" action="{{ route('admin.logout') }}" style="width: 100%; margin: 0;">
+                                    @csrf
+                                    <button type="submit" class="profile-logout">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('admin.logout') }}" style="display: inline;">
-                        @csrf
-                        <button type="submit" class="btn-logout">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
                 </div>
             </div>
 
@@ -448,6 +611,22 @@
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
         }
+
+        function toggleProfileMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('show');
+        }
+
+        // Close profile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const profileDropdown = document.getElementById('profileDropdown');
+            const profileMenu = document.getElementById('profileMenu');
+            
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                profileMenu.classList.remove('show');
+            }
+        });
 
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {

@@ -8,7 +8,7 @@
     <div class="form-header">
         <div>
             <h2>Edit Konten Profil</h2>
-            <p class="subtitle">Perbarui konten Sejarah Singkat atau Milestone Perjalanan</p>
+            <p class="subtitle">Perbarui Sejarah, Milestone, Visi, atau Misi halaman profil</p>
         </div>
         <a href="{{ route('admin.profile-content.index') }}" class="btn btn-outline">
             <i class="bi bi-arrow-left"></i> Kembali
@@ -33,13 +33,19 @@
                             <option value="milestone" {{ $content->type === 'milestone' || old('type') === 'milestone' ? 'selected' : '' }}>
                                 Milestone Perjalanan
                             </option>
+                            <option value="visi" {{ $content->type === 'visi' || old('type') === 'visi' ? 'selected' : '' }}>
+                                Visi
+                            </option>
+                            <option value="misi" {{ $content->type === 'misi' || old('type') === 'misi' ? 'selected' : '' }}>
+                                Misi
+                            </option>
                         </select>
                         @error('type')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div class="form-group">
+                    <div class="form-group" id="titleField">
                         <label for="title">Judul <span class="required">*</span></label>
                         <input type="text" id="title" name="title" 
                                class="form-control @error('title') is-invalid @enderror" 
@@ -82,6 +88,21 @@
                     </div>
                 </div>
 
+                <div id="visionMissionFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="order-vm">Urutan <span class="text-optional">(Opsional)</span></label>
+                        <input type="number" id="order-vm" name="order" 
+                               class="form-control @error('order') is-invalid @enderror" 
+                               value="{{ old('order', $content->order) }}" 
+                               min="0"
+                               placeholder="Contoh: 1">
+                        <small class="help-text">Angka kecil tampil lebih dulu</small>
+                        @error('order')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label for="content">Konten <span class="required">*</span></label>
                     <textarea id="content" name="content" rows="5" 
@@ -108,7 +129,7 @@
                         <i class="bi bi-x-circle"></i> Batal
                     </a>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> Perbarui Konten
+                        <i class="bi bi-check-circle"></i> <span id="submitText">Perbarui Konten</span>
                     </button>
                 </div>
             </form>
@@ -119,14 +140,39 @@
 <script>
     document.getElementById('type').addEventListener('change', function() {
         const milestoneFields = document.getElementById('milestoneFields');
-        if (this.value === 'milestone') {
+        const visionMissionFields = document.getElementById('visionMissionFields');
+        const titleField = document.getElementById('titleField');
+        const titleInput = document.getElementById('title');
+        const submitText = document.getElementById('submitText');
+        
+        const typeLabels = {
+            'sejarah': 'Perbarui Sejarah',
+            'milestone': 'Perbarui Milestone',
+            'visi': 'Perbarui Visi',
+            'misi': 'Perbarui Misi'
+        };
+        
+        if (this.value === 'sejarah' || this.value === 'milestone') {
             milestoneFields.style.display = 'block';
+            visionMissionFields.style.display = 'none';
+            titleField.style.display = 'block';
+            titleInput.setAttribute('required', 'required');
+        } else if (this.value === 'visi' || this.value === 'misi') {
+            milestoneFields.style.display = 'none';
+            visionMissionFields.style.display = 'block';
+            titleField.style.display = 'none';
+            titleInput.removeAttribute('required');
         } else {
             milestoneFields.style.display = 'none';
+            visionMissionFields.style.display = 'none';
+            titleField.style.display = 'block';
+            titleInput.setAttribute('required', 'required');
         }
+        
+        submitText.textContent = typeLabels[this.value] || 'Perbarui Konten';
     });
 
-    // Show milestone fields on page load if milestone is selected
+    // Show fields on page load if type is selected
     document.getElementById('type').dispatchEvent(new Event('change'));
 </script>
 @endsection
