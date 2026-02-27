@@ -33,17 +33,24 @@ class JadwalUjikomController extends Controller
         }
 
         if ($bulan) {
-            $query->whereRaw("DATE_FORMAT(tanggal, '%Y-%m') = ?", [$bulan]);
+            $query->where(function ($q) use ($bulan) {
+                $q->whereRaw("DATE_FORMAT(tanggal_mulai, '%Y-%m') = ?", [$bulan])
+                  ->orWhereRaw("DATE_FORMAT(tanggal_selesai, '%Y-%m') = ?", [$bulan]);
+            });
         }
 
-        $jadwals = $query->orderBy('tanggal', 'desc')->orderBy('waktu_mulai')->paginate(10)->withQueryString();
+        $jadwals = $query->orderBy('tanggal_mulai', 'desc')->orderBy('waktu_mulai')->paginate(10)->withQueryString();
 
         $stats = [
             'total'       => JadwalUjikom::count(),
             'dijadwalkan' => JadwalUjikom::where('status', 'dijadwalkan')->count(),
             'berlangsung' => JadwalUjikom::where('status', 'berlangsung')->count(),
             'selesai'     => JadwalUjikom::where('status', 'selesai')->count(),
-            'bulan_ini'   => JadwalUjikom::whereRaw("DATE_FORMAT(tanggal, '%Y-%m') = ?", [now()->format('Y-m')])->count(),
+            'bulan_ini'   => JadwalUjikom::where(function ($q) {
+                $bulan = now()->format('Y-m');
+                $q->whereRaw("DATE_FORMAT(tanggal_mulai, '%Y-%m') = ?", [$bulan])
+                  ->orWhereRaw("DATE_FORMAT(tanggal_selesai, '%Y-%m') = ?", [$bulan]);
+            })->count(),
         ];
 
         return view('admin.jadwal-ujikom.index', compact('jadwals', 'stats', 'search', 'status', 'bulan'));
@@ -62,7 +69,8 @@ class JadwalUjikomController extends Controller
             'judul_jadwal'  => 'required|string|max:255',
             'tuk_id'        => 'required|exists:tuk,id',
             'skema_id'      => 'required|exists:skemas,id',
-            'tanggal'       => 'required|date',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'waktu_mulai'   => 'required',
             'waktu_selesai' => 'required|after:waktu_mulai',
             'kuota'         => 'required|integer|min:1',
@@ -76,7 +84,9 @@ class JadwalUjikomController extends Controller
             'tuk_id.exists'           => 'TUK tidak ditemukan.',
             'skema_id.required'       => 'Skema wajib dipilih.',
             'skema_id.exists'         => 'Skema tidak ditemukan.',
-            'tanggal.required'        => 'Tanggal wajib diisi.',
+            'tanggal_mulai.required'  => 'Tanggal mulai wajib diisi.',
+            'tanggal_selesai.required' => 'Tanggal selesai wajib diisi.',
+            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
             'waktu_mulai.required'    => 'Waktu mulai wajib diisi.',
             'waktu_selesai.required'  => 'Waktu selesai wajib diisi.',
             'waktu_selesai.after'     => 'Waktu selesai harus setelah waktu mulai.',
@@ -145,7 +155,8 @@ class JadwalUjikomController extends Controller
             'judul_jadwal'      => 'required|string|max:255',
             'tuk_id'            => 'required|exists:tuk,id',
             'skema_id'          => 'required|exists:skemas,id',
-            'tanggal'           => 'required|date',
+            'tanggal_mulai'     => 'required|date',
+            'tanggal_selesai'   => 'required|date|after_or_equal:tanggal_mulai',
             'waktu_mulai'       => 'required',
             'waktu_selesai'     => 'required|after:waktu_mulai',
             'kuota'             => 'required|integer|min:1',
@@ -157,7 +168,9 @@ class JadwalUjikomController extends Controller
             'judul_jadwal.required'  => 'Judul jadwal wajib diisi.',
             'tuk_id.required'        => 'TUK wajib dipilih.',
             'skema_id.required'      => 'Skema wajib dipilih.',
-            'tanggal.required'       => 'Tanggal wajib diisi.',
+            'tanggal_mulai.required' => 'Tanggal mulai wajib diisi.',
+            'tanggal_selesai.required' => 'Tanggal selesai wajib diisi.',
+            'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
             'waktu_mulai.required'   => 'Waktu mulai wajib diisi.',
             'waktu_selesai.required' => 'Waktu selesai wajib diisi.',
             'waktu_selesai.after'    => 'Waktu selesai harus setelah waktu mulai.',

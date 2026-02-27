@@ -28,7 +28,8 @@ class JadwalController extends Controller
             ->select(
                 'jadwal_ujikom.id',
                 'jadwal_ujikom.judul_jadwal',
-                'jadwal_ujikom.tanggal',
+                'jadwal_ujikom.tanggal_mulai',
+                'jadwal_ujikom.tanggal_selesai',
                 'jadwal_ujikom.waktu_mulai',
                 'jadwal_ujikom.waktu_selesai',
                 'jadwal_ujikom.kuota',
@@ -42,7 +43,7 @@ class JadwalController extends Controller
                 'skemas.nama_skema'
             )
             ->orderByRaw("FIELD(jadwal_ujikom.status, 'berlangsung', 'dijadwalkan', 'selesai', 'dibatalkan')")
-            ->orderBy('jadwal_ujikom.tanggal')
+            ->orderBy('jadwal_ujikom.tanggal_mulai')
             ->get();
 
         // Ambil daftar peserta untuk setiap jadwal

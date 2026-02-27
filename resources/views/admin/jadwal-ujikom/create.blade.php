@@ -155,16 +155,25 @@
 
             <div class="form-section-title"><i class="bi bi-clock"></i> Tanggal & Waktu</div>
 
-            <!-- Tanggal -->
+            <!-- Tanggal Mulai -->
             <div class="form-group">
-                <label>Tanggal <span class="required">*</span></label>
-                <input type="date" name="tanggal" value="{{ old('tanggal') }}"
-                       class="form-control {{ $errors->has('tanggal') ? 'is-invalid' : '' }}">
-                @error('tanggal')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                <label>Tanggal Mulai <span class="required">*</span></label>
+                <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}"
+                       class="form-control {{ $errors->has('tanggal_mulai') ? 'is-invalid' : '' }}">
+                @error('tanggal_mulai')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
+
+            <!-- Tanggal Selesai -->
+            <div class="form-group">
+                <label>Tanggal Selesai <span class="required">*</span></label>
+                <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai') }}"
+                       class="form-control {{ $errors->has('tanggal_selesai') ? 'is-invalid' : '' }}">
+                <span class="hint">Bisa sama dengan tanggal mulai jika ujikom hanya 1 hari</span>
+                @error('tanggal_selesai')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
             <!-- Kuota -->
-            <div class="form-group">
+            <div class="form-group form-full">
                 <label>Kuota Peserta <span class="required">*</span></label>
                 <input type="number" name="kuota" value="{{ old('kuota', 30) }}" min="1"
                        class="form-control {{ $errors->has('kuota') ? 'is-invalid' : '' }}">

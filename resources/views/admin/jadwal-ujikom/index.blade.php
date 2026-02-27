@@ -201,7 +201,15 @@
                     <div style="font-weight:600;color:#0F172A;">{{ $jadwal->judul_jadwal }}</div>
                     <div style="font-size:12px;color:#0061a5;margin-top:2px;font-weight:600;">
                         <i class="bi bi-calendar3"></i>
-                        {{ $jadwal->tanggal ? $jadwal->tanggal->translatedFormat('d F Y') : '-' }}
+                        @if($jadwal->tanggal_mulai && $jadwal->tanggal_selesai)
+                            @if($jadwal->tanggal_mulai->eq($jadwal->tanggal_selesai))
+                                {{ $jadwal->tanggal_mulai->translatedFormat('d F Y') }}
+                            @else
+                                {{ $jadwal->tanggal_mulai->translatedFormat('d M') }} - {{ $jadwal->tanggal_selesai->translatedFormat('d M Y') }}
+                            @endif
+                        @else
+                            -
+                        @endif
                     </div>
                 </td>
                 <td>

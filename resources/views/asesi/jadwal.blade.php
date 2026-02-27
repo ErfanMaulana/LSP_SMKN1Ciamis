@@ -361,7 +361,7 @@
 @else
     @foreach($jadwalWithPeserta as $index => $jadwal)
     @php
-        $tglJadwal = \Carbon\Carbon::parse($jadwal->tanggal . ' ' . $jadwal->waktu_mulai);
+        $tglJadwal = \Carbon\Carbon::parse($jadwal->tanggal_mulai . ' ' . $jadwal->waktu_mulai);
         $now = now();
         
         $tipeLabel = match($jadwal->tipe_tuk ?? '') {
@@ -370,6 +370,11 @@
             'mandiri'      => 'TUK Mandiri',
             default        => 'TUK',
         };
+        
+        // Check if multi-day event
+        $tglMulai = \Carbon\Carbon::parse($jadwal->tanggal_mulai);
+        $tglSelesai = \Carbon\Carbon::parse($jadwal->tanggal_selesai);
+        $isMultiDay = !$tglMulai->eq($tglSelesai);
     @endphp
 
     <div class="jadwal-fullscreen status-{{ $jadwal->status }}" id="jadwal-{{ $index }}" data-jadwal-date="{{ $tglJadwal->toIso8601String() }}">
@@ -432,8 +437,14 @@
                     <i class="bi bi-calendar-event-fill info-card-icon"></i>
                     <div class="info-card-label">Tanggal & Waktu</div>
                     <div class="info-card-value">
-                        {{ $tglJadwal->translatedFormat('l, d F Y') }}<br>
-                        {{ substr($jadwal->waktu_mulai, 0, 5) }} – {{ substr($jadwal->waktu_selesai, 0, 5) }} WIB
+                        @if($isMultiDay)
+                            {{ $tglMulai->translatedFormat('d M') }} - {{ $tglSelesai->translatedFormat('d M Y') }}<br>
+                            {{ substr($jadwal->waktu_mulai, 0, 5) }} – {{ substr($jadwal->waktu_selesai, 0, 5) }} WIB
+                            <small style="display:block;margin-top:4px;opacity:0.85;">{{ $tglMulai->diffInDays($tglSelesai) + 1 }} Hari</small>
+                        @else
+                            {{ $tglJadwal->translatedFormat('l, d F Y') }}<br>
+                            {{ substr($jadwal->waktu_mulai, 0, 5) }} – {{ substr($jadwal->waktu_selesai, 0, 5) }} WIB
+                        @endif
                     </div>
                 </div>
 

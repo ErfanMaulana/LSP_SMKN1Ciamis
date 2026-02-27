@@ -12,7 +12,8 @@ class JadwalUjikom extends Model
         'tuk_id',
         'skema_id',
         'judul_jadwal',
-        'tanggal',
+        'tanggal_mulai',
+        'tanggal_selesai',
         'waktu_mulai',
         'waktu_selesai',
         'kuota',
@@ -22,7 +23,8 @@ class JadwalUjikom extends Model
     ];
 
     protected $casts = [
-        'tanggal'      => 'date',
+        'tanggal_mulai' => 'date',
+        'tanggal_selesai'=> 'date',
         'waktu_mulai'  => 'string',
         'waktu_selesai'=> 'string',
     ];
