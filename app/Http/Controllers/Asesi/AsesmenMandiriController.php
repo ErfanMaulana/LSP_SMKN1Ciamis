@@ -106,8 +106,14 @@ class AsesmenMandiriController extends Controller
             })
             ->get()
             ->keyBy('elemen_id');
+
+        // Re-fetch updated pivot to get rekomendasi data
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesi->NIK)
+            ->where('skema_id', $skemaId)
+            ->first();
         
-        return view('asesi.asesmen-mandiri.form', compact('account', 'asesi', 'skema', 'existingAnswers'));
+        return view('asesi.asesmen-mandiri.form', compact('account', 'asesi', 'skema', 'existingAnswers', 'pivot'));
     }
 
     /**

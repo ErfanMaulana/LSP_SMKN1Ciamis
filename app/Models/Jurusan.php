@@ -31,13 +31,10 @@ class Jurusan extends Model
     public function asesi()
     {
         return $this->hasMany(Asesi::class, 'ID_jurusan', 'ID_jurusan');
-<<<<<<< HEAD
-=======
     }
 
     public function skemas()
     {
         return $this->hasMany(Skema::class, 'jurusan_id', 'ID_jurusan');
->>>>>>> e4ad774 (feat: asesor panel, asesmen mandiri, jurusan-skema relation, rekomendasi FR.APL.02)
     }
 }

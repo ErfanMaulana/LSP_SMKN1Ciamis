@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\SkemaController;
 use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\SocialMediaController;
 use App\Http\Controllers\Admin\ProfileContentController;
+use App\Http\Controllers\Admin\TukController;
+use App\Http\Controllers\Admin\JadwalUjikomController;
 
 /*
 |--------------------------------------------------------------------------
@@ -110,5 +112,24 @@ Route::prefix('admin')->group(function () {
         Route::put('/profile-content/{id}', [ProfileContentController::class, 'update'])->name('admin.profile-content.update');
         Route::delete('/profile-content/{id}', [ProfileContentController::class, 'destroy'])->name('admin.profile-content.destroy');
         Route::patch('/profile-content/{id}/toggle', [ProfileContentController::class, 'toggleStatus'])->name('admin.profile-content.toggle');
+
+        // TUK CRUD
+        Route::get('/tuk', [TukController::class, 'index'])->name('admin.tuk.index');
+        Route::get('/tuk/create', [TukController::class, 'create'])->name('admin.tuk.create');
+        Route::post('/tuk', [TukController::class, 'store'])->name('admin.tuk.store');
+        Route::get('/tuk/{id}/edit', [TukController::class, 'edit'])->name('admin.tuk.edit');
+        Route::put('/tuk/{id}', [TukController::class, 'update'])->name('admin.tuk.update');
+        Route::delete('/tuk/{id}', [TukController::class, 'destroy'])->name('admin.tuk.destroy');
+        Route::patch('/tuk/{id}/toggle', [TukController::class, 'toggleStatus'])->name('admin.tuk.toggle');
+
+        // Jadwal Ujikom CRUD
+        Route::get('/jadwal-ujikom', [JadwalUjikomController::class, 'index'])->name('admin.jadwal-ujikom.index');
+        Route::get('/jadwal-ujikom/create', [JadwalUjikomController::class, 'create'])->name('admin.jadwal-ujikom.create');
+        Route::get('/jadwal-ujikom/asesi-rekomendasi', [JadwalUjikomController::class, 'getAsesiBySkema'])->name('admin.jadwal-ujikom.asesi-rekomendasi');
+        Route::post('/jadwal-ujikom', [JadwalUjikomController::class, 'store'])->name('admin.jadwal-ujikom.store');
+        Route::get('/jadwal-ujikom/{id}/edit', [JadwalUjikomController::class, 'edit'])->name('admin.jadwal-ujikom.edit');
+        Route::put('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'update'])->name('admin.jadwal-ujikom.update');
+        Route::delete('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'destroy'])->name('admin.jadwal-ujikom.destroy');
+        Route::patch('/jadwal-ujikom/{id}/status', [JadwalUjikomController::class, 'updateStatus'])->name('admin.jadwal-ujikom.status');
     });
 });

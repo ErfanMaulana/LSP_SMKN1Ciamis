@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Asesi\AuthController;
 use App\Http\Controllers\Asesi\AsesmenMandiriController;
+use App\Http\Controllers\Asesi\ProfileController;
+use App\Http\Controllers\Asesi\JadwalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,5 +29,13 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
         Route::get('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'show'])->name('asesmen-mandiri.show');
         Route::post('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'store'])->name('asesmen-mandiri.store');
         Route::get('/asesmen-mandiri/{skemaId}/result', [AsesmenMandiriController::class, 'result'])->name('asesmen-mandiri.result');
+
+        // Profil
+        Route::get('/profil', [ProfileController::class, 'edit'])->name('profil.edit');
+        Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
+        Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
+
+        // Jadwal Ujikom
+        Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
     });
 });
