@@ -23,12 +23,15 @@
               <div class="section-icon"><i class="bi bi-book-fill"></i></div>
               <h5 class="card-title-h">Sejarah Singkat</h5>
             </div>
+            @forelse($sejarah as $item)
             <p class="hero-text">
-              LSP P1 SMKN 1 Ciamis didirikan dengan semangat untuk memberikan pengakuan kompetensi formal bagi lulusan pendidikan vokasi. Sebagai salah satu SMK Pusat Keunggulan, kami meyakinkan bahwa setiap jebolan siap di pasar kerja global yang kompeten!
+              {{ $item->content }}
             </p>
-            <p class="hero-text">
-              Melalui lisensi resmi dari Badan Nasional Sertifikasi Profesi (BNSP), kami terus berinovasi dalam mengembangkan skema sertifikasi yang relevan dengan kebutuhan industri, Dunia Usaha, dan Dunia Kerja (DUDI/KA).
+            @empty
+            <p class="hero-text text-muted">
+              Konten sejarah singkat tidak tersedia.
             </p>
+            @endforelse
           </div>
         </div>
       </div>
@@ -39,27 +42,23 @@
           <div class="p-6">
             <h5 class="card-title-h">Milestone Perjalanan</h5>
             <div class="milestone-wrap">
+              @forelse($milestones as $milestone)
               <div class="milestone-item">
-                <div class="milestone-dot m-blue"><i class="bi bi-star-fill" style="font-size:.7rem"></i></div>
+                <div class="milestone-dot m-blue">
+                  @if($milestone->icon)
+                  <i class="{{ $milestone->icon }}" style="font-size:.7rem"></i>
+                  @else
+                  <i class="bi bi-star-fill" style="font-size:.7rem"></i>
+                  @endif
+                </div>
                 <div>
-                  <h6>Inisiasi & Persiapan</h6>
-                  <p>Pembentukan tim pengembang dan penyusunan dokumen sistem manajemen sertifikasi sesuai standar BNSP.</p>
+                  <h6>{{ $milestone->title }}</h6>
+                  <p>{{ $milestone->content }}</p>
                 </div>
               </div>
-              <div class="milestone-item">
-                <div class="milestone-dot m-blue"><i class="bi bi-patch-check-fill" style="font-size:.7rem"></i></div>
-                <div>
-                  <h6>Lisensi BNSP</h6>
-                  <p>Resmi memperoleh lisensi dari BNSP sebagai Lembaga Sertifikasi Profesi untuk menyelenggarakan uji kompetensi 5 skema.</p>
-                </div>
-              </div>
-              <div class="milestone-item">
-                <div class="milestone-dot m-blue"><i class="bi bi-arrow-repeat" style="font-size:.7rem"></i></div>
-                <div>
-                  <h6>Re-Akreditasi</h6>
-                  <p>Keberhasilan melewati proses re-akreditasi BNSP dengan penambahan ruang lingkup skema baru.</p>
-                </div>
-              </div>
+              @empty
+              <p class="text-muted">Milestone perjalanan tidak tersedia.</p>
+              @endforelse
             </div>
           </div>
         </div>
@@ -79,17 +78,24 @@
       <div class="lg:col-span-5">
         <div class="card-visi">
           <h5>Visi Kami</h5>
-          <p>"Menjadi platform digital resmi LSP SMKN 1 Ciamis yang terintegrasi, modern, dan profesional dalam mendukung seluruh proses sertifikasi kompetensi secara transparan, akurat, dan efisien, serta mampu meningkatkan kualitas layanan, kredibilitas lembaga, dan daya saing lulusan di dunia usaha dan dunia industri melalui pemanfaatan teknologi informasi."</p>
+          @if($visions->count() > 0)
+            @foreach($visions as $vision)
+              <p>{{ $vision->content }}</p>
+            @endforeach
+          @else
+            <p>Visi belum tersedia.</p>
+          @endif
         </div>
       </div>
 
       <div class="lg:col-span-7">
         <div class="card-misi">
           <h5 class="flex items-center gap-2"><i class="bi bi-list-check text-blue-600"></i> Misi Kami</h5>
-          <div class="misi-item"><i class="bi bi-check-circle-fill misi-icon"></i><span>Menyelenggarakan sertifikasi kompetensi yang transparan, objektif, dan terpercaya.</span></div>
-          <div class="misi-item"><i class="bi bi-check-circle-fill misi-icon"></i><span>Menyediakan asesor yang profesional dan kompeten di bidangnya.</span></div>
-          <div class="misi-item"><i class="bi bi-check-circle-fill misi-icon"></i><span>Mengembangkan skema sertifikasi sesuai dinamika kebutuhan pasar kerja.</span></div>
-          <div class="misi-item"><i class="bi bi-check-circle-fill misi-icon"></i><span>Meningkatkan kerjasama strategis dengan dunia usaha dan industri.</span></div>
+          @forelse($missions as $mission)
+            <div class="misi-item"><i class="bi bi-check-circle-fill misi-icon"></i><span>{{ $mission->content }}</span></div>
+          @empty
+            <p>Misi belum tersedia.</p>
+          @endforelse
         </div>
       </div>
 
@@ -103,7 +109,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
       <div class="lg:col-span-5 km-left">
-        <h4 class="flex items-center gap-2"><i class="bi bi-shield-check text-blue-600"></i> Kebijakan Mutu</h4>
+        <h4 class="flex items-center gap-2">Kebijakan Mutu</h4>
         <p>LSP P1 SMKN 1 Ciamis berkomitmen memberikan pelayanan sertifikasi yang mengutamakan kepuasan pelanggan, profesionalisme, dan konsistensi dalam menerapkan standar BNSP.</p>
         <p class="prinsip-header">Prinsip Utama</p>
         <span class="prinsip-tag">Kualitas</span>

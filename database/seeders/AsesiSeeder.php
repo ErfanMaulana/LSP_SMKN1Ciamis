@@ -3,9 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Asesi;
-use App\Models\Jurusan;
-use Faker\Factory as Faker;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AsesiSeeder extends Seeder
 {
@@ -14,59 +13,79 @@ class AsesiSeeder extends Seeder
      */
     public function run(): void
     {
-        $faker = Faker::create('id_ID');
-        $jurusan = Jurusan::all();
+        $jurusanNames = ['PPLG', 'DKV', 'AKL', 'KLN', 'MPLB', 'PM', 'HTL'];
+        $tempat_lahir = ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Semarang', 'Makassar', 'Yogyakarta', 'Palembang', 'Bogor', 'Bekasi'];
+        $kelas = ['X A', 'X B', 'XI A', 'XI B', 'XII A', 'XII B'];
 
-        if ($jurusan->isEmpty()) {
-            $this->command->warn('No jurusan found. Please run JurusanSeeder first.');
-            return;
-        }
+        $firstNames = ['Andi', 'Siti', 'Rizky', 'Budi', 'Dewi', 'Achmad', 'Nisa', 'Rudi', 'Siana', 'Toni', 'Udin', 'Vina', 'Wayan', 'Xenia', 'Yani', 'Zuri', 'Alfian', 'Bella', 'Choirul', 'Desy'];
+        $lastNames = ['Saputra', 'Aminah', 'Ramadhan', 'Wijaya', 'Kusuma', 'Rahman', 'Putri', 'Setiawan', 'Handoko', 'Wulandari', 'Santoso', 'Pratama', 'Gunawan', 'Hermawan', 'Irawan', 'Jakarta', 'Kusuma', 'Lestari', 'Mansur', 'Nurdin'];
 
-        $this->command->info('Found ' . $jurusan->count() . ' jurusan records');
+        $asesiCount = 0;
 
-        $asesiData = [
-            ['nama' => 'Andi Saputra', 'email' => 'andi.saputra@student.smkn1ciamis.sch.id'],
-            ['nama' => 'Siti Aminah', 'email' => 'siti.aminah@student.smkn1ciamis.sch.id'],
-            ['nama' => 'Rizky Ramadhan', 'email' => 'rizky.ramadhan@student.smkn1ciamis.sch.id'],
-            ['nama' => 'Budi Wijaya', 'email' => 'budi.wijaya@student.smkn1ciamis.sch.id'],
-            ['nama' => 'Dewi Kusuma', 'email' => 'dewi.kusuma@student.smkn1ciamis.sch.id'],
+        // Mapping jurusan names to ID (from database)
+        $jurusanIdMap = [
+            'PPLG' => 1,
+            'DKV' => 2,
+            'AKL' => 3,
+            'KLN' => 4,
+            'MPLB' => 5,
+            'PM' => 6,
+            'HTL' => 7,
         ];
 
-        foreach ($asesiData as $index => $data) {
-            $nik = '3207' . str_pad($index + 1, 12, '0', STR_PAD_LEFT);
-            
-            // Skip if NIK already exists
-            if (Asesi::where('NIK', $nik)->exists()) {
-                $this->command->info('Skipping existing NIK: ' . $nik);
-                continue;
+        // Distribution: PPLG=6, DKV=5, AKL=5, KLN=5, MPLB=5, PM=5, HTL=5
+        $distribution = [
+            'PPLG' => 6,
+            'DKV' => 5,
+            'AKL' => 5,
+            'KLN' => 5,
+            'MPLB' => 5,
+            'PM' => 5,
+            'HTL' => 5,
+        ];
+
+        foreach ($jurusanNames as $jurusanName) {
+            $idJurusan = $jurusanIdMap[$jurusanName];
+            $count = $distribution[$jurusanName];
+
+            for ($i = 1; $i <= $count; $i++) {
+                $asesiCount++;
+                $nik = '3207' . str_pad($asesiCount, 12, '0', STR_PAD_LEFT);
+                
+                // Skip if NIK already exists
+                if (DB::table('asesi')->where('NIK', $nik)->exists()) {
+                    continue;
+                }
+
+                $firstName = $firstNames[array_rand($firstNames)];
+                $lastName = $lastNames[array_rand($lastNames)];
+                $nama = "$firstName $lastName";
+
+                DB::table('asesi')->insert([
+                    'NIK' => $nik,
+                    'nama' => $nama,
+                    'email' => strtolower(str_replace(' ', '.', $nama)) . "@student.smkn1ciamis.sch.id",
+                    'ID_jurusan' => $idJurusan,
+                    'kelas' => $kelas[array_rand($kelas)],
+                    'tempat_lahir' => $tempat_lahir[array_rand($tempat_lahir)],
+                    'tanggal_lahir' => Carbon::now()->subYears(rand(16, 18))->subDays(rand(0, 365))->toDateString(),
+                    'alamat' => 'Jl. ' . $tempat_lahir[array_rand($tempat_lahir)] . ' No. ' . rand(1, 999),
+                    'kebangsaan' => 'Indonesia',
+                    'kode_kota' => '3207',
+                    'kode_provinsi' => '32',
+                    'telepon_hp' => '08' . rand(10000000000, 99999999999),
+                    'kode_pos' => '40' . rand(100, 999),
+                    'pendidikan_terakhir' => 'SMP',
+                    'kode_kementrian' => 'KEMENDIKBUD',
+                    'kode_anggaran' => 'APBN',
+                    'created_at' => Carbon::now(),
+                    'updated_at' => Carbon::now(),
+                ]);
+
+                $this->command->info("Created asesi #{$asesiCount}: {$nama} ({$jurusanName})");
             }
-            
-            $randomJurusan = $jurusan->random();
-            $idJurusan = $randomJurusan->id_jurusan; // lowercase
-            
-            $this->command->info('Creating asesi with ID_jurusan: ' . $idJurusan);
-            
-            Asesi::create([
-                'NIK' => $nik,
-                'nama' => $data['nama'],
-                'email' => $data['email'],
-                'ID_jurusan' => $idJurusan,
-                'kelas' => 'XII ' . ['RPL', 'TKJ', 'MM'][array_rand(['RPL', 'TKJ', 'MM'])],
-                'tempat_lahir' => $faker->city,
-                'tanggal_lahir' => $faker->dateTimeBetween('-18 years', '-16 years')->format('Y-m-d'),
-                'alamat' => $faker->address,
-                'kebangsaan' => 'Indonesia',
-                'kode_kota' => '3207',
-                'kode_provinsi' => '32',
-                'telepon_rumah' => $faker->phoneNumber,
-                'telepon_hp' => '08' . $faker->numerify('##########'),
-                'kode_pos' => $faker->postcode,
-                'pendidikan_terakhir' => 'SMK',
-                'kode_kementrian' => 'KEMENDIKBUD',
-                'kode_anggaran' => 'APBN',
-            ]);
         }
 
-        $this->command->info('Asesi seeder completed successfully!');
+        $this->command->info("Total {$asesiCount} asesi data created!");
     }
 }

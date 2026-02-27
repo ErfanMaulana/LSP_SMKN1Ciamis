@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\RegisterController;
 use App\Http\Controllers\Front\KompetensiController;
+use App\Http\Controllers\Front\ProfilController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +15,7 @@ use App\Http\Controllers\Front\KompetensiController;
 */
 
 Route::name('front.')->group(function () {
-    Route::view('/profil', 'asesi.profil')->name('profil');
+    Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
     Route::redirect('/daftar-lsp', '/#daftar-lsp')->name('daftar');
     Route::redirect('/kontak', '/#kontak')->name('kontak');
 

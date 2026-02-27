@@ -58,7 +58,7 @@ class Asesi extends Model
 
     public function jurusan()
     {
-        return $this->belongsTo(Jurusan::class, 'ID_jurusan', 'id_jurusan');
+        return $this->belongsTo(Jurusan::class, 'ID_jurusan', 'ID_jurusan');
     }
 
     public function verifiedBy()

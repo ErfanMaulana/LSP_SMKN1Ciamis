@@ -56,9 +56,9 @@ class AsesorController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit($ID_asesor)
     {
-        $asesor = Asesor::findOrFail($id);
+        $asesor = Asesor::findOrFail($ID_asesor);
         $mitra = Mitra::all();
         $skema = Skema::all();
         return view('admin.asesor.edit', compact('asesor', 'mitra', 'skema'));
@@ -67,9 +67,9 @@ class AsesorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $ID_asesor)
     {
-        $asesor = Asesor::findOrFail($id);
+        $asesor = Asesor::findOrFail($ID_asesor);
 
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
@@ -85,9 +85,9 @@ class AsesorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($ID_asesor)
     {
-        $asesor = Asesor::findOrFail($id);
+        $asesor = Asesor::findOrFail($ID_asesor);
         $asesor->delete();
 
         return redirect()->route('admin.asesor.index')->with('success', 'Data Asesor berhasil dihapus!');

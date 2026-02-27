@@ -31,6 +31,8 @@ class DatabaseSeeder extends Seeder
             AsesorSeeder::class,
             AsesiSeeder::class,
             SkemaSeederRPL::class,
+            ProfileContentSeeder::class,
+            ProfileVisionMissionSeeder::class,
         ]);
     }
 }

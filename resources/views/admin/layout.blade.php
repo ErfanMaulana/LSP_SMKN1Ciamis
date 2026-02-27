@@ -320,6 +320,11 @@
                     <span>Sosial Media</span>
                 </a>
 
+                <a href="{{ route('admin.profile-content.index') }}" class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
+                    <i class="bi bi-book-fill"></i>
+                    <span>Konten Profil</span>
+                </a>
+
                 <!-- ADMINISTRASI Section -->
                 <div class="menu-section-title">ADMINISTRASI</div>
                 

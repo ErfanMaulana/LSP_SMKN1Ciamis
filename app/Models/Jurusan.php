@@ -10,7 +10,7 @@ class Jurusan extends Model
     use HasFactory;
 
     protected $table = 'jurusan';
-    protected $primaryKey = 'id_jurusan';
+    protected $primaryKey = 'ID_jurusan';
 
     protected $fillable = [
         'Nama_Jurusan',
@@ -30,6 +30,6 @@ class Jurusan extends Model
 
     public function asesi()
     {
-        return $this->hasMany(Asesi::class, 'ID_jurusan', 'id_jurusan');
+        return $this->hasMany(Asesi::class, 'ID_jurusan', 'ID_jurusan');
     }
 }

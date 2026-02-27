@@ -717,8 +717,10 @@
 
     .text-center {
         text-align: center;
-        padding: 40px 20px;
-        color: #64748b;
+        padding: 16px;
+        color: #94a3b8;
+        font-size: 14px;
+        font-weight: 500;
     }
 </style>
 

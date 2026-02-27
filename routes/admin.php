@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CarouselController;
 use App\Http\Controllers\Admin\SkemaController;
 use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\SocialMediaController;
+use App\Http\Controllers\Admin\ProfileContentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,17 +48,17 @@ Route::prefix('admin')->group(function () {
         Route::get('/asesor', [AsesorController::class, 'index'])->name('admin.asesor.index');
         Route::get('/asesor/create', [AsesorController::class, 'create'])->name('admin.asesor.create');
         Route::post('/asesor', [AsesorController::class, 'store'])->name('admin.asesor.store');
-        Route::get('/asesor/{id}/edit', [AsesorController::class, 'edit'])->name('admin.asesor.edit');
-        Route::put('/asesor/{id}', [AsesorController::class, 'update'])->name('admin.asesor.update');
-        Route::delete('/asesor/{id}', [AsesorController::class, 'destroy'])->name('admin.asesor.destroy');
+        Route::get('/asesor/{ID_asesor}/edit', [AsesorController::class, 'edit'])->name('admin.asesor.edit');
+        Route::put('/asesor/{ID_asesor}', [AsesorController::class, 'update'])->name('admin.asesor.update');
+        Route::delete('/asesor/{ID_asesor}', [AsesorController::class, 'destroy'])->name('admin.asesor.destroy');
         
         // Jurusan CRUD
         Route::get('/jurusan', [JurusanController::class, 'index'])->name('admin.jurusan.index');
         Route::get('/jurusan/create', [JurusanController::class, 'create'])->name('admin.jurusan.create');
         Route::post('/jurusan', [JurusanController::class, 'store'])->name('admin.jurusan.store');
-        Route::get('/jurusan/{id}/edit', [JurusanController::class, 'edit'])->name('admin.jurusan.edit');
-        Route::put('/jurusan/{id}', [JurusanController::class, 'update'])->name('admin.jurusan.update');
-        Route::delete('/jurusan/{id}', [JurusanController::class, 'destroy'])->name('admin.jurusan.destroy');
+        Route::get('/jurusan/{ID_jurusan}/edit', [JurusanController::class, 'edit'])->name('admin.jurusan.edit');
+        Route::put('/jurusan/{ID_jurusan}', [JurusanController::class, 'update'])->name('admin.jurusan.update');
+        Route::delete('/jurusan/{ID_jurusan}', [JurusanController::class, 'destroy'])->name('admin.jurusan.destroy');
 
         // Skema CRUD
         Route::get('/skema', [SkemaController::class, 'index'])->name('admin.skema.index');
@@ -92,5 +93,23 @@ Route::prefix('admin')->group(function () {
         Route::put('/social-media/{id}', [SocialMediaController::class, 'update'])->name('admin.socialmedia.update');
         Route::delete('/social-media/{id}', [SocialMediaController::class, 'destroy'])->name('admin.socialmedia.destroy');
         Route::patch('/social-media/{id}/toggle', [SocialMediaController::class, 'toggleStatus'])->name('admin.socialmedia.toggle');
+
+        // Profile Content CRUD
+        Route::get('/profile-content', [ProfileContentController::class, 'index'])->name('admin.profile-content.index');
+        Route::get('/profile-content/create', [ProfileContentController::class, 'create'])->name('admin.profile-content.create');
+        Route::post('/profile-content', [ProfileContentController::class, 'store'])->name('admin.profile-content.store');
+        
+        // Vision & Mission CRUD (must be before {id}/edit to avoid conflict)
+        Route::get('/profile-content/vision-mission/create/{type}', [ProfileContentController::class, 'createVisionMission'])->name('admin.profile-content.vision-mission.create')->where('type', 'visi|misi');
+        Route::post('/profile-content/vision-mission', [ProfileContentController::class, 'storeVisionMission'])->name('admin.profile-content.vision-mission.store');
+        Route::get('/profile-content/vision-mission/{id}/edit', [ProfileContentController::class, 'editVisionMission'])->name('admin.profile-content.vision-mission.edit');
+        Route::put('/profile-content/vision-mission/{id}', [ProfileContentController::class, 'updateVisionMission'])->name('admin.profile-content.vision-mission.update');
+        Route::delete('/profile-content/vision-mission/{id}', [ProfileContentController::class, 'destroyVisionMission'])->name('admin.profile-content.vision-mission.destroy');
+        Route::patch('/profile-content/vision-mission/{id}/toggle', [ProfileContentController::class, 'toggleVisionMissionStatus'])->name('admin.profile-content.vision-mission.toggle');
+        
+        Route::get('/profile-content/{id}/edit', [ProfileContentController::class, 'edit'])->name('admin.profile-content.edit');
+        Route::put('/profile-content/{id}', [ProfileContentController::class, 'update'])->name('admin.profile-content.update');
+        Route::delete('/profile-content/{id}', [ProfileContentController::class, 'destroy'])->name('admin.profile-content.destroy');
+        Route::patch('/profile-content/{id}/toggle', [ProfileContentController::class, 'toggleStatus'])->name('admin.profile-content.toggle');
     });
 });

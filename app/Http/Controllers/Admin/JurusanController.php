@@ -73,22 +73,22 @@ class JurusanController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit($ID_jurusan)
     {
-        $jurusan = Jurusan::findOrFail($id);
+        $jurusan = Jurusan::findOrFail($ID_jurusan);
         return view('admin.jurusan.edit', compact('jurusan'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $ID_jurusan)
     {
-        $jurusan = Jurusan::findOrFail($id);
+        $jurusan = Jurusan::findOrFail($ID_jurusan);
 
         $validated = $request->validate([
             'nama_jurusan' => 'required|string|max:255',
-            'kode_jurusan' => 'required|string|max:10|unique:jurusan,kode_jurusan,' . $id . ',id_jurusan',
+            'kode_jurusan' => 'required|string|max:10|unique:jurusan,kode_jurusan,' . $ID_jurusan . ',ID_jurusan',
             'visi'         => 'nullable|string',
             'misi'         => 'nullable|string',
         ]);
@@ -101,9 +101,9 @@ class JurusanController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($ID_jurusan)
     {
-        $jurusan = Jurusan::findOrFail($id);
+        $jurusan = Jurusan::findOrFail($ID_jurusan);
         
         // Check if jurusan has related asesi
         if ($jurusan->asesi()->count() > 0) {
