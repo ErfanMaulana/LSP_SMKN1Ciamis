@@ -357,6 +357,19 @@
                     <span>Mitra</span>
                 </a>
 
+                <!-- UJIAN Section -->
+                <div class="menu-section-title">UJIAN KOMPETENSI</div>
+
+                <a href="{{ route('admin.tuk.index') }}" class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>Tempat Uji (TUK)</span>
+                </a>
+
+                <a href="{{ route('admin.jadwal-ujikom.index') }}" class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar-event"></i>
+                    <span>Jadwal Ujikom</span>
+                </a>
+
                 <!-- ASESOR Section -->
                 <div class="menu-section-title">ASESOR</div>
                 

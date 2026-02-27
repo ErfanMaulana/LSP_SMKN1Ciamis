@@ -88,7 +88,7 @@ class JurusanController extends Controller
 
         $validated = $request->validate([
             'nama_jurusan' => 'required|string|max:255',
-            'kode_jurusan' => 'required|string|max:10|unique:jurusan,kode_jurusan,' . $id . ',id_jurusan',
+            'kode_jurusan' => 'required|string|max:10|unique:jurusan,kode_jurusan,' . $id . ',ID_jurusan',
             'visi'         => 'nullable|string',
             'misi'         => 'nullable|string',
         ]);

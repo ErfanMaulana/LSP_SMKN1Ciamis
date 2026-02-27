@@ -329,11 +329,11 @@
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <div class="dropdown-menu">
-                            <a href="{{ route('admin.jurusan.edit', $item->id_jurusan) }}" class="dropdown-item">
+                            <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}" class="dropdown-item">
                                 <i class="bi bi-pencil-square"></i> Edit
                             </a>
                             <button type="button" class="dropdown-item delete"
-                                onclick="confirmDelete({{ $item->id_jurusan }}, '{{ addslashes($item->nama_jurusan) }}', {{ $item->asesi_count }})">
+                                onclick="confirmDelete({{ $item->ID_jurusan }}, '{{ addslashes($item->nama_jurusan) }}', {{ $item->asesi_count }})">
                                 <i class="bi bi-trash"></i> Hapus
                             </button>
                         </div>

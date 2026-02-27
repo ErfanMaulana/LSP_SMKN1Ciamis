@@ -29,36 +29,28 @@
             border-radius: 16px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             overflow: hidden;
-            max-width: 1000px;
+            max-width: 860px;
             width: 100%;
-            min-height: 500px;
+            min-height: 480px;
         }
 
         .left-panel {
             flex: 1;
-            background: #0F172A;
             padding: 60px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             position: relative;
             overflow: hidden;
+            background: #0F172A url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=60') center/cover no-repeat;
         }
 
         .left-panel::before {
             content: '';
             position: absolute;
-            top: -50%;
-            right: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-            animation: pulse 15s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
+            inset: 0;
+            background: rgba(10, 15, 30, 0.72);
+            z-index: 0;
         }
 
         .left-panel h1 {
@@ -304,8 +296,8 @@
 <body>
     <div class="login-wrapper">
         <div class="left-panel">
-            <h1>Selamat Datang</h1>
-            <p>LSP SMKN 1 Ciamis adalah Lembaga Sertifikasi Profesional yang berkomitmen pada standar kompetensi nasional dan industri.</p>
+            <h1>Welcome</h1>
+            <p>LSP SMKN 1 Ciamis provides competency assessment and certification aligned with national and industry standards.</p>
         </div>
 
         <div class="right-panel">

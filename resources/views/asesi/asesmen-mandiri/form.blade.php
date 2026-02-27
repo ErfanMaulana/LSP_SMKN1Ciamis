@@ -385,6 +385,95 @@
         box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
     }
 
+    /* Rekomendasi Banner */
+    .rekomendasi-banner {
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        border: 2px solid;
+    }
+
+    .rekomendasi-banner.lanjut {
+        background: #f0fdf4;
+        border-color: #22c55e;
+    }
+
+    .rekomendasi-banner.tidak_lanjut {
+        background: #fff1f2;
+        border-color: #f43f5e;
+    }
+
+    .rekomendasi-banner .banner-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
+    .rekomendasi-banner.lanjut .banner-icon {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .rekomendasi-banner.tidak_lanjut .banner-icon {
+        background: #ffe4e6;
+        color: #e11d48;
+    }
+
+    .rekomendasi-banner .banner-body { flex: 1; }
+
+    .rekomendasi-banner .banner-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .rekomendasi-banner.lanjut .banner-title { color: #15803d; }
+    .rekomendasi-banner.tidak_lanjut .banner-title { color: #be123c; }
+
+    .rekomendasi-banner .banner-meta {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 8px;
+    }
+
+    .rekomendasi-banner .banner-catatan {
+        font-size: 13px;
+        background: rgba(255,255,255,0.7);
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: #374151;
+        font-style: italic;
+        border-left: 3px solid;
+    }
+
+    .rekomendasi-banner.lanjut .banner-catatan { border-color: #22c55e; }
+    .rekomendasi-banner.tidak_lanjut .banner-catatan { border-color: #f43f5e; }
+
+    .rekomendasi-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .rekomendasi-badge-pill.lanjut { background: #dcfce7; color: #15803d; }
+    .rekomendasi-badge-pill.tidak_lanjut { background: #ffe4e6; color: #be123c; }
+
     @media (max-width: 768px) {
         .elemen-header {
             flex-direction: column;
@@ -456,6 +545,39 @@
         <li>Anda dapat menyimpan jawaban sementara dan melanjutkan di lain waktu.</li>
     </ul>
 </div>
+
+@if($pivot && $pivot->rekomendasi)
+@php
+    $rekLabel = $pivot->rekomendasi === 'lanjut' ? 'Asesmen Dapat Dilanjutkan' : 'Asesmen Tidak Dapat Dilanjutkan';
+    $rekIcon  = $pivot->rekomendasi === 'lanjut' ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
+    $rekClass = $pivot->rekomendasi;
+@endphp
+<div class="rekomendasi-banner {{ $rekClass }}">
+    <div class="banner-icon">
+        <i class="bi {{ $rekIcon }}"></i>
+    </div>
+    <div class="banner-body">
+        <div class="banner-title">
+            Rekomendasi Asesor:
+            <span class="rekomendasi-badge-pill {{ $rekClass }}">
+                <i class="bi {{ $rekIcon }}"></i>
+                {{ $rekLabel }}
+            </span>
+        </div>
+        <div class="banner-meta">
+            Ditinjau oleh: <strong>{{ $pivot->reviewed_by ?? 'Asesor' }}</strong>
+            @if($pivot->reviewed_at)
+                &nbsp;&bull;&nbsp; {{ \Carbon\Carbon::parse($pivot->reviewed_at)->translatedFormat('d F Y, H:i') }} WIB
+            @endif
+        </div>
+        @if($pivot->catatan_asesor)
+        <div class="banner-catatan">
+            <i class="bi bi-chat-quote"></i> {{ $pivot->catatan_asesor }}
+        </div>
+        @endif
+    </div>
+</div>
+@endif
 
 <form action="{{ route('asesi.asesmen-mandiri.store', $skema->id) }}" method="POST" id="asesmenForm">
     @csrf
@@ -541,12 +663,18 @@
             Total: <strong>{{ $skema->units->sum(fn($u) => $u->elemens->count()) }} elemen</strong> dari {{ $skema->units->count() }} unit kompetensi
         </div>
         <div class="btn-group">
+            @if($pivot && $pivot->rekomendasi)
+            <span style="font-size:13px;color:#64748b;display:flex;align-items:center;gap:6px;">
+                <i class="bi bi-lock-fill" style="color:#94a3b8;"></i> Asesmen telah direkomendasikan asesor — tidak dapat diubah
+            </span>
+            @else
             <button type="submit" name="save_draft" class="btn btn-save">
                 <i class="bi bi-save"></i> Simpan Sementara
             </button>
             <button type="submit" name="submit_final" class="btn btn-submit" onclick="return confirm('Apakah Anda yakin ingin menyelesaikan asesmen mandiri ini? Pastikan semua jawaban sudah benar.')">
                 <i class="bi bi-check-circle"></i> Selesaikan Asesmen
             </button>
+            @endif
         </div>
     </div>
 </form>

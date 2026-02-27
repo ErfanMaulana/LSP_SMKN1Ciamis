@@ -109,7 +109,7 @@
                    Kode jurusan tidak dapat diubah ke kode yang sudah digunakan jurusan lain.</p>
             </div>
 
-            <form action="{{ route('admin.jurusan.update', $jurusan->id_jurusan) }}" method="POST">
+            <form action="{{ route('admin.jurusan.update', $jurusan->ID_jurusan) }}" method="POST">
                 @csrf
                 @method('PUT')
 

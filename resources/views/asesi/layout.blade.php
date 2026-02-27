@@ -338,6 +338,11 @@
                     <span>Asesmen Mandiri</span>
                 </a>
 
+                <a href="{{ route('asesi.jadwal.index') }}" class="menu-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar-event-fill"></i>
+                    <span>Jadwal Ujikom</span>
+                </a>
+
                 <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>Hasil Asesmen</span>
@@ -346,14 +351,9 @@
                 <!-- PROFIL Section -->
                 <div class="menu-section-title">AKUN</div>
                 
-                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
+                <a href="{{ route('asesi.profil.edit') }}" class="menu-item {{ request()->routeIs('asesi.profil.*') && request('tab') !== 'password' ? 'active' : '' }}">
                     <i class="bi bi-person-circle"></i>
                     <span>Profil Saya</span>
-                </a>
-
-                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                    <i class="bi bi-key"></i>
-                    <span>Ubah Password</span>
                 </a>
             </nav>
         </aside>
