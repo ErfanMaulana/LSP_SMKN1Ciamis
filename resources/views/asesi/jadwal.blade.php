@@ -5,312 +5,576 @@
 
 @section('styles')
 <style>
+    .content-wrapper {
+        padding: 0 !important;
+        max-width: none !important;
+    }
+
     .empty-state {
-        text-align: center;
-        padding: 60px 20px;
-        color: #94a3b8;
-    }
-    .empty-state i { font-size: 56px; display: block; margin-bottom: 16px; color: #cbd5e1; }
-    .empty-state h3 { font-size: 18px; font-weight: 700; color: #475569; margin-bottom: 8px; }
-    .empty-state p  { font-size: 14px; }
-
-    .jadwal-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-        gap: 20px;
-    }
-
-    .jadwal-card {
-        background: white;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        overflow: hidden;
+        min-height: 60vh;
         display: flex;
         flex-direction: column;
-        transition: transform .2s, box-shadow .2s;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px 20px;
+        color: #94a3b8;
     }
-    .jadwal-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+    .empty-state i { font-size: 72px; display: block; margin-bottom: 20px; color: #cbd5e1; }
+    .empty-state h3 { font-size: 22px; font-weight: 700; color: #475569; margin-bottom: 10px; }
+    .empty-state p  { font-size: 15px; max-width: 500px; line-height: 1.6; }
+
+    /* Full screen jadwal item */
+    .jadwal-fullscreen {
+        min-height: calc(100vh - 80px);
+        display: flex;
+        flex-direction: column;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        overflow: hidden;
+        padding: 40px;
+        color: white;
     }
 
-    .card-status-bar {
-        height: 5px;
+    .jadwal-fullscreen.status-dijadwalkan {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     }
-    .card-status-bar.dijadwalkan { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-    .card-status-bar.berlangsung { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-    .card-status-bar.selesai     { background: linear-gradient(90deg, #10b981, #34d399); }
-    .card-status-bar.dibatalkan  { background: linear-gradient(90deg, #ef4444, #f87171); }
-
-    .card-header-area {
-        padding: 18px 20px 12px;
-        border-bottom: 1px solid #f1f5f9;
+    .jadwal-fullscreen.status-berlangsung {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    .jadwal-fullscreen.status-selesai {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    .jadwal-fullscreen.status-dibatalkan {
+        background: linear-gradient(135deg, #666 0%, #999 100%);
     }
 
-    .card-title {
-        font-size: 15px;
+    .jadwal-fullscreen::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .jadwal-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+        flex: 1;
+    }
+
+    /* Countdown Section */
+    .countdown-section {
+        text-align: center;
+        padding: 30px 0;
+    }
+
+    .countdown-label {
+        font-size: 18px;
+        font-weight: 600;
+        opacity: 0.9;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .countdown-display {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .countdown-box {
+        background: rgba(255,255,255,0.2);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 20px;
+        min-width: 100px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+
+    .countdown-number {
+        font-size: 48px;
         font-weight: 700;
-        color: #1a2332;
-        margin-bottom: 8px;
+        line-height: 1;
+        display: block;
+    }
+
+    .countdown-unit {
+        font-size: 13px;
+        text-transform: uppercase;
+        opacity: 0.8;
+        margin-top: 8px;
+        letter-spacing: 1px;
+    }
+
+    .jadwal-title-section {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .jadwal-title-main {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .jadwal-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+        background: rgba(255,255,255,0.25);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .info-card {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 14px;
+        padding: 20px;
+        border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .info-card-icon {
+        font-size: 24px;
+        margin-bottom: 10px;
+        display: block;
+        opacity: 0.9;
+    }
+
+    .info-card-label {
+        font-size: 12px;
+        text-transform: uppercase;
+        opacity: 0.8;
+        letter-spacing: 1px;
+        margin-bottom: 6px;
+    }
+
+    .info-card-value {
+        font-size: 16px;
+        font-weight: 600;
         line-height: 1.4;
     }
 
-    .badge-status {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 700;
-    }
-    .badge-status.dijadwalkan { background: #dbeafe; color: #1e40af; }
-    .badge-status.berlangsung { background: #fef3c7; color: #92400e; }
-    .badge-status.selesai     { background: #d1fae5; color: #065f46; }
-    .badge-status.dibatalkan  { background: #fee2e2; color: #991b1b; }
-
-    .card-body-area {
-        padding: 16px 20px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
+    /* Peserta Section */
+    .peserta-section {
+        background: rgba(255,255,255,0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 25px;
+        border: 1px solid rgba(255,255,255,0.2);
     }
 
-    .info-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        font-size: 13px;
-        color: #374151;
-    }
-    .info-row i {
-        font-size: 15px;
-        color: #14532d;
-        margin-top: 1px;
-        flex-shrink: 0;
-        width: 18px;
-        text-align: center;
-    }
-    .info-row .label {
-        font-weight: 600;
-        color: #6b7280;
-        font-size: 11px;
-        display: block;
-        text-transform: uppercase;
-        letter-spacing: 0.3px;
-        margin-bottom: 1px;
-    }
-
-    .divider-row { border-top: 1px solid #f1f5f9; margin: 4px 0; }
-
-    .card-footer-area {
-        padding: 12px 20px;
-        background: #f8fafc;
-        border-top: 1px solid #f1f5f9;
+    .peserta-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        font-size: 12px;
-        color: #6b7280;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
     }
 
-    .countdown-badge {
-        display: inline-flex;
+    .peserta-title {
+        font-size: 20px;
+        font-weight: 700;
+        display: flex;
         align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        border-radius: 8px;
-        font-size: 12px;
+        gap: 10px;
+    }
+
+    .peserta-count {
+        background: rgba(255,255,255,0.25);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
         font-weight: 600;
     }
-    .countdown-badge.upcoming { background: #eff6ff; color: #2563eb; }
-    .countdown-badge.today    { background: #fef3c7; color: #92400e; }
-    .countdown-badge.past     { background: #f1f5f9; color: #64748b; }
-    .countdown-badge.ongoing  { background: #fef3c7; color: #92400e; }
-    .countdown-badge.canceled { background: #fee2e2; color: #991b1b; }
 
-    .page-info-banner {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
+    .peserta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 12px;
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .peserta-grid::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .peserta-grid::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.1);
         border-radius: 10px;
-        padding: 14px 18px;
-        margin-bottom: 24px;
+    }
+
+    .peserta-grid::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.3);
+        border-radius: 10px;
+    }
+
+    .peserta-item {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 10px;
+        padding: 14px;
         display: flex;
         align-items: center;
         gap: 12px;
-        font-size: 13px;
-        color: #14532d;
+        transition: all 0.2s;
     }
-    .page-info-banner i { font-size: 20px; flex-shrink: 0; }
 
-    @media (max-width: 640px) {
-        .jadwal-grid { grid-template-columns: 1fr; }
+    .peserta-item:hover {
+        background: rgba(255,255,255,0.2);
+        transform: translateX(3px);
+    }
+
+    .peserta-avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 700;
+        flex-shrink: 0;
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .peserta-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .peserta-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .peserta-details {
+        font-size: 12px;
+        opacity: 0.85;
+    }
+
+    /* Navigation untuk multiple jadwal */
+    .jadwal-nav {
+        position: fixed;
+        right: 30px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 10;
+    }
+
+    .jadwal-nav-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.4);
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+    .jadwal-nav-dot.active {
+        background: white;
+        transform: scale(1.3);
+    }
+
+    .jadwal-nav-dot:hover {
+        background: rgba(255,255,255,0.7);
+    }
+
+    @media (max-width: 768px) {
+        .jadwal-fullscreen {
+            padding: 20px;
+        }
+
+        .countdown-number {
+            font-size: 36px;
+        }
+
+        .countdown-box {
+            min-width: 80px;
+            padding: 15px;
+        }
+
+        .jadwal-title-main {
+            font-size: 24px;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .peserta-grid {
+            grid-template-columns: 1fr;
+            max-height: 250px;
+        }
+
+        .jadwal-nav {
+            right: 15px;
+        }
     }
 </style>
 @endsection
 
 @section('content')
 
-<div class="page-info-banner">
-    <i class="bi bi-info-circle-fill"></i>
-    <span>
-        Halaman ini menampilkan jadwal uji kompetensi yang telah didaftarkan oleh admin untuk Anda.
-        Pastikan hadir tepat waktu di TUK yang tertera.
-    </span>
-</div>
-
-@if($jadwalTerdaftar->isEmpty())
+@if($jadwalWithPeserta->isEmpty())
     <div class="empty-state">
         <i class="bi bi-calendar-x"></i>
         <h3>Belum Ada Jadwal</h3>
-        <p>Anda belum terdaftar pada jadwal uji kompetensi manapun.<br>
-           Jadwal akan ditambahkan oleh admin setelah asesmen mandiri Anda selesai direview.</p>
+        <p>Anda belum terdaftar pada jadwal uji kompetensi manapun. Jadwal akan ditambahkan oleh admin setelah asesmen mandiri Anda selesai direview.</p>
     </div>
 @else
-    <div class="jadwal-grid">
-        @foreach($jadwalTerdaftar as $jadwal)
-        @php
-            $today     = now()->toDateString();
-            $tglJadwal = $jadwal->tanggal;
-            $diffDays  = now()->diffInDays($tglJadwal, false);
+    @foreach($jadwalWithPeserta as $index => $jadwal)
+    @php
+        $tglJadwal = \Carbon\Carbon::parse($jadwal->tanggal . ' ' . $jadwal->waktu_mulai);
+        $now = now();
+        
+        $tipeLabel = match($jadwal->tipe_tuk ?? '') {
+            'sewaktu'      => 'TUK Sewaktu',
+            'tempat_kerja' => 'TUK Tempat Kerja',
+            'mandiri'      => 'TUK Mandiri',
+            default        => 'TUK',
+        };
+    @endphp
 
-            if ($jadwal->status === 'dibatalkan') {
-                $countdownLabel = 'Dibatalkan';
-                $countdownClass = 'canceled';
-            } elseif ($jadwal->status === 'berlangsung') {
-                $countdownLabel = 'Sedang Berlangsung';
-                $countdownClass = 'ongoing';
-            } elseif ($jadwal->status === 'selesai') {
-                $countdownLabel = 'Sudah Selesai';
-                $countdownClass = 'past';
-            } elseif ($tglJadwal === $today) {
-                $countdownLabel = 'Hari Ini!';
-                $countdownClass = 'today';
-            } elseif ($diffDays > 0) {
-                $countdownLabel = $diffDays . ' hari lagi';
-                $countdownClass = 'upcoming';
-            } else {
-                $countdownLabel = abs($diffDays) . ' hari lalu';
-                $countdownClass = 'past';
-            }
-
-            $tipeLabel = match($jadwal->tipe_tuk ?? '') {
-                'sewaktu'      => 'TUK Sewaktu',
-                'tempat_kerja' => 'TUK Tempat Kerja',
-                'mandiri'      => 'TUK Mandiri',
-                default        => 'TUK',
-            };
-
-            $statusIcon = match($jadwal->status) {
-                'dijadwalkan' => 'bi-calendar-check',
-                'berlangsung' => 'bi-play-circle-fill',
-                'selesai'     => 'bi-check-circle-fill',
-                'dibatalkan'  => 'bi-x-circle-fill',
-                default       => 'bi-calendar',
-            };
-        @endphp
-
-        <div class="jadwal-card">
-            <div class="card-status-bar {{ $jadwal->status }}"></div>
-
-            <div class="card-header-area">
-                <div class="card-title">{{ $jadwal->judul_jadwal }}</div>
-                <span class="badge-status {{ $jadwal->status }}">
-                    <i class="bi {{ $statusIcon }}"></i>
+    <div class="jadwal-fullscreen status-{{ $jadwal->status }}" id="jadwal-{{ $index }}" data-jadwal-date="{{ $tglJadwal->toIso8601String() }}">
+        <div class="jadwal-content">
+            <!-- Title Section -->
+            <div class="jadwal-title-section">
+                <h1 class="jadwal-title-main">{{ $jadwal->judul_jadwal }}</h1>
+                <span class="jadwal-badge">
+                    <i class="bi {{ match($jadwal->status) {
+                        'dijadwalkan' => 'bi-calendar-check',
+                        'berlangsung' => 'bi-play-circle-fill',
+                        'selesai' => 'bi-check-circle-fill',
+                        'dibatalkan' => 'bi-x-circle-fill',
+                        default => 'bi-calendar'
+                    } }}"></i>
                     {{ match($jadwal->status) {
                         'dijadwalkan' => 'Dijadwalkan',
-                        'berlangsung' => 'Berlangsung',
-                        'selesai'     => 'Selesai',
-                        'dibatalkan'  => 'Dibatalkan',
-                        default       => $jadwal->status,
+                        'berlangsung' => 'Sedang Berlangsung',
+                        'selesai' => 'Sudah Selesai',
+                        'dibatalkan' => 'Dibatalkan',
+                        default => $jadwal->status
                     } }}
                 </span>
             </div>
 
-            <div class="card-body-area">
-                {{-- Skema --}}
-                <div class="info-row">
-                    <i class="bi bi-award-fill"></i>
-                    <div>
-                        <span class="label">Skema Kompetensi</span>
-                        {{ $jadwal->nama_skema ?? '-' }}
+            <!-- Countdown -->
+            @if($jadwal->status === 'dijadwalkan')
+            <div class="countdown-section">
+                <div class="countdown-label">Waktu Tersisa</div>
+                <div class="countdown-display" id="countdown-{{ $index }}">
+                    <div class="countdown-box">
+                        <span class="countdown-number days">0</span>
+                        <span class="countdown-unit">Hari</span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number hours">0</span>
+                        <span class="countdown-unit">Jam</span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number minutes">0</span>
+                        <span class="countdown-unit">Menit</span>
+                    </div>
+                    <div class="countdown-box">
+                        <span class="countdown-number seconds">0</span>
+                        <span class="countdown-unit">Detik</span>
                     </div>
                 </div>
+            </div>
+            @endif
 
-                {{-- Tanggal & Waktu --}}
-                <div class="info-row">
-                    <i class="bi bi-calendar-event-fill"></i>
-                    <div>
-                        <span class="label">Tanggal & Waktu</span>
-                        {{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('l, d F Y') }}
-                        &nbsp;&bull;&nbsp;
+            <!-- Info Grid -->
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="bi bi-award-fill info-card-icon"></i>
+                    <div class="info-card-label">Skema Kompetensi</div>
+                    <div class="info-card-value">{{ $jadwal->nama_skema ?? '-' }}</div>
+                </div>
+
+                <div class="info-card">
+                    <i class="bi bi-calendar-event-fill info-card-icon"></i>
+                    <div class="info-card-label">Tanggal & Waktu</div>
+                    <div class="info-card-value">
+                        {{ $tglJadwal->translatedFormat('l, d F Y') }}<br>
                         {{ substr($jadwal->waktu_mulai, 0, 5) }} – {{ substr($jadwal->waktu_selesai, 0, 5) }} WIB
                     </div>
                 </div>
 
-                <div class="divider-row"></div>
-
-                {{-- TUK --}}
-                <div class="info-row">
-                    <i class="bi bi-building-fill"></i>
-                    <div>
-                        <span class="label">Tempat Uji Kompetensi (TUK)</span>
+                <div class="info-card">
+                    <i class="bi bi-building-fill info-card-icon"></i>
+                    <div class="info-card-label">Tempat Uji Kompetensi</div>
+                    <div class="info-card-value">
                         {{ $jadwal->nama_tuk ?? '-' }}
-                        @if($jadwal->kota)
-                            <span style="color:#6b7280;"> — {{ $jadwal->kota }}</span>
-                        @endif
                         @if($jadwal->tipe_tuk)
-                            <span style="font-size:11px;color:#14532d;margin-left:4px;font-weight:600;">({{ $tipeLabel }})</span>
+                            <br><small style="opacity:0.85;">({{ $tipeLabel }})</small>
                         @endif
                     </div>
                 </div>
 
                 @if($jadwal->tuk_alamat)
-                <div class="info-row" style="margin-top:-4px;">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    <div>
-                        <span class="label">Alamat TUK</span>
-                        {{ $jadwal->tuk_alamat }}
-                    </div>
-                </div>
-                @endif
-
-                @if($jadwal->keterangan)
-                <div class="info-row" style="margin-top:2px;">
-                    <i class="bi bi-chat-left-text-fill"></i>
-                    <div>
-                        <span class="label">Keterangan</span>
-                        {{ $jadwal->keterangan }}
-                    </div>
+                <div class="info-card">
+                    <i class="bi bi-geo-alt-fill info-card-icon"></i>
+                    <div class="info-card-label">Alamat Lokasi</div>
+                    <div class="info-card-value">{{ $jadwal->tuk_alamat }}</div>
                 </div>
                 @endif
             </div>
 
-            <div class="card-footer-area">
-                <span>
-                    <i class="bi bi-people-fill" style="color:#14532d;margin-right:4px;"></i>
-                    {{ $jadwal->peserta_terdaftar }} / {{ $jadwal->kuota }} peserta
-                </span>
-                <span class="countdown-badge {{ $countdownClass }}">
-                    @if($countdownClass === 'today')
-                        <i class="bi bi-alarm-fill"></i>
-                    @elseif($countdownClass === 'ongoing')
-                        <i class="bi bi-play-circle-fill"></i>
-                    @elseif($countdownClass === 'upcoming')
-                        <i class="bi bi-hourglass-split"></i>
-                    @elseif($countdownClass === 'canceled')
-                        <i class="bi bi-x-circle-fill"></i>
-                    @else
-                        <i class="bi bi-check2"></i>
-                    @endif
-                    {{ $countdownLabel }}
-                </span>
+            <!-- Peserta Section -->
+            <div class="peserta-section">
+                <div class="peserta-header">
+                    <div class="peserta-title">
+                        <i class="bi bi-people-fill"></i>
+                        Peserta Terdaftar
+                    </div>
+                    <div class="peserta-count">
+                        {{ $jadwal->peserta->count() }} / {{ $jadwal->kuota }} Peserta
+                    </div>
+                </div>
+
+                @if($jadwal->peserta->count() > 0)
+                <div class="peserta-grid">
+                    @foreach($jadwal->peserta as $peserta)
+                    <div class="peserta-item">
+                        <div class="peserta-avatar">
+                            {{ strtoupper(substr($peserta->nama, 0, 1)) }}
+                        </div>
+                        <div class="peserta-info">
+                            <div class="peserta-name">{{ $peserta->nama }}</div>
+                            <div class="peserta-details">
+                                @if($peserta->kode_jurusan)
+                                    {{ $peserta->kode_jurusan }}
+                                @endif
+                                @if($peserta->kelas)
+                                    {{ $peserta->kelas ? ' • ' . $peserta->kelas : '' }}
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @else
+                <div style="text-align:center;padding:20px;opacity:0.7;">
+                    <i class="bi bi-inbox" style="font-size:32px;display:block;margin-bottom:10px;"></i>
+                    Belum ada peserta terdaftar
+                </div>
+                @endif
             </div>
         </div>
+    </div>
+    @endforeach
+
+    <!-- Navigation dots -->
+    @if($jadwalWithPeserta->count() > 1)
+    <div class="jadwal-nav">
+        @foreach($jadwalWithPeserta as $i => $j)
+        <div class="jadwal-nav-dot {{ $i === 0 ? 'active' : '' }}" onclick="scrollToJadwal({{ $i }})"></div>
         @endforeach
     </div>
+    @endif
 @endif
 
+@endsection
+
+@section('scripts')
+<script>
+// Countdown timers
+document.querySelectorAll('[id^="countdown-"]').forEach(countdownEl => {
+    const jadwalEl = countdownEl.closest('.jadwal-fullscreen');
+    const targetDate = new Date(jadwalEl.dataset.jadwalDate);
+
+    function updateCountdown() {
+        const now = new Date();
+        const diff = targetDate - now;
+
+        if (diff <= 0) {
+            countdownEl.innerHTML = '<div class="countdown-box"><span class="countdown-number" style="font-size:24px;">Waktu Dimulai!</span></div>';
+            return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        countdownEl.querySelector('.days').textContent = days;
+        countdownEl.querySelector('.hours').textContent = String(hours).padStart(2, '0');
+        countdownEl.querySelector('.minutes').textContent = String(minutes).padStart(2, '0');
+        countdownEl.querySelector('.seconds').textContent = String(seconds).padStart(2, '0');
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+});
+
+// Scroll navigation
+function scrollToJadwal(index) {
+    const target = document.getElementById('jadwal-' + index);
+    if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Update active dot
+        document.querySelectorAll('.jadwal-nav-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === index);
+        });
+    }
+}
+
+// Update active dot on scroll
+let scrollTimeout;
+window.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        const jadwals = document.querySelectorAll('.jadwal-fullscreen');
+        const scrollPos = window.scrollY + window.innerHeight / 2;
+        
+        jadwals.forEach((jadwal, index) => {
+            const top = jadwal.offsetTop;
+            const bottom = top + jadwal.offsetHeight;
+            
+            if (scrollPos >= top && scrollPos < bottom) {
+                document.querySelectorAll('.jadwal-nav-dot').forEach((dot, i) => {
+                    dot.classList.toggle('active', i === index);
+                });
+            }
+        });
+    }, 100);
+});
+</script>
 @endsection

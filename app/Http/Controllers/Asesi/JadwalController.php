@@ -45,6 +45,27 @@ class JadwalController extends Controller
             ->orderBy('jadwal_ujikom.tanggal')
             ->get();
 
-        return view('asesi.jadwal', compact('account', 'asesi', 'jadwalTerdaftar'));
+        // Ambil daftar peserta untuk setiap jadwal
+        $jadwalWithPeserta = $jadwalTerdaftar->map(function ($jadwal) {
+            $peserta = DB::table('jadwal_peserta')
+                ->join('asesi', 'asesi.NIK', '=', 'jadwal_peserta.asesi_nik')
+                ->leftJoin('jurusan', 'jurusan.ID_jurusan', '=', 'asesi.ID_jurusan')
+                ->where('jadwal_peserta.jadwal_id', $jadwal->id)
+                ->select(
+                    'asesi.NIK',
+                    'asesi.nama',
+                    'asesi.email',
+                    'asesi.kelas',
+                    'jurusan.nama_jurusan',
+                    'jurusan.kode_jurusan'
+                )
+                ->orderBy('asesi.nama')
+                ->get();
+            
+            $jadwal->peserta = $peserta;
+            return $jadwal;
+        });
+
+        return view('asesi.jadwal', compact('account', 'asesi', 'jadwalWithPeserta'));
     }
 }
