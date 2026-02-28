@@ -14,7 +14,38 @@ class AsesiController extends Controller
     public function index()
     {
         $asesi = Asesi::with('jurusan')->paginate(10);
-        return view('admin.asesi.index', compact('asesi'));
+        
+        // Statistik dinamis
+        $totalAsesi = Asesi::count();
+        
+        // Asesi yang terdaftar bulan ini
+        $registeredThisMonth = Asesi::whereYear('created_at', date('Y'))
+            ->whereMonth('created_at', date('m'))
+            ->count();
+        
+        // Hitung persentase pertumbuhan dibanding bulan lalu
+        $lastMonth = Asesi::whereYear('created_at', date('Y'))
+            ->whereMonth('created_at', date('m') - 1)
+            ->count();
+        $growthPercentage = $lastMonth > 0 ? round((($registeredThisMonth - $lastMonth) / $lastMonth) * 100) : 0;
+        
+        // Asesi dalam penilaian (status approved)
+        $inAssessment = Asesi::where('status', 'approved')->count();
+        
+        // Asesi yang sudah tersertifikasi (memiliki skema dengan status selesai)
+        $certified = Asesi::whereHas('skemas', function($query) {
+            $query->where('asesi_skema.status', 'selesai')
+                  ->where('asesi_skema.rekomendasi', 'lanjut');
+        })->count();
+        
+        return view('admin.asesi.index', compact(
+            'asesi', 
+            'totalAsesi',
+            'registeredThisMonth',
+            'growthPercentage',
+            'inAssessment',
+            'certified'
+        ));
     }
 
     /**

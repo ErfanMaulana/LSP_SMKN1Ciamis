@@ -16,7 +16,7 @@
         </div>
         <div class="stat-content">
             <h3>Total Asesi</h3>
-            <div class="number">0</div>
+            <div class="number">{{ $stats['totalAsesi'] }}</div>
         </div>
     </div>
     <div class="stat-card">
@@ -25,25 +25,34 @@
         </div>
         <div class="stat-content">
             <h3>Total Asesor</h3>
-            <div class="number">0</div>
+            <div class="number">{{ $stats['totalAsesor'] }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon siswa">
-            <i class="bi bi-journal-text"></i>
+        <div class="stat-icon jurusan">
+            <i class="bi bi-mortarboard-fill"></i>
         </div>
         <div class="stat-content">
-            <h3>Total Siswa</h3>
-            <div class="number">0</div>
+            <h3>Total Jurusan</h3>
+            <div class="number">{{ $stats['totalJurusan'] }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon unit">
-            <i class="bi bi-building"></i>
+        <div class="stat-icon skema">
+            <i class="bi bi-patch-check-fill"></i>
         </div>
         <div class="stat-content">
-            <h3>Total Unit</h3>
-            <div class="number">0</div>
+            <h3>Total Skema</h3>
+            <div class="number">{{ $stats['totalSkema'] }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon mitra">
+            <i class="bi bi-building-fill"></i>
+        </div>
+        <div class="stat-content">
+            <h3>Total Mitra</h3>
+            <div class="number">{{ $stats['totalMitra'] }}</div>
         </div>
     </div>
 </div>
@@ -51,11 +60,11 @@
 <div class="quick-actions">
     <h3>Aksi Cepat</h3>
     <div class="action-grid">
-        <a href="#" class="action-card">
+        <a href="{{ route('admin.asesor.create') }}" class="action-card">
             <i class="bi bi-person-plus-fill"></i>
             <span>Tambah Asesor</span>
         </a>
-        <a href="#" class="action-card">
+        <a href="{{ route('admin.asesi.create') }}" class="action-card">
             <i class="bi bi-people-fill"></i>
             <span>Tambah Asesi</span>
         </a>
@@ -93,7 +102,7 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 20px;
         margin-bottom: 30px;
     }
@@ -122,7 +131,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 28px;
+        font-size: 22px;
         color: white;
         flex-shrink: 0;
     }
@@ -131,11 +140,15 @@
         background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
     }
 
-    .stat-icon.siswa {
+    .stat-icon.jurusan {
         background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
     }
 
-    .stat-icon.unit {
+    .stat-icon.skema {
+        background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
+    }
+
+    .stat-icon.mitra {
         background: linear-gradient(135deg, #0073bd 0%, #0061A5 100%);
     }
 
@@ -154,7 +167,7 @@
 
     .stat-content .number {
         color: #2c3e50;
-        font-size: 32px;
+        font-size: 22px;
         font-weight: 700;
     }
 
@@ -198,7 +211,7 @@
     }
 
     .action-card i {
-        font-size: 32px;
+        font-size: 22px;
         color: white;
     }
 

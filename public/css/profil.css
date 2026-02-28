@@ -12,8 +12,8 @@
 .hero-section { background: linear-gradient(135deg, #0061A5 0%, #0073bd 100%); padding: 3rem 0 3.5rem; }
 .card-hero { background: #fff; border-radius: 14px; box-shadow: 0 4px 24px rgba(0,0,0,.12); }
 .section-icon { width: 36px; height: 36px; background: var(--blue-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--blue-accent); font-size: 1rem; flex-shrink: 0; }
-.card-title-h { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0; }
-.hero-text { font-size: .8rem; line-height: 1.7; color: #444; margin-top: .8rem; }
+.card-title-h { font-size: 1.125rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0; }
+.hero-text { font-size: 0.9375rem; line-height: 1.7; color: #444; margin-top: .8rem; }
 
 /* Milestone */
 .milestone-wrap { display: flex; flex-direction: column; gap: 1.1rem; margin-top: .8rem; }
@@ -22,37 +22,37 @@
 .m-blue { background: var(--blue-accent); }
 .m-teal { background: #00b4a0; }
 .m-orange { background: #f59e0b; }
-.milestone-item h6 { font-size: .82rem; font-weight: 700; margin-bottom: .18rem; color: var(--text-dark); }
-.milestone-item p { font-size: .72rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
+.milestone-item h6 { font-size: 0.9375rem; font-weight: 700; margin-bottom: .18rem; color: var(--text-dark); }
+.milestone-item p { font-size: 0.875rem; color: var(--text-muted); margin: 0; line-height: 1.5; }
 
 /* ===================== VISI MISI ===================== */
 .vm-section { background: #f7f9ff; padding: 4rem 0; }
-.section-title { font-size: 1.6rem; font-weight: 800; color: var(--text-dark); text-align: center; }
+.section-title { font-size: 1.75rem; font-weight: 800; color: var(--text-dark); text-align: center; }
 .section-underline { width: 50px; height: 4px; background: var(--blue-accent); border-radius: 4px; margin: .6rem auto 2.5rem; }
 .card-visi { background: linear-gradient(145deg, #0061A5, #0073bd); border-radius: 16px; padding: 2.2rem; color: #fff; height: 100%; text-align: center; }
 .visi-icon { font-size: 2.2rem; margin-bottom: 1rem; }
-.card-visi h5 { font-weight: 700; font-size: 1rem; margin-bottom: 1rem; }
-.card-visi p { font-size: .82rem; line-height: 1.8; font-style: italic; opacity: .92; }
+.card-visi h5 { font-weight: 700; font-size: 1.125rem; margin-bottom: 1rem; }
+.card-visi p { font-size: 0.9375rem; line-height: 1.8; font-style: italic; opacity: .92; }
 .card-misi { background: #fff; border-radius: 16px; padding: 2rem; height: 100%; box-shadow: 0 4px 20px rgba(0,0,0,.07); border: 1px solid var(--border); }
-.card-misi h5 { font-weight: 700; font-size: 1rem; color: var(--text-dark); margin-bottom: 1.2rem; }
-.misi-item { display: flex; align-items: flex-start; gap: .7rem; margin-bottom: .9rem; font-size: .8rem; line-height: 1.6; color: #444; }
+.card-misi h5 { font-weight: 700; font-size: 1.125rem; color: var(--text-dark); margin-bottom: 1.2rem; }
+.misi-item { display: flex; align-items: flex-start; gap: .7rem; margin-bottom: .9rem; font-size: 0.9375rem; line-height: 1.6; color: #444; }
 .misi-icon { color: #22c55e; font-size: 1rem; flex-shrink: 0; margin-top: .1rem; }
 
 /* ===================== KEBIJAKAN MUTU ===================== */
 .km-section { background: #fff; padding: 4rem 0; }
-.km-left h4 { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); margin-bottom: .8rem; }
-.km-left p { font-size: .8rem; line-height: 1.75; color: #555; }
-.prinsip-header { font-size: .75rem; font-weight: 700; color: var(--text-muted); margin-top: 1rem; margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .05em; }
-.prinsip-tag { display: inline-block; background: var(--blue-light); color: var(--blue-accent); font-size: .7rem; font-weight: 600; padding: .3rem .8rem; border-radius: 20px; margin: .3rem .2rem 0 0; }
-.km-sasaran-title { font-size: 1.05rem; font-weight: 700; color: var(--text-dark); margin-bottom: 1rem; }
+.km-left h4 { font-size: 1.25rem; font-weight: 700; color: var(--text-dark); margin-bottom: .8rem; }
+.km-left p { font-size: 0.9375rem; line-height: 1.75; color: #555; }
+.prinsip-header { font-size: 0.875rem; font-weight: 700; color: var(--text-muted); margin-top: 1rem; margin-bottom: .4rem; text-transform: uppercase; letter-spacing: .05em; }
+.prinsip-tag { display: inline-block; background: var(--blue-light); color: var(--blue-accent); font-size: 0.8125rem; font-weight: 600; padding: .3rem .8rem; border-radius: 20px; margin: .3rem .2rem 0 0; }
+.km-sasaran-title { font-size: 1.25rem; font-weight: 700; color: var(--text-dark); margin-bottom: 1rem; }
 .stat-card { background: #f7f9ff; border-radius: 12px; padding: 1.2rem; text-align: center; border: 1px solid var(--border); }
 .stat-number { font-size: 2rem; font-weight: 800; color: var(--blue-accent); line-height: 1; }
-.stat-label { font-size: .68rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-top: .3rem; }
-.stat-desc { font-size: .72rem; color: #888; margin-top: .3rem; line-height: 1.4; }
+.stat-label { font-size: 0.8125rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .05em; margin-top: .3rem; }
+.stat-desc { font-size: 0.875rem; color: #888; margin-top: .3rem; line-height: 1.4; }
 
 /* ===================== RUANG LINGKUP ===================== */
 .rl-section { background: var(--gray-bg); padding: 4rem 0; }
-.section-subtitle { font-size: .85rem; color: var(--text-muted); text-align: center; margin-top: -.5rem; margin-bottom: 2.5rem; }
+.section-subtitle { font-size: 1rem; color: var(--text-muted); text-align: center; margin-top: -.5rem; margin-bottom: 2.5rem; }
 .scope-card { background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,.06); border: 1px solid var(--border); height: 100%; transition: transform .2s, box-shadow .2s; }
 .scope-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(30,92,191,.13); }
 .scope-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: .9rem; }
@@ -60,12 +60,22 @@
 .ic-green { background: #d1fae5; color: #059669; }
 .ic-orange { background: #ffedd5; color: #ea580c; }
 .ic-purple { background: #ede9fe; color: #7c3aed; }
-.scope-card h6 { font-size: .85rem; font-weight: 700; color: var(--text-dark); margin-bottom: .4rem; }
-.scope-card p { font-size: .74rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .8rem; }
-.skema-badge { background: var(--blue-light); color: var(--blue-accent); font-size: .7rem; font-weight: 600; padding: .22rem .7rem; border-radius: 20px; }
+.scope-card h6 { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: .4rem; }
+.scope-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .8rem; }
+.skema-badge { background: var(--blue-light); color: var(--blue-accent); font-size: 0.8125rem; font-weight: 600; padding: .22rem .7rem; border-radius: 20px; }
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 768px) {
   .stat-number { font-size: 1.5rem; }
-  .section-title { font-size: 1.3rem; }
+  .section-title { font-size: 1.4rem; }
+  .km-left h4, .km-sasaran-title { font-size: 1.125rem; }
+  .card-title-h { font-size: 1rem; }
+  .hero-text { font-size: 0.875rem; }
+  .milestone-item h6 { font-size: 0.875rem; }
+  .milestone-item p { font-size: 0.8125rem; }
+  .card-visi p, .misi-item { font-size: 0.875rem; }
+  .km-left p { font-size: 0.875rem; }
+  .stat-desc { font-size: 0.8125rem; }
+  .scope-card h6 { font-size: 0.9375rem; }
+  .scope-card p { font-size: 0.8125rem; }
 }

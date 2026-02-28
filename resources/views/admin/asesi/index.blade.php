@@ -1,22 +1,22 @@
 @extends('admin.layout')
 
-@section('title', 'Asesi Management')
-@section('page-title', 'Asesi Management')
+@section('title', 'Manajemen Asesi')
+@section('page-title', 'Manajemen Asesi')
 
 @section('content')
 <div class="asesi-management">
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Asesi Management</h2>
-            <p class="subtitle">Manage and monitor all candidates in the certification system.</p>
+            <h2>Manajemen Asesi</h2>
+            <p class="subtitle">Kelola dan pantau semua kandidat dalam sistem sertifikasi.</p>
         </div>
         <div class="header-actions">
             <button class="btn btn-outline">
-                <i class="bi bi-file-earmark-excel"></i> Import Asesi (Excel)
+                <i class="bi bi-file-earmark-excel"></i> Impor Asesi (Excel)
             </button>
             <a href="{{ route('admin.asesi.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Add New Asesi
+                <i class="bi bi-plus-circle"></i> Tambah Asesi Baru
             </a>
         </div>
     </div>
@@ -29,27 +29,24 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">TOTAL ASESI</div>
-                <div class="stat-value">{{ $asesi->total() }}</div>
+                <div class="stat-value">{{ number_format($totalAsesi) }}</div>
             </div>
         </div>
-
-        <!-- <div class="stat-card">
-            <div class="stat-icon purple">
-                <i class="bi bi-infinity"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">LIFETIME</div>
-                <div class="stat-value">{{ $asesi->total() }}</div>
-            </div>
-        </div> -->
 
         <div class="stat-card">
             <div class="stat-icon blue">
                 <i class="bi bi-person-plus"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">REGISTERED THIS MONTH</div>
-                <div class="stat-value">142 <span class="stat-change positive">+78%</span></div>
+                <div class="stat-label">TERDAFTAR BULAN INI</div>
+                <div class="stat-value">
+                    {{ number_format($registeredThisMonth) }} 
+                    @if($growthPercentage != 0)
+                        <span class="stat-change {{ $growthPercentage > 0 ? 'positive' : 'negative' }}">
+                            {{ $growthPercentage > 0 ? '+' : '' }}{{ $growthPercentage }}%
+                        </span>
+                    @endif
+                </div>
             </div>
         </div>
 
@@ -58,8 +55,8 @@
                 <i class="bi bi-clipboard-check"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">IN ASSESSMENT</div>
-                <div class="stat-value">85 <span class="stat-subtitle">Active</span></div>
+                <div class="stat-label">DALAM PENILAIAN</div>
+                <div class="stat-value">{{ number_format($inAssessment) }} <span class="stat-subtitle">Aktif</span></div>
             </div>
         </div>
 
@@ -68,8 +65,8 @@
                 <i class="bi bi-award"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">CERTIFIED</div>
-                <div class="stat-value">2,914 <span class="stat-subtitle">Total</span></div>
+                <div class="stat-label">TERSERTIFIKASI</div>
+                <div class="stat-value">{{ number_format($certified) }} <span class="stat-subtitle">Total</span></div>
             </div>
         </div>
     </div>
@@ -80,21 +77,21 @@
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Search by name or ID...">
+                    <input type="text" placeholder="Cari berdasarkan nama atau ID...">
                 </div>
                 <div class="filter-group">
                     <select class="filter-select">
-                        <option>Filter: All Schemes</option>
+                        <option>Filter: Semua Skema</option>
                         <option>Software Engineering</option>
                         <option>Cloud Infrastructure</option>
                         <option>Data Analyst</option>
                         <option>Network Systems</option>
                     </select>
                     <select class="filter-select">
-                        <option>All Status</option>
-                        <option>Completed</option>
-                        <option>In Progress</option>
-                        <option>Scheduled</option>
+                        <option>Semua Status</option>
+                        <option>Selesai</option>
+                        <option>Dalam Proses</option>
+                        <option>Terjadwal</option>
                     </select>
                 </div>
             </div>
@@ -104,11 +101,11 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>NAME</th>
-                            <th>SCHEME/PROGRAM</th>
-                            <th>ASSESSMENT STATUS</th>
-                            <th>DATE REGISTERED</th>
-                            <th>ACTIONS</th>
+                            <th>NAMA</th>
+                            <th>SKEMA/PROGRAM</th>
+                            <th>STATUS PENILAIAN</th>
+                            <th>TANGGAL TERDAFTAR</th>
+                            <th>AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -126,13 +123,13 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? 'Not Assigned' }}</span>
+                                <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? 'Belum Ditentukan' }}</span>
                             </td>
                             <td>
                                 @php
-                                    $statuses = ['Completed', 'In Progress', 'Scheduled'];
+                                    $statuses = ['Selesai', 'Dalam Proses', 'Terjadwal'];
                                     $status = $statuses[array_rand($statuses)];
-                                    $badgeClass = $status === 'Completed' ? 'badge-success' : ($status === 'In Progress' ? 'badge-info' : 'badge-warning');
+                                    $badgeClass = $status === 'Selesai' ? 'badge-success' : ($status === 'Dalam Proses' ? 'badge-info' : 'badge-warning');
                                 @endphp
                                 <span class="badge {{ $badgeClass }}">{{ $status }}</span>
                             </td>
@@ -146,16 +143,16 @@
                                     </button>
                                     <div class="action-dropdown">
                                         <a href="{{ route('admin.asesi.edit', $item->NIK) }}">
-                                            <i class="bi bi-pencil"></i> Edit
+                                            <i class="bi bi-pencil"></i> Ubah
                                         </a>
                                         <a href="#">
-                                            <i class="bi bi-eye"></i> View Details
+                                            <i class="bi bi-eye"></i> Lihat Detail
                                         </a>
                                         <form action="{{ route('admin.asesi.destroy', $item->NIK) }}" method="POST" style="margin: 0;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Are you sure?')">
-                                                <i class="bi bi-trash"></i> Delete
+                                            <button type="submit" onclick="return confirm('Apakah Anda yakin?')">
+                                                <i class="bi bi-trash"></i> Hapus
                                             </button>
                                         </form>
                                     </div>
@@ -164,7 +161,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center">No asesi data available</td>
+                            <td colspan="5" class="text-center">Tidak ada data asesi</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -174,7 +171,7 @@
             <!-- Pagination -->
             <div class="pagination-container">
                 <div class="pagination-info">
-                    Showing {{ $asesi->firstItem() ?? 0 }} to {{ $asesi->lastItem() ?? 0 }} of {{ $asesi->total() }} entries
+                    Menampilkan {{ $asesi->firstItem() ?? 0 }} sampai {{ $asesi->lastItem() ?? 0 }} dari {{ $asesi->total() }} entri
                 </div>
                 <div class="pagination">
                     @if($asesi->currentPage() > 1)
@@ -218,7 +215,7 @@
     }
 
     .page-header h2 {
-        font-size: 28px;
+        font-size: 22px;
         color: #0F172A;
         font-weight: 700;
         margin: 0 0 4px 0;
@@ -345,6 +342,10 @@
 
     .stat-change.positive {
         color: #10b981;
+    }
+
+    .stat-change.negative {
+        color: #ef4444;
     }
 
     .stat-subtitle {

@@ -87,18 +87,53 @@
             padding: 20px 0;
         }
 
+        .menu-section {
+            margin-top: 15px;
+        }
+
+        .menu-section:first-child {
+            margin-top: 0;
+        }
+
         .menu-section-title {
-            padding: 8px 20px;
+            padding: 12px 20px;
             font-size: 11px;
             font-weight: 600;
             color: #95a5a6;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-top: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            user-select: none;
         }
 
-        .menu-section-title:first-child {
-            margin-top: 0;
+        .menu-section-title:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .menu-section-title i {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-section-title.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+        .menu-section-items {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+
+        .menu-section-items.collapsed {
+            max-height: 0;
+            opacity: 0;
         }
 
         .menu-item {
@@ -443,90 +478,114 @@
                 </a>
 
                 <!-- WEBSITE Section -->
-                <div class="menu-section-title">WEBSITE</div>
+                <div class="menu-section">
+                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                        <span>WEBSITE</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="menu-section-items">
+                        <a href="{{ route('admin.carousel.index') }}" class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
+                            <i class="bi bi-images"></i>
+                            <span>Banner Carousel</span>
+                        </a>
 
-                <a href="{{ route('admin.carousel.index') }}" class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
-                    <i class="bi bi-images"></i>
-                    <span>Banner Carousel</span>
-                </a>
+                        <a href="{{ route('admin.socialmedia.index') }}" class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
+                            <i class="bi bi-share"></i>
+                            <span>Sosial Media</span>
+                        </a>
 
-                <a href="{{ route('admin.socialmedia.index') }}" class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
-                    <i class="bi bi-share"></i>
-                    <span>Sosial Media</span>
-                </a>
-
-                <a href="{{ route('admin.profile-content.index') }}" class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
-                    <i class="bi bi-book-fill"></i>
-                    <span>Konten Profil</span>
-                </a>
+                        <a href="{{ route('admin.profile-content.index') }}" class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
+                            <i class="bi bi-book-fill"></i>
+                            <span>Konten Profil</span>
+                        </a>
+                    </div>
+                </div>
 
                 <!-- ADMINISTRASI Section -->
-                <div class="menu-section-title">ADMINISTRASI</div>
-                
-                <a href="{{ route('admin.asesor.index') }}" class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
-                    <i class="bi bi-person-badge"></i>
-                    <span>Asesor</span>
-                </a>
-                
-                <a href="{{ route('admin.asesi.index') }}" class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
-                    <i class="bi bi-people"></i>
-                    <span>Asesi</span>
-                </a>
+                <div class="menu-section">
+                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                        <span>ADMINISTRASI</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="menu-section-items">
+                        <a href="{{ route('admin.asesor.index') }}" class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
+                            <i class="bi bi-person-badge"></i>
+                            <span>Asesor</span>
+                        </a>
+                        
+                        <a href="{{ route('admin.asesi.index') }}" class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
+                            <i class="bi bi-people"></i>
+                            <span>Asesi</span>
+                        </a>
 
-                <a href="{{ route('admin.asesi.verifikasi') }}" class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
-                    <i class="bi bi-clipboard-check"></i>
-                    <span>Verifikasi Asesi</span>
-                    @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
-                    @if($pendingCount > 0)
-                        <span style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
-                    @endif
-                </a>
-                
-                <a href="{{ route('admin.jurusan.index') }}" class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
-                    <i class="bi bi-mortarboard"></i>
-                    <span>Jurusan</span>
-                </a>
+                        <a href="{{ route('admin.asesi.verifikasi') }}" class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
+                            <i class="bi bi-clipboard-check"></i>
+                            <span>Verifikasi Asesi</span>
+                            @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
+                            @if($pendingCount > 0)
+                                <span style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
+                            @endif
+                        </a>
+                        
+                        <a href="{{ route('admin.jurusan.index') }}" class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
+                            <i class="bi bi-mortarboard"></i>
+                            <span>Jurusan</span>
+                        </a>
 
-                <a href="{{ route('admin.skema.index') }}" class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
-                    <i class="bi bi-patch-check"></i>
-                    <span>Skema</span>
-                </a>
+                        <a href="{{ route('admin.skema.index') }}" class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
+                            <i class="bi bi-patch-check"></i>
+                            <span>Skema</span>
+                        </a>
 
-                <a href="{{ route('admin.mitra.index') }}" class="menu-item {{ request()->routeIs('admin.mitra.*') ? 'active' : '' }}">
-                    <i class="bi bi-building"></i>
-                    <span>Mitra</span>
-                </a>
+                        <a href="{{ route('admin.mitra.index') }}" class="menu-item {{ request()->routeIs('admin.mitra.*') ? 'active' : '' }}">
+                            <i class="bi bi-building"></i>
+                            <span>Mitra</span>
+                        </a>
+                    </div>
+                </div>
 
-                <!-- UJIAN Section -->
-                <div class="menu-section-title">UJIAN KOMPETENSI</div>
+                <!-- UJIAN KOMPETENSI Section -->
+                <div class="menu-section">
+                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                        <span>UJIAN KOMPETENSI</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="menu-section-items">
+                        <a href="{{ route('admin.tuk.index') }}" class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>Tempat Uji (TUK)</span>
+                        </a>
 
-                <a href="{{ route('admin.tuk.index') }}" class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
-                    <i class="bi bi-geo-alt"></i>
-                    <span>Tempat Uji (TUK)</span>
-                </a>
-
-                <a href="{{ route('admin.jadwal-ujikom.index') }}" class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
-                    <i class="bi bi-calendar-event"></i>
-                    <span>Jadwal Ujikom</span>
-                </a>
+                        <a href="{{ route('admin.jadwal-ujikom.index') }}" class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
+                            <i class="bi bi-calendar-event"></i>
+                            <span>Jadwal Ujikom</span>
+                        </a>
+                    </div>
+                </div>
 
                 <!-- ASESOR Section -->
-                <div class="menu-section-title">ASESOR</div>
-                
-                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                    <i class="bi bi-pencil-square"></i>
-                    <span>Entry Penilaian</span>
-                </a>
-                
-                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>Hasil Ujian</span>
-                </a>
-                
-                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                    <i class="bi bi-bar-chart"></i>
-                    <span>Rekap Nilai Akhir</span>
-                </a>
+                <div class="menu-section">
+                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                        <span>ASESOR</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="menu-section-items">
+                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Entry Penilaian</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>Hasil Ujian</span>
+                        </a>
+                        
+                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
+                            <i class="bi bi-bar-chart"></i>
+                            <span>Rekap Nilai Akhir</span>
+                        </a>
+                    </div>
+                </div>
             </nav>
         </aside>
 
@@ -617,6 +676,31 @@
             const menu = document.getElementById('profileMenu');
             menu.classList.toggle('show');
         }
+
+        function toggleMenuSection(element) {
+            const items = element.nextElementSibling;
+            element.classList.toggle('collapsed');
+            items.classList.toggle('collapsed');
+            
+            // Save state to localStorage
+            const sectionName = element.querySelector('span').textContent;
+            const isCollapsed = element.classList.contains('collapsed');
+            localStorage.setItem('menu-' + sectionName, isCollapsed ? 'collapsed' : 'expanded');
+        }
+
+        // Restore menu states on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.menu-section-title').forEach(function(title) {
+                const sectionName = title.querySelector('span').textContent;
+                const state = localStorage.getItem('menu-' + sectionName);
+                
+                // By default, expand sections if no state is saved
+                if (state === 'collapsed') {
+                    title.classList.add('collapsed');
+                    title.nextElementSibling.classList.add('collapsed');
+                }
+            });
+        });
 
         // Close profile menu when clicking outside
         document.addEventListener('click', function(event) {

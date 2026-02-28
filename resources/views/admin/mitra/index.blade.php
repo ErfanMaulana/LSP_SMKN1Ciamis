@@ -222,7 +222,7 @@ document.addEventListener('click', function(e) {
     }
 
     .page-header h2 {
-        font-size: 28px;
+        font-size: 22px;
         color: #0F172A;
         font-weight: 700;
         margin: 0 0 4px 0;
@@ -254,7 +254,7 @@ document.addEventListener('click', function(e) {
     }
 
     .btn-primary {
-        background: #0061A5;
+        background: #0073bd;
         color: white;
     }
 

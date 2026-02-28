@@ -1,18 +1,18 @@
 @extends('admin.layout')
 
-@section('title', 'Asesor Management')
-@section('page-title', 'Asesor Management')
+@section('title', 'Manajemen Asesor')
+@section('page-title', 'Manajemen Asesor')
 
 @section('content')
 <div class="asesor-management">
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Asesor Management</h2>
-            <p class="subtitle">Manage and oversee all registered assessors within the system.</p>
+            <h2>Manajemen Asesor</h2>
+            <p class="subtitle">Kelola dan awasi semua asesor yang terdaftar dalam sistem.</p>
         </div>
         <a href="{{ route('admin.asesor.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add New Asesor
+            <i class="bi bi-plus-circle"></i> Tambah Asesor Baru
         </a>
     </div>
 
@@ -25,7 +25,6 @@
             <div class="stat-content">
                 <div class="stat-label">TOTAL ASESOR</div>
                 <div class="stat-value">{{ $stats['total'] }}</div>
-                <div class="stat-subtitle">Terdaftar dalam sistem</div>
             </div>
         </div>
 
@@ -36,7 +35,6 @@
             <div class="stat-content">
                 <div class="stat-label">ASESOR BERMITRA</div>
                 <div class="stat-value">{{ $stats['with_mitra'] }}</div>
-                <div class="stat-subtitle">Memiliki kemitraan aktif</div>
             </div>
         </div>
 
@@ -47,7 +45,6 @@
             <div class="stat-content">
                 <div class="stat-label">DENGAN SKEMA</div>
                 <div class="stat-value">{{ $stats['with_skema'] }}</div>
-                <div class="stat-subtitle">Telah ditugaskan skema</div>
             </div>
         </div>
 
@@ -58,7 +55,6 @@
             <div class="stat-content">
                 <div class="stat-label">TANPA SKEMA</div>
                 <div class="stat-value">{{ $stats['without_skema'] }}</div>
-                <div class="stat-subtitle">Perlu penugasan skema</div>
             </div>
         </div>
     </div>
@@ -69,20 +65,20 @@
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Search by name or ID...">
+                    <input type="text" placeholder="Cari berdasarkan nama atau ID...">
                 </div>
                 <div class="filter-group">
                     <select class="filter-select">
-                        <option>Expertise: All</option>
+                        <option>Keahlian: Semua</option>
                         <option>Software Engineering</option>
                         <option>Cloud Infrastructure</option>
                         <option>Network Systems</option>
                         <option>Data Analysis</option>
                     </select>
                     <select class="filter-select">
-                        <option>Status: All</option>
-                        <option>Active</option>
-                        <option>Inactive</option>
+                        <option>Status: Semua</option>
+                        <option>Aktif</option>
+                        <option>Tidak Aktif</option>
                     </select>
                 </div>
             </div>
@@ -92,10 +88,10 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>ASESOR NAME</th>
-                            <th>EXPERTISE</th>
+                            <th>NAMA ASESOR</th>
+                            <th>KEAHLIAN</th>
                             <th>STATUS</th>
-                            <th>ACTIONS</th>
+                            <th>AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -113,10 +109,10 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="expertise-text">{{ $item->ID_skema ? 'Software Engineering - Level II' : 'Not Assigned' }}</span>
+                                <span class="expertise-text">{{ $item->ID_skema ? 'Software Engineering - Level II' : 'Belum Ditentukan' }}</span>
                             </td>
                             <td>
-                                <span class="badge badge-active">ACTIVE</span>
+                                <span class="badge badge-active">AKTIF</span>
                             </td>
                             <td>
                                 <div class="action-menu">
@@ -125,16 +121,16 @@
                                     </button>
                                     <div class="action-dropdown">
                                         <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}">
-                                            <i class="bi bi-pencil"></i> Edit
+                                            <i class="bi bi-pencil"></i> Ubah
                                         </a>
                                         <a href="#">
-                                            <i class="bi bi-eye"></i> View Details
+                                            <i class="bi bi-eye"></i> Lihat Detail
                                         </a>
                                         <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin: 0;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Are you sure?')">
-                                                <i class="bi bi-trash"></i> Delete
+                                            <button type="submit" onclick="return confirm('Apakah Anda yakin?')">
+                                                <i class="bi bi-trash"></i> Hapus
                                             </button>
                                         </form>
                                     </div>
@@ -143,7 +139,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="text-center">No asesor data available</td>
+                            <td colspan="4" class="text-center">Tidak ada data asesor</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -153,7 +149,7 @@
             <!-- Pagination -->
             <div class="pagination-container">
                 <div class="pagination-info">
-                    Showing {{ $asesor->firstItem() ?? 0 }} to {{ $asesor->lastItem() ?? 0 }} of {{ $asesor->total() }} entries
+                    Menampilkan {{ $asesor->firstItem() ?? 0 }} sampai {{ $asesor->lastItem() ?? 0 }} dari {{ $asesor->total() }} entri
                 </div>
                 <div class="pagination">
                     @if($asesor->currentPage() > 1)
@@ -195,7 +191,7 @@
     }
 
     .page-header h2 {
-        font-size: 28px;
+        font-size: 22px;
         color: #0F172A;
         font-weight: 700;
         margin: 0 0 4px 0;

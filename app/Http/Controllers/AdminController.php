@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Admin;
+use App\Models\Asesi;
+use App\Models\Asesor;
+use App\Models\Jurusan;
+use App\Models\Skema;
+use App\Models\Mitra;
 
 class AdminController extends Controller
 {
@@ -58,6 +63,15 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        return view('admin.dashboard');
+        // Ambil statistik dari database
+        $stats = [
+            'totalAsesi' => Asesi::count(),
+            'totalAsesor' => Asesor::count(),
+            'totalJurusan' => Jurusan::count(),
+            'totalSkema' => Skema::count(),
+            'totalMitra' => Mitra::count(),
+        ];
+        
+        return view('admin.dashboard', compact('stats'));
     }
 }

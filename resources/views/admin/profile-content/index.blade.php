@@ -16,26 +16,32 @@
     </div>
 
     {{-- Stats --}}
-    <div class="stats-row">
+    <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon bg-blue"><i class="bi bi-book-fill"></i></div>
-            <div class="stat-info">
-                <h3>{{ $sejarah->count() }}</h3>
-                <p>Sejarah Singkat</p>
+            <div class="stat-icon blue">
+                <i class="bi bi-book-fill"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">SEJARAH SINGKAT</div>
+                <div class="stat-value">{{ $sejarah->count() }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon bg-blue"><i class="bi bi-star-fill"></i></div>
-            <div class="stat-info">
-                <h3>{{ $milestones->count() }}</h3>
-                <p>Milestone Perjalanan</p>
+            <div class="stat-icon blue">
+                <i class="bi bi-star-fill"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">MILESTONE PERJALANAN</div>
+                <div class="stat-value">{{ $milestones->count() }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon bg-blue"><i class="bi bi-check-circle"></i></div>
-            <div class="stat-info">
-                <h3>{{ $sejarah->where('is_active', true)->count() + $milestones->where('is_active', true)->count() }}</h3>
-                <p>Konten Aktif</p>
+            <div class="stat-icon blue">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">KONTEN AKTIF</div>
+                <div class="stat-value">{{ $sejarah->where('is_active', true)->count() + $milestones->where('is_active', true)->count() }}</div>
             </div>
         </div>
     </div>
@@ -345,13 +351,57 @@
     .btn-primary:hover { background: #003961; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
 
     /* Stats */
-    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
-    .stat-card { background: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s; }
-    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
-    .stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; }
-    .stat-icon.bg-blue { background: #0073bd; }
-    .stat-info h3 { font-size: 24px; font-weight: 700; color: #1e293b; }
-    .stat-info p { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+        gap: 20px; 
+        margin-bottom: 24px; 
+    }
+    .stat-card { 
+        background: white; 
+        padding: 20px; 
+        border-radius: 12px; 
+        display: flex; 
+        align-items: center; 
+        gap: 16px; 
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+        transition: all 0.2s; 
+    }
+    .stat-card:hover { 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+        transform: translateY(-2px); 
+    }
+    .stat-icon { 
+        width: 56px; 
+        height: 56px; 
+        border-radius: 12px; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-size: 24px; 
+        color: white; 
+        flex-shrink: 0;
+    }
+    .stat-icon.blue { background: linear-gradient(135deg, #0073bd, #0073bd); }
+    .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+    .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stat-content { flex: 1; }
+    .stat-label { 
+        font-size: 11px; 
+        font-weight: 600; 
+        color: #64748b; 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px; 
+        margin-bottom: 4px; 
+    }
+    .stat-value { 
+        font-size: 28px; 
+        font-weight: 700; 
+        color: #0F172A; 
+        display: flex; 
+        align-items: baseline; 
+        gap: 8px; 
+    }
 
     .section-header {
         display: flex;

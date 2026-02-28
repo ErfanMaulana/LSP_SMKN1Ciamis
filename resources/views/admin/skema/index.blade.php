@@ -229,7 +229,7 @@
     }
 
     .page-header h2 {
-        font-size: 28px;
+        font-size: 22px;
         color: #0F172A;
         font-weight: 700;
         margin: 0 0 4px 0;

@@ -18,8 +18,8 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
         margin-bottom: 24px;
     }
     .stat-card {
@@ -37,10 +37,10 @@
         transform: translateY(-2px);
     }
     .stat-icon {
-        width: 50px; height: 50px;
+        width: 56px; height: 56px;
         border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
-        font-size: 22px; color: #fff; flex-shrink: 0;
+        font-size: 24px; color: #fff; flex-shrink: 0;
     }
     .stat-icon.blue   { background: linear-gradient(135deg,#0073bd,#0073bd); }
     .stat-icon.green  { background: linear-gradient(135deg,#10b981,#059669); }
@@ -78,7 +78,7 @@
         padding: 9px 18px; border-radius: 8px; font-size: 14px;
         font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: all .2s;
     }
-    .btn-primary { background: #0061A5; color: #fff; }
+    .btn-primary { background: #0073bd; color: #fff; }
     .btn-primary:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
     .btn-xs { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
     .btn-edit { background: #eff6ff; color: #0073bd; }
@@ -209,7 +209,7 @@
 
 <div class="page-header">
     <div>
-        <h2><i class="bi bi-mortarboard" style="color:#0073bd;margin-right:8px;"></i>Manajemen Jurusan</h2>
+        <h2></i>Manajemen Jurusan</h2>
         <p>Kelola semua program keahlian yang tersedia di LSP.</p>
     </div>
     <a href="{{ route('admin.jurusan.create') }}" class="btn btn-primary">
