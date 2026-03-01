@@ -327,7 +327,7 @@
                         </tr>
                         <tr>
                             <td style="padding:9px 14px;border-bottom:1px solid #eff0f1;color:#64748b;">No. Reg:</td>
-                            <td style="padding:9px 14px;border-bottom:1px solid #eff0f1;font-weight:500;font-family:monospace;">{{ $account->no_reg }}</td>
+                            <td style="padding:9px 14px;border-bottom:1px solid #eff0f1;font-weight:500;font-family:monospace;">{{ $account->id }}</td>
                         </tr>
                         <tr>
                             <td style="padding:9px 14px;color:#64748b;vertical-align:top;">Tanda tangan/<br>Tanggal</td>

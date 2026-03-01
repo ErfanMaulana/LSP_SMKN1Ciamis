@@ -19,7 +19,7 @@ class DashboardController extends Controller
     private function getAsesor()
     {
         $account = Auth::guard('account')->user();
-        return Asesor::with('skema')->where('no_reg', $account->no_reg)->first();
+        return Asesor::with('skema')->where('no_reg', $account->id)->first();
     }
 
     /**
@@ -153,7 +153,7 @@ class DashboardController extends Controller
                 'rekomendasi'    => $request->rekomendasi,
                 'catatan_asesor' => $request->catatan_asesor,
                 'reviewed_at'    => now(),
-                'reviewed_by'    => $account->no_reg,
+                'reviewed_by'    => $account->id,
                 'updated_at'     => now(),
             ]);
 

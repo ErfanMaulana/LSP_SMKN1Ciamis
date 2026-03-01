@@ -12,7 +12,7 @@ class JadwalController extends Controller
     public function index()
     {
         $account = Auth::guard('account')->user();
-        $asesi   = Asesi::where('no_reg', $account->no_reg)->first();
+        $asesi   = Asesi::where('NIK', $account->NIK)->first();
 
         if (!$asesi) {
             return redirect()->route('asesi.dashboard')

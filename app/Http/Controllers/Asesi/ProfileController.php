@@ -16,7 +16,7 @@ class ProfileController extends Controller
     public function edit(Request $request)
     {
         $account = Auth::guard('account')->user();
-        $asesi   = Asesi::where('no_reg', $account->no_reg)->first();
+        $asesi   = Asesi::where('NIK', $account->NIK)->first();
         $tab     = $request->get('tab', session('tab', 'profil'));
 
         return view('asesi.profil-edit', compact('account', 'asesi', 'tab'));
@@ -28,7 +28,7 @@ class ProfileController extends Controller
     public function update(Request $request)
     {
         $account = Auth::guard('account')->user();
-        $asesi   = Asesi::where('no_reg', $account->no_reg)->first();
+        $asesi   = Asesi::where('NIK', $account->NIK)->first();
 
         if (!$asesi) {
             return back()->with('error', 'Data asesi tidak ditemukan.');

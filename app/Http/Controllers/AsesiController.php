@@ -215,14 +215,24 @@ class AsesiController extends Controller
             'verified_by' => auth('admin')->id(),
         ]);
         
-        // Create account for asesi to login
-        \App\Models\Account::create([
-            'no_reg' => $noReg,
-            'password' => $plainPassword, // Will be automatically hashed by the model
-            'role' => 'asesi',
-        ]);
+        // Check if account already exists (NIK-based flow)
+        $existingAccount = \App\Models\Account::where('NIK', $asesi->NIK)->first();
         
-        // Send approval email with login credentials if asesi has email
+        if ($existingAccount) {
+            // Account already exists (created by admin with NIK), no need to create again
+            $plainPassword = null;
+        } else {
+            // Old flow: create account for asesi to login
+            $plainPassword = $noReg;
+            \App\Models\Account::create([
+                'id' => $noReg,
+                'NIK' => $asesi->NIK,
+                'password' => $plainPassword,
+                'role' => 'asesi',
+            ]);
+        }
+        
+        // Send approval email if asesi has email
         if ($asesi->email) {
             try {
                 \Mail::to($asesi->email)->send(new \App\Mail\AsesiApprovedMail($asesi, $noReg, $plainPassword));

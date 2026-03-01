@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\SocialMediaController;
 use App\Http\Controllers\Admin\ProfileContentController;
 use App\Http\Controllers\Admin\TukController;
 use App\Http\Controllers\Admin\JadwalUjikomController;
+use App\Http\Controllers\Admin\AkunAsesiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -132,5 +133,11 @@ Route::prefix('admin')->group(function () {
         Route::put('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'update'])->name('admin.jadwal-ujikom.update');
         Route::delete('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'destroy'])->name('admin.jadwal-ujikom.destroy');
         Route::patch('/jadwal-ujikom/{id}/status', [JadwalUjikomController::class, 'updateStatus'])->name('admin.jadwal-ujikom.status');
+
+        // Akun Asesi (NIK-based account management)
+        Route::get('/akun-asesi', [AkunAsesiController::class, 'index'])->name('admin.akun-asesi.index');
+        Route::get('/akun-asesi/create', [AkunAsesiController::class, 'create'])->name('admin.akun-asesi.create');
+        Route::post('/akun-asesi', [AkunAsesiController::class, 'store'])->name('admin.akun-asesi.store');
+        Route::delete('/akun-asesi/{id}', [AkunAsesiController::class, 'destroy'])->name('admin.akun-asesi.destroy');
     });
 });

@@ -18,7 +18,7 @@ class AsesmenMandiriController extends Controller
     private function getAsesi()
     {
         $account = Auth::guard('account')->user();
-        return Asesi::where('no_reg', $account->no_reg)->first();
+        return Asesi::where('NIK', $account->NIK)->first();
     }
 
     /**

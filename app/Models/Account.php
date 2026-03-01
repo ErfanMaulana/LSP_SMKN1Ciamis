@@ -18,12 +18,20 @@ class Account extends Authenticatable
     protected $table = 'accounts';
 
     /**
+     * Primary key is a string (no_reg renamed to id).
+     */
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'no_reg',
+        'NIK',
         'password',
         'role',
     ];

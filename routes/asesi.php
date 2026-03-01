@@ -5,6 +5,7 @@ use App\Http\Controllers\Asesi\AuthController;
 use App\Http\Controllers\Asesi\AsesmenMandiriController;
 use App\Http\Controllers\Asesi\ProfileController;
 use App\Http\Controllers\Asesi\JadwalController;
+use App\Http\Controllers\Asesi\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,5 +38,11 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
 
         // Jadwal Ujikom
         Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+
+        // Pendaftaran (Registration within panel)
+        Route::get('/pendaftaran', [RegisterController::class, 'showForm'])->name('pendaftaran.formulir');
+        Route::post('/pendaftaran', [RegisterController::class, 'storeForm'])->name('pendaftaran.formulir.store');
+        Route::get('/pendaftaran/dokumen', [RegisterController::class, 'showDokumen'])->name('pendaftaran.dokumen');
+        Route::post('/pendaftaran/dokumen', [RegisterController::class, 'storeDokumen'])->name('pendaftaran.dokumen.store');
     });
 });

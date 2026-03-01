@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('accounts', function (Blueprint $table) {
-            $table->id();
-            $table->string('no_reg')->unique()->comment('Nomor registrasi unik untuk setiap akun');
+            $table->string('id')->primary()->comment('Nomor registrasi unik untuk setiap akun');
             $table->string('password');
             $table->enum('role', ['admin', 'asesi', 'asesor'])->default('asesi');
             $table->rememberToken();

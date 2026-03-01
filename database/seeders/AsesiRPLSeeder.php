@@ -70,7 +70,7 @@ class AsesiRPLSeeder extends Seeder
 
             // Skip if already exists
             if (DB::table('asesi')->where('NIK', $nik)->exists()) continue;
-            if (DB::table('accounts')->where('no_reg', $noReg)->exists()) continue;
+            if (DB::table('accounts')->where('id', $noReg)->exists()) continue;
 
             DB::table('asesi')->insert([
                 'NIK'                 => $nik,
@@ -104,7 +104,7 @@ class AsesiRPLSeeder extends Seeder
             ]);
 
             DB::table('accounts')->insert([
-                'no_reg'       => $noReg,
+                'id'           => $noReg,
                 'password'     => $hashedPw,
                 'role'         => 'asesi',
                 'created_at'   => $now,

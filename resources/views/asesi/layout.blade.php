@@ -318,9 +318,9 @@
                 <div class="user-icon">
                     <i class="bi bi-person-fill"></i>
                 </div>
-                <h4>{{ $asesi->nama ?? 'Asesi' }}</h4>
+                <h4>{{ $asesi->nama ?? ($account->NIK ?? 'Asesi') }}</h4>
                 <p>Asesi LSP</p>
-                <div class="noreg">{{ $account->no_reg ?? '-' }}</div>
+                <div class="noreg">{{ $asesi->no_reg ?? ($account->NIK ?? '-') }}</div>
             </div>
 
             <nav class="sidebar-menu">
@@ -328,6 +328,12 @@
                 <a href="{{ route('asesi.dashboard') }}" class="menu-item {{ request()->routeIs('asesi.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
+                </a>
+
+                <!-- PENDAFTARAN -->
+                <a href="{{ route('asesi.pendaftaran.formulir') }}" class="menu-item {{ request()->routeIs('asesi.pendaftaran.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-plus"></i>
+                    <span>Pendaftaran</span>
                 </a>
 
                 <!-- ASESMEN Section -->
@@ -371,10 +377,10 @@
                 <div class="topbar-right">
                     <div class="user-info">
                         <div class="user-avatar">
-                            {{ strtoupper(substr($asesi->nama ?? 'A', 0, 1)) }}
+                            {{ strtoupper(substr($asesi->nama ?? ($account->NIK ?? 'A'), 0, 1)) }}
                         </div>
                         <div class="user-details">
-                            <span class="user-name">{{ $asesi->nama ?? 'Asesi' }}</span>
+                            <span class="user-name">{{ $asesi->nama ?? ($account->NIK ?? 'Asesi') }}</span>
                             <span class="user-role">Asesi</span>
                         </div>
                     </div>

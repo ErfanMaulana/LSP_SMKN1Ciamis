@@ -398,7 +398,7 @@
     <div class="info-grid">
         <div class="info-item">
             <label>Nomor Registrasi</label>
-            <span>{{ $account->no_reg }}</span>
+            <span>{{ $account->id }}</span>
         </div>
         <div class="info-item">
             <label>NIK</label>

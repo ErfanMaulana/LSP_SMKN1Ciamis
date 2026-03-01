@@ -184,7 +184,7 @@
             </div>
             <h4>{{ $asesor->nama ?? 'Asesor' }}</h4>
             <div class="role-badge">Asesor LSP</div>
-            <div class="noreg">{{ $account->no_reg ?? '-' }}</div>
+            <div class="noreg">{{ $account->id ?? '-' }}</div>
         </div>
 
         <nav class="sidebar-menu">

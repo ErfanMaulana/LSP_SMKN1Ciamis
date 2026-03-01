@@ -39,7 +39,7 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $account = Account::where('no_reg', $request->no_reg)->first();
+        $account = Account::where('id', $request->no_reg)->first();
 
         if ($account && Hash::check($request->password, $account->password)) {
             Auth::guard('account')->login($account, $request->filled('remember'));
@@ -82,11 +82,17 @@ class AuthController extends Controller
 
         if ($account->isAsesor()) {
             // Asesor gets their own dashboard
-            $asesor = \App\Models\Asesor::with('skema')->where('no_reg', $account->no_reg)->first();
+            $asesor = \App\Models\Asesor::with('skema')->where('no_reg', $account->id)->first();
             return redirect()->route('asesor.dashboard');
         }
 
-        $asesi = \App\Models\Asesi::where('no_reg', $account->no_reg)->first();
+        $asesi = \App\Models\Asesi::where('NIK', $account->NIK)->first();
+
+        // If asesi has no registration yet, redirect to registration form
+        if (!$asesi) {
+            return redirect()->route('asesi.pendaftaran.formulir');
+        }
+
         return view('asesi.dashboard', compact('account', 'asesi'));
     }
 }

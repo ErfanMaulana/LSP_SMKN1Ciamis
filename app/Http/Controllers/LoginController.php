@@ -39,10 +39,16 @@ class LoginController extends Controller
 
         $role = $request->role;
 
-        // ── Login Asesi / Asesor ─────────────────────────────────────
-        $account = Account::where('no_reg', $request->identifier)
-                          ->where('role', $role)
-                          ->first();
+        // ── Login Asesi (via NIK) / Asesor (via No Reg) ──────────────
+        if ($role === 'asesi') {
+            $account = Account::where('NIK', $request->identifier)
+                              ->where('role', 'asesi')
+                              ->first();
+        } else {
+            $account = Account::where('id', $request->identifier)
+                              ->where('role', 'asesor')
+                              ->first();
+        }
 
         if ($account && Hash::check($request->password, $account->password)) {
             Auth::guard('account')->login($account, $request->filled('remember'));
@@ -53,7 +59,11 @@ class LoginController extends Controller
             return redirect()->intended(route('asesi.dashboard'))->with('success', 'Login berhasil!');
         }
 
-        return back()->withErrors(['identifier' => 'Nomor registrasi atau password salah.'])
+        $errorMsg = $role === 'asesi' 
+            ? 'NIK atau password salah.' 
+            : 'Nomor registrasi atau password salah.';
+
+        return back()->withErrors(['identifier' => $errorMsg])
                      ->withInput($request->only('identifier', 'role'));
     }
 

@@ -31,6 +31,6 @@ class Asesor extends Model
 
     public function account()
     {
-        return $this->belongsTo(Account::class, 'no_reg', 'no_reg');
+        return $this->belongsTo(Account::class, 'no_reg', 'id');
     }
 }

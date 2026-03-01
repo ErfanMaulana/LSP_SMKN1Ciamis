@@ -454,7 +454,7 @@
         <div class="card-body">
             <div class="info-badge">
                 <i class="bi bi-info-circle-fill"></i>
-                No. Registrasi: <strong>{{ $account->no_reg }}</strong>
+                No. Registrasi: <strong>{{ $account->id }}</strong>
             </div>
 
             <form method="POST" action="{{ route('asesi.profil.password') }}">

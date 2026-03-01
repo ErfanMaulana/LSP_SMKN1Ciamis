@@ -371,9 +371,9 @@
             asesi: {
                 panelTitle:            'Portal Asesi',
                 panelDesc:             'Akses portal uji kompetensi dan kelola berkas pendaftaran Anda.',
-                identifierLabel:       'NOMOR REGISTRASI',
-                identifierIcon:        'bi-card-text',
-                identifierPlaceholder: 'Masukkan nomor registrasi',
+                identifierLabel:       'NIK (NOMOR INDUK KEPENDUDUKAN)',
+                identifierIcon:        'bi-person-vcard',
+                identifierPlaceholder: 'Masukkan NIK Anda',
             },
             asesor: {
                 panelTitle:            'Portal Asesor',

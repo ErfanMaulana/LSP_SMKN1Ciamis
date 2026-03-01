@@ -30,7 +30,7 @@
             @endforeach
         </nav>
 
-        <a href="{{ route('admin.login') }}"
+        <a href="{{ route('login') }}"
            class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors duration-150">
            Login
         </a>
