@@ -4,19 +4,19 @@
 @section('page-title', 'Kelola Akun Asesi')
 
 @section('content')
-<div class="asesi-management">
+<div class="asesi-management" style="background:#ffffff;min-height:100vh;padding:0;">
     <!-- Header -->
-    <div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius:16px;padding:32px;margin-bottom:24px;box-shadow:0 4px 6px rgba(0,0,0,.1);">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+    <div style="background:#0061A5;padding:32px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,97,165,0.15);">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;max-width:1400px;margin:0 auto;">
             <div style="color:#fff;">
                 <h2 style="font-size:28px;font-weight:700;margin:0 0 8px 0;color:#fff;">Kelola Akun Asesi</h2>
-                <p style="font-size:14px;margin:0;color:rgba(255,255,255,0.9);font-weight:400;">Buat dan kelola akun asesi berdasarkan NIK. Import massal via CSV.</p>
+                <p style="font-size:14px;margin:0;color:rgba(255,255,255,0.95);font-weight:400;">Buat dan kelola akun asesi berdasarkan NIK. Import massal via XLSX/CSV.</p>
             </div>
             <div style="display:flex;gap:10px;">
-                <button class="btn btn-outline" onclick="openImportModal()" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s;backdrop-filter:blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                    <i class="bi bi-file-earmark-arrow-up"></i> Import CSV
+                <button class="btn btn-outline" onclick="openImportModal()" style="background:#ffffff;border:none;color:#0061A5;padding:10px 20px;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#f0f9ff';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.background='#ffffff';this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                    <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
                 </button>
-                <button class="btn btn-primary" onclick="openCreateModal()" style="background:#fff;border:none;color:#667eea;padding:10px 20px;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#f8f9ff';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.background='#fff';this.style.transform='translateY(0)';this.style.boxShadow='none'">
+                <button class="btn btn-primary" onclick="openCreateModal()" style="background:#ffffff;border:none;color:#0061A5;padding:10px 20px;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#f0f9ff';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.background='#ffffff';this.style.transform='translateY(0)';this.style.boxShadow='none'">
                     <i class="bi bi-plus-circle"></i> Tambah Akun
                 </button>
             </div>
@@ -74,67 +74,68 @@
     @endif
 
     <!-- Stats Cards -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:20px;">
-        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:16px;">
-            <div style="width:52px;height:52px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="bi bi-person-vcard" style="font-size:24px;color:#2563eb;"></i>
-            </div>
-            <div>
-                <div style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:.5px;margin-bottom:4px;">TOTAL AKUN</div>
-                <div style="font-size:28px;font-weight:700;color:#1e293b;">{{ number_format($totalAkun) }}</div>
-            </div>
-        </div>
-
-        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:16px;">
-            <div style="width:52px;height:52px;border-radius:12px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="bi bi-patch-check-fill" style="font-size:24px;color:#16a34a;"></i>
-            </div>
-            <div>
-                <div style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:.5px;margin-bottom:4px;">SUDAH APL-01</div>
-                <div style="font-size:28px;font-weight:700;color:#1e293b;">{{ number_format($verified) }}</div>
-            </div>
-        </div>
-
-        <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:16px;">
-            <div style="width:52px;height:52px;border-radius:12px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                <i class="bi bi-hourglass-split" style="font-size:24px;color:#ea580c;"></i>
-            </div>
-            <div>
-                <div style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:.5px;margin-bottom:4px;">BELUM APL-01</div>
-                <div style="font-size:28px;font-weight:700;color:#1e293b;">{{ number_format($unverified) }}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Search & Filter Bar -->
-    <div class="card" style="margin-bottom:16px;">
-        <div class="card-body" style="padding:14px 18px;">
-            <form method="GET" action="{{ route('admin.akun-asesi.index') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                <div style="flex:1;min-width:200px;">
-                    <div style="position:relative;">
-                        <i class="bi bi-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:14px;"></i>
-                        <input type="text" name="search" value="{{ request('search') }}"
-                               placeholder="Cari NIK atau nama..."
-                               style="width:100%;padding:9px 12px 9px 36px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
-                    </div>
+    <div style="padding:0 32px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:20px;">
+            <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:16px;">
+                <div style="width:52px;height:52px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-person-vcard" style="font-size:24px;color:#2563eb;"></i>
                 </div>
-                <select name="status" style="padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;min-width:160px;outline:none;">
-                    <option value="">Semua Status</option>
-                    <option value="verified" {{ request('status') === 'verified' ? 'selected' : '' }}>Sudah APL-01</option>
-                    <option value="unverified" {{ request('status') === 'unverified' ? 'selected' : '' }}>Belum APL-01</option>
-                </select>
-                <button type="submit" class="btn btn-primary" style="padding:9px 18px;">
-                    <i class="bi bi-funnel"></i> Filter
-                </button>
-                @if(request('search') || request('status'))
-                    <a href="{{ route('admin.akun-asesi.index') }}" style="font-size:12px;color:#64748b;text-decoration:underline;">Reset</a>
-                @endif
-            </form>
-        </div>
-    </div>
+                <div>
+                    <div style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:.5px;margin-bottom:4px;">TOTAL AKUN</div>
+                    <div style="font-size:28px;font-weight:700;color:#1e293b;">{{ number_format($totalAkun) }}</div>
+                </div>
+            </div>
 
-    <!-- Data Table -->
-    <div class="card">
+            <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:16px;">
+                <div style="width:52px;height:52px;border-radius:12px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-patch-check-fill" style="font-size:24px;color:#16a34a;"></i>
+                </div>
+                <div>
+                    <div style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:.5px;margin-bottom:4px;">SUDAH APL-01</div>
+                    <div style="font-size:28px;font-weight:700;color:#1e293b;">{{ number_format($verified) }}</div>
+                </div>
+            </div>
+
+            <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:16px;">
+                <div style="width:52px;height:52px;border-radius:12px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-hourglass-split" style="font-size:24px;color:#ea580c;"></i>
+                </div>
+                <div>
+                    <div style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:.5px;margin-bottom:4px;">BELUM APL-01</div>
+                    <div style="font-size:28px;font-weight:700;color:#1e293b;">{{ number_format($unverified) }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="card" style="margin-bottom:16px;">
+            <div class="card-body" style="padding:14px 18px;">
+                <form method="GET" action="{{ route('admin.akun-asesi.index') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:200px;">
+                        <div style="position:relative;">
+                            <i class="bi bi-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:14px;"></i>
+                            <input type="text" name="search" value="{{ request('search') }}"
+                                   placeholder="Cari NIK atau nama..."
+                                   style="width:100%;padding:9px 12px 9px 36px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
+                        </div>
+                    </div>
+                    <select name="status" style="padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;min-width:160px;outline:none;">
+                        <option value="">Semua Status</option>
+                        <option value="verified" {{ request('status') === 'verified' ? 'selected' : '' }}>Sudah APL-01</option>
+                        <option value="unverified" {{ request('status') === 'unverified' ? 'selected' : '' }}>Belum APL-01</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary" style="padding:9px 18px;">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
+                    @if(request('search') || request('status'))
+                        <a href="{{ route('admin.akun-asesi.index') }}" style="font-size:12px;color:#64748b;text-decoration:underline;">Reset</a>
+                    @endif
+                </form>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card">
         <div class="card-body" style="padding:0;">
             @if($accounts->isEmpty())
                 <div style="padding:60px 20px;text-align:center;color:#64748b;">
@@ -142,11 +143,11 @@
                         <i class="bi bi-person-vcard" style="font-size:36px;color:#94a3b8;"></i>
                     </div>
                     <p style="font-size:16px;font-weight:600;margin-bottom:6px;color:#475569;">Belum ada akun asesi</p>
-                    <p style="font-size:13px;color:#94a3b8;margin-bottom:20px;">Buat satu per satu atau import massal dari file CSV.</p>
+                    <p style="font-size:13px;color:#94a3b8;margin-bottom:20px;">Buat satu per satu atau import massal dari file XLSX/CSV.</p>
                     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
                         <button onclick="openImportModal()" style="padding:10px 20px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#475569;transition:all .2s;"
                                 onmouseover="this.style.borderColor='#cbd5e1';this.style.background='#f8fafc'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#fff'">
-                            <i class="bi bi-file-earmark-arrow-up"></i> Import CSV
+                            <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
                         </button>
                         <button onclick="openCreateModal()" style="padding:10px 20px;background:#2563eb;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#fff;transition:all .2s;"
                                 onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
@@ -224,32 +225,42 @@
                                         {{ $account->created_at?->format('d M Y H:i') ?? '-' }}
                                     </td>
                                     <td style="padding:14px 16px;text-align:center;">
-                                        <div style="display:flex;gap:6px;justify-content:center;">
-                                            {{-- Reset Password --}}
-                                            <form action="{{ route('admin.akun-asesi.reset-password', $account->id) }}" method="POST"
-                                                  onsubmit="return confirm('Reset password akun NIK {{ $account->NIK }} ke NIK sebagai password?')" style="display:inline;">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                        style="padding:6px 11px;font-size:12px;background:#dbeafe;color:#1e40af;border:none;border-radius:6px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:4px;"
-                                                        onmouseover="this.style.background='#bfdbfe'" onmouseout="this.style.background='#dbeafe'"
-                                                        title="Reset Password ke NIK">
-                                                    <i class="bi bi-key" style="font-size:13px;"></i>
-                                                </button>
-                                            </form>
+                                        <div style="position:relative;display:inline-block;">
+                                            <button onclick="toggleActionsDropdown(event, this)" 
+                                                    style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .2s;"
+                                                    onmouseover="this.style.background='#f1f5f9';this.style.color='#475569'" 
+                                                    onmouseout="this.style.background='none';this.style.color='#94a3b8'">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <div class="actions-dropdown" style="display:none;position:absolute;top:100%;right:0;background:white;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.12);min-width:180px;z-index:100;overflow:hidden;margin-top:4px;">
+                                                {{-- Reset Password --}}
+                                                <form action="{{ route('admin.akun-asesi.reset-password', $account->id) }}" method="POST"
+                                                      onsubmit="return confirm('Reset password akun NIK {{ $account->NIK }} ke NIK sebagai password?')" style="display:block;width:100%;">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit"
+                                                            style="width:100%;padding:12px 16px;text-align:left;background:none;border:none;color:#475569;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f1f5f9;"
+                                                            onmouseover="this.style.background='#f8fafc';this.style.color='#0061A5'" 
+                                                            onmouseout="this.style.background='none';this.style.color='#475569'">
+                                                        <i class="bi bi-key" style="font-size:14px;"></i>
+                                                        <span>Reset Password</span>
+                                                    </button>
+                                                </form>
 
-                                            {{-- Delete --}}
-                                            <form action="{{ route('admin.akun-asesi.destroy', $account->id) }}" method="POST"
-                                                  onsubmit="return confirm('Hapus akun NIK {{ $account->NIK }}? Akun akan dihapus permanen.')" style="display:inline;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                        style="padding:6px 11px;font-size:12px;background:#fee2e2;color:#991b1b;border:none;border-radius:6px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:4px;"
-                                                        onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fee2e2'"
-                                                        title="Hapus Akun">
-                                                    <i class="bi bi-trash" style="font-size:13px;"></i>
-                                                </button>
-                                            </form>
+                                                {{-- Delete --}}
+                                                <form action="{{ route('admin.akun-asesi.destroy', $account->id) }}" method="POST"
+                                                      onsubmit="return confirm('Hapus akun NIK {{ $account->NIK }}? Akun akan dihapus permanen.')" style="display:block;width:100%;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                            style="width:100%;padding:12px 16px;text-align:left;background:none;border:none;color:#dc2626;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:10px;"
+                                                            onmouseover="this.style.background='#fef2f2'" 
+                                                            onmouseout="this.style.background='none'">
+                                                        <i class="bi bi-trash" style="font-size:14px;"></i>
+                                                        <span>Hapus Akun</span>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
@@ -264,7 +275,7 @@
                         <span style="font-size:12px;color:#64748b;">
                             Menampilkan {{ $accounts->firstItem() }}–{{ $accounts->lastItem() }} dari {{ $accounts->total() }} akun
                         </span>
-                        {{ $accounts->withQueryString()->links('pagination::tailwind') }}
+                        {{ $accounts->withQueryString()->links('vendor.pagination.admin-custom') }}
                     </div>
                 @endif
             @endif
@@ -280,7 +291,7 @@
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
             <h3 style="font-size:17px;font-weight:700;color:#1e293b;margin:0;">
-                <i class="bi bi-file-earmark-arrow-up" style="color:#16a34a;"></i> Import Akun Asesi (CSV)
+                <i class="bi bi-file-earmark-arrow-up" style="color:#16a34a;"></i> Import Akun Asesi
             </h3>
             <button onclick="closeImportModal()" style="background:none;border:none;font-size:20px;
                     color:#94a3b8;cursor:pointer;line-height:1;">&times;</button>
@@ -294,19 +305,29 @@
                         cursor:pointer;transition:all .2s;background:#fafafa;margin-bottom:16px;">
                 <i class="bi bi-cloud-upload" style="font-size:36px;color:#9ca3af;display:block;margin-bottom:8px;"></i>
                 <p style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Klik atau seret file ke sini</p>
-                <p style="font-size:11px;color:#9ca3af;">.csv &bull; Maks 5 MB</p>
+                <p style="font-size:11px;color:#9ca3af;">.xlsx atau .csv &bull; Maks 5 MB</p>
                 <p id="import-file-label" style="margin-top:8px;font-size:12px;font-weight:600;color:#16a34a;display:none;"></p>
             </div>
-            <input type="file" id="import-file" name="file" accept=".csv"
+            <input type="file" id="import-file" name="file" accept=".xlsx,.csv"
                    style="display:none;" onchange="onImportFileChange(this)" required>
 
             <div style="background:#f0fdf4;border-left:3px solid #14532d;padding:10px 14px;
-                        border-radius:6px;margin-bottom:16px;font-size:12px;color:#14532d;line-height:1.7;">
+                        border-radius:6px;margin-bottom:12px;font-size:12px;color:#14532d;line-height:1.7;">
                 <strong>Format kolom:</strong> Kolom A = NIK (16 digit) &bull; Kolom B = Nama<br>
                 Password default akun = NIK.
                 <a href="{{ route('admin.akun-asesi.template') }}" style="color:#14532d;font-weight:700;text-decoration:underline;">
-                    <i class="bi bi-download"></i> Download template CSV
+                    <i class="bi bi-download"></i> Download template XLSX
                 </a>
+            </div>
+
+            <div style="background:#eff6ff;border-left:3px solid #0061A5;padding:10px 14px;
+                        border-radius:6px;margin-bottom:16px;font-size:12px;color:#1e40af;line-height:1.7;display:flex;align-items:center;gap:8px;">
+                <i class="bi bi-lightbulb" style="font-size:16px;color:#0061A5;flex-shrink:0;"></i>
+                <span>NIK berubah jadi angka aneh (1.23E+15)?
+                    <a href="javascript:void(0)" onclick="closeImportModal();openTutorialModal()" style="color:#0061A5;font-weight:700;text-decoration:underline;">
+                        Lihat tutorial format Text di Excel <i class="bi bi-arrow-right"></i>
+                    </a>
+                </span>
             </div>
 
             <div style="display:flex;gap:10px;">
@@ -323,6 +344,152 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- TUTORIAL MODAL -->
+<div id="tutorial-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);
+     z-index:10000;align-items:center;justify-content:center;overflow-y:auto;padding:20px 0;">
+    <div style="background:white;border-radius:16px;padding:0;width:100%;max-width:640px;
+                margin:20px auto;box-shadow:0 25px 60px rgba(0,0,0,.25);max-height:90vh;display:flex;flex-direction:column;">
+
+        {{-- Header --}}
+        <div style="padding:24px 28px 16px;border-bottom:1px solid #e2e8f0;flex-shrink:0;">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+                <h3 style="font-size:18px;font-weight:700;color:#1e293b;margin:0;display:flex;align-items:center;gap:10px;">
+                    <span style="display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;background:#eff6ff;border-radius:10px;">
+                        <i class="bi bi-mortarboard" style="font-size:18px;color:#0061A5;"></i>
+                    </span>
+                    Tutorial: Format NIK sebagai Text
+                </h3>
+                <button onclick="closeTutorialModal()" style="background:none;border:none;font-size:22px;
+                        color:#94a3b8;cursor:pointer;line-height:1;padding:4px;" title="Tutup">&times;</button>
+            </div>
+            <p style="font-size:13px;color:#64748b;margin:10px 0 0;line-height:1.5;">
+                Agar NIK 16 digit tidak berubah menjadi <code style="background:#fee2e2;color:#dc2626;padding:1px 6px;border-radius:4px;font-size:12px;">1.23E+15</code>,
+                kolom NIK harus diformat sebagai <strong>Text</strong> di Excel sebelum disimpan.
+            </p>
+        </div>
+
+        {{-- Body (scrollable) --}}
+        <div style="padding:20px 28px;overflow-y:auto;flex:1;">
+
+            {{-- Tip box --}}
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 16px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">
+                <i class="bi bi-check-circle-fill" style="color:#16a34a;font-size:18px;flex-shrink:0;margin-top:1px;"></i>
+                <div style="font-size:12px;color:#14532d;line-height:1.6;">
+                    <strong>Cara paling mudah:</strong> Gunakan template XLSX dari tombol
+                    <a href="{{ route('admin.akun-asesi.template') }}" style="color:#14532d;font-weight:700;text-decoration:underline;">Download Template XLSX</a>.
+                    Kolom NIK sudah otomatis diformat sebagai Text.
+                </div>
+            </div>
+
+            <p style="font-size:13px;font-weight:700;color:#475569;margin:0 0 16px;text-transform:uppercase;letter-spacing:0.5px;">Jika ingin membuat file sendiri:</p>
+
+            {{-- Step 1 --}}
+            <div style="display:flex;gap:14px;margin-bottom:20px;">
+                <div style="flex-shrink:0;width:32px;height:32px;background:#0061A5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">1</div>
+                <div style="flex:1;">
+                    <h4 style="font-size:14px;font-weight:600;color:#1e293b;margin:0 0 6px;">Seleksi kolom NIK</h4>
+                    <p style="font-size:13px;color:#64748b;margin:0;line-height:1.6;">Klik header kolom <strong>A</strong> (atau kolom yang berisi NIK) untuk menyeleksi seluruh kolom.</p>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-top:8px;text-align:center;">
+                        <div style="display:inline-flex;align-items:center;gap:4px;background:#dbeafe;border:1px solid #93c5fd;border-radius:4px;padding:4px 14px;">
+                            <span style="font-weight:700;font-size:13px;color:#1e40af;">A</span>
+                        </div>
+                        <p style="font-size:11px;color:#94a3b8;margin:6px 0 0;">Klik huruf "A" di atas kolom</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Step 2 --}}
+            <div style="display:flex;gap:14px;margin-bottom:20px;">
+                <div style="flex-shrink:0;width:32px;height:32px;background:#0061A5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">2</div>
+                <div style="flex:1;">
+                    <h4 style="font-size:14px;font-weight:600;color:#1e293b;margin:0 0 6px;">Klik kanan → Format Cells</h4>
+                    <p style="font-size:13px;color:#64748b;margin:0;line-height:1.6;">Klik kanan pada kolom yang sudah diseleksi, lalu pilih <strong>"Format Cells..."</strong></p>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-top:8px;">
+                        <div style="display:inline-flex;flex-direction:column;gap:2px;background:#fff;border:1px solid #d1d5db;border-radius:6px;padding:6px 0;min-width:180px;text-align:left;">
+                            <span style="padding:4px 14px;font-size:12px;color:#6b7280;">Cut</span>
+                            <span style="padding:4px 14px;font-size:12px;color:#6b7280;">Copy</span>
+                            <span style="padding:4px 14px;font-size:12px;color:#6b7280;">Paste Special...</span>
+                            <span style="border-top:1px solid #e5e7eb;margin:2px 0;"></span>
+                            <span style="padding:4px 14px;font-size:12px;color:#1e293b;font-weight:600;background:#eff6ff;"><i class="bi bi-grid-3x3" style="font-size:11px;"></i> Format Cells...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Step 3 --}}
+            <div style="display:flex;gap:14px;margin-bottom:20px;">
+                <div style="flex-shrink:0;width:32px;height:32px;background:#0061A5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">3</div>
+                <div style="flex:1;">
+                    <h4 style="font-size:14px;font-weight:600;color:#1e293b;margin:0 0 6px;">Pilih kategori "Text"</h4>
+                    <p style="font-size:13px;color:#64748b;margin:0;line-height:1.6;">Pada tab <strong>Number</strong>, di daftar <strong>Category</strong>, pilih <strong>"Text"</strong> lalu klik <strong>OK</strong>.</p>
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px;margin-top:8px;">
+                        <p style="font-size:11px;font-weight:600;color:#475569;margin:0 0 8px;">Category:</p>
+                        <div style="display:flex;flex-direction:column;gap:1px;background:#fff;border:1px solid #d1d5db;border-radius:6px;padding:4px 0;max-width:160px;">
+                            <span style="padding:3px 12px;font-size:12px;color:#6b7280;">General</span>
+                            <span style="padding:3px 12px;font-size:12px;color:#6b7280;">Number</span>
+                            <span style="padding:3px 12px;font-size:12px;color:#6b7280;">Currency</span>
+                            <span style="padding:3px 12px;font-size:12px;color:#6b7280;">Date</span>
+                            <span style="padding:3px 12px;font-size:12px;color:#fff;background:#0061A5;border-radius:4px;font-weight:600;">Text</span>
+                            <span style="padding:3px 12px;font-size:12px;color:#6b7280;">Special</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Step 4 --}}
+            <div style="display:flex;gap:14px;margin-bottom:20px;">
+                <div style="flex-shrink:0;width:32px;height:32px;background:#0061A5;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">4</div>
+                <div style="flex:1;">
+                    <h4 style="font-size:14px;font-weight:600;color:#1e293b;margin:0 0 6px;">Ketik ulang NIK</h4>
+                    <p style="font-size:13px;color:#64748b;margin:0;line-height:1.6;">Setelah format diubah ke Text, <strong>ketik ulang</strong> NIK di setiap sel. NIK yang sudah terlanjur jadi angka harus diketik ulang agar disimpan sebagai teks.</p>
+                    <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:10px 14px;margin-top:8px;font-size:12px;color:#92400e;line-height:1.6;">
+                        <i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;"></i>
+                        <strong>Penting:</strong> Jika NIK sudah menjadi <code style="background:#fee2e2;padding:1px 4px;border-radius:3px;">1.23E+15</code>, mengubah format saja tidak cukup. Harus diketik ulang angka aslinya.
+                    </div>
+                </div>
+            </div>
+
+            {{-- Step 5 --}}
+            <div style="display:flex;gap:14px;margin-bottom:20px;">
+                <div style="flex-shrink:0;width:32px;height:32px;background:#16a34a;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;">5</div>
+                <div style="flex:1;">
+                    <h4 style="font-size:14px;font-weight:600;color:#1e293b;margin:0 0 6px;">Simpan & Upload</h4>
+                    <p style="font-size:13px;color:#64748b;margin:0;line-height:1.6;">Simpan file sebagai <strong>.xlsx</strong> (disarankan) atau <strong>.csv</strong>, lalu upload ke halaman import.</p>
+                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-top:8px;font-size:12px;color:#14532d;line-height:1.6;">
+                        <i class="bi bi-check-circle-fill" style="color:#16a34a;"></i>
+                        Ciri NIK sudah benar sebagai Text: angka rata kiri di sel dan ada tanda <span style="color:#16a34a;font-weight:700;">segitiga hijau kecil</span> di pojok kiri atas sel.
+                    </div>
+                </div>
+            </div>
+
+            {{-- Alternative: apostrophe trick --}}
+            <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;margin-bottom:8px;">
+                <h4 style="font-size:13px;font-weight:700;color:#1e293b;margin:0 0 8px;display:flex;align-items:center;gap:6px;">
+                    <i class="bi bi-lightning-charge-fill" style="color:#f59e0b;"></i> Trik Cepat: Tambahkan tanda petik satu
+                </h4>
+                <p style="font-size:12px;color:#64748b;margin:0;line-height:1.7;">
+                    Ketik <code style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:4px;font-weight:700;font-size:13px;">'1234567898765430</code>
+                    (awali dengan tanda <strong>'</strong> petik satu/apostrophe). Excel akan otomatis menyimpan sebagai teks.
+                    Tanda petik tidak akan masuk ke data.
+                </p>
+            </div>
+        </div>
+
+        {{-- Footer --}}
+        <div style="padding:16px 28px;border-top:1px solid #e2e8f0;display:flex;gap:10px;justify-content:space-between;align-items:center;flex-shrink:0;">
+            <a href="{{ route('admin.akun-asesi.template') }}" style="font-size:13px;color:#0061A5;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+                <i class="bi bi-download"></i> Download Template XLSX
+            </a>
+            <button onclick="closeTutorialModal()" style="padding:10px 24px;border-radius:8px;border:none;
+                    background:#0061A5;color:white;font-size:14px;font-weight:600;cursor:pointer;
+                    display:flex;align-items:center;gap:6px;transition:background .15s;"
+                    onmouseover="this.style.background='#004d84'" onmouseout="this.style.background='#0061A5'">
+                <i class="bi bi-check-lg"></i> Mengerti
+            </button>
+        </div>
     </div>
 </div>
 
@@ -379,6 +546,7 @@
             </div>
         </form>
     </div>
+    </div>
 </div>
 
 <script>
@@ -396,6 +564,27 @@ function openCreateModal() {
 function closeCreateModal() {
     document.getElementById('create-modal').style.display = 'none';
 }
+
+// Dropdown actions
+function toggleActionsDropdown(event, button) {
+    event.stopPropagation();
+    const dropdown = button.nextElementSibling;
+    
+    // Close all other dropdowns
+    document.querySelectorAll('.actions-dropdown').forEach(d => {
+        if (d !== dropdown) d.style.display = 'none';
+    });
+    
+    // Toggle current dropdown
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function() {
+    document.querySelectorAll('.actions-dropdown').forEach(d => {
+        d.style.display = 'none';
+    });
+});
 function onImportFileChange(input) {
     var label = document.getElementById('import-file-label');
     if (input.files.length > 0) {
@@ -406,8 +595,16 @@ function onImportFileChange(input) {
     }
 }
 
+// Tutorial modal
+function openTutorialModal() {
+    document.getElementById('tutorial-modal').style.display = 'flex';
+}
+function closeTutorialModal() {
+    document.getElementById('tutorial-modal').style.display = 'none';
+}
+
 // Close modals on backdrop click
-['import-modal', 'create-modal'].forEach(function(id) {
+['import-modal', 'create-modal', 'tutorial-modal'].forEach(function(id) {
     document.getElementById(id).addEventListener('click', function(e) {
         if (e.target === this) {
             this.style.display = 'none';

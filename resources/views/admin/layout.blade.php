@@ -27,13 +27,15 @@
         /* Sidebar Styles */
         .sidebar {
             width: 260px;
-            background: #0F172A;
-            color: #ecf0f1;
+            background: #ffffff;
+            color: #0061A5;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             z-index: 1000;
             transition: all 0.3s ease;
+            border-right: 1px solid #e2e8f0;
+            box-shadow: 2px 0 8px rgba(0, 97, 165, 0.06);
         }
 
         .sidebar::-webkit-scrollbar {
@@ -41,17 +43,17 @@
         }
 
         .sidebar::-webkit-scrollbar-track {
-            background: #1e293b;
+            background: #f1f5f9;
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: #334155;
+            background: #bfdbfe;
             border-radius: 5px;
         }
 
         .sidebar-header {
-            padding: 25px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
             text-align: center;
         }
 
@@ -63,21 +65,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 12px;
+            margin: 0 auto;
             font-size: 24px;
+            color: #ffffff;
         }
 
-        .sidebar-header h3 {
+        .sidebar-header h3,
+        .sidebar-header h4 {
             font-size: 18px;
             font-weight: 700;
-            color: #fff;
+            color: #0061A5;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .sidebar-header p {
             font-size: 11px;
-            color: #95a5a6;
+            color: #64748b;
             margin-top: 4px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -98,8 +102,8 @@
         .menu-section-title {
             padding: 12px 20px;
             font-size: 11px;
-            font-weight: 600;
-            color: #95a5a6;
+            font-weight: 700;
+            color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 1px;
             cursor: pointer;
@@ -111,8 +115,8 @@
         }
 
         .menu-section-title:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            background: rgba(0, 97, 165, 0.05);
+            color: #0061A5;
         }
 
         .menu-section-title i {
@@ -140,21 +144,23 @@
             display: flex;
             align-items: center;
             padding: 12px 20px;
-            color: #bdc3c7;
+            color: #475569;
             text-decoration: none;
             transition: all 0.3s ease;
             position: relative;
+            border-radius: 0;
         }
 
         .menu-item:hover {
-            background: rgba(0, 97, 165, 0.1);
-            color: #fff;
+            background: rgba(0, 97, 165, 0.08);
+            color: #0061A5;
         }
 
         .menu-item.active {
-            background: rgba(0, 97, 165, 0.15);
-            color: #fff;
+            background: rgba(0, 97, 165, 0.12);
+            color: #0061A5;
             border-left: 3px solid #0061A5;
+            font-weight: 600;
         }
 
         .menu-item i {
@@ -214,9 +220,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 600;
+            color: #ffffff;
+            font-weight: 700;
             font-size: 16px;
+            box-shadow: 0 2px 8px rgba(0, 97, 165, 0.3);
         }
 
         .user-details {
@@ -294,10 +301,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 600;
+            color: #ffffff;
+            font-weight: 700;
             font-size: 18px;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 97, 165, 0.3);
         }
 
         .profile-header-info {
@@ -420,7 +428,7 @@
         /* Mobile Toggle Button */
         .mobile-toggle {
             display: none;
-            background: #0F172A;
+            background: #0061A5;
             color: white;
             border: none;
             padding: 10px 15px;
@@ -463,11 +471,9 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="admin-icon">
-                    <i class="bi bi-person-circle"></i>
+                <div class="">
+                    <img src="{{ asset('images/lsp.png') }}" alt="LSP Logo" style="width: 54px; height: 54px; object-fit: contain;">
                 </div>
-                <h4>Admin LSP</h4>
-                <p>{{ Auth::guard('admin')->user()->name }}</p>
             </div>
 
             <nav class="sidebar-menu">
@@ -569,7 +575,7 @@
                 </div>
 
                 <!-- ASESOR Section -->
-                <div class="menu-section">
+                <!-- <div class="menu-section">
                     <div class="menu-section-title" onclick="toggleMenuSection(this)">
                         <span>ASESOR</span>
                         <i class="bi bi-chevron-down"></i>
@@ -590,7 +596,7 @@
                             <span>Rekap Nilai Akhir</span>
                         </a>
                     </div>
-                </div>
+                </div> -->
             </nav>
         </aside>
 
@@ -732,3 +738,4 @@
     @yield('scripts')
 </body>
 </html>
+a
