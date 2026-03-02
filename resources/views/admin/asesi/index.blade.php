@@ -12,9 +12,6 @@
             <p class="subtitle">Kelola dan pantau semua kandidat dalam sistem sertifikasi.</p>
         </div>
         <div class="header-actions">
-            <button class="btn btn-outline" onclick="openImportModal()">
-                <i class="bi bi-file-earmark-excel"></i> Impor Asesi (Excel)
-            </button>
             <a href="{{ route('admin.asesi.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Tambah Asesi Baru
             </a>
@@ -30,16 +27,6 @@
     @if(session('error'))
         <div class="alert alert-error" style="margin-bottom:16px;">
             <i class="bi bi-exclamation-circle-fill"></i> {{ session('error') }}
-        </div>
-    @endif
-    @if(session('import_errors') && count(session('import_errors')))
-        <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:14px 18px;margin-bottom:16px;font-size:12px;">
-            <strong><i class="bi bi-exclamation-triangle"></i> Catatan Import:</strong>
-            <ul style="margin:6px 0 0;padding-left:18px;line-height:1.8;color:#713f12;">
-                @foreach(session('import_errors') as $err)
-                    <li>{{ $err }}</li>
-                @endforeach
-            </ul>
         </div>
     @endif
 
@@ -707,87 +694,6 @@
             });
         }
     });
-
-    // ── Import Modal ────────────────────────────────────────────
-    function openImportModal() {
-        document.getElementById('import-modal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }
-    function closeImportModal() {
-        document.getElementById('import-modal').style.display = 'none';
-        document.body.style.overflow = '';
-    }
-    document.getElementById('import-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeImportModal();
-    });
-    function onImportFileChange(input) {
-        const label = document.getElementById('import-file-label');
-        if (input.files && input.files[0]) {
-            label.textContent = '✓ ' + input.files[0].name;
-            label.style.color = '#14532d';
-            document.getElementById('import-drop').style.borderColor = '#14532d';
-            document.getElementById('import-drop').style.background = '#f0fdf4';
-        }
-    }
-    document.getElementById('import-form').addEventListener('submit', function() {
-        const btn = document.getElementById('import-submit-btn');
-        btn.disabled = true;
-        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Memproses...';
-    });
 </script>
-
-<!-- Import Modal -->
-<div id="import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);
-     z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:white;border-radius:14px;padding:28px;width:100%;max-width:520px;
-                margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
-
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
-            <h3 style="font-size:17px;font-weight:700;color:#1e293b;margin:0;">
-                <i class="bi bi-file-earmark-excel" style="color:#16a34a;"></i> Impor Asesi dari Excel
-            </h3>
-            <button onclick="closeImportModal()" style="background:none;border:none;font-size:20px;
-                    color:#94a3b8;cursor:pointer;line-height:1;">&times;</button>
-        </div>
-
-        <form id="import-form" action="{{ route('admin.asesi.import') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-
-            <div id="import-drop" onclick="document.getElementById('import-file').click()"
-                 style="border:2px dashed #d1d5db;border-radius:10px;padding:28px;text-align:center;
-                        cursor:pointer;transition:all .2s;background:#fafafa;margin-bottom:16px;">
-                <i class="bi bi-cloud-upload" style="font-size:36px;color:#9ca3af;display:block;margin-bottom:8px;"></i>
-                <p style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Klik atau seret file ke sini</p>
-                <p style="font-size:11px;color:#9ca3af;">.xlsx, .xls, .csv &bull; Maks 5 MB</p>
-                <p id="import-file-label" style="margin-top:8px;font-size:12px;font-weight:600;color:#9ca3af;"></p>
-            </div>
-            <input type="file" id="import-file" name="file" accept=".xlsx,.xls,.csv"
-                   style="display:none;" onchange="onImportFileChange(this)" required>
-
-            <div style="background:#f0fdf4;border-left:3px solid #14532d;padding:10px 14px;
-                        border-radius:6px;margin-bottom:16px;font-size:12px;color:#14532d;line-height:1.7;">
-                <strong>Format kolom:</strong> Kolom A = NIK (16 digit) &bull; Kolom B = Nama<br>
-                Password default akun = NIK siswa.
-                <a href="{{ route('admin.asesi.import.template') }}" style="color:#14532d;font-weight:700;text-decoration:underline;">
-                    Download template
-                </a>
-            </div>
-
-            <div style="display:flex;gap:10px;">
-                <button type="button" onclick="closeImportModal()"
-                        style="flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;
-                               background:white;font-size:14px;font-weight:600;cursor:pointer;color:#64748b;">
-                    Batal
-                </button>
-                <button id="import-submit-btn" type="submit"
-                        style="flex:2;padding:10px;border-radius:8px;border:none;
-                               background:#14532d;color:white;font-size:14px;font-weight:600;cursor:pointer;
-                               display:flex;align-items:center;justify-content:center;gap:8px;">
-                    <i class="bi bi-upload"></i> Upload &amp; Import
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
 
 @endsection

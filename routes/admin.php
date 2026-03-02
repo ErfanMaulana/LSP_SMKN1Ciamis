@@ -37,8 +37,6 @@ Route::prefix('admin')->group(function () {
         Route::get('/asesi', [AsesiController::class, 'index'])->name('admin.asesi.index');
         Route::get('/asesi/create', [AsesiController::class, 'create'])->name('admin.asesi.create');
         Route::post('/asesi', [AsesiController::class, 'store'])->name('admin.asesi.store');
-        Route::get('/asesi/import-template', [AsesiController::class, 'downloadTemplate'])->name('admin.asesi.import.template');
-        Route::post('/asesi/import', [AsesiController::class, 'import'])->name('admin.asesi.import');
         Route::get('/asesi/{nik}/edit', [AsesiController::class, 'edit'])->name('admin.asesi.edit');
         Route::put('/asesi/{nik}', [AsesiController::class, 'update'])->name('admin.asesi.update');
         Route::delete('/asesi/{nik}', [AsesiController::class, 'destroy'])->name('admin.asesi.destroy');
@@ -138,11 +136,10 @@ Route::prefix('admin')->group(function () {
 
         // Akun Asesi (NIK-based account management)
         Route::get('/akun-asesi', [AkunAsesiController::class, 'index'])->name('admin.akun-asesi.index');
-        Route::get('/akun-asesi/create', [AkunAsesiController::class, 'create'])->name('admin.akun-asesi.create');
         Route::post('/akun-asesi', [AkunAsesiController::class, 'store'])->name('admin.akun-asesi.store');
-        Route::get('/akun-asesi/import', [AkunAsesiController::class, 'showImport'])->name('admin.akun-asesi.import.form');
         Route::post('/akun-asesi/import', [AkunAsesiController::class, 'import'])->name('admin.akun-asesi.import');
         Route::get('/akun-asesi/template', [AkunAsesiController::class, 'downloadTemplate'])->name('admin.akun-asesi.template');
+        Route::patch('/akun-asesi/{id}/reset-password', [AkunAsesiController::class, 'resetPassword'])->name('admin.akun-asesi.reset-password');
         Route::delete('/akun-asesi/{id}', [AkunAsesiController::class, 'destroy'])->name('admin.akun-asesi.destroy');
     });
 });

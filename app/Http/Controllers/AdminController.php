@@ -63,15 +63,14 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        // Ambil statistik dari database
         $stats = [
-            'totalAsesi' => Asesi::count(),
-            'totalAsesor' => Asesor::count(),
+            'totalAsesi'   => Asesi::count(),
+            'totalAsesor'  => Asesor::count(),
             'totalJurusan' => Jurusan::count(),
-            'totalSkema' => Skema::count(),
-            'totalMitra' => Mitra::count(),
+            'totalSkema'   => Skema::count(),
+            'totalMitra'   => Mitra::count(),
         ];
-        
+
         return view('admin.dashboard', compact('stats'));
     }
 }
