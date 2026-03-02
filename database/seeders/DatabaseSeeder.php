@@ -31,6 +31,7 @@ class DatabaseSeeder extends Seeder
             AsesorSeeder::class,
             AsesiSeeder::class,
             SkemaSeederRPL::class,
+            SkemaDKVSeeder::class,
             ProfileContentSeeder::class,
             ProfileVisionMissionSeeder::class,
         ]);

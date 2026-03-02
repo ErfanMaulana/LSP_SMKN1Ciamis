@@ -8,7 +8,7 @@
     <div class="page-header">
         <div>
             <h2>Kelola Konten Profil</h2>
-            <p class="subtitle">Kelola Sejarah Singkat, Milestone, Visi & Misi LSP</p>
+            <p class="subtitle">Kelola Sejarah Singkat, Visi & Misi LSP</p>
         </div>
         <a href="{{ route('admin.profile-content.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> Tambah Konten
@@ -28,20 +28,11 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon blue">
-                <i class="bi bi-star-fill"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">MILESTONE PERJALANAN</div>
-                <div class="stat-value">{{ $milestones->count() }}</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon blue">
                 <i class="bi bi-check-circle"></i>
             </div>
             <div class="stat-content">
                 <div class="stat-label">KONTEN AKTIF</div>
-                <div class="stat-value">{{ $sejarah->where('is_active', true)->count() + $milestones->where('is_active', true)->count() }}</div>
+                <div class="stat-value">{{ $sejarah->where('is_active', true)->count() }}</div>
             </div>
         </div>
     </div>
@@ -110,83 +101,6 @@
                 <p>Tambahkan konten Sejarah Singkat untuk ditampilkan di halaman profil</p>
                 <a href="{{ route('admin.profile-content.create') }}" class="btn btn-primary">
                     <i class="bi bi-plus-circle"></i> Tambah Sejarah
-                </a>
-            </div>
-        @endif
-    </div>
-
-    {{-- Milestone Perjalanan Section --}}
-    <div style="margin-top: 2rem;">
-        <div class="section-header">
-            <h3>Milestone Perjalanan</h3>
-            <span class="content-count">{{ $milestones->count() }} item</span>
-        </div>
-
-        @if($milestones->count() > 0)
-            <div class="card">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th width="60">Urutan</th>
-                            <th>Judul</th>
-                            <th width="80">Icon</th>
-                            <th width="90">Status</th>
-                            <th width="140">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($milestones as $milestone)
-                        <tr>
-                            <td class="text-center">
-                                <span class="order-badge">{{ $milestone->order }}</span>
-                            </td>
-                            <td>
-                                <strong>{{ $milestone->title }}</strong>
-                                <p class="desc-preview">{{ Str::limit($milestone->content, 100) }}</p>
-                            </td>
-                            <td class="text-center">
-                                @if($milestone->icon)
-                                    <i class="{{ $milestone->icon }}" style="font-size: 1.25rem; color: #0073bd;"></i>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
-                            <td class="text-center">
-                                <form action="{{ route('admin.profile-content.toggle', $milestone->id) }}" method="POST" style="display:inline">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="status-badge {{ $milestone->is_active ? 'active' : 'inactive' }}" title="Klik untuk toggle">
-                                        {{ $milestone->is_active ? 'Aktif' : 'Nonaktif' }}
-                                    </button>
-                                </form>
-                            </td>
-                            <td>
-                                <div class="action-btns">
-                                    <a href="{{ route('admin.profile-content.edit', $milestone->id) }}" class="btn-action edit" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('admin.profile-content.destroy', $milestone->id) }}" method="POST" 
-                                          onsubmit="return confirm('Hapus konten ini?')" style="display:inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-action delete" title="Hapus">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @else
-            <div class="empty-state">
-                <i class="bi bi-star"></i>
-                <h3>Belum ada Milestone Perjalanan</h3>
-                <p>Tambahkan milestone untuk ditampilkan di halaman profil</p>
-                <a href="{{ route('admin.profile-content.create') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Tambah Milestone
                 </a>
             </div>
         @endif

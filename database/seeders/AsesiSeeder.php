@@ -13,7 +13,7 @@ class AsesiSeeder extends Seeder
      */
     public function run(): void
     {
-        $jurusanNames = ['PPLG', 'DKV', 'AKL', 'KLN', 'MPLB', 'PM', 'HTL'];
+        $jurusanNames = ['PPLG', 'DKV', 'AKL', 'MPLB', 'PM', 'HTL'];
         $tempat_lahir = ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Semarang', 'Makassar', 'Yogyakarta', 'Palembang', 'Bogor', 'Bekasi'];
         $kelas = ['X A', 'X B', 'XI A', 'XI B', 'XII A', 'XII B'];
 
@@ -22,29 +22,36 @@ class AsesiSeeder extends Seeder
 
         $asesiCount = 0;
 
-        // Mapping jurusan names to ID (from database)
-        $jurusanIdMap = [
-            'PPLG' => 1,
-            'DKV' => 2,
-            'AKL' => 3,
-            'KLN' => 4,
-            'MPLB' => 5,
-            'PM' => 6,
-            'HTL' => 7,
-        ];
+        // Get jurusan IDs from database dynamically
+        $jurusanIdMap = [];
+        $jurusanRecords = DB::table('jurusan')->whereIn('kode_jurusan', $jurusanNames)->get();
+        foreach ($jurusanRecords as $jurusan) {
+            $jurusanIdMap[$jurusan->kode_jurusan] = $jurusan->ID_jurusan;
+        }
 
-        // Distribution: PPLG=6, DKV=5, AKL=5, KLN=5, MPLB=5, PM=5, HTL=5
+        // Check if all jurusan exist
+        foreach ($jurusanNames as $jName) {
+            if (!isset($jurusanIdMap[$jName])) {
+                $this->command->warn("Jurusan {$jName} tidak ditemukan di database! Skip...");
+            }
+        }
+
+        // Distribution: PPLG=6, DKV=5, AKL=5, MPLB=5, PM=5, HTL=5
         $distribution = [
             'PPLG' => 6,
             'DKV' => 5,
             'AKL' => 5,
-            'KLN' => 5,
             'MPLB' => 5,
             'PM' => 5,
             'HTL' => 5,
         ];
 
         foreach ($jurusanNames as $jurusanName) {
+            // Skip if jurusan not found
+            if (!isset($jurusanIdMap[$jurusanName])) {
+                continue;
+            }
+            
             $idJurusan = $jurusanIdMap[$jurusanName];
             $count = $distribution[$jurusanName];
 

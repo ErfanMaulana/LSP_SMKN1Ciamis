@@ -13,8 +13,8 @@ class SkemaSeederRPL extends Seeder
 {
     public function run(): void
     {
-        // ── Jurusan RPL ────────────────────────────────────────
-        $jurusan = Jurusan::where('kode_jurusan', 'RPL')->first();
+        // ── Jurusan PPLG (Pengembangan Perangkat Lunak dan Gim) ────
+        $jurusan = Jurusan::where('kode_jurusan', 'PPLG')->first();
 
         // ── Skema ──────────────────────────────────────────────
         $skema = Skema::updateOrCreate(

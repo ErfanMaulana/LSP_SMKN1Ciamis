@@ -17,7 +17,7 @@ class SkemaController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Skema::withCount('units');
+        $query = Skema::with('jurusan')->withCount('units');
         
         // Filter by jenis_skema
         if ($request->filled('jenis_skema') && $request->jenis_skema !== 'all') {

@@ -178,13 +178,7 @@
             <tr>
                 <td style="color:#94a3b8;font-weight:600;">{{ $tuks->firstItem() + $i }}</td>
                 <td>
-                    <div style="font-weight:600;color:#0F172A;">{{ $tuk->nama_tuk }}</div>
-                    @if($tuk->kode_tuk)
-                    <div style="font-size:11px;color:#94a3b8;font-family:monospace;">{{ $tuk->kode_tuk }}</div>
-                    @endif
-                    @if($tuk->alamat)
-                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;"><i class="bi bi-geo-alt"></i> {{ Str::limit($tuk->alamat, 50) }}</div>
-                    @endif
+                    <div style="font-weight:600;color:#0F172A;">{{ $tuk->nama_tuk }}</div>                   
                 </td>
                 <td>
                     @php
@@ -195,13 +189,12 @@
                 <td>{{ $tuk->kota ?? '-' }}</td>
                 <td>
                     <div style="display:flex;align-items:center;gap:6px;">
-                        <i class="bi bi-people" style="color:#64748b;"></i>
                         <span>{{ number_format($tuk->kapasitas) }} peserta</span>
                     </div>
                 </td>
                 <td>
                     <span style="font-weight:600;color:#0061a5;">{{ $tuk->jadwal_ujikom_count }}</span>
-                    <span style="font-size:11px;color:#94a3b8;"> jadwal</span>
+                    <span style="font-size:11px;color:#94a3b8;"></span>
                 </td>
                 <td>
                     <span class="badge {{ $tuk->status }}">

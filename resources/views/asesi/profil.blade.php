@@ -16,11 +16,11 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
       <!-- Sejarah Singkat -->
-      <div class="lg:col-span-5">
+      <div class="lg:col-span-12">
         <div class="card-hero h-full">
-          <div class="p-6">
-            <div class="flex items-center gap-2 mb-1">
-              <div class="section-icon"><i class="bi bi-book-fill"></i></div>
+          <div class="p-6 text-left">
+            <div class="flex items-center justify-center gap-2 mb-1">
+              
               <h5 class="card-title-h">Sejarah Singkat</h5>
             </div>
             @forelse($sejarah as $item)
@@ -32,34 +32,6 @@
               Konten sejarah singkat tidak tersedia.
             </p>
             @endforelse
-          </div>
-        </div>
-      </div>
-
-      <!-- Milestone -->
-      <div class="lg:col-span-7">
-        <div class="card-hero h-full">
-          <div class="p-6">
-            <h5 class="card-title-h">Milestone Perjalanan</h5>
-            <div class="milestone-wrap">
-              @forelse($milestones as $milestone)
-              <div class="milestone-item">
-                <div class="milestone-dot m-blue">
-                  @if($milestone->icon)
-                  <i class="{{ $milestone->icon }}" style="font-size:.7rem"></i>
-                  @else
-                  <i class="bi bi-star-fill" style="font-size:.7rem"></i>
-                  @endif
-                </div>
-                <div>
-                  <h6>{{ $milestone->title }}</h6>
-                  <p>{{ $milestone->content }}</p>
-                </div>
-              </div>
-              @empty
-              <p class="text-muted">Milestone perjalanan tidak tersedia.</p>
-              @endforelse
-            </div>
           </div>
         </div>
       </div>
@@ -90,7 +62,7 @@
 
       <div class="lg:col-span-7">
         <div class="card-misi">
-          <h5 class="flex items-center gap-2"><i class="bi bi-list-check text-blue-600"></i> Misi Kami</h5>
+          <h5 class="flex items-center gap-2">Misi Kami</h5>
           @forelse($missions as $mission)
             <div class="misi-item"><i class="bi bi-check-circle-fill misi-icon"></i><span>{{ $mission->content }}</span></div>
           @empty
@@ -122,7 +94,7 @@
         <h4 class="km-sasaran-title">Sasaran Mutu</h4>
         <div class="grid grid-cols-2 gap-3">
           <div class="stat-card">
-            <div class="stat-number">95%</div>
+            <div class="stat-number">100%</div>
             <div class="stat-label">Kelulusan Pelanggan</div>
             <div class="stat-desc">Target tingkat kepuasan peserta terhadap layanan uji kompetensi.</div>
           </div>

@@ -13,25 +13,30 @@ class JurusanSeeder extends Seeder
     public function run(): void
     {
         $jurusan = [
+            
             [
-                'nama_jurusan' => 'Teknik Komputer dan Jaringan',
-                'kode_jurusan' => 'TKJ',
+                'nama_jurusan' => 'Akuntansi dan Keuangan Lembaga',
+                'kode_jurusan' => 'AKL',
             ],
             [
-                'nama_jurusan' => 'Rekayasa Perangkat Lunak',
-                'kode_jurusan' => 'RPL',
+                'nama_jurusan' => 'Desain Komunikasi Visual',
+                'kode_jurusan' => 'DKV',
             ],
             [
-                'nama_jurusan' => 'Multimedia',
-                'kode_jurusan' => 'MM',
+                'nama_jurusan' => 'Manajemen Perkantoran dan Layanan Bisnis',
+                'kode_jurusan' => 'MPLB',
             ],
             [
-                'nama_jurusan' => 'Teknik Kendaraan Ringan',
-                'kode_jurusan' => 'TKR',
+                'nama_jurusan' => 'Pemasaran',
+                'kode_jurusan' => 'PM',
             ],
             [
-                'nama_jurusan' => 'Teknik Sepeda Motor',
-                'kode_jurusan' => 'TSM',
+                'nama_jurusan' => 'Pengembangan Perangkat Lunak dan Gim',
+                'kode_jurusan' => 'PPLG',
+            ],
+            [
+                'nama_jurusan' => 'Perhotelan',
+                'kode_jurusan' => 'HTL',
             ],
         ];
 

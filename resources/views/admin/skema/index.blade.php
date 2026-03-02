@@ -122,6 +122,7 @@
                             <th>NOMOR SKEMA</th>
                             <th>NAMA SKEMA</th>
                             <th>JENIS SKEMA</th>
+                            <th>JURUSAN</th>
                             <th>TANGGAL DIBUAT</th>
                             <th>AKSI</th>
                         </tr>
@@ -149,6 +150,14 @@
                                 </span>
                             </td>
                             <td>
+                                @if($skema->jurusan)
+                                    <span class="text-xs font-medium">{{ $skema->jurusan->nama_jurusan }}</span>
+                                    <span class="text-xs text-muted d-block">{{ $skema->jurusan->kode_jurusan }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
                                 <span class="date-text">{{ $skema->created_at ? $skema->created_at->format('d M Y') : 'N/A' }}</span>
                             </td>
                             <td>
@@ -173,7 +182,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center">Belum ada data skema sertifikasi</td>
+                            <td colspan="6" class="text-center">Belum ada data skema sertifikasi</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -318,7 +327,7 @@
     }
 
     .stat-label {
-        font-size: 10px;
+        font-size: 12px;
         font-weight: 600;
         color: #64748b;
         text-transform: uppercase;
@@ -453,7 +462,7 @@
         padding: 8px 32px 8px 12px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-        font-size: 13px;
+        font-size: 12px;
         background: white;
         cursor: pointer;
         outline: none;
@@ -482,7 +491,7 @@
     .data-table thead th {
         padding: 12px 16px;
         text-align: left;
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 600;
         color: #64748b;
         text-transform: uppercase;
@@ -543,7 +552,7 @@
     }
 
     .user-name {
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 600;
         color: #0F172A;
     }
@@ -589,7 +598,7 @@
     }
 
     .date-text {
-        font-size: 14px;
+        font-size: 12px;
         color: #475569;
     }
 

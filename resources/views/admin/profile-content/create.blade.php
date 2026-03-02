@@ -8,7 +8,7 @@
     <div class="form-header">
         <div>
             <h2>Tambah Konten Profil</h2>
-            <p class="subtitle">Tambahkan Sejarah, Milestone, Visi, atau Misi untuk halaman profil</p>
+            <p class="subtitle">Tambahkan Sejarah, Visi, atau Misi untuk halaman profil</p>
         </div>
         <a href="{{ route('admin.profile-content.index') }}" class="btn btn-outline">
             <i class="bi bi-arrow-left"></i> Kembali
@@ -28,9 +28,6 @@
                             <option value="">-- Pilih Tipe --</option>
                             <option value="sejarah" {{ old('type') === 'sejarah' ? 'selected' : '' }}>
                                 Sejarah Singkat
-                            </option>
-                            <option value="milestone" {{ old('type') === 'milestone' ? 'selected' : '' }}>
-                                Milestone Perjalanan
                             </option>
                             <option value="visi" {{ old('type') === 'visi' ? 'selected' : '' }}>
                                 Visi
