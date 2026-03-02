@@ -37,6 +37,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/asesi', [AsesiController::class, 'index'])->name('admin.asesi.index');
         Route::get('/asesi/create', [AsesiController::class, 'create'])->name('admin.asesi.create');
         Route::post('/asesi', [AsesiController::class, 'store'])->name('admin.asesi.store');
+        Route::get('/asesi/import-template', [AsesiController::class, 'downloadTemplate'])->name('admin.asesi.import.template');
+        Route::post('/asesi/import', [AsesiController::class, 'import'])->name('admin.asesi.import');
         Route::get('/asesi/{nik}/edit', [AsesiController::class, 'edit'])->name('admin.asesi.edit');
         Route::put('/asesi/{nik}', [AsesiController::class, 'update'])->name('admin.asesi.update');
         Route::delete('/asesi/{nik}', [AsesiController::class, 'destroy'])->name('admin.asesi.destroy');

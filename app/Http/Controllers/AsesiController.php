@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Imports\AsesiImport;
 use App\Models\Asesi;
 use App\Models\Jurusan;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AsesiController extends Controller
 {
@@ -85,6 +87,50 @@ class AsesiController extends Controller
         Asesi::create($validated);
 
         return redirect()->route('admin.asesi.index')->with('success', 'Data Asesi berhasil ditambahkan!');
+    }
+
+    /**
+     * Handle Excel/CSV import (NIK + Nama)
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+        ], [
+            'file.required' => 'File Excel wajib diunggah.',
+            'file.mimes'    => 'Format file harus .xlsx, .xls, atau .csv.',
+            'file.max'      => 'Ukuran file maksimal 5 MB.',
+        ]);
+
+        $import = new AsesiImport();
+        Excel::import($import, $request->file('file'));
+
+        $msg  = "Import selesai: {$import->imported} asesi ditambahkan.";
+        if ($import->skipped > 0) $msg .= " {$import->skipped} NIK sudah ada (dilewati).";
+        if ($import->invalid > 0) $msg .= " {$import->invalid} baris tidak valid.";
+
+        $type = $import->imported > 0 ? 'success' : 'error';
+
+        return redirect()->route('admin.asesi.index')
+            ->with($type, $msg)
+            ->with('import_errors', $import->errors);
+    }
+
+    /**
+     * Download CSV template for import
+     */
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="template_import_asesi.csv"',
+        ];
+
+        $content  = "NIK,Nama\n";
+        $content .= "3204010101010001,Budi Santoso\n";
+        $content .= "3204010101010002,Siti Rahayu\n";
+
+        return response($content, 200, $headers);
     }
 
     /**
