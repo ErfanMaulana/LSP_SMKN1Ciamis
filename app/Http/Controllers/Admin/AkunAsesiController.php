@@ -3,111 +3,174 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Imports\AkunAsesiImport;
 use App\Models\Account;
+use App\Models\Asesi;
 use Illuminate\Http\Request;
-use Maatwebsite\Excel\Facades\Excel;
 
 class AkunAsesiController extends Controller
 {
     /**
      * Display list of asesi accounts
      */
-    public function index()
+    public function index(Request $request)
     {
-        $accounts = Account::where('role', 'asesi')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Account::where('role', 'asesi');
 
-        return view('admin.akun-asesi.index', compact('accounts'));
+        // Search
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('NIK', 'like', "%{$search}%")
+                  ->orWhere('nama', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter status
+        if ($status = $request->input('status')) {
+            if ($status === 'verified') {
+                $query->whereIn('NIK', Asesi::whereNotNull('status')->pluck('NIK'));
+            } elseif ($status === 'unverified') {
+                $query->whereNotIn('NIK', Asesi::whereNotNull('status')->pluck('NIK'));
+            }
+        }
+
+        $accounts = $query->orderBy('created_at', 'desc')->paginate(15);
+
+        // Stats
+        $totalAkun     = Account::where('role', 'asesi')->count();
+        $verified      = Account::where('role', 'asesi')
+            ->whereIn('NIK', Asesi::whereNotNull('status')->pluck('NIK'))->count();
+        $unverified    = $totalAkun - $verified;
+
+        return view('admin.akun-asesi.index', compact(
+            'accounts', 'totalAkun', 'verified', 'unverified'
+        ));
     }
 
     /**
-     * Show form to create a new asesi account
-     */
-    public function create()
-    {
-        return view('admin.akun-asesi.create');
-    }
-
-    /**
-     * Store a new asesi account with NIK
+     * Store a new asesi account
      */
     public function store(Request $request)
     {
         $request->validate([
-            'NIK' => 'required|string|size:16|unique:accounts,NIK',
-            'password' => 'required|string|min:6|confirmed',
+            'NIK'  => 'required|string|size:16|unique:accounts,NIK',
+            'nama' => 'required|string|max:255',
         ], [
             'NIK.required' => 'NIK wajib diisi.',
-            'NIK.size' => 'NIK harus terdiri dari 16 digit.',
-            'NIK.unique' => 'NIK sudah terdaftar.',
-            'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal 6 karakter.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'NIK.size'     => 'NIK harus terdiri dari 16 digit.',
+            'NIK.unique'   => 'NIK sudah terdaftar.',
+            'nama.required'=> 'Nama wajib diisi.',
         ]);
 
         Account::create([
-            'id' => $request->NIK,
-            'NIK' => $request->NIK,
-            'password' => $request->password,
-            'role' => 'asesi',
+            'id'       => $request->NIK,
+            'NIK'      => $request->NIK,
+            'nama'     => $request->nama,
+            'password' => $request->NIK, // default password = NIK
+            'role'     => 'asesi',
         ]);
 
         return redirect()->route('admin.akun-asesi.index')
-            ->with('success', 'Akun asesi dengan NIK ' . $request->NIK . ' berhasil dibuat!');
+            ->with('success', 'Akun asesi ' . $request->nama . ' (NIK: ' . $request->NIK . ') berhasil dibuat!');
     }
 
     /**
-     * Show import form
-     */
-    public function showImport()
-    {
-        return view('admin.akun-asesi.import');
-    }
-
-    /**
-     * Handle Excel import
+     * Handle CSV import (native PHP fgetcsv — no ext-zip needed)
      */
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+            'file' => 'required|file|mimes:csv,txt|max:5120',
         ], [
-            'file.required' => 'File Excel wajib diunggah.',
-            'file.mimes' => 'Format file harus .xlsx, .xls, atau .csv.',
-            'file.max' => 'Ukuran file maksimal 5 MB.',
+            'file.required' => 'File CSV wajib diunggah.',
+            'file.mimes'    => 'Format file harus .csv (gunakan template yang disediakan).',
+            'file.max'      => 'Ukuran file maksimal 5 MB.',
         ]);
 
-        $import = new AkunAsesiImport();
-        Excel::import($import, $request->file('file'));
+        $path    = $request->file('file')->getRealPath();
+        $handle  = fopen($path, 'r');
 
-        $msg = "Import selesai: {$import->imported} akun dibuat.";
-        if ($import->skipped > 0) {
-            $msg .= " {$import->skipped} NIK sudah ada (dilewati).";
-        }
-        if ($import->invalid > 0) {
-            $msg .= " {$import->invalid} baris tidak valid.";
+        if ($handle === false) {
+            return redirect()->route('admin.akun-asesi.index')
+                ->with('error', 'Gagal membaca file.');
         }
 
-        $type = $import->imported > 0 ? 'success' : 'error';
+        $imported = 0;
+        $skipped  = 0;
+        $invalid  = 0;
+        $errors   = [];
+        $rowNum   = 0;
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $rowNum++;
+
+            // Skip empty rows
+            if (count(array_filter($row, fn($v) => trim((string) $v) !== '')) === 0) {
+                continue;
+            }
+
+            $nik  = trim((string) ($row[0] ?? ''));
+            $nama = trim((string) ($row[1] ?? ''));
+
+            // Skip header
+            if (strtolower($nik) === 'nik') {
+                continue;
+            }
+
+            // Validate NIK (16 digits)
+            if (!preg_match('/^\d{16}$/', $nik)) {
+                $invalid++;
+                $errors[] = "Baris {$rowNum}: NIK \"{$nik}\" tidak valid (harus 16 digit angka).";
+                continue;
+            }
+
+            if (empty($nama)) {
+                $invalid++;
+                $errors[] = "Baris {$rowNum}: Nama kosong untuk NIK {$nik}.";
+                continue;
+            }
+
+            // Skip duplicate NIK
+            if (Account::where('NIK', $nik)->exists()) {
+                $skipped++;
+                $errors[] = "Baris {$rowNum}: NIK {$nik} sudah terdaftar (dilewati).";
+                continue;
+            }
+
+            Account::create([
+                'id'       => $nik,
+                'NIK'      => $nik,
+                'nama'     => $nama,
+                'password' => $nik,
+                'role'     => 'asesi',
+            ]);
+
+            $imported++;
+        }
+
+        fclose($handle);
+
+        $msg = "Import selesai: {$imported} akun dibuat.";
+        if ($skipped > 0) $msg .= " {$skipped} NIK sudah ada (dilewati).";
+        if ($invalid > 0) $msg .= " {$invalid} baris tidak valid.";
+
+        $type = $imported > 0 ? 'success' : 'error';
 
         return redirect()->route('admin.akun-asesi.index')
             ->with($type, $msg)
-            ->with('import_errors', $import->errors);
+            ->with('import_errors', $errors);
     }
 
     /**
-     * Download Excel template
+     * Download CSV template
      */
     public function downloadTemplate()
     {
         $headers = [
-            'Content-Type'        => 'application/vnd.ms-excel',
+            'Content-Type'        => 'text/csv',
             'Content-Disposition' => 'attachment; filename="template_import_akun_asesi.csv"',
         ];
 
-        $content = "NIK,Nama\n";
+        $content  = "NIK,Nama\n";
         $content .= "3204010101010001,Budi Santoso\n";
         $content .= "3204010101010002,Siti Rahayu\n";
 
@@ -128,6 +191,19 @@ class AkunAsesiController extends Controller
         $account->delete();
 
         return redirect()->route('admin.akun-asesi.index')
-            ->with('success', 'Akun asesi berhasil dihapus.');
+            ->with('success', 'Akun NIK ' . $account->NIK . ' berhasil dihapus.');
+    }
+
+    /**
+     * Reset password to NIK
+     */
+    public function resetPassword($id)
+    {
+        $account = Account::findOrFail($id);
+        $account->password = $account->NIK;
+        $account->save();
+
+        return redirect()->route('admin.akun-asesi.index')
+            ->with('success', 'Password akun NIK ' . $account->NIK . ' berhasil direset ke NIK.');
     }
 }

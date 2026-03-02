@@ -4,7 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Illuminate\Support\Carbon;
+use App\Models\Asesi;
+use App\Models\Jurusan;
+use Faker\Factory as Faker;
 
 class AsesiSeeder extends Seeder
 {
@@ -93,6 +96,6 @@ class AsesiSeeder extends Seeder
             }
         }
 
-        $this->command->info("Total {$asesiCount} asesi data created!");
+        $this->command->info('Asesi seeder completed successfully!');
     }
 }

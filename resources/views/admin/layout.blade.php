@@ -87,53 +87,18 @@
             padding: 20px 0;
         }
 
-        .menu-section {
-            margin-top: 15px;
-        }
-
-        .menu-section:first-child {
-            margin-top: 0;
-        }
-
         .menu-section-title {
-            padding: 12px 20px;
+            padding: 8px 20px;
             font-size: 11px;
             font-weight: 600;
             color: #95a5a6;
             text-transform: uppercase;
             letter-spacing: 1px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-            user-select: none;
+            margin-top: 15px;
         }
 
-        .menu-section-title:hover {
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-        }
-
-        .menu-section-title i {
-            font-size: 12px;
-            transition: transform 0.3s ease;
-        }
-
-        .menu-section-title.collapsed i {
-            transform: rotate(-90deg);
-        }
-
-        .menu-section-items {
-            max-height: 1000px;
-            overflow: hidden;
-            transition: max-height 0.4s ease, opacity 0.3s ease;
-            opacity: 1;
-        }
-
-        .menu-section-items.collapsed {
-            max-height: 0;
-            opacity: 0;
+        .menu-section-title:first-child {
+            margin-top: 0;
         }
 
         .menu-item {
@@ -235,156 +200,21 @@
             color: #95a5a6;
         }
 
-        /* Profile Dropdown */
-        .profile-dropdown {
-            position: relative;
-        }
-
-        .profile-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .profile-toggle:hover {
-            background: #f5f7fa;
-        }
-
-        .profile-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 8px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-            min-width: 260px;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-        }
-
-        .profile-menu.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .profile-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #e5e7eb;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .profile-avatar-lg {
-            width: 48px;
-            height: 48px;
+        .btn-logout {
             background: #0061A5;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: white;
-            font-weight: 600;
-            font-size: 18px;
-            flex-shrink: 0;
-        }
-
-        .profile-header-info {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .profile-header-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: #0F172A;
-            margin: 0;
-        }
-
-        .profile-header-role {
-            font-size: 12px;
-            color: #64748b;
-            margin: 2px 0 0 0;
-        }
-
-        .profile-body {
-            padding: 8px 0;
-        }
-
-        .profile-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            color: #475569;
-            text-decoration: none;
-            font-size: 14px;
-            transition: all 0.2s ease;
             border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
+            padding: 8px 20px;
+            border-radius: 6px;
             cursor: pointer;
-        }
-
-        .profile-menu-item:hover {
-            background: #f8fafc;
-            color: #0F172A;
-        }
-
-        .profile-menu-item i {
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
-            color: #94a3b8;
-        }
-
-        .profile-menu-item:hover i {
-            color: #0061A5;
-        }
-
-        .profile-divider {
-            height: 1px;
-            background: #e5e7eb;
-            margin: 8px 0;
-        }
-
-        .profile-logout {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 20px;
-            color: #dc2626;
-            text-decoration: none;
             font-size: 14px;
-            transition: all 0.2s ease;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
         }
 
-        .profile-logout:hover {
-            background: #fef2f2;
-            color: #991b1b;
-        }
-
-        .profile-logout i {
-            font-size: 16px;
-            width: 20px;
-            text-align: center;
+        .btn-logout:hover {
+            background: #003961;
+            transform: translateY(-1px);
         }
 
         .content-wrapper {
@@ -478,114 +308,90 @@
                 </a>
 
                 <!-- WEBSITE Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>WEBSITE</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.carousel.index') }}" class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
-                            <i class="bi bi-images"></i>
-                            <span>Banner Carousel</span>
-                        </a>
+                <div class="menu-section-title">WEBSITE</div>
 
-                        <a href="{{ route('admin.socialmedia.index') }}" class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
-                            <i class="bi bi-share"></i>
-                            <span>Sosial Media</span>
-                        </a>
+                <a href="{{ route('admin.carousel.index') }}" class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
+                    <i class="bi bi-images"></i>
+                    <span>Banner Carousel</span>
+                </a>
 
-                        <a href="{{ route('admin.profile-content.index') }}" class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
-                            <i class="bi bi-book-fill"></i>
-                            <span>Konten Profil</span>
-                        </a>
-                    </div>
-                </div>
+                <a href="{{ route('admin.socialmedia.index') }}" class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
+                    <i class="bi bi-share"></i>
+                    <span>Sosial Media</span>
+                </a>
 
                 <!-- ADMINISTRASI Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>ADMINISTRASI</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.asesor.index') }}" class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
-                            <i class="bi bi-person-badge"></i>
-                            <span>Asesor</span>
-                        </a>
-                        
-                        <a href="{{ route('admin.asesi.index') }}" class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
-                            <i class="bi bi-people"></i>
-                            <span>Asesi</span>
-                        </a>
+                <div class="menu-section-title">ADMINISTRASI</div>
+                
+                <a href="{{ route('admin.asesor.index') }}" class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Asesor</span>
+                </a>
+                
+                <a href="{{ route('admin.asesi.index') }}" class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
+                    <i class="bi bi-people"></i>
+                    <span>Asesi</span>
+                </a>
 
-                        <a href="{{ route('admin.asesi.verifikasi') }}" class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
-                            <i class="bi bi-clipboard-check"></i>
-                            <span>Verifikasi Asesi</span>
-                            @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
-                            @if($pendingCount > 0)
-                                <span style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
-                            @endif
-                        </a>
-                        
-                        <a href="{{ route('admin.jurusan.index') }}" class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
-                            <i class="bi bi-mortarboard"></i>
-                            <span>Jurusan</span>
-                        </a>
+                <a href="{{ route('admin.asesi.verifikasi') }}" class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span>Verifikasi Asesi</span>
+                    @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
+                    @if($pendingCount > 0)
+                        <span style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
+                    @endif
+                </a>
 
-                        <a href="{{ route('admin.skema.index') }}" class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
-                            <i class="bi bi-patch-check"></i>
-                            <span>Skema</span>
-                        </a>
+                <a href="{{ route('admin.akun-asesi.index') }}" class="menu-item {{ request()->routeIs('admin.akun-asesi.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-vcard"></i>
+                    <span>Akun Asesi (NIK)</span>
+                </a>
+                
+                <a href="{{ route('admin.jurusan.index') }}" class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
+                    <i class="bi bi-mortarboard"></i>
+                    <span>Jurusan</span>
+                </a>
 
-                        <a href="{{ route('admin.mitra.index') }}" class="menu-item {{ request()->routeIs('admin.mitra.*') ? 'active' : '' }}">
-                            <i class="bi bi-building"></i>
-                            <span>Mitra</span>
-                        </a>
-                    </div>
-                </div>
+                <a href="{{ route('admin.skema.index') }}" class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
+                    <i class="bi bi-patch-check"></i>
+                    <span>Skema</span>
+                </a>
 
-                <!-- UJIAN KOMPETENSI Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>UJIAN KOMPETENSI</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.tuk.index') }}" class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
-                            <i class="bi bi-geo-alt"></i>
-                            <span>Tempat Uji (TUK)</span>
-                        </a>
+                <a href="{{ route('admin.mitra.index') }}" class="menu-item {{ request()->routeIs('admin.mitra.*') ? 'active' : '' }}">
+                    <i class="bi bi-building"></i>
+                    <span>Mitra</span>
+                </a>
 
-                        <a href="{{ route('admin.jadwal-ujikom.index') }}" class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
-                            <i class="bi bi-calendar-event"></i>
-                            <span>Jadwal Ujikom</span>
-                        </a>
-                    </div>
-                </div>
+                <!-- UJIAN Section -->
+                <div class="menu-section-title">UJIAN KOMPETENSI</div>
+
+                <a href="{{ route('admin.tuk.index') }}" class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>Tempat Uji (TUK)</span>
+                </a>
+
+                <a href="{{ route('admin.jadwal-ujikom.index') }}" class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar-event"></i>
+                    <span>Jadwal Ujikom</span>
+                </a>
 
                 <!-- ASESOR Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>ASESOR</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                            <i class="bi bi-pencil-square"></i>
-                            <span>Entry Penilaian</span>
-                        </a>
-                        
-                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                            <i class="bi bi-file-earmark-text"></i>
-                            <span>Hasil Ujian</span>
-                        </a>
-                        
-                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                            <i class="bi bi-bar-chart"></i>
-                            <span>Rekap Nilai Akhir</span>
-                        </a>
-                    </div>
-                </div>
+                <!-- <div class="menu-section-title">ASESOR</div>
+                
+                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
+                    <i class="bi bi-pencil-square"></i>
+                    <span>Entry Penilaian</span>
+                </a>
+                
+                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Hasil Ujian</span>
+                </a>
+                
+                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Rekap Nilai Akhir</span>
+                </a> -->
             </nav>
         </aside>
 
@@ -600,49 +406,21 @@
                 </div>
                 
                 <div class="topbar-right">
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <button class="profile-toggle" onclick="toggleProfileMenu(event)">
-                            <div class="user-avatar">
-                                {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
-                            </div>
-                            <div class="user-details">
-                                <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
-                                <span class="user-role">Admin LSP</span>
-                            </div>
-                            <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
-                        </button>
-
-                        <div class="profile-menu" id="profileMenu">
-                            <div class="profile-header">
-                                <div class="profile-avatar-lg">
-                                    {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
-                                </div>
-                                <div class="profile-header-info">
-                                    <h4 class="profile-header-name">{{ Auth::guard('admin')->user()->name }}</h4>
-                                    <p class="profile-header-role">Administrator</p>
-                                </div>
-                            </div>
-
-                            <div class="profile-body">
-                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
-                                    <i class="bi bi-person"></i>
-                                    <span>Profil</span>
-                                </a>
-                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
-                                    <i class="bi bi-gear"></i>
-                                    <span>Pengaturan</span>
-                                </a>
-                                <div class="profile-divider"></div>
-                                <form method="POST" action="{{ route('admin.logout') }}" style="width: 100%; margin: 0;">
-                                    @csrf
-                                    <button type="submit" class="profile-logout">
-                                        <i class="bi bi-box-arrow-right"></i>
-                                        <span>Logout</span>
-                                    </button>
-                                </form>
-                            </div>
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
+                            <span class="user-role">Admin LSP</span>
                         </div>
                     </div>
+                    <form method="POST" action="{{ route('admin.logout') }}" style="display: inline;">
+                        @csrf
+                        <button type="submit" class="btn-logout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -670,47 +448,6 @@
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
         }
-
-        function toggleProfileMenu(event) {
-            event.stopPropagation();
-            const menu = document.getElementById('profileMenu');
-            menu.classList.toggle('show');
-        }
-
-        function toggleMenuSection(element) {
-            const items = element.nextElementSibling;
-            element.classList.toggle('collapsed');
-            items.classList.toggle('collapsed');
-            
-            // Save state to localStorage
-            const sectionName = element.querySelector('span').textContent;
-            const isCollapsed = element.classList.contains('collapsed');
-            localStorage.setItem('menu-' + sectionName, isCollapsed ? 'collapsed' : 'expanded');
-        }
-
-        // Restore menu states on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.menu-section-title').forEach(function(title) {
-                const sectionName = title.querySelector('span').textContent;
-                const state = localStorage.getItem('menu-' + sectionName);
-                
-                // By default, expand sections if no state is saved
-                if (state === 'collapsed') {
-                    title.classList.add('collapsed');
-                    title.nextElementSibling.classList.add('collapsed');
-                }
-            });
-        });
-
-        // Close profile menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const profileDropdown = document.getElementById('profileDropdown');
-            const profileMenu = document.getElementById('profileMenu');
-            
-            if (profileDropdown && !profileDropdown.contains(event.target)) {
-                profileMenu.classList.remove('show');
-            }
-        });
 
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {

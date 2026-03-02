@@ -32,6 +32,7 @@ class Account extends Authenticatable
         'id',
         'no_reg',
         'NIK',
+        'nama',
         'password',
         'role',
     ];
