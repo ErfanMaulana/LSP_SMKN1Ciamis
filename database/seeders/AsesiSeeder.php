@@ -13,7 +13,7 @@ class AsesiSeeder extends Seeder
      */
     public function run(): void
     {
-        $jurusanNames = ['PPLG', 'DKV', 'AKL', 'MPLB', 'PM', 'HTL'];
+        $jurusanNames = ['PPLG', 'DKV', 'AKL', 'KLN', 'MPLB', 'PM', 'HTL'];
         $tempat_lahir = ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Semarang', 'Makassar', 'Yogyakarta', 'Palembang', 'Bogor', 'Bekasi'];
         $kelas = ['X A', 'X B', 'XI A', 'XI B', 'XII A', 'XII B'];
 
@@ -36,11 +36,12 @@ class AsesiSeeder extends Seeder
             }
         }
 
-        // Distribution: PPLG=6, DKV=5, AKL=5, MPLB=5, PM=5, HTL=5
+        // Distribution: PPLG=6, DKV=5, AKL=5, KLN=5, MPLB=5, PM=5, HTL=5
         $distribution = [
             'PPLG' => 6,
             'DKV' => 5,
             'AKL' => 5,
+            'KLN' => 5,
             'MPLB' => 5,
             'PM' => 5,
             'HTL' => 5,

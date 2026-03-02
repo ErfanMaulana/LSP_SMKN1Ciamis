@@ -151,8 +151,7 @@
                             </td>
                             <td>
                                 @if($skema->jurusan)
-                                    <span class="text-xs font-medium">{{ $skema->jurusan->nama_jurusan }}</span>
-                                    <span class="text-xs text-muted d-block">{{ $skema->jurusan->kode_jurusan }}</span>
+                                    <span class="text-xs font-medium">{{ strtoupper($skema->jurusan->kode_jurusan) }}</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif

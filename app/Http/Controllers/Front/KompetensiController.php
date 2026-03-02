@@ -12,13 +12,18 @@ class KompetensiController extends Controller
      */
     public function index()
     {
-        $kompetensi = Jurusan::with('asesi')->get()->map(function ($jurusan) {
+        $kompetensi = Jurusan::with(['asesi', 'skemas.units'])->get()->map(function ($jurusan) {
+            // Hitung total unit kompetensi dari semua skema di jurusan ini
+            $totalUnits = $jurusan->skemas->sum(function ($skema) {
+                return $skema->units->count();
+            });
+
             return [
                 'id' => $jurusan->id_jurusan,
                 'kode' => $jurusan->kode_jurusan,
                 'slug' => strtolower($jurusan->kode_jurusan),
                 'nama' => $jurusan->nama_jurusan,
-                'unit_kompetensi' => 0, // Placeholder, bisa diambil dari tabel skema jika ada
+                'unit_kompetensi' => $totalUnits,
                 'jumlah_asesi' => $jurusan->asesi()->count(),
                 'visi' => $jurusan->visi,
                 'misi' => $jurusan->misi,
@@ -35,20 +40,25 @@ class KompetensiController extends Controller
      */
     public function detail($slug)
     {
-        $jurusan = Jurusan::where('kode_jurusan', strtoupper($slug))->first();
+        $jurusan = Jurusan::with(['skemas.units'])->where('kode_jurusan', strtoupper($slug))->first();
 
         if (!$jurusan) {
             abort(404, 'Kompetensi tidak ditemukan');
         }
 
         $jumlah_asesi = $jurusan->asesi()->count();
+        
+        // Hitung total unit kompetensi dari semua skema di jurusan ini
+        $totalUnits = $jurusan->skemas->sum(function ($skema) {
+            return $skema->units->count();
+        });
 
         $data = [
             'id' => $jurusan->id_jurusan,
             'kode' => $jurusan->kode_jurusan,
             'slug' => strtolower($jurusan->kode_jurusan),
             'nama' => $jurusan->nama_jurusan,
-            'unit_kompetensi' => 0,
+            'unit_kompetensi' => $totalUnits,
             'jumlah_asesi' => $jumlah_asesi,
             'visi' => $jurusan->visi ?? '',
             'misi' => $this->parseMisi($jurusan->misi),

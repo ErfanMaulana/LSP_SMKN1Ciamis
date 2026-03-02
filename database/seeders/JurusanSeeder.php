@@ -23,6 +23,10 @@ class JurusanSeeder extends Seeder
                 'kode_jurusan' => 'DKV',
             ],
             [
+                'nama_jurusan' => 'Kuliner',
+                'kode_jurusan' => 'KLN',
+            ],
+            [
                 'nama_jurusan' => 'Manajemen Perkantoran dan Layanan Bisnis',
                 'kode_jurusan' => 'MPLB',
             ],
