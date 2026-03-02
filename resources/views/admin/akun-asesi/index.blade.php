@@ -6,9 +6,14 @@
 @section('content')
 <div class="page-header">
     <h2>Daftar Akun Asesi</h2>
-    <a href="{{ route('admin.akun-asesi.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-lg"></i> Tambah Akun
-    </a>
+    <div style="display:flex;gap:8px;">
+        <a href="{{ route('admin.akun-asesi.import.form') }}" class="btn btn-secondary">
+            <i class="bi bi-file-earmark-arrow-up"></i> Import Excel
+        </a>
+        <a href="{{ route('admin.akun-asesi.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Tambah Akun
+        </a>
+    </div>
 </div>
 
 @if(session('success'))
@@ -20,6 +25,17 @@
 @if(session('error'))
     <div class="alert alert-error" style="margin-bottom:16px;">
         <i class="bi bi-exclamation-circle-fill"></i> {{ session('error') }}
+    </div>
+@endif
+
+@if(session('import_errors') && count(session('import_errors')))
+    <div style="background:#fef9c3;border:1px solid #fde68a;border-radius:8px;padding:14px 18px;margin-bottom:16px;font-size:12px;">
+        <strong><i class="bi bi-exclamation-triangle"></i> Catatan Import:</strong>
+        <ul style="margin:6px 0 0;padding-left:18px;line-height:1.8;color:#713f12;">
+            @foreach(session('import_errors') as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
     </div>
 @endif
 

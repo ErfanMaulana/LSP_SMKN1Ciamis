@@ -138,6 +138,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/akun-asesi', [AkunAsesiController::class, 'index'])->name('admin.akun-asesi.index');
         Route::get('/akun-asesi/create', [AkunAsesiController::class, 'create'])->name('admin.akun-asesi.create');
         Route::post('/akun-asesi', [AkunAsesiController::class, 'store'])->name('admin.akun-asesi.store');
+        Route::get('/akun-asesi/import', [AkunAsesiController::class, 'showImport'])->name('admin.akun-asesi.import.form');
+        Route::post('/akun-asesi/import', [AkunAsesiController::class, 'import'])->name('admin.akun-asesi.import');
+        Route::get('/akun-asesi/template', [AkunAsesiController::class, 'downloadTemplate'])->name('admin.akun-asesi.template');
         Route::delete('/akun-asesi/{id}', [AkunAsesiController::class, 'destroy'])->name('admin.akun-asesi.destroy');
     });
 });
