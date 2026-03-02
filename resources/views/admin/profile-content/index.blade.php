@@ -35,6 +35,24 @@
                 <div class="stat-value">{{ $sejarah->where('is_active', true)->count() }}</div>
             </div>
         </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="bi bi-eye-fill"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">VISI LSP</div>
+                <div class="stat-value">{{ $visions->count() }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="bi bi-flag-fill"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">MISI LSP</div>
+                <div class="stat-value">{{ $missions->count() }}</div>
+            </div>
+        </div>
     </div>
 
     {{-- Sejarah Singkat Section --}}

@@ -11,9 +11,32 @@ class AsesiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $asesi = Asesi::with('jurusan')->paginate(10);
+        $query = Asesi::with('jurusan');
+        
+        // Search filter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'LIKE', "%{$search}%")
+                  ->orWhere('NIK', 'LIKE', "%{$search}%")
+                  ->orWhere('email', 'LIKE', "%{$search}%")
+                  ->orWhere('telepon_hp', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        // Jurusan filter
+        if ($request->has('jurusan') && $request->jurusan != '') {
+            $query->where('ID_jurusan', $request->jurusan);
+        }
+        
+        // Status filter
+        if ($request->has('status') && $request->status != '') {
+            $query->where('status', $request->status);
+        }
+        
+        $asesi = $query->paginate(10);
         
         // Statistik dinamis
         $totalAsesi = Asesi::count();
@@ -38,13 +61,22 @@ class AsesiController extends Controller
                   ->where('asesi_skema.rekomendasi', 'lanjut');
         })->count();
         
+        // Get all jurusan for filter dropdown
+        $jurusanList = Jurusan::all();
+        
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.asesi.partials.table-rows', compact('asesi'))->render();
+        }
+        
         return view('admin.asesi.index', compact(
             'asesi', 
             'totalAsesi',
             'registeredThisMonth',
             'growthPercentage',
             'inAssessment',
-            'certified'
+            'certified',
+            'jurusanList'
         ));
     }
 
@@ -146,10 +178,16 @@ class AsesiController extends Controller
     public function verifikasi(Request $request)
     {
         // Get the filter status from query parameter
-        $status = $request->query('status');
+        $status = $request->query('status', '');
         
         // Get search query
         $search = $request->query('search');
+        
+        // Get jurusan filter
+        $jurusanFilter = $request->query('jurusan');
+        
+        // Get sort parameter
+        $sort = $request->query('sort', 'desc'); // default: newest first
         
         // Build the query
         $query = Asesi::with('jurusan');
@@ -157,6 +195,11 @@ class AsesiController extends Controller
         // Apply status filter if provided
         if (in_array($status, ['pending', 'approved', 'rejected'])) {
             $query->where('status', $status);
+        }
+        
+        // Apply jurusan filter if provided
+        if ($jurusanFilter) {
+            $query->where('ID_jurusan', $jurusanFilter);
         }
         
         // Apply search filter if provided
@@ -168,8 +211,17 @@ class AsesiController extends Controller
             });
         }
         
+        // Apply sorting
+        if ($sort === 'asc') {
+            $query->orderBy('nama', 'asc');
+        } elseif ($sort === 'desc') {
+            $query->orderBy('nama', 'desc');
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
+        
         // Get paginated results
-        $asesi = $query->orderBy('created_at', 'desc')->paginate(10);
+        $asesi = $query->paginate(10);
         
         // Get counts for stats
         $counts = [
@@ -179,7 +231,15 @@ class AsesiController extends Controller
             'total' => Asesi::count(),
         ];
         
-        return view('admin.asesi.verifikasi', compact('asesi', 'status', 'counts'));
+        // Get jurusan list for filter dropdown
+        $jurusanList = Jurusan::orderBy('nama_jurusan')->get();
+        
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.asesi.partials.verifikasi-table-rows', compact('asesi'))->render();
+        }
+        
+        return view('admin.asesi.verifikasi', compact('asesi', 'status', 'counts', 'jurusanList'));
     }
 
     /**

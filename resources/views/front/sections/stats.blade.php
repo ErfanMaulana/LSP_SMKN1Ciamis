@@ -1,15 +1,15 @@
 @php
     // safety fallback biar gak 500 walau controller lupa kirim
-    $totalMurid  = $totalMurid  ?? 1200;
-    $totalAsesor = $totalAsesor ?? 45;
-    $totalSkema  = $totalSkema  ?? 12;
-    $totalTuk    = $totalTuk    ?? 8;
+    $totalAsesi  = $totalAsesi  ?? 0;
+    $totalAsesor = $totalAsesor ?? 0;
+    $totalSkema  = $totalSkema  ?? 0;
+    $totalTuk    = $totalTuk    ?? 0;
 
     $items = [
         [
-            'label' => 'TOTAL MURID',
-            'value' => $totalMurid,
-            'suffix' => '+'
+            'label' => 'TOTAL ASESI',
+            'value' => $totalAsesi,
+            'suffix' => ''
         ],
         [
             'label' => 'ASESOR BERLISENSI',

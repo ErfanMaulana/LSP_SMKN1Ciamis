@@ -4,22 +4,20 @@
 @section('page-title', 'Kelola Akun Asesi')
 
 @section('content')
-<div class="asesi-management" style="background:#ffffff;min-height:100vh;padding:0;">
+<div class="akun-asesi-management">
     <!-- Header -->
-    <div style="background:#0061A5;padding:32px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,97,165,0.15);">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;max-width:1400px;margin:0 auto;">
-            <div style="color:#fff;">
-                <h2 style="font-size:28px;font-weight:700;margin:0 0 8px 0;color:#fff;">Kelola Akun Asesi</h2>
-                <p style="font-size:14px;margin:0;color:rgba(255,255,255,0.95);font-weight:400;">Buat dan kelola akun asesi berdasarkan NIK. Import massal via XLSX/CSV.</p>
-            </div>
-            <div style="display:flex;gap:10px;">
-                <button class="btn btn-outline" onclick="openImportModal()" style="background:#ffffff;border:none;color:#0061A5;padding:10px 20px;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#f0f9ff';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.background='#ffffff';this.style.transform='translateY(0)';this.style.boxShadow='none'">
-                    <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
-                </button>
-                <button class="btn btn-primary" onclick="openCreateModal()" style="background:#ffffff;border:none;color:#0061A5;padding:10px 20px;border-radius:8px;font-weight:600;display:inline-flex;align-items:center;gap:8px;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#f0f9ff';this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'" onmouseout="this.style.background='#ffffff';this.style.transform='translateY(0)';this.style.boxShadow='none'">
-                    <i class="bi bi-plus-circle"></i> Tambah Akun
-                </button>
-            </div>
+    <div class="page-header">
+        <div>
+            <h2>Kelola Akun Asesi</h2>
+            <p class="subtitle">Buat dan kelola akun asesi berdasarkan NIK. Import massal via XLSX/CSV.</p>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="openImportModal()">
+                <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
+            </button>
+            <button class="btn btn-primary" onclick="openCreateModal()">
+                <i class="bi bi-plus-circle"></i> Tambah Akun
+            </button>
         </div>
     </div>
 
@@ -73,212 +71,133 @@
         </div>
     @endif
 
-    <!-- Stats Cards -->
-    <div style="padding:0 32px;">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:20px;">
-            <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:16px;">
-                <div style="width:52px;height:52px;border-radius:12px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <i class="bi bi-person-vcard" style="font-size:24px;color:#2563eb;"></i>
-                </div>
-                <div>
-                    <div style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:.5px;margin-bottom:4px;">TOTAL AKUN</div>
-                    <div style="font-size:28px;font-weight:700;color:#1e293b;">{{ number_format($totalAkun) }}</div>
-                </div>
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="bi bi-person-vcard"></i>
             </div>
-
-            <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:16px;">
-                <div style="width:52px;height:52px;border-radius:12px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <i class="bi bi-patch-check-fill" style="font-size:24px;color:#16a34a;"></i>
-                </div>
-                <div>
-                    <div style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:.5px;margin-bottom:4px;">SUDAH APL-01</div>
-                    <div style="font-size:28px;font-weight:700;color:#1e293b;">{{ number_format($verified) }}</div>
-                </div>
-            </div>
-
-            <div style="background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:16px;">
-                <div style="width:52px;height:52px;border-radius:12px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <i class="bi bi-hourglass-split" style="font-size:24px;color:#ea580c;"></i>
-                </div>
-                <div>
-                    <div style="font-size:11px;font-weight:600;color:#64748b;letter-spacing:.5px;margin-bottom:4px;">BELUM APL-01</div>
-                    <div style="font-size:28px;font-weight:700;color:#1e293b;">{{ number_format($unverified) }}</div>
-                </div>
+            <div class="stat-content">
+                <div class="stat-label">TOTAL AKUN</div>
+                <div class="stat-value">{{ number_format($totalAkun) }}</div>
             </div>
         </div>
 
-        <!-- Search & Filter Bar -->
-        <div class="card" style="margin-bottom:16px;">
-            <div class="card-body" style="padding:14px 18px;">
-                <form method="GET" action="{{ route('admin.akun-asesi.index') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-                    <div style="flex:1;min-width:200px;">
-                        <div style="position:relative;">
-                            <i class="bi bi-search" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:14px;"></i>
-                            <input type="text" name="search" value="{{ request('search') }}"
-                                   placeholder="Cari NIK atau nama..."
-                                   style="width:100%;padding:9px 12px 9px 36px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="bi bi-patch-check-fill"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">SUDAH APL-01</div>
+                <div class="stat-value">{{ number_format($verified) }}</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon blue">
+                <i class="bi bi-hourglass-split"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-label">BELUM APL-01</div>
+                <div class="stat-value">{{ number_format($unverified) }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="card">
+        <div class="card-body">
+            <div class="filter-section">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="searchInput" placeholder="Cari berdasarkan NIK atau nama..." autocomplete="off">
+                </div>
+                <div class="filter-controls">
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">Semua Status</option>
+                        <option value="verified">Sudah APL-01</option>
+                        <option value="unverified">Belum APL-01</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" style="display:none;text-align:center;padding:20px;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" style="display:none;text-align:center;padding:20px;color:#dc2626;">
+                <i class="bi bi-exclamation-triangle" style="font-size:24px;display:block;margin-bottom:8px;"></i>
+                <span>Terjadi kesalahan saat memuat data</span>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                @if($accounts->isEmpty())
+                    <div class="empty-state">
+                        <i class="bi bi-person-vcard"></i>
+                        <p>Belum ada akun asesi</p>
+                        <span>Buat satu per satu atau import massal dari file XLSX/CSV.</span>
+                        <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
+                            <button onclick="openImportModal()" class="btn btn-primary">
+                                <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
+                            </button>
+                            <button onclick="openCreateModal()" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Tambah Akun
+                            </button>
                         </div>
                     </div>
-                    <select name="status" style="padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;min-width:160px;outline:none;">
-                        <option value="">Semua Status</option>
-                        <option value="verified" {{ request('status') === 'verified' ? 'selected' : '' }}>Sudah APL-01</option>
-                        <option value="unverified" {{ request('status') === 'unverified' ? 'selected' : '' }}>Belum APL-01</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary" style="padding:9px 18px;">
-                        <i class="bi bi-funnel"></i> Filter
-                    </button>
-                    @if(request('search') || request('status'))
-                        <a href="{{ route('admin.akun-asesi.index') }}" style="font-size:12px;color:#64748b;text-decoration:underline;">Reset</a>
-                    @endif
-                </form>
-            </div>
-        </div>
-
-        <!-- Data Table -->
-        <div class="card">
-        <div class="card-body" style="padding:0;">
-            @if($accounts->isEmpty())
-                <div style="padding:60px 20px;text-align:center;color:#64748b;">
-                    <div style="width:80px;height:80px;margin:0 auto 20px;background:#f1f5f9;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                        <i class="bi bi-person-vcard" style="font-size:36px;color:#94a3b8;"></i>
-                    </div>
-                    <p style="font-size:16px;font-weight:600;margin-bottom:6px;color:#475569;">Belum ada akun asesi</p>
-                    <p style="font-size:13px;color:#94a3b8;margin-bottom:20px;">Buat satu per satu atau import massal dari file XLSX/CSV.</p>
-                    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-                        <button onclick="openImportModal()" style="padding:10px 20px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#475569;transition:all .2s;"
-                                onmouseover="this.style.borderColor='#cbd5e1';this.style.background='#f8fafc'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='#fff'">
-                            <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
-                        </button>
-                        <button onclick="openCreateModal()" style="padding:10px 20px;background:#2563eb;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:#fff;transition:all .2s;"
-                                onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
-                            <i class="bi bi-plus-circle"></i> Tambah Akun
-                        </button>
-                    </div>
-                </div>
-            @else
-                <div style="overflow-x:auto;">
-                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                @else
+                    <table class="data-table">
                         <thead>
-                            <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0;">
-                                <th style="width:50px;padding:12px 16px;text-align:center;font-weight:600;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">No</th>
-                                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">NIK</th>
-                                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Nama</th>
-                                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Status APL-01</th>
-                                <th style="padding:12px 16px;text-align:left;font-weight:600;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Dibuat</th>
-                                <th style="width:140px;padding:12px 16px;text-align:center;font-weight:600;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;">Aksi</th>
+                            <tr>
+                                <th style="width:50px;">NO</th>
+                                <th>NIK</th>
+                                <th>NAMA</th>
+                                <th>STATUS APL-01</th>
+                                <th>DIBUAT</th>
+                                <th style="width:140px;">AKSI</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach($accounts as $index => $account)
-                                @php
-                                    $asesi = \App\Models\Asesi::where('NIK', $account->NIK)->first();
-                                    $statusLabel = 'Belum Mendaftar';
-                                    $statusColor = '#f1f5f9';
-                                    $statusText  = '#64748b';
-                                    $statusIcon  = 'bi-dash-circle';
-
-                                    if ($asesi) {
-                                        if ($asesi->status === 'approved') {
-                                            $statusLabel = 'Terverifikasi';
-                                            $statusColor = '#d1fae5';
-                                            $statusText  = '#065f46';
-                                            $statusIcon  = 'bi-check-circle-fill';
-                                        } elseif ($asesi->status === 'pending') {
-                                            $statusLabel = 'Menunggu Verifikasi';
-                                            $statusColor = '#fef3c7';
-                                            $statusText  = '#92400e';
-                                            $statusIcon  = 'bi-clock';
-                                        } elseif ($asesi->status === 'rejected') {
-                                            $statusLabel = 'Ditolak';
-                                            $statusColor = '#fee2e2';
-                                            $statusText  = '#991b1b';
-                                            $statusIcon  = 'bi-x-circle-fill';
-                                        } else {
-                                            $statusLabel = 'Sudah Daftar';
-                                            $statusColor = '#e0e7ff';
-                                            $statusText  = '#3730a3';
-                                            $statusIcon  = 'bi-person-check';
-                                        }
-                                    }
-                                @endphp
-                                <tr style="border-bottom:1px solid #f1f5f9;transition:background-color .15s;" 
-                                    onmouseover="this.style.backgroundColor='#f8fafc'" 
-                                    onmouseout="this.style.backgroundColor='transparent'">
-                                    <td style="padding:14px 16px;text-align:center;color:#94a3b8;font-size:12px;font-weight:500;">
-                                        {{ ($accounts->currentPage() - 1) * $accounts->perPage() + $index + 1 }}
-                                    </td>
-                                    <td style="padding:14px 16px;">
-                                        <span style="font-family:'Courier New',monospace;font-weight:600;font-size:13px;letter-spacing:0.3px;color:#334155;background:#f8fafc;padding:4px 8px;border-radius:4px;display:inline-block;">
-                                            {{ $account->NIK }}
-                                        </span>
-                                    </td>
-                                    <td style="padding:14px 16px;font-weight:600;color:#1e293b;">
-                                        {{ $account->nama ?? ($asesi->nama ?? '-') }}
-                                    </td>
-                                    <td style="padding:14px 16px;">
-                                        <span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;background:{{ $statusColor }};color:{{ $statusText }};">
-                                            <i class="bi {{ $statusIcon }}" style="font-size:12px;"></i>
-                                            {{ $statusLabel }}
-                                        </span>
-                                    </td>
-                                    <td style="padding:14px 16px;font-size:12px;color:#64748b;">
-                                        {{ $account->created_at?->format('d M Y H:i') ?? '-' }}
-                                    </td>
-                                    <td style="padding:14px 16px;text-align:center;">
-                                        <div style="position:relative;display:inline-block;">
-                                            <button onclick="toggleActionsDropdown(event, this)" 
-                                                    style="background:none;border:none;font-size:18px;color:#94a3b8;cursor:pointer;padding:4px 8px;border-radius:6px;transition:all .2s;"
-                                                    onmouseover="this.style.background='#f1f5f9';this.style.color='#475569'" 
-                                                    onmouseout="this.style.background='none';this.style.color='#94a3b8'">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-                                            <div class="actions-dropdown" style="display:none;position:absolute;top:100%;right:0;background:white;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.12);min-width:180px;z-index:100;overflow:hidden;margin-top:4px;">
-                                                {{-- Reset Password --}}
-                                                <form action="{{ route('admin.akun-asesi.reset-password', $account->id) }}" method="POST"
-                                                      onsubmit="return confirm('Reset password akun NIK {{ $account->NIK }} ke NIK sebagai password?')" style="display:block;width:100%;">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit"
-                                                            style="width:100%;padding:12px 16px;text-align:left;background:none;border:none;color:#475569;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:10px;border-bottom:1px solid #f1f5f9;"
-                                                            onmouseover="this.style.background='#f8fafc';this.style.color='#0061A5'" 
-                                                            onmouseout="this.style.background='none';this.style.color='#475569'">
-                                                        <i class="bi bi-key" style="font-size:14px;"></i>
-                                                        <span>Reset Password</span>
-                                                    </button>
-                                                </form>
-
-                                                {{-- Delete --}}
-                                                <form action="{{ route('admin.akun-asesi.destroy', $account->id) }}" method="POST"
-                                                      onsubmit="return confirm('Hapus akun NIK {{ $account->NIK }}? Akun akan dihapus permanen.')" style="display:block;width:100%;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                            style="width:100%;padding:12px 16px;text-align:left;background:none;border:none;color:#dc2626;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;display:flex;align-items:center;gap:10px;"
-                                                            onmouseover="this.style.background='#fef2f2'" 
-                                                            onmouseout="this.style.background='none'">
-                                                        <i class="bi bi-trash" style="font-size:14px;"></i>
-                                                        <span>Hapus Akun</span>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
+                        <tbody id="accountsTableBody">
+                            @include('admin.akun-asesi.partials.table-rows')
                         </tbody>
                     </table>
-                </div>
 
-                {{-- Pagination --}}
-                @if($accounts->hasPages())
-                    <div style="padding:14px 18px;border-top:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;">
-                        <span style="font-size:12px;color:#64748b;">
-                            Menampilkan {{ $accounts->firstItem() }}–{{ $accounts->lastItem() }} dari {{ $accounts->total() }} akun
-                        </span>
-                        {{ $accounts->withQueryString()->links('vendor.pagination.admin-custom') }}
-                    </div>
+                    <!-- Pagination -->
+                    @if($accounts->hasPages())
+                        <div class="pagination-container">
+                            <div class="pagination-info">
+                                Menampilkan {{ $accounts->firstItem() }} sampai {{ $accounts->lastItem() }} dari {{ $accounts->total() }} entri
+                            </div>
+                            <div class="pagination">
+                                @if($accounts->currentPage() > 1)
+                                    <a href="{{ $accounts->previousPageUrl() }}" class="page-link">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </a>
+                                @endif
+
+                                @foreach(range(1, $accounts->lastPage()) as $page)
+                                    @if($page == $accounts->currentPage())
+                                        <span class="page-link active">{{ $page }}</span>
+                                    @else
+                                        <a href="{{ $accounts->url($page) }}" class="page-link">{{ $page }}</a>
+                                    @endif
+                                @endforeach
+
+                                @if($accounts->currentPage() < $accounts->lastPage())
+                                    <a href="{{ $accounts->nextPageUrl() }}" class="page-link">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 @endif
-            @endif
+            </div>
         </div>
     </div>
 </div>
@@ -629,29 +548,547 @@ setTimeout(function() {
         }, 300);
     });
 }, 5000);
+
+// AJAX Search & Filter
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+const tableBody = document.getElementById('accountsTableBody');
+const loadingSpinner = document.getElementById('loadingSpinner');
+const errorMessage = document.getElementById('errorMessage');
+let debounceTimer;
+
+function performSearch() {
+    const search = searchInput.value.trim();
+    const status = statusFilter.value;
+
+    // Show loading state
+    loadingSpinner.style.display = 'flex';
+    errorMessage.style.display = 'none';
+    tableBody.style.opacity = '0.5';
+
+    // Build URL with query parameters
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (status) params.append('status', status);
+
+    // Make AJAX request
+    fetch(`{{ route('admin.akun-asesi.index') }}?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'text/html'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.text();
+    })
+    .then(html => {
+        // Update table body
+        tableBody.innerHTML = html;
+        tableBody.style.opacity = '1';
+        loadingSpinner.style.display = 'none';
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        errorMessage.style.display = 'block';
+        loadingSpinner.style.display = 'none';
+        tableBody.style.opacity = '1';
+    });
+}
+
+// Debounced search on input (500ms delay)
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(performSearch, 500);
+    });
+}
+
+// Immediate search on filter change
+if (statusFilter) {
+    statusFilter.addEventListener('change', performSearch);
+}
 </script>
 
 <style>
-@keyframes slideInRight {
-    from {
-        transform: translateX(400px);
-        opacity: 0;
+    /* Page Header */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
     }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
 
-@keyframes slideOutRight {
-    from {
-        transform: translateX(0);
-        opacity: 1;
+    .page-header h2 {
+        font-size: 22px;
+        color: #0F172A;
+        font-weight: 700;
+        margin: 0 0 4px 0;
     }
-    to {
-        transform: translateX(400px);
-        opacity: 0;
+
+    .subtitle {
+        font-size: 14px;
+        color: #64748b;
+        margin: 0;
     }
-}
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background: #0073bd;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #003961;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+    }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-secondary:hover {
+        background: #e2e8f0;
+    }
+
+    /* Statistics Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+    }
+
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+    }
+
+    .stat-icon.blue { background: linear-gradient(135deg, #0073bd, #0073bd); }
+    .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+    .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0F172A;
+    }
+
+    /* Card & Table */
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        margin-bottom: 20px;
+    }
+
+    .card-body {
+        padding: 20px;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 250px;
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 42px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .filter-controls {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+        min-width: 160px;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    /* Table */
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .data-table thead tr {
+        background: #f8fafc;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .data-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .data-table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: background-color 0.15s;
+    }
+
+    .data-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .data-table td {
+        padding: 14px 16px;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 60px 20px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        color: #cbd5e1;
+        margin-bottom: 16px;
+    }
+
+    .empty-state p {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        color: #475569;
+    }
+
+    .empty-state span {
+        font-size: 14px;
+        color: #94a3b8;
+        display: block;
+    }
+
+    /* Badges */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .badge-approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .badge-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* Page specific styles */
+    .code-badge {
+        font-family: 'Courier New', monospace;
+        font-weight: 600;
+        font-size: 13px;
+        letter-spacing: 0.3px;
+        color: #334155;
+        background: #f8fafc;
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .badge-info {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    .badge-secondary {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .actions-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all .2s;
+    }
+
+    .action-btn:hover {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .actions-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.12);
+        min-width: 180px;
+        z-index: 100;
+        overflow: hidden;
+        margin-top: 4px;
+    }
+
+    .dropdown-item {
+        width: 100%;
+        padding: 12px 16px;
+        text-align: left;
+        background: none;
+        border: none;
+        color: #475569;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all .2s;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .dropdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-item:hover {
+        background: #f8fafc;
+        color: #0061A5;
+    }
+
+    .dropdown-item.danger {
+        color: #dc2626;
+    }
+
+    .dropdown-item.danger:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    /* Pagination */
+    .pagination-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-top: 1px solid #f1f5f9;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .pagination-info {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 6px;
+    }
+
+    .page-link {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        background: white;
+        color: #475569;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+    }
+
+    .page-link:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+    .page-link.active {
+        background: #0073bd;
+        color: white;
+        border-color: #0073bd;
+        pointer-events: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            min-width: 100%;
+        }
+
+        .filter-controls {
+            width: 100%;
+        }
+
+        .filter-select {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
 </style>
 @endsection

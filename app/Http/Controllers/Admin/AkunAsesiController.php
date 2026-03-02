@@ -41,6 +41,11 @@ class AkunAsesiController extends Controller
             ->whereIn('NIK', Asesi::whereNotNull('status')->pluck('NIK'))->count();
         $unverified    = $totalAkun - $verified;
 
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.akun-asesi.partials.table-rows', compact('accounts'))->render();
+        }
+
         return view('admin.akun-asesi.index', compact(
             'accounts', 'totalAkun', 'verified', 'unverified'
         ));

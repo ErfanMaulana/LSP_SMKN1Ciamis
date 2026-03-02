@@ -7,6 +7,8 @@ use App\Models\Carousel;
 use App\Models\User;
 use App\Models\Skema;
 use App\Models\Tuk;
+use App\Models\Asesi;
+use App\Models\Asesor;
 
 class HomeController extends Controller
 {
@@ -26,15 +28,15 @@ class HomeController extends Controller
             ]);
         }
 
-        // sementara dummy dulu biar ga error
-        $totalMurid  = 1200;
-        $totalAsesor = 45;
-        $totalSkema  = 12;
-        $totalTuk    = 8;
+        // Dynamic stats from database
+        $totalAsesi  = Asesi::count();
+        $totalAsesor = Asesor::count();
+        $totalSkema  = Skema::count();
+        $totalTuk    = Tuk::count();
 
         return view('front.home', compact(
             'carousels',
-            'totalMurid',
+            'totalAsesi',
             'totalAsesor',
             'totalSkema',
             'totalTuk'

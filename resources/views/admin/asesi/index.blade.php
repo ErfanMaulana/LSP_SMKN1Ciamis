@@ -86,21 +86,21 @@
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Cari berdasarkan nama atau ID...">
+                    <input type="text" id="searchInput" placeholder="Cari berdasarkan nama atau ID..." autocomplete="off">
                 </div>
-                <div class="filter-group">
-                    <select class="filter-select">
-                        <option>Filter: Semua Skema</option>
-                        <option>Software Engineering</option>
-                        <option>Cloud Infrastructure</option>
-                        <option>Data Analyst</option>
-                        <option>Network Systems</option>
+                <div class="filter-controls">
+                    <select class="filter-select" id="jurusanFilter">
+                        <option value="">Semua Jurusan</option>
+                        @foreach($jurusanList as $j)
+                            <option value="{{ $j->ID_jurusan }}">{{ $j->nama_jurusan }}</option>
+                        @endforeach
                     </select>
-                    <select class="filter-select">
-                        <option>Semua Status</option>
-                        <option>Selesai</option>
-                        <option>Dalam Proses</option>
-                        <option>Terjadwal</option>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">Semua Status</option>
+                        <option value="pending">Menunggu</option>
+                        <option value="approved">Dalam Proses</option>
+                        <option value="completed">Selesai</option>
+                        <option value="rejected">Ditolak</option>
                     </select>
                 </div>
             </div>
@@ -117,62 +117,8 @@
                             <th>AKSI</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse($asesi as $item)
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar-initials">
-                                        {{ strtoupper(substr($item->nama, 0, 2)) }}
-                                    </div>
-                                    <div class="user-details">
-                                        <div class="user-name">{{ $item->nama }}</div>
-                                        <div class="user-id">{{ $item->NIK }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? 'Belum Ditentukan' }}</span>
-                            </td>
-                            <td>
-                                @php
-                                    $statuses = ['Selesai', 'Dalam Proses', 'Terjadwal'];
-                                    $status = $statuses[array_rand($statuses)];
-                                    $badgeClass = $status === 'Selesai' ? 'badge-success' : ($status === 'Dalam Proses' ? 'badge-info' : 'badge-warning');
-                                @endphp
-                                <span class="badge {{ $badgeClass }}">{{ $status }}</span>
-                            </td>
-                            <td>
-                                <span class="date-text">{{ $item->created_at ? $item->created_at->format('M d, Y') : 'N/A' }}</span>
-                            </td>
-                            <td>
-                                <div class="action-menu">
-                                    <button class="action-btn" onclick="toggleMenu(this)">
-                                        <i class="bi bi-three-dots"></i>
-                                    </button>
-                                    <div class="action-dropdown">
-                                        <a href="{{ route('admin.asesi.edit', $item->NIK) }}">
-                                            <i class="bi bi-pencil"></i> Ubah
-                                        </a>
-                                        <a href="#">
-                                            <i class="bi bi-eye"></i> Lihat Detail
-                                        </a>
-                                        <form action="{{ route('admin.asesi.destroy', $item->NIK) }}" method="POST" style="margin: 0;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Apakah Anda yakin?')">
-                                                <i class="bi bi-trash"></i> Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="text-center">Tidak ada data asesi</td>
-                        </tr>
-                        @endforelse
+                    <tbody id="asesiTableBody">
+                        @include('admin.asesi.partials.table-rows')
                     </tbody>
                 </table>
             </div>
@@ -413,28 +359,33 @@
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
-    .filter-group {
+    /* Filter Controls */
+    .filter-controls {
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
     }
 
     .filter-select {
-        padding: 10px 36px 10px 14px;
+        padding: 10px 14px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         font-size: 14px;
         background: white;
+        color: #475569;
         cursor: pointer;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
         transition: all 0.2s;
+        min-width: 160px;
     }
 
     .filter-select:hover {
         border-color: #cbd5e1;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     /* Table */
@@ -542,6 +493,11 @@
     .badge-warning {
         background: #fef3c7;
         color: #92400e;
+    }
+
+    .badge-danger {
+        background: #fee2e2;
+        color: #991b1b;
     }
 
     /* Action Menu */
@@ -671,6 +627,67 @@
         padding: 40px 20px;
         color: #64748b;
     }
+
+    /* Spinner/Loading */
+    .spinner-border {
+        display: inline-block;
+        width: 3rem;
+        height: 3rem;
+        vertical-align: text-bottom;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+    }
+
+    .spinner-border.text-primary {
+        color: #0073bd;
+    }
+
+    @keyframes spinner-border {
+        to { transform: rotate(360deg); }
+    }
+
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .filter-section {
+            flex-direction: column;
+        }
+
+        .search-box {
+            min-width: 100%;
+        }
+
+        .filter-controls {
+            width: 100%;
+        }
+
+        .filter-select {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .table-container {
+            display: block;
+            overflow-x: auto;
+        }
+    }
 </style>
 
 <script>
@@ -694,6 +711,75 @@
             });
         }
     });
+
+    // AJAX Search dengan Debounce
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    const jurusanFilter = document.getElementById('jurusanFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const tableBody = document.getElementById('asesiTableBody');
+
+    function performSearch() {
+        const searchValue = searchInput.value;
+        const jurusanValue = jurusanFilter.value;
+        const statusValue = statusFilter.value;
+
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (searchValue) params.append('search', searchValue);
+        if (jurusanValue) params.append('jurusan', jurusanValue);
+        if (statusValue) params.append('status', statusValue);
+
+        // Show loading indicator
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="5" class="text-center">
+                    <div style="padding: 40px 20px;">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; margin-bottom: 12px;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p style="color: #64748b; margin: 0;">Mencari data...</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        // Perform AJAX request
+        fetch(`{{ route('admin.asesi.index') }}?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            tableBody.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center">
+                        <div style="padding: 40px 20px;">
+                            <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
+                            <p style="color: #64748b; margin: 0;">Terjadi kesalahan saat memuat data</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Search input with debounce (delay 500ms)
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(performSearch, 500);
+    });
+
+    // Filter changes trigger immediate search
+    jurusanFilter.addEventListener('change', performSearch);
+    statusFilter.addEventListener('change', performSearch);
 </script>
 
 @endsection

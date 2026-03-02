@@ -127,30 +127,19 @@
     <p class="section-subtitle">Berbagai bidang keahlian yang telah terlisensi untuk dilakukan pengujian.</p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
+      @forelse($jurusanList ?? [] as $jurusan)
       <div class="scope-card">
-        <div class="scope-icon ic-blue"><i class="bi bi-pc-display-horizontal"></i></div>
-        <h6>TIK & Rekayasa Perangkat Lunak</h6>
-        <p>Pemrograman Web, Mobile, dan Manajemen Basis Data.</p>
-        <span class="skema-badge">3 Skema</span>
+        <div class="scope-icon {{ $jurusan['color'] }}"><i class="bi {{ $jurusan['icon'] }}"></i></div>
+        <h6>{{ $jurusan['nama'] }}</h6>
+        <p>{{ Str::limit($jurusan['visi'] ?? 'Sertifikasi kompetensi untuk ' . $jurusan['nama'], 80) }}</p>
+        <span class="skema-badge">{{ $jurusan['skema_count'] }} Skema</span>
       </div>
-      <div class="scope-card">
-        <div class="scope-icon ic-blue"><i class="bi bi-calculator-fill"></i></div>
-        <h6>Akuntansi & Keuangan</h6>
-        <p>Akuntansi Junior, Pengelolaan Kas, dan Teknis Akuntansi.</p>
-        <span class="skema-badge">2 Skema</span>
+      @empty
+      <div class="col-span-full text-center py-8 text-gray-500">
+        <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+        <p class="mt-2">Belum ada skema sertifikasi tersedia.</p>
       </div>
-      <div class="scope-card">
-        <div class="scope-icon ic-blue"><i class="bi bi-graph-up-arrow"></i></div>
-        <h6>Bisnis & Pemasaran</h6>
-        <p>Administrasi, Bisnis, dan Digital Marketing Level 3.</p>
-        <span class="skema-badge">2 Skema</span>
-      </div>
-      <div class="scope-card">
-        <div class="scope-icon ic-blue"><i class="bi bi-briefcase-fill"></i></div>
-        <h6>Manajemen Perkantoran</h6>
-        <p>Sekretaris Junior dan Staf Administrasi Perkantoran.</p>
-        <span class="skema-badge">3 Skema</span>
-      </div>
+      @endforelse
 
     </div>
   </div>

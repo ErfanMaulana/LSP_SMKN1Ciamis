@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Asesor;
 use App\Models\Account;
-use App\Models\Mitra;
 use App\Models\Skema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -14,17 +13,47 @@ class AsesorController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $asesor = Asesor::with('mitra')->paginate(10);
+        $query = Asesor::with('skema');
+        
+        // Search filter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'LIKE', "%{$search}%")
+                  ->orWhere('ID_asesor', 'LIKE', "%{$search}%")
+                  ->orWhere('no_reg', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        // Keahlian filter
+        if ($request->has('keahlian') && $request->keahlian != '') {
+            $query->where('ID_skema', $request->keahlian);
+        }
+        
+        // Status filter  
+        if ($request->has('status') && $request->status != '') {
+            if ($request->status === 'aktif') {
+                $query->whereNotNull('ID_skema');
+            } elseif ($request->status === 'tidak_aktif') {
+                $query->whereNull('ID_skema');
+            }
+        }
+        
+        $asesor = $query->paginate(10);
         
         // Dynamic statistics
         $stats = [
             'total' => Asesor::count(),
-            'with_mitra' => Asesor::whereNotNull('no_mou')->count(),
             'with_skema' => Asesor::whereNotNull('ID_skema')->count(),
             'without_skema' => Asesor::whereNull('ID_skema')->count(),
         ];
+        
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.asesor.partials.table-rows', compact('asesor'))->render();
+        }
         
         return view('admin.asesor.index', compact('asesor', 'stats'));
     }
@@ -34,9 +63,8 @@ class AsesorController extends Controller
      */
     public function create()
     {
-        $mitra = Mitra::all();
         $skema = Skema::all();
-        return view('admin.asesor.create', compact('mitra', 'skema'));
+        return view('admin.asesor.create', compact('skema'));
     }
 
     /**
@@ -47,7 +75,6 @@ class AsesorController extends Controller
         $validated = $request->validate([
             'nama'    => 'required|string|max:255',
             'ID_skema' => 'nullable|integer',
-            'no_mou'  => 'nullable|exists:mitra,no_mou',
             'no_reg'  => 'nullable|string|max:50|unique:asesor,no_reg|unique:accounts,id',
         ]);
 
@@ -71,9 +98,8 @@ class AsesorController extends Controller
     public function edit($ID_asesor)
     {
         $asesor = Asesor::findOrFail($ID_asesor);
-        $mitra = Mitra::all();
         $skema = Skema::all();
-        return view('admin.asesor.edit', compact('asesor', 'mitra', 'skema'));
+        return view('admin.asesor.edit', compact('asesor', 'skema'));
     }
 
     /**
@@ -86,7 +112,6 @@ class AsesorController extends Controller
         $validated = $request->validate([
             'nama'    => 'required|string|max:255',
             'ID_skema' => 'nullable|integer',
-            'no_mou'  => 'nullable|exists:mitra,no_mou',
             'no_reg'  => 'nullable|string|max:50|unique:asesor,no_reg,' . $asesor->ID_asesor . ',ID_asesor|unique:accounts,id,' . ($asesor->no_reg ? Account::where('id', $asesor->no_reg)->value('id') : 'NULL'),
         ]);
 

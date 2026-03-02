@@ -48,6 +48,11 @@ class SkemaController extends Controller
             'klaster' => Skema::where('jenis_skema', 'Klaster')->count(),
         ];
         
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.skema.partials.table-rows', compact('skemas'))->render();
+        }
+        
         return view('admin.skema.index', compact('skemas', 'stats'));
     }
 

@@ -42,6 +42,11 @@ class JurusanController extends Controller
             'with_asesi'      => Jurusan::has('asesi')->count(),
         ];
 
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.jurusan.partials.table-rows', compact('jurusan'))->render();
+        }
+
         return view('admin.jurusan.index', compact('jurusan', 'stats', 'search', 'sort', 'order'));
     }
 

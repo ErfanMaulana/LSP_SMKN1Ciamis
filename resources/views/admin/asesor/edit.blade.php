@@ -45,41 +45,24 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="no_mou">Mitra (No MoU)</label>
-                        <select id="no_mou" name="no_mou" class="form-control @error('no_mou') is-invalid @enderror">
-                            <option value="">Pilih Mitra</option>
-                            @foreach($mitra as $item)
-                                <option value="{{ $item->no_mou }}" {{ old('no_mou', $asesor->no_mou) == $item->no_mou ? 'selected' : '' }}>
-                                    {{ $item->nama_mitra }} ({{ $item->no_mou }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('no_mou')
+                        <label for="no_reg">No. Registrasi (Login)</label>
+                        <input type="text" id="no_reg" name="no_reg"
+                               class="form-control @error('no_reg') is-invalid @enderror"
+                               value="{{ old('no_reg', $asesor->no_reg) }}"
+                               placeholder="Contoh: ASR001">
+                        @error('no_reg')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
-                        <small class="form-text">Pilih mitra yang bekerja sama (opsional)</small>
+                        @if($asesor->no_reg)
+                            <small class="form-text" style="color:#059669;">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Akun aktif dengan No. Reg <strong>{{ $asesor->no_reg }}</strong>.
+                                Kosongkan untuk tidak mengubah.
+                            </small>
+                        @else
+                            <small class="form-text">Isi untuk membuat akun login asesor. Password awal = No. Reg.</small>
+                        @endif
                     </div>
-                </div>
-
-                {{-- Akun Login --}}
-                <div class="form-group" style="margin-top:8px;">
-                    <label for="no_reg">No. Registrasi (Login)</label>
-                    <input type="text" id="no_reg" name="no_reg"
-                           class="form-control @error('no_reg') is-invalid @enderror"
-                           value="{{ old('no_reg', $asesor->no_reg) }}"
-                           placeholder="Contoh: ASR001">
-                    @error('no_reg')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    @if($asesor->no_reg)
-                        <small class="form-text" style="color:#059669;">
-                            <i class="bi bi-check-circle-fill"></i>
-                            Akun aktif dengan No. Reg <strong>{{ $asesor->no_reg }}</strong>.
-                            Kosongkan untuk tidak mengubah.
-                        </small>
-                    @else
-                        <small class="form-text">Isi untuk membuat akun login asesor. Password awal = No. Reg.</small>
-                    @endif
                 </div>
             </div>
 

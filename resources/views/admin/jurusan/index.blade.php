@@ -51,27 +51,37 @@
 
     .toolbar {
         display: flex; align-items: center; justify-content: space-between;
-        gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+        gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
     }
-    .search-form { display: flex; gap: 8px; flex: 1; min-width: 260px; }
-    .search-form input {
-        flex: 1; padding: 9px 14px; border: 1px solid #d1d5db;
-        border-radius: 8px; font-size: 13px; outline: none; transition: border-color .2s;
+    .search-box {
+        flex: 1; min-width: 300px; position: relative;
     }
-    .search-form input:focus { border-color: #0073bd; box-shadow: 0 0 0 3px rgba(0,115,189,.1); }
-    .search-form button {
-        padding: 9px 16px; background: #0073bd; color: #fff; border: none;
-        border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background .2s;
-        display: inline-flex; align-items: center; gap: 6px;
+    .search-box i {
+        position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+        color: #94a3b8; font-size: 16px; z-index: 1;
     }
-    .search-form button:hover { background: #0073bd; }
+    .search-box input {
+        width: 100%; padding: 10px 14px 10px 42px; border: 1px solid #e2e8f0;
+        border-radius: 8px; font-size: 14px; outline: none; transition: all 0.2s;
+    }
+    .search-box input:focus {
+        border-color: #0073bd; box-shadow: 0 0 0 3px rgba(0,115,189,.1);
+    }
 
-    .sort-form { display: flex; align-items: center; gap: 8px; }
-    .sort-form select {
-        padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 8px;
-        font-size: 13px; background: #fff; cursor: pointer; outline: none;
+    .filter-controls {
+        display: flex; gap: 12px; flex-wrap: wrap;
     }
-    .sort-form label { font-size: 13px; color: #6b7280; white-space: nowrap; }
+
+    .filter-select {
+        padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px;
+        font-size: 14px; background: white; color: #475569; cursor: pointer;
+        transition: all 0.2s; min-width: 160px;
+    }
+    .filter-select:hover { border-color: #cbd5e1; }
+    .filter-select:focus {
+        outline: none; border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
 
     .btn {
         display: inline-flex; align-items: center; gap: 6px;
@@ -194,13 +204,48 @@
     }
     .btn-confirm-delete:hover { background: #dc2626; }
 
+    /* Spinner/Loading */
+    .spinner-border {
+        display: inline-block;
+        width: 3rem;
+        height: 3rem;
+        vertical-align: text-bottom;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+    }
+
+    .spinner-border.text-primary {
+        color: #0073bd;
+    }
+
+    @keyframes spinner-border {
+        to { transform: rotate(360deg); }
+    }
+
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
     @media (max-width: 800px) {
         .stats-grid { grid-template-columns: repeat(2,1fr); }
         .data-table { display: block; overflow-x: auto; }
+        .toolbar { flex-direction: column; }
+        .search-box { min-width: 100%; }
+        .filter-controls { width: 100%; }
+        .filter-select { flex: 1; min-width: 0; }
     }
     @media (max-width: 480px) {
         .stats-grid { grid-template-columns: 1fr 1fr; }
-        .toolbar { flex-direction: column; align-items: stretch; }
     }
 </style>
 @endsection
@@ -239,41 +284,28 @@
 
 <!-- Toolbar -->
 <div class="toolbar">
-    <form method="GET" action="{{ route('admin.jurusan.index') }}" class="search-form">
-        <input type="hidden" name="sort"  value="{{ $sort }}">
-        <input type="hidden" name="order" value="{{ $order }}">
-        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama atau kode jurusan...">
-        <button type="submit"><i class="bi bi-search"></i> Cari</button>
-        @if($search)
-            <a href="{{ route('admin.jurusan.index') }}" class="btn" style="background:#f3f4f6;color:#374151;padding:9px 14px;">
-                <i class="bi bi-x"></i>
-            </a>
-        @endif
-    </form>
-
-    <form method="GET" action="{{ route('admin.jurusan.index') }}" class="sort-form" id="sortForm">
-        <input type="hidden" name="search" value="{{ $search }}">
-        <label>Urutkan:</label>
-        <select name="sort" onchange="document.getElementById('sortForm').submit()">
-            <option value="nama_jurusan"  {{ $sort === 'nama_jurusan'  ? 'selected' : '' }}>Nama</option>
-            <option value="kode_jurusan"  {{ $sort === 'kode_jurusan'  ? 'selected' : '' }}>Kode</option>
-            <option value="asesi_count"   {{ $sort === 'asesi_count'   ? 'selected' : '' }}>Jumlah Asesi</option>
-            <option value="created_at"    {{ $sort === 'created_at'    ? 'selected' : '' }}>Tanggal Dibuat</option>
+    <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" id="searchInput" placeholder="Cari nama atau kode jurusan..." autocomplete="off">
+    </div>
+    <div class="filter-controls">
+        <select class="filter-select" id="sortSelect">
+            <option value="nama_jurusan">Nama</option>
+            <option value="kode_jurusan">Kode</option>
+            <option value="asesi_count">Jumlah Asesi</option>
+            <option value="created_at">Tanggal Dibuat</option>
         </select>
-        <select name="order" onchange="document.getElementById('sortForm').submit()">
-            <option value="asc"  {{ $order === 'asc'  ? 'selected' : '' }}>A → Z</option>
-            <option value="desc" {{ $order === 'desc' ? 'selected' : '' }}>Z → A</option>
+        <select class="filter-select" id="orderSelect">
+            <option value="asc">A → Z</option>
+            <option value="desc">Z → A</option>
         </select>
-    </form>
+    </div>
 </div>
 
 <!-- Table -->
 <div class="card">
     <div class="card-header">
-        <h3>
-            Daftar Jurusan
-            @if($search) &mdash; hasil pencarian "<strong>{{ $search }}</strong>" @endif
-        </h3>
+        <h3>Daftar Jurusan</h3>
         <span style="font-size:12px;color:#6b7280;">{{ $jurusan->total() }} jurusan</span>
     </div>
 
@@ -310,37 +342,8 @@
                 <th style="text-align:center;">Aksi</th>
             </tr>
         </thead>
-        <tbody>
-            @foreach($jurusan as $i => $item)
-            <tr>
-                <td>{{ $jurusan->firstItem() + $i }}</td>
-                <td class="jurusan-name">{{ $item->nama_jurusan }}</td>
-                <td><span class="jurusan-code">{{ $item->kode_jurusan ?? '-' }}</span></td>
-                <td><span class="visi-text" title="{{ $item->visi }}">{{ $item->visi ? Str::limit($item->visi, 60) : '-' }}</span></td>
-                <td>
-                    <span class="asesi-badge {{ $item->asesi_count == 0 ? 'empty' : '' }}">
-                        <i class="bi bi-people"></i> {{ $item->asesi_count }}
-                    </span>
-                </td>
-                <td>{{ $item->created_at ? $item->created_at->format('d M Y') : '-' }}</td>
-                <td>
-                    <div class="action-cell">
-                        <button type="button" class="kebab-btn" onclick="toggleMenu(this)">
-                            <i class="bi bi-three-dots-vertical"></i>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}" class="dropdown-item">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </a>
-                            <button type="button" class="dropdown-item delete"
-                                onclick="confirmDelete({{ $item->ID_jurusan }}, '{{ addslashes($item->nama_jurusan) }}', {{ $item->asesi_count }})">
-                                <i class="bi bi-trash"></i> Hapus
-                            </button>
-                        </div>
-                    </div>
-                </td>
-            </tr>
-            @endforeach
+        <tbody id="jurusanTableBody">
+            @include('admin.jurusan.partials.table-rows')
         </tbody>
     </table>
 
@@ -380,6 +383,76 @@
 
 @section('scripts')
 <script>
+// AJAX Search Implementation
+let searchTimeout;
+const searchInput = document.getElementById('searchInput');
+const sortSelect = document.getElementById('sortSelect');
+const orderSelect = document.getElementById('orderSelect');
+const tableBody = document.getElementById('jurusanTableBody');
+
+// Set initial values from server
+sortSelect.value = '{{ $sort }}';
+orderSelect.value = '{{ $order }}';
+
+function performSearch() {
+    const searchValue = searchInput.value;
+    const sortValue = sortSelect.value;
+    const orderValue = orderSelect.value;
+    
+    // Build query parameters
+    const params = new URLSearchParams();
+    if (searchValue) params.append('search', searchValue);
+    if (sortValue) params.append('sort', sortValue);
+    if (orderValue) params.append('order', orderValue);
+    
+    // Show loading state
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="7" style="text-align:center; padding:40px;">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; margin-bottom: 12px;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p style="color: #64748b; margin: 0;">Mencari data...</p>
+            </td>
+        </tr>
+    `;
+    
+    // Perform AJAX request
+    fetch(`{{ route('admin.jurusan.index') }}?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'text/html'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        tableBody.innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align:center; padding:40px;">
+                    <i class="bi bi-exclamation-triangle" style="font-size:48px; color:#ef4444; display:block; margin-bottom:12px;"></i>
+                    <p style="color: #64748b; margin: 0;">Terjadi kesalahan saat memuat data</p>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Debounced search on input
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(performSearch, 500);
+});
+
+// Immediate search on filter change
+sortSelect.addEventListener('change', performSearch);
+orderSelect.addEventListener('change', performSearch);
+
+// Toggle menu, delete confirmation, etc.
 function toggleMenu(btn) {
     const menu = btn.nextElementSibling;
     const allMenus = document.querySelectorAll('.dropdown-menu');
