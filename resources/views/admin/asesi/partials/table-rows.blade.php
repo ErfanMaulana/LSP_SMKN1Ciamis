@@ -39,7 +39,7 @@
                 <a href="{{ route('admin.asesi.edit', $item->NIK) }}" class="dropdown-item">
                     <i class="bi bi-pencil"></i> Ubah
                 </a>
-                <a href="#" class="dropdown-item">
+                <a href="{{ route('admin.asesi.show', $item->NIK) }}" class="dropdown-item">
                     <i class="bi bi-eye"></i> Lihat Detail
                 </a>
                 <form action="{{ route('admin.asesi.destroy', $item->NIK) }}" method="POST" style="margin: 0;">

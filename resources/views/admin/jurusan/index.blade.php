@@ -179,7 +179,7 @@
         padding: 14px 20px; border-top: 1px solid #e5e7eb;
         display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
     }
-    .pagination-info { font-size: 12px; color: #6b7280; }
+    .pagination-info { font-size: 14px; color: #6b7280; }
 
     /* Delete Modal */
     .modal-overlay {
@@ -352,7 +352,7 @@
 
     <div class="pagination-row">
         <div class="pagination-info">
-            Menampilkan {{ $jurusan->firstItem() }}–{{ $jurusan->lastItem() }} dari {{ $jurusan->total() }} jurusan
+            Menampilkan {{ $jurusan->firstItem() }} sampai {{ $jurusan->lastItem() }} dari {{ $jurusan->total() }} jurusan
         </div>
         {{ $jurusan->links() }}
     </div>

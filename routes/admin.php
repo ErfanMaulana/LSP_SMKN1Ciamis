@@ -37,6 +37,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/asesi', [AsesiController::class, 'index'])->name('admin.asesi.index');
         Route::get('/asesi/create', [AsesiController::class, 'create'])->name('admin.asesi.create');
         Route::post('/asesi', [AsesiController::class, 'store'])->name('admin.asesi.store');
+        Route::get('/asesi/{nik}', [AsesiController::class, 'show'])->name('admin.asesi.show');
         Route::get('/asesi/{nik}/edit', [AsesiController::class, 'edit'])->name('admin.asesi.edit');
         Route::put('/asesi/{nik}', [AsesiController::class, 'update'])->name('admin.asesi.update');
         Route::delete('/asesi/{nik}', [AsesiController::class, 'destroy'])->name('admin.asesi.destroy');
@@ -51,6 +52,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/asesor', [AsesorController::class, 'index'])->name('admin.asesor.index');
         Route::get('/asesor/create', [AsesorController::class, 'create'])->name('admin.asesor.create');
         Route::post('/asesor', [AsesorController::class, 'store'])->name('admin.asesor.store');
+        Route::get('/asesor/{ID_asesor}', [AsesorController::class, 'show'])->name('admin.asesor.show');
         Route::get('/asesor/{ID_asesor}/edit', [AsesorController::class, 'edit'])->name('admin.asesor.edit');
         Route::put('/asesor/{ID_asesor}', [AsesorController::class, 'update'])->name('admin.asesor.update');
         Route::delete('/asesor/{ID_asesor}', [AsesorController::class, 'destroy'])->name('admin.asesor.destroy');
@@ -59,6 +61,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/jurusan', [JurusanController::class, 'index'])->name('admin.jurusan.index');
         Route::get('/jurusan/create', [JurusanController::class, 'create'])->name('admin.jurusan.create');
         Route::post('/jurusan', [JurusanController::class, 'store'])->name('admin.jurusan.store');
+        Route::get('/jurusan/{ID_jurusan}', [JurusanController::class, 'show'])->name('admin.jurusan.show');
         Route::get('/jurusan/{ID_jurusan}/edit', [JurusanController::class, 'edit'])->name('admin.jurusan.edit');
         Route::put('/jurusan/{ID_jurusan}', [JurusanController::class, 'update'])->name('admin.jurusan.update');
         Route::delete('/jurusan/{ID_jurusan}', [JurusanController::class, 'destroy'])->name('admin.jurusan.destroy');
@@ -67,6 +70,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/skema', [SkemaController::class, 'index'])->name('admin.skema.index');
         Route::get('/skema/create', [SkemaController::class, 'create'])->name('admin.skema.create');
         Route::post('/skema', [SkemaController::class, 'store'])->name('admin.skema.store');
+        Route::get('/skema/{id}', [SkemaController::class, 'show'])->name('admin.skema.show');
         Route::get('/skema/{id}/edit', [SkemaController::class, 'edit'])->name('admin.skema.edit');
         Route::put('/skema/{id}', [SkemaController::class, 'update'])->name('admin.skema.update');
         Route::delete('/skema/{id}', [SkemaController::class, 'destroy'])->name('admin.skema.destroy');

@@ -76,6 +76,18 @@ class JurusanController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($ID_jurusan)
+    {
+        $jurusan = Jurusan::withCount(['asesi', 'skemas'])
+            ->with('skemas')
+            ->findOrFail($ID_jurusan);
+        
+        return view('admin.jurusan.show', compact('jurusan'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($ID_jurusan)

@@ -93,6 +93,17 @@ class AsesorController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($ID_asesor)
+    {
+        $asesor = Asesor::with('skema')->findOrFail($ID_asesor);
+        $account = Account::where('id', $asesor->no_reg)->where('role', 'asesor')->first();
+        
+        return view('admin.asesor.show', compact('asesor', 'account'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($ID_asesor)

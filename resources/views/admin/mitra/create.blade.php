@@ -4,23 +4,22 @@
 @section('page-title', 'Tambah Mitra')
 
 @section('content')
-<div class="form-container">
-    <div class="form-header">
-        <div>
-            <h2>Tambah Mitra Baru</h2>
-            <p class="subtitle">Tambahkan mitra industri dan informasi MOU</p>
-        </div>
-        <a href="{{ route('admin.mitra.index') }}" class="btn btn-outline">
-            <i class="bi bi-arrow-left"></i> Kembali
-        </a>
-    </div>
+<div class="page-header">
+    <h2>Tambah Mitra Baru</h2>
+    <a href="{{ route('admin.mitra.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
 
-    <div class="card">
-        <div class="card-body">
-            <form action="{{ route('admin.mitra.store') }}" method="POST">
-                @csrf
+<div class="card">
+    <div class="card-body">
+        <form action="{{ route('admin.mitra.store') }}" method="POST">
+            @csrf
+            
+            <div class="form-section">
+                <h3>Informasi Mitra</h3>
                 
-                <div class="form-grid">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="no_mou">Nomor MOU <span class="required">*</span></label>
                         <input type="text" 
@@ -29,7 +28,8 @@
                                class="form-control @error('no_mou') is-invalid @enderror" 
                                value="{{ old('no_mou') }}" 
                                placeholder="Contoh: MOU/2024/001"
-                               required>
+                               required
+                               autofocus>
                         @error('no_mou')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -63,7 +63,7 @@
                     @enderror
                 </div>
 
-                <div class="form-grid">
+                <div class="form-row">
                     <div class="form-group">
                         <label for="tanggal_mou">Tanggal MOU</label>
                         <input type="date" 
@@ -89,144 +89,104 @@
                         <small class="form-text">Tanggal berakhir harus sama atau setelah tanggal MOU</small>
                     </div>
                 </div>
+            </div>
 
-                <div class="form-actions">
-                    <a href="{{ route('admin.mitra.index') }}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Batal
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> Simpan Mitra
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Simpan
+                </button>
+                <a href="{{ route('admin.mitra.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Batal
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 
 <style>
-    .form-container {
-        padding: 0;
-    }
-
-    .form-header {
+    .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 24px;
-        flex-wrap: wrap;
-        gap: 16px;
+        margin-bottom: 25px;
     }
 
-    .form-header h2 {
-        font-size: 28px;
+    .page-header h2 {
+        font-size: 24px;
         color: #0F172A;
         font-weight: 700;
-        margin: 0 0 4px 0;
-    }
-
-    .subtitle {
-        font-size: 14px;
-        color: #64748b;
         margin: 0;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.2s;
-        text-decoration: none;
-    }
-
-    .btn-primary {
-        background: #0F172A;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: #1e293b;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
-    }
-
-    .btn-secondary {
-        background: #e2e8f0;
-        color: #475569;
-    }
-
-    .btn-secondary:hover {
-        background: #cbd5e1;
-    }
-
-    .btn-outline {
-        background: white;
-        color: #0F172A;
-        border: 1px solid #e2e8f0;
-    }
-
-    .btn-outline:hover {
-        background: #f8fafc;
-        border-color: #cbd5e1;
     }
 
     .card {
         background: white;
         border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
 
     .card-body {
-        padding: 32px;
+        padding: 30px;
     }
 
-    .form-grid {
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .form-section h3 {
+        font-size: 18px;
+        color: #0F172A;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-section h3:before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: #0073bd;
+        border-radius: 2px;
+    }
+
+    .form-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-    }
-
-    @media (max-width: 768px) {
-        .form-grid {
-            grid-template-columns: 1fr;
-        }
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
     }
 
     .form-group {
         display: flex;
         flex-direction: column;
-        gap: 8px;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
     }
 
     .form-group label {
         font-size: 14px;
-        font-weight: 600;
-        color: #334155;
+        font-weight: 500;
+        color: #475569;
+        margin-bottom: 8px;
     }
 
     .required {
         color: #ef4444;
+        margin-left: 2px;
     }
 
     .form-control {
         padding: 10px 14px;
         border: 1px solid #e2e8f0;
-        border-radius: 8px;
+        border-radius: 6px;
         font-size: 14px;
-        transition: all 0.2s;
-        width: 100%;
-        font-family: inherit;
+        transition: all 0.3s;
+        background: #f8fafc;
     }
 
     .form-control:focus {
         outline: none;
         border-color: #0073bd;
+        background: white;
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
@@ -234,33 +194,73 @@
         border-color: #ef4444;
     }
 
-    .form-control.is-invalid:focus {
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-    }
-
     .invalid-feedback {
-        font-size: 13px;
         color: #ef4444;
-        margin-top: 4px;
+        font-size: 12px;
+        margin-top: 5px;
     }
 
     .form-text {
         font-size: 12px;
         color: #64748b;
-        margin-top: 4px;
+        margin-top: 5px;
     }
 
     .form-actions {
         display: flex;
         gap: 12px;
-        justify-content: flex-end;
-        padding-top: 24px;
-        border-top: 1px solid #e2e8f0;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid #f1f5f9;
     }
 
-    textarea.form-control {
-        resize: vertical;
-        min-height: 100px;
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: #0073bd;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #005a94;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: #64748b;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #475569;
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
     }
 </style>
 @endsection

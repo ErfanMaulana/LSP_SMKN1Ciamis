@@ -109,7 +109,7 @@
                 <!-- Pagination -->
                 <div class="pagination-container">
                     <div class="pagination-info">
-                        Showing {{ $asesi->firstItem() }} to {{ $asesi->lastItem() }} of {{ $asesi->total() }} entries
+                        Menampilkan {{ $asesi->firstItem() }} sampai {{ $asesi->lastItem() }} dari {{ $asesi->total() }} entri
                     </div>
                     <div class="pagination">
                         @if($asesi->currentPage() > 1)

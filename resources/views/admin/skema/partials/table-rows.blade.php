@@ -38,7 +38,7 @@
                 <a href="{{ route('admin.skema.edit', $skema->id) }}" class="dropdown-item">
                     <i class="bi bi-pencil-square"></i> Ubah
                 </a>
-                <a href="{{ route('admin.skema.edit', $skema->id) }}" class="dropdown-item">
+                <a href="{{ route('admin.skema.show', $skema->id) }}" class="dropdown-item">
                     <i class="bi bi-eye"></i> Lihat Detail
                 </a>
                 <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;">

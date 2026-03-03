@@ -19,7 +19,7 @@
                 <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}" class="dropdown-item">
                     <i class="bi bi-pencil-square"></i> Ubah
                 </a>
-                <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}" class="dropdown-item">
+                <a href="{{ route('admin.jurusan.show', $item->ID_jurusan) }}" class="dropdown-item">
                     <i class="bi bi-eye"></i> Lihat Detail
                 </a>
                 <button type="button" class="dropdown-item danger"

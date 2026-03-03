@@ -46,7 +46,7 @@
                     <!-- Button -->
                     <a href="{{ route('front.kompetensi.detail', $item['slug']) }}" 
                        class="inline-block text-blue-600 font-semibold hover:text-blue-700 transition pt-2">
-                        View Details <i class="bi bi-arrow-right ml-1"></i>
+                        Lihat Detail <i class="bi bi-arrow-right ml-1"></i>
                     </a>
                 </div>
             </div>

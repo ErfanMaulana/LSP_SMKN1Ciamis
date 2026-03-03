@@ -120,6 +120,16 @@ class AsesiController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($nik)
+    {
+        $asesi = Asesi::with(['jurusan', 'skemas'])->findOrFail($nik);
+        
+        return view('admin.asesi.show', compact('asesi'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($nik)

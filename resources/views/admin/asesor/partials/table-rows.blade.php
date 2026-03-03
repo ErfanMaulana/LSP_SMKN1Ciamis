@@ -32,7 +32,7 @@
                 <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}" class="dropdown-item">
                     <i class="bi bi-pencil"></i> Ubah
                 </a>
-                <a href="#" class="dropdown-item">
+                <a href="{{ route('admin.asesor.show', $item->ID_asesor) }}" class="dropdown-item">
                     <i class="bi bi-eye"></i> Lihat Detail
                 </a>
                 <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin: 0;">

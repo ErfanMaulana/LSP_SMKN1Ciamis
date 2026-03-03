@@ -138,6 +138,29 @@ class SkemaController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        $skema = Skema::with(['jurusan', 'units.elemens.kriteria'])
+            ->withCount('units')
+            ->findOrFail($id);
+        
+        // Count total elemens and kriteria
+        $elemensCount = 0;
+        $kriteriaCount = 0;
+        
+        foreach ($skema->units as $unit) {
+            $elemensCount += $unit->elemens->count();
+            foreach ($unit->elemens as $elemen) {
+                $kriteriaCount += $elemen->kriteria->count();
+            }
+        }
+        
+        return view('admin.skema.show', compact('skema', 'elemensCount', 'kriteriaCount'));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit($id)

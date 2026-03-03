@@ -5,55 +5,64 @@
 
 @section('styles')
 <style>
-    .form-container { padding: 0; }
-
-    .form-header {
+    .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 24px;
-        flex-wrap: wrap;
-        gap: 16px;
+        margin-bottom: 25px;
     }
 
-    .form-header h2 {
+    .page-header h2 {
         font-size: 24px;
         color: #0F172A;
         font-weight: 700;
-        margin: 0 0 4px 0;
+        margin: 0;
     }
-
-    .subtitle { font-size: 14px; color: #64748b; margin: 0; }
 
     .btn {
         padding: 10px 20px;
         border: none;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        transition: all 0.2s;
+        transition: all 0.3s;
         text-decoration: none;
     }
 
-    .btn-primary { background: #0F172A; color: white; }
-    .btn-primary:hover { background: #1e293b; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
-    .btn-secondary { background: #e2e8f0; color: #475569; }
-    .btn-secondary:hover { background: #cbd5e1; }
-    .btn-outline { background: white; color: #0F172A; border: 1px solid #e2e8f0; }
-    .btn-outline:hover { background: #f8fafc; border-color: #cbd5e1; }
+    .btn-primary { 
+        background: #0073bd; 
+        color: white; 
+    }
+    
+    .btn-primary:hover { 
+        background: #005a94; 
+        transform: translateY(-1px); 
+        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.3); 
+    }
+    
+    .btn-secondary { 
+        background: #64748b; 
+        color: white; 
+    }
+    
+    .btn-secondary:hover { 
+        background: #475569; 
+    }
 
     .card {
         background: white;
         border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         margin-bottom: 20px;
     }
 
-    .card-body { padding: 28px; }
+    .card-body { 
+        padding: 30px; 
+    }
 
     .form-group {
         display: flex;
@@ -63,9 +72,9 @@
     }
 
     .form-group label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+        color: #475569;
     }
 
     .required { color: #ef4444; }
@@ -73,22 +82,36 @@
     .form-control {
         padding: 10px 14px;
         border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 13px;
-        transition: all 0.2s;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s;
         width: 100%;
         font-family: inherit;
+        background: #f8fafc;
     }
 
     .form-control:focus {
         outline: none;
         border-color: #0073bd;
+        background: white;
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
-    .form-control.is-invalid { border-color: #ef4444; }
-    .invalid-feedback { font-size: 12px; color: #ef4444; }
-    .form-text { font-size: 11px; color: #64748b; }
+    .form-control.is-invalid { 
+        border-color: #ef4444; 
+    }
+    
+    .invalid-feedback { 
+        font-size: 12px; 
+        color: #ef4444; 
+        margin-top: 5px;
+    }
+    
+    .form-text { 
+        font-size: 12px; 
+        color: #64748b; 
+        margin-top: 5px;
+    }
 
     .form-grid {
         display: grid;
@@ -116,25 +139,33 @@
     .form-actions {
         display: flex;
         gap: 12px;
-        justify-content: flex-end;
-        padding-top: 24px;
-        border-top: 1px solid #e2e8f0;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid #f1f5f9;
     }
 
     .section-label {
-        font-size: 16px;
-        font-weight: 700;
+        font-size: 18px;
+        font-weight: 600;
         color: #0F172A;
-        margin: 0 0 4px;
+        margin: 0 0 8px;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+    }
+
+    .section-label:before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: #0073bd;
+        border-radius: 2px;
     }
 
     .section-desc {
-        font-size: 12px;
+        font-size: 13px;
         color: #64748b;
-        margin: 0 0 16px;
+        margin: 0 0 20px;
     }
 
     .unit-filter {
@@ -363,25 +394,31 @@
     .divider { height: 1px; background: #e2e8f0; margin: 20px 0; }
 
     @media (max-width: 768px) {
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
         .form-grid, .form-grid-3 { grid-template-columns: 1fr; }
         .elemen-card { margin-left: 8px; }
         .kriteria-item { margin-left: 8px; }
         .add-btn.add-elemen { margin-left: 8px; }
+        
+        .card-body {
+            padding: 20px;
+        }
     }
 </style>
 @endsection
 
 @section('content')
-<div class="form-container">
-    <div class="form-header">
-        <div>
-            <h2>View Skema Sertifikasi</h2>
-            <p class="subtitle">Lihat dan kelola data skema beserta unit kompetensi, elemen, dan kriteria</p>
-        </div>
-        <a href="{{ route('admin.skema.index') }}" class="btn btn-outline">
-            <i class="bi bi-arrow-left"></i> Kembali
-        </a>
-    </div>
+<div class="page-header">
+    <h2>Edit Skema Sertifikasi</h2>
+    <a href="{{ route('admin.skema.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
 
     @if(session('error'))
         <div class="alert alert-error">
@@ -410,9 +447,7 @@
         <!-- Info Skema -->
         <div class="card">
             <div class="card-body">
-                <div class="section-label">
-                    <i class="bi bi-patch-check" style="color:#0073bd;"></i> Informasi Skema
-                </div>
+                <div class="section-label">Informasi Skema</div>
                 <p class="section-desc">Data dasar skema sertifikasi kompetensi.</p>
 
                 <div class="info-box">
@@ -465,9 +500,7 @@
         <!-- Unit Kompetensi -->
         <div class="card">
             <div class="card-body">
-                <div class="section-label">
-                    <i class="bi bi-layers" style="color:#10b981;"></i> Unit Kompetensi
-                </div>
+                <div class="section-label">Unit Kompetensi</div>
                 <p class="section-desc">Kelola unit kompetensi beserta elemen dan kriteria unjuk kerja (KUK).</p>
 
                 <!-- Filter Unit -->
@@ -623,12 +656,12 @@
         <div class="card">
             <div class="card-body">
                 <div class="form-actions" style="border-top: none; padding-top: 0;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Simpan Perubahan
+                    </button>
                     <a href="{{ route('admin.skema.index') }}" class="btn btn-secondary">
                         <i class="bi bi-x-circle"></i> Batal
                     </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> Update Skema
-                    </button>
                 </div>
             </div>
         </div>
