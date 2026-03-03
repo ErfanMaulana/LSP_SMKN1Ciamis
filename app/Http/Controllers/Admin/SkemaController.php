@@ -7,6 +7,7 @@ use App\Models\Skema;
 use App\Models\Unit;
 use App\Models\Elemen;
 use App\Models\Kriteria;
+use App\Models\Jurusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -61,7 +62,8 @@ class SkemaController extends Controller
      */
     public function create()
     {
-        return view('admin.skema.create');
+        $jurusans = Jurusan::orderBy('nama_jurusan')->get();
+        return view('admin.skema.create', compact('jurusans'));
     }
 
     /**
@@ -73,6 +75,7 @@ class SkemaController extends Controller
             'nama_skema' => 'required|string|max:255',
             'nomor_skema' => 'required|string|max:255|unique:skemas,nomor_skema',
             'jenis_skema' => 'required|in:KKNI,Okupasi,Klaster',
+            'jurusan_id' => 'nullable|exists:jurusan,ID_jurusan',
             'units' => 'required|array|min:1',
             'units.*.kode_unit' => 'required|string|max:255',
             'units.*.judul_unit' => 'required|string|max:255',
@@ -102,6 +105,7 @@ class SkemaController extends Controller
                 'nama_skema' => $validated['nama_skema'],
                 'nomor_skema' => $validated['nomor_skema'],
                 'jenis_skema' => $validated['jenis_skema'],
+                'jurusan_id' => $validated['jurusan_id'] ?? null,
             ]);
 
             foreach ($validated['units'] as $unitData) {
@@ -139,7 +143,8 @@ class SkemaController extends Controller
     public function edit($id)
     {
         $skema = Skema::with('units.elemens.kriteria')->findOrFail($id);
-        return view('admin.skema.edit', compact('skema'));
+        $jurusans = Jurusan::orderBy('nama_jurusan')->get();
+        return view('admin.skema.edit', compact('skema', 'jurusans'));
     }
 
     /**
@@ -153,6 +158,7 @@ class SkemaController extends Controller
             'nama_skema' => 'required|string|max:255',
             'nomor_skema' => 'required|string|max:255|unique:skemas,nomor_skema,' . $id,
             'jenis_skema' => 'required|in:KKNI,Okupasi,Klaster',
+            'jurusan_id' => 'nullable|exists:jurusan,ID_jurusan',
             'units' => 'required|array|min:1',
             'units.*.kode_unit' => 'required|string|max:255',
             'units.*.judul_unit' => 'required|string|max:255',
@@ -176,6 +182,7 @@ class SkemaController extends Controller
                 'nama_skema' => $validated['nama_skema'],
                 'nomor_skema' => $validated['nomor_skema'],
                 'jenis_skema' => $validated['jenis_skema'],
+                'jurusan_id' => $validated['jurusan_id'] ?? null,
             ]);
 
             // Delete old units (use each() for proper cascade via DB foreign keys)

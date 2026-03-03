@@ -134,36 +134,39 @@
         background: #dbeafe; color: #1d4ed8;
     }
     .asesi-badge.empty { background: #f1f5f9; color: #94a3b8; }
-    .action-cell { position: relative; text-align: center; }
-    .kebab-btn {
-        background: none; border: none; font-size: 18px; color: #6b7280;
-        cursor: pointer; padding: 4px; transition: color .2s;
-        display: inline-flex; align-items: center; justify-content: center;
+    .dropdown-action { position: relative; display: inline-block; text-align: center; }
+    .btn-dropdown {
+        background: none; border: none; padding: 8px; color: #64748b;
+        cursor: pointer; border-radius: 6px; transition: all 0.2s;
+        display: flex; align-items: center; justify-content: center;
     }
-    .kebab-btn:hover { color: #1e293b; }
+    .btn-dropdown:hover { background: #f1f5f9; color: #0F172A; }
+    .btn-dropdown i { font-size: 18px; }
     .dropdown-menu {
-        display: none; position: absolute; right: 0; top: 28px;
-        background: #fff; border-radius: 8px;
-        box-shadow: 0 10px 25px rgba(0,0,0,.1);
-        border: 1px solid #e5e7eb;
-        min-width: 180px; z-index: 100;
-        overflow: hidden;
+        position: absolute; right: 0; top: 100%; margin-top: 4px;
+        background: white; border: 1px solid #e2e8f0; border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 160px; z-index: 1000;
+        opacity: 0; visibility: hidden; transform: translateY(-10px);
+        transition: all 0.2s;
     }
-    .dropdown-menu.show { display: block; }
+    .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
     .dropdown-item {
         display: flex; align-items: center; gap: 8px;
-        padding: 10px 14px; font-size: 13px; color: #374151;
+        padding: 10px 16px; font-size: 14px; color: #475569;
         text-decoration: none; border: none; background: none; cursor: pointer;
-        transition: all .2s; width: 100%; text-align: left;
+        transition: all 0.2s; width: 100%; text-align: left;
     }
+    .dropdown-item:first-child { border-radius: 8px 8px 0 0; }
+    .dropdown-item:last-child { border-radius: 0 0 8px 8px; }
     .dropdown-item:hover {
-        background: #f3f4f6; color: #1e293b;
+        background: #f8fafc; color: #0F172A;
     }
-    .dropdown-item.delete {
-        color: #dc2626; border-top: 1px solid #e5e7eb;
+    .dropdown-item.danger {
+        color: #dc2626;
     }
-    .dropdown-item.delete:hover {
-        background: #fef2f2;
+    .dropdown-item.danger:hover {
+        background: #fef2f2; color: #dc2626;
     }
     .dropdown-item i { font-size: 15px; }
 
@@ -452,14 +455,22 @@ searchInput.addEventListener('input', function() {
 sortSelect.addEventListener('change', performSearch);
 orderSelect.addEventListener('change', performSearch);
 
-// Toggle menu, delete confirmation, etc.
-function toggleMenu(btn) {
-    const menu = btn.nextElementSibling;
-    const allMenus = document.querySelectorAll('.dropdown-menu');
-    allMenus.forEach(m => {
-        if (m !== menu) m.classList.remove('show');
+// Dropdown Toggle Function
+function toggleDropdown(event) {
+    event.stopPropagation();
+    const button = event.currentTarget;
+    const dropdown = button.nextElementSibling;
+    const allDropdowns = document.querySelectorAll('.dropdown-menu');
+    
+    // Close all other dropdowns
+    allDropdowns.forEach(menu => {
+        if (menu !== dropdown) {
+            menu.classList.remove('show');
+        }
     });
-    menu.classList.toggle('show');
+    
+    // Toggle current dropdown
+    dropdown.classList.toggle('show');
 }
 
 function confirmDelete(id, nama, asesiCount) {
@@ -486,9 +497,12 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
 });
 
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.action-cell')) {
-        closeMenus();
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.dropdown-action')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
     }
 });
 

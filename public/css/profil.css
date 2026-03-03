@@ -53,16 +53,17 @@
 /* ===================== RUANG LINGKUP ===================== */
 .rl-section { background: var(--gray-bg); padding: 4rem 0; }
 .section-subtitle { font-size: 1rem; color: var(--text-muted); text-align: center; margin-top: -.5rem; margin-bottom: 2.5rem; }
-.scope-card { background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,.06); border: 1px solid var(--border); height: 100%; transition: transform .2s, box-shadow .2s; }
+.rl-section .grid { grid-auto-rows: 1fr; }
+.scope-card { background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,.06); border: 1px solid var(--border); height: 100%; transition: transform .2s, box-shadow .2s; display: flex; flex-direction: column; text-align: center; }
 .scope-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(30,92,191,.13); }
-.scope-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: .9rem; }
+.scope-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: .9rem; margin-left: auto; margin-right: auto; }
 .ic-blue { background: #dbeafe; color: #0073bd; }
 .ic-green { background: #d1fae5; color: #059669; }
 .ic-orange { background: #ffedd5; color: #ea580c; }
 .ic-purple { background: #ede9fe; color: #7c3aed; }
 .scope-card h6 { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: .4rem; }
-.scope-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .8rem; }
-.skema-badge { background: var(--blue-light); color: var(--blue-accent); font-size: 0.8125rem; font-weight: 600; padding: .22rem .7rem; border-radius: 20px; }
+.scope-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .8rem; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.skema-badge { background: var(--blue-light); color: var(--blue-accent); font-size: 0.8125rem; font-weight: 600; padding: .22rem .7rem; border-radius: 20px; display: inline-block; margin-top: auto; }
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 768px) {

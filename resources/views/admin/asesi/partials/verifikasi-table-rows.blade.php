@@ -34,9 +34,16 @@
         @endif
     </td>
     <td style="text-align:center;">
-        <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" class="btn-sm btn-view">
-            <i class="bi bi-eye"></i> Review
-        </a>
+        <div class="dropdown-action">
+            <button class="btn-dropdown" onclick="toggleDropdown(event)">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <div class="dropdown-menu">
+                <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" class="dropdown-item">
+                    <i class="bi bi-eye"></i> Review
+                </a>
+            </div>
+        </div>
     </td>
 </tr>
 @empty

@@ -88,7 +88,7 @@
                             <th>BERAKHIR</th>
                             <th>STATUS</th>
                             <th>ASESOR</th>
-                            <th>ACTIONS</th>
+                            <th>AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -140,19 +140,22 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="action-menu">
-                                    <button class="action-btn" onclick="toggleMenu(this)">
-                                        <i class="bi bi-three-dots"></i>
+                                <div class="dropdown-action">
+                                    <button class="btn-dropdown" onclick="toggleDropdown(event)">
+                                        <i class="bi bi-three-dots-vertical"></i>
                                     </button>
-                                    <div class="action-dropdown">
-                                        <a href="{{ route('admin.mitra.edit', $item->no_mou) }}">
-                                            <i class="bi bi-pencil"></i> Edit
+                                    <div class="dropdown-menu">
+                                        <a href="{{ route('admin.mitra.edit', $item->no_mou) }}" class="dropdown-item">
+                                            <i class="bi bi-pencil-square"></i> Ubah
+                                        </a>
+                                        <a href="{{ route('admin.mitra.edit', $item->no_mou) }}" class="dropdown-item">
+                                            <i class="bi bi-eye"></i> Lihat Detail
                                         </a>
                                         <form action="{{ route('admin.mitra.destroy', $item->no_mou) }}" method="POST" style="margin: 0;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Yakin hapus mitra ini? Pastikan tidak ada asesor yang terkait.')">
-                                                <i class="bi bi-trash"></i> Delete
+                                            <button type="submit" class="dropdown-item danger" onclick="return confirm('Yakin hapus mitra ini? Pastikan tidak ada asesor yang terkait.')">
+                                                <i class="bi bi-trash"></i> Hapus
                                             </button>
                                         </form>
                                     </div>
@@ -184,9 +187,11 @@
 </div>
 
 <script>
-function toggleMenu(button) {
+function toggleDropdown(event) {
+    event.stopPropagation();
+    const button = event.currentTarget;
     const dropdown = button.nextElementSibling;
-    const allDropdowns = document.querySelectorAll('.action-dropdown');
+    const allDropdowns = document.querySelectorAll('.dropdown-menu');
     
     allDropdowns.forEach(d => {
         if (d !== dropdown) {
@@ -199,8 +204,8 @@ function toggleMenu(button) {
 
 // Close dropdowns when clicking outside
 document.addEventListener('click', function(e) {
-    if (!e.target.closest('.action-menu')) {
-        document.querySelectorAll('.action-dropdown').forEach(d => {
+    if (!e.target.closest('.dropdown-action')) {
+        document.querySelectorAll('.dropdown-menu').forEach(d => {
             d.classList.remove('show');
         });
     }
@@ -360,9 +365,7 @@ document.addEventListener('click', function(e) {
     }
 
     /* Table */
-    .table-container {
-        overflow-x: auto;
-    }
+    
 
     .data-table {
         width: 100%;
@@ -484,70 +487,104 @@ document.addEventListener('click', function(e) {
         color: #64748b;
     }
 
-    /* Action Menu */
-    .action-menu {
+    /* Dropdown Action Menu */
+    .dropdown-action {
         position: relative;
+        display: inline-block;
     }
 
-    .action-btn {
-        width: 32px;
-        height: 32px;
+    .btn-dropdown {
+        background: none;
         border: none;
-        background: transparent;
-        border-radius: 6px;
+        padding: 8px;
         cursor: pointer;
+        color: #64748b;
+        border-radius: 6px;
+        transition: all 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.2s;
     }
 
-    .action-btn:hover {
+    .btn-dropdown:hover {
         background: #f1f5f9;
+        color: #0F172A;
     }
 
-    .action-dropdown {
-        display: none;
+    .btn-dropdown i {
+        font-size: 18px;
+    }
+
+    .dropdown-menu {
         position: absolute;
         right: 0;
         top: 100%;
         margin-top: 4px;
         background: white;
+        border: 1px solid #e2e8f0;
         border-radius: 8px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         min-width: 160px;
-        z-index: 10;
-        overflow: hidden;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.2s;
     }
 
-    .action-dropdown.show {
-        display: block;
+    .dropdown-menu.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
     }
 
-    .action-dropdown a,
-    .action-dropdown button {
+    .dropdown-item,
+    .dropdown-menu a,
+    .dropdown-menu button {
         display: flex;
         align-items: center;
-        gap: 10px;
-        width: 100%;
+        gap: 8px;
         padding: 10px 16px;
+        color: #475569;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s;
         border: none;
         background: none;
+        width: 100%;
         text-align: left;
-        font-size: 14px;
-        color: #475569;
         cursor: pointer;
-        transition: all 0.2s;
-        text-decoration: none;
     }
 
-    .action-dropdown a:hover,
-    .action-dropdown button:hover {
+    .dropdown-item:first-child,
+    .dropdown-menu a:first-child {
+        border-radius: 8px 8px 0 0;
+    }
+
+    .dropdown-item:last-child,
+    .dropdown-menu button:last-child {
+        border-radius: 0 0 8px 8px;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-menu a:hover {
         background: #f8fafc;
         color: #0F172A;
     }
 
-    .action-dropdown button[type="submit"]:hover {
+    .dropdown-item i,
+    .dropdown-menu a i,
+    .dropdown-menu button i {
+        font-size: 16px;
+    }
+
+    .dropdown-item.danger,
+    .dropdown-menu button[type="submit"] {
+        color: #dc2626;
+    }
+
+    .dropdown-item.danger:hover,
+    .dropdown-menu button[type="submit"]:hover {
         background: #fef2f2;
         color: #dc2626;
     }

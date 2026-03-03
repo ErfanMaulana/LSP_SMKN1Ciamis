@@ -11,15 +11,18 @@
     </td>
     <td>{{ $item->created_at ? $item->created_at->format('d M Y') : '-' }}</td>
     <td>
-        <div class="action-cell">
-            <button type="button" class="kebab-btn" onclick="toggleMenu(this)">
+        <div class="dropdown-action">
+            <button type="button" class="btn-dropdown" onclick="toggleDropdown(event)">
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
             <div class="dropdown-menu">
                 <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}" class="dropdown-item">
-                    <i class="bi bi-pencil-square"></i> Edit
+                    <i class="bi bi-pencil-square"></i> Ubah
                 </a>
-                <button type="button" class="dropdown-item delete"
+                <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}" class="dropdown-item">
+                    <i class="bi bi-eye"></i> Lihat Detail
+                </a>
+                <button type="button" class="dropdown-item danger"
                     onclick="confirmDelete({{ $item->ID_jurusan }}, '{{ addslashes($item->nama_jurusan) }}', {{ $item->asesi_count }})">
                     <i class="bi bi-trash"></i> Hapus
                 </button>

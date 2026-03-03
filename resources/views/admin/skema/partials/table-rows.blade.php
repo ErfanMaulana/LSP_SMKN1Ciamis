@@ -30,18 +30,21 @@
         <span class="date-text">{{ $skema->created_at ? $skema->created_at->format('d M Y') : 'N/A' }}</span>
     </td>
     <td>
-        <div class="action-menu">
-            <button class="action-btn" onclick="toggleMenu(this)">
-                <i class="bi bi-three-dots"></i>
+        <div class="dropdown-action">
+            <button class="btn-dropdown" onclick="toggleDropdown(event)">
+                <i class="bi bi-three-dots-vertical"></i>
             </button>
-            <div class="action-dropdown">
-                <a href="{{ route('admin.skema.edit', $skema->id) }}">
-                    <i class="bi bi-eye"></i> View
+            <div class="dropdown-menu">
+                <a href="{{ route('admin.skema.edit', $skema->id) }}" class="dropdown-item">
+                    <i class="bi bi-pencil-square"></i> Ubah
+                </a>
+                <a href="{{ route('admin.skema.edit', $skema->id) }}" class="dropdown-item">
+                    <i class="bi bi-eye"></i> Lihat Detail
                 </a>
                 <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus skema ini?')">
+                    <button type="submit" class="dropdown-item danger" onclick="return confirm('Apakah Anda yakin ingin menghapus skema ini?')">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>

@@ -31,21 +31,21 @@
         <span class="date-text">{{ $item->created_at ? $item->created_at->format('M d, Y') : 'N/A' }}</span>
     </td>
     <td>
-        <div class="action-menu">
-            <button class="action-btn" onclick="toggleMenu(this)">
-                <i class="bi bi-three-dots"></i>
+        <div class="dropdown-action">
+            <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                <i class="bi bi-three-dots-vertical"></i>
             </button>
-            <div class="action-dropdown">
-                <a href="{{ route('admin.asesi.edit', $item->NIK) }}">
+            <div class="dropdown-menu">
+                <a href="{{ route('admin.asesi.edit', $item->NIK) }}" class="dropdown-item">
                     <i class="bi bi-pencil"></i> Ubah
                 </a>
-                <a href="#">
+                <a href="#" class="dropdown-item">
                     <i class="bi bi-eye"></i> Lihat Detail
                 </a>
                 <form action="{{ route('admin.asesi.destroy', $item->NIK) }}" method="POST" style="margin: 0;">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" onclick="return confirm('Apakah Anda yakin?')">
+                    <button type="submit" class="dropdown-item danger" onclick="return confirm('Apakah Anda yakin?')">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>

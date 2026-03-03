@@ -131,7 +131,7 @@
       <div class="scope-card">
         <div class="scope-icon {{ $jurusan['color'] }}"><i class="bi {{ $jurusan['icon'] }}"></i></div>
         <h6>{{ $jurusan['nama'] }}</h6>
-        <p>{{ Str::limit($jurusan['visi'] ?? 'Sertifikasi kompetensi untuk ' . $jurusan['nama'], 80) }}</p>
+        <p>{{ Str::limit($jurusan['visi'] ?? 'Sertifikasi kompetensi untuk Program Keahlian ' . $jurusan['nama'], 80) }}</p>
         <span class="skema-badge">{{ $jurusan['skema_count'] }} Skema</span>
       </div>
       @empty

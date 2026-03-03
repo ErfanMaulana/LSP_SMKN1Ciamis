@@ -93,18 +93,26 @@
                                 </form>
                             </td>
                             <td>
-                                <div class="action-btns">
-                                    <a href="{{ route('admin.profile-content.edit', $item->id) }}" class="btn-action edit" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('admin.profile-content.destroy', $item->id) }}" method="POST" 
-                                          onsubmit="return confirm('Hapus konten ini?')" style="display:inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-action delete" title="Hapus">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                <div class="dropdown-action">
+                                    <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a href="{{ route('admin.profile-content.edit', $item->id) }}" class="dropdown-item">
+                                            <i class="bi bi-pencil-square"></i> Ubah
+                                        </a>
+                                        <a href="{{ route('admin.profile-content.edit', $item->id) }}" class="dropdown-item">
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </a>
+                                        <form action="{{ route('admin.profile-content.destroy', $item->id) }}" method="POST" 
+                                              onsubmit="return confirm('Hapus konten ini?')" style="margin: 0;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item danger">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -161,18 +169,26 @@
                                 </form>
                             </td>
                             <td>
-                                <div class="action-btns">
-                                    <a href="{{ route('admin.profile-content.vision-mission.edit', $vision->id) }}" class="btn-action edit" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('admin.profile-content.vision-mission.destroy', $vision->id) }}" method="POST" 
-                                          onsubmit="return confirm('Hapus visi ini?')" style="display:inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-action delete" title="Hapus">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                <div class="dropdown-action">
+                                    <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a href="{{ route('admin.profile-content.vision-mission.edit', $vision->id) }}" class="dropdown-item">
+                                            <i class="bi bi-pencil-square"></i> Ubah
+                                        </a>
+                                        <a href="{{ route('admin.profile-content.vision-mission.edit', $vision->id) }}" class="dropdown-item">
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </a>
+                                        <form action="{{ route('admin.profile-content.vision-mission.destroy', $vision->id) }}" method="POST" 
+                                              onsubmit="return confirm('Hapus visi ini?')" style="margin: 0;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item danger">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -229,18 +245,26 @@
                                 </form>
                             </td>
                             <td>
-                                <div class="action-btns">
-                                    <a href="{{ route('admin.profile-content.vision-mission.edit', $mission->id) }}" class="btn-action edit" title="Edit">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('admin.profile-content.vision-mission.destroy', $mission->id) }}" method="POST" 
-                                          onsubmit="return confirm('Hapus misi ini?')" style="display:inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn-action delete" title="Hapus">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                <div class="dropdown-action">
+                                    <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a href="{{ route('admin.profile-content.vision-mission.edit', $mission->id) }}" class="dropdown-item">
+                                            <i class="bi bi-pencil-square"></i> Ubah
+                                        </a>
+                                        <a href="{{ route('admin.profile-content.vision-mission.edit', $mission->id) }}" class="dropdown-item">
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </a>
+                                        <form action="{{ route('admin.profile-content.vision-mission.destroy', $mission->id) }}" method="POST" 
+                                              onsubmit="return confirm('Hapus misi ini?')" style="margin: 0;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item danger">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -427,37 +451,32 @@
         background: #fecaca; 
     }
 
-    .action-btns { 
-        display: flex; 
-        gap: 8px; 
+    /* Dropdown Action */
+    .dropdown-action { position: relative; display: inline-block; }
+    .btn-dropdown {
+        background: none; border: none; padding: 8px; cursor: pointer; color: #64748b;
+        border-radius: 6px; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
     }
-    .btn-action {
-        width: 36px; 
-        height: 36px; 
-        border-radius: 8px; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
-        border: none; 
-        cursor: pointer; 
-        font-size: 16px; 
-        transition: all 0.2s; 
-        text-decoration: none;
+    .btn-dropdown:hover { background: #f1f5f9; color: #0F172A; }
+    .btn-dropdown i { font-size: 18px; }
+    .dropdown-menu {
+        position: absolute; right: 0; top: 100%; margin-top: 4px; background: white;
+        border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 160px; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(-10px);
+        transition: all 0.2s;
     }
-    .btn-action.edit { 
-        background: #eff6ff; 
-        color: #0073bd; 
+    .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+    .dropdown-item {
+        display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #475569;
+        text-decoration: none; font-size: 14px; transition: all 0.2s; border: none; background: none;
+        width: 100%; text-align: left; cursor: pointer;
     }
-    .btn-action.edit:hover { 
-        background: #dbeafe; 
-    }
-    .btn-action.delete { 
-        background: #fef2f2; 
-        color: #ef4444; 
-    }
-    .btn-action.delete:hover { 
-        background: #fee2e2; 
-    }
+    .dropdown-item:first-child { border-radius: 8px 8px 0 0; }
+    .dropdown-item:last-child { border-radius: 0 0 8px 8px; }
+    .dropdown-item:hover { background: #f8fafc; color: #0F172A; }
+    .dropdown-item i { font-size: 16px; }
+    .dropdown-item.danger { color: #dc2626; }
+    .dropdown-item.danger:hover { background: #fef2f2; color: #dc2626; }
 
     /* Empty state */
     .empty-state {
@@ -487,4 +506,31 @@
         .page-header { flex-direction: column; align-items: flex-start; }
     }
 </style>
+@endsection
+@section('scripts')
+<script>
+function toggleDropdown(button) {
+    const dropdown = button.nextElementSibling;
+    const allDropdowns = document.querySelectorAll('.dropdown-menu');
+    
+    // Close all other dropdowns
+    allDropdowns.forEach(menu => {
+        if (menu !== dropdown) {
+            menu.classList.remove('show');
+        }
+    });
+    
+    // Toggle current dropdown
+    dropdown.classList.toggle('show');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.dropdown-action')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+            menu.classList.remove('show');
+        });
+    }
+});
+</script>
 @endsection

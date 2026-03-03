@@ -363,13 +363,13 @@
                     <small class="form-text">Format: SKM/xxxx/xxxxx/x/xxxx/x</small>
                 </div>
 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="nama_skema">Nama Skema <span class="required">*</span></label>
-                        <input type="text" id="nama_skema" name="nama_skema" class="form-control" 
-                               value="{{ old('nama_skema') }}" placeholder="Contoh: Okupasi Pemrogram Junior" required>
-                    </div>
+                <div class="form-group">
+                    <label for="nama_skema">Nama Skema <span class="required">*</span></label>
+                    <input type="text" id="nama_skema" name="nama_skema" class="form-control" 
+                           value="{{ old('nama_skema') }}" placeholder="Contoh: Okupasi Pemrogram Junior" required>
+                </div>
 
+                <div class="form-grid">
                     <div class="form-group">
                         <label for="jenis_skema">Jenis Skema <span class="required">*</span></label>
                         <select id="jenis_skema" name="jenis_skema" class="form-control" required>
@@ -377,6 +377,18 @@
                             <option value="KKNI" {{ old('jenis_skema') == 'KKNI' ? 'selected' : '' }}>KKNI</option>
                             <option value="Okupasi" {{ old('jenis_skema') == 'Okupasi' ? 'selected' : '' }}>Okupasi</option>
                             <option value="Klaster" {{ old('jenis_skema') == 'Klaster' ? 'selected' : '' }}>Klaster</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jurusan_id">Jurusan</label>
+                        <select id="jurusan_id" name="jurusan_id" class="form-control">
+                            <option value="">-- Pilih Jurusan --</option>
+                            @foreach($jurusans as $jurusan)
+                                <option value="{{ $jurusan->ID_jurusan }}" {{ old('jurusan_id') == $jurusan->ID_jurusan ? 'selected' : '' }}>
+                                    {{ $jurusan->nama_jurusan }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
                 </div>

@@ -24,21 +24,21 @@
         </span>
     </td>
     <td>
-        <div class="action-menu">
-            <button class="action-btn" onclick="toggleMenu(this)">
-                <i class="bi bi-three-dots"></i>
+        <div class="dropdown-action">
+            <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                <i class="bi bi-three-dots-vertical"></i>
             </button>
-            <div class="action-dropdown">
-                <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}">
+            <div class="dropdown-menu">
+                <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}" class="dropdown-item">
                     <i class="bi bi-pencil"></i> Ubah
                 </a>
-                <a href="#">
+                <a href="#" class="dropdown-item">
                     <i class="bi bi-eye"></i> Lihat Detail
                 </a>
                 <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin: 0;">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" onclick="return confirm('Apakah Anda yakin?')">
+                    <button type="submit" class="dropdown-item danger" onclick="return confirm('Apakah Anda yakin?')">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>
