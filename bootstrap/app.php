@@ -25,7 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         }
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->alias([
+            'asesi.approved' => \App\Http\Middleware\EnsureAsesiApproved::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

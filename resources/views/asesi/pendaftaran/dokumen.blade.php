@@ -4,6 +4,7 @@
 @section('page-title', 'Upload Dokumen Pendukung')
 
 @section('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <style>
     .reg-card {
         background: white; border-radius: 12px; padding: 32px;
@@ -47,26 +48,61 @@
 
     /* Photo upload */
     .photo-upload { display: flex; flex-direction: column; align-items: center; margin-bottom: 28px; }
-    .photo-circle {
-        width: 120px; height: 120px; border-radius: 50%;
-        border: 4px dashed #cbd5e1; background: #f1f5f9;
+    .photo-box {
+        width: 120px; height: 160px; border-radius: 8px;
+        border: 3px dashed #cbd5e1; background: #f1f5f9;
         position: relative; overflow: hidden;
         display: flex; align-items: center; justify-content: center;
-        margin-bottom: 12px; cursor: pointer;
+        margin-bottom: 12px; cursor: pointer; transition: border-color .2s;
     }
-    .photo-circle:hover { border-color: #14532d; }
-    .photo-circle img {
+    .photo-box:hover { border-color: #14532d; }
+    .photo-box img {
         position: absolute; inset: 0;
-        width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+        width: 100%; height: 100%; object-fit: cover; border-radius: 5px;
     }
-    .photo-circle i { font-size: 36px; color: #94a3b8; }
+    .photo-box i { font-size: 36px; color: #94a3b8; }
     .photo-badge {
-        position: absolute; bottom: 0; right: 0;
-        width: 32px; height: 32px; border-radius: 50%;
+        position: absolute; bottom: 6px; right: 6px;
+        width: 28px; height: 28px; border-radius: 50%;
         background: #14532d; color: white;
         display: flex; align-items: center; justify-content: center;
-        font-size: 14px; cursor: pointer;
+        font-size: 13px;
     }
+    .photo-ratio-badge {
+        position: absolute; top: 6px; left: 6px;
+        background: rgba(0,0,0,0.5); color: #fff;
+        font-size: 10px; font-weight: 700; padding: 2px 6px;
+        border-radius: 4px; letter-spacing: .5px;
+    }
+    /* Edit overlay shown when photo is previewed */
+    .photo-edit-overlay {
+        display: none;
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.45);
+        align-items: center; justify-content: center;
+        flex-direction: column; gap: 6px;
+        border-radius: 5px;
+        transition: opacity .2s;
+    }
+    .photo-box:hover .photo-edit-overlay.visible { display: flex; }
+    .photo-edit-overlay span {
+        color: #fff; font-size: 11px; font-weight: 600;
+    }
+    .photo-edit-overlay i { color: white; font-size: 22px; }
+    /* Action buttons under photo */
+    .photo-actions {
+        display: none; gap: 8px; margin-top: 2px;
+    }
+    .photo-actions.visible { display: flex; }
+    .photo-action-btn {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 12px; font-size: 11px; font-weight: 600;
+        border-radius: 20px; cursor: pointer; transition: all .2s; border: 1px solid;
+    }
+    .photo-action-btn.edit { color: #0061a5; background: #eff6ff; border-color: #bfdbfe; }
+    .photo-action-btn.edit:hover { background: #dbeafe; }
+    .photo-action-btn.change { color: #64748b; background: #f8fafc; border-color: #e2e8f0; }
+    .photo-action-btn.change:hover { background: #f1f5f9; }
     .photo-label { font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 8px; }
     .photo-btn {
         display: inline-flex; align-items: center; gap: 6px;
@@ -76,6 +112,39 @@
     }
     .photo-btn:hover { background: #dcfce7; }
     .photo-name { font-size: 11px; color: #94a3b8; margin-top: 6px; }
+
+    /* Cropper Modal */
+    .cropper-modal-overlay {
+        display: none; position: fixed; inset: 0; z-index: 9999;
+        background: rgba(0,0,0,0.7); align-items: center; justify-content: center;
+    }
+    .cropper-modal-overlay.open { display: flex; }
+    .cropper-modal-box {
+        background: white; border-radius: 14px; overflow: hidden;
+        width: 90%; max-width: 540px; display: flex; flex-direction: column;
+        max-height: 90vh;
+    }
+    .cropper-modal-header {
+        padding: 16px 20px; border-bottom: 1px solid #e2e8f0;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .cropper-modal-header h4 { font-size: 15px; font-weight: 700; color: #1e293b; margin: 0; }
+    .cropper-modal-body { padding: 20px; overflow: auto; background: #1e293b; }
+    .cropper-modal-body img { max-width: 100%; display: block; }
+    .cropper-modal-footer {
+        padding: 14px 20px; border-top: 1px solid #e2e8f0;
+        display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+    }
+    .btn-crop-cancel {
+        padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+        border: 1px solid #e2e8f0; background: white; color: #64748b; cursor: pointer;
+    }
+    .btn-crop-apply {
+        padding: 8px 24px; border-radius: 8px; font-size: 13px; font-weight: 600;
+        background: #14532d; color: white; border: none; cursor: pointer;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .btn-crop-apply:hover { background: #166534; }
 
     /* Upload card */
     .upload-card {
@@ -179,17 +248,53 @@
 
         <!-- Pas Foto -->
         <div class="photo-upload">
-            <div class="photo-circle" onclick="document.getElementById('pas_foto').click()">
+            <div class="photo-box" id="photo-box" onclick="handlePhotoBoxClick()">
                 <i class="bi bi-person-fill" id="photo-placeholder"></i>
                 <img id="photo-preview" src="" alt="Preview" style="display:none;">
-                <div class="photo-badge"><i class="bi bi-camera-fill"></i></div>
+                <div class="photo-badge" id="photo-badge"><i class="bi bi-crop"></i></div>
+                <div class="photo-ratio-badge">3×4</div>
+                <div class="photo-edit-overlay" id="photo-edit-overlay">
+                    <i class="bi bi-crop"></i>
+                    <span>Edit Crop</span>
+                </div>
             </div>
             <span class="photo-label">Pas Foto <span style="color:#ef4444;">*</span></span>
-            <label class="photo-btn" for="pas_foto">
-                <i class="bi bi-paperclip"></i> Pilih File
+            {{-- shown when no photo --}}
+            <label class="photo-btn" id="photo-btn-pick" onclick="event.stopPropagation(); document.getElementById('pas_foto_raw').click()">
+                <i class="bi bi-paperclip"></i> Pilih & Crop Foto
             </label>
-            <input type="file" name="pas_foto" id="pas_foto" accept="image/*" class="hidden" style="display:none;" onchange="previewPhoto(this)">
-            <span class="photo-name" id="pas_foto_name"></span>
+            {{-- shown after crop --}}
+            <div class="photo-actions" id="photo-actions">
+                <button type="button" class="photo-action-btn edit" onclick="editCrop()">
+                    <i class="bi bi-crop"></i> Edit Crop
+                </button>
+                <button type="button" class="photo-action-btn change" onclick="document.getElementById('pas_foto_raw').click()">
+                    <i class="bi bi-arrow-repeat"></i> Ganti Foto
+                </button>
+            </div>
+            {{-- raw input triggers cropper, hidden cropped input is submitted --}}
+            <input type="file" id="pas_foto_raw" accept="image/*" style="display:none;" onchange="openCropper(this)">
+            <input type="file" name="pas_foto" id="pas_foto" style="display:none;" required>
+            <span class="photo-name" id="pas_foto_name">Belum ada foto dipilih</span>
+        </div>
+
+        <!-- Cropper Modal -->
+        <div class="cropper-modal-overlay" id="cropperModal">
+            <div class="cropper-modal-box">
+                <div class="cropper-modal-header">
+                    <h4><i class="bi bi-crop" style="margin-right:8px;"></i>Sesuaikan Pas Foto (3×4)</h4>
+                    <button type="button" class="btn-crop-cancel" onclick="closeCropper()" style="border:none;background:none;font-size:20px;line-height:1;padding:0;color:#94a3b8;cursor:pointer;">×</button>
+                </div>
+                <div class="cropper-modal-body">
+                    <img id="cropper-image" src="">
+                </div>
+                <div class="cropper-modal-footer">
+                    <button type="button" class="btn-crop-cancel" onclick="closeCropper()">Batal</button>
+                    <button type="button" class="btn-crop-apply" onclick="applyCrop()">
+                        <i class="bi bi-check-lg"></i> Pangkas & Gunakan
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- Transkrip Nilai -->
@@ -249,19 +354,89 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
-function previewPhoto(input) {
-    if (input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('photo-placeholder').style.display = 'none';
-            const img = document.getElementById('photo-preview');
-            img.src = e.target.result;
-            img.style.display = 'block';
-        };
-        reader.readAsDataURL(input.files[0]);
-        document.getElementById('pas_foto_name').textContent = input.files[0].name;
+let cropperInstance = null;
+let originalImageSrc = null; // stores the raw (pre-crop) image for re-editing
+
+function handlePhotoBoxClick() {
+    if (originalImageSrc) {
+        editCrop();
+    } else {
+        document.getElementById('pas_foto_raw').click();
     }
+}
+
+function openCropperWithSrc(src) {
+    const img = document.getElementById('cropper-image');
+    img.src = src;
+    document.getElementById('cropperModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    if (cropperInstance) { cropperInstance.destroy(); }
+    cropperInstance = new Cropper(img, {
+        aspectRatio: 3 / 4,
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 0.9,
+        responsive: true,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false,
+    });
+}
+
+function openCropper(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        originalImageSrc = e.target.result; // save original for re-crop
+        openCropperWithSrc(originalImageSrc);
+    };
+    reader.readAsDataURL(input.files[0]);
+    input.value = ''; // reset so same file can be re-selected
+}
+
+function editCrop() {
+    if (!originalImageSrc) return;
+    openCropperWithSrc(originalImageSrc);
+}
+
+function closeCropper() {
+    document.getElementById('cropperModal').classList.remove('open');
+    document.body.style.overflow = '';
+    if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+}
+
+function applyCrop() {
+    if (!cropperInstance) return;
+    const canvas = cropperInstance.getCroppedCanvas({ width: 300, height: 400 });
+    canvas.toBlob(function(blob) {
+        // Assign cropped blob to the actual file input
+        const file = new File([blob], 'pas_foto.jpg', { type: 'image/jpeg' });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById('pas_foto').files = dt.files;
+
+        // Update preview
+        document.getElementById('photo-placeholder').style.display = 'none';
+        document.getElementById('photo-badge').style.display = 'none';
+        const preview = document.getElementById('photo-preview');
+        preview.src = canvas.toDataURL('image/jpeg');
+        preview.style.display = 'block';
+        document.getElementById('pas_foto_name').textContent = 'pas_foto.jpg';
+        document.getElementById('pas_foto_name').style.color = '#1e293b';
+
+        // Show edit overlay and action buttons
+        document.getElementById('photo-edit-overlay').classList.add('visible');
+        document.getElementById('photo-btn-pick').style.display = 'none';
+        document.getElementById('photo-actions').classList.add('visible');
+
+        closeCropper();
+    }, 'image/jpeg', 0.92);
 }
 
 document.addEventListener('DOMContentLoaded', function() {

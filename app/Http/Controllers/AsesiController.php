@@ -287,17 +287,21 @@ class AsesiController extends Controller
     {
         $request->validate([
             'catatan_admin' => 'required|string',
+            'reject_type'   => 'required|in:rejected,banned',
         ], [
             'catatan_admin.required' => 'Catatan penolakan wajib diisi.',
+            'reject_type.required'   => 'Jenis penolakan wajib dipilih.',
+            'reject_type.in'         => 'Jenis penolakan tidak valid.',
         ]);
         
         $asesi = Asesi::findOrFail($nik);
+        $rejectType = $request->input('reject_type', 'rejected'); // 'rejected' or 'banned'
         
         $asesi->update([
-            'status' => 'rejected',
+            'status'        => $rejectType,
             'catatan_admin' => $request->input('catatan_admin'),
-            'verified_at' => now(),
-            'verified_by' => auth('admin')->id(),
+            'verified_at'   => now(),
+            'verified_by'   => auth('admin')->id(),
         ]);
         
         // Send rejection email if asesi has email
@@ -305,12 +309,15 @@ class AsesiController extends Controller
             try {
                 \Mail::to($asesi->email)->send(new \App\Mail\AsesiRejectedMail($asesi));
             } catch (\Exception $e) {
-                // Log error but don't fail the rejection
                 \Log::error('Failed to send rejection email: ' . $e->getMessage());
             }
         }
         
+        $message = $rejectType === 'banned'
+            ? 'Pendaftaran asesi ' . $asesi->nama . ' ditolak secara permanen.'
+            : 'Pendaftaran asesi ' . $asesi->nama . ' telah ditolak (dapat mendaftar ulang).';
+        
         return redirect()->route('admin.asesi.verifikasi')
-            ->with('success', 'Pendaftaran asesi ' . $asesi->nama . ' telah ditolak.');
+            ->with('success', $message);
     }
 }

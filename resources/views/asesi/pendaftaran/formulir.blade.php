@@ -111,7 +111,75 @@
 @endsection
 
 @section('content')
+
+{{-- Banned state: permanent block --}}
+@if($asesi && $asesi->status === 'banned')
+<div class="reg-card" style="max-width:640px;margin:0 auto;text-align:center;padding:56px 40px;">
+    <div style="
+        width:88px;height:88px;border-radius:50%;
+        background:linear-gradient(135deg,#1e293b,#374151);
+        display:flex;align-items:center;justify-content:center;
+        margin:0 auto 28px;
+        box-shadow:0 4px 16px rgba(0,0,0,.25);
+    ">
+        <i class="bi bi-slash-circle" style="font-size:38px;color:#f8fafc;"></i>
+    </div>
+    <h3 style="font-size:22px;font-weight:700;color:#1e293b;margin-bottom:12px;">Pendaftaran Ditolak Permanen</h3>
+    <p style="color:#64748b;margin-bottom:28px;line-height:1.7;font-size:14.5px;">
+        Akun Anda telah diblokir secara permanen oleh admin dan tidak dapat melakukan pendaftaran.
+        Silakan hubungi pihak LSP untuk informasi lebih lanjut.
+    </p>
+    @if($asesi->catatan_admin)
+    <div style="
+        background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;
+        padding:14px 18px;color:#991b1b;font-size:13.5px;
+        display:flex;align-items:flex-start;gap:10px;text-align:left;
+    ">
+        <i class="bi bi-info-circle" style="font-size:20px;flex-shrink:0;margin-top:1px;"></i>
+        <span><strong>Catatan admin:</strong> {{ $asesi->catatan_admin }}</span>
+    </div>
+    @endif
+</div>
+
+{{-- Pending state: show waiting card instead of form --}}
+@elseif($asesi && $asesi->status === 'pending')
+<div class="reg-card" style="max-width:640px;margin:0 auto;text-align:center;padding:56px 40px;">
+    <div style="
+        width:88px;height:88px;border-radius:50%;
+        background:linear-gradient(135deg,#fef9c3,#fde047);
+        display:flex;align-items:center;justify-content:center;
+        margin:0 auto 28px;
+        box-shadow:0 4px 16px rgba(234,179,8,.25);
+    ">
+        <i class="bi bi-hourglass-split" style="font-size:38px;color:#854d0e;"></i>
+    </div>
+    <h3 style="font-size:22px;font-weight:700;color:#1e293b;margin-bottom:12px;">Menunggu Verifikasi Admin</h3>
+    <p style="color:#64748b;margin-bottom:28px;line-height:1.7;font-size:14.5px;">
+        Formulir pendaftaran Anda telah berhasil dikirim dan sedang dalam proses<br>peninjauan oleh admin.
+        Cek email secara berkala untuk mendapat notifikasi setelah proses verifikasi selesai.
+    </p>
+    <div style="
+        background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;
+        padding:14px 18px;color:#166534;font-size:13.5px;
+        display:flex;align-items:center;gap:10px;text-align:left;
+    ">
+        <i class="bi bi-shield-check" style="font-size:20px;flex-shrink:0;"></i>
+        <span>Akses ke fitur lainnya akan dibuka otomatis setelah admin menyetujui pendaftaran Anda.</span>
+    </div>
+</div>
+@else
+{{-- Normal/Rejected: show the registration form --}}
 <div class="reg-card">
+    {{-- Rejection notice --}}
+    @if($asesi && $asesi->status === 'rejected')
+    <div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;padding:16px;margin-bottom:24px;color:#991b1b;font-size:14px;">
+        <strong><i class="bi bi-x-circle" style="margin-right:6px;"></i>Pendaftaran Ditolak</strong>
+        @if($asesi->catatan_admin)
+            <p style="margin:8px 0 0;">Catatan admin: <em>{{ $asesi->catatan_admin }}</em></p>
+        @endif
+        <p style="margin:8px 0 0;">Silakan perbaiki data di bawah ini dan kirim ulang formulir.</p>
+    </div>
+    @endif
     <!-- Step Indicator -->
     <div class="step-indicator">
         <div class="step">
@@ -159,8 +227,11 @@
         <div class="reg-grid">
             <div class="reg-group">
                 <label>Nama Lengkap <span class="required">*</span></label>
-                <input type="text" name="nama" value="{{ old('nama') }}" required
-                       class="reg-control {{ $errors->has('nama') ? 'is-invalid' : '' }}" placeholder="Masukkan nama lengkap">
+                <input type="text" name="nama" value="{{ old('nama', $account->nama ?? '') }}" required readonly
+                       class="reg-control {{ $errors->has('nama') ? 'is-invalid' : '' }}" style="background:#f1f5f9;color:#475569;cursor:default;" title="Nama diambil dari data akun dan tidak dapat diubah">
+                <!-- <small style="font-size:11px;color:#64748b;margin-top:4px;display:flex;align-items:center;gap:4px;">
+                    <i class="bi bi-lock-fill" style="color:#94a3b8;"></i> Diambil dari data akun, tidak dapat diubah
+                </small> -->
                 @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
@@ -178,23 +249,33 @@
 
             <div class="reg-group">
                 <label>Tanggal Lahir <span class="required">*</span></label>
-                <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir') }}" required
-                       class="reg-control {{ $errors->has('tanggal_lahir') ? 'is-invalid' : '' }}">
+                <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $nikData['tanggal_lahir'] ?? '') }}" required readonly
+                       class="reg-control {{ $errors->has('tanggal_lahir') ? 'is-invalid' : '' }}" style="background:#f1f5f9;color:#475569;cursor:default;">
+                <small style="font-size:11px;color:#16a34a;margin-top:4px;display:flex;align-items:center;gap:4px;">
+                    <i class="bi bi-magic"></i> Diisi otomatis dari NIK
+                </small>
                 @error('tanggal_lahir')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
             <div class="reg-group">
                 <label>Jenis Kelamin <span class="required">*</span></label>
                 <div class="radio-group">
-                    <label class="radio-label">
-                        <input type="radio" name="jenis_kelamin" value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'checked' : '' }} required>
+                    <label class="radio-label" style="background:#f1f5f9;cursor:default;opacity:0.85;">
+                        <input type="radio" name="jenis_kelamin" value="Laki-laki"
+                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Laki-laki' ? 'checked' : '' }} required disabled>
                         <span>Laki-laki</span>
                     </label>
-                    <label class="radio-label">
-                        <input type="radio" name="jenis_kelamin" value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'checked' : '' }}>
+                    <label class="radio-label" style="background:#f1f5f9;cursor:default;opacity:0.85;">
+                        <input type="radio" name="jenis_kelamin" value="Perempuan"
+                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Perempuan' ? 'checked' : '' }} disabled>
                         <span>Perempuan</span>
                     </label>
                 </div>
+                {{-- Hidden input so value still submits when disabled --}}
+                <input type="hidden" name="jenis_kelamin" value="{{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') }}">
+                <small style="font-size:11px;color:#16a34a;margin-top:4px;display:flex;align-items:center;gap:4px;">
+                    <i class="bi bi-magic"></i> Diisi otomatis dari NIK
+                </small>
             </div>
 
             <div class="reg-group">
@@ -322,4 +403,5 @@
         </div>
     </form>
 </div>
+@endif
 @endsection

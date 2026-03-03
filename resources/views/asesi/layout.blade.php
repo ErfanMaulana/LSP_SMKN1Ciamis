@@ -27,13 +27,15 @@
         /* Sidebar Styles */
         .sidebar {
             width: 260px;
-            background: #14532d;
-            color: #ecf0f1;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            color: #475569;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             z-index: 1000;
             transition: all 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.04);
         }
 
         .sidebar::-webkit-scrollbar {
@@ -41,17 +43,17 @@
         }
 
         .sidebar::-webkit-scrollbar-track {
-            background: #166534;
+            background: #f0fdf4;
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: #22c55e;
+            background: #bbf7d0;
             border-radius: 5px;
         }
 
         .sidebar-header {
-            padding: 25px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 22px 20px;
+            border-bottom: 1px solid #f1f5f9;
             text-align: center;
         }
 
@@ -64,39 +66,43 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 12px;
-            font-size: 28px;
+            font-size: 24px;
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(22,163,74,0.3);
         }
 
         .sidebar-header h4 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
-            color: #fff;
+            color: #1e293b;
             margin-bottom: 4px;
         }
 
         .sidebar-header p {
             font-size: 11px;
-            color: #86efac;
+            color: #16a34a;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            font-weight: 600;
         }
 
         .sidebar-header .noreg {
             font-size: 12px;
-            color: #bbf7d0;
+            color: #64748b;
             margin-top: 6px;
             font-family: monospace;
         }
 
         .sidebar-menu {
-            padding: 20px 0;
+            padding: 16px 0;
         }
 
         .menu-section-title {
             padding: 8px 20px;
-            font-size: 11px;
-            font-weight: 600;
-            color: #86efac;
+            font-size: 10px;
+            font-weight: 700;
+            color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 15px;
@@ -109,22 +115,24 @@
         .menu-item {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
-            color: #bbf7d0;
+            padding: 11px 20px;
+            color: #475569;
             text-decoration: none;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             position: relative;
+            border-left: 3px solid transparent;
         }
 
         .menu-item:hover {
-            background: rgba(34, 197, 94, 0.2);
-            color: #fff;
+            background: rgba(22,163,74,0.07);
+            color: #16a34a;
         }
 
         .menu-item.active {
-            background: rgba(34, 197, 94, 0.25);
-            color: #fff;
-            border-left: 3px solid #22c55e;
+            background: rgba(22,163,74,0.10);
+            color: #16a34a;
+            border-left: 3px solid #16a34a;
+            font-weight: 600;
         }
 
         .menu-item i {
@@ -143,7 +151,7 @@
             margin-left: auto;
             font-size: 10px;
             padding: 2px 8px;
-            background: #22c55e;
+            background: #16a34a;
             color: #fff;
             border-radius: 10px;
             font-weight: 600;
@@ -170,7 +178,7 @@
 
         .topbar h1 {
             font-size: 22px;
-            color: #14532d;
+            color: #1e293b;
             font-weight: 700;
         }
 
@@ -194,10 +202,107 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 15px;
+            box-shadow: 0 2px 8px rgba(22,163,74,0.35);
         }
+
+        /* Profile dropdown */
+        .profile-dropdown {
+            position: relative;
+        }
+        .profile-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 10px;
+            transition: background .15s;
+        }
+        .profile-toggle:hover { background: #f0fdf4; }
+        .profile-toggle .chevron {
+            font-size: 13px;
+            color: #94a3b8;
+            transition: transform .2s;
+        }
+        .profile-dropdown.open .chevron { transform: rotate(180deg); }
+        .profile-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            min-width: 220px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-6px);
+            transition: opacity .18s, transform .18s, visibility .18s;
+        }
+        .profile-dropdown.open .profile-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .profile-menu-header {
+            padding: 16px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .profile-avatar-lg {
+            width: 44px;
+            height: 44px;
+            background: #16a34a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+        .profile-menu-name { font-size: 14px; font-weight: 700; color: #1e293b; }
+        .profile-menu-role { font-size: 11px; color: #64748b; }
+        .profile-menu-body { padding: 8px 0; }
+        .profile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #374151;
+            text-decoration: none;
+            transition: background .12s;
+            cursor: pointer;
+        }
+        .profile-menu-item:hover { background: #f0fdf4; color: #16a34a; }
+        .profile-menu-item i { font-size: 16px; width: 18px; text-align: center; }
+        .profile-menu-divider { height: 1px; background: #f1f5f9; margin: 4px 0; }
+        .profile-logout {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #dc2626;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            transition: background .12s;
+            border-radius: 0 0 12px 12px;
+        }
+        .profile-logout:hover { background: #fef2f2; }
 
         .user-details {
             display: flex;
@@ -215,25 +320,7 @@
             color: #64748b;
         }
 
-        .btn-logout {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
 
-        .btn-logout:hover {
-            background: #b91c1c;
-            transform: translateY(-1px);
-        }
 
         .content-wrapper {
             padding: 30px;
@@ -268,13 +355,13 @@
         /* Mobile Toggle Button */
         .mobile-toggle {
             display: none;
-            background: #14532d;
+            background: #16a34a;
             color: white;
             border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         /* Responsive */
@@ -316,51 +403,86 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="user-icon">
-                    <i class="bi bi-person-fill"></i>
+                    {{ strtoupper(substr($asesi->nama ?? ($account->nama ?? 'A'), 0, 1)) }}
                 </div>
-                <h4>{{ $asesi->nama ?? ($account->NIK ?? 'Asesi') }}</h4>
-                <p>Asesi LSP</p>
-                <div class="noreg">{{ $asesi->no_reg ?? ($account->NIK ?? '-') }}</div>
+                <h4>Asesi</h4>
             </div>
 
-            <nav class="sidebar-menu">
-                <!-- Dashboard -->
-                <a href="{{ route('asesi.dashboard') }}" class="menu-item {{ request()->routeIs('asesi.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
-                </a>
+            @php
+                $isApproved = $asesi && $asesi->status === 'approved';
+                $isPending  = $asesi && $asesi->status === 'pending';
+                $isRejected = $asesi && $asesi->status === 'rejected';
+                $isBanned   = $asesi && $asesi->status === 'banned';
+            @endphp
 
-                <!-- PENDAFTARAN -->
+            {{-- Status banner for non-approved users --}}
+            @if(!$isApproved)
+                <div style="margin: 12px 14px 4px; border-radius: 10px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5;
+                    {{ $isPending ? 'background:#fef9c3;border:1px solid #fde047;color:#854d0e;' : ($isRejected ? 'background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;' : ($isBanned ? 'background:#1e293b;border:1px solid #334155;color:#e2e8f0;' : 'background:#eff6ff;border:1px solid #93c5fd;color:#1e40af;')) }}">
+                    @if($isPending)
+                        <i class="bi bi-hourglass-split" style="margin-right:5px;"></i>
+                        <strong>Menunggu Verifikasi</strong><br>
+                        Formulir Anda sedang ditinjau oleh admin.
+                    @elseif($isRejected)
+                        <i class="bi bi-x-circle" style="margin-right:5px;"></i>
+                        <strong>Pendaftaran Ditolak</strong><br>
+                        Silakan perbaiki dan kirim ulang formulir.
+                    @elseif($isBanned)
+                        <i class="bi bi-slash-circle" style="margin-right:5px;"></i>
+                        <strong>Ditolak Permanen</strong><br>
+                        Akun Anda diblokir. Hubungi pihak LSP.
+                    @else
+                        <i class="bi bi-info-circle" style="margin-right:5px;"></i>
+                        <strong>Belum Mendaftar</strong><br>
+                        Lengkapi formulir pendaftaran untuk mengakses fitur lainnya.
+                    @endif
+                </div>
+            @endif
+
+            <nav class="sidebar-menu">
+                @if($isApproved)
+                    <!-- Dashboard -->
+                    <a href="{{ route('asesi.dashboard') }}" class="menu-item {{ request()->routeIs('asesi.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                @endif
+
+                <!-- PENDAFTARAN (hidden for banned users) -->
+                @if(!$isBanned)
                 <a href="{{ route('asesi.pendaftaran.formulir') }}" class="menu-item {{ request()->routeIs('asesi.pendaftaran.*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-plus"></i>
                     <span>Pendaftaran</span>
                 </a>
+                @endif
 
-                <!-- ASESMEN Section -->
-                <div class="menu-section-title">ASESMEN</div>
+                @if($isApproved)
+                    <!-- ASESMEN Section -->
+                    <div class="menu-section-title">ASESMEN</div>
 
-                <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="menu-item {{ request()->routeIs('asesi.asesmen-mandiri.*') ? 'active' : '' }}">
-                    <i class="bi bi-clipboard-check"></i>
-                    <span>Asesmen Mandiri</span>
-                </a>
+                    <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="menu-item {{ request()->routeIs('asesi.asesmen-mandiri.*') ? 'active' : '' }}">
+                        <i class="bi bi-clipboard-check"></i>
+                        <span>Asesmen Mandiri</span>
+                    </a>
 
-                <a href="{{ route('asesi.jadwal.index') }}" class="menu-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
-                    <i class="bi bi-calendar-event-fill"></i>
-                    <span>Jadwal Ujikom</span>
-                </a>
+                    <a href="{{ route('asesi.jadwal.index') }}" class="menu-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-event-fill"></i>
+                        <span>Jadwal Ujikom</span>
+                    </a>
 
-                <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>Hasil Asesmen</span>
-                </a>
+                    <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Hasil Asesmen</span>
+                    </a>
 
-                <!-- PROFIL Section -->
-                <div class="menu-section-title">AKUN</div>
-                
-                <a href="{{ route('asesi.profil.edit') }}" class="menu-item {{ request()->routeIs('asesi.profil.*') && request('tab') !== 'password' ? 'active' : '' }}">
-                    <i class="bi bi-person-circle"></i>
-                    <span>Profil Saya</span>
-                </a>
+                    <!-- AKUN Section -->
+                    <div class="menu-section-title">AKUN</div>
+
+                    <a href="{{ route('asesi.profil.edit') }}" class="menu-item {{ request()->routeIs('asesi.profil.*') && request('tab') !== 'password' ? 'active' : '' }}">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Profil Saya</span>
+                    </a>
+                @endif
             </nav>
         </aside>
 
@@ -375,21 +497,44 @@
                 </div>
                 
                 <div class="topbar-right">
-                    <div class="user-info">
-                        <div class="user-avatar">
-                            {{ strtoupper(substr($asesi->nama ?? ($account->NIK ?? 'A'), 0, 1)) }}
-                        </div>
-                        <div class="user-details">
-                            <span class="user-name">{{ $asesi->nama ?? ($account->NIK ?? 'Asesi') }}</span>
-                            <span class="user-role">Asesi</span>
+                    <div class="profile-dropdown" id="asesiProfileDropdown">
+                        <button class="profile-toggle" onclick="toggleAsesiProfile(event)" type="button">
+                            <div class="user-avatar">
+                                {{ strtoupper(substr($asesi->nama ?? ($account->nama ?? 'A'), 0, 1)) }}
+                            </div>
+                            <div class="user-details">
+                                <span class="user-name">{{ $asesi->nama ?? ($account->nama ?? 'Asesi') }}</span>
+                                <span class="user-role">Asesi</span>
+                            </div>
+                            <i class="bi bi-chevron-down chevron"></i>
+                        </button>
+
+                        <div class="profile-menu" id="asesiProfileMenu">
+                            <div class="profile-menu-header">
+                                <div class="profile-avatar-lg">
+                                    {{ strtoupper(substr($asesi->nama ?? ($account->nama ?? 'A'), 0, 1)) }}
+                                </div>
+                                <div>
+                                    <div class="profile-menu-name">{{ $asesi->nama ?? ($account->nama ?? 'Asesi') }}</div>
+                                    <div class="profile-menu-role">Asesi LSP</div>
+                                </div>
+                            </div>
+                            <div class="profile-menu-body">
+                                @if($isApproved)
+                                    <a href="{{ route('asesi.profil.edit') }}" class="profile-menu-item">
+                                        <i class="bi bi-person-circle"></i> Profil Saya
+                                    </a>
+                                    <div class="profile-menu-divider"></div>
+                                @endif
+                                <form method="POST" action="{{ route('asesi.logout') }}">
+                                    @csrf
+                                    <button type="submit" class="profile-logout">
+                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                    <form method="POST" action="{{ route('asesi.logout') }}" style="display: inline;">
-                        @csrf
-                        <button type="submit" class="btn-logout">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
                 </div>
             </div>
 
@@ -408,6 +553,13 @@
                     </div>
                 @endif
 
+                @if(session('warning'))
+                    <div class="alert" style="background:#fef9c3;color:#854d0e;border:1px solid #fde047;">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>{{ session('warning') }}</span>
+                    </div>
+                @endif
+
                 @yield('content')
             </div>
         </main>
@@ -418,13 +570,24 @@
             document.getElementById('sidebar').classList.toggle('active');
         }
 
-        // Close sidebar when clicking outside on mobile
+        function toggleAsesiProfile(e) {
+            e.stopPropagation();
+            const dd = document.getElementById('asesiProfileDropdown');
+            dd.classList.toggle('open');
+        }
+
         document.addEventListener('click', function(event) {
+            // Close profile dropdown
+            const dd = document.getElementById('asesiProfileDropdown');
+            if (dd && !dd.contains(event.target)) {
+                dd.classList.remove('open');
+            }
+
+            // Close sidebar on mobile when clicking outside
             const sidebar = document.getElementById('sidebar');
             const toggle = document.querySelector('.mobile-toggle');
-            
             if (window.innerWidth <= 768) {
-                if (!sidebar.contains(event.target) && !toggle.contains(event.target)) {
+                if (!sidebar.contains(event.target) && toggle && !toggle.contains(event.target)) {
                     sidebar.classList.remove('active');
                 }
             }

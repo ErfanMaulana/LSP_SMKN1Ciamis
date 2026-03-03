@@ -93,6 +93,7 @@
     .badge-pending { background: #fef3c7; color: #92400e; }
     .badge-approved { background: #d1fae5; color: #065f46; }
     .badge-rejected { background: #fee2e2; color: #991b1b; }
+    .badge-banned { background: #1e293b; color: #f8fafc; }
 
     .section-card {
         background: #fff;
@@ -509,6 +510,8 @@
                         <span class="badge badge-pending">Menunggu Verifikasi</span>
                     @elseif($asesi->status === 'approved')
                         <span class="badge badge-approved">Disetujui</span>
+                    @elseif($asesi->status === 'banned')
+                        <span class="badge badge-banned">Ditolak Permanen</span>
                     @else
                         <span class="badge badge-rejected">Ditolak</span>
                     @endif
@@ -709,7 +712,7 @@
                 <i class="bi bi-info-circle" style="color:#0073bd;"></i> Informasi Verifikasi
             </div>
             <div class="section-body">
-                <div class="verified-info {{ $asesi->status === 'rejected' ? 'rejected-info' : '' }}">
+                <div class="verified-info {{ in_array($asesi->status, ['rejected','banned']) ? 'rejected-info' : '' }}">
                     <div class="verified-icon {{ $asesi->status }}">
                         <i class="bi {{ $asesi->status === 'approved' ? 'bi-check-lg' : 'bi-x-lg' }}"></i>
                     </div>
@@ -717,6 +720,8 @@
                         <h4>
                             @if($asesi->status === 'approved')
                                 Pendaftaran Disetujui
+                            @elseif($asesi->status === 'banned')
+                                Ditolak Permanen (Tidak Dapat Mendaftar Ulang)
                             @else
                                 Pendaftaran Ditolak
                             @endif
@@ -757,12 +762,30 @@
         <p>Apakah Anda yakin ingin <strong>menolak</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>? Email notifikasi akan dikirim ke <strong>{{ $asesi->email }}</strong>.</p>
         <form method="POST" action="{{ route('admin.asesi.reject', $asesi->NIK) }}" id="rejectForm" onsubmit="return validateReject()">
             @csrf
+            {{-- Reject type --}}
+            <label class="catatan-label" style="margin-bottom:8px;">Jenis Penolakan <span style="color:#ef4444;">*</span></label>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;">
+                    <input type="radio" name="reject_type" value="rejected" checked id="rt_rejected" onchange="updateRejectBtn()" style="margin-top:3px;accent-color:#ef4444;">
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:#1e293b;">Tolak Sementara</div>
+                        <div style="font-size:12px;color:#64748b;">Asesi dapat memperbaiki dan mendaftar ulang.</div>
+                    </div>
+                </label>
+                <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;">
+                    <input type="radio" name="reject_type" value="banned" id="rt_banned" onchange="updateRejectBtn()" style="margin-top:3px;accent-color:#1e293b;">
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:#991b1b;">Tolak Permanen <span style="font-size:11px;background:#fee2e2;color:#991b1b;padding:1px 6px;border-radius:4px;margin-left:4px;">Tidak bisa daftar lagi</span></div>
+                        <div style="font-size:12px;color:#64748b;">Asesi tidak dapat mendaftar ulang selamanya.</div>
+                    </div>
+                </label>
+            </div>
             <label class="catatan-label">Alasan Penolakan <span style="color:#ef4444;">*</span></label>
             <textarea name="catatan_admin" id="reject_catatan" class="catatan" placeholder="Tulis alasan penolakan di sini..." required></textarea>
             <div id="reject-error" class="error-text" style="display:none;margin-top:6px;">Alasan penolakan wajib diisi.</div>
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeModal('rejectModal')">Batal</button>
-                <button type="submit" class="btn-confirm-reject"><i class="bi bi-x-lg"></i> Ya, Tolak</button>
+                <button type="submit" class="btn-confirm-reject" id="btnConfirmReject"><i class="bi bi-x-lg"></i> Ya, Tolak</button>
             </div>
         </form>
     </div>
@@ -775,9 +798,23 @@
         document.getElementById('approveModal').classList.add('show');
     }
 
+    function updateRejectBtn() {
+        const isBanned = document.getElementById('rt_banned').checked;
+        const btn = document.getElementById('btnConfirmReject');
+        if (isBanned) {
+            btn.style.background = '#1e293b';
+            btn.innerHTML = '<i class="bi bi-slash-circle"></i> Ya, Tolak Permanen';
+        } else {
+            btn.style.background = '#ef4444';
+            btn.innerHTML = '<i class="bi bi-x-lg"></i> Ya, Tolak';
+        }
+    }
+
     function showRejectModal() {
         // Reset error state
         document.getElementById('reject-error').style.display = 'none';
+        document.getElementById('rt_rejected').checked = true;
+        updateRejectBtn();
         document.getElementById('reject_catatan').style.borderColor = '#d1d5db';
         document.getElementById('reject_catatan').value = '';
         document.getElementById('rejectModal').classList.add('show');

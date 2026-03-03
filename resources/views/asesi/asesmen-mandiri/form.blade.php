@@ -619,6 +619,7 @@
                                        name="jawaban[{{ $elemen->id }}][status]" 
                                        value="K" 
                                        {{ ($existingAnswer && $existingAnswer->status === 'K') ? 'checked' : '' }}
+                                       {{ ($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)) ? 'disabled' : '' }}
                                        required>
                                 <span>K (Kompeten)</span>
                             </label>
@@ -626,7 +627,8 @@
                                 <input type="radio" 
                                        name="jawaban[{{ $elemen->id }}][status]" 
                                        value="BK"
-                                       {{ ($existingAnswer && $existingAnswer->status === 'BK') ? 'checked' : '' }}>
+                                       {{ ($existingAnswer && $existingAnswer->status === 'BK') ? 'checked' : '' }}
+                                       {{ ($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)) ? 'disabled' : '' }}>
                                 <span>BK (Belum Kompeten)</span>
                             </label>
                         </div>
@@ -649,6 +651,7 @@
                     <label class="bukti-label">Bukti yang Relevan</label>
                     <textarea name="jawaban[{{ $elemen->id }}][bukti]" 
                               class="bukti-input" 
+                              {{ ($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)) ? 'readonly' : '' }}
                               placeholder="Tuliskan bukti yang menunjukkan bahwa Anda dapat melakukan kompetensi ini (contoh: sertifikat, pengalaman kerja, portofolio, dll)">{{ $existingAnswer->bukti ?? '' }}</textarea>
                 </div>
             </div>
@@ -667,6 +670,16 @@
             <span style="font-size:13px;color:#64748b;display:flex;align-items:center;gap:6px;">
                 <i class="bi bi-lock-fill" style="color:#94a3b8;"></i> Asesmen telah direkomendasikan asesor — tidak dapat diubah
             </span>
+            @elseif($pivot && $pivot->status === 'selesai')
+            <div style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d1fae5,#a7f3d0);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-hourglass-split" style="font-size:18px;color:#065f46;"></i>
+                </div>
+                <div>
+                    <div style="font-size:13.5px;font-weight:700;color:#065f46;">Asesmen Selesai — Menunggu Rekomendasi Asesor</div>
+                    <div style="font-size:12.5px;color:#166534;margin-top:2px;">Jawaban Anda telah tersimpan. Mohon tunggu hingga asesor memberikan rekomendasi untuk melanjutkan proses sertifikasi.</div>
+                </div>
+            </div>
             @else
             <button type="submit" name="save_draft" class="btn btn-save">
                 <i class="bi bi-save"></i> Simpan Sementara

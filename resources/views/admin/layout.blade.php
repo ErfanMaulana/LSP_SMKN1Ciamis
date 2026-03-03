@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard') - Admin LSP SMKN 1 Ciamis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * {
@@ -36,6 +38,7 @@
             transition: all 0.3s ease;
             border-right: 1px solid #e2e8f0;
             box-shadow: 2px 0 8px rgba(0, 97, 165, 0.06);
+            direction: rtl;
         }
 
         .sidebar::-webkit-scrollbar {
@@ -55,6 +58,7 @@
             padding: 16px 20px;
             border-bottom: 1px solid #e2e8f0;
             text-align: center;
+            direction: ltr;
         }
 
         .sidebar-header .admin-icon {
@@ -89,6 +93,7 @@
 
         .sidebar-menu {
             padding: 20px 0;
+            direction: ltr;
         }
 
         .menu-section {
@@ -466,46 +471,25 @@
     </style>
     @yield('styles')
 </head>
+
 <body>
     <div class="admin-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="">
-                    <img src="{{ asset('images/lsp.png') }}" alt="LSP Logo" style="width: 54px; height: 54px; object-fit: contain;">
+                    <img src="{{ asset('images/lsp.png') }}" alt="LSP Logo"
+                        style="width: 54px; height: 54px; object-fit: contain;">
                 </div>
             </div>
 
             <nav class="sidebar-menu">
                 <!-- Dashboard -->
-                <a href="{{ route('admin.dashboard') }}" class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('admin.dashboard') }}"
+                    class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
-
-                <!-- WEBSITE Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>WEBSITE</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.carousel.index') }}" class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
-                            <i class="bi bi-images"></i>
-                            <span>Banner Carousel</span>
-                        </a>
-
-                        <a href="{{ route('admin.socialmedia.index') }}" class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
-                            <i class="bi bi-share"></i>
-                            <span>Sosial Media</span>
-                        </a>
-
-                        <a href="{{ route('admin.profile-content.index') }}" class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
-                            <i class="bi bi-book-fill"></i>
-                            <span>Konten Profil</span>
-                        </a>
-                    </div>
-                </div>
 
                 <!-- ADMINISTRASI Section -->
                 <div class="menu-section">
@@ -514,41 +498,49 @@
                         <i class="bi bi-chevron-down"></i>
                     </div>
                     <div class="menu-section-items">
-                        <a href="{{ route('admin.asesor.index') }}" class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.asesor.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
                             <i class="bi bi-person-badge"></i>
                             <span>Asesor</span>
                         </a>
-                        
-                        <a href="{{ route('admin.asesi.index') }}" class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
+
+                        <a href="{{ route('admin.asesi.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
                             <i class="bi bi-people"></i>
                             <span>Asesi</span>
                         </a>
 
-                        <a href="{{ route('admin.asesi.verifikasi') }}" class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.asesi.verifikasi') }}"
+                            class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
                             <i class="bi bi-clipboard-check"></i>
                             <span>Verifikasi Asesi</span>
                             @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
                             @if($pendingCount > 0)
-                                <span style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
+                                <span
+                                    style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
                             @endif
                         </a>
 
-                        <a href="{{ route('admin.akun-asesi.index') }}" class="menu-item {{ request()->routeIs('admin.akun-asesi.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.akun-asesi.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.akun-asesi.*') ? 'active' : '' }}">
                             <i class="bi bi-person-vcard"></i>
                             <span>Akun Asesi (NIK)</span>
                         </a>
-                        
-                        <a href="{{ route('admin.jurusan.index') }}" class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
+
+                        <a href="{{ route('admin.jurusan.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
                             <i class="bi bi-mortarboard"></i>
                             <span>Jurusan</span>
                         </a>
 
-                        <a href="{{ route('admin.skema.index') }}" class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.skema.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
                             <i class="bi bi-patch-check"></i>
                             <span>Skema</span>
                         </a>
 
-                        <a href="{{ route('admin.mitra.index') }}" class="menu-item {{ request()->routeIs('admin.mitra.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.mitra.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.mitra.*') ? 'active' : '' }}">
                             <i class="bi bi-building"></i>
                             <span>Mitra</span>
                         </a>
@@ -562,14 +554,43 @@
                         <i class="bi bi-chevron-down"></i>
                     </div>
                     <div class="menu-section-items">
-                        <a href="{{ route('admin.tuk.index') }}" class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.tuk.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
                             <i class="bi bi-geo-alt"></i>
                             <span>Tempat Uji (TUK)</span>
                         </a>
 
-                        <a href="{{ route('admin.jadwal-ujikom.index') }}" class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.jadwal-ujikom.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
                             <i class="bi bi-calendar-event"></i>
                             <span>Jadwal Ujikom</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- WEBSITE Section -->
+                <div class="menu-section">
+                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                        <span>WEBSITE</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </div>
+                    <div class="menu-section-items">
+                        <a href="{{ route('admin.carousel.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
+                            <i class="bi bi-images"></i>
+                            <span>Banner Carousel</span>
+                        </a>
+
+                        <a href="{{ route('admin.socialmedia.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
+                            <i class="bi bi-share"></i>
+                            <span>Sosial Media</span>
+                        </a>
+
+                        <a href="{{ route('admin.profile-content.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
+                            <i class="bi bi-book-fill"></i>
+                            <span>Konten Profil</span>
                         </a>
                     </div>
                 </div>
@@ -609,7 +630,7 @@
                     </button>
                     <h1>@yield('page-title', 'Dashboard')</h1>
                 </div>
-                
+
                 <div class="topbar-right">
                     <div class="profile-dropdown" id="profileDropdown">
                         <button class="profile-toggle" onclick="toggleProfileMenu(event)">
@@ -644,7 +665,8 @@
                                     <span>Pengaturan</span>
                                 </a>
                                 <div class="profile-divider"></div>
-                                <form method="POST" action="{{ route('admin.logout') }}" style="width: 100%; margin: 0;">
+                                <form method="POST" action="{{ route('admin.logout') }}"
+                                    style="width: 100%; margin: 0;">
                                     @csrf
                                     <button type="submit" class="profile-logout">
                                         <i class="bi bi-box-arrow-right"></i>
@@ -692,7 +714,7 @@
             const items = element.nextElementSibling;
             element.classList.toggle('collapsed');
             items.classList.toggle('collapsed');
-            
+
             // Save state to localStorage
             const sectionName = element.querySelector('span').textContent;
             const isCollapsed = element.classList.contains('collapsed');
@@ -700,11 +722,11 @@
         }
 
         // Restore menu states on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.menu-section-title').forEach(function(title) {
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.menu-section-title').forEach(function (title) {
                 const sectionName = title.querySelector('span').textContent;
                 const state = localStorage.getItem('menu-' + sectionName);
-                
+
                 // By default, expand sections if no state is saved
                 if (state === 'collapsed') {
                     title.classList.add('collapsed');
@@ -714,20 +736,20 @@
         });
 
         // Close profile menu when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const profileDropdown = document.getElementById('profileDropdown');
             const profileMenu = document.getElementById('profileMenu');
-            
+
             if (profileDropdown && !profileDropdown.contains(event.target)) {
                 profileMenu.classList.remove('show');
             }
         });
 
         // Close sidebar when clicking outside on mobile
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const sidebar = document.getElementById('sidebar');
             const toggle = document.querySelector('.mobile-toggle');
-            
+
             if (window.innerWidth <= 768) {
                 if (!sidebar.contains(event.target) && !toggle.contains(event.target)) {
                     sidebar.classList.remove('active');
@@ -737,5 +759,6 @@
     </script>
     @yield('scripts')
 </body>
+
 </html>
 a

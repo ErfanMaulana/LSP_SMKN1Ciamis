@@ -378,7 +378,7 @@
             asesor: {
                 panelTitle:            'Portal Asesor',
                 panelDesc:             'Kelola penilaian dan hasil uji kompetensi peserta.',
-                identifierLabel:       'NOMOR REGISTRASI',
+                identifierLabel:       'No MET',
                 identifierIcon:        'bi-card-text',
                 identifierPlaceholder: 'Masukkan nomor registrasi',
             },
