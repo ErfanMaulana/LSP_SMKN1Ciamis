@@ -50,12 +50,15 @@ class AsesorController extends Controller
             'without_skema' => Asesor::whereNull('ID_skema')->count(),
         ];
         
+        // Get all skema for filter dropdown (distinct and ordered)
+        $skemaList = Skema::orderBy('nama_skema', 'asc')->get()->unique('nama_skema');
+        
         // If AJAX request, return only table rows
         if ($request->ajax()) {
             return view('admin.asesor.partials.table-rows', compact('asesor'))->render();
         }
         
-        return view('admin.asesor.index', compact('asesor', 'stats'));
+        return view('admin.asesor.index', compact('asesor', 'stats', 'skemaList'));
     }
 
     /**

@@ -7,9 +7,11 @@
             </div>
             <div class="user-details">
                 <div class="user-name">{{ $item->nama }}</div>
-                <div class="user-id">ID: {{ $item->ID_asesor }}</div>
             </div>
         </div>
+    </td>
+    <td>
+        <span class="reg-number">{{ $item->no_reg ?? '-' }}</span>
     </td>
     <td>
         @if($item->skema)
@@ -48,7 +50,7 @@
 </tr>
 @empty
 <tr>
-    <td colspan="4" class="text-center">
+    <td colspan="5" class="text-center">
         <div style="padding: 40px 20px;">
             <i class="bi bi-search" style="font-size: 48px; color: #cbd5e1; display: block; margin-bottom: 12px;"></i>
             <p style="color: #64748b; margin: 0;">Tidak ada data asesor ditemukan</p>

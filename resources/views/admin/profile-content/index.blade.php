@@ -99,11 +99,9 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <a href="{{ route('admin.profile-content.edit', $item->id) }}" class="dropdown-item">
-                                            <i class="bi bi-pencil-square"></i> Ubah
+                                            <i class="bi bi-pencil"></i> Ubah
                                         </a>
-                                        <a href="{{ route('admin.profile-content.edit', $item->id) }}" class="dropdown-item">
-                                            <i class="bi bi-eye"></i> Lihat Detail
-                                        </a>
+                                       
                                         <form action="{{ route('admin.profile-content.destroy', $item->id) }}" method="POST" 
                                               onsubmit="return confirm('Hapus konten ini?')" style="margin: 0;">
                                             @csrf
@@ -175,11 +173,9 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <a href="{{ route('admin.profile-content.vision-mission.edit', $vision->id) }}" class="dropdown-item">
-                                            <i class="bi bi-pencil-square"></i> Ubah
+                                            <i class="bi bi-pencil"></i> Ubah
                                         </a>
-                                        <a href="{{ route('admin.profile-content.vision-mission.edit', $vision->id) }}" class="dropdown-item">
-                                            <i class="bi bi-eye"></i> Lihat Detail
-                                        </a>
+                                       
                                         <form action="{{ route('admin.profile-content.vision-mission.destroy', $vision->id) }}" method="POST" 
                                               onsubmit="return confirm('Hapus visi ini?')" style="margin: 0;">
                                             @csrf
@@ -251,11 +247,9 @@
                                     </button>
                                     <div class="dropdown-menu">
                                         <a href="{{ route('admin.profile-content.vision-mission.edit', $mission->id) }}" class="dropdown-item">
-                                            <i class="bi bi-pencil-square"></i> Ubah
+                                            <i class="bi bi-pencil"></i> Ubah
                                         </a>
-                                        <a href="{{ route('admin.profile-content.vision-mission.edit', $mission->id) }}" class="dropdown-item">
-                                            <i class="bi bi-eye"></i> Lihat Detail
-                                        </a>
+                                       
                                         <form action="{{ route('admin.profile-content.vision-mission.destroy', $mission->id) }}" method="POST" 
                                               onsubmit="return confirm('Hapus misi ini?')" style="margin: 0;">
                                             @csrf
@@ -390,7 +384,7 @@
     }
 
     /* Table */
-    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: visible; }
     .table { width: 100%; border-collapse: collapse; }
     .table thead { background: #f8fafc; }
     .table th { padding: 14px 16px; font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; text-align: left; border-bottom: 2px solid #e2e8f0; }

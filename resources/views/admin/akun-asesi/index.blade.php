@@ -159,7 +159,7 @@
                                 <th>NAMA</th>
                                 <th>STATUS APL-01</th>
                                 <th>DIBUAT</th>
-                                <th style="width:140px;">AKSI</th>
+                                <th style="width:140px;text-align:center;">AKSI</th>
                             </tr>
                         </thead>
                         <tbody id="accountsTableBody">
@@ -733,6 +733,7 @@ if (statusFilter) {
         border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         margin-bottom: 20px;
+        overflow: visible;
     }
 
     .card-body {
@@ -808,7 +809,7 @@ if (statusFilter) {
 
     /* Table */
     .table-container {
-        overflow-x: auto;
+        /* overflow-x: auto; */
     }
 
     .data-table {
@@ -945,7 +946,8 @@ if (statusFilter) {
         display: none;
         position: absolute;
         top: 100%;
-        right: 0;
+        left: 50%;
+        transform: translateX(-50%);
         background: white;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,.12);
@@ -963,7 +965,7 @@ if (statusFilter) {
         border: none;
         color: #475569;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 500;
         transition: all .2s;
         display: flex;

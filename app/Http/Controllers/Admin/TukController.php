@@ -11,7 +11,7 @@ class TukController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $status = $request->get('status', 'all');
+        $status = $request->get('status');
 
         $query = Tuk::withCount('jadwalUjikom');
 
@@ -23,17 +23,22 @@ class TukController extends Controller
             });
         }
 
-        if ($status !== 'all') {
+        if ($status && $status !== 'all') {
             $query->where('status', $status);
         }
 
-        $tuks = $query->latest()->paginate(10)->withQueryString();
+        $tuks = $query->latest()->paginate(10);
 
         $stats = [
             'total'    => Tuk::count(),
             'aktif'    => Tuk::where('status', 'aktif')->count(),
             'nonaktif' => Tuk::where('status', 'nonaktif')->count(),
         ];
+
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.tuk.partials.table-rows', compact('tuks'))->render();
+        }
 
         return view('admin.tuk.index', compact('tuks', 'stats', 'search', 'status'));
     }

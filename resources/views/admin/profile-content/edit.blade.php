@@ -4,22 +4,21 @@
 @section('page-title', 'Edit Konten')
 
 @section('content')
-<div class="form-container">
-    <div class="form-header">
-        <div>
-            <h2>Edit Konten Profil</h2>
-            <p class="subtitle">Perbarui Sejarah, Visi, atau Misi halaman profil</p>
-        </div>
-        <a href="{{ route('admin.profile-content.index') }}" class="btn btn-outline">
-            <i class="bi bi-arrow-left"></i> Kembali
-        </a>
-    </div>
+<div class="page-header">
+    <h2>Edit Konten Profil</h2>
+    <a href="{{ route('admin.profile-content.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
 
-    <div class="card">
-        <div class="card-body">
-            <form action="{{ route('admin.profile-content.update', $content->id) }}" method="POST">
-                @csrf
-                @method('PUT')
+<div class="card">
+    <div class="card-body">
+        <form action="{{ route('admin.profile-content.update', $content->id) }}" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="form-section">
+                <h3>Informasi Konten</h3>
 
                 <div class="form-grid">
                     <div class="form-group">
@@ -119,16 +118,15 @@
                         </label>
                         <span class="toggle-label">Aktifkan konten ini</span>
                     </div>
-                </div>
-
-                <div class="form-actions">
-                    <a href="{{ route('admin.profile-content.index') }}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Batal
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> <span id="submitText">Perbarui Konten</span>
-                    </button>
-                </div>
+                </div>            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> <span id="submitText">Simpan</span>
+                </button>
+                <a href="{{ route('admin.profile-content.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Batal
+                </a>
+            </div>
             </form>
         </div>
     </div>
@@ -143,10 +141,10 @@
         const submitText = document.getElementById('submitText');
         
         const typeLabels = {
-            'sejarah': 'Perbarui Sejarah',
-            'milestone': 'Perbarui Milestone',
-            'visi': 'Perbarui Visi',
-            'misi': 'Perbarui Misi'
+            'sejarah': 'Simpan',
+            'milestone': 'Simpan',
+            'visi': 'Simpan',
+            'misi': 'Simpan'
         };
         
         if (this.value === 'sejarah' || this.value === 'milestone') {
@@ -166,7 +164,7 @@
             titleInput.setAttribute('required', 'required');
         }
         
-        submitText.textContent = typeLabels[this.value] || 'Perbarui Konten';
+        submitText.textContent = typeLabels[this.value] || 'Simpan';
     });
 
     // Show fields on page load if type is selected
@@ -176,38 +174,158 @@
 
 @section('styles')
 <style>
-    .form-container { padding: 0; }
-    .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
-    .form-header h2 { font-size: 22px; color: #1e293b; font-weight: 700; }
-    .form-header .subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
 
-    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
-    .card-body { padding: 30px; }
+    .page-header h2 {
+        font-size: 24px;
+        color: #0F172A;
+        font-weight: 700;
+        margin: 0;
+    }
 
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
-    .btn-primary { background: #0073bd; color: white; }
-    .btn-primary:hover { background: #003961; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
-    .btn-secondary { background: #e2e8f0; color: #475569; }
-    .btn-secondary:hover { background: #cbd5e1; }
-    .btn-outline { background: transparent; border: 2px solid #e2e8f0; color: #475569; }
-    .btn-outline:hover { border-color: #94a3b8; color: #334155; }
+    .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-body {
+        padding: 30px;
+    }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .form-section h3 {
+        font-size: 18px;
+        color: #0F172A;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-section h3:before {
+        content: '';
+        width: 4px;
+        height: 20px;
+        background: #0073bd;
+        border-radius: 2px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s;
+    }
+
+    .btn-primary {
+        background: #0073bd;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #005a94;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: #64748b;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #475569;
+    }
 
     .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
     .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 8px; }
-    .required { color: #ef4444; }
-    .text-optional { color: #94a3b8; font-size: 12px; font-weight: normal; }
-    .help-text { font-size: 12px; color: #94a3b8; margin-top: 6px; display: block; }
-    .help-text a { color: #0073bd; text-decoration: none; }
-    .help-text a:hover { text-decoration: underline; }
+    .form-group label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+    .required {
+        color: #ef4444;
+        margin-left: 2px;
+    }
+
+    .text-optional {
+        color: #64748b;
+        font-size: 12px;
+        font-weight: normal;
+    }
+
+    .help-text {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 5px;
+        display: block;
+    }
+
+    .help-text a {
+        color: #0073bd;
+        text-decoration: none;
+    }
+
+    .help-text a:hover {
+        text-decoration: underline;
+    }
 
     .form-control {
-        width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 8px;
-        font-size: 14px; color: #334155; transition: all 0.2s; font-family: inherit;
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #0F172A;
+        transition: all 0.3s;
+        font-family: inherit;
+        background: #f8fafc;
     }
-    .form-control:focus { outline: none; border-color: #0073bd; box-shadow: 0 0 0 3px rgba(0,115,189,0.1); }
-    .form-control.is-invalid { border-color: #ef4444; }
-    .invalid-feedback { color: #ef4444; font-size: 12px; margin-top: 6px; }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #0073bd;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .form-control.is-invalid {
+        border-color: #ef4444;
+    }
+
+    .invalid-feedback {
+        color: #ef4444;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    select.form-control {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+    }
 
     /* Toggle */
     .toggle-wrapper { display: flex; align-items: center; gap: 12px; padding-top: 8px; }
@@ -225,12 +343,26 @@
     .toggle input:checked + .toggle-slider::before { transform: translateX(22px); }
     .toggle-label { font-size: 14px; color: #475569; }
 
-    .form-actions { display: flex; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
-    .form-actions .btn { flex: 1; justify-content: center; }
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid #f1f5f9;
+    }
 
     @media (max-width: 768px) {
         .form-grid { grid-template-columns: 1fr; }
-        .form-header { flex-direction: column; align-items: flex-start; }
+        
+        .card-body {
+            padding: 20px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+        }
     }
 </style>
 @endsection

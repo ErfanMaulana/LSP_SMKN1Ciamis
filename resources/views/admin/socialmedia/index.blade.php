@@ -124,11 +124,9 @@
                             </button>
                             <div class="dropdown-menu">
                                 <a href="{{ route('admin.socialmedia.edit', $sm->id) }}" class="dropdown-item">
-                                    <i class="bi bi-pencil-square"></i> Ubah
+                                    <i class="bi bi-pencil"></i> Ubah
                                 </a>
-                                <a href="{{ route('admin.socialmedia.edit', $sm->id) }}" class="dropdown-item">
-                                    <i class="bi bi-eye"></i> Lihat Detail
-                                </a>
+                               
                                 <form action="{{ route('admin.socialmedia.destroy', $sm->id) }}" method="POST"
                                       onsubmit="return confirm('Hapus {{ $sm->name }}?')" style="margin: 0;">
                                     @csrf

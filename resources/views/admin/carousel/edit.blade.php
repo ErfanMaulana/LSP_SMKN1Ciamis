@@ -4,26 +4,25 @@
 @section('page-title', 'Edit Banner')
 
 @section('content')
-<div class="form-container">
-    <div class="form-header">
-        <div>
-            <h2>Edit Banner</h2>
-            <p class="subtitle">Perbarui gambar atau konten banner carousel</p>
-        </div>
-        <a href="{{ route('admin.carousel.index') }}" class="btn btn-outline">
-            <i class="bi bi-arrow-left"></i> Kembali
-        </a>
-    </div>
+<div class="page-header">
+    <h2>Edit Banner Carousel</h2>
+    <a href="{{ route('admin.carousel.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
+</div>
 
-    <div class="card">
-        <div class="card-body">
-            <form action="{{ route('admin.carousel.update', $carousel->id) }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
+<div class="card">
+    <div class="card-body">
+        <form action="{{ route('admin.carousel.update', $carousel->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+
+            <div class="form-section">
+                <h3>Informasi Banner</h3>
 
                 {{-- Preview Gambar --}}
                 <div class="form-group">
-                    <label>Gambar Banner</label>
+                    <label>Upload Banner <span class="required">*</span></label>
                     <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
                         <div class="upload-placeholder" id="uploadPlaceholder" style="{{ $carousel->image ? 'display:none' : '' }}">
                             <i class="bi bi-cloud-arrow-up"></i>
@@ -116,36 +115,45 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {{-- Info --}}
+            {{-- Info --}}
                 <div class="info-box">
                     <i class="bi bi-clock"></i>
                     <span>Dibuat: {{ $carousel->created_at->format('d M Y, H:i') }} | 
                           Terakhir diubah: {{ $carousel->updated_at->format('d M Y, H:i') }}</span>
                 </div>
 
-                <div class="form-actions">
-                    <a href="{{ route('admin.carousel.index') }}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Batal
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> Simpan Perubahan
-                    </button>
-                </div>
-            </form>
-        </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Simpan
+                </button>
+                <a href="{{ route('admin.carousel.index') }}" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Batal
+                </a>
+            </div>
+        </form>
     </div>
 </div>
 @endsection
 
 @section('styles')
 <style>
-    .form-container { padding: 0; }
-    .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
-    .form-header h2 { font-size: 22px; color: #1e293b; font-weight: 700; }
-    .form-header .subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
 
-    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .page-header h2 {
+        font-size: 24px;
+        color: #0F172A;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
     .card-body { padding: 30px; }
 
     .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
@@ -153,8 +161,19 @@
     .btn-primary:hover { background: #0073bd; }
     .btn-secondary { background: #e2e8f0; color: #475569; }
     .btn-secondary:hover { background: #cbd5e1; }
-    .btn-outline { background: transparent; border: 2px solid #e2e8f0; color: #475569; }
-    .btn-outline:hover { border-color: #94a3b8; color: #334155; }
+
+    .form-section {
+        margin-bottom: 30px;
+    }
+
+    .form-section h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 20px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #f1f5f9;
+    }
 
     .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
     .form-group { margin-bottom: 20px; }
@@ -202,11 +221,16 @@
         padding: 12px 16px; font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 8px; margin-top: 10px;
     }
 
-    .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9; }
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid #f1f5f9;
+    }
 
     @media (max-width: 768px) {
         .form-grid { grid-template-columns: 1fr; }
-        .form-header { flex-direction: column; align-items: flex-start; }
     }
 </style>
 @endsection

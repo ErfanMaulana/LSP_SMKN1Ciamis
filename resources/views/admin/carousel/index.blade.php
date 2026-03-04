@@ -102,11 +102,9 @@
                             </button>
                             <div class="dropdown-menu">
                                 <a href="{{ route('admin.carousel.edit', $carousel->id) }}" class="dropdown-item">
-                                    <i class="bi bi-pencil-square"></i> Ubah
+                                    <i class="bi bi-pencil"></i> Ubah
                                 </a>
-                                <a href="{{ route('admin.carousel.edit', $carousel->id) }}" class="dropdown-item">
-                                    <i class="bi bi-eye"></i> Lihat Detail
-                                </a>
+                               
                                 <form action="{{ route('admin.carousel.destroy', $carousel->id) }}" method="POST" 
                                       onsubmit="return confirm('Hapus banner ini?')" style="margin: 0;">
                                     @csrf

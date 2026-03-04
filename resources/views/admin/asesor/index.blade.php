@@ -55,13 +55,13 @@
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" id="searchInput" placeholder="Cari berdasarkan nama atau ID..." autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Cari berdasarkan nama atau no. registrasi..." autocomplete="off">
                 </div>
                 <div class="filter-controls">
                     <select class="filter-select" id="keahlianFilter">
-                        <option value="">Semua Keahlian</option>
-                        @foreach($stats as $key => $val)
-                            {{-- Will dynamically load skema options via backend --}}
+                        <option value="">Semua Skema</option>
+                        @foreach($skemaList as $skema)
+                            <option value="{{ $skema->id }}">{{ $skema->nama_skema }}</option>
                         @endforeach
                     </select>
                     <select class="filter-select" id="statusFilter">
@@ -78,6 +78,7 @@
                     <thead>
                         <tr>
                             <th>NAMA ASESOR</th>
+                            <th>NO. REGISTRASI</th>
                             <th>KEAHLIAN</th>
                             <th>STATUS</th>
                             <th>AKSI</th>
@@ -92,7 +93,7 @@
             <!-- Pagination -->
             <div class="pagination-container">
                 <div class="pagination-info">
-                    Menampilkan {{ $asesor->firstItem() ?? 0 }} sampai {{ $asesor->lastItem() ?? 0 }} dari {{ $asesor->total() }} entri
+                    Menampilkan {{ $asesor->firstItem() ?? 0 }} sampai {{ $asesor->lastItem() ?? 0 }} dari {{ $asesor->total() }} data
                 </div>
                 <div class="pagination">
                     @if($asesor->currentPage() > 1)
@@ -685,7 +686,7 @@
         // Show loading indicator
         tableBody.innerHTML = `
             <tr>
-                <td colspan="4" class="text-center">
+                <td colspan="5" class="text-center">
                     <div style="padding: 40px 20px;">
                         <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; margin-bottom: 12px;">
                             <span class="visually-hidden">Loading...</span>
@@ -712,7 +713,7 @@
             console.error('Error:', error);
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="text-center">
+                    <td colspan="5" class="text-center">
                         <div style="padding: 40px 20px;">
                             <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
                             <p style="color: #64748b; margin: 0;">Terjadi kesalahan saat memuat data</p>

@@ -16,7 +16,7 @@ class JadwalUjikomController extends Controller
     {
         $search = $request->get('search');
         $status = $request->get('status', 'all');
-        $bulan  = $request->get('bulan', now()->format('Y-m'));
+        $bulan  = $request->get('bulan');
 
         $query = JadwalUjikom::with(['tuk', 'skema']);
 
@@ -28,7 +28,7 @@ class JadwalUjikomController extends Controller
             });
         }
 
-        if ($status !== 'all') {
+        if ($status && $status !== 'all') {
             $query->where('status', $status);
         }
 
@@ -39,7 +39,7 @@ class JadwalUjikomController extends Controller
             });
         }
 
-        $jadwals = $query->orderBy('tanggal_mulai', 'desc')->orderBy('waktu_mulai')->paginate(10)->withQueryString();
+        $jadwals = $query->orderBy('tanggal_mulai', 'desc')->orderBy('waktu_mulai')->paginate(10);
 
         $stats = [
             'total'       => JadwalUjikom::count(),
@@ -52,6 +52,11 @@ class JadwalUjikomController extends Controller
                   ->orWhereRaw("DATE_FORMAT(tanggal_selesai, '%Y-%m') = ?", [$bulan]);
             })->count(),
         ];
+
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.jadwal-ujikom.partials.table-rows', compact('jadwals'))->render();
+        }
 
         return view('admin.jadwal-ujikom.index', compact('jadwals', 'stats', 'search', 'status', 'bulan'));
     }
