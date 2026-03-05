@@ -448,8 +448,8 @@
                     </a>
                 @endif
 
-                <!-- PENDAFTARAN (hidden for banned users) -->
-                @if(!$isBanned)
+                <!-- PENDAFTARAN (hidden for banned & approved users) -->
+                @if(!$isBanned && !$isApproved)
                 <a href="{{ route('asesi.pendaftaran.formulir') }}" class="menu-item {{ request()->routeIs('asesi.pendaftaran.*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-plus"></i>
                     <span>Pendaftaran</span>
@@ -542,7 +542,7 @@
                 @if(session('success'))
                     <div class="alert alert-success">
                         <i class="bi bi-check-circle-fill"></i>
-                        <span>{{ session('success') }}</span>
+                        <span>{!! session('success') !!}</span>
                     </div>
                 @endif
 

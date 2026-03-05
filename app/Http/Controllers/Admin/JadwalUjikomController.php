@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Asesi;
 use App\Models\JadwalUjikom;
+use App\Models\Kelompok;
 use App\Models\Tuk;
-use App\Models\Skema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -58,44 +57,56 @@ class JadwalUjikomController extends Controller
 
     public function create()
     {
-        $tuks   = Tuk::where('status', 'aktif')->orderBy('nama_tuk')->get();
-        $skemas = Skema::orderBy('nama_skema')->get();
-        return view('admin.jadwal-ujikom.create', compact('tuks', 'skemas'));
+        $tuks      = Tuk::where('status', 'aktif')->orderBy('nama_tuk')->get();
+        $kelompoks = Kelompok::with(['skema', 'asesors', 'asesis'])->orderBy('nama_kelompok')->get();
+
+        // Build JS-friendly data: kelompok_id => { skema, asesor_nama, asesi_count, asesi_niks }
+        $kelompokData = $kelompoks->mapWithKeys(fn($k) => [
+            $k->id => [
+                'nama_skema'  => $k->skema?->nama_skema ?? '-',
+                'asesor_nama' => $k->asesors->first()?->nama ?? '-',
+                'asesi_count' => $k->asesis->count(),
+                'asesi_niks'  => $k->asesis->pluck('NIK')->values(),
+            ]
+        ]);
+
+        return view('admin.jadwal-ujikom.create', compact('tuks', 'kelompoks', 'kelompokData'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'judul_jadwal'  => 'required|string|max:255',
-            'tuk_id'        => 'required|exists:tuk,id',
-            'skema_id'      => 'required|exists:skemas,id',
-            'tanggal_mulai' => 'required|date',
+            'judul_jadwal'    => 'required|string|max:255',
+            'kelompok_id'     => 'required|exists:kelompok,id',
+            'tuk_id'          => 'required|exists:tuk,id',
+            'tanggal_mulai'   => 'required|date',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
-            'waktu_mulai'   => 'required',
-            'waktu_selesai' => 'required|after:waktu_mulai',
-            'kuota'         => 'required|integer|min:1',
-            'status'        => 'required|in:dijadwalkan,berlangsung,selesai,dibatalkan',
-            'keterangan'    => 'nullable|string',
-            'peserta_niks'   => 'nullable|array',
-            'peserta_niks.*' => 'exists:asesi,NIK',
+            'waktu_mulai'     => 'required',
+            'waktu_selesai'   => 'required|after:waktu_mulai',
+            'status'          => 'required|in:dijadwalkan,berlangsung,selesai,dibatalkan',
+            'keterangan'      => 'nullable|string',
         ], [
-            'judul_jadwal.required'   => 'Judul jadwal wajib diisi.',
-            'tuk_id.required'         => 'TUK wajib dipilih.',
-            'tuk_id.exists'           => 'TUK tidak ditemukan.',
-            'skema_id.required'       => 'Skema wajib dipilih.',
-            'skema_id.exists'         => 'Skema tidak ditemukan.',
-            'tanggal_mulai.required'  => 'Tanggal mulai wajib diisi.',
-            'tanggal_selesai.required' => 'Tanggal selesai wajib diisi.',
+            'judul_jadwal.required'          => 'Judul jadwal wajib diisi.',
+            'kelompok_id.required'           => 'Kelompok wajib dipilih.',
+            'kelompok_id.exists'             => 'Kelompok tidak ditemukan.',
+            'tuk_id.required'                => 'TUK wajib dipilih.',
+            'tuk_id.exists'                  => 'TUK tidak ditemukan.',
+            'tanggal_mulai.required'         => 'Tanggal mulai wajib diisi.',
+            'tanggal_selesai.required'       => 'Tanggal selesai wajib diisi.',
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
-            'waktu_mulai.required'    => 'Waktu mulai wajib diisi.',
-            'waktu_selesai.required'  => 'Waktu selesai wajib diisi.',
-            'waktu_selesai.after'     => 'Waktu selesai harus setelah waktu mulai.',
-            'kuota.required'          => 'Kuota wajib diisi.',
-            'kuota.min'               => 'Kuota minimal 1.',
+            'waktu_mulai.required'           => 'Waktu mulai wajib diisi.',
+            'waktu_selesai.required'         => 'Waktu selesai wajib diisi.',
+            'waktu_selesai.after'            => 'Waktu selesai harus setelah waktu mulai.',
         ]);
 
-        $niks = $request->input('peserta_niks', []);
+        // Derive skema, asesor, and peserta from kelompok
+        $kelompok = Kelompok::with(['skema', 'asesors', 'asesis'])->findOrFail($validated['kelompok_id']);
+        $validated['skema_id']  = $kelompok->skema_id;
+        $validated['asesor_id'] = $kelompok->asesors->first()?->ID_asesor;
+
+        $niks = $kelompok->asesis->pluck('NIK')->toArray();
         $validated['peserta_terdaftar'] = count($niks);
+        $validated['kuota']             = max(1, count($niks));
 
         $jadwal = JadwalUjikom::create($validated);
 
@@ -140,11 +151,20 @@ class JadwalUjikomController extends Controller
 
     public function edit($id)
     {
-        $jadwal       = JadwalUjikom::with('peserta')->findOrFail($id);
-        $tuks         = Tuk::where('status', 'aktif')->orderBy('nama_tuk')->get();
-        $skemas       = Skema::orderBy('nama_skema')->get();
-        $selectedNiks = $jadwal->peserta->pluck('NIK')->toArray();
-        return view('admin.jadwal-ujikom.edit', compact('jadwal', 'tuks', 'skemas', 'selectedNiks'));
+        $jadwal    = JadwalUjikom::with(['peserta', 'kelompok'])->findOrFail($id);
+        $tuks      = Tuk::where('status', 'aktif')->orderBy('nama_tuk')->get();
+        $kelompoks = Kelompok::with(['skema', 'asesors', 'asesis'])->orderBy('nama_kelompok')->get();
+
+        $kelompokData = $kelompoks->mapWithKeys(fn($k) => [
+            $k->id => [
+                'nama_skema'  => $k->skema?->nama_skema ?? '-',
+                'asesor_nama' => $k->asesors->first()?->nama ?? '-',
+                'asesi_count' => $k->asesis->count(),
+                'asesi_niks'  => $k->asesis->pluck('NIK')->values(),
+            ]
+        ]);
+
+        return view('admin.jadwal-ujikom.edit', compact('jadwal', 'tuks', 'kelompoks', 'kelompokData'));
     }
 
     public function update(Request $request, $id)
@@ -152,33 +172,35 @@ class JadwalUjikomController extends Controller
         $jadwal = JadwalUjikom::findOrFail($id);
 
         $validated = $request->validate([
-            'judul_jadwal'      => 'required|string|max:255',
-            'tuk_id'            => 'required|exists:tuk,id',
-            'skema_id'          => 'required|exists:skemas,id',
-            'tanggal_mulai'     => 'required|date',
-            'tanggal_selesai'   => 'required|date|after_or_equal:tanggal_mulai',
-            'waktu_mulai'       => 'required',
-            'waktu_selesai'     => 'required|after:waktu_mulai',
-            'kuota'             => 'required|integer|min:1',
-            'status'            => 'required|in:dijadwalkan,berlangsung,selesai,dibatalkan',
-            'keterangan'        => 'nullable|string',
-            'peserta_niks'      => 'nullable|array',
-            'peserta_niks.*'    => 'exists:asesi,NIK',
+            'judul_jadwal'    => 'required|string|max:255',
+            'kelompok_id'     => 'required|exists:kelompok,id',
+            'tuk_id'          => 'required|exists:tuk,id',
+            'tanggal_mulai'   => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+            'waktu_mulai'     => 'required',
+            'waktu_selesai'   => 'required|after:waktu_mulai',
+            'status'          => 'required|in:dijadwalkan,berlangsung,selesai,dibatalkan',
+            'keterangan'      => 'nullable|string',
         ], [
-            'judul_jadwal.required'  => 'Judul jadwal wajib diisi.',
-            'tuk_id.required'        => 'TUK wajib dipilih.',
-            'skema_id.required'      => 'Skema wajib dipilih.',
-            'tanggal_mulai.required' => 'Tanggal mulai wajib diisi.',
-            'tanggal_selesai.required' => 'Tanggal selesai wajib diisi.',
+            'judul_jadwal.required'          => 'Judul jadwal wajib diisi.',
+            'kelompok_id.required'           => 'Kelompok wajib dipilih.',
+            'kelompok_id.exists'             => 'Kelompok tidak ditemukan.',
+            'tuk_id.required'                => 'TUK wajib dipilih.',
+            'tanggal_mulai.required'         => 'Tanggal mulai wajib diisi.',
+            'tanggal_selesai.required'       => 'Tanggal selesai wajib diisi.',
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
-            'waktu_mulai.required'   => 'Waktu mulai wajib diisi.',
-            'waktu_selesai.required' => 'Waktu selesai wajib diisi.',
-            'waktu_selesai.after'    => 'Waktu selesai harus setelah waktu mulai.',
-            'kuota.required'         => 'Kuota wajib diisi.',
-            'kuota.min'              => 'Kuota minimal 1.',
+            'waktu_mulai.required'           => 'Waktu mulai wajib diisi.',
+            'waktu_selesai.required'         => 'Waktu selesai wajib diisi.',
+            'waktu_selesai.after'            => 'Waktu selesai harus setelah waktu mulai.',
         ]);
 
-        $niks = $request->input('peserta_niks', []);
+        // Derive skema, asesor, and peserta from kelompok
+        $kelompok = Kelompok::with(['skema', 'asesors', 'asesis'])->findOrFail($validated['kelompok_id']);
+        $validated['skema_id']  = $kelompok->skema_id;
+        $validated['asesor_id'] = $kelompok->asesors->first()?->ID_asesor;
+
+        $niks = $kelompok->asesis->pluck('NIK')->toArray();
+        $validated['kuota']             = max(1, count($niks));
         $validated['peserta_terdaftar'] = count($niks);
 
         $jadwal->update($validated);

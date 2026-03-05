@@ -249,7 +249,7 @@
             @if(session('success'))
                 <div class="alert alert-success">
                     <i class="bi bi-check-circle-fill"></i>
-                    <span>{{ session('success') }}</span>
+                    <span>{!! session('success') !!}</span>
                 </div>
             @endif
             @if(session('error'))

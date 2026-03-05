@@ -527,6 +527,12 @@
                             <span>Akun Asesi (NIK)</span>
                         </a>
 
+                        <a href="{{ route('admin.kelompok.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
+                            <i class="bi bi-diagram-3-fill"></i>
+                            <span>Kelompok</span>
+                        </a>
+
                         <a href="{{ route('admin.jurusan.index') }}"
                             class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
                             <i class="bi bi-mortarboard"></i>
@@ -539,11 +545,6 @@
                             <span>Skema</span>
                         </a>
 
-                        <a href="{{ route('admin.mitra.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.mitra.*') ? 'active' : '' }}">
-                            <i class="bi bi-building"></i>
-                            <span>Mitra</span>
-                        </a>
                     </div>
                 </div>
 
@@ -683,7 +684,7 @@
                 @if(session('success'))
                     <div class="alert alert-success">
                         <i class="bi bi-check-circle-fill"></i>
-                        <span>{{ session('success') }}</span>
+                        <span>{!! session('success') !!}</span>
                     </div>
                 @endif
 

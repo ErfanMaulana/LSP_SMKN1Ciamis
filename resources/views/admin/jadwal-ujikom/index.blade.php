@@ -192,8 +192,7 @@
                 <th>Jadwal</th>
                 <th>Skema</th>
                 <th>TUK</th>
-                <th>Waktu</th>
-                <th>Kuota</th>
+                <th>Tanggal</th>
                 <th>Status</th>
                 <th>Aksi</th>
             </tr>
@@ -234,15 +233,16 @@
                     @endif
                 </td>
                 <td>
-                    <div style="font-size:13px;"><i class="bi bi-clock" style="color:#64748b;"></i> {{ substr($jadwal->waktu_mulai,0,5) }} – {{ substr($jadwal->waktu_selesai,0,5) }}</div>
-                </td>
-                <td>
-                    @php $pct = $jadwal->kuota > 0 ? min(100, round($jadwal->peserta_terdaftar / $jadwal->kuota * 100)) : 0; @endphp
-                    <div style="font-size:13px;font-weight:600;">{{ $jadwal->peserta_terdaftar }} / {{ $jadwal->kuota }}</div>
-                    <div class="kuota-bar">
-                        <div class="kuota-fill" style="width:{{ $pct }}%;background:{{ $pct >= 100 ? '#ef4444' : ($pct >= 80 ? '#f59e0b' : '#0061a5') }};"></div>
-                    </div>
-                    <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Sisa: {{ $jadwal->sisa_kuota }}</div>
+                    @if($jadwal->tanggal_mulai && $jadwal->tanggal_selesai)
+                        @if($jadwal->tanggal_mulai->eq($jadwal->tanggal_selesai))
+                            <div style="font-size:13px;font-weight:500;"><i class="bi bi-calendar3" style="color:#0061a5;"></i> {{ $jadwal->tanggal_mulai->translatedFormat('d M Y') }}</div>
+                        @else
+                            <div style="font-size:13px;font-weight:500;"><i class="bi bi-calendar3" style="color:#0061a5;"></i> {{ $jadwal->tanggal_mulai->translatedFormat('d M Y') }}</div>
+                            <div style="font-size:12px;color:#64748b;">s/d {{ $jadwal->tanggal_selesai->translatedFormat('d M Y') }}</div>
+                        @endif
+                    @else
+                        <span style="color:#94a3b8;">—</span>
+                    @endif
                 </td>
                 <td>
                     <span class="badge {{ $jadwal->status }}">

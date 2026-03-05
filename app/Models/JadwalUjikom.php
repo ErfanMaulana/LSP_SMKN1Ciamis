@@ -11,6 +11,8 @@ class JadwalUjikom extends Model
     protected $fillable = [
         'tuk_id',
         'skema_id',
+        'asesor_id',
+        'kelompok_id',
         'judul_jadwal',
         'tanggal_mulai',
         'tanggal_selesai',
@@ -37,6 +39,16 @@ class JadwalUjikom extends Model
     public function skema()
     {
         return $this->belongsTo(Skema::class, 'skema_id');
+    }
+
+    public function asesor()
+    {
+        return $this->belongsTo(\App\Models\Asesor::class, 'asesor_id', 'ID_asesor');
+    }
+
+    public function kelompok()
+    {
+        return $this->belongsTo(\App\Models\Kelompok::class, 'kelompok_id');
     }
 
     public function peserta()

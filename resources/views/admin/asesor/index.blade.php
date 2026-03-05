@@ -30,11 +30,11 @@
 
         <div class="stat-card">
             <div class="stat-icon blue">
-                <i class="bi bi-building"></i>
+                <i class="bi bi-person-check"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-label">ASESOR BERMITRA</div>
-                <div class="stat-value">{{ $stats['with_mitra'] }}</div>
+                <div class="stat-label">PUNYA AKUN</div>
+                <div class="stat-value">{{ $stats['with_account'] }}</div>
             </div>
         </div>
 

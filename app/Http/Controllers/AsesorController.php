@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Asesor;
 use App\Models\Account;
-use App\Models\Mitra;
 use App\Models\Skema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,16 +15,15 @@ class AsesorController extends Controller
      */
     public function index()
     {
-        $asesor = Asesor::with('mitra')->paginate(10);
-        
-        // Dynamic statistics
+        $asesor = Asesor::with('skemas')->paginate(10);
+
         $stats = [
-            'total' => Asesor::count(),
-            'with_mitra' => Asesor::whereNotNull('no_mou')->count(),
-            'with_skema' => Asesor::whereNotNull('ID_skema')->count(),
-            'without_skema' => Asesor::whereNull('ID_skema')->count(),
+            'total'           => Asesor::count(),
+            'with_skema'      => Asesor::whereHas('skemas')->count(),
+            'without_skema'   => Asesor::whereDoesntHave('skemas')->count(),
+            'with_account'    => Asesor::whereNotNull('no_met')->count(),
         ];
-        
+
         return view('admin.asesor.index', compact('asesor', 'stats'));
     }
 
@@ -34,9 +32,8 @@ class AsesorController extends Controller
      */
     public function create()
     {
-        $mitra = Mitra::all();
-        $skema = Skema::all();
-        return view('admin.asesor.create', compact('mitra', 'skema'));
+        $skema = Skema::orderBy('nama_skema')->get();
+        return view('admin.asesor.create', compact('skema'));
     }
 
     /**
@@ -45,20 +42,28 @@ class AsesorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama'    => 'required|string|max:255',
-            'ID_skema' => 'nullable|integer',
-            'no_mou'  => 'nullable|exists:mitra,no_mou',
-            'no_reg'  => 'nullable|string|max:50|unique:asesor,no_reg|unique:accounts,id',
+            'nama'      => 'required|string|max:255',
+            'skema_ids' => 'nullable|array',
+            'skema_ids.*' => 'exists:skemas,id',
+            'no_met'    => 'nullable|string|max:50|unique:asesor,no_met|unique:accounts,id',
         ]);
 
-        $asesor = Asesor::create($validated);
+        $asesor = Asesor::create([
+            'nama'   => $validated['nama'],
+            'no_met' => $validated['no_met'] ?? null,
+        ]);
 
-        // Auto-create account if no_reg provided
-        if (!empty($validated['no_reg'])) {
+        // Sync skemas
+        if (!empty($validated['skema_ids'])) {
+            $asesor->skemas()->sync($validated['skema_ids']);
+        }
+
+        // Auto-create account if no_met provided
+        if (!empty($validated['no_met'])) {
             Account::create([
-                'id'  => $validated['no_reg'],
-                'password' => Hash::make($validated['no_reg']),
-                'role'    => 'asesor',
+                'id'       => $validated['no_met'],
+                'password' => Hash::make($validated['no_met']),
+                'role'     => 'asesor',
             ]);
         }
 
@@ -70,10 +75,10 @@ class AsesorController extends Controller
      */
     public function edit($ID_asesor)
     {
-        $asesor = Asesor::findOrFail($ID_asesor);
-        $mitra = Mitra::all();
-        $skema = Skema::all();
-        return view('admin.asesor.edit', compact('asesor', 'mitra', 'skema'));
+        $asesor = Asesor::with('skemas')->findOrFail($ID_asesor);
+        $skema  = Skema::orderBy('nama_skema')->get();
+        $selectedSkemaIds = $asesor->skemas->pluck('id')->toArray();
+        return view('admin.asesor.edit', compact('asesor', 'skema', 'selectedSkemaIds'));
     }
 
     /**
@@ -84,32 +89,35 @@ class AsesorController extends Controller
         $asesor = Asesor::findOrFail($ID_asesor);
 
         $validated = $request->validate([
-            'nama'    => 'required|string|max:255',
-            'ID_skema' => 'nullable|integer',
-            'no_mou'  => 'nullable|exists:mitra,no_mou',
-            'no_reg'  => 'nullable|string|max:50|unique:asesor,no_reg,' . $asesor->ID_asesor . ',ID_asesor|unique:accounts,id,' . ($asesor->no_reg ? Account::where('id', $asesor->no_reg)->value('id') : 'NULL'),
+            'nama'        => 'required|string|max:255',
+            'skema_ids'   => 'nullable|array',
+            'skema_ids.*' => 'exists:skemas,id',
+            'no_met'      => 'nullable|string|max:50|unique:asesor,no_met,' . $asesor->ID_asesor . ',ID_asesor|unique:accounts,id,' . ($asesor->no_met ? $asesor->no_met : 'NULL'),
         ]);
 
-        $oldNoReg = $asesor->no_reg;
-        $newNoReg = $validated['no_reg'] ?? null;
+        $oldNoMet = $asesor->no_met;
+        $newNoMet = $validated['no_met'] ?? null;
 
-        $asesor->update($validated);
+        $asesor->update([
+            'nama'   => $validated['nama'],
+            'no_met' => $newNoMet,
+        ]);
+
+        // Sync skemas
+        $asesor->skemas()->sync($validated['skema_ids'] ?? []);
 
         // Sync account
-        if ($newNoReg && $newNoReg !== $oldNoReg) {
-            // Remove old account if exists
-            if ($oldNoReg) {
-                Account::where('id', $oldNoReg)->where('role', 'asesor')->delete();
+        if ($newNoMet && $newNoMet !== $oldNoMet) {
+            if ($oldNoMet) {
+                Account::where('id', $oldNoMet)->where('role', 'asesor')->delete();
             }
-            // Create new account
             Account::create([
-                'id'  => $newNoReg,
-                'password' => Hash::make($newNoReg),
-                'role'    => 'asesor',
+                'id'       => $newNoMet,
+                'password' => Hash::make($newNoMet),
+                'role'     => 'asesor',
             ]);
-        } elseif (!$newNoReg && $oldNoReg) {
-            // no_reg cleared — remove account
-            Account::where('id', $oldNoReg)->where('role', 'asesor')->delete();
+        } elseif (!$newNoMet && $oldNoMet) {
+            Account::where('id', $oldNoMet)->where('role', 'asesor')->delete();
         }
 
         return redirect()->route('admin.asesor.index')->with('success', 'Data Asesor berhasil diupdate!');
