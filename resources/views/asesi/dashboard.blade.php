@@ -280,7 +280,7 @@
 
 @section('content')
 <div class="welcome-card">
-    <h2>Selamat Datang, {{ $asesi->nama ?? 'Asesi' }}! 👋</h2>
+    <h2>Selamat Datang, {{ $asesi->nama ?? 'Asesi' }}!</h2>
     <p>Anda berhasil masuk ke sistem LSP SMKN 1 Ciamis. Mulailah persiapan sertifikasi Anda dengan mengerjakan Asesmen Mandiri.</p>
 </div>
 
@@ -293,69 +293,6 @@
         : collect();
     $rekomendasiCount = $rekomendasiList->count();
 @endphp
-
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon green">
-            <i class="bi bi-patch-check"></i>
-        </div>
-        <div class="stat-info">
-            <h3>Total Skema Diambil</h3>
-            <div class="value">{{ $skemaCount }}</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon yellow">
-            <i class="bi bi-hourglass-split"></i>
-        </div>
-        <div class="stat-info">
-            <h3>Sedang Dikerjakan</h3>
-            <div class="value">{{ $sedangCount }}</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon blue">
-            <i class="bi bi-check-circle"></i>
-        </div>
-        <div class="stat-info">
-            <h3>Asesmen Selesai</h3>
-            <div class="value">{{ $selesaiCount }}</div>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon {{ $rekomendasiCount > 0 ? 'rose' : 'purple' }}">
-            <i class="bi bi-person-check"></i>
-        </div>
-        <div class="stat-info">
-            <h3>Direkomendasikan</h3>
-            <div class="value">{{ $rekomendasiCount }}</div>
-        </div>
-    </div>
-</div>
-
-<div class="quick-actions">
-    <h3><i class="bi bi-lightning"></i> Aksi Cepat</h3>
-    <div class="action-list">
-        <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="action-item">
-            <div class="icon">
-                <i class="bi bi-clipboard-check"></i>
-            </div>
-            <div class="text">
-                <h4>Asesmen Mandiri</h4>
-                <p>Isi form penilaian diri untuk persiapan sertifikasi</p>
-            </div>
-        </a>
-        <a href="#" class="action-item" style="opacity:0.5;pointer-events:none;">
-            <div class="icon">
-                <i class="bi bi-file-earmark-text"></i>
-            </div>
-            <div class="text">
-                <h4>Lihat Hasil Asesmen</h4>
-                <p>Cek hasil penilaian asesmen mandiri Anda</p>
-            </div>
-        </a>
-    </div>
-</div>
 
 @if($rekomendasiList->count() > 0)
 <div class="rekomendasi-card">
@@ -393,8 +330,48 @@
 @endif
 
 @if($asesi)
-<div class="info-card">
-    <h3><i class="bi bi-person-circle"></i> Informasi Akun</h3>
+{{-- ─── Asesor Penguji ─── --}}
+<div class="info-card" style="margin-top:24px;">
+    <h3><i class="bi bi-person-badge-fill" style="color:#0061a5;"></i> Asesor Penguji</h3>
+    @if($asesi->asesor)
+    <div style="display:flex;align-items:center;gap:16px;padding:16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;">
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#0061a5,#0073bd);color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">
+            {{ strtoupper(substr($asesi->asesor->nama, 0, 1)) }}
+        </div>
+        <div style="flex:1;">
+            <div style="font-size:15px;font-weight:700;color:#1e293b;">{{ $asesi->asesor->nama }}</div>
+            <div style="font-size:12px;color:#64748b;margin-top:2px;">
+                @if($asesi->asesor->skemas->count())
+                    <i class="bi bi-patch-check-fill" style="color:#0061a5;"></i>
+                    {{ $asesi->asesor->skemas->pluck('nama_skema')->join(', ') }}
+                @endif
+                @if($asesi->asesor->no_met)
+                    &nbsp;·&nbsp; NO MET: {{ $asesi->asesor->no_met }}
+                @endif
+            </div>
+        </div>
+        <span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:#dbeafe;color:#1d4ed8;"><i class="bi bi-diagram-3-fill"></i> Ditugaskan</span>
+    </div>
+    @else
+    <div style="padding:20px;text-align:center;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;color:#94a3b8;font-size:13px;">
+        <i class="bi bi-person-dash" style="font-size:28px;display:block;margin-bottom:8px;"></i>
+        Belum ada asesor yang ditugaskan untuk Anda.
+    </div>
+    @endif
+</div>
+
+{{-- ─── Data Pendaftaran ─── --}}
+<div class="info-card" style="margin-top:24px;">
+    <h3><i class="bi bi-person-circle"></i> Data Pendaftaran</h3>
+    <div style="margin-bottom:12px;padding:8px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12.5px;color:#166534;display:flex;align-items:center;gap:8px;">
+        <i class="bi bi-check-circle-fill"></i>
+        Pendaftaran Anda telah disetujui oleh admin.
+        @if($asesi->verified_at)
+            &nbsp;·&nbsp; {{ \Carbon\Carbon::parse($asesi->verified_at)->translatedFormat('d F Y, H:i') }} WIB
+        @endif
+    </div>
+
+    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 10px;">Informasi Akun</div>
     <div class="info-grid">
         <div class="info-item">
             <label>Nomor Registrasi</label>
@@ -417,10 +394,96 @@
             <span>{{ $asesi->jurusan->nama_jurusan ?? '-' }}</span>
         </div>
         <div class="info-item">
+            <label>Kelas</label>
+            <span>{{ $asesi->kelas ?? '-' }}</span>
+        </div>
+        <div class="info-item">
             <label>Status Akun</label>
-            <span style="color:#16a34a;font-weight:600;">{{ ucfirst($asesi->status) }}</span>
+            <span style="color:#16a34a;font-weight:600;"><i class="bi bi-patch-check-fill"></i> Disetujui</span>
+        </div>
+        <div class="info-item">
+            <label>Telepon / HP</label>
+            <span>{{ $asesi->telepon_hp ?? $asesi->telepon_rumah ?? '-' }}</span>
         </div>
     </div>
+
+    @if($asesi->tempat_lahir || $asesi->tanggal_lahir || $asesi->jenis_kelamin || $asesi->alamat)
+    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 10px;">Data Pribadi</div>
+    <div class="info-grid">
+        @if($asesi->tempat_lahir)
+        <div class="info-item">
+            <label>Tempat Lahir</label>
+            <span>{{ $asesi->tempat_lahir }}</span>
+        </div>
+        @endif
+        @if($asesi->tanggal_lahir)
+        <div class="info-item">
+            <label>Tanggal Lahir</label>
+            <span>{{ \Carbon\Carbon::parse($asesi->tanggal_lahir)->translatedFormat('d F Y') }}</span>
+        </div>
+        @endif
+        @if($asesi->jenis_kelamin)
+        <div class="info-item">
+            <label>Jenis Kelamin</label>
+            <span>{{ $asesi->jenis_kelamin }}</span>
+        </div>
+        @endif
+        @if($asesi->kebangsaan)
+        <div class="info-item">
+            <label>Kebangsaan</label>
+            <span>{{ $asesi->kebangsaan }}</span>
+        </div>
+        @endif
+        @if($asesi->alamat)
+        <div class="info-item" style="grid-column:1/-1;">
+            <label>Alamat</label>
+            <span>{{ $asesi->alamat }}</span>
+        </div>
+        @endif
+    </div>
+    @endif
+
+    @if($asesi->pendidikan_terakhir || $asesi->pekerjaan || $asesi->nama_lembaga || $asesi->jabatan)
+    <div style="font-size:12px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 10px;">Pekerjaan & Lembaga</div>
+    <div class="info-grid">
+        @if($asesi->pendidikan_terakhir)
+        <div class="info-item">
+            <label>Pendidikan Terakhir</label>
+            <span>{{ $asesi->pendidikan_terakhir }}</span>
+        </div>
+        @endif
+        @if($asesi->pekerjaan)
+        <div class="info-item">
+            <label>Pekerjaan</label>
+            <span>{{ $asesi->pekerjaan }}</span>
+        </div>
+        @endif
+        @if($asesi->jabatan)
+        <div class="info-item">
+            <label>Jabatan</label>
+            <span>{{ $asesi->jabatan }}</span>
+        </div>
+        @endif
+        @if($asesi->nama_lembaga)
+        <div class="info-item">
+            <label>Nama Lembaga</label>
+            <span>{{ $asesi->nama_lembaga }}</span>
+        </div>
+        @endif
+        @if($asesi->alamat_lembaga)
+        <div class="info-item">
+            <label>Alamat Lembaga</label>
+            <span>{{ $asesi->alamat_lembaga }}</span>
+        </div>
+        @endif
+        @if($asesi->unit_lembaga)
+        <div class="info-item">
+            <label>Unit / Bagian</label>
+            <span>{{ $asesi->unit_lembaga }}</span>
+        </div>
+        @endif
+    </div>
+    @endif
 </div>
 @endif
 @endsection

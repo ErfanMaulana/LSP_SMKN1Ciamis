@@ -57,7 +57,7 @@
     </div>
 </div>
 
-<div class="quick-actions">
+<!-- <div class="quick-actions">
     <h3>Aksi Cepat</h3>
     <div class="action-grid">
         <a href="{{ route('admin.asesor.create') }}" class="action-card">
@@ -77,7 +77,7 @@
             <span>Lihat Laporan</span>
         </a>
     </div>
-</div>
+</div> -->
 
 <style>
     .welcome-card {

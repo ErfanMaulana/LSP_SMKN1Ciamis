@@ -133,11 +133,13 @@
     <div>
         <h2>Selamat datang, {{ $asesor->nama ?? 'Asesor' }}! 👋</h2>
         <p>Pantau progres asesmen mandiri para asesi pada skema yang Anda ampuh.</p>
-        @if($asesor?->skema)
+        @if($asesor?->skemas?->count())
             <div class="skema-info">
                 <i class="bi bi-award"></i>
-                <strong>{{ $asesor->skema->nama_skema }}</strong>
-                &bull; {{ $asesor->skema->nomor_skema }}
+                <strong>{{ $asesor->skemas->pluck('nama_skema')->join(', ') }}</strong>
+                @if($asesor->skemas->count() === 1)
+                    &bull; {{ $asesor->skemas->first()->nomor_skema }}
+                @endif
             </div>
         @elseif(!$asesor)
             <div class="skema-info" style="background:rgba(239,68,68,0.2);">

@@ -7,12 +7,13 @@ use App\Http\Controllers\AsesorController;
 use App\Http\Controllers\Admin\JurusanController;
 use App\Http\Controllers\Admin\CarouselController;
 use App\Http\Controllers\Admin\SkemaController;
-use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\SocialMediaController;
 use App\Http\Controllers\Admin\ProfileContentController;
 use App\Http\Controllers\Admin\TukController;
 use App\Http\Controllers\Admin\JadwalUjikomController;
 use App\Http\Controllers\Admin\AkunAsesiController;
+use App\Http\Controllers\Admin\PenugasanAsesorController;
+use App\Http\Controllers\Admin\KelompokController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,14 +76,6 @@ Route::prefix('admin')->group(function () {
         Route::put('/skema/{id}', [SkemaController::class, 'update'])->name('admin.skema.update');
         Route::delete('/skema/{id}', [SkemaController::class, 'destroy'])->name('admin.skema.destroy');
 
-        // Mitra CRUD
-        Route::get('/mitra', [MitraController::class, 'index'])->name('admin.mitra.index');
-        Route::get('/mitra/create', [MitraController::class, 'create'])->name('admin.mitra.create');
-        Route::post('/mitra', [MitraController::class, 'store'])->name('admin.mitra.store');
-        Route::get('/mitra/{no_mou}/edit', [MitraController::class, 'edit'])->name('admin.mitra.edit');
-        Route::put('/mitra/{no_mou}', [MitraController::class, 'update'])->name('admin.mitra.update');
-        Route::delete('/mitra/{no_mou}', [MitraController::class, 'destroy'])->name('admin.mitra.destroy');
-
         // Carousel CRUD
         Route::get('/carousel', [CarouselController::class, 'index'])->name('admin.carousel.index');
         Route::get('/carousel/create', [CarouselController::class, 'create'])->name('admin.carousel.create');
@@ -137,6 +130,25 @@ Route::prefix('admin')->group(function () {
         Route::put('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'update'])->name('admin.jadwal-ujikom.update');
         Route::delete('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'destroy'])->name('admin.jadwal-ujikom.destroy');
         Route::patch('/jadwal-ujikom/{id}/status', [JadwalUjikomController::class, 'updateStatus'])->name('admin.jadwal-ujikom.status');
+
+        // Penugasan Asesor ke Asesi (legacy)
+        Route::get('/penugasan-asesor', [PenugasanAsesorController::class, 'index'])->name('admin.penugasan-asesor.index');
+        Route::get('/penugasan-asesor/{ID_asesor}', [PenugasanAsesorController::class, 'show'])->name('admin.penugasan-asesor.show');
+        Route::post('/penugasan-asesor/{ID_asesor}/assign', [PenugasanAsesorController::class, 'assign'])->name('admin.penugasan-asesor.assign');
+        Route::post('/penugasan-asesor/{ID_asesor}/assign-bulk', [PenugasanAsesorController::class, 'assignBulk'])->name('admin.penugasan-asesor.assign-bulk');
+        Route::delete('/penugasan-asesor/{ID_asesor}/unassign/{NIK}', [PenugasanAsesorController::class, 'unassign'])->name('admin.penugasan-asesor.unassign');
+
+        // Kelompok CRUD + Manage Asesi
+        Route::get('/kelompok', [KelompokController::class, 'index'])->name('admin.kelompok.index');
+        Route::get('/kelompok/create', [KelompokController::class, 'create'])->name('admin.kelompok.create');
+        Route::post('/kelompok', [KelompokController::class, 'store'])->name('admin.kelompok.store');
+        Route::get('/kelompok/{id}', [KelompokController::class, 'show'])->name('admin.kelompok.show');
+        Route::get('/kelompok/{id}/edit', [KelompokController::class, 'edit'])->name('admin.kelompok.edit');
+        Route::put('/kelompok/{id}', [KelompokController::class, 'update'])->name('admin.kelompok.update');
+        Route::delete('/kelompok/{id}', [KelompokController::class, 'destroy'])->name('admin.kelompok.destroy');
+        Route::post('/kelompok/{id}/assign', [KelompokController::class, 'assignAsesi'])->name('admin.kelompok.assign');
+        Route::post('/kelompok/{id}/assign-bulk', [KelompokController::class, 'assignBulk'])->name('admin.kelompok.assign-bulk');
+        Route::delete('/kelompok/{id}/unassign/{NIK}', [KelompokController::class, 'unassignAsesi'])->name('admin.kelompok.unassign');
 
         // Akun Asesi (NIK-based account management)
         Route::get('/akun-asesi', [AkunAsesiController::class, 'index'])->name('admin.akun-asesi.index');

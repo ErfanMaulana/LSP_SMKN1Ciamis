@@ -82,11 +82,11 @@ class AuthController extends Controller
 
         if ($account->isAsesor()) {
             // Asesor gets their own dashboard
-            $asesor = \App\Models\Asesor::with('skema')->where('no_reg', $account->id)->first();
+            $asesor = \App\Models\Asesor::with('skemas')->where('no_met', $account->id)->first();
             return redirect()->route('asesor.dashboard');
         }
 
-        $asesi = \App\Models\Asesi::where('NIK', $account->NIK)->first();
+        $asesi = \App\Models\Asesi::with(['jurusan', 'asesor.skemas'])->where('NIK', $account->NIK)->first();
 
         // If asesi has no registration yet, redirect to registration form
         if (!$asesi) {

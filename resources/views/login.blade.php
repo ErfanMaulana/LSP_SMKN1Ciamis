@@ -283,7 +283,7 @@
             </div>
 
             @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
+                <div class="alert alert-success">{!! session('success') !!}</div>
             @endif
 
             @if($errors->any())
@@ -378,7 +378,7 @@
             asesor: {
                 panelTitle:            'Portal Asesor',
                 panelDesc:             'Kelola penilaian dan hasil uji kompetensi peserta.',
-                identifierLabel:       'NOMOR REGISTRASI',
+                identifierLabel:       'No MET',
                 identifierIcon:        'bi-card-text',
                 identifierPlaceholder: 'Masukkan nomor registrasi',
             },

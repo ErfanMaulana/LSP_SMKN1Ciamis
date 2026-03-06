@@ -17,7 +17,7 @@
 
     @if(session('success'))
     <div class="alert-success">
-        <i class="bi bi-check-circle"></i> {{ session('success') }}
+        <i class="bi bi-check-circle"></i> {!! session('success') !!}
     </div>
     @endif
 

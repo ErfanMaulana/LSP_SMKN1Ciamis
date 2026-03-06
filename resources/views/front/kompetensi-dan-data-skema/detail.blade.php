@@ -90,8 +90,8 @@
                         <hr class="border-gray-200">
 
                         <div>
-                            <p class="text-sm text-gray-600 font-semibold mb-1">PESERTA ASESI</p>
-                            <p class="text-lg font-bold text-gray-900">{{ $jurusan['jumlah_asesi'] }} Peserta</p>
+                            <p class="text-sm text-gray-600 font-semibold mb-1">DATA ASESI</p>
+                            <p class="text-lg font-bold text-gray-900">{{ $jurusan['jumlah_asesi'] }} Asesi</p>
                         </div>
 
                         <hr class="border-gray-200">

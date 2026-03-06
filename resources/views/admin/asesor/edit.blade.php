@@ -27,42 +27,65 @@
                     @enderror
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="ID_skema">Skema</label>
-                        <select id="ID_skema" name="ID_skema" class="form-control @error('ID_skema') is-invalid @enderror">
-                            <option value="">Pilih Skema</option>
-                            @foreach($skema as $item)
-                                <option value="{{ $item->id }}" {{ old('ID_skema', $asesor->ID_skema) == $item->id ? 'selected' : '' }}>
-                                    {{ $item->nama_skema }} ({{ $item->nomor_skema }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('ID_skema')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="form-text">Pilih skema sertifikasi (opsional)</small>
+                <div class="form-group">
+                    <label for="no_met">NO MET</label>
+                    <input type="text" id="no_met" name="no_met"
+                           class="form-control @error('no_met') is-invalid @enderror"
+                           value="{{ old('no_met', $asesor->no_met) }}"
+                           placeholder="Contoh: ASR001">
+                    @error('no_met')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    @if($asesor->no_met)
+                        <small class="form-text" style="color:#059669;">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Akun aktif dengan NO MET <strong>{{ $asesor->no_met }}</strong>.
+                            Kosongkan untuk tidak mengubah.
+                        </small>
+                    @else
+                        <small class="form-text">Isi untuk membuat akun login asesor. Password awal = NO MET.</small>
+                    @endif
+                </div>
+
+                <div class="form-group">
+                    <label>Skema Kompetensi</label>
+                    <div id="skema-hidden-inputs"></div>
+
+                    <div style="position:relative;" id="skema-dropdown-wrap">
+                        {{-- Trigger --}}
+                        <div id="skema-trigger" onclick="toggleSkemaDropdown()"
+                             style="display:flex;justify-content:space-between;align-items:center;
+                                    padding:10px 14px;border:1px solid #e2e8f0;border-radius:6px;
+                                    background:#f8fafc;cursor:pointer;font-size:14px;user-select:none;
+                                    transition:border-color .2s,box-shadow .2s;">
+                            <span id="skema-trigger-text" style="color:#94a3b8;">Pilih skema kompetensi...</span>
+                            <i class="bi bi-chevron-down" id="skema-chevron"
+                               style="font-size:12px;color:#64748b;transition:transform .2s;"></i>
+                        </div>
+
+                        {{-- Dropdown panel --}}
+                        <div id="skema-dropdown"
+                             style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:300;
+                                    background:white;border:1px solid #e2e8f0;border-radius:8px;
+                                    box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;">
+                            <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;">
+                                <input type="text" id="skema-search" autocomplete="off"
+                                       placeholder="&#128269; Cari nama atau kode skema..."
+                                       oninput="filterSkema(this.value)"
+                                       style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;
+                                              border-radius:6px;font-size:13px;outline:none;
+                                              font-family:inherit;background:#f8fafc;">
+                            </div>
+                            <div id="skema-list" style="max-height:220px;overflow-y:auto;"></div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="no_reg">No. Registrasi (Login)</label>
-                        <input type="text" id="no_reg" name="no_reg"
-                               class="form-control @error('no_reg') is-invalid @enderror"
-                               value="{{ old('no_reg', $asesor->no_reg) }}"
-                               placeholder="Contoh: ASR001">
-                        @error('no_reg')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        @if($asesor->no_reg)
-                            <small class="form-text" style="color:#059669;">
-                                <i class="bi bi-check-circle-fill"></i>
-                                Akun aktif dengan No. Reg <strong>{{ $asesor->no_reg }}</strong>.
-                                Kosongkan untuk tidak mengubah.
-                            </small>
-                        @else
-                            <small class="form-text">Isi untuk membuat akun login asesor. Password awal = No. Reg.</small>
-                        @endif
-                    </div>
+                    <div id="skema-badges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+
+                    @error('skema_ids')
+                        <div class="invalid-feedback" style="display:block;">{{ $message }}</div>
+                    @enderror
+                    <small class="form-text">Pilih satu atau lebih skema sertifikasi (opsional)</small>
                 </div>
             </div>
 
@@ -236,4 +259,126 @@
         }
     }
 </style>
+
+<script>
+const ALL_SKEMAS = @json($skema->map(fn($s) => ['id' => $s->id, 'nama' => $s->nama_skema, 'nomor' => $s->nomor_skema]));
+let selectedSkemas = new Map();
+let skemaOpen = false;
+
+@php $preselect = old('skema_ids', $selectedSkemaIds); @endphp
+@foreach($preselect as $preId)
+    (function() {
+        const s = ALL_SKEMAS.find(x => x.id == {{ $preId }});
+        if (s) selectedSkemas.set(s.id, s);
+    })();
+@endforeach
+
+function renderTriggerText() {
+    const el = document.getElementById('skema-trigger-text');
+    if (selectedSkemas.size === 0) {
+        el.textContent = 'Pilih skema kompetensi...';
+        el.style.color = '#94a3b8';
+    } else {
+        el.textContent = selectedSkemas.size + ' skema dipilih';
+        el.style.color = '#1e293b';
+    }
+}
+
+function renderBadges() {
+    const badgeWrap  = document.getElementById('skema-badges');
+    const hiddenWrap = document.getElementById('skema-hidden-inputs');
+    badgeWrap.innerHTML  = '';
+    hiddenWrap.innerHTML = '';
+    selectedSkemas.forEach(s => {
+        const badge = document.createElement('span');
+        badge.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 12px;background:#dbeafe;color:#1d4ed8;border-radius:20px;font-size:12px;font-weight:600;';
+        badge.innerHTML = `${s.nama} <button type="button" onclick="removeSkema(${s.id})" style="background:none;border:none;cursor:pointer;color:#1d4ed8;font-size:15px;line-height:1;padding:0;">&times;</button>`;
+        badgeWrap.appendChild(badge);
+        const inp = document.createElement('input');
+        inp.type = 'hidden'; inp.name = 'skema_ids[]'; inp.value = s.id;
+        hiddenWrap.appendChild(inp);
+    });
+    if (selectedSkemas.size === 0) {
+        badgeWrap.innerHTML = '<span style="font-size:12px;color:#94a3b8;">Belum ada skema dipilih.</span>';
+    }
+    renderTriggerText();
+}
+
+function removeSkema(id) {
+    selectedSkemas.delete(id);
+    renderBadges();
+    if (skemaOpen) buildDropdownItems(currentSkemaList());
+}
+
+function selectSkema(id) {
+    const s = ALL_SKEMAS.find(x => x.id === id);
+    if (s) selectedSkemas.set(s.id, s);
+    renderBadges();
+    buildDropdownItems(currentSkemaList());
+}
+
+function currentSkemaList() {
+    const q = (document.getElementById('skema-search').value || '').toLowerCase().trim();
+    return q ? ALL_SKEMAS.filter(s => s.nama.toLowerCase().includes(q) || s.nomor.toLowerCase().includes(q)) : ALL_SKEMAS;
+}
+
+function buildDropdownItems(list) {
+    const el = document.getElementById('skema-list');
+    el.innerHTML = '';
+    if (!list.length) {
+        el.innerHTML = '<div style="padding:10px 14px;color:#94a3b8;font-size:13px;">Tidak ada hasil.</div>';
+        return;
+    }
+    list.forEach(s => {
+        const item = document.createElement('div');
+        const already = selectedSkemas.has(s.id);
+        item.style.cssText = `padding:9px 14px;font-size:13px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #f8fafc;cursor:${already?'default':'pointer'};${already?'color:#94a3b8;':'color:#1e293b;'}`;
+        item.innerHTML = `<span>${s.nama} <span style="font-size:11px;color:#94a3b8;">(${s.nomor})</span></span>${already?'<span style="font-size:11px;color:#16a34a;font-weight:600;">&#10003; Dipilih</span>':''}`;
+        if (!already) {
+            item.onclick = () => selectSkema(s.id);
+            item.onmouseover = () => item.style.background = '#f0f9ff';
+            item.onmouseout  = () => item.style.background = '';
+        }
+        el.appendChild(item);
+    });
+}
+
+function filterSkema(q) {
+    buildDropdownItems(currentSkemaList());
+}
+
+function openSkemaDropdown() {
+    skemaOpen = true;
+    document.getElementById('skema-search').value = '';
+    buildDropdownItems(ALL_SKEMAS);
+    document.getElementById('skema-dropdown').style.display = '';
+    const trigger = document.getElementById('skema-trigger');
+    trigger.style.borderColor = '#0073bd';
+    trigger.style.boxShadow   = '0 0 0 3px rgba(0,115,189,.1)';
+    trigger.style.background  = 'white';
+    document.getElementById('skema-chevron').style.transform = 'rotate(180deg)';
+}
+
+function closeSkemaDropdown() {
+    skemaOpen = false;
+    document.getElementById('skema-dropdown').style.display = 'none';
+    const trigger = document.getElementById('skema-trigger');
+    trigger.style.borderColor = '#e2e8f0';
+    trigger.style.boxShadow   = '';
+    trigger.style.background  = '#f8fafc';
+    document.getElementById('skema-chevron').style.transform = '';
+}
+
+function toggleSkemaDropdown() {
+    skemaOpen ? closeSkemaDropdown() : openSkemaDropdown();
+}
+
+document.addEventListener('click', e => {
+    if (!document.getElementById('skema-dropdown-wrap').contains(e.target)) {
+        closeSkemaDropdown();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', renderBadges);
+</script>
 @endsection

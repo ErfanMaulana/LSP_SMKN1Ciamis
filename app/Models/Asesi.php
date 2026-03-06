@@ -20,6 +20,8 @@ class Asesi extends Model
         'nama',
         'email',
         'ID_jurusan',
+        'ID_asesor',
+        'kelompok_id',
         'kelas',
         'tempat_lahir',
         'tanggal_lahir',
@@ -60,6 +62,16 @@ class Asesi extends Model
     public function jurusan()
     {
         return $this->belongsTo(Jurusan::class, 'ID_jurusan', 'ID_jurusan');
+    }
+
+    public function asesor()
+    {
+        return $this->belongsTo(Asesor::class, 'ID_asesor', 'ID_asesor');
+    }
+
+    public function kelompok()
+    {
+        return $this->belongsTo(Kelompok::class, 'kelompok_id');
     }
 
     public function verifiedBy()

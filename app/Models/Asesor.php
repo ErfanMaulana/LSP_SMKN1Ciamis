@@ -13,24 +13,27 @@ class Asesor extends Model
     protected $primaryKey = 'ID_asesor';
 
     protected $fillable = [
-        'ID_skema',
-        'no_mou',
         'nama',
-        'no_reg',
+        'no_met',
     ];
 
-    public function mitra()
+    public function skemas()
     {
-        return $this->belongsTo(Mitra::class, 'no_mou', 'no_mou');
-    }
-
-    public function skema()
-    {
-        return $this->belongsTo(Skema::class, 'ID_skema');
+        return $this->belongsToMany(Skema::class, 'asesor_skema', 'asesor_id', 'skema_id');
     }
 
     public function account()
     {
-        return $this->belongsTo(Account::class, 'no_reg', 'id');
+        return $this->belongsTo(Account::class, 'no_met', 'id');
+    }
+
+    public function asesis()
+    {
+        return $this->hasMany(Asesi::class, 'ID_asesor', 'ID_asesor');
+    }
+
+    public function kelompoks()
+    {
+        return $this->belongsToMany(Kelompok::class, 'kelompok_asesor', 'asesor_id', 'kelompok_id');
     }
 }

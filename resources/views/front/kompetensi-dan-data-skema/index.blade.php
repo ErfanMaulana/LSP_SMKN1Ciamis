@@ -35,7 +35,7 @@
                             </div>
                             <div class="flex items-center gap-2">
                                 <i class="bi bi-people text-blue-600"></i>
-                                <span>{{ $item['jumlah_asesi'] }} Siswa</span>
+                                <span>{{ $item['jumlah_asesi'] }} Asesi</span>
                             </div>
                         </div>
                     </div>

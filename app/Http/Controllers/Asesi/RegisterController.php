@@ -21,15 +21,42 @@ class RegisterController extends Controller
         $account = Auth::guard('account')->user();
         $asesi   = Asesi::where('NIK', $account->NIK)->first();
 
-        // If asesi already registered, redirect to dashboard
-        if ($asesi) {
+        // If already approved, redirect to dashboard
+        if ($asesi && $asesi->status === 'approved') {
             return redirect()->route('asesi.dashboard')
-                ->with('info', 'Anda sudah terdaftar sebagai asesi.');
+                ->with('info', 'Pendaftaran Anda sudah disetujui.');
         }
 
         $jurusanList = Jurusan::all();
 
-        return view('asesi.pendaftaran.formulir', compact('account', 'jurusanList'));
+        // Parse NIK to auto-fill tanggal_lahir and jenis_kelamin
+        // NIK Format: PP KK CC DD MM YY SSSS
+        // Digit 7-8  : Tanggal (perempuan = tanggal + 40)
+        // Digit 9-10 : Bulan
+        // Digit 11-12: Tahun (2 digit)
+        $nikData = null;
+        $nik = $account->NIK ?? '';
+        if (strlen($nik) === 16 && ctype_digit($nik)) {
+            $dd = (int) substr($nik, 6, 2);
+            $mm = (int) substr($nik, 8, 2);
+            $yy = (int) substr($nik, 10, 2);
+
+            $isFemale = $dd > 40;
+            $day      = $isFemale ? $dd - 40 : $dd;
+
+            // 2-digit year heuristic: <= current 2-digit year → 2000s, else → 1900s
+            $currentYY = (int) date('y');
+            $year = ($yy <= $currentYY) ? (2000 + $yy) : (1900 + $yy);
+
+            if ($mm >= 1 && $mm <= 12 && $day >= 1 && $day <= 31) {
+                $nikData = [
+                    'tanggal_lahir' => sprintf('%04d-%02d-%02d', $year, $mm, $day),
+                    'jenis_kelamin' => $isFemale ? 'Perempuan' : 'Laki-laki',
+                ];
+            }
+        }
+
+        return view('asesi.pendaftaran.formulir', compact('account', 'asesi', 'jurusanList', 'nikData'));
     }
 
     /**
@@ -38,11 +65,24 @@ class RegisterController extends Controller
     public function storeForm(Request $request)
     {
         $account = Auth::guard('account')->user();
+        $existing = Asesi::where('NIK', $account->NIK)->first();
 
-        // Check if already registered
-        if (Asesi::where('NIK', $account->NIK)->exists()) {
+        // If already approved
+        if ($existing && $existing->status === 'approved') {
             return redirect()->route('asesi.dashboard')
-                ->with('info', 'Anda sudah terdaftar sebagai asesi.');
+                ->with('info', 'Pendaftaran Anda sudah disetujui.');
+        }
+
+        // If pending, cannot resubmit
+        if ($existing && $existing->status === 'pending') {
+            return redirect()->route('asesi.pendaftaran.formulir')
+                ->with('warning', 'Formulir Anda sedang menunggu verifikasi admin. Tidak dapat mengubah data saat ini.');
+        }
+
+        // If banned, cannot register at all
+        if ($existing && $existing->status === 'banned') {
+            return redirect()->route('asesi.pendaftaran.formulir')
+                ->with('error', 'Akun Anda telah diblokir secara permanen dan tidak dapat mendaftar.');
         }
 
         $validator = Validator::make($request->all(), [
@@ -74,9 +114,13 @@ class RegisterController extends Controller
         }
 
         $data = $request->all();
-        $data['NIK'] = $account->NIK;
+        $data['NIK']    = $account->NIK;
+        $data['status'] = 'pending';   // reset to pending on new/resubmit
+        $data['verified_at'] = null;
+        $data['verified_by'] = null;
+        $data['catatan_admin'] = null;
 
-        Asesi::create($data);
+        Asesi::updateOrCreate(['NIK' => $account->NIK], $data);
 
         // Store NIK in session for step 2
         session(['pendaftaran_nik' => $account->NIK]);
@@ -98,10 +142,17 @@ class RegisterController extends Controller
                 ->with('error', 'Silakan isi formulir data diri terlebih dahulu.');
         }
 
-        // If already has documents and is pending/approved, go to dashboard
-        if (in_array($asesi->status, ['pending', 'approved'])) {
+        // If already has documents and is approved, go to dashboard
+        if ($asesi->status === 'approved') {
             return redirect()->route('asesi.dashboard')
-                ->with('info', 'Pendaftaran Anda sudah diproses.');
+                ->with('info', 'Pendaftaran Anda sudah disetujui.');
+        }
+
+        // If pending (submitted step 1 but not yet approved), show step 2 still
+        // or redirect back to formulir with info
+        if ($asesi->status === 'pending' && $asesi->pas_foto) {
+            return redirect()->route('asesi.pendaftaran.formulir')
+                ->with('info', 'Dokumen sudah dikirim. Menunggu verifikasi admin.');
         }
 
         return view('asesi.pendaftaran.dokumen', compact('account', 'asesi'));

@@ -19,7 +19,7 @@ class DashboardController extends Controller
     private function getAsesor()
     {
         $account = Auth::guard('account')->user();
-        return Asesor::with('skema')->where('no_reg', $account->id)->first();
+        return Asesor::with('skemas')->where('no_met', $account->id)->first();
     }
 
     /**
@@ -30,19 +30,19 @@ class DashboardController extends Controller
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
 
-        $skemaId = $asesor?->ID_skema;
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
 
         // Asesi yang terdaftar di skema asesor ini
-        $totalAsesi = $skemaId
-            ? DB::table('asesi_skema')->where('skema_id', $skemaId)->count()
+        $totalAsesi = count($skemaIds)
+            ? DB::table('asesi_skema')->whereIn('skema_id', $skemaIds)->count()
             : 0;
 
-        $selesai = $skemaId
-            ? DB::table('asesi_skema')->where('skema_id', $skemaId)->where('status', 'selesai')->count()
+        $selesai = count($skemaIds)
+            ? DB::table('asesi_skema')->whereIn('skema_id', $skemaIds)->where('status', 'selesai')->count()
             : 0;
 
-        $sedang = $skemaId
-            ? DB::table('asesi_skema')->where('skema_id', $skemaId)->where('status', 'sedang_mengerjakan')->count()
+        $sedang = count($skemaIds)
+            ? DB::table('asesi_skema')->whereIn('skema_id', $skemaIds)->where('status', 'sedang_mengerjakan')->count()
             : 0;
 
         $belum = $totalAsesi - $selesai - $sedang;
@@ -51,9 +51,9 @@ class DashboardController extends Controller
 
         // 5 asesi terakhir yang selesai
         $recentCompleted = [];
-        if ($skemaId) {
+        if (count($skemaIds)) {
             $recentCompleted = DB::table('asesi_skema')
-                ->where('skema_id', $skemaId)
+                ->whereIn('skema_id', $skemaIds)
                 ->where('status', 'selesai')
                 ->orderByDesc('tanggal_selesai')
                 ->limit(5)
@@ -74,10 +74,16 @@ class DashboardController extends Controller
     {
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
-        $skemaId = $asesor?->ID_skema;
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
 
         $query = DB::table('asesi_skema')
-            ->where('skema_id', $skemaId);
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds));
+
+        if (!count($skemaIds)) {
+            $data  = collect();
+            $skema = null;
+            return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema'));
+        }
 
         // Filter status
         if ($request->filled('status')) {
@@ -92,7 +98,7 @@ class DashboardController extends Controller
             return $row;
         });
 
-        $skema = $skemaId ? Skema::find($skemaId) : null;
+        $skema = count($skemaIds) === 1 ? Skema::find($skemaIds[0]) : null;
 
         return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema'));
     }
@@ -104,17 +110,19 @@ class DashboardController extends Controller
     {
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
-        $skemaId = $asesor?->ID_skema;
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
 
         $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
 
-        // Pastikan asesi ini terdaftar di skema asesor
+        // Cari pivot di semua skema asesor
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
-            ->where('skema_id', $skemaId)
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
             ->first();
 
         abort_unless($pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
+        $skemaId = $pivot->skema_id;
 
         $skema = Skema::with(['units.elemens.kriteria'])->findOrFail($skemaId);
 
@@ -138,7 +146,7 @@ class DashboardController extends Controller
     {
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
-        $skemaId = $asesor?->ID_skema;
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
 
         $request->validate([
             'rekomendasi'    => 'required|in:lanjut,tidak_lanjut',
@@ -146,9 +154,16 @@ class DashboardController extends Controller
         ]);
 
         // Pastikan asesi ini memang di skema asesor
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->first();
+
+        abort_unless($pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
         $updated = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
-            ->where('skema_id', $skemaId)
+            ->where('skema_id', $pivot->skema_id)
             ->update([
                 'rekomendasi'    => $request->rekomendasi,
                 'catatan_asesor' => $request->catatan_asesor,
