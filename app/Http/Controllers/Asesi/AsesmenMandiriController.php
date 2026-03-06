@@ -34,18 +34,16 @@ class AsesmenMandiriController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
-        // Only load schemas that belong to asesi's jurusan
-        $skemas = Skema::withCount('units')
-            ->where('jurusan_id', $asesi->ID_jurusan)
-            ->get();
+        // Only load schemas that the asesi registered for (from pivot asesi_skema)
+        $asesiSkemas = $asesi->skemas()->withCount('units')->get();
+        $skemas      = $asesiSkemas;
 
         // If there is exactly one schema, go straight to the form
         if ($skemas->count() === 1) {
             return redirect()->route('asesi.asesmen-mandiri.show', $skemas->first()->id);
         }
 
-        // Get asesi's selected schemas with pivot data
-        $asesiSkemas = $asesi->skemas()->get()->keyBy('id');
+        $asesiSkemas = $asesiSkemas->keyBy('id');
 
         return view('asesi.asesmen-mandiri.index', compact('account', 'asesi', 'skemas', 'asesiSkemas'));
     }
@@ -65,30 +63,19 @@ class AsesmenMandiriController extends Controller
         
         $skema = Skema::with(['units.elemens.kriteria'])->findOrFail($skemaId);
 
-        // Make sure this schema belongs to asesi's jurusan
-        if ($skema->jurusan_id !== null && $skema->jurusan_id != $asesi->ID_jurusan) {
-            return redirect()->route('asesi.asesmen-mandiri.index')
-                ->with('error', 'Skema ini tidak sesuai dengan jurusan Anda.');
-        }
-
-        // Check if asesi has selected this schema, if not, create the relationship
+        // Make sure asesi is registered for this schema (via asesi_skema pivot)
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
             ->first();
-        
+
         if (!$pivot) {
-            // Create new relationship
-            DB::table('asesi_skema')->insert([
-                'asesi_nik' => $asesi->NIK,
-                'skema_id' => $skemaId,
-                'status' => 'sedang_mengerjakan',
-                'tanggal_mulai' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        } elseif ($pivot->status === 'belum_mulai') {
-            // Update status to sedang_mengerjakan
+            return redirect()->route('asesi.asesmen-mandiri.index')
+                ->with('error', 'Skema ini tidak terdaftar untuk akun Anda.');
+        }
+
+        // Update status to sedang_mengerjakan if still belum_mulai
+        if ($pivot->status === 'belum_mulai') {
             DB::table('asesi_skema')
                 ->where('asesi_nik', $asesi->NIK)
                 ->where('skema_id', $skemaId)

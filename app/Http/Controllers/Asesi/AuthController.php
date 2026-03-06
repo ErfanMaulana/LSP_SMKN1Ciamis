@@ -86,7 +86,7 @@ class AuthController extends Controller
             return redirect()->route('asesor.dashboard');
         }
 
-        $asesi = \App\Models\Asesi::with(['jurusan', 'asesor.skemas'])->where('NIK', $account->NIK)->first();
+        $asesi = \App\Models\Asesi::with(['jurusan', 'asesor.skemas', 'kelompok.asesors.skemas'])->where('NIK', $account->NIK)->first();
 
         // If asesi has no registration yet, redirect to registration form
         if (!$asesi) {

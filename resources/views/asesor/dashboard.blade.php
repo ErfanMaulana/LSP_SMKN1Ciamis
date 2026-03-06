@@ -195,7 +195,7 @@
 </div>
 
 <div class="table-card">
-    @if($recentCompleted->count())
+    @if(count($recentCompleted))
     <table>
         <thead>
             <tr>

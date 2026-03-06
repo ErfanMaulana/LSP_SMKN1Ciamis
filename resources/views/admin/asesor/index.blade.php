@@ -70,10 +70,9 @@
                 <div class="filter-group">
                     <select class="filter-select">
                         <option>Keahlian: Semua</option>
-                        <option>Software Engineering</option>
-                        <option>Cloud Infrastructure</option>
-                        <option>Network Systems</option>
-                        <option>Data Analysis</option>
+                        @foreach(\App\Models\Skema::orderBy('nama_skema')->get() as $sk)
+                            <option value="{{ $sk->id }}">{{ $sk->nama_skema }}</option>
+                        @endforeach
                     </select>
                     <select class="filter-select">
                         <option>Status: Semua</option>
@@ -109,7 +108,13 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="expertise-text">{{ $item->ID_skema ? 'Software Engineering - Level II' : 'Belum Ditentukan' }}</span>
+                                @if($item->skemas->count())
+                                    @foreach($item->skemas as $skema)
+                                        <span class="expertise-text">{{ $skema->nama_skema }}</span>@if(!$loop->last), @endif
+                                    @endforeach
+                                @else
+                                    <span class="expertise-text" style="color:#94a3b8;">Belum Ditentukan</span>
+                                @endif
                             </td>
                             <td>
                                 <span class="badge badge-active">AKTIF</span>

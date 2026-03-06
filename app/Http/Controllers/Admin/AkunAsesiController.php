@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Imports\AkunAsesiImport;
 use App\Models\Account;
 use App\Models\Asesi;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AkunAsesiController extends Controller
 {
@@ -98,93 +100,24 @@ class AkunAsesiController extends Controller
                 ->with('error', 'Format file tidak didukung. Gunakan .xlsx atau .csv.');
         }
 
-        $rows = $extension === 'xlsx'
-            ? $this->readXlsx($uploadedFile->getRealPath())
-            : $this->readCsv($uploadedFile->getRealPath());
+        $import = new AkunAsesiImport();
 
-        if ($rows === null) {
+        try {
+            Excel::import($import, $uploadedFile);
+        } catch (\Exception $e) {
             return redirect()->route('admin.akun-asesi.index')
-                ->with('error', 'Gagal membaca file. Pastikan file tidak rusak.');
+                ->with('error', 'Gagal membaca file: ' . $e->getMessage());
         }
 
-        $imported = 0;
-        $skipped  = 0;
-        $invalid  = 0;
-        $errors   = [];
-        $rowNum   = 0;
+        $msg = "Import selesai: {$import->imported} akun dibuat.";
+        if ($import->skipped > 0) $msg .= " {$import->skipped} NIK sudah ada (dilewati).";
+        if ($import->invalid > 0) $msg .= " {$import->invalid} baris tidak valid.";
 
-        foreach ($rows as $row) {
-            $rowNum++;
-
-            $nik  = trim((string) ($row[0] ?? ''));
-            $nama = trim((string) ($row[1] ?? ''));
-
-            // Skip header
-            if (strtolower($nik) === 'nik') {
-                continue;
-            }
-
-            // Skip empty rows
-            if ($nik === '' && $nama === '') {
-                continue;
-            }
-
-            // Detect scientific notation (e.g. "1.23457E+15") — this means Excel
-            // converted the NIK to a number and precision is LOST. We must reject it
-            // because the original 16-digit NIK cannot be recovered.
-            if (preg_match('/[eE]/', $nik)) {
-                $invalid++;
-                $errors[] = "Baris {$rowNum}: NIK \"{$nik}\" dalam format scientific notation (presisi hilang). "
-                    . "Gunakan template XLSX (kolom NIK sudah diformat sebagai Text) agar NIK tidak berubah.";
-                continue;
-            }
-
-            // Remove trailing ".0" if a number is stored as decimal (e.g. "1234570000000000.0")
-            if (preg_match('/^(\d{16})\.0*$/', $nik, $m)) {
-                $nik = $m[1];
-            }
-
-            // Validate NIK (16 digits)
-            if (!preg_match('/^\d{16}$/', $nik)) {
-                $invalid++;
-                $errors[] = "Baris {$rowNum}: NIK \"{$nik}\" tidak valid (harus 16 digit angka). "
-                    . "Jika menggunakan CSV, format kolom NIK sebagai Text di Excel.";
-                continue;
-            }
-
-            if (empty($nama)) {
-                $invalid++;
-                $errors[] = "Baris {$rowNum}: Nama kosong untuk NIK {$nik}.";
-                continue;
-            }
-
-            // Skip duplicate NIK
-            if (Account::where('NIK', $nik)->exists()) {
-                $skipped++;
-                $errors[] = "Baris {$rowNum}: NIK {$nik} sudah terdaftar (dilewati).";
-                continue;
-            }
-
-            Account::create([
-                'id'       => $nik,
-                'NIK'      => $nik,
-                'nama'     => $nama,
-                'password' => $nik,
-                'role'     => 'asesi',
-            ]);
-
-            $imported++;
-        }
-
-        $msg = "Import selesai: {$imported} akun dibuat.";
-        if ($skipped > 0) $msg .= " {$skipped} NIK sudah ada (dilewati).";
-        if ($invalid > 0) $msg .= " {$invalid} baris tidak valid.";
-
-        $type = $imported > 0 ? 'success' : 'error';
+        $type = $import->imported > 0 ? 'success' : 'error';
 
         return redirect()->route('admin.akun-asesi.index')
             ->with($type, $msg)
-            ->with('import_errors', $errors);
+            ->with('import_errors', $import->errors);
     }
 
     /**

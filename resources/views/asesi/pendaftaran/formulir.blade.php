@@ -331,12 +331,26 @@
             </div>
 
             <div class="reg-group">
-                <label>Jurusan / Skema Sertifikasi <span class="required">*</span></label>
-                <select name="ID_jurusan" required class="reg-control">
+                <label>Jurusan <span class="required">*</span></label>
+                <select name="ID_jurusan" id="jurusan-select" required class="reg-control">
                     <option value="">Pilih Jurusan</option>
                     @foreach($jurusanList as $jurusan)
-                        <option value="{{ $jurusan->ID_jurusan }}" {{ old('ID_jurusan') == $jurusan->ID_jurusan ? 'selected' : '' }}>
+                        <option value="{{ $jurusan->ID_jurusan }}" {{ old('ID_jurusan', $asesi->ID_jurusan ?? '') == $jurusan->ID_jurusan ? 'selected' : '' }}>
                             {{ $jurusan->nama_jurusan }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="reg-group">
+                <label>Skema Sertifikasi <span class="required">*</span></label>
+                <select name="skema_id" id="skema-select" required class="reg-control">
+                    <option value="">Pilih Jurusan dulu</option>
+                    @foreach($skemaList as $sk)
+                        <option value="{{ $sk->id }}"
+                            data-jurusan="{{ $sk->jurusan_id }}"
+                            {{ old('skema_id', $asesi?->skemas->first()?->id ?? '') == $sk->id ? 'selected' : '' }}>
+                            {{ $sk->nama_skema }}
                         </option>
                     @endforeach
                 </select>
@@ -404,4 +418,43 @@
     </form>
 </div>
 @endif
+@endsection
+
+@section('scripts')
+<script>
+(function () {
+    const skemaData = @json($skemaList->map(fn($s) => ['id' => $s->id, 'jurusan_id' => $s->jurusan_id, 'nama' => $s->nama_skema]));
+    const jurusanSel = document.getElementById('jurusan-select');
+    const skemaSel   = document.getElementById('skema-select');
+    const savedSkema = '{{ old('skema_id', $asesi?->skemas->first()?->id ?? '') }}';
+
+    function filterSkema(jurusanId) {
+        skemaSel.innerHTML = '';
+        const filtered = skemaData.filter(s => String(s.jurusan_id) === String(jurusanId));
+        if (!filtered.length) {
+            skemaSel.innerHTML = '<option value="">Tidak ada skema untuk jurusan ini</option>';
+            return;
+        }
+        const def = document.createElement('option');
+        def.value = ''; def.textContent = 'Pilih Skema';
+        skemaSel.appendChild(def);
+        filtered.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.nama;
+            if (String(s.id) === String(savedSkema)) opt.selected = true;
+            skemaSel.appendChild(opt);
+        });
+    }
+
+    // Init on page load
+    if (jurusanSel.value) {
+        filterSkema(jurusanSel.value);
+    }
+
+    jurusanSel.addEventListener('change', function () {
+        filterSkema(this.value);
+    });
+})();
+</script>
 @endsection

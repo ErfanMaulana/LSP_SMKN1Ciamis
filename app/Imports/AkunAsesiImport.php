@@ -34,6 +34,18 @@ class AkunAsesiImport implements ToCollection, WithChunkReading
                 continue;
             }
 
+            // Remove trailing ".0" if number stored as decimal
+            if (preg_match('/^(\d{16})\.0*$/', $nik, $m)) {
+                $nik = $m[1];
+            }
+
+            // Convert from scientific notation if needed
+            if (preg_match('/[eE]/', $nik) && preg_match('/^([+-]?)(\d+)\.?(\d*)[eE]\+?(\d+)$/', trim($nik), $m)) {
+                $digits = $m[2] . $m[3];
+                $shift  = (int) $m[4] - strlen($m[3]);
+                $nik = $m[1] . $digits . ($shift >= 0 ? str_repeat('0', $shift) : '');
+            }
+
             // Validate: NIK must be 16 digits
             if (!preg_match('/^\d{16}$/', $nik)) {
                 $this->invalid++;
@@ -52,6 +64,7 @@ class AkunAsesiImport implements ToCollection, WithChunkReading
             Account::create([
                 'id'       => $nik,
                 'NIK'      => $nik,
+                'nama'     => $nama,
                 'password' => $nik,
                 'role'     => 'asesi',
             ]);

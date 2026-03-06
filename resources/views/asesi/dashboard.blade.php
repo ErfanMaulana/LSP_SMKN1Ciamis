@@ -331,22 +331,27 @@
 
 @if($asesi)
 {{-- ─── Asesor Penguji ─── --}}
+@php
+    // Asesor bisa dari assignment langsung (ID_asesor) atau dari kelompok
+    $asesorTampil = $asesi->asesor
+        ?? $asesi->kelompok?->asesors?->first();
+@endphp
 <div class="info-card" style="margin-top:24px;">
     <h3><i class="bi bi-person-badge-fill" style="color:#0061a5;"></i> Asesor Penguji</h3>
-    @if($asesi->asesor)
+    @if($asesorTampil)
     <div style="display:flex;align-items:center;gap:16px;padding:16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;">
         <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#0061a5,#0073bd);color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">
-            {{ strtoupper(substr($asesi->asesor->nama, 0, 1)) }}
+            {{ strtoupper(substr($asesorTampil->nama, 0, 1)) }}
         </div>
         <div style="flex:1;">
-            <div style="font-size:15px;font-weight:700;color:#1e293b;">{{ $asesi->asesor->nama }}</div>
+            <div style="font-size:15px;font-weight:700;color:#1e293b;">{{ $asesorTampil->nama }}</div>
             <div style="font-size:12px;color:#64748b;margin-top:2px;">
-                @if($asesi->asesor->skemas->count())
+                @if($asesorTampil->skemas->count())
                     <i class="bi bi-patch-check-fill" style="color:#0061a5;"></i>
-                    {{ $asesi->asesor->skemas->pluck('nama_skema')->join(', ') }}
+                    {{ $asesorTampil->skemas->pluck('nama_skema')->join(', ') }}
                 @endif
-                @if($asesi->asesor->no_met)
-                    &nbsp;·&nbsp; NO MET: {{ $asesi->asesor->no_met }}
+                @if($asesorTampil->no_met)
+                    &nbsp;·&nbsp; NO MET: {{ $asesorTampil->no_met }}
                 @endif
             </div>
         </div>

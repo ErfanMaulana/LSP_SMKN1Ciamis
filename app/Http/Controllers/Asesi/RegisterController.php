@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Asesi;
 use App\Models\BuktiPendukung;
 use App\Models\Jurusan;
+use App\Models\Skema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -19,7 +20,7 @@ class RegisterController extends Controller
     public function showForm()
     {
         $account = Auth::guard('account')->user();
-        $asesi   = Asesi::where('NIK', $account->NIK)->first();
+        $asesi   = Asesi::with('skemas')->where('NIK', $account->NIK)->first();
 
         // If already approved, redirect to dashboard
         if ($asesi && $asesi->status === 'approved') {
@@ -28,6 +29,7 @@ class RegisterController extends Controller
         }
 
         $jurusanList = Jurusan::all();
+        $skemaList   = Skema::orderBy('jurusan_id')->orderBy('nama_skema')->get();
 
         // Parse NIK to auto-fill tanggal_lahir and jenis_kelamin
         // NIK Format: PP KK CC DD MM YY SSSS
@@ -56,7 +58,7 @@ class RegisterController extends Controller
             }
         }
 
-        return view('asesi.pendaftaran.formulir', compact('account', 'asesi', 'jurusanList', 'nikData'));
+        return view('asesi.pendaftaran.formulir', compact('account', 'asesi', 'jurusanList', 'skemaList', 'nikData'));
     }
 
     /**
@@ -98,6 +100,7 @@ class RegisterController extends Controller
             'pekerjaan'             => 'required|string|max:255',
             'pendidikan_terakhir'   => 'required|string|max:255',
             'ID_jurusan'            => 'required|exists:jurusan,ID_jurusan',
+            'skema_id'              => 'required|exists:skemas,id',
             'nama_lembaga'          => 'required|string|max:255',
             'alamat_lembaga'        => 'required|string',
             'jabatan'               => 'required|string|max:255',
@@ -113,14 +116,17 @@ class RegisterController extends Controller
                 ->withInput();
         }
 
-        $data = $request->all();
+        $data = $request->except('skema_id');
         $data['NIK']    = $account->NIK;
         $data['status'] = 'pending';   // reset to pending on new/resubmit
         $data['verified_at'] = null;
         $data['verified_by'] = null;
         $data['catatan_admin'] = null;
 
-        Asesi::updateOrCreate(['NIK' => $account->NIK], $data);
+        $asesiRecord = Asesi::updateOrCreate(['NIK' => $account->NIK], $data);
+
+        // Sync selected skema to pivot table
+        $asesiRecord->skemas()->sync([$request->skema_id => ['status' => 'belum_mulai']]);
 
         // Store NIK in session for step 2
         session(['pendaftaran_nik' => $account->NIK]);
