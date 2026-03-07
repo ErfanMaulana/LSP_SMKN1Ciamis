@@ -22,7 +22,7 @@
             'suffix' => ''
         ],
         [
-            'label' => 'LOKASI TUK',
+            'label' => 'TUK',
             'value' => $totalTuk,
             'suffix' => ''
         ],

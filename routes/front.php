@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\RegisterController;
 use App\Http\Controllers\Front\KompetensiController;
 use App\Http\Controllers\Front\ProfilController;
+use App\Http\Controllers\Front\BeritaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,10 @@ Route::name('front.')->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
     Route::redirect('/daftar-lsp', '/#daftar-lsp')->name('daftar');
     Route::redirect('/kontak', '/#kontak')->name('kontak');
+
+    // Berita Routes
+    Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
+    Route::get('/berita/{slug}', [BeritaController::class, 'show'])->name('berita.show');
 
     // Kompetensi Routes
     Route::get('/kompetensi-dan-data-skema', [KompetensiController::class, 'index'])->name('kompetensi.index');

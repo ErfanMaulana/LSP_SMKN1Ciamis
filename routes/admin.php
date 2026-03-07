@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\JadwalUjikomController;
 use App\Http\Controllers\Admin\AkunAsesiController;
 use App\Http\Controllers\Admin\PenugasanAsesorController;
 use App\Http\Controllers\Admin\KelompokController;
+use App\Http\Controllers\Admin\BeritaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -157,5 +158,14 @@ Route::prefix('admin')->group(function () {
         Route::get('/akun-asesi/template', [AkunAsesiController::class, 'downloadTemplate'])->name('admin.akun-asesi.template');
         Route::patch('/akun-asesi/{id}/reset-password', [AkunAsesiController::class, 'resetPassword'])->name('admin.akun-asesi.reset-password');
         Route::delete('/akun-asesi/{id}', [AkunAsesiController::class, 'destroy'])->name('admin.akun-asesi.destroy');
+
+        // Berita CRUD
+        Route::get('/berita', [BeritaController::class, 'index'])->name('admin.berita.index');
+        Route::get('/berita/create', [BeritaController::class, 'create'])->name('admin.berita.create');
+        Route::post('/berita', [BeritaController::class, 'store'])->name('admin.berita.store');
+        Route::get('/berita/{id}', [BeritaController::class, 'show'])->name('admin.berita.show');
+        Route::get('/berita/{id}/edit', [BeritaController::class, 'edit'])->name('admin.berita.edit');
+        Route::put('/berita/{id}', [BeritaController::class, 'update'])->name('admin.berita.update');
+        Route::delete('/berita/{id}', [BeritaController::class, 'destroy'])->name('admin.berita.destroy');
     });
 });

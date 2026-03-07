@@ -593,6 +593,12 @@
                             <i class="bi bi-book-fill"></i>
                             <span>Konten Profil</span>
                         </a>
+
+                        <a href="{{ route('admin.berita.index') }}"
+                            class="menu-item {{ request()->routeIs('admin.berita.*') ? 'active' : '' }}">
+                            <i class="bi bi-newspaper"></i>
+                            <span>Berita</span>
+                        </a>
                     </div>
                 </div>
 
