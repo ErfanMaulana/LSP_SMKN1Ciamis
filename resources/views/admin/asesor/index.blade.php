@@ -8,7 +8,7 @@
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Manajemen Asesor</h2>
+            <h2>Kelola Asesor</h2>
             <p class="subtitle">Kelola dan awasi semua asesor yang terdaftar dalam sistem.</p>
         </div>
         <a href="{{ route('admin.asesor.create') }}" class="btn btn-primary">
@@ -65,19 +65,19 @@
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Cari berdasarkan nama atau ID...">
+                    <input type="text" id="searchInput" placeholder="Cari berdasarkan nama atau ID..." autocomplete="off">
                 </div>
-                <div class="filter-group">
-                    <select class="filter-select">
-                        <option>Keahlian: Semua</option>
+                <div class="filter-controls">
+                    <select class="filter-select" id="keahlianFilter">
+                        <option value="">Keahlian: Semua</option>
                         @foreach(\App\Models\Skema::orderBy('nama_skema')->get() as $sk)
                             <option value="{{ $sk->id }}">{{ $sk->nama_skema }}</option>
                         @endforeach
                     </select>
-                    <select class="filter-select">
-                        <option>Status: Semua</option>
-                        <option>Aktif</option>
-                        <option>Tidak Aktif</option>
+                    <select class="filter-select" id="sortFilter">
+                        <option value="">Terbaru</option>
+                        <option value="asc">A - Z</option>
+                        <option value="desc">Z - A</option>
                     </select>
                 </div>
             </div>
@@ -93,60 +93,8 @@
                             <th>AKSI</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse($asesor as $item)
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar">
-                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($item->nama) }}&background=3b82f6&color=fff" alt="{{ $item->nama }}">
-                                    </div>
-                                    <div class="user-details">
-                                        <div class="user-name">{{ $item->nama }}</div>
-                                        <div class="user-id">ID: {{ $item->ID_asesor }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                @if($item->skemas->count())
-                                    @foreach($item->skemas as $skema)
-                                        <span class="expertise-text">{{ $skema->nama_skema }}</span>@if(!$loop->last), @endif
-                                    @endforeach
-                                @else
-                                    <span class="expertise-text" style="color:#94a3b8;">Belum Ditentukan</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge badge-active">AKTIF</span>
-                            </td>
-                            <td>
-                                <div class="action-menu">
-                                    <button class="action-btn" onclick="toggleMenu(this)">
-                                        <i class="bi bi-three-dots"></i>
-                                    </button>
-                                    <div class="action-dropdown">
-                                        <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}">
-                                            <i class="bi bi-pencil"></i> Ubah
-                                        </a>
-                                        <a href="#">
-                                            <i class="bi bi-eye"></i> Lihat Detail
-                                        </a>
-                                        <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin: 0;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Apakah Anda yakin?')">
-                                                <i class="bi bi-trash"></i> Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="text-center">Tidak ada data asesor</td>
-                        </tr>
-                        @endforelse
+                    <tbody id="asesorTableBody">
+                        @include('admin.asesor.partials.table-rows')
                     </tbody>
                 </table>
             </div>
@@ -154,7 +102,7 @@
             <!-- Pagination -->
             <div class="pagination-container">
                 <div class="pagination-info">
-                    Menampilkan {{ $asesor->firstItem() ?? 0 }} sampai {{ $asesor->lastItem() ?? 0 }} dari {{ $asesor->total() }} entri
+                    Menampilkan {{ $asesor->firstItem() ?? 0 }} sampai {{ $asesor->lastItem() ?? 0 }} dari {{ $asesor->total() }} data
                 </div>
                 <div class="pagination">
                     @if($asesor->currentPage() > 1)
@@ -361,33 +309,36 @@
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
-    .filter-group {
+    .filter-controls {
         display: flex;
         gap: 12px;
+        flex-wrap: wrap;
     }
 
     .filter-select {
-        padding: 10px 36px 10px 14px;
+        padding: 10px 14px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         font-size: 14px;
         background: white;
+        color: #475569;
         cursor: pointer;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
         transition: all 0.2s;
+        min-width: 160px;
     }
 
     .filter-select:hover {
         border-color: #cbd5e1;
     }
 
-    /* Table */
-    .table-container {
-        overflow-x: auto;
+    .filter-select:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
+
+    /* Table */
+    
 
     .data-table {
         width: 100%;
@@ -550,6 +501,94 @@
         color: #dc2626;
     }
 
+    /* Dropdown Action */
+    .dropdown-action {
+        position: relative;
+        display: inline-block;
+    }
+
+    .btn-dropdown {
+        background: none;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        color: #64748b;
+        border-radius: 6px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-dropdown:hover {
+        background: #f1f5f9;
+        color: #0F172A;
+    }
+
+    .btn-dropdown i {
+        font-size: 18px;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        margin-top: 4px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 160px;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.2s;
+    }
+
+    .dropdown-menu.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        color: #475569;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.2s;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    .dropdown-item:first-child {
+        border-radius: 8px 8px 0 0;
+    }
+
+    .dropdown-item:last-child {
+        border-radius: 0 0 8px 8px;
+    }
+
+    .dropdown-item:hover {
+        background: #f8fafc;
+        color: #0F172A;
+    }
+
+    .dropdown-item.danger {
+        color: #dc2626;
+    }
+    .dropdown-item.danger:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
     /* Pagination */
     .pagination-container {
         display: flex;
@@ -610,25 +649,97 @@
 </style>
 
 <script>
-    function toggleMenu(button) {
+    function toggleDropdown(button) {
+        const dropdown = button.nextElementSibling;
+        const allDropdowns = document.querySelectorAll('.dropdown-menu');
+        
         // Close all other dropdowns
-        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
-            if (dropdown !== button.nextElementSibling) {
-                dropdown.classList.remove('show');
+        allDropdowns.forEach(menu => {
+            if (menu !== dropdown) {
+                menu.classList.remove('show');
             }
         });
         
         // Toggle current dropdown
-        button.nextElementSibling.classList.toggle('show');
+        dropdown.classList.toggle('show');
     }
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
-        if (!event.target.closest('.action-menu')) {
-            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
-                dropdown.classList.remove('show');
+        if (!event.target.closest('.dropdown-action')) {
+            document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                menu.classList.remove('show');
             });
         }
     });
+
+    // AJAX Search dengan Debounce
+    let searchTimeout;
+    const searchInput = document.getElementById('searchInput');
+    const keahlianFilter = document.getElementById('keahlianFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    const tableBody = document.getElementById('asesorTableBody');
+
+    function performSearch() {
+        const searchValue = searchInput.value;
+        const keahlianValue = keahlianFilter.value;
+        const sortValue = sortFilter.value;
+
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (searchValue) params.append('search', searchValue);
+        if (keahlianValue) params.append('keahlian', keahlianValue);
+        if (sortValue) params.append('sort', sortValue);
+
+        // Show loading indicator
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="4" class="text-center">
+                    <div style="padding: 40px 20px;">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; margin-bottom: 12px;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p style="color: #64748b; margin: 0;">Mencari data...</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        // Perform AJAX request
+        fetch(`{{ route('admin.asesor.index') }}?${params.toString()}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            tableBody.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center">
+                        <div style="padding: 40px 20px;">
+                            <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
+                            <p style="color: #64748b; margin: 0;">Terjadi kesalahan saat memuat data</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Search input with debounce (delay 500ms)
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(performSearch, 500);
+    });
+
+    // Filter changes trigger immediate search
+    keahlianFilter.addEventListener('change', performSearch);
+    sortFilter.addEventListener('change', performSearch);
 </script>
 @endsection

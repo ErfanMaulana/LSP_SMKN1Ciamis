@@ -7,23 +7,21 @@
             </div>
             <div class="user-details">
                 <div class="user-name">{{ $item->nama }}</div>
+                <div class="user-id">ID: {{ $item->ID_asesor }}</div>
             </div>
         </div>
     </td>
     <td>
-        <span class="reg-number">{{ $item->no_reg ?? '-' }}</span>
-    </td>
-    <td>
-        @if($item->skema)
-            <span class="expertise-text">{{ $item->skema->nama_skema }}</span>
+        @if($item->skemas->count())
+            @foreach($item->skemas as $skema)
+                <span class="expertise-text">{{ $skema->nama_skema }}</span>@if(!$loop->last), @endif
+            @endforeach
         @else
-            <span class="expertise-text text-muted">Belum Ditentukan</span>
+            <span class="expertise-text" style="color:#94a3b8;">Belum Ditentukan</span>
         @endif
     </td>
     <td>
-        <span class="badge {{ $item->ID_skema ? 'badge-active' : 'badge-inactive' }}">
-            {{ $item->ID_skema ? 'AKTIF' : 'TIDAK AKTIF' }}
-        </span>
+        <span class="badge badge-active">AKTIF</span>
     </td>
     <td>
         <div class="dropdown-action">
@@ -50,7 +48,7 @@
 </tr>
 @empty
 <tr>
-    <td colspan="5" class="text-center">
+    <td colspan="4" class="text-center">
         <div style="padding: 40px 20px;">
             <i class="bi bi-search" style="font-size: 48px; color: #cbd5e1; display: block; margin-bottom: 12px;"></i>
             <p style="color: #64748b; margin: 0;">Tidak ada data asesor ditemukan</p>

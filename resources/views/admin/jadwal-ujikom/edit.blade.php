@@ -6,9 +6,25 @@
 
 @section('styles')
 <style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .page-header h2 {
+        font-size: 22px;
+        color: #0F172A;
+        font-weight: 700;
+        margin: 0;
+    }
+
     .form-card {
         background: white; border-radius: 12px; padding: 32px;
-        box-shadow: 0 1px 3px rgba(0,0,0,.08); max-width: 860px;
+        box-shadow: 0 1px 3px rgba(0,0,0,.08);
     }
     .form-card h3 {
         font-size: 16px; font-weight: 700; color: #0F172A;
@@ -54,40 +70,57 @@
     .validation-error.show { display: flex; }
     .form-group.has-error .form-control { border-color: #ef4444; }
 
-    .form-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px solid #f1f5f9;
+    }
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s;
+    }
     .btn-submit {
-        padding: 10px 24px; background: #0061a5; color: #fff; border: none;
-        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-        display: inline-flex; align-items: center; gap: 8px;
+        background: #0073bd;
+        color: white;
+        padding: 10px 20px;
     }
-    .btn-submit:hover { background: #003961; }
+    .btn-submit:hover {
+        background: #0073bd;
+        transform: translateY(-1px);
+    }
     .btn-cancel {
-        padding: 10px 20px; background: #f1f5f9; color: #475569; border: none;
-        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-        text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        background: #64748b;
+        color: white;
+        padding: 10px 20px;
     }
-    .btn-cancel:hover { background: #e2e8f0; }
-    .btn-delete {
-        padding: 10px 20px; background: #fff1f2; color: #e11d48; border: 1px solid #fecdd3;
-        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-        display: inline-flex; align-items: center; gap: 8px; margin-left: auto;
+    .btn-cancel:hover {
+        background: #475569;
     }
-    .btn-delete:hover { background: #ffe4e6; }
     @media(max-width:640px) { .form-grid { grid-template-columns: 1fr; } }
 </style>
 @endsection
 
 @section('content')
-<div style="margin-bottom:16px;">
-    <a href="{{ route('admin.jadwal-ujikom.index') }}" style="color:#64748b;text-decoration:none;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
-        <i class="bi bi-arrow-left"></i> Kembali ke Daftar Jadwal
+<div class="page-header">
+    <h2>Edit Jadwal Uji Kompetensi</h2>
+    <a href="{{ route('admin.jadwal-ujikom.index') }}" class="btn btn-cancel">
+        <i class="bi bi-arrow-left"></i> Kembali
     </a>
 </div>
 
 <div class="form-card">
-    <h3><i class="bi bi-calendar-event" style="color:#0061a5;"></i> Edit Jadwal Uji Kompetensi</h3>
-
-        @if($errors->any())
+    @if($errors->any())
     <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#9f1239;">
         <strong><i class="bi bi-exclamation-triangle"></i> Terdapat kesalahan:</strong>
         <ul style="margin:6px 0 0 16px;padding:0;">
@@ -232,23 +265,13 @@
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn-submit">
-                <i class="bi bi-save"></i> Simpan Perubahan
+            <button type="submit" class="btn btn-submit">
+                <i class="bi bi-save"></i> Update
             </button>
-            <a href="{{ route('admin.jadwal-ujikom.index') }}" class="btn-cancel">
+            <a href="{{ route('admin.jadwal-ujikom.index') }}" class="btn btn-cancel">
                 <i class="bi bi-x-circle"></i> Batal
             </a>
         </div>
-    </form>
-
-    {{-- Delete Form --}}
-    <form method="POST" action="{{ route('admin.jadwal-ujikom.destroy', $jadwal->id) }}"
-          style="margin-top: 12px; text-align: right;"
-          onsubmit="return confirm('Yakin ingin menghapus jadwal ini? Tindakan ini tidak dapat dibatalkan.')">
-        @csrf @method('DELETE')
-        <button type="submit" class="btn-delete">
-            <i class="bi bi-trash"></i> Hapus Jadwal
-        </button>
     </form>
 </div>
 @endsection

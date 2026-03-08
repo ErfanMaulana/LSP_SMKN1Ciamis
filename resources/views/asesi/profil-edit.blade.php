@@ -31,11 +31,11 @@
         font-family: inherit;
     }
 
-    .profile-tab:hover { color: #14532d; }
+    .profile-tab:hover { color: #0073bd; }
 
     .profile-tab.active {
-        color: #14532d;
-        border-bottom-color: #14532d;
+        color: #0073bd;
+        border-bottom-color: #0073bd;
     }
 
     .tab-content { display: none; }
@@ -60,12 +60,12 @@
     .card-header-icon {
         width: 40px;
         height: 40px;
-        background: #d1fae5;
+        background: #dbeafe;
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #14532d;
+        color: #0073bd;
         font-size: 18px;
         flex-shrink: 0;
     }
@@ -118,9 +118,9 @@
 
     .form-control:focus {
         outline: none;
-        border-color: #14532d;
+        border-color: #0073bd;
         background: white;
-        box-shadow: 0 0 0 3px rgba(20, 83, 45, 0.1);
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     .form-control::placeholder { color: #9ca3af; }
@@ -176,7 +176,7 @@
         display: inline-block;
         width: 3px;
         height: 14px;
-        background: #14532d;
+        background: #0073bd;
         border-radius: 2px;
     }
 
@@ -204,12 +204,12 @@
     }
 
     .btn-primary {
-        background: #14532d;
+        background: #0073bd;
         color: white;
-        box-shadow: 0 2px 8px rgba(20, 83, 45, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 115, 189, 0.3);
     }
 
-    .btn-primary:hover { background: #166534; transform: translateY(-1px); }
+    .btn-primary:hover { background: #0c4a6e; transform: translateY(-1px); }
 
     .btn-outline {
         background: white;
@@ -260,11 +260,11 @@
         align-items: center;
         gap: 6px;
         padding: 10px 16px;
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
         border-radius: 8px;
         font-size: 13px;
-        color: #14532d;
+        color: #0073bd;
         margin-bottom: 20px;
     }
 
@@ -553,7 +553,7 @@
             { pct: '25%',  color: '#ef4444', label: 'Sangat lemah' },
             { pct: '50%',  color: '#f97316', label: 'Lemah' },
             { pct: '75%',  color: '#eab308', label: 'Cukup kuat' },
-            { pct: '100%', color: '#22c55e', label: 'Kuat' },
+            { pct: '100%', color: '#3b82f6', label: 'Kuat' },
         ];
 
         bar.style.width       = levels[score].pct;

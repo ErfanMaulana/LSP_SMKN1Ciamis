@@ -6,7 +6,7 @@
 @section('styles')
 <style>
     .page-header {
-        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+        background: #0073bd;
         border-radius: 12px;
         padding: 22px 26px;
         color: white;
@@ -23,7 +23,7 @@
         font-size: 13px; font-weight: 500; text-decoration: none;
         color: #64748b; background: white; cursor: pointer; transition: all 0.2s;
     }
-    .filter-btn:hover, .filter-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+    .filter-btn:hover, .filter-btn.active { background: #0073bd; color: white; border-color: #0073bd; }
 
     .table-card {
         background: white; border-radius: 12px;
@@ -56,7 +56,7 @@
 
     .btn-review {
         display: inline-flex; align-items: center; gap: 5px;
-        background: #2563eb; color: white;
+        background: #0073bd; color: white;
         padding: 6px 14px; border-radius: 6px;
         font-size: 12px; font-weight: 500; text-decoration: none;
         transition: background 0.2s;
@@ -133,9 +133,9 @@
                 <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
                 <td>
                     @if($row->rekomendasi === 'lanjut')
-                        <span class="badge" style="background:#d1fae5;color:#059669;">✓ Dapat Lanjut</span>
+                        <span class="badge" style="background:#d1fae5;color:#059669;justify-content:center;white-space:nowrap;">✓ Dapat Lanjut</span>
                     @elseif($row->rekomendasi === 'tidak_lanjut')
-                        <span class="badge" style="background:#fee2e2;color:#dc2626;">✗ Tidak Lanjut</span>
+                        <span class="badge" style="background:#fee2e2;color:#dc2626;justify-content:center;white-space:nowrap;">✗ Tidak Lanjut</span>
                     @else
                         <span style="font-size:12px;color:#94a3b8;">— Belum direview</span>
                     @endif

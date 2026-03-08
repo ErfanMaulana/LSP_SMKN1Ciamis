@@ -36,6 +36,13 @@ class AsesiController extends Controller
             $query->where('status', $request->status);
         }
         
+        // Sort filter (A-Z or Z-A)
+        $sortOrder = 'asc'; // default
+        if ($request->has('sort') && $request->sort != '') {
+            $sortOrder = $request->sort;
+        }
+        $query->orderBy('nama', $sortOrder);
+        
         $asesi = $query->paginate(10);
         
         // Statistik dinamis

@@ -42,7 +42,7 @@
         .sidebar-header .user-icon {
             width: 64px;
             height: 64px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: #0073bd;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -98,7 +98,7 @@
 
         .menu-badge {
             margin-left: auto;
-            background: #3b82f6;
+            background: #0073bd;
             color: white;
             font-size: 10px;
             padding: 2px 7px;
@@ -127,7 +127,7 @@
 
         .user-avatar-sm {
             width: 38px; height: 38px;
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: #0073bd;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             color: white; font-weight: 700; font-size: 15px;
@@ -137,14 +137,158 @@
         .user-name { font-size: 13px; font-weight: 600; color: #1e293b; }
         .user-role { font-size: 11px; color: #64748b; }
 
-        .btn-logout {
-            background: #dc2626; color: white; border: none;
-            padding: 7px 18px; border-radius: 6px; cursor: pointer;
-            font-size: 13px; font-weight: 500;
-            display: inline-flex; align-items: center; gap: 6px;
-            transition: background 0.2s;
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: relative;
         }
-        .btn-logout:hover { background: #b91c1c; }
+
+        .profile-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .profile-toggle:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            min-width: 260px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .profile-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .profile-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .profile-avatar-lg {
+            width: 48px;
+            height: 48px;
+            background: #0073bd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 115, 189, 0.3);
+        }
+
+        .profile-header-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-header-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .profile-header-role {
+            font-size: 12px;
+            color: #64748b;
+            margin: 2px 0 0 0;
+        }
+
+        .profile-body {
+            padding: 8px 0;
+        }
+
+        .profile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .profile-menu-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .profile-menu-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .profile-menu-item:hover i {
+            color: #2563eb;
+        }
+
+        .profile-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 8px 0;
+        }
+
+        .profile-logout {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #dc2626;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .profile-logout:hover {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .profile-logout i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
 
         .content-wrapper { padding: 28px; }
 
@@ -227,21 +371,50 @@
             </div>
 
             <div class="topbar-right">
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <div class="user-avatar-sm">
-                        {{ strtoupper(substr($asesor->nama ?? 'A', 0, 1)) }}
-                    </div>
-                    <div class="user-details">
-                        <span class="user-name">{{ $asesor->nama ?? 'Asesor' }}</span>
-                        <span class="user-role">Asesor</span>
+                <div class="profile-dropdown" id="profileDropdown">
+                    <button class="profile-toggle" onclick="toggleProfileMenu(event)">
+                        <div class="user-avatar-sm">
+                            {{ strtoupper(substr($asesor->nama ?? 'A', 0, 1)) }}
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name">{{ $asesor->nama ?? 'Asesor' }}</span>
+                            <span class="user-role">Asesor</span>
+                        </div>
+                        <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
+                    </button>
+
+                    <div class="profile-menu" id="profileMenu">
+                        <div class="profile-header">
+                            <div class="profile-avatar-lg">
+                                {{ strtoupper(substr($asesor->nama ?? 'A', 0, 1)) }}
+                            </div>
+                            <div class="profile-header-info">
+                                <h4 class="profile-header-name">{{ $asesor->nama ?? 'Asesor' }}</h4>
+                                <p class="profile-header-role">Asesor LSP</p>
+                            </div>
+                        </div>
+
+                        <div class="profile-body">
+                            <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                <i class="bi bi-person"></i>
+                                <span>Profil</span>
+                            </a>
+                            <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                <i class="bi bi-gear"></i>
+                                <span>Pengaturan</span>
+                            </a>
+                            <div class="profile-divider"></div>
+                            <form method="POST" action="{{ route('asesor.logout') }}"
+                                style="width: 100%; margin: 0;">
+                                @csrf
+                                <button type="submit" class="profile-logout">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-                <form method="POST" action="{{ route('asesor.logout') }}">
-                    @csrf
-                    <button type="submit" class="btn-logout">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </button>
-                </form>
             </div>
         </div>
 
@@ -263,6 +436,25 @@
         </div>
     </main>
 </div>
+
+<script>
+    function toggleProfileMenu(event) {
+        event.stopPropagation();
+        const menu = document.getElementById('profileMenu');
+        menu.classList.toggle('show');
+    }
+
+    // Close profile menu when clicking outside
+    document.addEventListener('click', function (event) {
+        const profileDropdown = document.getElementById('profileDropdown');
+        const profileMenu = document.getElementById('profileMenu');
+
+        if (profileDropdown && !profileDropdown.contains(event.target)) {
+            if (profileMenu) profileMenu.classList.remove('show');
+        }
+    });
+</script>
+
 @yield('scripts')
 </body>
 </html>

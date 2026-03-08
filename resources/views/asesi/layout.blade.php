@@ -43,11 +43,11 @@
         }
 
         .sidebar::-webkit-scrollbar-track {
-            background: #f0fdf4;
+            background: #eff6ff;
         }
 
         .sidebar::-webkit-scrollbar-thumb {
-            background: #bbf7d0;
+            background: #bfdbfe;
             border-radius: 5px;
         }
 
@@ -60,7 +60,7 @@
         .sidebar-header .user-icon {
             width: 60px;
             height: 60px;
-            background: #16a34a;
+            background: #0073bd;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -69,7 +69,7 @@
             font-size: 24px;
             color: #ffffff;
             font-weight: 700;
-            box-shadow: 0 4px 12px rgba(22,163,74,0.3);
+            box-shadow: 0 4px 12px rgba(0,115,189,0.3);
         }
 
         .sidebar-header h4 {
@@ -81,7 +81,7 @@
 
         .sidebar-header p {
             font-size: 11px;
-            color: #16a34a;
+            color: #0073bd;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: 600;
@@ -124,14 +124,14 @@
         }
 
         .menu-item:hover {
-            background: rgba(22,163,74,0.07);
-            color: #16a34a;
+            background: rgba(0,115,189,0.07);
+            color: #0073bd;
         }
 
         .menu-item.active {
-            background: rgba(22,163,74,0.10);
-            color: #16a34a;
-            border-left: 3px solid #16a34a;
+            background: rgba(0,115,189,0.10);
+            color: #0073bd;
+            border-left: 3px solid #0073bd;
             font-weight: 600;
         }
 
@@ -151,7 +151,7 @@
             margin-left: auto;
             font-size: 10px;
             padding: 2px 8px;
-            background: #16a34a;
+            background: #0073bd;
             color: #fff;
             border-radius: 10px;
             font-weight: 600;
@@ -197,7 +197,7 @@
         .user-avatar {
             width: 40px;
             height: 40px;
-            background: #16a34a;
+            background: #0073bd;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -205,104 +205,162 @@
             color: #ffffff;
             font-weight: 700;
             font-size: 15px;
-            box-shadow: 0 2px 8px rgba(22,163,74,0.35);
+            box-shadow: 0 2px 8px rgba(0,115,189,0.35);
         }
 
-        /* Profile dropdown */
+        /* Profile Dropdown */
         .profile-dropdown {
             position: relative;
         }
+
         .profile-toggle {
-            display: flex;
-            align-items: center;
-            gap: 10px;
             background: none;
             border: none;
             cursor: pointer;
-            padding: 6px 10px;
-            border-radius: 10px;
-            transition: background .15s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
-        .profile-toggle:hover { background: #f0fdf4; }
-        .profile-toggle .chevron {
-            font-size: 13px;
-            color: #94a3b8;
-            transition: transform .2s;
+
+        .profile-toggle:hover {
+            background: rgba(0, 115, 189, 0.1);
         }
-        .profile-dropdown.open .chevron { transform: rotate(180deg); }
+
         .profile-menu {
             position: absolute;
+            top: 100%;
             right: 0;
-            top: calc(100% + 8px);
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            min-width: 220px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-            z-index: 9999;
+            margin-top: 8px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+            min-width: 260px;
+            z-index: 1000;
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-6px);
-            transition: opacity .18s, transform .18s, visibility .18s;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
         }
-        .profile-dropdown.open .profile-menu {
+
+        .profile-dropdown.open .profile-menu,
+        .profile-dropdown .profile-menu.show {
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
         }
+
         .profile-menu-header {
-            padding: 16px;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
             display: flex;
             align-items: center;
             gap: 12px;
         }
+
         .profile-avatar-lg {
-            width: 44px;
-            height: 44px;
-            background: #16a34a;
+            width: 48px;
+            height: 48px;
+            background: #0073bd;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #ffffff;
             font-weight: 700;
-            font-size: 17px;
+            font-size: 18px;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 115, 189, 0.3);
         }
-        .profile-menu-name { font-size: 14px; font-weight: 700; color: #1e293b; }
-        .profile-menu-role { font-size: 11px; color: #64748b; }
-        .profile-menu-body { padding: 8px 0; }
+
+        .profile-menu-header-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-menu-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .profile-menu-role {
+            font-size: 12px;
+            color: #64748b;
+            margin: 2px 0 0 0;
+        }
+
+        .profile-menu-body {
+            padding: 8px 0;
+        }
+
         .profile-menu-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            font-size: 13px;
-            color: #374151;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #475569;
             text-decoration: none;
-            transition: background .12s;
-            cursor: pointer;
-        }
-        .profile-menu-item:hover { background: #f0fdf4; color: #16a34a; }
-        .profile-menu-item i { font-size: 16px; width: 18px; text-align: center; }
-        .profile-menu-divider { height: 1px; background: #f1f5f9; margin: 4px 0; }
-        .profile-logout {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 16px;
-            font-size: 13px;
-            color: #dc2626;
-            background: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
             border: none;
+            background: none;
             width: 100%;
             text-align: left;
             cursor: pointer;
-            transition: background .12s;
-            border-radius: 0 0 12px 12px;
         }
-        .profile-logout:hover { background: #fef2f2; }
+
+        .profile-menu-item:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        .profile-menu-item i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .profile-menu-item:hover i {
+            color: #0073bd;
+        }
+
+        .profile-menu-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 8px 0;
+        }
+
+        .profile-logout {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #dc2626;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .profile-logout:hover {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .profile-logout i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
 
         .user-details {
             display: flex;
@@ -341,9 +399,9 @@
         }
 
         .alert-success {
-            background-color: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
+            background-color: #dbeafe;
+            color: #0c4a6e;
+            border: 1px solid #bfdbfe;
         }
 
         .alert-error {
@@ -355,7 +413,7 @@
         /* Mobile Toggle Button */
         .mobile-toggle {
             display: none;
-            background: #16a34a;
+            background: #0073bd;
             color: white;
             border: none;
             padding: 8px 12px;
@@ -506,7 +564,7 @@
                                 <span class="user-name">{{ $asesi->nama ?? ($account->nama ?? 'Asesi') }}</span>
                                 <span class="user-role">Asesi</span>
                             </div>
-                            <i class="bi bi-chevron-down chevron"></i>
+                            <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
                         </button>
 
                         <div class="profile-menu" id="asesiProfileMenu">
@@ -514,22 +572,29 @@
                                 <div class="profile-avatar-lg">
                                     {{ strtoupper(substr($asesi->nama ?? ($account->nama ?? 'A'), 0, 1)) }}
                                 </div>
-                                <div>
-                                    <div class="profile-menu-name">{{ $asesi->nama ?? ($account->nama ?? 'Asesi') }}</div>
-                                    <div class="profile-menu-role">Asesi LSP</div>
+                                <div class="profile-menu-header-info">
+                                    <h4 class="profile-menu-name">{{ $asesi->nama ?? ($account->nama ?? 'Asesi') }}</h4>
+                                    <p class="profile-menu-role">Asesi LSP</p>
                                 </div>
                             </div>
+
                             <div class="profile-menu-body">
                                 @if($isApproved)
                                     <a href="{{ route('asesi.profil.edit') }}" class="profile-menu-item">
-                                        <i class="bi bi-person-circle"></i> Profil Saya
+                                        <i class="bi bi-person"></i>
+                                        <span>Profil</span>
+                                    </a>
+                                    <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                        <i class="bi bi-gear"></i>
+                                        <span>Pengaturan</span>
                                     </a>
                                     <div class="profile-menu-divider"></div>
                                 @endif
-                                <form method="POST" action="{{ route('asesi.logout') }}">
+                                <form method="POST" action="{{ route('asesi.logout') }}" style="width: 100%; margin: 0;">
                                     @csrf
                                     <button type="submit" class="profile-logout">
-                                        <i class="bi bi-box-arrow-right"></i> Logout
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span>Logout</span>
                                     </button>
                                 </form>
                             </div>
@@ -572,15 +637,17 @@
 
         function toggleAsesiProfile(e) {
             e.stopPropagation();
-            const dd = document.getElementById('asesiProfileDropdown');
-            dd.classList.toggle('open');
+            const menu = document.getElementById('asesiProfileMenu');
+            menu.classList.toggle('show');
         }
 
+        // Close profile menu when clicking outside
         document.addEventListener('click', function(event) {
-            // Close profile dropdown
-            const dd = document.getElementById('asesiProfileDropdown');
-            if (dd && !dd.contains(event.target)) {
-                dd.classList.remove('open');
+            const profileDropdown = document.getElementById('asesiProfileDropdown');
+            const profileMenu = document.getElementById('asesiProfileMenu');
+
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                if (profileMenu) profileMenu.classList.remove('show');
             }
 
             // Close sidebar on mobile when clicking outside

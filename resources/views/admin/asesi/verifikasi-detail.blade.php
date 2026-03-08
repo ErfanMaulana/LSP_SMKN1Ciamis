@@ -5,24 +5,53 @@
 
 @section('styles')
 <style>
-    .review-page {
-        max-width: 1000px;
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+        gap: 16px;
     }
 
-    .back-link {
+    .page-header h2 {
+        font-size: 22px;
+        color: #0F172A;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .review-page {
+        width: 100%;
+    }
+
+    .btn {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        color: #6b7280;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
         text-decoration: none;
-        font-size: 13px;
-        font-weight: 500;
-        margin-bottom: 20px;
-        transition: color 0.2s;
+        transition: all 0.2s;
     }
 
-    .back-link:hover {
-        color: #0073bd;
+    .btn-secondary {
+        background: #64748b;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #475569;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+    }
+
+    .back-link {
+        display: none;
     }
 
     .profile-header {
@@ -38,26 +67,28 @@
     }
 
     .profile-photo {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
+        width: 140px;
+        height: 140px;
+        border-radius: 8px;
         object-fit: cover;
         border: 4px solid #e5e7eb;
         flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     .profile-photo-placeholder {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        width: 140px;
+        height: 140px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #0073bd, #0073bd);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 36px;
+        font-size: 48px;
         font-weight: 700;
         color: #fff;
         flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     .profile-info h2 {
@@ -485,11 +516,14 @@
 @endsection
 
 @section('content')
-<div class="review-page">
-    <a href="{{ route('admin.asesi.verifikasi') }}" class="back-link">
-        <i class="bi bi-arrow-left"></i> Kembali ke Daftar Verifikasi
+<div class="page-header">
+    <h2>Review & Verifikasi Asesi</h2>
+    <a href="{{ route('admin.asesi.verifikasi') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
     </a>
+</div>
 
+<div class="review-page">
     <!-- Profile Header -->
     <div class="profile-header">
         @if($asesi->pas_foto)

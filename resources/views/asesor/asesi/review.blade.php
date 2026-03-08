@@ -7,13 +7,14 @@
 <style>
     .back-btn {
         display: inline-flex; align-items: center; gap: 6px;
-        color: #2563eb; text-decoration: none; font-size: 14px;
-        font-weight: 500; margin-bottom: 18px;
+        background: white; color: #475569; text-decoration: none; font-size: 14px;
+        font-weight: 500; margin-bottom: 18px; padding: 8px 16px; border-radius: 8px;
+        border: 1.5px solid #e2e8f0; transition: all 0.2s;
     }
-    .back-btn:hover { color: #1d4ed8; }
+    .back-btn:hover { background: #f8fafc; }
 
     .header-card {
-        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+        background: #0073bd;
         border-radius: 14px; padding: 24px 28px; color: white; margin-bottom: 24px;
         display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
         flex-wrap: wrap;
@@ -33,7 +34,7 @@
     }
     .summary-card .num { font-size: 28px; font-weight: 700; }
     .summary-card .lbl { font-size: 12px; color: #64748b; font-weight: 500; }
-    .k-color  { color: #059669; }
+    .k-color  { color: #0073bd; }
     .bk-color { color: #dc2626; }
 
     .print-btn {
@@ -57,7 +58,7 @@
     }
     .unit-number {
         width: 32px; height: 32px;
-        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        background: #0073bd;
         color: white; border-radius: 8px;
         display: flex; align-items: center; justify-content: center;
         font-size: 13px; font-weight: 700; flex-shrink: 0;
@@ -84,7 +85,7 @@
         padding: 5px 14px; border-radius: 20px; font-size: 13px; font-weight: 700;
         flex-shrink: 0;
     }
-    .status-K  { background: #d1fae5; color: #059669; }
+    .status-K  { background: #dbeafe; color: #0073bd; }
     .status-BK { background: #fee2e2; color: #dc2626; }
     .status-na { background: #f1f5f9; color: #94a3b8; }
 
@@ -98,7 +99,7 @@
     .kriteria-list li::before {
         content: counter(krit);
         counter-increment: krit;
-        background: #dbeafe; color: #2563eb;
+        background: #dbeafe; color: #0073bd;
         width: 18px; height: 18px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
         font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
@@ -156,7 +157,7 @@
         <div class="lbl">Unit Kompetensi</div>
     </div>
     <div class="summary-card">
-        <div class="num" style="color:#2563eb;">{{ $answers->count() }}</div>
+        <div class="num" style="color:#0073bd;">{{ $answers->count() }}</div>
         <div class="lbl">Elemen Dijawab</div>
     </div>
     <div class="summary-card">
@@ -169,7 +170,7 @@
     </div>
     <div class="summary-card">
         @php $pct = $answers->count() > 0 ? round($kCount / $answers->count() * 100) : 0; @endphp
-        <div class="num" style="color:{{ $pct >= 70 ? '#059669' : '#d97706' }};">{{ $pct }}%</div>
+        <div class="num" style="color:{{ $pct >= 70 ? '#0073bd' : '#d97706' }};">{{ $pct }}%</div>
         <div class="lbl">Tingkat Kompeten</div>
     </div>
 </div>
@@ -229,7 +230,7 @@
      FR.APL.02 — Rekomendasi Asesor
 ════════════════════════════════════════════════════════ --}}
 <div class="unit-card" style="margin-top:28px;" id="rekomendasi-section">
-    <div class="unit-header" style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:white;">
+    <div class="unit-header" style="background:#0073bd;color:white;">
         <div class="unit-number" style="background:rgba(255,255,255,0.2);">
             <i class="bi bi-patch-check-fill" style="font-size:16px;"></i>
         </div>
@@ -240,11 +241,11 @@
     </div>
 
     @if($pivot->rekomendasi)
-    <div style="padding:16px 22px;background:{{ $pivot->rekomendasi === 'lanjut' ? '#d1fae5' : '#fee2e2' }};border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:12px;">
+    <div style="padding:16px 22px;background:{{ $pivot->rekomendasi === 'lanjut' ? '#dbeafe' : '#fee2e2' }};border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:12px;">
         <i class="bi bi-{{ $pivot->rekomendasi === 'lanjut' ? 'check-circle-fill' : 'x-circle-fill' }}"
-           style="font-size:22px;color:{{ $pivot->rekomendasi === 'lanjut' ? '#059669' : '#dc2626' }};"></i>
+           style="font-size:22px;color:{{ $pivot->rekomendasi === 'lanjut' ? '#0073bd' : '#dc2626' }};"></i>
         <div>
-            <div style="font-weight:700;font-size:15px;color:{{ $pivot->rekomendasi === 'lanjut' ? '#065f46' : '#991b1b' }};">
+            <div style="font-weight:700;font-size:15px;color:{{ $pivot->rekomendasi === 'lanjut' ? '#0c4a6e' : '#991b1b' }};">
                 Asesmen {{ $pivot->rekomendasi === 'lanjut' ? 'dapat' : 'tidak dapat' }} dilanjutkan
             </div>
             <div style="font-size:12px;color:#64748b;margin-top:2px;">
@@ -270,8 +271,8 @@
                            style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:8px;border:2px solid #e2e8f0;margin-bottom:10px;transition:all 0.2s;">
                         <input type="radio" name="rekomendasi" value="lanjut"
                                {{ old('rekomendasi', $pivot->rekomendasi) === 'lanjut' ? 'checked' : '' }}
-                               style="accent-color:#059669;width:16px;height:16px;">
-                        <span style="font-weight:600;color:#065f46;">✓ &nbsp;Asesmen <u>dapat</u> dilanjutkan</span>
+                               style="accent-color:#0073bd;width:16px;height:16px;">
+                        <span style="font-weight:600;color:#0073bd;">✓ &nbsp;Asesmen <u>dapat</u> dilanjutkan</span>
                     </label>
                     <label id="label-tidak" onclick="selectRekom('tidak_lanjut')"
                            style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border-radius:8px;border:2px solid #e2e8f0;transition:all 0.2s;">
@@ -344,7 +345,7 @@
                 <i class="bi bi-arrow-left"></i> Kembali
             </a>
             <button type="submit"
-                    style="padding:10px 26px;border-radius:8px;border:none;background:linear-gradient(135deg,#1e3a5f,#2563eb);color:white;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+                    style="padding:10px 26px;border-radius:8px;border:none;background:#0073bd;color:white;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
                 <i class="bi bi-send-check-fill"></i>
                 {{ $pivot->rekomendasi ? 'Perbarui Rekomendasi' : 'Simpan Rekomendasi' }}
             </button>
@@ -359,8 +360,8 @@
 function selectRekom(val) {
     const lanjut = document.getElementById('label-lanjut');
     const tidak  = document.getElementById('label-tidak');
-    lanjut.style.borderColor = val === 'lanjut'       ? '#059669' : '#e2e8f0';
-    lanjut.style.background  = val === 'lanjut'       ? '#f0fdf4' : 'white';
+    lanjut.style.borderColor = val === 'lanjut'       ? '#0073bd' : '#e2e8f0';
+    lanjut.style.background  = val === 'lanjut'       ? '#eff6ff' : 'white';
     tidak.style.borderColor  = val === 'tidak_lanjut' ? '#dc2626' : '#e2e8f0';
     tidak.style.background   = val === 'tidak_lanjut' ? '#fff1f2' : 'white';
 }

@@ -37,7 +37,7 @@ class AdminController extends Controller
         if ($admin && Hash::check($request->password, $admin->password)) {
             Auth::guard('admin')->login($admin, $request->filled('remember'));
             
-            return redirect()->intended('/admin/dashboard')->with('success', 'Login berhasil!');
+            return redirect()->route('admin.dashboard')->with('success', 'Login berhasil!');
         }
 
         return back()->withErrors([

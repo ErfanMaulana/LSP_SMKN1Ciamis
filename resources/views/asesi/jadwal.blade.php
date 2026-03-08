@@ -81,7 +81,7 @@
     }
 
     .countdown-box {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #0073bd;
         border-radius: 16px;
         padding: 20px;
         min-width: 100px;
@@ -89,8 +89,8 @@
     }
 
     .countdown-box.started {
-        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
-        box-shadow: 0 8px 32px rgba(20, 83, 45, 0.3);
+        background: #0073bd;
+        box-shadow: 0 8px 32px rgba(0, 115, 189, 0.3);
     }
 
     .countdown-number {
@@ -154,7 +154,7 @@
         font-size: 24px;
         margin-bottom: 10px;
         display: block;
-        color: #667eea;
+        color: #0073bd;
     }
 
     .info-card-label {
@@ -200,7 +200,7 @@
     }
 
     .peserta-count {
-        background: #667eea;
+        background: #0073bd;
         color: white;
         padding: 6px 16px;
         border-radius: 20px;
@@ -245,16 +245,16 @@
 
     .peserta-item:hover {
         background: #f8fafc;
-        border-color: #667eea;
+        border-color: #0073bd;
         transform: translateX(3px);
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 115, 189, 0.1);
     }
 
     .peserta-avatar {
         width: 42px;
         height: 42px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #0073bd;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -308,7 +308,7 @@
     }
 
     .jadwal-nav-dot.active {
-        background: #667eea;
+        background: #0073bd;
         transform: scale(1.3);
     }
 

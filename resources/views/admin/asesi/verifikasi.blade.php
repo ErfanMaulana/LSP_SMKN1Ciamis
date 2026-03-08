@@ -1,22 +1,21 @@
 @extends('admin.layout')
 
 @section('title', 'Verifikasi Asesi')
-@section('page-title', 'Verifikasi Pendaftaran Asesi')
+@section('page-title', 'Verifikasi Asesi')
 
 @section('content')
 <div class="asesi-verifikasi">
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Verifikasi Pendaftaran Asesi</h2>
+            <h2>Verifikasi Hasil Pendaftaran Asesi</h2>
             <p class="subtitle">Kelola dan verifikasi pendaftaran calon asesi baru.</p>
         </div>
     </div>
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
-        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'pending']) }}" 
-           class="stat-card {{ $status === 'pending' ? 'stat-card-active' : '' }}">
+        <div class="stat-card">
             <div class="stat-icon blue">
                 <i class="bi bi-hourglass-split"></i>
             </div>
@@ -24,10 +23,9 @@
                 <div class="stat-label">MENUNGGU</div>
                 <div class="stat-value">{{ $counts['pending'] }}</div>
             </div>
-        </a>
+        </div>
 
-        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'approved']) }}" 
-           class="stat-card {{ $status === 'approved' ? 'stat-card-active' : '' }}">
+        <div class="stat-card">
             <div class="stat-icon blue">
                 <i class="bi bi-check-circle"></i>
             </div>
@@ -35,10 +33,9 @@
                 <div class="stat-label">DISETUJUI</div>
                 <div class="stat-value">{{ $counts['approved'] }}</div>
             </div>
-        </a>
+        </div>
 
-        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'rejected']) }}" 
-           class="stat-card {{ $status === 'rejected' ? 'stat-card-active' : '' }}">
+        <div class="stat-card">
             <div class="stat-icon blue">
                 <i class="bi bi-x-circle"></i>
             </div>
@@ -46,10 +43,9 @@
                 <div class="stat-label">DITOLAK</div>
                 <div class="stat-value">{{ $counts['rejected'] }}</div>
             </div>
-        </a>
+        </div>
 
-        <a href="{{ route('admin.asesi.verifikasi') }}" 
-           class="stat-card {{ $status === '' ? 'stat-card-active' : '' }}">
+        <div class="stat-card">
             <div class="stat-icon blue">
                 <i class="bi bi-people"></i>
             </div>
@@ -57,7 +53,7 @@
                 <div class="stat-label">TOTAL</div>
                 <div class="stat-value">{{ $counts['total'] }}</div>
             </div>
-        </a>
+        </div>
     </div>
 
     <!-- Table Card -->
@@ -71,6 +67,13 @@
                 </div>
                 
                 <div class="filter-controls">
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">Semua Status</option>
+                        <option value="pending">Menunggu</option>
+                        <option value="approved">Disetujui</option>
+                        <option value="rejected">Ditolak</option>
+                    </select>
+                    
                     <select id="jurusanFilter" class="filter-select">
                         <option value="">Semua Jurusan</option>
                         @foreach($jurusanList as $jurusan)
@@ -80,8 +83,8 @@
                     
                     <select id="sortFilter" class="filter-select">
                         <option value="">Terbaru</option>
-                        <option value="asc">Nama A-Z</option>
-                        <option value="desc">Nama Z-A</option>
+                        <option value="asc">A - Z</option>
+                        <option value="desc">Z - A</option>
                     </select>
                 </div>
             </div>
@@ -150,20 +153,21 @@
     // AJAX Search Implementation
     let searchTimeout;
     const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
     const jurusanFilter = document.getElementById('jurusanFilter');
     const sortFilter = document.getElementById('sortFilter');
     const tableBody = document.getElementById('verifikasiTableBody');
-    const currentStatus = '{{ $status }}';
 
     function performSearch() {
         const searchValue = searchInput.value;
+        const statusValue = statusFilter.value;
         const jurusanValue = jurusanFilter.value;
         const sortValue = sortFilter.value;
         
         // Build query parameters
         const params = new URLSearchParams();
         if (searchValue) params.append('search', searchValue);
-        if (currentStatus) params.append('status', currentStatus);
+        if (statusValue) params.append('status', statusValue);
         if (jurusanValue) params.append('jurusan', jurusanValue);
         if (sortValue) params.append('sort', sortValue);
         
@@ -211,6 +215,7 @@
     });
 
     // Immediate search on filter change
+    statusFilter.addEventListener('change', performSearch);
     jurusanFilter.addEventListener('change', performSearch);
     sortFilter.addEventListener('change', performSearch);
 
@@ -277,7 +282,7 @@
         margin-bottom: 24px;
     }
 
-    .stat-card {
+     .stat-card {
         background: white;
         border-radius: 12px;
         padding: 20px;
@@ -286,18 +291,11 @@
         gap: 16px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         transition: all 0.2s;
-        text-decoration: none;
-        color: inherit;
     }
 
     .stat-card:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         transform: translateY(-2px);
-    }
-
-    .stat-card.stat-card-active {
-        border: 2px solid #0073bd;
-        background: #f0f9ff;
     }
 
     .stat-icon {
@@ -351,25 +349,15 @@
     /* Filter Section */
     .filter-section {
         display: flex;
-        justify-content: space-between;
         gap: 16px;
         margin-bottom: 24px;
-        flex-wrap: wrap;
-    }
-
-    .search-box {
-        flex: 1;
-        min-width: 300px;
-    }
-
-    .search-box {
-        position: relative;
-    }
-
-    .search-box > form {
-        display: flex;
-        gap: 8px;
         align-items: center;
+    }
+
+    .search-box {
+        flex: 1 1 auto;
+        min-width: 0;
+        position: relative;
     }
 
     .search-box i {
@@ -383,12 +371,13 @@
     }
 
     .search-box input {
-        flex: 1;
+        width: 100%;
         padding: 10px 14px 10px 42px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         font-size: 14px;
         transition: all 0.2s;
+        box-sizing: border-box;
     }
 
     .search-box input:focus {
@@ -401,7 +390,7 @@
     .filter-controls {
         display: flex;
         gap: 12px;
-        flex-wrap: wrap;
+        flex-shrink: 0;
     }
 
     .filter-select {

@@ -134,7 +134,7 @@
         background: #dbeafe; color: #1d4ed8;
     }
     .asesi-badge.empty { background: #f1f5f9; color: #94a3b8; }
-    .dropdown-action { position: relative; display: inline-block; text-align: center; }
+    .dropdown-action { position: relative; display: flex; align-items: center; justify-content: center; }
     .btn-dropdown {
         background: none; border: none; padding: 8px; color: #64748b;
         cursor: pointer; border-radius: 6px; transition: all 0.2s;
@@ -257,7 +257,7 @@
 
 <div class="page-header">
     <div>
-        <h2></i>Manajemen Jurusan</h2>
+        <h2></i>Kelola Jurusan</h2>
         <p>Kelola semua program keahlian yang tersedia di LSP.</p>
     </div>
     <a href="{{ route('admin.jurusan.create') }}" class="btn btn-primary">
@@ -298,10 +298,7 @@
             <option value="asesi_count">Jumlah Asesi</option>
             <option value="created_at">Tanggal Dibuat</option>
         </select>
-        <select class="filter-select" id="orderSelect">
-            <option value="asc">A → Z</option>
-            <option value="desc">Z → A</option>
-        </select>
+        
     </div>
 </div>
 

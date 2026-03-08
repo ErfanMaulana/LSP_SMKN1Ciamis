@@ -6,7 +6,7 @@
 @section('styles')
 <style>
     .welcome-card {
-        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+        background: #0073bd;
         border-radius: 14px;
         padding: 28px 32px;
         color: white;
@@ -57,7 +57,7 @@
         flex-shrink: 0;
     }
 
-    .stat-icon.blue   { background: #dbeafe; color: #2563eb; }
+    .stat-icon.blue   { background: #dbeafe; color: #0073bd; }
     .stat-icon.green  { background: #d1fae5; color: #059669; }
     .stat-icon.amber  { background: #fef3c7; color: #d97706; }
     .stat-icon.gray   { background: #f1f5f9; color: #64748b; }
@@ -111,12 +111,12 @@
 
     .btn-review {
         display: inline-flex; align-items: center; gap: 5px;
-        background: #2563eb; color: white;
+        background: #0073bd; color: white;
         padding: 5px 14px; border-radius: 6px;
         font-size: 12px; font-weight: 500; text-decoration: none;
         transition: background 0.2s;
     }
-    .btn-review:hover { background: #1d4ed8; color: white; }
+    .btn-review:hover { background: #005a9e; color: white; }
 
     .empty-state {
         text-align: center; padding: 50px 20px; color: #94a3b8;
@@ -166,21 +166,21 @@
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green"><i class="bi bi-check2-circle"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-check2-circle"></i></div>
         <div>
             <h3>{{ $stats['selesai'] }}</h3>
             <p>Selesai Asesmen</p>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon amber"><i class="bi bi-pencil-square"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-pencil-square"></i></div>
         <div>
             <h3>{{ $stats['sedang'] }}</h3>
             <p>Sedang Dikerjakan</p>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon gray"><i class="bi bi-hourglass"></i></div>
+        <div class="stat-icon blue"><i class="bi bi-hourglass"></i></div>
         <div>
             <h3>{{ $stats['belum'] }}</h3>
             <p>Belum Mulai</p>

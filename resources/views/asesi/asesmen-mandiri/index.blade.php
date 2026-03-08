@@ -6,7 +6,7 @@
 @section('styles')
 <style>
     .page-header {
-        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+        background: #0061A5;
         border-radius: 12px;
         padding: 28px;
         margin-bottom: 24px;
@@ -45,7 +45,7 @@
     .skema-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        border-color: #22c55e;
+        border-color: #0061A5;
     }
 
     .skema-card .skema-badge {
@@ -65,7 +65,7 @@
     .skema-icon {
         width: 50px;
         height: 50px;
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        background: #0061A5;
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -139,23 +139,23 @@
     }
 
     .btn-start {
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        background: #0061A5;
         color: white;
     }
 
     .btn-start:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+        box-shadow: 0 4px 12px rgba(0, 97, 165, 0.4);
     }
 
     .btn-continue {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: #0061A5;
         color: white;
     }
 
     .btn-continue:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        box-shadow: 0 4px 12px rgba(0, 97, 165, 0.4);
     }
 
     .btn-view {

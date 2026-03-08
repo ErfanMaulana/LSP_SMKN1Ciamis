@@ -8,7 +8,7 @@
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Manajemen Asesi</h2>
+            <h2>Kelola Asesi</h2>
             <p class="subtitle">Kelola dan pantau semua kandidat dalam sistem sertifikasi.</p>
         </div>
         <div class="header-actions">
@@ -65,7 +65,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">DALAM PENILAIAN</div>
-                <div class="stat-value">{{ number_format($inAssessment) }} <span class="stat-subtitle">Aktif</span></div>
+                <div class="stat-value">{{ number_format($inAssessment) }} <span class="stat-subtitle"></span></div>
             </div>
         </div>
 
@@ -75,7 +75,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">TERSERTIFIKASI</div>
-                <div class="stat-value">{{ number_format($certified) }} <span class="stat-subtitle">Total</span></div>
+                <div class="stat-value">{{ number_format($certified) }} <span class="stat-subtitle"></span></div>
             </div>
         </div>
     </div>
@@ -101,6 +101,11 @@
                         <option value="approved">Dalam Proses</option>
                         <option value="completed">Selesai</option>
                         <option value="rejected">Ditolak</option>
+                    </select>
+                    <select class="filter-select" id="sortFilter">
+                        <option value="">Terbaru</option>
+                        <option value="asc">A - Z</option>
+                        <option value="desc">Z - A</option>
                     </select>
                 </div>
             </div>
@@ -743,18 +748,21 @@
     const searchInput = document.getElementById('searchInput');
     const jurusanFilter = document.getElementById('jurusanFilter');
     const statusFilter = document.getElementById('statusFilter');
+    const sortFilter = document.getElementById('sortFilter');
     const tableBody = document.getElementById('asesiTableBody');
 
     function performSearch() {
         const searchValue = searchInput.value;
         const jurusanValue = jurusanFilter.value;
         const statusValue = statusFilter.value;
+        const sortValue = sortFilter.value;
 
         // Build query parameters
         const params = new URLSearchParams();
         if (searchValue) params.append('search', searchValue);
         if (jurusanValue) params.append('jurusan', jurusanValue);
         if (statusValue) params.append('status', statusValue);
+        if (sortValue) params.append('sort', sortValue);
 
         // Show loading indicator
         tableBody.innerHTML = `
@@ -806,6 +814,7 @@
     // Filter changes trigger immediate search
     jurusanFilter.addEventListener('change', performSearch);
     statusFilter.addEventListener('change', performSearch);
+    sortFilter.addEventListener('change', performSearch);
 </script>
 
 @endsection

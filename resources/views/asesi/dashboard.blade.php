@@ -6,7 +6,7 @@
 @section('styles')
 <style>
     .welcome-card {
-        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+        background: #0073bd;
         border-radius: 12px;
         padding: 32px;
         color: white;
@@ -53,8 +53,7 @@
         font-size: 24px;
     }
 
-    .stat-icon.green { background: #d1fae5; color: #059669; }
-    .stat-icon.blue { background: #dbeafe; color: #2563eb; }
+    .stat-icon.blue { background: #dbeafe; color: #0073bd; }
     .stat-icon.yellow { background: #fef3c7; color: #d97706; }
     .stat-icon.purple { background: #ede9fe; color: #7c3aed; }
     .stat-icon.rose { background: #ffe4e6; color: #e11d48; }
@@ -90,7 +89,7 @@
 
     .rek-item:last-child { margin-bottom: 0; }
 
-    .rek-item.lanjut { background: #f0fdf4; border-color: #bbf7d0; }
+    .rek-item.lanjut { background: #eff6ff; border-color: #bfdbfe; }
     .rek-item.tidak_lanjut { background: #fff1f2; border-color: #fecdd3; }
 
     .rek-icon {
@@ -104,7 +103,7 @@
         flex-shrink: 0;
     }
 
-    .rek-item.lanjut .rek-icon { background: #dcfce7; color: #16a34a; }
+    .rek-item.lanjut .rek-icon { background: #dbeafe; color: #0073bd; }
     .rek-item.tidak_lanjut .rek-icon { background: #ffe4e6; color: #e11d48; }
 
     .rek-body { flex: 1; }
@@ -127,7 +126,7 @@
         margin-bottom: 6px;
     }
 
-    .rek-item.lanjut .rek-status { background: #dcfce7; color: #15803d; }
+    .rek-item.lanjut .rek-status { background: #dbeafe; color: #0c4a6e; }
     .rek-item.tidak_lanjut .rek-status { background: #ffe4e6; color: #be123c; }
 
     .rek-body .rek-meta {
@@ -146,7 +145,7 @@
         border-left: 3px solid;
     }
 
-    .rek-item.lanjut .rek-catatan { border-color: #22c55e; }
+    .rek-item.lanjut .rek-catatan { border-color: #3b82f6; }
     .rek-item.tidak_lanjut .rek-catatan { border-color: #f43f5e; }
 
     .stat-info h3 {
@@ -200,15 +199,15 @@
     }
 
     .action-item:hover {
-        background: #f0fdf4;
-        border-color: #22c55e;
+        background: #eff6ff;
+        border-color: #3b82f6;
         transform: translateX(4px);
     }
 
     .action-item .icon {
         width: 44px;
         height: 44px;
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #0073bd 100%);
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -296,7 +295,7 @@
 
 @if($rekomendasiList->count() > 0)
 <div class="rekomendasi-card">
-    <h3><i class="bi bi-person-check-fill" style="color:#16a34a;"></i> Rekomendasi Asesor</h3>
+    <h3><i class="bi bi-person-check-fill" style="color:#0073bd;"></i> Rekomendasi Asesor</h3>
     @foreach($rekomendasiList as $skemaRek)
     @php
         $rek      = $skemaRek->pivot->rekomendasi;
@@ -337,17 +336,17 @@
         ?? $asesi->kelompok?->asesors?->first();
 @endphp
 <div class="info-card" style="margin-top:24px;">
-    <h3><i class="bi bi-person-badge-fill" style="color:#0061a5;"></i> Asesor Penguji</h3>
+    <h3><i class="bi bi-person-badge-fill" style="color:#0073bd;"></i> Asesor Penguji</h3>
     @if($asesorTampil)
     <div style="display:flex;align-items:center;gap:16px;padding:16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;">
-        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#0061a5,#0073bd);color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#001f3f,#0073bd);color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">
             {{ strtoupper(substr($asesorTampil->nama, 0, 1)) }}
         </div>
         <div style="flex:1;">
             <div style="font-size:15px;font-weight:700;color:#1e293b;">{{ $asesorTampil->nama }}</div>
             <div style="font-size:12px;color:#64748b;margin-top:2px;">
                 @if($asesorTampil->skemas->count())
-                    <i class="bi bi-patch-check-fill" style="color:#0061a5;"></i>
+                    <i class="bi bi-patch-check-fill" style="color:#0073bd;"></i>
                     {{ $asesorTampil->skemas->pluck('nama_skema')->join(', ') }}
                 @endif
                 @if($asesorTampil->no_met)
@@ -368,7 +367,7 @@
 {{-- ─── Data Pendaftaran ─── --}}
 <div class="info-card" style="margin-top:24px;">
     <h3><i class="bi bi-person-circle"></i> Data Pendaftaran</h3>
-    <div style="margin-bottom:12px;padding:8px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:12.5px;color:#166534;display:flex;align-items:center;gap:8px;">
+    <div style="margin-bottom:12px;padding:8px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:12.5px;color:#0c4a6e;display:flex;align-items:center;gap:8px;">
         <i class="bi bi-check-circle-fill"></i>
         Pendaftaran Anda telah disetujui oleh admin.
         @if($asesi->verified_at)
@@ -404,7 +403,7 @@
         </div>
         <div class="info-item">
             <label>Status Akun</label>
-            <span style="color:#16a34a;font-weight:600;"><i class="bi bi-patch-check-fill"></i> Disetujui</span>
+            <span style="color:#0073bd;font-weight:600;"><i class="bi bi-patch-check-fill"></i> Disetujui</span>
         </div>
         <div class="info-item">
             <label>Telepon / HP</label>

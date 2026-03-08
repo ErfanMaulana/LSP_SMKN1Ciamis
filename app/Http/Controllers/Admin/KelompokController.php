@@ -18,6 +18,7 @@ class KelompokController extends Controller
     {
         $query = Kelompok::with(['skema', 'asesors', 'asesis.jurusan']);
 
+        // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -25,6 +26,11 @@ class KelompokController extends Controller
                   ->orWhereHas('skema', fn($sq) => $sq->where('nama_skema', 'like', "%{$search}%"))
                   ->orWhereHas('asesors', fn($sq) => $sq->where('nama', 'like', "%{$search}%"));
             });
+        }
+
+        // Skema filter
+        if ($request->has('skema') && $request->skema != '') {
+            $query->where('skema_id', $request->skema);
         }
 
         $kelompoks = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
@@ -36,7 +42,15 @@ class KelompokController extends Controller
             'belum_ditugaskan'  => Asesi::where('status', 'approved')->whereNull('kelompok_id')->count(),
         ];
 
-        return view('admin.kelompok.index', compact('kelompoks', 'stats'));
+        // Get all skema for filter dropdown
+        $skemaList = Skema::orderBy('nama_skema')->get();
+
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.kelompok.partials.table-rows', compact('kelompoks'))->render();
+        }
+
+        return view('admin.kelompok.index', compact('kelompoks', 'stats', 'skemaList'));
     }
 
     /**

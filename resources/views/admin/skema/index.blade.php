@@ -1,14 +1,14 @@
 @extends('admin.layout')
 
 @section('title', 'Skema Sertifikasi Management')
-@section('page-title', 'Skema Sertifikasi Management')
+@section('page-title', 'Manajemen Skema Sertifikasi')
 
 @section('content')
 <div class="skema-management">
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Skema Sertifikasi</h2>
+            <h2>Kelola Skema Sertifikasi</h2>
             <p class="subtitle">Kelola dan organisasi semua skema sertifikasi kompetensi.</p>
         </div>
         <div class="header-actions">
@@ -96,8 +96,9 @@
                         <option value="nomor_skema">Nomor Skema</option>
                     </select>
                     <select class="filter-select" id="orderFilter">
-                        <option value="asc">A → Z</option>
-                        <option value="desc">Z → A</option>
+                        <option value="">Terbaru</option>
+                        <option value="asc">A - Z</option>
+                        <option value="desc">Z - A</option>
                     </select>
                 </div>
             </div>

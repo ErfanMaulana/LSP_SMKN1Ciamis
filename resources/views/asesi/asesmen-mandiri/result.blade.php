@@ -18,11 +18,11 @@
     }
 
     .back-link:hover {
-        color: #16a34a;
+        color: #0061A5;
     }
 
     .result-header {
-        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+        background: #0061A5;
         border-radius: 12px;
         padding: 28px;
         margin-bottom: 24px;

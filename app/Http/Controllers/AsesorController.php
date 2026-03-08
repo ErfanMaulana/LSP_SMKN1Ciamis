@@ -13,9 +13,35 @@ class AsesorController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $asesor = Asesor::with('skemas')->paginate(10);
+        $query = Asesor::with('skemas');
+        
+        // Search filter
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'LIKE', "%{$search}%")
+                  ->orWhere('ID_asesor', 'LIKE', "%{$search}%");
+            });
+        }
+        
+        // Skema filter
+        if ($request->has('keahlian') && $request->keahlian != '') {
+            $keahlian = $request->keahlian;
+            $query->whereHas('skemas', function($q) use ($keahlian) {
+                $q->where('skemas.id', $keahlian);
+            });
+        }
+        
+        // Sort filter (A-Z or Z-A)
+        $sortOrder = 'asc'; // default
+        if ($request->has('sort') && $request->sort != '') {
+            $sortOrder = $request->sort;
+        }
+        $query->orderBy('nama', $sortOrder);
+        
+        $asesor = $query->paginate(10);
 
         $stats = [
             'total'           => Asesor::count(),
@@ -23,6 +49,11 @@ class AsesorController extends Controller
             'without_skema'   => Asesor::whereDoesntHave('skemas')->count(),
             'with_account'    => Asesor::whereNotNull('no_met')->count(),
         ];
+
+        // If AJAX request, return only table rows
+        if ($request->ajax()) {
+            return view('admin.asesor.partials.table-rows', compact('asesor'))->render();
+        }
 
         return view('admin.asesor.index', compact('asesor', 'stats'));
     }
@@ -68,6 +99,15 @@ class AsesorController extends Controller
         }
 
         return redirect()->route('admin.asesor.index')->with('success', 'Data Asesor berhasil ditambahkan!');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show($ID_asesor)
+    {
+        $asesor = Asesor::with('skemas')->findOrFail($ID_asesor);
+        return view('admin.asesor.show', compact('asesor'));
     }
 
     /**

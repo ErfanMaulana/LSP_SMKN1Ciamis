@@ -270,7 +270,7 @@
 <!-- Header -->
 <div class="page-header">
     <div>
-        <h2>Tempat Uji Kompetensi (TUK)</h2>
+        <h2>Kelola TUK</h2>
         <p>Kelola data tempat uji kompetensi untuk pelaksanaan ujian sertifikasi</p>
     </div>
     <a href="{{ route('admin.tuk.create') }}" class="btn-add">

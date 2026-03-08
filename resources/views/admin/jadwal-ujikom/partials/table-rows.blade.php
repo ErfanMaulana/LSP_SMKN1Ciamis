@@ -50,7 +50,7 @@
     </td>
     <td>
         <div class="dropdown-action">
-            <button class="btn-dropdown" onclick="toggleDropdown(this)">
+            <button class="btn-dropdown" onclick="toggleDropdown(this, event)">
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
             <div class="dropdown-menu">

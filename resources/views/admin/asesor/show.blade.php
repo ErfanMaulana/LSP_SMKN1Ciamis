@@ -35,9 +35,9 @@
                 <div class="detail-item">
                     <label>No. Registrasi</label>
                     <div class="detail-value">
-                        @if($asesor->no_reg)
+                        @if($asesor->no_met)
                             <span class="badge badge-success">
-                                <i class="bi bi-check-circle-fill"></i> {{ $asesor->no_reg }}
+                                <i class="bi bi-check-circle-fill"></i> {{ $asesor->no_met }}
                             </span>
                         @else
                             <span class="text-muted">Belum diatur</span>
@@ -48,10 +48,16 @@
                 <div class="detail-item">
                     <label>Skema Sertifikasi</label>
                     <div class="detail-value">
-                        @if($asesor->skema)
-                            <div class="skema-info">
-                                <div class="skema-name">{{ $asesor->skema->nama_skema }}</div>
-                                <div class="skema-number">{{ $asesor->skema->nomor_skema }}</div>
+                        @if($asesor->skemas->count())
+                            <div class="skema-list">
+                                @foreach($asesor->skemas as $skema)
+                                    <div class="skema-item">
+                                        <div class="skema-name">{{ $skema->nama_skema }}</div>
+                                        @if($skema->nomor_skema)
+                                            <div class="skema-number">{{ $skema->nomor_skema }}</div>
+                                        @endif
+                                    </div>
+                                @endforeach
                             </div>
                         @else
                             <span class="text-muted">Belum ditentukan</span>
@@ -62,7 +68,7 @@
                 <div class="detail-item">
                     <label>Status Login</label>
                     <div class="detail-value">
-                        @if($account)
+                        @if($asesor->no_met)
                             <span class="badge badge-active">
                                 <i class="bi bi-person-check-fill"></i> Akun Aktif
                             </span>
@@ -77,7 +83,7 @@
                 <div class="detail-item">
                     <label>Status Asesor</label>
                     <div class="detail-value">
-                        @if($asesor->ID_skema)
+                        @if($asesor->skemas->count())
                             <span class="badge badge-active">
                                 <i class="bi bi-check-circle-fill"></i> Aktif
                             </span>
@@ -91,7 +97,7 @@
             </div>
         </div>
 
-        @if($account)
+        @if($asesor->no_met)
         <div class="detail-section">
             <h3>Informasi Akun Login</h3>
             
@@ -102,7 +108,7 @@
                 <div class="info-content">
                     <div class="info-title">Akses Login Tersedia</div>
                     <div class="info-desc">
-                        Asesor dapat login menggunakan <strong>No. Registrasi: {{ $account->id }}</strong>
+                        Asesor dapat login menggunakan <strong>No. Registrasi: {{ $asesor->no_met }}</strong>
                     </div>
                     <div class="info-note">
                         <i class="bi bi-info-circle"></i>

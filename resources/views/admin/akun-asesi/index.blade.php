@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('title', 'Akun Asesi')
-@section('page-title', 'Kelola Akun Asesi')
+@section('page-title', 'Akun Asesi')
 
 @section('content')
 <div class="akun-asesi-management">
