@@ -1,21 +1,22 @@
 @extends('admin.layout')
 
 @section('title', 'Verifikasi Asesi')
-@section('page-title', 'Verifikasi Asesi')
+@section('page-title', 'Verifikasi Pendaftaran Asesi')
 
 @section('content')
 <div class="asesi-verifikasi">
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Verifikasi Hasil Pendaftaran Asesi</h2>
+            <h2>Verifikasi Pendaftaran Asesi</h2>
             <p class="subtitle">Kelola dan verifikasi pendaftaran calon asesi baru.</p>
         </div>
     </div>
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'pending']) }}" 
+           class="stat-card {{ $status === 'pending' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-hourglass-split"></i>
             </div>
@@ -23,9 +24,10 @@
                 <div class="stat-label">MENUNGGU</div>
                 <div class="stat-value">{{ $counts['pending'] }}</div>
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'approved']) }}" 
+           class="stat-card {{ $status === 'approved' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-check-circle"></i>
             </div>
@@ -33,9 +35,10 @@
                 <div class="stat-label">DISETUJUI</div>
                 <div class="stat-value">{{ $counts['approved'] }}</div>
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'rejected']) }}" 
+           class="stat-card {{ $status === 'rejected' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-x-circle"></i>
             </div>
@@ -43,9 +46,10 @@
                 <div class="stat-label">DITOLAK</div>
                 <div class="stat-value">{{ $counts['rejected'] }}</div>
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a href="{{ route('admin.asesi.verifikasi') }}" 
+           class="stat-card {{ $status === '' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-people"></i>
             </div>
@@ -53,7 +57,7 @@
                 <div class="stat-label">TOTAL</div>
                 <div class="stat-value">{{ $counts['total'] }}</div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Table Card -->
@@ -63,29 +67,11 @@
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" id="searchInput" autocomplete="off" placeholder="Cari nama, NIK, atau email..." style="flex:1;">
-                </div>
-                
-                <div class="filter-controls">
-                    <select id="statusFilter" class="filter-select">
-                        <option value="">Semua Status</option>
-                        <option value="pending">Menunggu</option>
-                        <option value="approved">Disetujui</option>
-                        <option value="rejected">Ditolak</option>
-                    </select>
-                    
-                    <select id="jurusanFilter" class="filter-select">
-                        <option value="">Semua Jurusan</option>
-                        @foreach($jurusanList as $jurusan)
-                            <option value="{{ $jurusan->ID_jurusan }}">{{ $jurusan->nama_jurusan }}</option>
-                        @endforeach
-                    </select>
-                    
-                    <select id="sortFilter" class="filter-select">
-                        <option value="">Terbaru</option>
-                        <option value="asc">A - Z</option>
-                        <option value="desc">Z - A</option>
-                    </select>
+                    <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" style="display:flex;gap:8px;width:100%;">
+                        <input type="hidden" name="status" value="{{ $status }}">
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NIK, atau email..." style="flex:1;">
+                        <button type="submit" style="padding:10px 16px;background:#0073bd;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:500;">Cari</button>
+                    </form>
                 </div>
             </div>
 
@@ -103,8 +89,77 @@
                                 <th style="text-align:center;">AKSI</th>
                             </tr>
                         </thead>
-                        <tbody id="verifikasiTableBody">
-                            @include('admin.asesi.partials.verifikasi-table-rows')
+                        <tbody>
+                            @foreach($asesi as $item)
+                            <tr>
+                                <td>
+                                    <div class="user-info">
+                                        @if($item->pas_foto)
+                                            <img src="{{ asset('storage/' . $item->pas_foto) }}" alt="Foto" class="user-avatar-img">
+                                        @else
+                                            <div class="user-avatar-initials">
+                                                {{ strtoupper(substr($item->nama, 0, 2)) }}
+                                            </div>
+                                        @endif
+                                        <div class="user-details">
+                                            <div class="user-name">{{ $item->nama }}</div>
+                                            <div class="user-id">{{ $item->email ?? '-' }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="nik-text">{{ $item->NIK }}</span>
+                                </td>
+                                <td>
+                                    <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? '-' }}</span>
+                                </td>
+                                <td>
+                                    <span class="date-text">{{ $item->created_at ? $item->created_at->format('M d, Y') : '-' }}</span>
+                                </td>
+                                <td>
+                                    @if($item->status === 'pending')
+                                        <span class="badge badge-pending">Menunggu</span>
+                                    @elseif($item->status === 'approved')
+                                        <span class="badge badge-approved">Disetujui</span>
+                                    @else
+                                        <span class="badge badge-rejected">Ditolak</span>
+                                    @endif
+                                </td>
+                                <td style="text-align:center;">
+                                    <div style="display:flex;gap:6px;align-items:center;justify-content:center;">
+                                        <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}"
+                                           title="Review Detail"
+                                           style="width:32px;height:32px;border-radius:8px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;"
+                                           onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        @if($item->status === 'pending')
+                                        <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;">
+                                            @csrf
+                                            <button type="submit"
+                                                    title="Setujui"
+                                                    onclick="return confirm('Setujui pendaftaran {{ addslashes($item->nama) }}?')"
+                                                    style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;color:#16a34a;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;"
+                                                    onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                        <form action="{{ route('admin.asesi.reject', $item->NIK) }}" method="POST" style="margin:0;">
+                                            @csrf
+                                            <button type="submit"
+                                                    title="Tolak"
+                                                    onclick="return confirm('Tolak pendaftaran {{ addslashes($item->nama) }}?')"
+                                                    style="width:32px;height:32px;border-radius:8px;background:#fff1f2;color:#e11d48;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;"
+                                                    onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'">
+                                                <i class="bi bi-x-lg"></i>
+
+                                            </button>
+                                        </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
@@ -112,7 +167,7 @@
                 <!-- Pagination -->
                 <div class="pagination-container">
                     <div class="pagination-info">
-                        Menampilkan {{ $asesi->firstItem() }} sampai {{ $asesi->lastItem() }} dari {{ $asesi->total() }} data
+                        Showing {{ $asesi->firstItem() }} to {{ $asesi->lastItem() }} of {{ $asesi->total() }} entries
                     </div>
                     <div class="pagination">
                         @if($asesi->currentPage() > 1)
@@ -149,104 +204,6 @@
     </div>
 </div>
 
-<script>
-    // AJAX Search Implementation
-    let searchTimeout;
-    const searchInput = document.getElementById('searchInput');
-    const statusFilter = document.getElementById('statusFilter');
-    const jurusanFilter = document.getElementById('jurusanFilter');
-    const sortFilter = document.getElementById('sortFilter');
-    const tableBody = document.getElementById('verifikasiTableBody');
-
-    function performSearch() {
-        const searchValue = searchInput.value;
-        const statusValue = statusFilter.value;
-        const jurusanValue = jurusanFilter.value;
-        const sortValue = sortFilter.value;
-        
-        // Build query parameters
-        const params = new URLSearchParams();
-        if (searchValue) params.append('search', searchValue);
-        if (statusValue) params.append('status', statusValue);
-        if (jurusanValue) params.append('jurusan', jurusanValue);
-        if (sortValue) params.append('sort', sortValue);
-        
-        // Show loading state
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align:center; padding:40px;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p style="margin-top:12px; color:#64748b;">Mencari data...</p>
-                </td>
-            </tr>
-        `;
-        
-        // Perform AJAX request
-        fetch(`{{ route('admin.asesi.verifikasi') }}?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            tableBody.innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align:center; padding:40px;">
-                        <i class="bi bi-exclamation-triangle" style="font-size:48px; color:#ef4444;"></i>
-                        <p style="margin-top:12px; color:#64748b;">Terjadi kesalahan saat memuat data</p>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    // Debounced search on input
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(performSearch, 500);
-    });
-
-    // Immediate search on filter change
-    statusFilter.addEventListener('change', performSearch);
-    jurusanFilter.addEventListener('change', performSearch);
-    sortFilter.addEventListener('change', performSearch);
-
-    // Dropdown Toggle Function
-    function toggleDropdown(event) {
-        event.stopPropagation();
-        const button = event.currentTarget;
-        const dropdown = button.nextElementSibling;
-        const allDropdowns = document.querySelectorAll('.dropdown-menu');
-        
-        // Close all other dropdowns
-        allDropdowns.forEach(menu => {
-            if (menu !== dropdown) {
-                menu.classList.remove('show');
-            }
-        });
-        
-        // Toggle current dropdown
-        dropdown.classList.toggle('show');
-    }
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        if (!event.target.closest('.dropdown-action')) {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
-    });
-</script>
-
 <style>
     .asesi-verifikasi {
         padding: 0;
@@ -282,7 +239,7 @@
         margin-bottom: 24px;
     }
 
-     .stat-card {
+    .stat-card {
         background: white;
         border-radius: 12px;
         padding: 20px;
@@ -291,11 +248,18 @@
         gap: 16px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         transition: all 0.2s;
+        text-decoration: none;
+        color: inherit;
     }
 
     .stat-card:hover {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         transform: translateY(-2px);
+    }
+
+    .stat-card.stat-card-active {
+        border: 2px solid #0073bd;
+        background: #f0f9ff;
     }
 
     .stat-icon {
@@ -349,15 +313,25 @@
     /* Filter Section */
     .filter-section {
         display: flex;
+        justify-content: space-between;
         gap: 16px;
         margin-bottom: 24px;
-        align-items: center;
+        flex-wrap: wrap;
     }
 
     .search-box {
-        flex: 1 1 auto;
-        min-width: 0;
+        flex: 1;
+        min-width: 300px;
+    }
+
+    .search-box {
         position: relative;
+    }
+
+    .search-box > form {
+        display: flex;
+        gap: 8px;
+        align-items: center;
     }
 
     .search-box i {
@@ -371,13 +345,12 @@
     }
 
     .search-box input {
-        width: 100%;
+        flex: 1;
         padding: 10px 14px 10px 42px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         font-size: 14px;
         transition: all 0.2s;
-        box-sizing: border-box;
     }
 
     .search-box input:focus {
@@ -386,37 +359,10 @@
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
-    /* Filter Controls */
-    .filter-controls {
-        display: flex;
-        gap: 12px;
-        flex-shrink: 0;
-    }
-
-    .filter-select {
-        padding: 10px 14px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 14px;
-        background: white;
-        color: #475569;
-        cursor: pointer;
-        transition: all 0.2s;
-        min-width: 160px;
-    }
-
-    .filter-select:hover {
-        border-color: #cbd5e1;
-    }
-
-    .filter-select:focus {
-        outline: none;
-        border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
-    }
-
     /* Table */
-    
+    .table-container {
+        overflow-x: auto;
+    }
 
     .data-table {
         width: 100%;
@@ -640,155 +586,6 @@
         margin: 0;
     }
 
-    /* Empty State Row (for AJAX) */
-    .empty-state-row {
-        text-align: center;
-        padding: 60px 20px !important;
-    }
-
-    .empty-state-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-    }
-
-    .empty-state-content i {
-        font-size: 48px;
-        color: #d1d5db;
-    }
-
-    .empty-state-content p {
-        color: #9ca3af;
-        font-size: 14px;
-        margin: 0;
-    }
-
-    /* Spinner for loading state */
-    .spinner-border {
-        display: inline-block;
-        width: 2rem;
-        height: 2rem;
-        vertical-align: text-bottom;
-        border: 0.25em solid currentColor;
-        border-right-color: transparent;
-        border-radius: 50%;
-        animation: spinner-border 0.75s linear infinite;
-    }
-
-    .spinner-border.text-primary {
-        color: #0073bd;
-    }
-
-    @keyframes spinner-border {
-        to { transform: rotate(360deg); }
-    }
-
-    .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-    }
-
-    /* Dropdown Action Menu */
-    .dropdown-action {
-        position: relative;
-        display: inline-block;
-    }
-
-    .btn-dropdown {
-        background: none;
-        border: none;
-        padding: 8px;
-        cursor: pointer;
-        color: #64748b;
-        border-radius: 6px;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-dropdown:hover {
-        background: #f1f5f9;
-        color: #0F172A;
-    }
-
-    .btn-dropdown i {
-        font-size: 18px;
-    }
-
-    .dropdown-menu {
-        position: absolute;
-        right: 0;
-        top: 100%;
-        margin-top: 4px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        min-width: 160px;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.2s;
-    }
-
-    .dropdown-menu.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        color: #475569;
-        text-decoration: none;
-        font-size: 14px;
-        transition: all 0.2s;
-        border: none;
-        background: none;
-        width: 100%;
-        text-align: left;
-        cursor: pointer;
-    }
-
-    .dropdown-item:first-child {
-        border-radius: 8px 8px 0 0;
-    }
-
-    .dropdown-item:last-child {
-        border-radius: 0 0 8px 8px;
-    }
-
-    .dropdown-item:hover {
-        background: #f8fafc;
-        color: #0F172A;
-    }
-
-    .dropdown-item i {
-        font-size: 16px;
-    }
-
-    .dropdown-item.danger {
-        color: #dc2626;
-    }
-
-    .dropdown-item.danger:hover {
-        background: #fef2f2;
-        color: #dc2626;
-    }
-
     @media (max-width: 768px) {
         .stats-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -800,15 +597,6 @@
 
         .search-box {
             min-width: 100%;
-        }
-
-        .filter-controls {
-            width: 100%;
-        }
-
-        .filter-select {
-            flex: 1;
-            min-width: 0;
         }
 
         .table-container {

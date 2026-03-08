@@ -134,8 +134,10 @@ class DashboardController extends Controller
         $kCount  = $answers->where('status', 'K')->count();
         $bkCount = $answers->where('status', 'BK')->count();
 
+        $savedSignature = $asesor->saved_tanda_tangan;
+
         return view('asesor.asesi.review', compact(
-            'account', 'asesor', 'asesi', 'skema', 'answers', 'pivot', 'kCount', 'bkCount'
+            'account', 'asesor', 'asesi', 'skema', 'answers', 'pivot', 'kCount', 'bkCount', 'savedSignature'
         ));
     }
 
@@ -149,9 +151,18 @@ class DashboardController extends Controller
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
 
         $request->validate([
-            'rekomendasi'    => 'required|in:lanjut,tidak_lanjut',
-            'catatan_asesor' => 'nullable|string|max:1000',
+            'rekomendasi'          => 'required|in:lanjut,tidak_lanjut',
+            'catatan_asesor'       => 'nullable|string|max:1000',
+            'tanda_tangan_asesor'  => 'required|string',
+            'simpan_tanda_tangan'  => 'nullable|in:0,1',
+        ], [
+            'tanda_tangan_asesor.required' => 'Tanda tangan asesor wajib diisi sebelum menyimpan rekomendasi.',
         ]);
+
+        // Validasi format base64 PNG
+        if (!preg_match('/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/', $request->tanda_tangan_asesor)) {
+            return back()->withErrors(['tanda_tangan_asesor' => 'Format tanda tangan tidak valid.'])->withInput();
+        }
 
         // Pastikan asesi ini memang di skema asesor
         $pivot = DB::table('asesi_skema')
@@ -165,14 +176,21 @@ class DashboardController extends Controller
             ->where('asesi_nik', $asesiNik)
             ->where('skema_id', $pivot->skema_id)
             ->update([
-                'rekomendasi'    => $request->rekomendasi,
-                'catatan_asesor' => $request->catatan_asesor,
-                'reviewed_at'    => now(),
-                'reviewed_by'    => $account->id,
-                'updated_at'     => now(),
+                'rekomendasi'                => $request->rekomendasi,
+                'catatan_asesor'             => $request->catatan_asesor,
+                'tanda_tangan_asesor'        => $request->tanda_tangan_asesor,
+                'tanggal_tanda_tangan_asesor' => now(),
+                'reviewed_at'                => now(),
+                'reviewed_by'                => $account->id,
+                'updated_at'                 => now(),
             ]);
 
         abort_unless($updated, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
+        // Simpan tanda tangan ke profil asesor jika diminta
+        if ($request->simpan_tanda_tangan === '1') {
+            $asesor->update(['saved_tanda_tangan' => $request->tanda_tangan_asesor]);
+        }
 
         $label = $request->rekomendasi === 'lanjut'
             ? 'Asesmen dapat dilanjutkan'

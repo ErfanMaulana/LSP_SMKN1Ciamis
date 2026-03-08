@@ -35,77 +35,20 @@
     .stat-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing:.5px; }
     .stat-value { font-size: 26px; font-weight: 700; color: #0F172A; line-height: 1.2; margin-top: 2px; }
 
-    /* Filter Section */
-    .filter-section {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 24px;
-        flex-wrap: wrap;
-    }
-
-    .search-box {
-        flex: 1;
-        min-width: 300px;
-        position: relative;
-    }
-
-    .search-box i {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-        font-size: 16px;
-    }
-
-    .search-box input {
-        width: 100%;
-        padding: 10px 14px 10px 42px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 14px;
-        transition: all 0.2s;
-    }
-
-    .search-box input:focus {
-        outline: none;
-        border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
-    }
-
-    /* Filter Controls */
-    .filter-controls {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .filter-select {
-        padding: 10px 14px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 14px;
-        background: white;
-        color: #475569;
-        cursor: pointer;
-        transition: all 0.2s;
-        min-width: 160px;
-    }
-
-    .filter-select:hover {
-        border-color: #cbd5e1;
-    }
-
-    .filter-select:focus {
-        outline: none;
-        border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
-    }
-
     .toolbar {
         display: flex; align-items: center; justify-content: space-between;
         gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .filter-form { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+    .filter-form input, .filter-form select {
+        padding: 9px 14px; border: 1px solid #d1d5db; border-radius: 8px;
+        font-size: 13px; outline: none; transition: border-color .2s;
+    }
+    .filter-form input { flex: 1; min-width: 220px; }
+    .filter-form input:focus, .filter-form select:focus { border-color: #0061a5; }
+    .btn-search {
+        padding: 9px 18px; background: #0061a5; color: #fff;
+        border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
     .btn-add {
         padding: 9px 18px; background: #0061a5; color: #fff;
@@ -115,7 +58,7 @@
     }
     .btn-add:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
 
-    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
     th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #64748b;
          text-transform: uppercase; letter-spacing: .5px; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
@@ -133,126 +76,22 @@
     .badge.tempat_kerja { background: #fef3c7; color: #92400e; }
     .badge.mandiri  { background: #ede9fe; color: #5b21b6; }
 
-    /* Dropdown Action Menu */
-    .dropdown-action {
-        position: relative;
-        display: inline-block;
-    }
-    .btn-dropdown {
-        background: none;
-        border: none;
-        padding: 8px;
-        cursor: pointer;
-        color: #64748b;
-        border-radius: 6px;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .btn-dropdown:hover {
-        background: #f1f5f9;
-        color: #0F172A;
-    }
-    .btn-dropdown i {
-        font-size: 18px;
-    }
-    .dropdown-menu {
-        position: absolute;
-        right: 0;
-        top: 100%;
-        margin-top: 4px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        min-width: 160px;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.2s;
-    }
-    .dropdown-menu.show {
-        opacity: 1; visibility: visible; transform: translateY(0);
-    }
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        color: #475569;
+    .action-btns { display: flex; gap: 6px; }
+    .btn-icon {
+        width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .2s;
         text-decoration: none;
-        font-size: 14px;
-        transition: all 0.2s;
-        border: none;
-        background: none;
-        width: 100%;
-        text-align: left;
-        cursor: pointer;
     }
-    .dropdown-item:first-child { border-radius: 8px 8px 0 0; }
-    .dropdown-item:last-child { border-radius: 0 0 8px 8px; }
-    .dropdown-item:hover {
-        background: #f8fafc;
-    }
-    .dropdown-item.danger {
-        color: #dc2626;
-    }
-    .dropdown-item.danger:hover {
-        background: #fef2f2;
-    }
-    .dropdown-item i {
-        font-size: 14px; width: 16px;
-    }
+    .btn-icon.edit   { background: #eff6ff; color: #2563eb; }
+    .btn-icon.edit:hover { background: #dbeafe; }
+    .btn-icon.toggle { background: #fef3c7; color: #d97706; }
+    .btn-icon.toggle:hover { background: #fde68a; }
+    .btn-icon.del    { background: #fff1f2; color: #e11d48; }
+    .btn-icon.del:hover { background: #ffe4e6; }
 
     .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
     .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
     .empty-state p  { font-size: 14px; }
-
-    .pagination-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 20px;
-        flex-wrap: wrap;
-        gap: 12px;
-    }
-
-    .pagination-info {
-        color: #64748b;
-        font-size: 13px;
-    }
-
-    .spinner-border {
-        display: inline-block;
-        width: 3rem;
-        height: 3rem;
-        vertical-align: text-bottom;
-        border: 0.25em solid currentColor;
-        border-right-color: transparent;
-        border-radius: 50%;
-        animation: spinner-border 0.75s linear infinite;
-    }
-
-    @keyframes spinner-border {
-        to { transform: rotate(360deg); }
-    }
-
-    .text-primary { color: #0073bd; }
-    .text-center { text-align: center; }
-
-    .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-    }
 
     .pagination-wrap { padding: 16px; }
 </style>
@@ -260,17 +99,10 @@
 
 @section('content')
 
-@if(session('success'))
-<div class="alert alert-success"><i class="bi bi-check-circle-fill"></i> {{ session('success') }}</div>
-@endif
-@if(session('error'))
-<div class="alert alert-error"><i class="bi bi-exclamation-circle-fill"></i> {{ session('error') }}</div>
-@endif
-
 <!-- Header -->
 <div class="page-header">
     <div>
-        <h2>Kelola TUK</h2>
+        <h2>Tempat Uji Kompetensi (TUK)</h2>
         <p>Kelola data tempat uji kompetensi untuk pelaksanaan ujian sertifikasi</p>
     </div>
     <a href="{{ route('admin.tuk.create') }}" class="btn-add">
@@ -303,142 +135,105 @@
     </div>
 </div>
 
-<!-- Search and Filter Section -->
-<div class="card">
-    <div style="padding: 24px;">
-        <div class="filter-section">
-            <div class="search-box">
-                <i class="bi bi-search"></i>
-                <input type="text" id="searchInput" placeholder="Cari nama TUK, kode, kota..." autocomplete="off">
-            </div>
-            <div class="filter-controls">
-                <select class="filter-select" id="statusFilter">
-                    <option value="">Semua Status</option>
-                    <option value="aktif">Aktif</option>
-                    <option value="nonaktif">Non-Aktif</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Table -->
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Nama TUK</th>
-                        <th>Tipe</th>
-                        <th>Kota</th>
-                        <th>Kapasitas</th>
-                        <th>Jadwal</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="tukTableBody">
-                    @include('admin.tuk.partials.table-rows')
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination-container">
-            <div class="pagination-info">
-                Menampilkan {{ $tuks->firstItem() ?? 0 }} sampai {{ $tuks->lastItem() ?? 0 }} dari {{ $tuks->total() }} data
-            </div>
-        </div>
+<!-- Toolbar -->
+<form method="GET" class="toolbar">
+    <div class="filter-form">
+        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama TUK, kode, kota...">
+        <select name="status">
+            <option value="all"     {{ $status === 'all'     ? 'selected' : '' }}>Semua Status</option>
+            <option value="aktif"   {{ $status === 'aktif'   ? 'selected' : '' }}>Aktif</option>
+            <option value="nonaktif"{{ $status === 'nonaktif'? 'selected' : '' }}>Non-Aktif</option>
+        </select>
+        <button type="submit" class="btn-search"><i class="bi bi-search"></i> Cari</button>
+        @if($search || $status !== 'all')
+        <a href="{{ route('admin.tuk.index') }}" style="padding:9px 14px;color:#64748b;text-decoration:none;font-size:13px;">Reset</a>
+        @endif
     </div>
-</div>
+</form>
 
-<script>
-    function toggleDropdown(button) {
-        const dropdown = button.nextElementSibling;
-        const allDropdowns = document.querySelectorAll('.dropdown-menu');
-        
-        // Close all other dropdowns
-        allDropdowns.forEach(menu => {
-            if (menu !== dropdown) {
-                menu.classList.remove('show');
-            }
-        });
-        
-        // Toggle current dropdown
-        dropdown.classList.toggle('show');
-    }
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-        if (!event.target.closest('.dropdown-action')) {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
-        }
-    });
-
-    // AJAX Search dengan Debounce
-    let searchTimeout;
-    const searchInput = document.getElementById('searchInput');
-    const statusFilter = document.getElementById('statusFilter');
-    const tableBody = document.getElementById('tukTableBody');
-
-    function performSearch() {
-        const searchValue = searchInput.value;
-        const statusValue = statusFilter.value;
-
-        // Build query parameters
-        const params = new URLSearchParams();
-        if (searchValue) params.append('search', searchValue);
-        if (statusValue) params.append('status', statusValue);
-
-        // Show loading indicator
-        tableBody.innerHTML = `
+<!-- Table -->
+<div class="card">
+    <table>
+        <thead>
             <tr>
-                <td colspan="8" class="text-center">
-                    <div style="padding: 40px 20px;">
-                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; margin-bottom: 12px;">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p style="color: #64748b; margin: 0;">Mencari data...</p>
+                <th>#</th>
+                <th>Nama TUK</th>
+                <th>Tipe</th>
+                <th>Kota</th>
+                <th>Kapasitas</th>
+                <th>Jadwal</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($tuks as $i => $tuk)
+            <tr>
+                <td style="color:#94a3b8;font-weight:600;">{{ $tuks->firstItem() + $i }}</td>
+                <td>
+                    <div style="font-weight:600;color:#0F172A;">{{ $tuk->nama_tuk }}</div>                   
+                </td>
+                <td>
+                    @php
+                        $tipeMap = ['sewaktu'=>'TUK Sewaktu','tempat_kerja'=>'Tempat Kerja','mandiri'=>'TUK Mandiri'];
+                    @endphp
+                    <span class="badge {{ $tuk->tipe_tuk }}">{{ $tipeMap[$tuk->tipe_tuk] ?? $tuk->tipe_tuk }}</span>
+                </td>
+                <td>{{ $tuk->kota ?? '-' }}</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                        <span>{{ number_format($tuk->kapasitas) }} peserta</span>
+                    </div>
+                </td>
+                <td>
+                    <span style="font-weight:600;color:#0061a5;">{{ $tuk->jadwal_ujikom_count }}</span>
+                    <span style="font-size:11px;color:#94a3b8;"></span>
+                </td>
+                <td>
+                    <span class="badge {{ $tuk->status }}">
+                        <i class="bi bi-{{ $tuk->status === 'aktif' ? 'check-circle' : 'x-circle' }}"></i>
+                        {{ $tuk->status === 'aktif' ? 'Aktif' : 'Non-Aktif' }}
+                    </span>
+                </td>
+                <td>
+                    <div class="action-btns">
+                        <a href="{{ route('admin.tuk.edit', $tuk->id) }}" class="btn-icon edit" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="POST" action="{{ route('admin.tuk.toggle', $tuk->id) }}" style="margin:0;">
+                            @csrf @method('PATCH')
+                            <button type="submit" class="btn-icon toggle" title="{{ $tuk->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                <i class="bi bi-{{ $tuk->status === 'aktif' ? 'pause-circle' : 'play-circle' }}"></i>
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('admin.tuk.destroy', $tuk->id) }}" style="margin:0;"
+                              onsubmit="return confirm('Hapus TUK {{ addslashes($tuk->nama_tuk) }}?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn-icon del" title="Hapus">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
                     </div>
                 </td>
             </tr>
-        `;
-
-        // Perform AJAX request
-        fetch(`{{ route('admin.tuk.index') }}?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            tableBody.innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="text-center">
-                        <div style="padding: 40px 20px;">
-                            <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
-                            <p style="color: #64748b; margin: 0;">Terjadi kesalahan saat memuat data</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    // Search input with debounce (delay 500ms)
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(performSearch, 500);
-    });
-
-    // Filter changes trigger immediate search
-    statusFilter.addEventListener('change', performSearch);
-</script>
+            @empty
+            <tr>
+                <td colspan="8">
+                    <div class="empty-state">
+                        <i class="bi bi-building-x"></i>
+                        <p>Belum ada data TUK{{ $search ? ' yang cocok dengan pencarian' : '' }}.</p>
+                        <a href="{{ route('admin.tuk.create') }}" class="btn-add" style="display:inline-flex;margin-top:12px;">
+                            <i class="bi bi-plus-lg"></i> Tambah TUK Sekarang
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+    @if($tuks->hasPages())
+    <div class="pagination-wrap">{{ $tuks->links() }}</div>
+    @endif
+</div>
 
 @endsection

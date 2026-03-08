@@ -1,14 +1,14 @@
 @extends('admin.layout')
 
 @section('title', 'Skema Sertifikasi Management')
-@section('page-title', 'Manajemen Skema Sertifikasi')
+@section('page-title', 'Skema Sertifikasi Management')
 
 @section('content')
 <div class="skema-management">
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Kelola Skema Sertifikasi</h2>
+            <h2>Skema Sertifikasi</h2>
             <p class="subtitle">Kelola dan organisasi semua skema sertifikasi kompetensi.</p>
         </div>
         <div class="header-actions">
@@ -61,45 +61,43 @@
         </div>
     </div>
 
-    <!-- Success/Error Messages -->
-    @if(session('success'))
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle"></i> {!! session('success') !!}
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-error">
-            <i class="bi bi-exclamation-circle"></i> {{ session('error') }}
-        </div>
-    @endif
-
     <!-- Main Content Card -->
     <div class="card">
         <div class="card-body">
-            <!-- Filter Section -->
-            <div class="filter-section">
-                <div class="search-box">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="searchInput" placeholder="Cari nama atau nomor skema..." autocomplete="off">
-                </div>
-                <div class="filter-controls">
-                    <select class="filter-select" id="jenisFilter">
-                        <option value="all">Semua Jenis</option>
-                        <option value="KKNI">KKNI</option>
-                        <option value="Okupasi">Okupasi</option>
-                        <option value="Klaster">Klaster</option>
-                    </select>
-                    <select class="filter-select" id="sortFilter">
-                        <option value="created_at">Tanggal Dibuat</option>
-                        <option value="nama_skema">Nama Skema</option>
-                        <option value="nomor_skema">Nomor Skema</option>
-                    </select>
-                    <select class="filter-select" id="orderFilter">
-                        <option value="">Terbaru</option>
-                        <option value="asc">A - Z</option>
-                        <option value="desc">Z - A</option>
-                    </select>
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <form method="GET" action="{{ route('admin.skema.index') }}" class="search-form">
+                    <input type="hidden" name="jenis_skema" value="{{ request('jenis_skema', 'all') }}">
+                    <input type="hidden" name="sort" value="{{ request('sort', 'created_at') }}">
+                    <input type="hidden" name="order" value="{{ request('order', 'desc') }}">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau nomor skema...">
+                    <button type="submit"><i class="bi bi-search"></i> Cari</button>
+                    @if(request('search'))
+                        <a href="{{ route('admin.skema.index') }}" class="btn-clear" title="Clear">
+                            <i class="bi bi-x"></i>
+                        </a>
+                    @endif
+                </form>
+
+                <div class="filters">
+                    <form method="GET" action="{{ route('admin.skema.index') }}" class="filter-form" id="filterForm">
+                        <input type="hidden" name="search" value="{{ request('search') }}">
+                        <select name="jenis_skema" onchange="document.getElementById('filterForm').submit()">
+                            <option value="all" {{ request('jenis_skema', 'all') === 'all' ? 'selected' : '' }}>Semua Jenis</option>
+                            <option value="KKNI" {{ request('jenis_skema') === 'KKNI' ? 'selected' : '' }}>KKNI</option>
+                            <option value="Okupasi" {{ request('jenis_skema') === 'Okupasi' ? 'selected' : '' }}>Okupasi</option>
+                            <option value="Klaster" {{ request('jenis_skema') === 'Klaster' ? 'selected' : '' }}>Klaster</option>
+                        </select>
+                        <select name="sort" onchange="document.getElementById('filterForm').submit()">
+                            <option value="created_at" {{ request('sort', 'created_at') === 'created_at' ? 'selected' : '' }}>Tanggal Dibuat</option>
+                            <option value="nama_skema" {{ request('sort') === 'nama_skema' ? 'selected' : '' }}>Nama Skema</option>
+                            <option value="nomor_skema" {{ request('sort') === 'nomor_skema' ? 'selected' : '' }}>Nomor Skema</option>
+                        </select>
+                        <select name="order" onchange="document.getElementById('filterForm').submit()">
+                            <option value="asc" {{ request('order', 'desc') === 'asc' ? 'selected' : '' }}>A → Z</option>
+                            <option value="desc" {{ request('order', 'desc') === 'desc' ? 'selected' : '' }}>Z → A</option>
+                        </select>
+                    </form>
                 </div>
             </div>
 
@@ -116,8 +114,64 @@
                             <th>AKSI</th>
                         </tr>
                     </thead>
-                    <tbody id="skemaTableBody">
-                        @include('admin.skema.partials.table-rows')
+                    <tbody>
+                        @forelse($skemas as $skema)
+                        <tr>
+                            <td>
+                                <span class="code-badge">{{ $skema->nomor_skema }}</span>
+                            </td>
+                            <td>
+                                <div class="user-info">
+                                    <div class="skema-icon {{ strtolower($skema->jenis_skema) }}">
+                                        <i class="bi {{ $skema->jenis_skema === 'KKNI' ? 'bi-patch-check' : ($skema->jenis_skema === 'Okupasi' ? 'bi-briefcase' : 'bi-diagram-3') }}"></i>
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name">{{ $skema->nama_skema }}</div>
+                                        <div class="user-id">{{ $skema->nomor_skema }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ strtolower($skema->jenis_skema) }}">
+                                    {{ $skema->jenis_skema }}
+                                </span>
+                            </td>
+                            <td>
+                                @if($skema->jurusan)
+                                    <span class="text-xs font-medium">{{ $skema->jurusan->nama_jurusan }}</span>
+                                    <span class="text-xs text-muted d-block">{{ $skema->jurusan->kode_jurusan }}</span>
+                                @else
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="date-text">{{ $skema->created_at ? $skema->created_at->format('d M Y') : 'N/A' }}</span>
+                            </td>
+                            <td>
+                                <div class="action-menu">
+                                    <button class="action-btn" onclick="toggleMenu(this)">
+                                        <i class="bi bi-three-dots"></i>
+                                    </button>
+                                    <div class="action-dropdown">
+                                        <a href="{{ route('admin.skema.edit', $skema->id) }}">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus skema ini?')">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="6" class="text-center">Belum ada data skema sertifikasi</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -308,77 +362,113 @@
         padding: 24px;
     }
 
-    /* Filter Section */
-    .filter-section {
+    /* Toolbar */
+    .toolbar {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         gap: 16px;
-        margin-bottom: 24px;
+        margin-bottom: 20px;
         flex-wrap: wrap;
     }
 
-    .search-box {
+    .search-form {
+        display: flex;
+        gap: 8px;
         flex: 1;
         min-width: 300px;
-        position: relative;
     }
 
-    .search-box i {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-        font-size: 16px;
-        z-index: 1;
-    }
-
-    .search-box input {
-        width: 100%;
-        padding: 10px 14px 10px 42px;
+    .search-form input[type="text"] {
+        flex: 1;
+        padding: 9px 14px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-        font-size: 14px;
-        transition: all 0.2s;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.2s;
     }
 
-    .search-box input:focus {
-        outline: none;
+    .search-form input[type="text"]:focus {
         border-color: #0073bd;
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
-    /* Filter Controls */
-    .filter-controls {
+    .search-form button {
+        padding: 9px 16px;
+        background: #0073bd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
         display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s;
     }
 
-    .filter-select {
-        padding: 10px 14px;
+    .search-form button:hover {
+        background: #0073bd;
+    }
+
+    .btn-clear {
+        padding: 9px;
+        background: #f3f4f6;
+        color: #6b7280;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        text-decoration: none;
+        width: 38px;
+        height: 38px;
+    }
+
+    .btn-clear:hover {
+        background: #e5e7eb;
+        color: #374151;
+    }
+
+    .filters {
+        display: flex;
+        gap: 8px;
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 8px;
+    }
+
+    .filter-form select {
+        padding: 8px 32px 8px 12px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-        font-size: 14px;
+        font-size: 12px;
         background: white;
-        color: #475569;
         cursor: pointer;
-        transition: all 0.2s;
-        min-width: 160px;
-    }
-
-    .filter-select:hover {
-        border-color: #cbd5e1;
-    }
-
-    .filter-select:focus {
         outline: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        transition: border-color 0.2s;
+    }
+
+    .filter-form select:focus {
         border-color: #0073bd;
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     /* Table */
-    
+    .table-container {
+        overflow-x: auto;
+    }
 
     .data-table {
         width: 100%;
@@ -499,104 +589,70 @@
         color: #475569;
     }
 
-    /* Dropdown Action Menu */
-    .dropdown-action {
+    /* Action Menu */
+    .action-menu {
         position: relative;
-        display: inline-block;
     }
 
-    .btn-dropdown {
-        background: none;
+    .action-btn {
+        width: 32px;
+        height: 32px;
         border: none;
-        padding: 8px;
-        cursor: pointer;
-        color: #64748b;
+        background: transparent;
         border-radius: 6px;
-        transition: all 0.2s;
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all 0.2s;
     }
 
-    .btn-dropdown:hover {
+    .action-btn:hover {
         background: #f1f5f9;
-        color: #0F172A;
     }
 
-    .btn-dropdown i {
-        font-size: 18px;
-    }
-
-    .dropdown-menu {
+    .action-dropdown {
+        display: none;
         position: absolute;
         right: 0;
         top: 100%;
         margin-top: 4px;
         background: white;
-        border: 1px solid #e2e8f0;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
         min-width: 160px;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.2s;
+        z-index: 10;
+        overflow: hidden;
     }
 
-    .dropdown-menu.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
+    .action-dropdown.show {
+        display: block;
     }
 
-    .dropdown-item {
+    .action-dropdown a,
+    .action-dropdown button {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        width: 100%;
         padding: 10px 16px;
-        color: #475569;
-        text-decoration: none;
-        font-size: 14px;
-        transition: all 0.2s;
         border: none;
         background: none;
-        width: 100%;
         text-align: left;
+        font-size: 14px;
+        color: #475569;
         cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
     }
 
-    .dropdown-item:first-child {
-        border-radius: 8px 8px 0 0;
-    }
-
-    .dropdown-item:last-child {
-        border-radius: 0 0 8px 8px;
-    }
-
-    .dropdown-item:hover {
+    .action-dropdown a:hover,
+    .action-dropdown button:hover {
         background: #f8fafc;
         color: #0F172A;
     }
 
-    .dropdown-item i {
-        font-size: 16px;
-    }
-
-    .dropdown-item.danger {
-        color: #dc2626;
-    }
-
-    .dropdown-item.danger:hover {
-        background: #fef2f2;
-        color: #dc2626;
-    }
-
-    .dropdown-menu button[type="submit"] {
-        color: #dc2626;
-    }
-
-    .dropdown-menu button[type="submit"]:hover {
+    .action-dropdown button[type="submit"]:hover {
         background: #fef2f2;
         color: #dc2626;
     }
@@ -662,167 +718,26 @@
         font-size: 14px;
         font-weight: 500;
     }
-
-    /* Spinner/Loading */
-    .spinner-border {
-        display: inline-block;
-        width: 3rem;
-        height: 3rem;
-        vertical-align: text-bottom;
-        border: 0.25em solid currentColor;
-        border-right-color: transparent;
-        border-radius: 50%;
-        animation: spinner-border 0.75s linear infinite;
-    }
-
-    .spinner-border.text-primary {
-        color: #0073bd;
-    }
-
-    @keyframes spinner-border {
-        to { transform: rotate(360deg); }
-    }
-
-    .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .filter-section {
-            flex-direction: column;
-        }
-
-        .search-box {
-            min-width: 100%;
-        }
-
-        .filter-controls {
-            width: 100%;
-        }
-
-        .filter-select {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .table-container {
-            display: block;
-            overflow-x: auto;
-        }
-    }
 </style>
 
 <script>
-    // AJAX Search Implementation
-    let searchTimeout;
-    const searchInput = document.getElementById('searchInput');
-    const jenisFilter = document.getElementById('jenisFilter');
-    const sortFilter = document.getElementById('sortFilter');
-    const orderFilter = document.getElementById('orderFilter');
-    const tableBody = document.getElementById('skemaTableBody');
-
-    // Set initial values from request
-    jenisFilter.value = '{{ request("jenis_skema", "all") }}';
-    sortFilter.value = '{{ request("sort", "created_at") }}';
-    orderFilter.value = '{{ request("order", "desc") }}';
-
-    function performSearch() {
-        const searchValue = searchInput.value;
-        const jenisValue = jenisFilter.value;
-        const sortValue = sortFilter.value;
-        const orderValue = orderFilter.value;
-        
-        // Build query parameters
-        const params = new URLSearchParams();
-        if (searchValue) params.append('search', searchValue);
-        if (jenisValue && jenisValue !== 'all') params.append('jenis_skema', jenisValue);
-        if (sortValue) params.append('sort', sortValue);
-        if (orderValue) params.append('order', orderValue);
-        
-        // Show loading state
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="6" style="text-align:center; padding:40px;">
-                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; margin-bottom: 12px;">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p style="color: #64748b; margin: 0;">Mencari data...</p>
-                </td>
-            </tr>
-        `;
-        
-        // Perform AJAX request
-        fetch(`{{ route('admin.skema.index') }}?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            tableBody.innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" style="text-align:center; padding:40px;">
-                        <i class="bi bi-exclamation-triangle" style="font-size:48px; color:#ef4444; display:block; margin-bottom:12px;"></i>
-                        <p style="color: #64748b; margin: 0;">Terjadi kesalahan saat memuat data</p>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    // Debounced search on input
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(performSearch, 500);
-    });
-
-    // Immediate search on filter change
-    jenisFilter.addEventListener('change', performSearch);
-    sortFilter.addEventListener('change', performSearch);
-    orderFilter.addEventListener('change', performSearch);
-
-    // Dropdown Toggle Function
-    function toggleDropdown(event) {
-        event.stopPropagation();
-        const button = event.currentTarget;
-        const dropdown = button.nextElementSibling;
-        const allDropdowns = document.querySelectorAll('.dropdown-menu');
-        
+    function toggleMenu(button) {
         // Close all other dropdowns
-        allDropdowns.forEach(menu => {
-            if (menu !== dropdown) {
-                menu.classList.remove('show');
+        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+            if (dropdown !== button.nextElementSibling) {
+                dropdown.classList.remove('show');
             }
         });
         
         // Toggle current dropdown
-        dropdown.classList.toggle('show');
+        button.nextElementSibling.classList.toggle('show');
     }
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
-        if (!event.target.closest('.dropdown-action')) {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
+        if (!event.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
             });
         }
     });

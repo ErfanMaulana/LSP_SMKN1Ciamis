@@ -18,7 +18,7 @@
     }
 
     .back-link:hover {
-        color: #0073bd;
+        color: #16a34a;
     }
 
     .skema-header {
@@ -42,7 +42,7 @@
     .skema-header-icon {
         width: 56px;
         height: 56px;
-        background: #0073bd;
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -90,8 +90,8 @@
     }
 
     .instructions-box {
-        background: #eff6ff;
-        border: 1px solid #bfdbfe;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 24px;
@@ -99,7 +99,7 @@
 
     .instructions-box h3 {
         font-size: 15px;
-        color: #0073bd;
+        color: #166534;
         margin-bottom: 12px;
         display: flex;
         align-items: center;
@@ -113,7 +113,7 @@
 
     .instructions-box li {
         font-size: 13px;
-        color: #0073bd;
+        color: #15803d;
         margin-bottom: 6px;
         line-height: 1.5;
     }
@@ -132,7 +132,7 @@
     }
 
     .unit-header {
-        background: #0073bd;
+        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
         padding: 20px 24px;
         color: white;
     }
@@ -208,7 +208,7 @@
     .elemen-number {
         font-size: 12px;
         font-weight: 700;
-        color: #0073bd;
+        color: #16a34a;
         margin-bottom: 4px;
     }
 
@@ -241,13 +241,13 @@
     .radio-option input[type="radio"] {
         width: 18px;
         height: 18px;
-        accent-color: #0073bd;
+        accent-color: #16a34a;
     }
 
     .radio-option.kompeten span {
         font-size: 13px;
         font-weight: 600;
-        color: #0073bd;
+        color: #16a34a;
     }
 
     .radio-option.belum span {
@@ -314,8 +314,8 @@
 
     .bukti-input:focus {
         outline: none;
-        border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+        border-color: #16a34a;
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
     }
 
     .bukti-input::placeholder {
@@ -344,7 +344,7 @@
     }
 
     .progress-info strong {
-        color: #0073bd;
+        color: #16a34a;
     }
 
     .btn-group {
@@ -376,13 +376,13 @@
     }
 
     .btn-submit {
-        background: linear-gradient(135deg, #3b82f6 0%, #0073bd 100%);
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
         color: white;
     }
 
     .btn-submit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.4);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
     }
 
     /* Rekomendasi Banner */
@@ -397,8 +397,8 @@
     }
 
     .rekomendasi-banner.lanjut {
-        background: #eff6ff;
-        border-color: #0073bd;
+        background: #f0fdf4;
+        border-color: #22c55e;
     }
 
     .rekomendasi-banner.tidak_lanjut {
@@ -418,8 +418,8 @@
     }
 
     .rekomendasi-banner.lanjut .banner-icon {
-        background: #dbeafe;
-        color: #0073bd;
+        background: #dcfce7;
+        color: #16a34a;
     }
 
     .rekomendasi-banner.tidak_lanjut .banner-icon {
@@ -439,7 +439,7 @@
         flex-wrap: wrap;
     }
 
-    .rekomendasi-banner.lanjut .banner-title { color: #0073bd; }
+    .rekomendasi-banner.lanjut .banner-title { color: #15803d; }
     .rekomendasi-banner.tidak_lanjut .banner-title { color: #be123c; }
 
     .rekomendasi-banner .banner-meta {
@@ -458,7 +458,7 @@
         border-left: 3px solid;
     }
 
-    .rekomendasi-banner.lanjut .banner-catatan { border-color: #0073bd; }
+    .rekomendasi-banner.lanjut .banner-catatan { border-color: #22c55e; }
     .rekomendasi-banner.tidak_lanjut .banner-catatan { border-color: #f43f5e; }
 
     .rekomendasi-badge-pill {
@@ -471,8 +471,159 @@
         font-weight: 700;
     }
 
-    .rekomendasi-badge-pill.lanjut { background: #dbeafe; color: #0073bd; }
+    .rekomendasi-badge-pill.lanjut { background: #dcfce7; color: #15803d; }
     .rekomendasi-badge-pill.tidak_lanjut { background: #ffe4e6; color: #be123c; }
+
+    /* Signature Pad */
+    .signature-section {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-top: 24px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border: 1px solid #e5e7eb;
+    }
+
+    .signature-section h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .signature-section .signature-subtitle {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 16px;
+    }
+
+    .signature-canvas-wrapper {
+        border: 2px dashed #d1d5db;
+        border-radius: 10px;
+        background: #fafafa;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s;
+    }
+
+    .signature-canvas-wrapper.active {
+        border-color: #16a34a;
+        background: #fff;
+    }
+
+    .signature-canvas-wrapper.has-signature {
+        border-style: solid;
+        border-color: #16a34a;
+    }
+
+    .signature-canvas {
+        width: 100%;
+        height: 200px;
+        cursor: crosshair;
+        display: block;
+    }
+
+    .signature-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+        color: #9ca3af;
+        transition: opacity 0.2s;
+    }
+
+    .signature-placeholder i {
+        font-size: 28px;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .signature-placeholder span {
+        font-size: 13px;
+    }
+
+    .signature-canvas-wrapper.has-signature .signature-placeholder {
+        opacity: 0;
+    }
+
+    .signature-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+    }
+
+    .signature-date {
+        font-size: 13px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .signature-date strong {
+        color: #1e293b;
+    }
+
+    .btn-clear-signature {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+
+    .btn-clear-signature:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        color: #dc2626;
+    }
+
+    .signature-saved-display {
+        text-align: center;
+        padding: 16px;
+    }
+
+    .signature-saved-display img {
+        max-width: 400px;
+        width: 100%;
+        height: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .signature-saved-meta {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #16a34a;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .signature-error {
+        color: #dc2626;
+        font-size: 13px;
+        margin-top: 8px;
+        display: none;
+        align-items: center;
+        gap: 6px;
+    }
 
     @media (max-width: 768px) {
         .elemen-header {
@@ -497,6 +648,15 @@
 
         .btn {
             justify-content: center;
+        }
+
+        .signature-canvas {
+            height: 160px;
+        }
+
+        .signature-actions {
+            flex-direction: column;
+            gap: 8px;
         }
     }
 </style>
@@ -565,7 +725,7 @@
             </span>
         </div>
         <div class="banner-meta">
-            Ditinjau oleh: <strong>{{ $pivot->reviewed_by ?? 'Asesor' }}</strong>
+            Ditinjau oleh: <strong>{{ $asesorReviewer->nama ?? ($pivot->reviewed_by ?? 'Asesor') }}</strong>
             @if($pivot->reviewed_at)
                 &nbsp;&bull;&nbsp; {{ \Carbon\Carbon::parse($pivot->reviewed_at)->translatedFormat('d F Y, H:i') }} WIB
             @endif
@@ -660,6 +820,159 @@
     </div>
     @endforeach
 
+    <!-- Tanda Tangan Asesi -->
+    <div class="signature-section">
+        <h3><i class="bi bi-pen"></i> Tanda Tangan Asesi</h3>
+        <p class="signature-subtitle">Dengan menandatangani, saya menyatakan bahwa semua jawaban di atas adalah benar dan sesuai dengan kompetensi yang saya miliki.</p>
+
+        @if($pivot && $pivot->tanda_tangan)
+        {{-- Signature sudah tersimpan --}}
+        <div class="signature-saved-display">
+            <img src="{{ $pivot->tanda_tangan }}" alt="Tanda Tangan Asesi">
+            <div class="signature-saved-meta">
+                <i class="bi bi-check-circle-fill"></i>
+                Ditandatangani pada: {{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan)->translatedFormat('d F Y, H:i') }} WIB
+            </div>
+        </div>
+        @elseif(!($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)))
+        {{-- Form tanda tangan --}}
+        <div class="signature-canvas-wrapper" id="signatureWrapper">
+            <canvas class="signature-canvas" id="signatureCanvas"></canvas>
+            <div class="signature-placeholder" id="signaturePlaceholder">
+                <i class="bi bi-pen"></i>
+                <span>Tanda tangan di sini</span>
+            </div>
+        </div>
+        <input type="hidden" name="tanda_tangan" id="tandaTanganInput">
+        <div class="signature-error" id="signatureError">
+            <i class="bi bi-exclamation-circle"></i>
+            <span>Tanda tangan wajib diisi sebelum menyelesaikan asesmen.</span>
+        </div>
+        <div class="signature-actions">
+            <div class="signature-date">
+                <i class="bi bi-calendar3"></i>
+                Tanggal: <strong id="signatureDate">{{ now()->translatedFormat('d F Y') }}</strong>
+            </div>
+            <button type="button" class="btn-clear-signature" id="clearSignature">
+                <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+            </button>
+        </div>
+        @endif
+    </div>
+
+    {{-- ═══════════════════════════════════════════════════════
+         FR.APL.02 — Rekomendasi Asesor (Read-Only untuk Asesi)
+    ════════════════════════════════════════════════════════ --}}
+    @if($pivot && $pivot->rekomendasi)
+    <div style="background:white;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);border:1px solid #e2e8f0;margin-top:20px;overflow:hidden;">
+        <div style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);padding:16px 20px;display:flex;align-items:center;gap:12px;">
+            <div style="width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-patch-check-fill" style="font-size:16px;color:white;"></i>
+            </div>
+            <div>
+                <h3 style="color:white;margin:0;font-size:15px;font-weight:700;">Rekomendasi Asesor <span style="font-size:12px;font-weight:400;opacity:0.8;">(FR.APL.02)</span></h3>
+                <small style="color:rgba(255,255,255,0.7);">Hasil tinjauan asesor terhadap asesmen mandiri Anda</small>
+            </div>
+        </div>
+
+        <div style="padding:22px 24px;">
+            {{-- Tabel Rekomendasi --}}
+            <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px;">
+                <tr>
+                    <td style="width:42%;border:1px solid #d1d5db;padding:12px 16px;vertical-align:top;background:#f8fafc;">
+                        <strong>Rekomendasi Untuk Asesi:</strong>
+                        <div style="font-size:12px;color:#64748b;margin-top:4px;">Asesmen dapat / tidak dapat dilanjutkan</div>
+                    </td>
+                    <td style="border:1px solid #d1d5db;padding:14px 20px;">
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:2px solid {{ $pivot->rekomendasi === 'lanjut' ? '#059669' : '#dc2626' }};background:{{ $pivot->rekomendasi === 'lanjut' ? '#f0fdf4' : '#fff1f2' }};">
+                            <span style="font-weight:600;color:{{ $pivot->rekomendasi === 'lanjut' ? '#065f46' : '#991b1b' }};">
+                                {{ $pivot->rekomendasi === 'lanjut' ? '✓' : '✗' }} &nbsp;Asesmen <u>{{ $pivot->rekomendasi === 'lanjut' ? 'dapat' : 'tidak dapat' }}</u> dilanjutkan
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                @if($pivot->catatan_asesor)
+                <tr>
+                    <td style="border:1px solid #d1d5db;border-top:none;padding:12px 16px;vertical-align:top;background:#f8fafc;">
+                        <strong>Catatan Asesor:</strong>
+                    </td>
+                    <td style="border:1px solid #d1d5db;border-top:none;padding:12px 14px;">
+                        <div style="font-size:13px;color:#374151;line-height:1.6;">{{ $pivot->catatan_asesor }}</div>
+                    </td>
+                </tr>
+                @endif
+            </table>
+
+            {{-- Tabel Tanda Tangan --}}
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <tr>
+                    {{-- KOLOM ASESI --}}
+                    <td style="width:50%;border:1px solid #d1d5db;padding:0;vertical-align:top;">
+                        <table style="width:100%;border-collapse:collapse;">
+                            <tr>
+                                <td colspan="2" style="padding:9px 14px;background:#f8fafc;font-weight:700;border-bottom:1px solid #d1d5db;">Asesi :</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:9px 14px;width:42%;border-bottom:1px solid #eff0f1;color:#64748b;">Nama</td>
+                                <td style="padding:9px 14px;border-bottom:1px solid #eff0f1;font-weight:500;">{{ $asesi->nama }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:9px 14px;color:#64748b;vertical-align:top;">Tanda tangan/<br>Tanggal</td>
+                                <td style="padding:9px 14px;">
+                                    @if($pivot->tanda_tangan)
+                                        <img src="{{ $pivot->tanda_tangan }}" alt="Tanda tangan asesi"
+                                             style="max-width:180px;max-height:70px;border:1px solid #e2e8f0;border-radius:4px;">
+                                        @if($pivot->tanggal_tanda_tangan)
+                                        <div style="font-size:11px;color:#64748b;margin-top:4px;">
+                                            {{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan)->locale('id')->isoFormat('D MMMM YYYY, HH:mm') }}
+                                        </div>
+                                        @endif
+                                    @else
+                                        <span style="color:#94a3b8;font-style:italic;">Belum tanda tangan</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+
+                    {{-- KOLOM ASESOR --}}
+                    <td style="width:50%;border:1px solid #d1d5db;border-left:none;padding:0;vertical-align:top;">
+                        <table style="width:100%;border-collapse:collapse;">
+                            <tr>
+                                <td colspan="2" style="padding:9px 14px;background:#f8fafc;font-weight:700;border-bottom:1px solid #d1d5db;">Ditinjau Oleh Asesor :</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:9px 14px;width:38%;border-bottom:1px solid #eff0f1;color:#64748b;">Nama :</td>
+                                <td style="padding:9px 14px;border-bottom:1px solid #eff0f1;font-weight:500;">{{ $asesorReviewer->nama ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:9px 14px;border-bottom:1px solid #eff0f1;color:#64748b;">No. Reg:</td>
+                                <td style="padding:9px 14px;border-bottom:1px solid #eff0f1;font-weight:500;font-family:monospace;">{{ $pivot->reviewed_by ?? '-' }}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:9px 14px;color:#64748b;vertical-align:top;">Tanda tangan/<br>Tanggal</td>
+                                <td style="padding:9px 14px;">
+                                    @if($pivot->tanda_tangan_asesor)
+                                        <img src="{{ $pivot->tanda_tangan_asesor }}" alt="Tanda tangan asesor"
+                                             style="max-width:180px;max-height:70px;border:1px solid #e2e8f0;border-radius:4px;">
+                                        @if($pivot->tanggal_tanda_tangan_asesor)
+                                        <div style="font-size:11px;color:#64748b;margin-top:4px;">
+                                            {{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan_asesor)->locale('id')->isoFormat('D MMMM YYYY, HH:mm') }}
+                                        </div>
+                                        @endif
+                                    @else
+                                        <span style="color:#94a3b8;font-style:italic;">Belum tanda tangan</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    @endif
+
     <div class="form-actions">
         <div class="progress-info">
             <i class="bi bi-info-circle"></i>
@@ -671,13 +984,13 @@
                 <i class="bi bi-lock-fill" style="color:#94a3b8;"></i> Asesmen telah direkomendasikan asesor — tidak dapat diubah
             </span>
             @elseif($pivot && $pivot->status === 'selesai')
-            <div style="display:flex;align-items:center;gap:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 20px;">
-                <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#bfdbfe);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <i class="bi bi-hourglass-split" style="font-size:18px;color:#0c4a6e;"></i>
+            <div style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d1fae5,#a7f3d0);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-hourglass-split" style="font-size:18px;color:#065f46;"></i>
                 </div>
                 <div>
-                    <div style="font-size:13.5px;font-weight:700;color:#0c4a6e;">Asesmen Selesai — Menunggu Rekomendasi Asesor</div>
-                    <div style="font-size:12.5px;color:#0c4a6e;margin-top:2px;">Jawaban Anda telah tersimpan. Mohon tunggu hingga asesor memberikan rekomendasi untuk melanjutkan proses sertifikasi.</div>
+                    <div style="font-size:13.5px;font-weight:700;color:#065f46;">Asesmen Selesai — Menunggu Rekomendasi Asesor</div>
+                    <div style="font-size:12.5px;color:#166534;margin-top:2px;">Jawaban Anda telah tersimpan. Mohon tunggu hingga asesor memberikan rekomendasi untuk melanjutkan proses sertifikasi.</div>
                 </div>
             </div>
             @else
@@ -704,8 +1017,126 @@
         saveTimeout = setTimeout(function() {
             // Visual feedback
             const saveBtn = document.querySelector('.btn-save');
-            saveBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Menyimpan...';
+            if (saveBtn) saveBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Menyimpan...';
         }, 2000);
     });
+
+    // Signature Pad
+    (function() {
+        const canvas = document.getElementById('signatureCanvas');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const wrapper = document.getElementById('signatureWrapper');
+        const placeholder = document.getElementById('signaturePlaceholder');
+        const hiddenInput = document.getElementById('tandaTanganInput');
+        const clearBtn = document.getElementById('clearSignature');
+        const errorEl = document.getElementById('signatureError');
+
+        let isDrawing = false;
+        let hasSignature = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.scale(dpr, dpr);
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#1e293b';
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', function() {
+            const imageData = canvas.toDataURL();
+            resizeCanvas();
+            if (hasSignature) {
+                const img = new Image();
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0, canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
+                };
+                img.src = imageData;
+            }
+        });
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches ? e.touches[0] : e;
+            return {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+        }
+
+        function startDrawing(e) {
+            e.preventDefault();
+            isDrawing = true;
+            const pos = getPos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+            wrapper.classList.add('active');
+        }
+
+        function draw(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const pos = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+            if (!hasSignature) {
+                hasSignature = true;
+                wrapper.classList.add('has-signature');
+                errorEl.style.display = 'none';
+            }
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            wrapper.classList.remove('active');
+            if (hasSignature) {
+                hiddenInput.value = canvas.toDataURL('image/png');
+            }
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        // Touch events
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        // Clear signature
+        clearBtn.addEventListener('click', function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false;
+            hiddenInput.value = '';
+            wrapper.classList.remove('has-signature');
+        });
+
+        // Validate signature on final submit
+        const submitBtn = document.querySelector('[name="submit_final"]');
+        if (submitBtn) {
+            submitBtn.addEventListener('click', function(e) {
+                if (!hasSignature) {
+                    e.preventDefault();
+                    errorEl.style.display = 'flex';
+                    document.querySelector('.signature-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return false;
+                }
+            });
+        }
+    })();
 </script>
 @endsection

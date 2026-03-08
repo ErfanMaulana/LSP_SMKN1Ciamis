@@ -8,7 +8,7 @@
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Kelola Asesi</h2>
+            <h2>Manajemen Asesi</h2>
             <p class="subtitle">Kelola dan pantau semua kandidat dalam sistem sertifikasi.</p>
         </div>
         <div class="header-actions">
@@ -17,18 +17,6 @@
             </a>
         </div>
     </div>
-
-    {{-- Flash messages --}}
-    @if(session('success'))
-        <div class="alert alert-success" style="margin-bottom:16px;">
-            <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-error" style="margin-bottom:16px;">
-            <i class="bi bi-exclamation-circle-fill"></i> {{ session('error') }}
-        </div>
-    @endif
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
@@ -65,7 +53,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">DALAM PENILAIAN</div>
-                <div class="stat-value">{{ number_format($inAssessment) }} <span class="stat-subtitle"></span></div>
+                <div class="stat-value">{{ number_format($inAssessment) }} <span class="stat-subtitle">Aktif</span></div>
             </div>
         </div>
 
@@ -75,7 +63,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">TERSERTIFIKASI</div>
-                <div class="stat-value">{{ number_format($certified) }} <span class="stat-subtitle"></span></div>
+                <div class="stat-value">{{ number_format($certified) }} <span class="stat-subtitle">Total</span></div>
             </div>
         </div>
     </div>
@@ -83,32 +71,40 @@
     <!-- Search and Filter Section -->
     <div class="card">
         <div class="card-body">
+            <form method="GET" action="{{ route('admin.asesi.index') }}" id="filterForm">
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" id="searchInput" placeholder="Cari berdasarkan nama atau ID..." autocomplete="off">
+                    <input type="text" name="search" placeholder="Cari berdasarkan nama atau NIK..."
+                           value="{{ request('search') }}" autocomplete="off">
                 </div>
-                <div class="filter-controls">
-                    <select class="filter-select" id="jurusanFilter">
+                <div class="filter-group">
+                    <select class="filter-select" name="jurusan" onchange="document.getElementById('filterForm').submit()">
                         <option value="">Semua Jurusan</option>
-                        @foreach($jurusanList as $j)
-                            <option value="{{ $j->ID_jurusan }}">{{ $j->nama_jurusan }}</option>
+                        @foreach($jurusanList as $jur)
+                            <option value="{{ $jur->ID_jurusan }}"
+                                {{ request('jurusan') == $jur->ID_jurusan ? 'selected' : '' }}>
+                                {{ $jur->nama_jurusan }}
+                            </option>
                         @endforeach
                     </select>
-                    <select class="filter-select" id="statusFilter">
+                    <select class="filter-select" name="status" onchange="document.getElementById('filterForm').submit()">
                         <option value="">Semua Status</option>
-                        <option value="pending">Menunggu</option>
-                        <option value="approved">Dalam Proses</option>
-                        <option value="completed">Selesai</option>
-                        <option value="rejected">Ditolak</option>
+                        <option value="pending"  {{ request('status') == 'pending'  ? 'selected' : '' }}>Menunggu</option>
+                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
+                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
                     </select>
-                    <select class="filter-select" id="sortFilter">
-                        <option value="">Terbaru</option>
-                        <option value="asc">A - Z</option>
-                        <option value="desc">Z - A</option>
-                    </select>
+                    <button type="submit" class="btn-filter-search">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    @if(request('search') || request('jurusan') || request('status'))
+                    <a href="{{ route('admin.asesi.index') }}" class="btn-filter-reset" title="Reset filter">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                    @endif
                 </div>
             </div>
+            </form>
 
             <!-- Table -->
             <div class="table-container">
@@ -122,8 +118,76 @@
                             <th>AKSI</th>
                         </tr>
                     </thead>
-                    <tbody id="asesiTableBody">
-                        @include('admin.asesi.partials.table-rows')
+                    <tbody>
+                        @forelse($asesi as $item)
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-avatar-initials">
+                                        {{ strtoupper(substr($item->nama, 0, 2)) }}
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name">{{ $item->nama }}</div>
+                                        <div class="user-id">{{ $item->NIK }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? 'Belum Ditentukan' }}</span>
+                            </td>
+                            <td>
+                                @php
+                                    $badgeClass = match($item->status ?? '') {
+                                        'approved' => 'badge-success',
+                                        'pending'  => 'badge-warning',
+                                        'rejected' => 'badge-danger',
+                                        default    => 'badge-info',
+                                    };
+                                    $statusLabel = match($item->status ?? '') {
+                                        'approved' => 'Disetujui',
+                                        'pending'  => 'Menunggu',
+                                        'rejected' => 'Ditolak',
+                                        default    => 'Dalam Proses',
+                                    };
+                                @endphp
+                                <span class="badge {{ $badgeClass }}">{{ $statusLabel }}</span>
+                            </td>
+                            <td>
+                                <span class="date-text">{{ $item->created_at ? $item->created_at->format('M d, Y') : 'N/A' }}</span>
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:6px;align-items:center;">
+                                    <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}"
+                                       title="Lihat Detail"
+                                       style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;color:#16a34a;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;transition:background .2s;"
+                                       onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.asesi.edit', $item->NIK) }}"
+                                       title="Edit"
+                                       style="width:32px;height:32px;border-radius:8px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;transition:background .2s;"
+                                       onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="{{ route('admin.asesi.destroy', $item->NIK) }}" method="POST" style="margin:0;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                title="Hapus"
+                                                onclick="return confirm('Hapus asesi {{ addslashes($item->nama) }}?')"
+                                                style="width:32px;height:32px;border-radius:8px;background:#fff1f2;color:#e11d48;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .2s;"
+                                                onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center">Tidak ada data asesi</td>
+                        </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
@@ -131,7 +195,7 @@
             <!-- Pagination -->
             <div class="pagination-container">
                 <div class="pagination-info">
-                    Menampilkan {{ $asesi->firstItem() ?? 0 }} sampai {{ $asesi->lastItem() ?? 0 }} dari {{ $asesi->total() }} data
+                    Menampilkan {{ $asesi->firstItem() ?? 0 }} sampai {{ $asesi->lastItem() ?? 0 }} dari {{ $asesi->total() }} entri
                 </div>
                 <div class="pagination">
                     @if($asesi->currentPage() > 1)
@@ -364,37 +428,63 @@
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
-    /* Filter Controls */
-    .filter-controls {
+    .filter-group {
         display: flex;
         gap: 12px;
         flex-wrap: wrap;
     }
 
     .filter-select {
-        padding: 10px 14px;
+        padding: 10px 36px 10px 14px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         font-size: 14px;
         background: white;
-        color: #475569;
         cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
         transition: all 0.2s;
-        min-width: 160px;
     }
 
     .filter-select:hover {
         border-color: #cbd5e1;
     }
 
-    .filter-select:focus {
-        outline: none;
-        border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    .btn-filter-search {
+        padding: 9px 14px;
+        background: #0073bd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
     }
+    .btn-filter-search:hover { background: #005f99; }
+
+    .btn-filter-reset {
+        padding: 9px 12px;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-filter-reset:hover { background: #fecaca; }
 
     /* Table */
-    
+    .table-container {
+        overflow-x: auto;
+    }
 
     .data-table {
         width: 100%;
@@ -498,100 +588,70 @@
         color: #92400e;
     }
 
-    .badge-danger {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    /* Dropdown Action */
-    .dropdown-action {
+    /* Action Menu */
+    .action-menu {
         position: relative;
-        display: inline-block;
     }
 
-    .btn-dropdown {
-        background: none;
+    .action-btn {
+        width: 32px;
+        height: 32px;
         border: none;
-        padding: 8px;
-        cursor: pointer;
-        color: #64748b;
+        background: transparent;
         border-radius: 6px;
-        transition: all 0.2s;
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all 0.2s;
     }
 
-    .btn-dropdown:hover {
+    .action-btn:hover {
         background: #f1f5f9;
-        color: #0F172A;
     }
 
-    .btn-dropdown i {
-        font-size: 18px;
-    }
-
-    .dropdown-menu {
+    .action-dropdown {
+        display: none;
         position: absolute;
         right: 0;
         top: 100%;
         margin-top: 4px;
         background: white;
-        border: 1px solid #e2e8f0;
         border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
         min-width: 160px;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.2s;
+        z-index: 10;
+        overflow: hidden;
     }
 
-    .dropdown-menu.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
+    .action-dropdown.show {
+        display: block;
     }
 
-    .dropdown-item {
+    .action-dropdown a,
+    .action-dropdown button {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        width: 100%;
         padding: 10px 16px;
-        color: #475569;
-        text-decoration: none;
-        font-size: 14px;
-        transition: all 0.2s;
         border: none;
         background: none;
-        width: 100%;
         text-align: left;
+        font-size: 14px;
+        color: #475569;
         cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
     }
 
-    .dropdown-item:first-child {
-        border-radius: 8px 8px 0 0;
-    }
-
-    .dropdown-item:last-child {
-        border-radius: 0 0 8px 8px;
-    }
-
-    .dropdown-item:hover {
+    .action-dropdown a:hover,
+    .action-dropdown button:hover {
         background: #f8fafc;
         color: #0F172A;
     }
 
-    .dropdown-item i {
-        font-size: 16px;
-    }
-
-    .dropdown-item.danger {
-        color: #dc2626;
-    }
-
-    .dropdown-item.danger:hover {
+    .action-dropdown button[type="submit"]:hover {
         background: #fef2f2;
         color: #dc2626;
     }
@@ -655,166 +715,40 @@
         padding: 40px 20px;
         color: #64748b;
     }
-
-    /* Spinner/Loading */
-    .spinner-border {
-        display: inline-block;
-        width: 3rem;
-        height: 3rem;
-        vertical-align: text-bottom;
-        border: 0.25em solid currentColor;
-        border-right-color: transparent;
-        border-radius: 50%;
-        animation: spinner-border 0.75s linear infinite;
-    }
-
-    .spinner-border.text-primary {
-        color: #0073bd;
-    }
-
-    @keyframes spinner-border {
-        to { transform: rotate(360deg); }
-    }
-
-    .visually-hidden {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .filter-section {
-            flex-direction: column;
-        }
-
-        .search-box {
-            min-width: 100%;
-        }
-
-        .filter-controls {
-            width: 100%;
-        }
-
-        .filter-select {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .table-container {
-            display: block;
-            overflow-x: auto;
-        }
-    }
 </style>
 
 <script>
-    function toggleDropdown(button) {
-        const dropdown = button.nextElementSibling;
-        const allDropdowns = document.querySelectorAll('.dropdown-menu');
-        
+    function toggleMenu(button) {
         // Close all other dropdowns
-        allDropdowns.forEach(menu => {
-            if (menu !== dropdown) {
-                menu.classList.remove('show');
+        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+            if (dropdown !== button.nextElementSibling) {
+                dropdown.classList.remove('show');
             }
         });
         
         // Toggle current dropdown
-        dropdown.classList.toggle('show');
+        button.nextElementSibling.classList.toggle('show');
     }
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
-        if (!event.target.closest('.dropdown-action')) {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
+        if (!event.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
             });
         }
     });
 
-    // AJAX Search dengan Debounce
-    let searchTimeout;
-    const searchInput = document.getElementById('searchInput');
-    const jurusanFilter = document.getElementById('jurusanFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    const sortFilter = document.getElementById('sortFilter');
-    const tableBody = document.getElementById('asesiTableBody');
-
-    function performSearch() {
-        const searchValue = searchInput.value;
-        const jurusanValue = jurusanFilter.value;
-        const statusValue = statusFilter.value;
-        const sortValue = sortFilter.value;
-
-        // Build query parameters
-        const params = new URLSearchParams();
-        if (searchValue) params.append('search', searchValue);
-        if (jurusanValue) params.append('jurusan', jurusanValue);
-        if (statusValue) params.append('status', statusValue);
-        if (sortValue) params.append('sort', sortValue);
-
-        // Show loading indicator
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center">
-                    <div style="padding: 40px 20px;">
-                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; margin-bottom: 12px;">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p style="color: #64748b; margin: 0;">Mencari data...</p>
-                    </div>
-                </td>
-            </tr>
-        `;
-
-        // Perform AJAX request
-        fetch(`{{ route('admin.asesi.index') }}?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
+    // Submit filter form on Enter key in search input
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('filterForm').submit();
             }
-        })
-        .then(response => response.text())
-        .then(html => {
-            tableBody.innerHTML = html;
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="5" class="text-center">
-                        <div style="padding: 40px 20px;">
-                            <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
-                            <p style="color: #64748b; margin: 0;">Terjadi kesalahan saat memuat data</p>
-                        </div>
-                    </td>
-                </tr>
-            `;
         });
     }
-
-    // Search input with debounce (delay 500ms)
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(performSearch, 500);
-    });
-
-    // Filter changes trigger immediate search
-    jurusanFilter.addEventListener('change', performSearch);
-    statusFilter.addEventListener('change', performSearch);
-    sortFilter.addEventListener('change', performSearch);
 </script>
 
 @endsection

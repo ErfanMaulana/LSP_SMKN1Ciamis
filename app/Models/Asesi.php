@@ -105,7 +105,7 @@ class Asesi extends Model
     public function skemas()
     {
         return $this->belongsToMany(Skema::class, 'asesi_skema', 'asesi_nik', 'skema_id')
-                    ->withPivot('status', 'tanggal_mulai', 'tanggal_selesai', 'rekomendasi', 'catatan_asesor', 'reviewed_at', 'reviewed_by')
+                    ->withPivot('status', 'tanggal_mulai', 'tanggal_selesai', 'rekomendasi', 'catatan_asesor', 'reviewed_at', 'reviewed_by', 'tanda_tangan', 'tanggal_tanda_tangan')
                     ->withTimestamps();
     }
 
