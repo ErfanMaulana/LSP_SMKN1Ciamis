@@ -76,8 +76,16 @@ class AkunAsesiController extends Controller
             'role'     => 'asesi',
         ]);
 
+        $successMsg = 'Akun asesi ' . $request->nama . ' (NIK: ' . $request->NIK . ') berhasil dibuat!';
+
+        // If the form came from the asesi tab, redirect back there
+        if ($request->input('source') === 'asesi_tab') {
+            return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
+                ->with('success', $successMsg);
+        }
+
         return redirect()->route('admin.akun-asesi.index')
-            ->with('success', 'Akun asesi ' . $request->nama . ' (NIK: ' . $request->NIK . ') berhasil dibuat!');
+            ->with('success', $successMsg);
     }
 
     /**
@@ -114,6 +122,13 @@ class AkunAsesiController extends Controller
         if ($import->invalid > 0) $msg .= " {$import->invalid} baris tidak valid.";
 
         $type = $import->imported > 0 ? 'success' : 'error';
+
+        // If the form came from the asesi tab, redirect back there
+        if ($request->input('source') === 'asesi_tab') {
+            return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
+                ->with($type, $msg)
+                ->with('import_errors', $import->errors);
+        }
 
         return redirect()->route('admin.akun-asesi.index')
             ->with($type, $msg)

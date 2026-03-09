@@ -112,18 +112,23 @@
                         </form>
                     </td>
                     <td>
-                        <div class="action-btns">
-                            <a href="{{ route('admin.socialmedia.edit', $sm->id) }}" class="btn-action edit" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <form action="{{ route('admin.socialmedia.destroy', $sm->id) }}" method="POST"
-                                  onsubmit="return confirm('Hapus {{ $sm->name }}?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn-action delete" title="Hapus">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
+                        <div class="action-menu">
+                            <button class="action-btn" onclick="toggleMenu(this)">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <div class="action-dropdown">
+                                <a href="{{ route('admin.socialmedia.edit', $sm->id) }}">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <form action="{{ route('admin.socialmedia.destroy', $sm->id) }}" method="POST"
+                                      onsubmit="return confirm('Hapus {{ $sm->name }}?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </td>
                 </tr>
@@ -231,12 +236,14 @@
     .status-badge.inactive { background: #fee2e2; color: #991b1b; }
     .status-badge.inactive:hover { background: #fecaca; }
 
-    .action-btns { display: flex; gap: 8px; }
-    .btn-action { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: none; cursor: pointer; font-size: 16px; transition: all 0.2s; text-decoration: none; }
-    .btn-action.edit { background: #eff6ff; color: #0073bd; }
-    .btn-action.edit:hover { background: #dbeafe; }
-    .btn-action.delete { background: #fef2f2; color: #ef4444; }
-    .btn-action.delete:hover { background: #fee2e2; }
+    .action-menu { position: relative; }
+    .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .action-btn:hover { background: #f1f5f9; }
+    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 160px; z-index: 10; overflow: hidden; }
+    .action-dropdown.show { display: block; }
+    .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
+    .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
+    .action-dropdown button[type="submit"]:hover { background: #fef2f2; color: #dc2626; }
 
     .empty-state { background: white; border-radius: 12px; padding: 60px 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .empty-state i { font-size: 48px; color: #cbd5e1; }
@@ -248,4 +255,20 @@
         .page-header { flex-direction: column; align-items: flex-start; }
     }
 </style>
+@endsection
+
+@section('scripts')
+<script>
+function toggleMenu(button) {
+    document.querySelectorAll('.action-dropdown.show').forEach(d => {
+        if (d !== button.nextElementSibling) d.classList.remove('show');
+    });
+    button.nextElementSibling.classList.toggle('show');
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.action-menu')) {
+        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
+    }
+});
+</script>
 @endsection

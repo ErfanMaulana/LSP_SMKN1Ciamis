@@ -76,18 +76,14 @@
     .badge.tempat_kerja { background: #fef3c7; color: #92400e; }
     .badge.mandiri  { background: #ede9fe; color: #5b21b6; }
 
-    .action-btns { display: flex; gap: 6px; }
-    .btn-icon {
-        width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer;
-        display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .2s;
-        text-decoration: none;
-    }
-    .btn-icon.edit   { background: #eff6ff; color: #2563eb; }
-    .btn-icon.edit:hover { background: #dbeafe; }
-    .btn-icon.toggle { background: #fef3c7; color: #d97706; }
-    .btn-icon.toggle:hover { background: #fde68a; }
-    .btn-icon.del    { background: #fff1f2; color: #e11d48; }
-    .btn-icon.del:hover { background: #ffe4e6; }
+    .action-menu { position: relative; }
+    .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .action-btn:hover { background: #f1f5f9; }
+    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 170px; z-index: 10; overflow: hidden; }
+    .action-dropdown.show { display: block; }
+    .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
+    .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
+    .action-dropdown button[type="submit"]:last-child:hover { background: #fef2f2; color: #dc2626; }
 
     .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
     .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
@@ -196,23 +192,29 @@
                     </span>
                 </td>
                 <td>
-                    <div class="action-btns">
-                        <a href="{{ route('admin.tuk.edit', $tuk->id) }}" class="btn-icon edit" title="Edit">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        <form method="POST" action="{{ route('admin.tuk.toggle', $tuk->id) }}" style="margin:0;">
-                            @csrf @method('PATCH')
-                            <button type="submit" class="btn-icon toggle" title="{{ $tuk->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                <i class="bi bi-{{ $tuk->status === 'aktif' ? 'pause-circle' : 'play-circle' }}"></i>
-                            </button>
-                        </form>
-                        <form method="POST" action="{{ route('admin.tuk.destroy', $tuk->id) }}" style="margin:0;"
-                              onsubmit="return confirm('Hapus TUK {{ addslashes($tuk->nama_tuk) }}?')">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn-icon del" title="Hapus">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
+                    <div class="action-menu">
+                        <button class="action-btn" onclick="toggleMenu(this)">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <div class="action-dropdown">
+                            <a href="{{ route('admin.tuk.edit', $tuk->id) }}">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <form method="POST" action="{{ route('admin.tuk.toggle', $tuk->id) }}" style="margin:0;">
+                                @csrf @method('PATCH')
+                                <button type="submit">
+                                    <i class="bi bi-{{ $tuk->status === 'aktif' ? 'pause-circle' : 'play-circle' }}"></i>
+                                    {{ $tuk->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ route('admin.tuk.destroy', $tuk->id) }}" style="margin:0;"
+                                  onsubmit="return confirm('Hapus TUK {{ addslashes($tuk->nama_tuk) }}?')">
+                                @csrf @method('DELETE')
+                                <button type="submit">
+                                    <i class="bi bi-trash"></i> Hapus
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </td>
             </tr>
@@ -236,4 +238,20 @@
     @endif
 </div>
 
+@endsection
+
+@section('scripts')
+<script>
+function toggleMenu(button) {
+    document.querySelectorAll('.action-dropdown.show').forEach(d => {
+        if (d !== button.nextElementSibling) d.classList.remove('show');
+    });
+    button.nextElementSibling.classList.toggle('show');
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.action-menu')) {
+        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
+    }
+});
+</script>
 @endsection

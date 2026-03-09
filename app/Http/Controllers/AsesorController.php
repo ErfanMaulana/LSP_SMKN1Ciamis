@@ -15,7 +15,7 @@ class AsesorController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Asesor::with('skemas');
+        $query = Asesor::with(['skemas', 'account']);
         
         // Search filter
         if ($request->has('search') && $request->search != '') {
@@ -47,7 +47,6 @@ class AsesorController extends Controller
             'total'           => Asesor::count(),
             'with_skema'      => Asesor::whereHas('skemas')->count(),
             'without_skema'   => Asesor::whereDoesntHave('skemas')->count(),
-            'with_account'    => Asesor::whereNotNull('no_met')->count(),
         ];
 
         // If AJAX request, return only table rows
@@ -76,7 +75,7 @@ class AsesorController extends Controller
             'nama'      => 'required|string|max:255',
             'skema_ids' => 'nullable|array',
             'skema_ids.*' => 'exists:skemas,id',
-            'no_met'    => 'nullable|string|max:50|unique:asesor,no_met|unique:accounts,id',
+            'no_met'    => 'required|string|max:50|unique:asesor,no_met|unique:accounts,id',
         ]);
 
         $asesor = Asesor::create([
@@ -89,14 +88,13 @@ class AsesorController extends Controller
             $asesor->skemas()->sync($validated['skema_ids']);
         }
 
-        // Auto-create account if no_met provided
-        if (!empty($validated['no_met'])) {
-            Account::create([
-                'id'       => $validated['no_met'],
-                'password' => Hash::make($validated['no_met']),
-                'role'     => 'asesor',
-            ]);
-        }
+        // Always create account with no_met as login ID
+        Account::create([
+            'id'       => $validated['no_met'],
+            'nama'     => $validated['nama'],
+            'password' => Hash::make($validated['no_met']),
+            'role'     => 'asesor',
+        ]);
 
         return redirect()->route('admin.asesor.index')->with('success', 'Data Asesor berhasil ditambahkan!');
     }

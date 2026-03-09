@@ -113,4 +113,9 @@ class Asesi extends Model
     {
         return $this->hasMany(JawabanElemen::class, 'asesi_nik', 'NIK');
     }
+
+    public function account()
+    {
+        return $this->hasOne(Account::class, 'NIK', 'NIK');
+    }
 }

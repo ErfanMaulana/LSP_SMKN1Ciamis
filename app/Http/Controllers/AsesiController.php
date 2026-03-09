@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asesi;
+use App\Models\Account;
 use App\Models\Jurusan;
 use App\Models\Skema;
 use App\Models\Asesor;
 use App\Models\Kelompok;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AsesiController extends Controller
 {
@@ -78,6 +80,12 @@ class AsesiController extends Controller
         if ($request->ajax()) {
             return view('admin.asesi.partials.table-rows', compact('asesi'))->render();
         }
+
+        // Akun role=asesi yang tidak punya data di tabel asesi
+        $akunTanpaAsesi = Account::where('role', 'asesi')
+            ->whereNotIn('NIK', Asesi::pluck('NIK')->filter())
+            ->orderBy('nama')
+            ->get();
         
         return view('admin.asesi.index', compact(
             'asesi', 
@@ -86,7 +94,8 @@ class AsesiController extends Controller
             'growthPercentage',
             'inAssessment',
             'certified',
-            'jurusanList'
+            'jurusanList',
+            'akunTanpaAsesi'
         ));
     }
 
@@ -124,9 +133,20 @@ class AsesiController extends Controller
             'kode_anggaran' => 'nullable|string|max:50',
         ]);
 
-        Asesi::create($validated);
+        $asesi = Asesi::create($validated);
 
-        return redirect()->route('admin.asesi.index')->with('success', 'Data Asesi berhasil ditambahkan!');
+        // Auto-create account with NIK as login ID and default password
+        if (!Account::where('NIK', $validated['NIK'])->exists()) {
+            Account::create([
+                'id'       => $validated['NIK'],
+                'NIK'      => $validated['NIK'],
+                'nama'     => $validated['nama'],
+                'password' => Hash::make($validated['NIK']),
+                'role'     => 'asesi',
+            ]);
+        }
+
+        return redirect()->route('admin.asesi.index')->with('success', 'Data Asesi berhasil ditambahkan! Akun login (NIK: ' . $validated['NIK'] . ', password awal: NIK) otomatis dibuat.');
     }
 
     /**

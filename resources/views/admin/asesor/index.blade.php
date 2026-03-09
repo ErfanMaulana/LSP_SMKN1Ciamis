@@ -30,16 +30,6 @@
 
         <div class="stat-card">
             <div class="stat-icon blue">
-                <i class="bi bi-person-check"></i>
-            </div>
-            <div class="stat-content">
-                <div class="stat-label">PUNYA AKUN</div>
-                <div class="stat-value">{{ $stats['with_account'] }}</div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-icon blue">
                 <i class="bi bi-patch-check"></i>
             </div>
             <div class="stat-content">
@@ -90,6 +80,7 @@
                         <tr>
                             <th>NAMA ASESOR</th>
                             <th>KEAHLIAN</th>
+                            <th>NO. MET / AKUN</th>
                             <th>STATUS</th>
                             <th>AKSI</th>
                         </tr>
@@ -118,33 +109,39 @@
                                 @endif
                             </td>
                             <td>
+                                <div style="font-size:13px;font-weight:600;color:#1e293b;">{{ $item->no_met ?? '—' }}</div>
+                                @if($item->account)
+                                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Password awal: {{ $item->no_met }}</div>
+                                @else
+                                    <span style="font-size:11px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:20px;">Belum ada akun</span>
+                                @endif
+                            </td>
+                            <td>
                                 <span class="badge badge-active">AKTIF</span>
                             </td>
                             <td>
-                                <div style="display:flex;gap:6px;align-items:center;">
-                                    <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}"
-                                       title="Edit"
-                                       style="width:32px;height:32px;border-radius:8px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;transition:background .2s;"
-                                       onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
-                                        <i class="bi bi-pencil"></i>
-                                    </a>
-                                    <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin:0;">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                                title="Hapus"
-                                                onclick="return confirm('Hapus asesor {{ addslashes($item->nama) }}?')"
-                                                style="width:32px;height:32px;border-radius:8px;background:#fff1f2;color:#e11d48;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .2s;"
-                                                onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                <div class="action-menu">
+                                    <button class="action-btn" onclick="toggleMenu(this)">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="action-dropdown">
+                                        <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin:0;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" onclick="return confirm('Hapus asesor {{ addslashes($item->nama) }}?')">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" class="text-center">Tidak ada data asesor</td>
+                            <td colspan="5" class="text-center">Tidak ada data asesor</td>
                         </tr>
                         @endforelse
                     </tbody>

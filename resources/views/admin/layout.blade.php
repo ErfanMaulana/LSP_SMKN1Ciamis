@@ -256,8 +256,8 @@
             box-shadow: 0 0 0 3px rgba(0, 97, 165, 0.1);
         }
 
-        .global-search-input:focus + .search-icon,
-        .global-search-input:focus ~ i.search-icon {
+        .global-search-input:focus+.search-icon,
+        .global-search-input:focus~i.search-icon {
             color: #0061A5;
         }
 
@@ -403,7 +403,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .user-info {
@@ -702,141 +704,184 @@
             </div>
 
             <nav class="sidebar-menu">
+
                 <!-- Dashboard -->
-                <a href="{{ route('admin.dashboard') }}"
-                    class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
-                </a>
+                @if(Auth::guard('admin')->user()->hasPermission('dashboard.view'))
+                    <a href="{{ route('admin.dashboard') }}"
+                        class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                @endif
 
-                <!-- ADMINISTRASI Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>ADMINISTRASI</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.asesor.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
-                            <i class="bi bi-person-badge"></i>
-                            <span>Asesor</span>
-                        </a>
-
-                        <a href="{{ route('admin.asesi.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
-                            <i class="bi bi-people"></i>
-                            <span>Asesi</span>
-                        </a>
-
-                        <a href="{{ route('admin.asesi.verifikasi') }}"
-                            class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
-                            <i class="bi bi-clipboard-check"></i>
-                            <span>Verifikasi Asesi</span>
-                            @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
-                            @if($pendingCount > 0)
-                                <span
-                                    style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
+                <!-- ADMIN Section -->
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['role.view', 'admin.view']))
+                    <div class="menu-section">
+                        <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                            <span>ADMIN</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="menu-section-items">
+                            @if(Auth::guard('admin')->user()->hasPermission('admin.view'))
+                                <a href="{{ route('admin.admin-management.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.admin-management.*') ? 'active' : '' }}">
+                                    <i class="bi bi-person-gear"></i>
+                                    <span>Manajemen Admin</span>
+                                </a>
                             @endif
-                        </a>
 
-                        <a href="{{ route('admin.akun-asesi.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.akun-asesi.*') ? 'active' : '' }}">
-                            <i class="bi bi-person-vcard"></i>
-                            <span>Akun Asesi (NIK)</span>
-                        </a>
-
-                        <a href="{{ route('admin.kelompok.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
-                            <i class="bi bi-diagram-3-fill"></i>
-                            <span>Kelompok</span>
-                        </a>
-
-                        <a href="{{ route('admin.jurusan.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
-                            <i class="bi bi-mortarboard"></i>
-                            <span>Jurusan</span>
-                        </a>
-
-                        <a href="{{ route('admin.skema.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
-                            <i class="bi bi-patch-check"></i>
-                            <span>Skema</span>
-                        </a>
-
+                            @if(Auth::guard('admin')->user()->hasPermission('role.view'))
+                                <a href="{{ route('admin.roles.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+                                    <i class="bi bi-shield-lock"></i>
+                                    <span>Role & Permission</span>
+                                </a>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                @endif
 
-                <!-- UJIAN KOMPETENSI Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>UJIAN KOMPETENSI</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.tuk.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
-                            <i class="bi bi-geo-alt"></i>
-                            <span>Tempat Uji (TUK)</span>
-                        </a>
+                <!-- DATA MASTER Section -->
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view']))
+                    <div class="menu-section">
+                        <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                            <span>DATA MASTER</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="menu-section-items">
+                            @if(Auth::guard('admin')->user()->hasPermission('asesi.view'))
+                                <a href="{{ route('admin.asesi.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
+                                    <i class="bi bi-people"></i>
+                                    <span>Asesi</span>
+                                </a>
+                            @endif
 
-                        <a href="{{ route('admin.jadwal-ujikom.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
-                            <i class="bi bi-calendar-event"></i>
-                            <span>Jadwal Ujikom</span>
-                        </a>
+                            @if(Auth::guard('admin')->user()->hasPermission('asesor.view'))
+                                <a href="{{ route('admin.asesor.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
+                                    <i class="bi bi-person-badge"></i>
+                                    <span>Asesor</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('akun-asesi.view'))
+                                <a href="{{ route('admin.akun-asesi.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.akun-asesi.*') ? 'active' : '' }}">
+                                    <i class="bi bi-person-vcard"></i>
+                                    <span>Akun Asesi (NIK)</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('jurusan.view'))
+                                <a href="{{ route('admin.jurusan.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
+                                    <i class="bi bi-mortarboard"></i>
+                                    <span>Jurusan</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('tuk.view'))
+                                <a href="{{ route('admin.tuk.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>Tempat Uji (TUK)</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('skema.view'))
+                                <a href="{{ route('admin.skema.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
+                                    <i class="bi bi-patch-check"></i>
+                                    <span>Skema</span>
+                                </a>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                @endif
+
+                <!-- PROGRAM SERTIFIKASI Section -->
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view']))
+                    <div class="menu-section">
+                        <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                            <span>PROGRAM SERTIFIKASI</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="menu-section-items">
+                            @if(Auth::guard('admin')->user()->hasPermission('verifikasi-asesi.view'))
+                                <a href="{{ route('admin.asesi.verifikasi') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
+                                    <i class="bi bi-clipboard-check"></i>
+                                    <span>Verifikasi Asesi</span>
+                                    @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
+                                    @if($pendingCount > 0)
+                                        <span
+                                            style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
+                                    @endif
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('kelompok.view'))
+                                <a href="{{ route('admin.kelompok.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
+                                    <i class="bi bi-diagram-3-fill"></i>
+                                    <span>Kelompok</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view'))
+                                <a href="{{ route('admin.jadwal-ujikom.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
+                                    <i class="bi bi-calendar-event"></i>
+                                    <span>Jadwal Ujikom</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view'))
+                                <a href="{{ route('admin.asesmen-mandiri.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesmen-mandiri.*') ? 'active' : '' }}">
+                                    <i class="bi bi-journal-check"></i>
+                                    <span>Asesmen Mandiri</span>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 <!-- WEBSITE Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>WEBSITE</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.carousel.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
-                            <i class="bi bi-images"></i>
-                            <span>Banner Carousel</span>
-                        </a>
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['carousel.view', 'socialmedia.view', 'profile-content.view']))
+                    <div class="menu-section">
+                        <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                            <span>WEBSITE</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="menu-section-items">
+                            @if(Auth::guard('admin')->user()->hasPermission('carousel.view'))
+                                <a href="{{ route('admin.carousel.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
+                                    <i class="bi bi-images"></i>
+                                    <span>Banner Carousel</span>
+                                </a>
+                            @endif
 
-                        <a href="{{ route('admin.socialmedia.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
-                            <i class="bi bi-share"></i>
-                            <span>Sosial Media</span>
-                        </a>
+                            @if(Auth::guard('admin')->user()->hasPermission('socialmedia.view'))
+                                <a href="{{ route('admin.socialmedia.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
+                                    <i class="bi bi-share"></i>
+                                    <span>Sosial Media</span>
+                                </a>
+                            @endif
 
-                        <a href="{{ route('admin.profile-content.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
-                            <i class="bi bi-book-fill"></i>
-                            <span>Konten Profil</span>
-                        </a>
+                            @if(Auth::guard('admin')->user()->hasPermission('profile-content.view'))
+                                <a href="{{ route('admin.profile-content.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
+                                    <i class="bi bi-book-fill"></i>
+                                    <span>Konten Profil</span>
+                                </a>
+                            @endif
+                        </div>
                     </div>
-                </div>
-
-                <!-- ASESOR Section -->
-                <!-- <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>ASESOR</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                            <i class="bi bi-pencil-square"></i>
-                            <span>Entry Penilaian</span>
-                        </a>
-                        
-                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                            <i class="bi bi-file-earmark-text"></i>
-                            <span>Hasil Ujian</span>
-                        </a>
-                        
-                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                            <i class="bi bi-bar-chart"></i>
-                            <span>Rekap Nilai Akhir</span>
-                        </a>
-                    </div>
-                </div> -->
+                @endif
             </nav>
         </aside>
 
@@ -851,11 +896,8 @@
                         </button>
                         <div class="global-search-input-wrapper" style="flex: 1;">
                             <i class="bi bi-search search-icon"></i>
-                            <input type="text"
-                                   class="global-search-input"
-                                   id="globalSearchInput"
-                                   placeholder="Cari asesi, asesor, kelompok, skema..."
-                                   autocomplete="off">
+                            <input type="text" class="global-search-input" id="globalSearchInput"
+                                placeholder="Cari asesi, asesor, kelompok, skema..." autocomplete="off">
                             <span class="search-shortcut" id="searchShortcut">Ctrl+K</span>
                         </div>
                     </div>
@@ -870,7 +912,8 @@
                             </div>
                             <div class="user-details">
                                 <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
-                                <span class="user-role">Admin LSP</span>
+                                <span
+                                    class="user-role">{{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Admin' }}</span>
                             </div>
                             <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
                         </button>
@@ -882,7 +925,9 @@
                                 </div>
                                 <div class="profile-header-info">
                                     <h4 class="profile-header-name">{{ Auth::guard('admin')->user()->name }}</h4>
-                                    <p class="profile-header-role">Administrator</p>
+                                    <p class="profile-header-role">
+                                        {{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Administrator' }}
+                                    </p>
                                 </div>
                             </div>
 
@@ -989,7 +1034,7 @@
         });
 
         // ===== Global Search =====
-        (function() {
+        (function () {
             const searchInput = document.getElementById('globalSearchInput');
             const searchResults = document.getElementById('searchResults');
             const searchShortcut = document.getElementById('searchShortcut');
@@ -998,7 +1043,7 @@
             let currentResults = [];
 
             // Ctrl+K shortcut
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                     e.preventDefault();
                     searchInput.focus();
@@ -1012,22 +1057,22 @@
             });
 
             // Hide shortcut on focus
-            searchInput.addEventListener('focus', function() {
+            searchInput.addEventListener('focus', function () {
                 searchShortcut.style.display = 'none';
                 if (searchInput.value.length >= 2) {
                     searchResults.classList.add('show');
                 }
             });
 
-            searchInput.addEventListener('blur', function() {
-                setTimeout(function() {
+            searchInput.addEventListener('blur', function () {
+                setTimeout(function () {
                     searchShortcut.style.display = '';
                     closeSearch();
                 }, 200);
             });
 
             // Live search on input
-            searchInput.addEventListener('input', function() {
+            searchInput.addEventListener('input', function () {
                 const query = this.value.trim();
                 activeIndex = -1;
 
@@ -1041,13 +1086,13 @@
                 searchResults.classList.add('show');
 
                 clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(function() {
+                searchTimeout = setTimeout(function () {
                     fetchResults(query);
                 }, 300);
             });
 
             // Keyboard navigation
-            searchInput.addEventListener('keydown', function(e) {
+            searchInput.addEventListener('keydown', function (e) {
                 const items = searchResults.querySelectorAll('.search-result-item');
                 if (!items.length) return;
 
@@ -1066,7 +1111,7 @@
             });
 
             function updateActiveItem(items) {
-                items.forEach(function(item, i) {
+                items.forEach(function (item, i) {
                     item.classList.toggle('active', i === activeIndex);
                 });
                 if (items[activeIndex]) {
@@ -1078,13 +1123,13 @@
                 fetch('{{ route("admin.search") }}?q=' + encodeURIComponent(query), {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 })
-                .then(function(response) { return response.json(); })
-                .then(function(data) {
-                    renderResults(data.results);
-                })
-                .catch(function() {
-                    searchResults.innerHTML = '<div class="search-empty"><i class="bi bi-exclamation-circle"></i>Gagal memuat hasil</div>';
-                });
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        renderResults(data.results);
+                    })
+                    .catch(function () {
+                        searchResults.innerHTML = '<div class="search-empty"><i class="bi bi-exclamation-circle"></i>Gagal memuat hasil</div>';
+                    });
             }
 
             function renderResults(results) {
@@ -1098,7 +1143,7 @@
 
                 // Group by category
                 var grouped = {};
-                results.forEach(function(r) {
+                results.forEach(function (r) {
                     if (!grouped[r.category]) grouped[r.category] = [];
                     grouped[r.category].push(r);
                 });
@@ -1106,7 +1151,7 @@
                 var html = '';
                 for (var cat in grouped) {
                     html += '<div class="search-category-label">' + cat + '</div>';
-                    grouped[cat].forEach(function(item) {
+                    grouped[cat].forEach(function (item) {
                         html += '<a href="' + item.url + '" class="search-result-item">';
                         html += '<div class="search-result-icon" style="background:' + item.color + '15;color:' + item.color + '"><i class="bi ' + item.icon + '"></i></div>';
                         html += '<div class="search-result-info">';
@@ -1134,7 +1179,7 @@
             }
 
             // Close when clicking outside
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 var globalSearch = document.getElementById('globalSearch');
                 if (!globalSearch.contains(e.target)) {
                     closeSearch();
