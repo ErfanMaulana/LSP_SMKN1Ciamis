@@ -24,7 +24,7 @@ class AsesmenMandiriController extends Controller
                 'asesi.kelas',
                 'skemas.id as skema_id',
                 'skemas.nama_skema',
-                'skemas.kode_skema',
+                'skemas.nomor_skema as kode_skema',
                 'jurusan.nama_jurusan'
             );
 
