@@ -39,12 +39,12 @@
 
     .print-btn {
         display: inline-flex; align-items: center; gap: 6px;
-        background: white; color: #1e3a5f;
+        background: white; color: #0073bd;
         border: 1.5px solid #d1d5db; padding: 8px 18px; border-radius: 8px;
         font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none;
         transition: all 0.2s;
     }
-    .print-btn:hover { background: #f8fafc; color: #1e3a5f; }
+    .print-btn:hover { background: #f8fafc; color: #0073bd; }
 
     .unit-card {
         background: white; border-radius: 12px;
@@ -63,7 +63,7 @@
         display: flex; align-items: center; justify-content: center;
         font-size: 13px; font-weight: 700; flex-shrink: 0;
     }
-    .unit-header h3 { font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
+    .unit-header h3 { font-size: 15px; font-weight: 700; color: #0073bd; margin-bottom: 2px; }
     .unit-header small { font-size: 12px; color: #64748b; font-family: monospace; }
 
     .elemen-row {
@@ -76,7 +76,7 @@
         align-items: flex-start; gap: 12px; margin-bottom: 10px;
     }
     .elemen-name {
-        font-size: 14px; font-weight: 600; color: #1e293b;
+        font-size: 14px; font-weight: 600; color: #0073bd;
     }
     .elemen-label { font-size: 11px; color: #64748b; font-weight: 500; margin-bottom: 2px; }
 
@@ -153,7 +153,7 @@
 {{-- Summary --}}
 <div class="summary-row">
     <div class="summary-card">
-        <div class="num" style="color:#1e3a5f;">{{ $skema->units->count() }}</div>
+        <div class="num" style="color:#0073bd;">{{ $skema->units->count() }}</div>
         <div class="lbl">Unit Kompetensi</div>
     </div>
     <div class="summary-card">

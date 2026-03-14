@@ -229,6 +229,7 @@
     .form-group {
         display: flex;
         flex-direction: column;
+        margin-bottom: 0;
     }
 
     .form-group label {
@@ -236,6 +237,14 @@
         font-weight: 500;
         color: #475569;
         margin-bottom: 8px;
+    }
+
+    .form-section > .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-section > .form-group:last-of-type {
+        margin-bottom: 0;
     }
 
     .required {

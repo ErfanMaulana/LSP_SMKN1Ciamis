@@ -339,7 +339,7 @@
     <h3><i class="bi bi-person-badge-fill" style="color:#0073bd;"></i> Asesor Penguji</h3>
     @if($asesorTampil)
     <div style="display:flex;align-items:center;gap:16px;padding:16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;">
-        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#001f3f,#0073bd);color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">
+        <div style="width:48px;height:48px;border-radius:50%;background:#0073bd;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">
             {{ strtoupper(substr($asesorTampil->nama, 0, 1)) }}
         </div>
         <div style="flex:1;">

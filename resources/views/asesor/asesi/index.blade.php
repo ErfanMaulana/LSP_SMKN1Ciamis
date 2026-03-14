@@ -61,7 +61,7 @@
         font-size: 12px; font-weight: 500; text-decoration: none;
         transition: background 0.2s;
     }
-    .btn-review:hover { background: #1d4ed8; color: white; }
+    .btn-review:hover { background: #003961; color: white; }
     .btn-review.disabled { background: #94a3b8; pointer-events: none; }
 
     .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }

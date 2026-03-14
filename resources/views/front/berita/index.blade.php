@@ -5,7 +5,7 @@
 @section('content')
 
 <!-- Page Header -->
-<section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-16">
+<section class="bg-blue-600 text-white py-16">
     <div class="max-w-6xl mx-auto px-6">
         <h1 class="text-4xl font-bold mb-3">Berita & Pengumuman</h1>
         <p class="text-blue-100 text-lg">Informasi terbaru seputar LSP SMKN 1 Ciamis</p>
@@ -157,7 +157,7 @@
                 @endif
 
                 <!-- Info Widget -->
-                <div class="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-xl shadow-md p-6">
+                <div class="bg-blue-600 text-white rounded-xl shadow-md p-6">
                     <h3 class="text-lg font-bold mb-3">
                         <i class="bi bi-info-circle"></i> Informasi
                     </h3>
