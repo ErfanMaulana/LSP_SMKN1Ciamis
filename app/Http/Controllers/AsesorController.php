@@ -33,6 +33,14 @@ class AsesorController extends Controller
                 $q->where('skemas.id', $keahlian);
             });
         }
+
+        // Card quick-filter
+        $cardFilter = $request->get('card_filter', '');
+        if ($cardFilter === 'with_skema') {
+            $query->whereHas('skemas');
+        } elseif ($cardFilter === 'without_skema') {
+            $query->whereDoesntHave('skemas');
+        }
         
         // Sort filter (A-Z or Z-A)
         $sortOrder = 'asc'; // default
@@ -41,7 +49,7 @@ class AsesorController extends Controller
         }
         $query->orderBy('nama', $sortOrder);
         
-        $asesor = $query->paginate(10);
+        $asesor = $query->paginate(10)->appends($request->except('page'));
 
         $stats = [
             'total'           => Asesor::count(),
@@ -49,12 +57,14 @@ class AsesorController extends Controller
             'without_skema'   => Asesor::whereDoesntHave('skemas')->count(),
         ];
 
+        $skemaList = Skema::orderBy('nama_skema')->get();
+
         // If AJAX request, return only table rows
         if ($request->ajax()) {
             return view('admin.asesor.partials.table-rows', compact('asesor'))->render();
         }
 
-        return view('admin.asesor.index', compact('asesor', 'stats'));
+        return view('admin.asesor.index', compact('asesor', 'stats', 'skemaList', 'cardFilter'));
     }
 
     /**

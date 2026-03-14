@@ -37,4 +37,9 @@ class Jurusan extends Model
     {
         return $this->hasMany(Skema::class, 'jurusan_id', 'ID_jurusan');
     }
+
+    public function kelasItems()
+    {
+        return $this->hasMany(Kelas::class, 'ID_jurusan', 'ID_jurusan');
+    }
 }

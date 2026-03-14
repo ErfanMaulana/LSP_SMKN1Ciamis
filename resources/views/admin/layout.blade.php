@@ -210,7 +210,7 @@
             display: flex;
             align-items: center;
             gap: 20px;
-            padding: 15px 30px;
+            padding: 15px 15px;
             flex-shrink: 0;
         }
 
@@ -218,7 +218,7 @@
         .global-search {
             position: relative;
             flex: 1;
-            padding: 15px 30px;
+            padding: 15px 15px;
         }
 
         .global-search-input-wrapper {
@@ -455,9 +455,9 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 8px 12px;
-            border-radius: 8px;
+            gap: 0;
+            padding: 4px;
+            border-radius: 50%;
             transition: all 0.3s ease;
         }
 
@@ -765,13 +765,13 @@
                                 </a>
                             @endif
 
-                            @if(Auth::guard('admin')->user()->hasPermission('akun-asesi.view'))
-                                <a href="{{ route('admin.akun-asesi.index') }}"
-                                    class="menu-item {{ request()->routeIs('admin.akun-asesi.*') ? 'active' : '' }}">
-                                    <i class="bi bi-person-vcard"></i>
-                                    <span>Akun Asesi (NIK)</span>
-                                </a>
-                            @endif
+                            <!-- @if(Auth::guard('admin')->user()->hasPermission('akun-asesi.view'))
+                                        <a href="{{ route('admin.akun-asesi.index') }}"
+                                            class="menu-item {{ request()->routeIs('admin.akun-asesi.*') ? 'active' : '' }}">
+                                            <i class="bi bi-person-vcard"></i>
+                                            <span>Akun Asesi (NIK)</span>
+                                        </a>
+                                    @endif -->
 
                             @if(Auth::guard('admin')->user()->hasPermission('jurusan.view'))
                                 <a href="{{ route('admin.jurusan.index') }}"
@@ -821,6 +821,20 @@
                                 </a>
                             @endif
 
+                            @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view'))
+                                <a href="{{ route('admin.asesmen-mandiri.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesmen-mandiri.*') ? 'active' : '' }}">
+                                    <i class="bi bi-journal-check"></i>
+                                    <span>Asesmen Mandiri</span>
+                                </a>
+
+                                <a href="{{ route('admin.nilai-asesor.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.nilai-asesor.*') ? 'active' : '' }}">
+                                    <i class="bi bi-clipboard-data"></i>
+                                    <span>Nilai Asesor</span>
+                                </a>
+                            @endif
+
                             @if(Auth::guard('admin')->user()->hasPermission('kelompok.view'))
                                 <a href="{{ route('admin.kelompok.index') }}"
                                     class="menu-item {{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
@@ -834,14 +848,6 @@
                                     class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
                                     <i class="bi bi-calendar-event"></i>
                                     <span>Jadwal Ujikom</span>
-                                </a>
-                            @endif
-
-                            @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view'))
-                                <a href="{{ route('admin.asesmen-mandiri.index') }}"
-                                    class="menu-item {{ request()->routeIs('admin.asesmen-mandiri.*') ? 'active' : '' }}">
-                                    <i class="bi bi-journal-check"></i>
-                                    <span>Asesmen Mandiri</span>
                                 </a>
                             @endif
                         </div>
@@ -910,12 +916,6 @@
                             <div class="user-avatar">
                                 {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
                             </div>
-                            <div class="user-details">
-                                <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
-                                <span
-                                    class="user-role">{{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Admin' }}</span>
-                            </div>
-                            <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
                         </button>
 
                         <div class="profile-menu" id="profileMenu">
@@ -1191,4 +1191,3 @@
 </body>
 
 </html>
-a

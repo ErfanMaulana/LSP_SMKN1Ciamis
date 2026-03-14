@@ -35,7 +35,7 @@
                         <label for="NIK">NIK <span class="required">*</span></label>
                         <input type="text" id="NIK" name="NIK"
                                class="form-control @error('NIK') is-invalid @enderror"
-                               value="{{ old('NIK', $asesi->NIK) }}" required>
+                               value="{{ old('NIK', $asesi->NIK) }}" required maxlength="16" minlength="16" pattern="\d{16}" inputmode="numeric" placeholder="16 digit NIK">
                         @error('NIK')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="form-group">
@@ -80,8 +80,10 @@
                     </div>
                     <div class="form-group">
                         <label for="kelas">Kelas</label>
-                        <input type="text" id="kelas" name="kelas" class="form-control"
-                               value="{{ old('kelas', $asesi->kelas) }}" placeholder="Contoh: XI A">
+                        <select id="kelas" name="kelas" class="form-control @error('kelas') is-invalid @enderror">
+                            <option value="">Pilih Jurusan dulu</option>
+                        </select>
+                        @error('kelas')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
 
@@ -90,8 +92,8 @@
                         <label for="jenis_kelamin">Jenis Kelamin</label>
                         <select id="jenis_kelamin" name="jenis_kelamin" class="form-control">
                             <option value="">Pilih</option>
-                            <option value="L" {{ old('jenis_kelamin', $asesi->jenis_kelamin) == 'L' ? 'selected' : '' }}>Laki-laki</option>
-                            <option value="P" {{ old('jenis_kelamin', $asesi->jenis_kelamin) == 'P' ? 'selected' : '' }}>Perempuan</option>
+                            <option value="Laki-laki" {{ old('jenis_kelamin', $asesi->jenis_kelamin) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
+                            <option value="Perempuan" {{ old('jenis_kelamin', $asesi->jenis_kelamin) == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -562,11 +564,44 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const jurusanSelect = document.getElementById('ID_jurusan');
+    const kelasSelect   = document.getElementById('kelas');
     const skemaGrid     = document.getElementById('skemaGrid');
     const emptyState    = document.getElementById('skemaEmptyState');
     const emptyJurusan  = document.getElementById('skemaEmptyJurusan');
+    const savedKelas    = @json(old('kelas', $asesi->kelas));
+    const jurusanKelasMap = @json(
+        $jurusan->mapWithKeys(function ($j) {
+            return [
+                (string) $j->ID_jurusan => $j->kelasItems->pluck('nama_kelas')->values(),
+            ];
+        })
+    );
 
     if (!jurusanSelect || !skemaGrid) return;
+
+    function syncKelasByJurusan() {
+        if (!kelasSelect) return;
+
+        const selectedJurusan = jurusanSelect.value || '';
+        const kelasList = jurusanKelasMap[selectedJurusan] || [];
+
+        kelasSelect.innerHTML = '';
+
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = '';
+        defaultOpt.textContent = selectedJurusan
+            ? (kelasList.length ? 'Pilih Kelas' : 'Belum ada kelas pada jurusan ini')
+            : 'Pilih Jurusan dulu';
+        kelasSelect.appendChild(defaultOpt);
+
+        kelasList.forEach(function (kelasNama) {
+            const opt = document.createElement('option');
+            opt.value = kelasNama;
+            opt.textContent = kelasNama;
+            if (savedKelas && savedKelas === kelasNama) opt.selected = true;
+            kelasSelect.appendChild(opt);
+        });
+    }
 
     function filterSkemas() {
         const selectedJurusan = jurusanSelect.value;
@@ -603,10 +638,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (emptyState) emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
     }
 
-    jurusanSelect.addEventListener('change', filterSkemas);
+    jurusanSelect.addEventListener('change', function () {
+        filterSkemas();
+        syncKelasByJurusan();
+    });
 
     // Run on load to reflect current jurusan value
     filterSkemas();
+    syncKelasByJurusan();
 });
 </script>
 @endsection

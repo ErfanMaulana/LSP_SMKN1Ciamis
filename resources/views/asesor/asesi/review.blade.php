@@ -113,6 +113,81 @@
     .bukti-box i { color: #3b82f6; margin-top: 2px; flex-shrink: 0; }
     .bukti-empty { color: #94a3b8; font-style: italic; }
 
+    .nilai-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+    .nilai-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 14px 18px;
+    }
+    .nilai-header h3 {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .nilai-header p {
+        margin: 4px 0 0;
+        font-size: 12px;
+        color: #64748b;
+    }
+    .nilai-table-wrap {
+        overflow-x: auto;
+    }
+    .nilai-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .nilai-table thead th {
+        text-align: left;
+        background: #eff6ff;
+        color: #1e3a8a;
+        border-bottom: 1px solid #bfdbfe;
+        padding: 10px 12px;
+        font-weight: 700;
+    }
+    .nilai-table tbody td {
+        border-bottom: 1px solid #f1f5f9;
+        padding: 10px 12px;
+        color: #334155;
+        vertical-align: top;
+    }
+    .nilai-table tfoot td {
+        padding: 10px 12px;
+        border-top: 2px solid #cbd5e1;
+        background: #f8fafc;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .nilai-point {
+        font-weight: 700;
+        text-align: center;
+        width: 90px;
+    }
+    .nilai-point.ok { color: #059669; }
+    .nilai-point.no { color: #dc2626; }
+    .nilai-meta {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 12px 18px 16px;
+    }
+    .nilai-chip {
+        background: #eef2ff;
+        color: #3730a3;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 10px;
+        border-radius: 999px;
+    }
+
     @media print {
         .back-btn, .print-btn, aside, .topbar { display: none !important; }
         .main-content { margin-left: 0 !important; }
@@ -171,6 +246,96 @@
         @php $pct = $answers->count() > 0 ? round($kCount / $answers->count() * 100) : 0; @endphp
         <div class="num" style="color:{{ $pct >= 70 ? '#059669' : '#d97706' }};">{{ $pct }}%</div>
         <div class="lbl">Tingkat Kompeten</div>
+    </div>
+</div>
+
+{{-- Format Penilaian Per Elemen --}}
+@php
+    $totalElemenSkema = $skema->units->sum(fn($u) => $u->elemens->count());
+    $totalPoinMandiri = 0;
+    $totalPoinPenilaian = 0;
+@endphp
+<div class="nilai-card">
+    <div class="nilai-header">
+        <h3><i class="bi bi-table"></i> Perbandingan Asesmen Mandiri vs Penilaian Asesor</h3>
+        <p>Poin per elemen sama: <strong>K = 1 poin</strong>, <strong>BK / belum dijawab = 0 poin</strong>.</p>
+    </div>
+    <div class="nilai-table-wrap">
+        <table class="nilai-table">
+            <thead>
+                <tr>
+                    <th style="width:50px;">No</th>
+                    <th style="width:220px;">Unit</th>
+                    <th>Elemen</th>
+                    <th style="width:140px;">Asesmen Mandiri</th>
+                    <th style="width:90px;text-align:center;">Poin AM</th>
+                    <th style="width:140px;">Penilaian Asesor</th>
+                    <th style="width:90px;text-align:center;">Poin PA</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php $rowNo = 1; @endphp
+                @foreach($skema->units as $unit)
+                    @foreach($unit->elemens as $elemen)
+                        @php
+                            $jwb = $answers->get($elemen->id);
+                            $statusMandiri = $jwb?->status;
+                            // Sementara penilaian asesor mengikuti poin elemen yang sama dari asesmen mandiri.
+                            $statusPenilaian = $statusMandiri;
+                            $poinMandiri = $statusMandiri === 'K' ? 1 : 0;
+                            $poinPenilaian = $statusPenilaian === 'K' ? 1 : 0;
+                            $totalPoinMandiri += $poinMandiri;
+                            $totalPoinPenilaian += $poinPenilaian;
+                        @endphp
+                        <tr>
+                            <td>{{ $rowNo++ }}</td>
+                            <td>
+                                <div style="font-weight:600;color:#1e293b;">{{ $unit->judul_unit }}</div>
+                                <div style="font-size:11px;color:#64748b;">{{ $unit->kode_unit }}</div>
+                            </td>
+                            <td>{{ $elemen->nama_elemen }}</td>
+                            <td>
+                                @if($statusMandiri === 'K')
+                                    <span class="status-badge status-K">K</span>
+                                @elseif($statusMandiri === 'BK')
+                                    <span class="status-badge status-BK">BK</span>
+                                @else
+                                    <span class="status-badge status-na">NA</span>
+                                @endif
+                            </td>
+                            <td class="nilai-point {{ $poinMandiri ? 'ok' : 'no' }}">{{ $poinMandiri }}</td>
+                            <td>
+                                @if($statusPenilaian === 'K')
+                                    <span class="status-badge status-K">K</span>
+                                @elseif($statusPenilaian === 'BK')
+                                    <span class="status-badge status-BK">BK</span>
+                                @else
+                                    <span class="status-badge status-na">NA</span>
+                                @endif
+                            </td>
+                            <td class="nilai-point {{ $poinPenilaian ? 'ok' : 'no' }}">{{ $poinPenilaian }}</td>
+                        </tr>
+                    @endforeach
+                @endforeach
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align:right;">Total Poin</td>
+                    <td style="text-align:center;">{{ $totalPoinMandiri }} / {{ $totalElemenSkema }}</td>
+                    <td style="text-align:center;">Total Poin</td>
+                    <td style="text-align:center;">{{ $totalPoinPenilaian }} / {{ $totalElemenSkema }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    @php
+        $nilaiMandiriPersen = $totalElemenSkema > 0 ? round(($totalPoinMandiri / $totalElemenSkema) * 100, 2) : 0;
+        $nilaiPenilaianPersen = $totalElemenSkema > 0 ? round(($totalPoinPenilaian / $totalElemenSkema) * 100, 2) : 0;
+    @endphp
+    <div class="nilai-meta">
+        <span class="nilai-chip">Total elemen: {{ $totalElemenSkema }}</span>
+        <span class="nilai-chip">Asesmen Mandiri: {{ $totalPoinMandiri }} poin ({{ $nilaiMandiriPersen }}%)</span>
+        <span class="nilai-chip">Penilaian Asesor: {{ $totalPoinPenilaian }} poin ({{ $nilaiPenilaianPersen }}%)</span>
     </div>
 </div>
 

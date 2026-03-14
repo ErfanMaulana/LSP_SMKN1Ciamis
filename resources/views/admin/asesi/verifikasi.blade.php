@@ -15,7 +15,7 @@
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
-        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'pending']) }}" 
+        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'pending', 'per_page' => $perPage]) }}" 
            class="stat-card {{ $status === 'pending' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-hourglass-split"></i>
@@ -26,7 +26,7 @@
             </div>
         </a>
 
-        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'approved']) }}" 
+        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'approved', 'per_page' => $perPage]) }}" 
            class="stat-card {{ $status === 'approved' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-check-circle"></i>
@@ -37,7 +37,7 @@
             </div>
         </a>
 
-        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'rejected']) }}" 
+        <a href="{{ route('admin.asesi.verifikasi', ['status' => 'rejected', 'per_page' => $perPage]) }}" 
            class="stat-card {{ $status === 'rejected' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-x-circle"></i>
@@ -48,7 +48,7 @@
             </div>
         </a>
 
-        <a href="{{ route('admin.asesi.verifikasi') }}" 
+        <a href="{{ route('admin.asesi.verifikasi', ['per_page' => $perPage]) }}" 
            class="stat-card {{ $status === '' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-people"></i>
@@ -69,6 +69,7 @@
                     <i class="bi bi-search"></i>
                     <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" style="display:flex;gap:8px;width:100%;">
                         <input type="hidden" name="status" value="{{ $status }}">
+                        <input type="hidden" name="per_page" value="{{ $perPage }}">
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NIK, atau email..." style="flex:1;">
                         <button type="submit" style="padding:10px 16px;background:#0073bd;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:500;">Cari</button>
                     </form>
@@ -76,11 +77,39 @@
             </div>
 
             @if($asesi->count() > 0)
+                <!-- Bulk Action Bar -->
+                <div id="bulk-action-bar" style="display:none;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px 16px;margin-bottom:16px;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <span id="bulk-count-text" style="font-size:14px;color:#0073bd;font-weight:600;">0 item dipilih</span>
+                    <div style="flex:1;"></div>
+                    <button type="button" onclick="submitBulkApprove()"
+                        style="padding:8px 18px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                        <i class="bi bi-check-lg"></i> Setujui Pilihan
+                    </button>
+                    <button type="button" onclick="openBulkRejectModal()"
+                        style="padding:8px 18px;background:#e11d48;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                        <i class="bi bi-x-lg"></i> Tolak Pilihan
+                    </button>
+                    <button type="button" onclick="clearBulkSelection()"
+                        style="padding:8px 14px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;">
+                        Batal
+                    </button>
+                </div>
+
+                <!-- Bulk Approve Hidden Form -->
+                <form id="bulk-approve-form" method="POST" action="{{ route('admin.asesi.bulk-approve') }}" style="display:none;">
+                    @csrf
+                    <div id="bulk-approve-niks"></div>
+                </form>
+
                 <!-- Table -->
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
                             <tr>
+                                <th style="width:44px;text-align:center;">
+                                    <input type="checkbox" id="bulk-select-all" title="Pilih semua pending"
+                                        style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
+                                </th>
                                 <th>ASESI</th>
                                 <th>NIK</th>
                                 <th>JURUSAN</th>
@@ -92,6 +121,12 @@
                         <tbody>
                             @foreach($asesi as $item)
                             <tr>
+                                <td style="text-align:center;">
+                                    @if($item->status === 'pending')
+                                    <input type="checkbox" class="bulk-checkbox" value="{{ $item->NIK }}"
+                                        style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="user-info">
                                         @if($item->pas_foto)
@@ -166,25 +201,47 @@
 
                 <!-- Pagination -->
                 <div class="pagination-container">
-                    <div class="pagination-info">
-                        Showing {{ $asesi->firstItem() }} to {{ $asesi->lastItem() }} of {{ $asesi->total() }} entries
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span class="pagination-info">Showing {{ $asesi->firstItem() }} to {{ $asesi->lastItem() }} of {{ $asesi->total() }} entries</span>
+                        <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" style="display:flex;align-items:center;gap:6px;">
+                            <input type="hidden" name="status" value="{{ $status }}">
+                            <input type="hidden" name="search" value="{{ request('search') }}">
+                            <label style="font-size:13px;color:#64748b;white-space:nowrap;">Tampilkan</label>
+                            <input type="number" name="per_page" value="{{ $perPage }}" min="1" max="200"
+                                style="width:68px;padding:6px 8px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;text-align:center;color:#374151;"
+                                onkeydown="if(event.key==='Enter'){this.form.submit();}"
+                                onblur="this.form.submit();">
+                            <label style="font-size:13px;color:#64748b;white-space:nowrap;">baris</label>
+                        </form>
                     </div>
                     <div class="pagination">
-                        @if($asesi->currentPage() > 1)
+                        @php
+                            $currentPage = $asesi->currentPage();
+                            $lastPage    = $asesi->lastPage();
+                            $window      = 2; // pages around current
+                            $start       = max(1, $currentPage - $window);
+                            $end         = min($lastPage, $currentPage + $window);
+                        @endphp
+                        @if($currentPage > 1)
                             <a href="{{ $asesi->previousPageUrl() }}" class="page-link">
                                 <i class="bi bi-chevron-left"></i>
                             </a>
                         @endif
-                        
-                        @for($i = 1; $i <= min($asesi->lastPage(), 5); $i++)
-                            <a href="{{ $asesi->url($i) }}" class="page-link {{ $i == $asesi->currentPage() ? 'active' : '' }}">{{ $i }}</a>
-                        @endfor
-                        
-                        @if($asesi->lastPage() > 5)
-                            <span class="page-dots">...</span>
-                            <a href="{{ $asesi->url($asesi->lastPage()) }}" class="page-link">{{ $asesi->lastPage() }}</a>
+
+                        @if($start > 1)
+                            <a href="{{ $asesi->url(1) }}" class="page-link">1</a>
+                            @if($start > 2)<span class="page-dots">…</span>@endif
                         @endif
-                        
+
+                        @for($i = $start; $i <= $end; $i++)
+                            <a href="{{ $asesi->url($i) }}" class="page-link {{ $i == $currentPage ? 'active' : '' }}">{{ $i }}</a>
+                        @endfor
+
+                        @if($end < $lastPage)
+                            @if($end < $lastPage - 1)<span class="page-dots">…</span>@endif
+                            <a href="{{ $asesi->url($lastPage) }}" class="page-link">{{ $lastPage }}</a>
+                        @endif
+
                         @if($asesi->hasMorePages())
                             <a href="{{ $asesi->nextPageUrl() }}" class="page-link">
                                 <i class="bi bi-chevron-right"></i>
@@ -604,5 +661,180 @@
             overflow-x: auto;
         }
     }
+
+    /* Bulk Reject Modal */
+    .bulk-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1050;
+        background: rgba(0,0,0,0.5);
+        align-items: center;
+        justify-content: center;
+    }
+    .bulk-modal-overlay.active { display: flex; }
+    .bulk-modal-box {
+        background: #fff;
+        border-radius: 14px;
+        padding: 28px 32px;
+        width: 480px;
+        max-width: 95vw;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .bulk-modal-box h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 4px;
+    }
+    .bulk-modal-box .modal-sub {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0 0 20px;
+    }
+    .bulk-modal-field { margin-bottom: 16px; }
+    .bulk-modal-field label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 6px;
+    }
+    .bulk-modal-field textarea,
+    .bulk-modal-field select {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+        color: #374151;
+        outline: none;
+        transition: border 0.2s;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+    .bulk-modal-field textarea:focus,
+    .bulk-modal-field select:focus { border-color: #0073bd; box-shadow: 0 0 0 3px rgba(0,115,189,0.1); }
+    .bulk-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
 </style>
+
+<!-- Bulk Reject Modal -->
+<div id="bulk-reject-modal" class="bulk-modal-overlay">
+    <div class="bulk-modal-box">
+        <h3><i class="bi bi-x-octagon" style="color:#e11d48;margin-right:8px;"></i>Tolak Asesi Terpilih</h3>
+        <p class="modal-sub" id="bulk-reject-count-text">0 asesi akan ditolak</p>
+        <form id="bulk-reject-form" method="POST" action="{{ route('admin.asesi.bulk-reject') }}">
+            @csrf
+            <div id="bulk-reject-niks"></div>
+            <div class="bulk-modal-field">
+                <label>Catatan Penolakan <span style="color:#e11d48;">*</span></label>
+                <textarea name="catatan_admin" rows="3" required
+                    placeholder="Tuliskan alasan penolakan..."></textarea>
+            </div>
+            <div class="bulk-modal-field">
+                <label>Jenis Penolakan <span style="color:#e11d48;">*</span></label>
+                <select name="reject_type" required>
+                    <option value="rejected">Ditolak (dapat mendaftar ulang)</option>
+                    <option value="banned">Ditolak Permanen (banned)</option>
+                </select>
+            </div>
+            <div class="bulk-modal-actions">
+                <button type="button" onclick="closeBulkRejectModal()"
+                    style="padding:9px 20px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">Batal</button>
+                <button type="submit"
+                    style="padding:9px 20px;background:#e11d48;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="bi bi-x-lg"></i> Konfirmasi Tolak
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section('scripts')
+<script>
+(function () {
+    // Checkbox listeners
+    function attachBulkListeners() {
+        document.querySelectorAll('.bulk-checkbox').forEach(function(cb) {
+            cb.addEventListener('change', updateBulkBar);
+        });
+        var selectAll = document.getElementById('bulk-select-all');
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                document.querySelectorAll('.bulk-checkbox').forEach(function(cb) {
+                    cb.checked = selectAll.checked;
+                });
+                updateBulkBar();
+            });
+        }
+    }
+
+    function updateBulkBar() {
+        var checked = document.querySelectorAll('.bulk-checkbox:checked');
+        var all     = document.querySelectorAll('.bulk-checkbox');
+        var bar     = document.getElementById('bulk-action-bar');
+        if (bar) bar.style.display = checked.length > 0 ? 'flex' : 'none';
+        var countEl = document.getElementById('bulk-count-text');
+        if (countEl) countEl.textContent = checked.length + ' item dipilih';
+        var selectAll = document.getElementById('bulk-select-all');
+        if (selectAll) {
+            selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+            selectAll.checked = all.length > 0 && checked.length === all.length;
+        }
+    }
+
+    function getSelectedNiks() {
+        return Array.from(document.querySelectorAll('.bulk-checkbox:checked')).map(function(cb) { return cb.value; });
+    }
+
+    window.submitBulkApprove = function() {
+        var niks = getSelectedNiks();
+        if (niks.length === 0) return;
+        if (!confirm('Setujui ' + niks.length + ' asesi terpilih?')) return;
+        var container = document.getElementById('bulk-approve-niks');
+        container.innerHTML = '';
+        niks.forEach(function(nik) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = 'niks[]'; inp.value = nik;
+            container.appendChild(inp);
+        });
+        document.getElementById('bulk-approve-form').submit();
+    };
+
+    window.openBulkRejectModal = function() {
+        var niks = getSelectedNiks();
+        if (niks.length === 0) return;
+        var container = document.getElementById('bulk-reject-niks');
+        container.innerHTML = '';
+        niks.forEach(function(nik) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = 'niks[]'; inp.value = nik;
+            container.appendChild(inp);
+        });
+        var countEl = document.getElementById('bulk-reject-count-text');
+        if (countEl) countEl.textContent = niks.length + ' asesi akan ditolak';
+        document.getElementById('bulk-reject-modal').classList.add('active');
+        document.getElementById('bulk-reject-modal').querySelector('textarea').value = '';
+    };
+
+    window.closeBulkRejectModal = function() {
+        document.getElementById('bulk-reject-modal').classList.remove('active');
+    };
+
+    window.clearBulkSelection = function() {
+        document.querySelectorAll('.bulk-checkbox').forEach(function(cb) { cb.checked = false; });
+        var selectAll = document.getElementById('bulk-select-all');
+        if (selectAll) { selectAll.checked = false; selectAll.indeterminate = false; }
+        updateBulkBar();
+    };
+
+    // Close modal on backdrop click
+    document.getElementById('bulk-reject-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeBulkRejectModal();
+    });
+
+    attachBulkListeners();
+}());
+</script>
+@endsection
 @endsection
