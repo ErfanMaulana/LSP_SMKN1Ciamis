@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use App\Models\Admin;
 use App\Models\Asesi;
 use App\Models\Asesor;
@@ -63,6 +64,7 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
+        // ── Statistik utama ────────────────────────────────────────────
         $stats = [
             'totalAsesi'   => Asesi::count(),
             'totalAsesor'  => Asesor::count(),
@@ -71,6 +73,42 @@ class AdminController extends Controller
             'totalMitra'   => Mitra::count(),
         ];
 
-        return view('admin.dashboard', compact('stats'));
+        // ── Status verifikasi asesi ────────────────────────────────────
+        $verifikasi = [
+            'pending'  => Asesi::where('status', 'pending')->count(),
+            'approved' => Asesi::where('status', 'approved')->count(),
+            'rejected' => Asesi::where('status', 'rejected')->count(),
+        ];
+
+        // ── Progress asesmen mandiri (dari pivot asesi_skema) ──────────
+        $asesmen = [
+            'belum_mulai'         => DB::table('asesi_skema')->where('status', 'belum_mulai')->count(),
+            'sedang_mengerjakan'  => DB::table('asesi_skema')->where('status', 'sedang_mengerjakan')->count(),
+            'selesai'             => DB::table('asesi_skema')->where('status', 'selesai')->count(),
+            'rekomendasi_lanjut'  => DB::table('asesi_skema')->where('rekomendasi', 'lanjut')->count(),
+            'rekomendasi_tidak'   => DB::table('asesi_skema')->where('rekomendasi', 'tidak_lanjut')->count(),
+        ];
+
+        // ── 6 asesi terbaru ────────────────────────────────────────────
+        $recentAsesi = Asesi::with('jurusan')
+            ->orderByDesc('created_at')
+            ->limit(6)
+            ->get();
+
+        // ── 5 rekomendasi terbaru ──────────────────────────────────────
+        $recentRekomendasi = DB::table('asesi_skema')
+            ->whereNotNull('rekomendasi')
+            ->orderByDesc('reviewed_at')
+            ->limit(5)
+            ->get()
+            ->map(function ($row) {
+                $row->asesi = Asesi::where('NIK', $row->asesi_nik)->first();
+                $row->skema = Skema::find($row->skema_id);
+                return $row;
+            });
+
+        return view('admin.dashboard', compact(
+            'stats', 'verifikasi', 'asesmen', 'recentAsesi', 'recentRekomendasi'
+        ));
     }
 }

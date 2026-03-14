@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asesi;
+use App\Models\Account;
 use App\Models\Jurusan;
+use App\Models\Skema;
+use App\Models\Asesor;
+use App\Models\Kelompok;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AsesiController extends Controller
 {
@@ -43,7 +48,7 @@ class AsesiController extends Controller
         }
         $query->orderBy('nama', $sortOrder);
         
-        $asesi = $query->paginate(10);
+        $asesi = $query->paginate(10)->appends($request->except('page'));
         
         // Statistik dinamis
         $totalAsesi = Asesi::count();
@@ -75,6 +80,12 @@ class AsesiController extends Controller
         if ($request->ajax()) {
             return view('admin.asesi.partials.table-rows', compact('asesi'))->render();
         }
+
+        // Akun role=asesi yang tidak punya data di tabel asesi
+        $akunTanpaAsesi = Account::where('role', 'asesi')
+            ->whereNotIn('NIK', Asesi::pluck('NIK')->filter())
+            ->orderBy('nama')
+            ->get();
         
         return view('admin.asesi.index', compact(
             'asesi', 
@@ -83,7 +94,8 @@ class AsesiController extends Controller
             'growthPercentage',
             'inAssessment',
             'certified',
-            'jurusanList'
+            'jurusanList',
+            'akunTanpaAsesi'
         ));
     }
 
@@ -121,9 +133,20 @@ class AsesiController extends Controller
             'kode_anggaran' => 'nullable|string|max:50',
         ]);
 
-        Asesi::create($validated);
+        $asesi = Asesi::create($validated);
 
-        return redirect()->route('admin.asesi.index')->with('success', 'Data Asesi berhasil ditambahkan!');
+        // Auto-create account with NIK as login ID and default password
+        if (!Account::where('NIK', $validated['NIK'])->exists()) {
+            Account::create([
+                'id'       => $validated['NIK'],
+                'NIK'      => $validated['NIK'],
+                'nama'     => $validated['nama'],
+                'password' => Hash::make($validated['NIK']),
+                'role'     => 'asesi',
+            ]);
+        }
+
+        return redirect()->route('admin.asesi.index')->with('success', 'Data Asesi berhasil ditambahkan! Akun login (NIK: ' . $validated['NIK'] . ', password awal: NIK) otomatis dibuat.');
     }
 
     /**
@@ -141,9 +164,10 @@ class AsesiController extends Controller
      */
     public function edit($nik)
     {
-        $asesi = Asesi::findOrFail($nik);
-        $jurusan = Jurusan::all();
-        return view('admin.asesi.edit', compact('asesi', 'jurusan'));
+        $asesi    = Asesi::with(['skemas'])->findOrFail($nik);
+        $jurusan  = Jurusan::orderBy('nama_jurusan')->get();
+        $skemas   = Skema::with('jurusan')->orderBy('nama_skema')->get();
+        return view('admin.asesi.edit', compact('asesi', 'jurusan', 'skemas'));
     }
 
     /**
@@ -154,26 +178,55 @@ class AsesiController extends Controller
         $asesi = Asesi::findOrFail($nik);
 
         $validated = $request->validate([
-            'NIK' => 'required|string|max:255|unique:asesi,NIK,' . $nik . ',NIK',
-            'nama' => 'required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'ID_jurusan' => 'required|exists:jurusan,ID_jurusan',
-            'kelas' => 'nullable|string|max:50',
-            'tempat_lahir' => 'nullable|string|max:255',
-            'tanggal_lahir' => 'nullable|date',
-            'alamat' => 'nullable|string',
-            'kebangsaan' => 'nullable|string|max:100',
-            'kode_kota' => 'nullable|string|max:50',
-            'kode_provinsi' => 'nullable|string|max:50',
-            'telepon_rumah' => 'nullable|string|max:20',
-            'telepon_hp' => 'nullable|string|max:20',
-            'kode_pos' => 'nullable|string|max:10',
+            'NIK'                 => 'required|string|max:255|unique:asesi,NIK,' . $nik . ',NIK',
+            'no_reg'              => 'nullable|string|max:50',
+            'nama'                => 'required|string|max:255',
+            'email'               => 'nullable|email|max:255',
+            'ID_jurusan'          => 'required|exists:jurusan,ID_jurusan',
+            'kelompok_id'         => 'nullable|exists:kelompok,id',
+            'kelas'               => 'nullable|string|max:50',
+            'jenis_kelamin'       => 'nullable|in:L,P',
+            'tempat_lahir'        => 'nullable|string|max:255',
+            'tanggal_lahir'       => 'nullable|date',
+            'alamat'              => 'nullable|string',
+            'kebangsaan'          => 'nullable|string|max:100',
+            'kewarganegaraan'     => 'nullable|string|max:100',
+            'kode_kota'           => 'nullable|string|max:50',
+            'kode_provinsi'       => 'nullable|string|max:50',
+            'telepon_rumah'       => 'nullable|string|max:20',
+            'telepon_hp'          => 'nullable|string|max:20',
+            'kode_pos'            => 'nullable|string|max:10',
             'pendidikan_terakhir' => 'nullable|string|max:100',
-            'kode_kementrian' => 'nullable|string|max:50',
-            'kode_anggaran' => 'nullable|string|max:50',
+            'pekerjaan'           => 'nullable|string|max:255',
+            'jabatan'             => 'nullable|string|max:255',
+            'nama_lembaga'        => 'nullable|string|max:255',
+            'alamat_lembaga'      => 'nullable|string',
+            'no_fax_lembaga'      => 'nullable|string|max:50',
+            'email_lembaga'       => 'nullable|email|max:255',
+            'unit_lembaga'        => 'nullable|string|max:255',
+            'kode_kementrian'     => 'nullable|string|max:50',
+            'kode_anggaran'       => 'nullable|string|max:50',
+            'skema_ids'           => 'nullable|array',
+            'skema_ids.*'         => 'exists:skemas,id',
         ]);
 
+        // Remove skema_ids before updating asesi model fields
+        $skemaIds = $request->input('skema_ids', []);
+        unset($validated['skema_ids']);
+
         $asesi->update($validated);
+
+        // Sync skemas: preserve pivot data for existing ones, only attach/detach diff
+        $currentSkemaIds = $asesi->skemas()->pluck('skemas.id')->toArray();
+        $toDetach = array_diff($currentSkemaIds, $skemaIds);
+        $toAttach = array_diff($skemaIds, $currentSkemaIds);
+
+        if (!empty($toDetach)) {
+            $asesi->skemas()->detach($toDetach);
+        }
+        foreach ($toAttach as $skemaId) {
+            $asesi->skemas()->attach($skemaId, ['status' => 'belum_mulai']);
+        }
 
         return redirect()->route('admin.asesi.index')->with('success', 'Data Asesi berhasil diupdate!');
     }

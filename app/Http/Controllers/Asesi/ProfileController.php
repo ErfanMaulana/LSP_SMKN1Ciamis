@@ -17,9 +17,8 @@ class ProfileController extends Controller
     {
         $account = Auth::guard('account')->user();
         $asesi   = Asesi::where('NIK', $account->NIK)->first();
-        $tab     = $request->get('tab', session('tab', 'profil'));
 
-        return view('asesi.profil-edit', compact('account', 'asesi', 'tab'));
+        return view('asesi.profil-edit', compact('account', 'asesi'));
     }
 
     /**

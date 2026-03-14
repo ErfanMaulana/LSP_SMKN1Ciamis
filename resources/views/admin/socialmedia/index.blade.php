@@ -15,12 +15,6 @@
         </a>
     </div>
 
-    @if(session('success'))
-    <div class="alert-success">
-        <i class="bi bi-check-circle"></i> {!! session('success') !!}
-    </div>
-    @endif
-
     {{-- Stats --}}
     <div class="stats-grid">
         <div class="stat-card">
@@ -118,20 +112,19 @@
                         </form>
                     </td>
                     <td>
-                        <div class="dropdown-action">
-                            <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                        <div class="action-menu">
+                            <button class="action-btn" onclick="toggleMenu(this)">
                                 <i class="bi bi-three-dots-vertical"></i>
                             </button>
-                            <div class="dropdown-menu">
-                                <a href="{{ route('admin.socialmedia.edit', $sm->id) }}" class="dropdown-item">
-                                    <i class="bi bi-pencil"></i> Ubah
+                            <div class="action-dropdown">
+                                <a href="{{ route('admin.socialmedia.edit', $sm->id) }}">
+                                    <i class="bi bi-pencil"></i> Edit
                                 </a>
-                               
                                 <form action="{{ route('admin.socialmedia.destroy', $sm->id) }}" method="POST"
-                                      onsubmit="return confirm('Hapus {{ $sm->name }}?')" style="margin: 0;">
+                                      onsubmit="return confirm('Hapus {{ $sm->name }}?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="dropdown-item danger">
+                                    <button type="submit">
                                         <i class="bi bi-trash"></i> Hapus
                                     </button>
                                 </form>
@@ -243,32 +236,14 @@
     .status-badge.inactive { background: #fee2e2; color: #991b1b; }
     .status-badge.inactive:hover { background: #fecaca; }
 
-    /* Dropdown Action */
-    .dropdown-action { position: relative; display: inline-block; }
-    .btn-dropdown {
-        background: none; border: none; padding: 8px; cursor: pointer; color: #64748b;
-        border-radius: 6px; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
-    }
-    .btn-dropdown:hover { background: #f1f5f9; color: #0F172A; }
-    .btn-dropdown i { font-size: 18px; }
-    .dropdown-menu {
-        position: absolute; right: 0; top: 100%; margin-top: 4px; background: white;
-        border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        min-width: 160px; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(-10px);
-        transition: all 0.2s;
-    }
-    .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
-    .dropdown-item {
-        display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #475569;
-        text-decoration: none; font-size: 14px; transition: all 0.2s; border: none; background: none;
-        width: 100%; text-align: left; cursor: pointer;
-    }
-    .dropdown-item:first-child { border-radius: 8px 8px 0 0; }
-    .dropdown-item:last-child { border-radius: 0 0 8px 8px; }
-    .dropdown-item:hover { background: #f8fafc; color: #0F172A; }
-    .dropdown-item i { font-size: 16px; }
-    .dropdown-item.danger { color: #dc2626; }
-    .dropdown-item.danger:hover { background: #fef2f2; color: #dc2626; }
+    .action-menu { position: relative; }
+    .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .action-btn:hover { background: #f1f5f9; }
+    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 160px; z-index: 10; overflow: hidden; }
+    .action-dropdown.show { display: block; }
+    .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
+    .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
+    .action-dropdown button[type="submit"]:hover { background: #fef2f2; color: #dc2626; }
 
     .empty-state { background: white; border-radius: 12px; padding: 60px 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .empty-state i { font-size: 48px; color: #cbd5e1; }
@@ -284,27 +259,15 @@
 
 @section('scripts')
 <script>
-function toggleDropdown(button) {
-    const dropdown = button.nextElementSibling;
-    const allDropdowns = document.querySelectorAll('.dropdown-menu');
-    
-    // Close all other dropdowns
-    allDropdowns.forEach(menu => {
-        if (menu !== dropdown) {
-            menu.classList.remove('show');
-        }
+function toggleMenu(button) {
+    document.querySelectorAll('.action-dropdown.show').forEach(d => {
+        if (d !== button.nextElementSibling) d.classList.remove('show');
     });
-    
-    // Toggle current dropdown
-    dropdown.classList.toggle('show');
+    button.nextElementSibling.classList.toggle('show');
 }
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    if (!event.target.closest('.dropdown-action')) {
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            menu.classList.remove('show');
-        });
+document.addEventListener('click', e => {
+    if (!e.target.closest('.action-menu')) {
+        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
     }
 });
 </script>

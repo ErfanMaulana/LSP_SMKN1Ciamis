@@ -15,6 +15,7 @@ class Asesor extends Model
     protected $fillable = [
         'nama',
         'no_met',
+        'saved_tanda_tangan',
     ];
 
     public function skemas()

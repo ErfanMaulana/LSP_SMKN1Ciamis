@@ -325,9 +325,11 @@
                             required
                             autofocus
                             placeholder="Masukkan identifier"
+                            maxlength="16"
                             {{ old('role') ? '' : 'disabled' }}
                         >
                     </div>
+                    <div id="nikLengthError" class="error" style="display:none;">NIK harus terdiri dari 16 digit.</div>
                     @error('identifier')
                         <div class="error">{{ $message }}</div>
                     @enderror
@@ -421,7 +423,28 @@
             identifierInput.placeholder = cfg.identifierPlaceholder;
         }
 
-        roleSelect.addEventListener('change', () => applyRole(roleSelect.value));
+        roleSelect.addEventListener('change', () => {
+            applyRole(roleSelect.value);
+            nikLengthError.style.display = 'none';
+            identifierInput.value = '';
+        });
+
+        const nikLengthError = document.getElementById('nikLengthError');
+
+        function validateNik() {
+            if (roleSelect.value === 'asesi' && identifierInput.value.length > 0 && identifierInput.value.length < 16) {
+                nikLengthError.style.display = 'block';
+            } else {
+                nikLengthError.style.display = 'none';
+            }
+        }
+
+        identifierInput.addEventListener('blur', validateNik);
+        identifierInput.addEventListener('input', () => {
+            if (roleSelect.value === 'asesi') {
+                nikLengthError.style.display = 'none';
+            }
+        });
 
         // Terapkan jika ada nilai lama (validasi gagal)
         const oldRole = '{{ old("role") }}';

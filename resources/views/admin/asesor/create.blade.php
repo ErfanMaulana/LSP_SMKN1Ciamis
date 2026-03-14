@@ -32,11 +32,11 @@
                     <input type="text" id="no_met" name="no_met"
                            class="form-control @error('no_met') is-invalid @enderror"
                            value="{{ old('no_met') }}"
-                           placeholder="Contoh: ASR001">
+                           placeholder="Contoh: ASR001" required>
                     @error('no_met')
                         <div class="invalid-feedback" style="display:block;">{{ $message }}</div>
                     @enderror
-                    <small class="form-text">Digunakan sebagai username login ke panel asesor. Password awal = NO MET.</small>
+                    <small class="form-text">Wajib diisi. Digunakan sebagai username login ke panel asesor. Password awal = NO MET.</small>
                 </div>
 
                 <div class="form-group">

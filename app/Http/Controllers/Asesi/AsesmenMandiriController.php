@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Asesi;
 
 use App\Http\Controllers\Controller;
 use App\Models\Asesi;
+use App\Models\Asesor;
 use App\Models\Skema;
 use App\Models\JawabanElemen;
 use Illuminate\Http\Request;
@@ -99,8 +100,14 @@ class AsesmenMandiriController extends Controller
             ->where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
             ->first();
+
+        // Load asesor data if recommendation exists
+        $asesorReviewer = null;
+        if ($pivot && $pivot->reviewed_by) {
+            $asesorReviewer = Asesor::where('no_met', $pivot->reviewed_by)->first();
+        }
         
-        return view('asesi.asesmen-mandiri.form', compact('account', 'asesi', 'skema', 'existingAnswers', 'pivot'));
+        return view('asesi.asesmen-mandiri.form', compact('account', 'asesi', 'skema', 'existingAnswers', 'pivot', 'asesorReviewer'));
     }
 
     /**
@@ -125,10 +132,18 @@ class AsesmenMandiriController extends Controller
         }
 
         // Validate input
-        $request->validate([
+        $rules = [
             'jawaban' => 'required|array',
             'jawaban.*.status' => 'required|in:K,BK',
             'jawaban.*.bukti' => 'nullable|string|max:1000',
+        ];
+
+        if ($request->has('submit_final')) {
+            $rules['tanda_tangan'] = 'required|string';
+        }
+
+        $request->validate($rules, [
+            'tanda_tangan.required' => 'Tanda tangan wajib diisi sebelum menyelesaikan asesmen.',
         ]);
         
         // Save answers
@@ -159,12 +174,21 @@ class AsesmenMandiriController extends Controller
         
         // If this is final submission
         if ($request->has('submit_final') && $totalElements === $answeredElements) {
+            // Validate signature format (must be base64 PNG data URI)
+            $tandaTangan = $request->input('tanda_tangan');
+            if (!preg_match('/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/', $tandaTangan)) {
+                return redirect()->route('asesi.asesmen-mandiri.show', $skemaId)
+                    ->with('error', 'Format tanda tangan tidak valid.');
+            }
+
             DB::table('asesi_skema')
                 ->where('asesi_nik', $asesi->NIK)
                 ->where('skema_id', $skemaId)
                 ->update([
                     'status' => 'selesai',
                     'tanggal_selesai' => now(),
+                    'tanda_tangan' => $tandaTangan,
+                    'tanggal_tanda_tangan' => now(),
                     'updated_at' => now(),
                 ]);
             

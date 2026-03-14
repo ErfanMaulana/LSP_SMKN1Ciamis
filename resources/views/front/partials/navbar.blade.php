@@ -14,12 +14,12 @@
                     ['route' => 'front.home',           'label' => 'Beranda'],
                     ['route' => 'front.profil',         'label' => 'Profil LSP'],
                     ['route' => 'front.kompetensi.index',  'label' => 'Kompetensi & Data Skema'],
-                    ['route' => 'front.berita.index',   'label' => 'Berita & Pengumuman'],
+                    ['route' => 'front.daftar',         'label' => 'Daftar LSP'],
                     ['route' => 'front.kontak',         'label' => 'Kontak'],
                 ];
             @endphp
             @foreach($navLinks as $link)
-                @php $active = request()->routeIs($link['route']) || (isset($link['route']) && str_contains($link['route'], 'berita') && request()->routeIs('front.berita.*')); @endphp
+                @php $active = request()->routeIs($link['route']); @endphp
                 <a href="{{ route($link['route']) }}"
                    class="px-4 py-2 rounded-lg transition-colors duration-150
                           {{ $active

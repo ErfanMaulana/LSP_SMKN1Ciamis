@@ -189,11 +189,12 @@
 
         .topbar {
             background: white;
-            padding: 15px 30px;
+            padding: 0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             display: flex;
-            justify-content: space-between;
+            flex-direction: row;
             align-items: center;
+            justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -209,6 +210,202 @@
             display: flex;
             align-items: center;
             gap: 20px;
+            padding: 15px 30px;
+            flex-shrink: 0;
+        }
+
+        /* Global Search */
+        .global-search {
+            position: relative;
+            flex: 1;
+            padding: 15px 30px;
+        }
+
+        .global-search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .global-search-input-wrapper i.search-icon {
+            position: absolute;
+            left: 14px;
+            font-size: 16px;
+            color: #94a3b8;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .global-search-input {
+            width: 100%;
+            padding: 10px 14px 10px 40px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #f8fafc;
+            color: #0F172A;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .global-search-input:focus {
+            border-color: #0061A5;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(0, 97, 165, 0.1);
+        }
+
+        .global-search-input:focus+.search-icon,
+        .global-search-input:focus~i.search-icon {
+            color: #0061A5;
+        }
+
+        .global-search-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .search-shortcut {
+            position: absolute;
+            right: 12px;
+            background: #e2e8f0;
+            color: #64748b;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            pointer-events: none;
+        }
+
+        .search-results-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            border: 1px solid #e2e8f0;
+            max-height: 420px;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+        }
+
+        .search-results-dropdown.show {
+            display: block;
+        }
+
+        .search-results-dropdown::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .search-results-dropdown::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 5px;
+        }
+
+        .search-category-label {
+            padding: 10px 16px 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            text-decoration: none;
+            color: #1e293b;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .search-result-item:hover,
+        .search-result-item.active {
+            background: #f0f7ff;
+        }
+
+        .search-result-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .search-result-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-result-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0F172A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-result-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-result-category-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .search-empty {
+            padding: 24px 16px;
+            text-align: center;
+            color: #94a3b8;
+        }
+
+        .search-empty i {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .search-loading {
+            padding: 20px 16px;
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .search-loading .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #e2e8f0;
+            border-top: 2px solid #0061A5;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .user-info {
@@ -467,6 +664,29 @@
             .content-wrapper {
                 padding: 20px 15px;
             }
+
+            .topbar {
+                flex-direction: column;
+                gap: 0;
+                padding: 0;
+            }
+
+            .global-search {
+                width: 100%;
+                max-width: 100%;
+                padding: 12px 15px !important;
+                order: 1;
+            }
+
+            .topbar-right {
+                width: 100%;
+                padding: 12px 15px !important;
+                order: 2;
+            }
+
+            .search-shortcut {
+                display: none !important;
+            }
         }
     </style>
     @yield('styles')
@@ -484,158 +704,204 @@
             </div>
 
             <nav class="sidebar-menu">
+
                 <!-- Dashboard -->
-                <a href="{{ route('admin.dashboard') }}"
-                    class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
-                </a>
+                @if(Auth::guard('admin')->user()->hasPermission('dashboard.view'))
+                    <a href="{{ route('admin.dashboard') }}"
+                        class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                @endif
 
-                <!-- ADMINISTRASI Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>ADMINISTRASI</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.asesor.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
-                            <i class="bi bi-person-badge"></i>
-                            <span>Asesor</span>
-                        </a>
-
-                        <a href="{{ route('admin.asesi.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
-                            <i class="bi bi-people"></i>
-                            <span>Asesi</span>
-                        </a>
-
-                        <a href="{{ route('admin.asesi.verifikasi') }}"
-                            class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
-                            <i class="bi bi-clipboard-check"></i>
-                            <span>Verifikasi Asesi</span>
-                            @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
-                            @if($pendingCount > 0)
-                                <span
-                                    style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
+                <!-- ADMIN Section -->
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['role.view', 'admin.view']))
+                    <div class="menu-section">
+                        <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                            <span>ADMIN</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="menu-section-items">
+                            @if(Auth::guard('admin')->user()->hasPermission('admin.view'))
+                                <a href="{{ route('admin.admin-management.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.admin-management.*') ? 'active' : '' }}">
+                                    <i class="bi bi-person-gear"></i>
+                                    <span>Manajemen Admin</span>
+                                </a>
                             @endif
-                        </a>
 
-                        <a href="{{ route('admin.akun-asesi.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.akun-asesi.*') ? 'active' : '' }}">
-                            <i class="bi bi-person-vcard"></i>
-                            <span>Akun Asesi (NIK)</span>
-                        </a>
-
-                        <a href="{{ route('admin.kelompok.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
-                            <i class="bi bi-diagram-3-fill"></i>
-                            <span>Kelompok</span>
-                        </a>
-
-                        <a href="{{ route('admin.jurusan.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
-                            <i class="bi bi-mortarboard"></i>
-                            <span>Jurusan</span>
-                        </a>
-
-                        <a href="{{ route('admin.skema.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
-                            <i class="bi bi-patch-check"></i>
-                            <span>Skema</span>
-                        </a>
-
+                            @if(Auth::guard('admin')->user()->hasPermission('role.view'))
+                                <a href="{{ route('admin.roles.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.roles.*') ? 'active' : '' }}">
+                                    <i class="bi bi-shield-lock"></i>
+                                    <span>Role & Permission</span>
+                                </a>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                @endif
 
-                <!-- UJIAN KOMPETENSI Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>UJIAN KOMPETENSI</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.tuk.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
-                            <i class="bi bi-geo-alt"></i>
-                            <span>TUK</span>
-                        </a>
+                <!-- DATA MASTER Section -->
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view']))
+                    <div class="menu-section">
+                        <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                            <span>DATA MASTER</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="menu-section-items">
+                            @if(Auth::guard('admin')->user()->hasPermission('asesi.view'))
+                                <a href="{{ route('admin.asesi.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesi.index', 'admin.asesi.create', 'admin.asesi.edit') ? 'active' : '' }}">
+                                    <i class="bi bi-people"></i>
+                                    <span>Asesi</span>
+                                </a>
+                            @endif
 
-                        <a href="{{ route('admin.jadwal-ujikom.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
-                            <i class="bi bi-calendar-event"></i>
-                            <span>Jadwal</span>
-                        </a>
+                            @if(Auth::guard('admin')->user()->hasPermission('asesor.view'))
+                                <a href="{{ route('admin.asesor.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesor.*') ? 'active' : '' }}">
+                                    <i class="bi bi-person-badge"></i>
+                                    <span>Asesor</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('akun-asesi.view'))
+                                <a href="{{ route('admin.akun-asesi.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.akun-asesi.*') ? 'active' : '' }}">
+                                    <i class="bi bi-person-vcard"></i>
+                                    <span>Akun Asesi (NIK)</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('jurusan.view'))
+                                <a href="{{ route('admin.jurusan.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.jurusan.*') ? 'active' : '' }}">
+                                    <i class="bi bi-mortarboard"></i>
+                                    <span>Jurusan</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('tuk.view'))
+                                <a href="{{ route('admin.tuk.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.tuk.*') ? 'active' : '' }}">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>Tempat Uji (TUK)</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('skema.view'))
+                                <a href="{{ route('admin.skema.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
+                                    <i class="bi bi-patch-check"></i>
+                                    <span>Skema</span>
+                                </a>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                @endif
+
+                <!-- PROGRAM SERTIFIKASI Section -->
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view']))
+                    <div class="menu-section">
+                        <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                            <span>PROGRAM SERTIFIKASI</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="menu-section-items">
+                            @if(Auth::guard('admin')->user()->hasPermission('verifikasi-asesi.view'))
+                                <a href="{{ route('admin.asesi.verifikasi') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
+                                    <i class="bi bi-clipboard-check"></i>
+                                    <span>Verifikasi Asesi</span>
+                                    @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
+                                    @if($pendingCount > 0)
+                                        <span
+                                            style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
+                                    @endif
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('kelompok.view'))
+                                <a href="{{ route('admin.kelompok.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
+                                    <i class="bi bi-diagram-3-fill"></i>
+                                    <span>Kelompok</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view'))
+                                <a href="{{ route('admin.jadwal-ujikom.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
+                                    <i class="bi bi-calendar-event"></i>
+                                    <span>Jadwal Ujikom</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view'))
+                                <a href="{{ route('admin.asesmen-mandiri.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesmen-mandiri.*') ? 'active' : '' }}">
+                                    <i class="bi bi-journal-check"></i>
+                                    <span>Asesmen Mandiri</span>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 <!-- WEBSITE Section -->
-                <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>WEBSITE</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="{{ route('admin.carousel.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
-                            <i class="bi bi-images"></i>
-                            <span>Banner Carousel</span>
-                        </a>
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['carousel.view', 'socialmedia.view', 'profile-content.view']))
+                    <div class="menu-section">
+                        <div class="menu-section-title" onclick="toggleMenuSection(this)">
+                            <span>WEBSITE</span>
+                            <i class="bi bi-chevron-down"></i>
+                        </div>
+                        <div class="menu-section-items">
+                            @if(Auth::guard('admin')->user()->hasPermission('carousel.view'))
+                                <a href="{{ route('admin.carousel.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
+                                    <i class="bi bi-images"></i>
+                                    <span>Banner Carousel</span>
+                                </a>
+                            @endif
 
-                        <a href="{{ route('admin.socialmedia.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
-                            <i class="bi bi-share"></i>
-                            <span>Sosial Media</span>
-                        </a>
+                            @if(Auth::guard('admin')->user()->hasPermission('socialmedia.view'))
+                                <a href="{{ route('admin.socialmedia.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.socialmedia.*') ? 'active' : '' }}">
+                                    <i class="bi bi-share"></i>
+                                    <span>Sosial Media</span>
+                                </a>
+                            @endif
 
-                        <a href="{{ route('admin.profile-content.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
-                            <i class="bi bi-book-fill"></i>
-                            <span>Konten Profil</span>
-                        </a>
-
-                        <a href="{{ route('admin.berita.index') }}"
-                            class="menu-item {{ request()->routeIs('admin.berita.*') ? 'active' : '' }}">
-                            <i class="bi bi-newspaper"></i>
-                            <span>Berita</span>
-                        </a>
+                            @if(Auth::guard('admin')->user()->hasPermission('profile-content.view'))
+                                <a href="{{ route('admin.profile-content.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.profile-content.*') ? 'active' : '' }}">
+                                    <i class="bi bi-book-fill"></i>
+                                    <span>Konten Profil</span>
+                                </a>
+                            @endif
+                        </div>
                     </div>
-                </div>
-
-                <!-- ASESOR Section -->
-                <!-- <div class="menu-section">
-                    <div class="menu-section-title" onclick="toggleMenuSection(this)">
-                        <span>ASESOR</span>
-                        <i class="bi bi-chevron-down"></i>
-                    </div>
-                    <div class="menu-section-items">
-                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                            <i class="bi bi-pencil-square"></i>
-                            <span>Entry Penilaian</span>
-                        </a>
-                        
-                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                            <i class="bi bi-file-earmark-text"></i>
-                            <span>Hasil Ujian</span>
-                        </a>
-                        
-                        <a href="#" class="menu-item" style="opacity:0.5;pointer-events:none;">
-                            <i class="bi bi-bar-chart"></i>
-                            <span>Rekap Nilai Akhir</span>
-                        </a>
-                    </div>
-                </div> -->
+                @endif
             </nav>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
             <div class="topbar">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <button class="mobile-toggle" onclick="toggleSidebar()">
-                        <i class="bi bi-list"></i>
-                    </button>
-                    <h1>@yield('page-title', 'Dashboard')</h1>
+                <!-- Global Search Full Width -->
+                <div class="global-search" id="globalSearch">
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <button class="mobile-toggle" onclick="toggleSidebar()">
+                            <i class="bi bi-list"></i>
+                        </button>
+                        <div class="global-search-input-wrapper" style="flex: 1;">
+                            <i class="bi bi-search search-icon"></i>
+                            <input type="text" class="global-search-input" id="globalSearchInput"
+                                placeholder="Cari asesi, asesor, kelompok, skema..." autocomplete="off">
+                            <span class="search-shortcut" id="searchShortcut">Ctrl+K</span>
+                        </div>
+                    </div>
+                    <div class="search-results-dropdown" id="searchResults"></div>
                 </div>
 
                 <div class="topbar-right">
@@ -646,7 +912,8 @@
                             </div>
                             <div class="user-details">
                                 <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
-                                <span class="user-role">Admin LSP</span>
+                                <span
+                                    class="user-role">{{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Admin' }}</span>
                             </div>
                             <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
                         </button>
@@ -658,7 +925,9 @@
                                 </div>
                                 <div class="profile-header-info">
                                     <h4 class="profile-header-name">{{ Auth::guard('admin')->user()->name }}</h4>
-                                    <p class="profile-header-role">Administrator</p>
+                                    <p class="profile-header-role">
+                                        {{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Administrator' }}
+                                    </p>
                                 </div>
                             </div>
 
@@ -763,6 +1032,160 @@
                 }
             }
         });
+
+        // ===== Global Search =====
+        (function () {
+            const searchInput = document.getElementById('globalSearchInput');
+            const searchResults = document.getElementById('searchResults');
+            const searchShortcut = document.getElementById('searchShortcut');
+            let searchTimeout = null;
+            let activeIndex = -1;
+            let currentResults = [];
+
+            // Ctrl+K shortcut
+            document.addEventListener('keydown', function (e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                    searchInput.select();
+                }
+                // Escape to close
+                if (e.key === 'Escape') {
+                    closeSearch();
+                    searchInput.blur();
+                }
+            });
+
+            // Hide shortcut on focus
+            searchInput.addEventListener('focus', function () {
+                searchShortcut.style.display = 'none';
+                if (searchInput.value.length >= 2) {
+                    searchResults.classList.add('show');
+                }
+            });
+
+            searchInput.addEventListener('blur', function () {
+                setTimeout(function () {
+                    searchShortcut.style.display = '';
+                    closeSearch();
+                }, 200);
+            });
+
+            // Live search on input
+            searchInput.addEventListener('input', function () {
+                const query = this.value.trim();
+                activeIndex = -1;
+
+                if (query.length < 2) {
+                    closeSearch();
+                    return;
+                }
+
+                // Show loading
+                searchResults.innerHTML = '<div class="search-loading"><span class="spinner"></span>Mencari...</div>';
+                searchResults.classList.add('show');
+
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function () {
+                    fetchResults(query);
+                }, 300);
+            });
+
+            // Keyboard navigation
+            searchInput.addEventListener('keydown', function (e) {
+                const items = searchResults.querySelectorAll('.search-result-item');
+                if (!items.length) return;
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    activeIndex = Math.min(activeIndex + 1, items.length - 1);
+                    updateActiveItem(items);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    activeIndex = Math.max(activeIndex - 1, 0);
+                    updateActiveItem(items);
+                } else if (e.key === 'Enter' && activeIndex >= 0) {
+                    e.preventDefault();
+                    items[activeIndex].click();
+                }
+            });
+
+            function updateActiveItem(items) {
+                items.forEach(function (item, i) {
+                    item.classList.toggle('active', i === activeIndex);
+                });
+                if (items[activeIndex]) {
+                    items[activeIndex].scrollIntoView({ block: 'nearest' });
+                }
+            }
+
+            function fetchResults(query) {
+                fetch('{{ route("admin.search") }}?q=' + encodeURIComponent(query), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        renderResults(data.results);
+                    })
+                    .catch(function () {
+                        searchResults.innerHTML = '<div class="search-empty"><i class="bi bi-exclamation-circle"></i>Gagal memuat hasil</div>';
+                    });
+            }
+
+            function renderResults(results) {
+                currentResults = results;
+
+                if (!results.length) {
+                    searchResults.innerHTML = '<div class="search-empty"><i class="bi bi-search"></i>Tidak ada hasil ditemukan</div>';
+                    searchResults.classList.add('show');
+                    return;
+                }
+
+                // Group by category
+                var grouped = {};
+                results.forEach(function (r) {
+                    if (!grouped[r.category]) grouped[r.category] = [];
+                    grouped[r.category].push(r);
+                });
+
+                var html = '';
+                for (var cat in grouped) {
+                    html += '<div class="search-category-label">' + cat + '</div>';
+                    grouped[cat].forEach(function (item) {
+                        html += '<a href="' + item.url + '" class="search-result-item">';
+                        html += '<div class="search-result-icon" style="background:' + item.color + '15;color:' + item.color + '"><i class="bi ' + item.icon + '"></i></div>';
+                        html += '<div class="search-result-info">';
+                        html += '<div class="search-result-title">' + escapeHtml(item.title) + '</div>';
+                        html += '<div class="search-result-subtitle">' + escapeHtml(item.subtitle) + '</div>';
+                        html += '</div>';
+                        html += '<span class="search-result-category-badge" style="background:' + item.color + '15;color:' + item.color + '">' + cat + '</span>';
+                        html += '</a>';
+                    });
+                }
+
+                searchResults.innerHTML = html;
+                searchResults.classList.add('show');
+            }
+
+            function closeSearch() {
+                searchResults.classList.remove('show');
+                activeIndex = -1;
+            }
+
+            function escapeHtml(text) {
+                var div = document.createElement('div');
+                div.textContent = text || '';
+                return div.innerHTML;
+            }
+
+            // Close when clicking outside
+            document.addEventListener('click', function (e) {
+                var globalSearch = document.getElementById('globalSearch');
+                if (!globalSearch.contains(e.target)) {
+                    closeSearch();
+                }
+            });
+        })();
     </script>
     @yield('scripts')
 </body>
