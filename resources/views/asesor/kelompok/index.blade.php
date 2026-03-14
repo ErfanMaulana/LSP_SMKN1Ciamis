@@ -1,0 +1,165 @@
+@extends('asesor.layout')
+
+@section('title', 'Kelompok Saya')
+@section('page-title', 'Kelompok Saya')
+
+@section('styles')
+<style>
+    .page-header {
+        background: #0073bd;
+        border-radius: 12px;
+        padding: 22px 26px;
+        color: white;
+        margin-bottom: 22px;
+    }
+
+    .page-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    .page-header p {
+        font-size: 13px;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .group-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+    }
+
+    .group-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+    }
+
+    .group-head {
+        padding: 16px 18px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #f8fafc;
+    }
+
+    .group-name {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e3a5f;
+        margin: 0 0 6px;
+    }
+
+    .group-meta {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .group-body {
+        padding: 16px 18px;
+    }
+
+    .meta-row {
+        font-size: 13px;
+        color: #334155;
+        margin-bottom: 8px;
+    }
+
+    .meta-row strong {
+        color: #0f172a;
+    }
+
+    .asesi-list {
+        margin-top: 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .asesi-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        font-size: 13px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .asesi-item:last-child {
+        border-bottom: none;
+    }
+
+    .asesi-name {
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .asesi-info {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .empty-state i {
+        font-size: 42px;
+        margin-bottom: 12px;
+        display: block;
+    }
+</style>
+@endsection
+
+@section('content')
+<div class="page-header">
+    <h2><i class="bi bi-people-fill"></i> Kelompok Yang Saya Ampu</h2>
+    <p>Informasi kelompok dan daftar asesi yang ditugaskan ke asesor Anda.</p>
+</div>
+
+@if($kelompoks->count())
+    <div class="group-grid">
+        @foreach($kelompoks as $kelompok)
+            <div class="group-card">
+                <div class="group-head">
+                    <h3 class="group-name">{{ $kelompok->nama_kelompok }}</h3>
+                    <div class="group-meta">Skema: {{ $kelompok->skema?->nama_skema ?? '-' }}</div>
+                </div>
+                <div class="group-body">
+                    <div class="meta-row"><strong>Total Asesi:</strong> {{ $kelompok->asesis->count() }} peserta</div>
+
+                    <div class="asesi-list">
+                        @forelse($kelompok->asesis as $asesi)
+                            <div class="asesi-item">
+                                <div>
+                                    <div class="asesi-name">{{ $asesi->nama }}</div>
+                                    <div class="asesi-info">NIK: {{ $asesi->NIK }}</div>
+                                </div>
+                                <div class="asesi-info" style="text-align:right;">
+                                    {{ $asesi->jurusan?->nama_jurusan ?? '-' }}
+                                </div>
+                            </div>
+                        @empty
+                            <div class="asesi-item">
+                                <div class="asesi-info">Belum ada asesi di kelompok ini.</div>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+@else
+    <div class="empty-state">
+        <i class="bi bi-people"></i>
+        <p>Belum ada kelompok yang ditugaskan untuk asesor ini.</p>
+    </div>
+@endif
+@endsection

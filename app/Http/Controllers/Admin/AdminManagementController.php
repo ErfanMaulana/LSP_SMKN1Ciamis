@@ -32,7 +32,12 @@ class AdminManagementController extends Controller
     public function create()
     {
         $roles = Role::orderBy('display_name')->get();
-        return view('admin.admin-management.create', compact('roles'));
+        $superAdminRoleIds = $roles->where('is_super_admin', true)->pluck('id')->map(fn ($id) => (int) $id)->toArray();
+        $superAdminExists = !empty($superAdminRoleIds)
+            ? Admin::whereHas('roles', fn ($q) => $q->whereIn('roles.id', $superAdminRoleIds))->exists()
+            : false;
+
+        return view('admin.admin-management.create', compact('roles', 'superAdminExists', 'superAdminRoleIds'));
     }
 
     public function store(Request $request)
@@ -48,6 +53,20 @@ class AdminManagementController extends Controller
             'username.regex' => 'Username hanya boleh huruf, angka, dan underscore.',
             'roles.required' => 'Pilih minimal satu role.',
         ]);
+
+        $selectedRoleIds = collect($request->roles)->map(fn ($id) => (int) $id);
+        $superAdminRoleIds = Role::where('is_super_admin', true)->pluck('id')->map(fn ($id) => (int) $id);
+
+        $requestWantsSuperAdmin = $selectedRoleIds->intersect($superAdminRoleIds)->isNotEmpty();
+        $superAdminExists = $superAdminRoleIds->isNotEmpty()
+            ? Admin::whereHas('roles', fn ($q) => $q->whereIn('roles.id', $superAdminRoleIds))->exists()
+            : false;
+
+        if ($requestWantsSuperAdmin && $superAdminExists) {
+            return back()
+                ->withInput()
+                ->withErrors(['roles' => 'Super Admin sudah ada. Hanya boleh 1 akun Super Admin.']);
+        }
 
         $admin = Admin::create([
             'name'     => $request->name,
@@ -66,7 +85,17 @@ class AdminManagementController extends Controller
     {
         $roles = Role::orderBy('display_name')->get();
         $adminRoleIds = $admin->roles()->pluck('roles.id')->toArray();
-        return view('admin.admin-management.edit', compact('admin', 'roles', 'adminRoleIds'));
+        $superAdminRoleIds = $roles->where('is_super_admin', true)->pluck('id')->map(fn ($id) => (int) $id)->toArray();
+
+        $superAdminExists = !empty($superAdminRoleIds)
+            ? Admin::whereHas('roles', fn ($q) => $q->whereIn('roles.id', $superAdminRoleIds))
+                ->where('admins.id', '!=', $admin->id)
+                ->exists()
+            : false;
+
+        $isCurrentAdminSuperAdmin = !empty(array_intersect($adminRoleIds, $superAdminRoleIds));
+
+        return view('admin.admin-management.edit', compact('admin', 'roles', 'adminRoleIds', 'superAdminExists', 'isCurrentAdminSuperAdmin', 'superAdminRoleIds'));
     }
 
     public function update(Request $request, Admin $admin)
@@ -82,6 +111,22 @@ class AdminManagementController extends Controller
             'username.regex' => 'Username hanya boleh huruf, angka, dan underscore.',
             'roles.required' => 'Pilih minimal satu role.',
         ]);
+
+        $selectedRoleIds = collect($request->roles)->map(fn ($id) => (int) $id);
+        $superAdminRoleIds = Role::where('is_super_admin', true)->pluck('id')->map(fn ($id) => (int) $id);
+
+        $requestWantsSuperAdmin = $selectedRoleIds->intersect($superAdminRoleIds)->isNotEmpty();
+        $superAdminExistsOnOtherAdmin = $superAdminRoleIds->isNotEmpty()
+            ? Admin::whereHas('roles', fn ($q) => $q->whereIn('roles.id', $superAdminRoleIds))
+                ->where('admins.id', '!=', $admin->id)
+                ->exists()
+            : false;
+
+        if ($requestWantsSuperAdmin && $superAdminExistsOnOtherAdmin) {
+            return back()
+                ->withInput()
+                ->withErrors(['roles' => 'Super Admin sudah ada. Hanya boleh 1 akun Super Admin.']);
+        }
 
         $admin->update([
             'name'     => $request->name,

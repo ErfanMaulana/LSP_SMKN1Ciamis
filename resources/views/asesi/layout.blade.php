@@ -552,13 +552,51 @@
                 </div>
                 
                 <div class="topbar-right">
-                    <form method="POST" action="{{ route('asesi.logout') }}" style="margin: 0;">
-                        @csrf
-                        <button type="submit" class="profile-logout" style="width: auto; padding: 8px 16px;">
-                            <i class="bi bi-box-arrow-right"></i>
-                            <span>Logout</span>
+                    <div class="profile-dropdown" id="asesiProfileDropdown">
+                        <button class="profile-toggle" onclick="toggleAsesiProfile(event)" type="button">
+                            <div class="user-avatar">
+                                {{ strtoupper(substr($asesi->nama ?? ($account->nama ?? 'A'), 0, 1)) }}
+                            </div>
+                            <div class="user-details">
+                                <span class="user-name">{{ $asesi->nama ?? ($account->nama ?? 'Asesi') }}</span>
+                                <span class="user-role">Asesi</span>
+                            </div>
+                            <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
                         </button>
-                    </form>
+
+                        <div class="profile-menu" id="asesiProfileMenu">
+                            <div class="profile-menu-header">
+                                <div class="profile-avatar-lg">
+                                    {{ strtoupper(substr($asesi->nama ?? ($account->nama ?? 'A'), 0, 1)) }}
+                                </div>
+                                <div class="profile-menu-header-info">
+                                    <h4 class="profile-menu-name">{{ $asesi->nama ?? ($account->nama ?? 'Asesi') }}</h4>
+                                    <p class="profile-menu-role">Asesi LSP</p>
+                                </div>
+                            </div>
+
+                            <div class="profile-menu-body">
+                                @if($isApproved)
+                                    <a href="{{ route('asesi.profil.edit') }}" class="profile-menu-item">
+                                        <i class="bi bi-person"></i>
+                                        <span>Profil</span>
+                                    </a>
+                                    <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                        <i class="bi bi-gear"></i>
+                                        <span>Pengaturan</span>
+                                    </a>
+                                    <div class="profile-menu-divider"></div>
+                                @endif
+                                <form method="POST" action="{{ route('asesi.logout') }}" style="width: 100%; margin: 0;">
+                                    @csrf
+                                    <button type="submit" class="profile-logout">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -594,8 +632,20 @@
             document.getElementById('sidebar').classList.toggle('active');
         }
 
+        function toggleAsesiProfile(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('asesiProfileMenu');
+            if (menu) menu.classList.toggle('show');
+        }
+
         // Close sidebar on mobile when clicking outside
         document.addEventListener('click', function(event) {
+            const profileDropdown = document.getElementById('asesiProfileDropdown');
+            const profileMenu = document.getElementById('asesiProfileMenu');
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                if (profileMenu) profileMenu.classList.remove('show');
+            }
+
             const sidebar = document.getElementById('sidebar');
             const toggle = document.querySelector('.mobile-toggle');
             if (window.innerWidth <= 768) {

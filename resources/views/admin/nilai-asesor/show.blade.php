@@ -185,7 +185,7 @@
                             <td>{{ $i + 1 }}</td>
                             <td>
                                 <strong>{{ $row->kode_unit }}</strong>
-                                <div style="font-size:12px;color:#64748b;">{{ $row->nama_unit }}</div>
+                                <div style="font-size:12px;color:#64748b;">{{ $row->judul_unit }}</div>
                             </td>
                             <td>{{ $row->nama_elemen }}</td>
                             <td>{{ (int) $row->nilai }}</td>

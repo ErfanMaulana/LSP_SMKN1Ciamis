@@ -455,14 +455,14 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0;
-            padding: 4px;
-            border-radius: 50%;
+            gap: 10px;
+            padding: 6px 10px;
+            border-radius: 999px;
             transition: all 0.3s ease;
         }
 
         .profile-toggle:hover {
-            background: #f5f7fa;
+            background: #f1f5f9;
         }
 
         .profile-menu {
@@ -686,6 +686,19 @@
 
             .search-shortcut {
                 display: none !important;
+            }
+
+            .topbar-right {
+                justify-content: flex-end;
+            }
+
+            .profile-toggle {
+                padding: 6px;
+            }
+
+            .profile-toggle .user-details,
+            .profile-toggle .bi-chevron-down {
+                display: none;
             }
         }
     </style>
@@ -912,10 +925,15 @@
 
                 <div class="topbar-right">
                     <div class="profile-dropdown" id="profileDropdown">
-                        <button class="profile-toggle" onclick="toggleProfileMenu(event)">
+                        <button class="profile-toggle" onclick="toggleProfileMenu(event)" type="button">
                             <div class="user-avatar">
                                 {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
                             </div>
+                            <div class="user-details">
+                                <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
+                                <span class="user-role">{{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Administrator' }}</span>
+                            </div>
+                            <i class="bi bi-chevron-down" style="font-size: 14px; color: #64748b;"></i>
                         </button>
 
                         <div class="profile-menu" id="profileMenu">

@@ -16,7 +16,7 @@ class NilaiAsesorController extends Controller
             ->join('asesi as a', 'ane.asesi_nik', '=', 'a.NIK')
             ->join('skemas as s', 'ane.skema_id', '=', 's.id')
             ->leftJoin('asesor as ar', 'ane.asesor_id', '=', 'ar.ID_asesor')
-            ->selectRaw('ane.asesi_nik, ane.skema_id, MAX(a.nama) as nama_asesi, MAX(a.email) as email_asesi, MAX(s.nama_skema) as nama_skema, MAX(s.nomor_skema) as nomor_skema, MAX(ar.nama) as nama_asesor, COUNT(*) as total_elemen, AVG(ane.nilai) as rata_rata, SUM(CASE WHEN ane.status = "K" THEN 1 ELSE 0 END) as total_k, MAX(ane.updated_at) as terakhir_dinilai')
+            ->selectRaw('ane.asesi_nik, ane.skema_id, MAX(a.nama) as nama_asesi, MAX(a.email) as email_asesi, MAX(s.nama_skema) as nama_skema, MAX(s.nomor_skema) as nomor_skema, MAX(ar.nama) as nama_asesor, COUNT(*) as total_elemen, AVG(ane.nilai) as rata_rata, SUM(CASE WHEN ane.status = "K" THEN 1 ELSE 0 END) as total_k, MAX(ane.updated_at) as terakhir_dinilai, MAX(s.kkm) as kkm')
             ->groupBy('ane.asesi_nik', 'ane.skema_id');
 
         if ($search = trim((string) $request->get('search'))) {
@@ -41,7 +41,7 @@ class NilaiAsesorController extends Controller
             ->selectRaw('COUNT(DISTINCT CONCAT(asesi_nik, "-", skema_id)) as total_form, COUNT(*) as total_elemen_dinilai, ROUND(AVG(nilai), 2) as rata_global')
             ->first();
 
-        $skemas = Skema::orderBy('nama_skema')->get(['id', 'nama_skema']);
+        $skemas = Skema::orderBy('nama_skema')->get(['id', 'nama_skema', 'nomor_skema', 'kkm']);
 
         return view('admin.nilai-asesor.index', compact('data', 'stats', 'skemas'));
     }
@@ -65,7 +65,7 @@ class NilaiAsesorController extends Controller
                 'e.id as elemen_id',
                 'e.nama_elemen',
                 'u.kode_unit',
-                'u.nama_unit',
+                'u.judul_unit',
                 'ar.nama as nama_asesor',
             ])
             ->orderBy('u.kode_unit')
@@ -79,5 +79,29 @@ class NilaiAsesorController extends Controller
         ];
 
         return view('admin.nilai-asesor.show', compact('asesi', 'skema', 'rows', 'summary'));
+    }
+
+    public function updateKkm(Request $request, $skemaId)
+    {
+        $request->validate([
+            'kkm' => 'required|numeric|min:0|max:100',
+        ], [
+            'kkm.required' => 'KKM tidak boleh kosong',
+            'kkm.numeric' => 'KKM harus berupa angka',
+            'kkm.min' => 'KKM minimum adalah 0',
+            'kkm.max' => 'KKM maksimum adalah 100',
+        ]);
+
+        $skema = Skema::findOrFail($skemaId);
+        $skema->update(['kkm' => $request->kkm]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'KKM untuk skema ' . $skema->nama_skema . ' berhasil diperbarui menjadi ' . $request->kkm
+            ]);
+        }
+
+        return back()->with('success', 'KKM untuk skema ' . $skema->nama_skema . ' berhasil diperbarui menjadi ' . $request->kkm);
     }
 }

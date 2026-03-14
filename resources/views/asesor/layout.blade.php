@@ -307,6 +307,18 @@
 
             <div class="menu-section-title">PENILAIAN</div>
 
+            <a href="{{ route('asesor.jadwal.index') }}"
+               class="menu-item {{ request()->routeIs('asesor.jadwal.*') ? 'active' : '' }}">
+                <i class="bi bi-calendar3"></i>
+                <span>Jadwal Saya</span>
+            </a>
+
+            <a href="{{ route('asesor.kelompok.index') }}"
+               class="menu-item {{ request()->routeIs('asesor.kelompok.*') ? 'active' : '' }}">
+                <i class="bi bi-people-fill"></i>
+                <span>Kelompok Saya</span>
+            </a>
+
                 <a href="{{ route('asesor.entry-penilaian') }}"
                     class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') || request()->routeIs('asesor.asesi.review') ? 'active' : '' }}">
                      <i class="bi bi-journal-check"></i>

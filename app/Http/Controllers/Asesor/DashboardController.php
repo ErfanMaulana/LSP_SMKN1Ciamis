@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Asesor;
 use App\Models\Asesi;
 use App\Models\Skema;
+use App\Models\Kelompok;
+use App\Models\JadwalUjikom;
 use App\Models\JawabanElemen;
 use App\Models\AsesorNilaiElemen;
 use Illuminate\Http\Request;
@@ -66,6 +68,54 @@ class DashboardController extends Controller
         }
 
         return view('asesor.dashboard', compact('account', 'asesor', 'stats', 'recentCompleted'));
+    }
+
+    /**
+     * Jadwal ujikom yang ditugaskan ke asesor login.
+     */
+    public function jadwalIndex(Request $request)
+    {
+        $account = Auth::guard('account')->user();
+        $asesor = $this->getAsesor();
+
+        if (!$asesor) {
+            $jadwals = collect();
+            return view('asesor.jadwal.index', compact('account', 'asesor', 'jadwals'));
+        }
+
+        $jadwals = JadwalUjikom::with(['tuk', 'skema', 'kelompok'])
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->when($request->filled('status') && $request->status !== 'all', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            })
+            ->orderByDesc('tanggal_mulai')
+            ->orderBy('waktu_mulai')
+            ->get();
+
+        return view('asesor.jadwal.index', compact('account', 'asesor', 'jadwals'));
+    }
+
+    /**
+     * Kelompok yang diampu asesor login.
+     */
+    public function kelompokIndex()
+    {
+        $account = Auth::guard('account')->user();
+        $asesor = $this->getAsesor();
+
+        if (!$asesor) {
+            $kelompoks = collect();
+            return view('asesor.kelompok.index', compact('account', 'asesor', 'kelompoks'));
+        }
+
+        $kelompoks = Kelompok::with(['skema', 'asesis.jurusan'])
+            ->whereHas('asesors', function ($q) use ($asesor) {
+                $q->where('asesor.ID_asesor', $asesor->ID_asesor);
+            })
+            ->orderBy('nama_kelompok')
+            ->get();
+
+        return view('asesor.kelompok.index', compact('account', 'asesor', 'kelompoks'));
     }
 
     /**

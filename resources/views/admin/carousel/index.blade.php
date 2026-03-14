@@ -4,15 +4,24 @@
 @section('page-title', 'Banner Carousel')
 
 @section('content')
+@php
+    $adminUser = Auth::guard('admin')->user();
+    $canCreateCarousel = $adminUser->hasPermission('carousel.create');
+    $canEditCarousel = $adminUser->hasPermission('carousel.edit');
+    $canDeleteCarousel = $adminUser->hasPermission('carousel.delete');
+@endphp
+
 <div class="carousel-container">
     <div class="page-header">
         <div>
             <h2>Kelola Banner Carousel</h2>
             <p class="subtitle">Atur banner slider yang tampil di halaman utama (Rasio 16:9)</p>
         </div>
-        <a href="{{ route('admin.carousel.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Tambah Banner
-        </a>
+        @if($canCreateCarousel)
+            <a href="{{ route('admin.carousel.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Tambah Banner
+            </a>
+        @endif
     </div>
 
     {{-- Stats --}}
@@ -87,34 +96,48 @@
                     </td>
                     <td>{{ $carousel->subtitle ?? '-' }}</td>
                     <td class="text-center">
-                        <form action="{{ route('admin.carousel.toggle', $carousel->id) }}" method="POST" style="display:inline">
-                            @csrf
-                            @method('PATCH')
-                            <button type="submit" class="status-badge {{ $carousel->is_active ? 'active' : 'inactive' }}" title="Klik untuk toggle">
+                        @if($canEditCarousel)
+                            <form action="{{ route('admin.carousel.toggle', $carousel->id) }}" method="POST" style="display:inline">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="status-badge {{ $carousel->is_active ? 'active' : 'inactive' }}" title="Klik untuk toggle">
+                                    {{ $carousel->is_active ? 'Aktif' : 'Nonaktif' }}
+                                </button>
+                            </form>
+                        @else
+                            <span class="status-badge {{ $carousel->is_active ? 'active' : 'inactive' }}">
                                 {{ $carousel->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </button>
-                        </form>
+                            </span>
+                        @endif
                     </td>
                     <td>
-                        <div class="dropdown-action">
-                            <button class="btn-dropdown" onclick="toggleDropdown(this)">
-                                <i class="bi bi-three-dots-vertical"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a href="{{ route('admin.carousel.edit', $carousel->id) }}" class="dropdown-item">
-                                    <i class="bi bi-pencil"></i> Ubah
-                                </a>
-                               
-                                <form action="{{ route('admin.carousel.destroy', $carousel->id) }}" method="POST" 
-                                      onsubmit="return confirm('Hapus banner ini?')" style="margin: 0;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="dropdown-item danger">
-                                        <i class="bi bi-trash"></i> Hapus
-                                    </button>
-                                </form>
+                        @if($canEditCarousel || $canDeleteCarousel)
+                            <div class="dropdown-action">
+                                <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    @if($canEditCarousel)
+                                        <a href="{{ route('admin.carousel.edit', $carousel->id) }}" class="dropdown-item">
+                                            <i class="bi bi-pencil"></i> Ubah
+                                        </a>
+                                    @endif
+
+                                    @if($canDeleteCarousel)
+                                        <form action="{{ route('admin.carousel.destroy', $carousel->id) }}" method="POST"
+                                              onsubmit="return confirm('Hapus banner ini?')" style="margin: 0;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="dropdown-item danger">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
+                        @else
+                            <span style="color:#94a3b8;">-</span>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
@@ -126,9 +149,11 @@
         <i class="bi bi-images"></i>
         <h3>Belum ada banner</h3>
         <p>Tambahkan banner carousel untuk ditampilkan di halaman utama</p>
-        <a href="{{ route('admin.carousel.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Tambah Banner Pertama
-        </a>
+        @if($canCreateCarousel)
+            <a href="{{ route('admin.carousel.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Tambah Banner Pertama
+            </a>
+        @endif
     </div>
     @endif
 </div>

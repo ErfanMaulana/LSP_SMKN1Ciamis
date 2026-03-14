@@ -83,9 +83,22 @@
             <div class="form-section">
                 <h3>Role</h3>
                 <p style="font-size:13px;color:#64748b;margin-bottom:16px;">Pilih satu atau lebih role untuk admin ini.</p>
+                @if(!empty($superAdminExists) && $superAdminExists && (empty($isCurrentAdminSuperAdmin) || !$isCurrentAdminSuperAdmin))
+                    <p style="font-size:12px;color:#b45309;margin-bottom:12px;">
+                        Role Super Admin sudah dipakai oleh akun lain. Sistem hanya mengizinkan 1 akun Super Admin.
+                    </p>
+                @endif
 
                 <div class="role-list">
                     @foreach($roles as $role)
+                    @if(
+                        !empty($role->is_super_admin)
+                        && !empty($superAdminExists)
+                        && $superAdminExists
+                        && (empty($isCurrentAdminSuperAdmin) || !$isCurrentAdminSuperAdmin)
+                    )
+                        @continue
+                    @endif
                     <label class="role-item">
                         <input type="checkbox" name="roles[]" value="{{ $role->id }}"
                                {{ in_array($role->id, old('roles', $adminRoleIds)) ? 'checked' : '' }}>

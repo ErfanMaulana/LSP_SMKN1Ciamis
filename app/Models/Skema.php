@@ -11,6 +11,7 @@ class Skema extends Model
         'nomor_skema',
         'jenis_skema',
         'jurusan_id',
+        'kkm',
     ];
 
     protected $casts = [

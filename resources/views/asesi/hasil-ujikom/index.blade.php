@@ -5,238 +5,198 @@
 
 @section('styles')
 <style>
-    .page-header {
-        margin-bottom: 20px;
-    }
-
-    .page-header h2 {
-        margin: 0 0 6px 0;
-        font-size: 22px;
-        color: #1e293b;
-    }
-
-    .page-header p {
-        margin: 0;
-        color: #64748b;
-        font-size: 13px;
-    }
-
-    .announcement-card {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 26px;
-        margin-bottom: 18px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-    }
-
-    .announcement-head {
+    .result-screen {
+        min-height: calc(100vh - 180px);
         display: flex;
         align-items: center;
-        gap: 14px;
-        margin-bottom: 12px;
-    }
-
-    .announcement-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
         justify-content: center;
-        font-size: 26px;
-        flex-shrink: 0;
     }
 
-    .announcement-title {
-        margin: 0;
-        font-size: 20px;
-        font-weight: 700;
-        color: #0f172a;
+    .result-content {
+        width: 100%;
+        max-width: 980px;
+        background-color: #ffffff;
+        border-radius: 12px;
+        padding: 50px 40px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
     }
 
-    .announcement-subtitle {
-        margin: 3px 0 0;
-        color: #64748b;
-        font-size: 13px;
-    }
-
-    .announcement-message {
-        margin: 12px 0 0;
-        font-size: 15px;
-        line-height: 1.7;
-        color: #1e293b;
-    }
-
-    .announcement-meta {
-        margin-top: 16px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 10px;
-    }
-
-    .meta-item {
-        background: #f8fafc;
-        border-radius: 8px;
-        padding: 10px 12px;
-        border: 1px solid #e2e8f0;
-    }
-
-    .meta-label {
-        display: block;
-        color: #64748b;
-        font-size: 11px;
+    .result-status-label {
+        font-size: 14px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.4px;
-        margin-bottom: 4px;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
     }
 
-    .meta-value {
-        color: #0f172a;
-        font-size: 13px;
+    .result-title {
+        margin: 0;
+        font-size: clamp(34px, 5vw, 58px);
+        line-height: 1.12;
+        font-weight: 800;
+    }
+
+    .result-subtitle {
+        margin-top: 14px;
+        font-size: clamp(16px, 2vw, 22px);
+        color: #334155;
         font-weight: 600;
     }
 
-    .announcement-card.kompeten {
-        border-color: #86efac;
-        background: linear-gradient(180deg, #ffffff 0%, #f0fdf4 100%);
-    }
-
-    .announcement-card.kompeten .announcement-icon {
-        background: #d1fae5;
-        color: #065f46;
-    }
-
-    .announcement-card.belum-kompeten {
-        border-color: #fca5a5;
-        background: linear-gradient(180deg, #ffffff 0%, #fef2f2 100%);
-    }
-
-    .announcement-card.belum-kompeten .announcement-icon {
-        background: #fee2e2;
-        color: #991b1b;
-    }
-
-    .announcement-card.pending {
-        border-color: #fcd34d;
-        background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
-    }
-
-    .announcement-card.pending .announcement-icon {
-        background: #fef3c7;
-        color: #92400e;
-    }
-
-    .other-title {
-        margin: 4px 0 10px;
-        font-size: 15px;
+    .result-message {
+        margin: 20px auto 0;
+        max-width: 760px;
         color: #475569;
-        font-weight: 700;
+        font-size: 18px;
+        line-height: 1.8;
     }
 
-    .other-list {
-        display: grid;
-        gap: 10px;
+    .result-meta {
+        margin-top: 28px;
+        padding-top: 18px;
+        border-top: 1px solid #cbd5e1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px 26px;
+        justify-content: center;
     }
 
-    .other-item {
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        padding: 12px 14px;
-    }
-
-    .other-item h4 {
-        margin: 0 0 3px;
+    .result-meta span {
         font-size: 14px;
+        color: #334155;
+    }
+
+    .result-meta strong {
         color: #0f172a;
     }
 
-    .other-item p {
+    .tone-competent .result-status-label,
+    .tone-competent .result-title {
+        color: #166534;
+    }
+
+    .tone-not-yet .result-status-label,
+    .tone-not-yet .result-title {
+        color: #991b1b;
+    }
+
+    .tone-pending .result-status-label,
+    .tone-pending .result-title {
+        color: #92400e;
+    }
+
+    .other-results {
+        margin-top: 26px;
+        text-align: left;
+        border-top: 1px dashed #cbd5e1;
+        padding-top: 14px;
+    }
+
+    .other-results h4 {
+        margin: 0 0 8px;
+        color: #475569;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .other-results ul {
         margin: 0;
-        color: #64748b;
-        font-size: 12px;
+        padding-left: 18px;
+        color: #475569;
+        font-size: 14px;
+        line-height: 1.7;
     }
 
     .empty {
         text-align: center;
-        padding: 64px 20px;
-        background: #fff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
         color: #94a3b8;
+        padding: 70px 20px;
     }
 
     .empty i {
-        font-size: 42px;
+        font-size: 54px;
         display: block;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .result-screen {
+            min-height: calc(100vh - 210px);
+            align-items: flex-start;
+            padding: 20px;
+        }
+
+        .result-content {
+            padding: 30px 20px;
+        }
+
+        .result-message {
+            font-size: 15px;
+        }
+
+        .result-meta {
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .result-content {
+            text-align: left;
+        }
     }
 </style>
 @endsection
 
 @section('content')
-<div class="page-header">
-    <h2><i class="bi bi-award"></i> Hasil Ujikom</h2>
-    <p>Pengumuman hasil ujikom Anda ditampilkan langsung di halaman ini tanpa nilai angka.</p>
-</div>
-
 @if($hasilUjikom->count())
     @php $utama = $hasilUjikom->first(); @endphp
 
-    <div class="announcement-card {{ $utama->status_penilaian === 'sudah_dinilai' ? ($utama->hasil_ujikom === 'kompeten' ? 'kompeten' : 'belum-kompeten') : 'pending' }}">
-        <div class="announcement-head">
-            <div class="announcement-icon">
+    @php
+        $toneClass = $utama->status_penilaian !== 'sudah_dinilai'
+            ? 'tone-pending'
+            : ($utama->hasil_ujikom === 'kompeten' ? 'tone-competent' : 'tone-not-yet');
+    @endphp
+
+    <div class="result-screen {{ $toneClass }}">
+        <div class="result-content">
+            <div class="result-status-label">
                 @if($utama->status_penilaian !== 'sudah_dinilai')
-                    <i class="bi bi-hourglass-split"></i>
+                    Menunggu Penilaian Asesor
                 @elseif($utama->hasil_ujikom === 'kompeten')
-                    <i class="bi bi-patch-check-fill"></i>
+                    Pengumuman Hasil Ujikom
                 @else
-                    <i class="bi bi-exclamation-circle-fill"></i>
+                    Pengumuman Hasil Ujikom
                 @endif
             </div>
 
-            <div>
+            <h1 class="result-title">
                 @if($utama->status_penilaian !== 'sudah_dinilai')
-                    <h3 class="announcement-title">Pengumuman Hasil Belum Tersedia</h3>
-                    <p class="announcement-subtitle">Status: Menunggu penilaian asesor</p>
+                    Hasil Ujikom Anda Belum Tersedia
                 @elseif($utama->hasil_ujikom === 'kompeten')
-                    <h3 class="announcement-title">SELAMAT! Anda Dinyatakan KOMPETEN</h3>
-                    <p class="announcement-subtitle">Skema: {{ $utama->nama_skema }}</p>
+                    SELAMAT! ANDA DINYATAKAN KOMPETEN
                 @else
-                    <h3 class="announcement-title">MOHON MAAF, Anda Belum Kompeten</h3>
-                    <p class="announcement-subtitle">Skema: {{ $utama->nama_skema }}</p>
+                    MOHON MAAF, ANDA BELUM KOMPETEN
                 @endif
-            </div>
-        </div>
+            </h1>
 
-        <p class="announcement-message">
-            @if($utama->status_penilaian !== 'sudah_dinilai')
-                Hasil ujikom Anda sedang dalam proses review oleh asesor. Silakan cek kembali secara berkala.
-            @elseif($utama->hasil_ujikom === 'kompeten')
-                Berdasarkan hasil penilaian asesor, Anda telah memenuhi kriteria kompetensi pada skema ini.
-            @else
-                Berdasarkan hasil penilaian asesor, Anda belum memenuhi seluruh kriteria kompetensi pada skema ini.
-            @endif
-        </p>
+            <div class="result-subtitle">{{ $utama->nama_skema }}</div>
 
-        <div class="announcement-meta">
-            <div class="meta-item">
-                <span class="meta-label">Skema</span>
-                <span class="meta-value">{{ $utama->nama_skema }}</span>
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Nomor Skema</span>
-                <span class="meta-value">{{ $utama->nomor_skema }}</span>
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Asesor Penilai</span>
-                <span class="meta-value">{{ $utama->asesor_nama ?? '-' }}</span>
-            </div>
-            <div class="meta-item">
-                <span class="meta-label">Tanggal Penilaian</span>
-                <span class="meta-value">
+            <p class="result-message">
+                @if($utama->status_penilaian !== 'sudah_dinilai')
+                    Penilaian dari asesor masih diproses. Silakan cek halaman ini secara berkala untuk melihat hasil akhir ujikom Anda.
+                @elseif($utama->hasil_ujikom === 'kompeten')
+                    Berdasarkan hasil penilaian asesor, Anda telah memenuhi kriteria kompetensi pada skema ini.
+                @else
+                    Berdasarkan hasil penilaian asesor, Anda belum memenuhi seluruh kriteria kompetensi pada skema ini.
+                @endif
+            </p>
+
+            <div class="result-meta">
+                <span><strong>Nomor Skema:</strong> {{ $utama->nomor_skema }}</span>
+                <span><strong>Asesor:</strong> {{ $utama->asesor_nama ?? '-' }}</span>
+                <span>
+                    <strong>Tanggal Penilaian:</strong>
                     @if($utama->terakhir_dinilai)
                         {{ \Carbon\Carbon::parse($utama->terakhir_dinilai)->format('d/m/Y H:i') }}
                     @else
@@ -244,28 +204,28 @@
                     @endif
                 </span>
             </div>
+
+            @if($hasilUjikom->count() > 1)
+                <div class="other-results">
+                    <h4>Skema Lainnya</h4>
+                    <ul>
+                        @foreach($hasilUjikom->skip(1) as $row)
+                            <li>
+                                <strong>{{ $row->nama_skema }}</strong>:
+                                @if($row->status_penilaian !== 'sudah_dinilai')
+                                    Menunggu penilaian asesor.
+                                @elseif($row->hasil_ujikom === 'kompeten')
+                                    Dinyatakan Kompeten.
+                                @else
+                                    Dinyatakan Belum Kompeten.
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         </div>
     </div>
-
-    @if($hasilUjikom->count() > 1)
-        <h4 class="other-title">Pengumuman Skema Lainnya</h4>
-        <div class="other-list">
-            @foreach($hasilUjikom->skip(1) as $row)
-                <div class="other-item">
-                    <h4>{{ $row->nama_skema }} ({{ $row->nomor_skema }})</h4>
-                    <p>
-                        @if($row->status_penilaian !== 'sudah_dinilai')
-                            Menunggu penilaian asesor.
-                        @elseif($row->hasil_ujikom === 'kompeten')
-                            Dinyatakan Kompeten.
-                        @else
-                            Dinyatakan Belum Kompeten.
-                        @endif
-                    </p>
-                </div>
-            @endforeach
-        </div>
-    @endif
 @else
     <div class="empty">
         <i class="bi bi-inbox"></i>

@@ -14,6 +14,8 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
     // Protected asesor routes (uses account guard, role = asesor)
     Route::middleware('auth:account')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('/jadwal', [DashboardController::class, 'jadwalIndex'])->name('jadwal.index');
+        Route::get('/kelompok', [DashboardController::class, 'kelompokIndex'])->name('kelompok.index');
         Route::get('/entry-penilaian', [DashboardController::class, 'entryPenilaianIndex'])->name('entry-penilaian');
         Route::get('/entry-penilaian/create', [DashboardController::class, 'entryPenilaianCreate'])->name('entry-penilaian.create');
         Route::get('/entry-penilaian/{asesiNik}/input', [DashboardController::class, 'entryPenilaianForm'])->name('entry-penilaian.form');

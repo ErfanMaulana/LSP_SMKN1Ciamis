@@ -220,6 +220,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/asesmen-mandiri/{asesiNik}/{skemaId}', [AsesmenMandiriController::class, 'show'])->name('admin.asesmen-mandiri.show');
             Route::get('/nilai-asesor', [NilaiAsesorController::class, 'index'])->name('admin.nilai-asesor.index');
             Route::get('/nilai-asesor/{asesiNik}/{skemaId}', [NilaiAsesorController::class, 'show'])->name('admin.nilai-asesor.show');
+            Route::post('/nilai-asesor/{skemaId}/update-kkm', [NilaiAsesorController::class, 'updateKkm'])->name('admin.nilai-asesor.update-kkm');
         });
     });
 });
