@@ -93,7 +93,7 @@ class AsesmenMandiriController extends Controller
 
         $reviewer = null;
         if ($pivot->reviewed_by) {
-            $reviewer = \App\Models\Asesor::where('no_reg', $pivot->reviewed_by)->first();
+            $reviewer = \App\Models\Asesor::where('no_met', $pivot->reviewed_by)->first();
         }
 
         return view('admin.asesmen-mandiri.show', compact('asesi', 'skema', 'pivot', 'jawaban', 'reviewer'));

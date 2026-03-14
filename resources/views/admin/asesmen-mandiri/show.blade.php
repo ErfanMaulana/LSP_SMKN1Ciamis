@@ -158,9 +158,9 @@
 @endif
 
 <!-- Tanda Tangan -->
-@if($pivot->tanda_tangan || $pivot->tanda_tangan_asesor)
-    <div class="reviewer-section">
-        <h4><i class="bi bi-pen" style="color:#0061a5"></i> Tanda Tangan</h4>
+<div class="reviewer-section">
+    <h4><i class="bi bi-pen" style="color:#0061a5"></i> Tanda Tangan</h4>
+    @if($pivot->tanda_tangan || $pivot->tanda_tangan_asesor)
         <div style="display:flex;gap:24px;flex-wrap:wrap;">
             @if($pivot->tanda_tangan)
                 <div>
@@ -181,8 +181,12 @@
                 </div>
             @endif
         </div>
-    </div>
-@endif
+    @else
+        <div style="padding: 16px; background: #f8fafc; border-radius: 8px; color: #94a3b8; text-align: center;">
+            <p style="margin: 0; font-size: 13px;">Belum ada tanda tangan</p>
+        </div>
+    @endif
+</div>
 
 <!-- Jawaban per Unit -->
 @php $totalK = 0; $totalBK = 0; $totalBelum = 0; @endphp
@@ -203,11 +207,18 @@
             <div class="elemen-row">
                 <div class="elemen-info">
                     <div class="elemen-title">{{ $elemen->nama_elemen ?? $elemen->judul_elemen ?? 'Elemen' }}</div>
-                    @if($elemen->kriteria && $elemen->kriteria->count())
+                    @php
+                        $kriteria = $elemen->kriteria ?? [];
+                    @endphp
+                    @if(count($kriteria) > 0)
                         <div class="elemen-kriteria">
-                            @foreach($elemen->kriteria as $krit)
-                                <div>&bull; {{ $krit->nama_kriteria ?? $krit->unjuk_kerja ?? '' }}</div>
+                            @foreach($kriteria as $krit)
+                                <div>&bull; {{ $krit->deskripsi_kriteria ?? $krit->nama_kriteria ?? $krit->unjuk_kerja ?? '' }}</div>
                             @endforeach
+                        </div>
+                    @else
+                        <div class="elemen-kriteria" style="color: #cbd5e1;">
+                            <div>&bull; -</div>
                         </div>
                     @endif
                     @if($jwb && $jwb->bukti)

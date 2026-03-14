@@ -39,31 +39,22 @@
                         @error('NIK')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="form-group">
-                        <label for="no_reg">No. Registrasi</label>
-                        <input type="text" id="no_reg" name="no_reg" class="form-control"
-                               value="{{ old('no_reg', $asesi->no_reg) }}"
-                               placeholder="Contoh: REG-2026-001">
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
                         <label for="nama">Nama Lengkap <span class="required">*</span></label>
                         <input type="text" id="nama" name="nama"
                                class="form-control @error('nama') is-invalid @enderror"
                                value="{{ old('nama', $asesi->nama) }}" required>
                         @error('nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email"
-                               class="form-control @error('email') is-invalid @enderror"
-                               value="{{ old('email', $asesi->email) }}">
-                        @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
                 </div>
 
                 <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email <span class="required">*</span></label>
+                        <input type="email" id="email" name="email"
+                               class="form-control @error('email') is-invalid @enderror"
+                               value="{{ old('email', $asesi->email) }}" required>
+                        @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    </div>
                     <div class="form-group">
                         <label for="ID_jurusan">Jurusan <span class="required">*</span></label>
                         <select id="ID_jurusan" name="ID_jurusan"
@@ -78,6 +69,9 @@
                         </select>
                         @error('ID_jurusan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
+                </div>
+
+                <div class="form-row">
                     <div class="form-group">
                         <label for="kelas">Kelas</label>
                         <select id="kelas" name="kelas" class="form-control @error('kelas') is-invalid @enderror">
@@ -85,26 +79,28 @@
                         </select>
                         @error('kelas')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label>Jenis Kelamin <span class="required">*</span></label>
+                        <div class="radio-group" id="jenis-kelamin-group">
+                            <label class="radio-label">
+                                <input type="radio" name="jenis_kelamin_radio" value="Laki-laki" {{ old('jenis_kelamin', $asesi->jenis_kelamin) == 'Laki-laki' ? 'checked' : '' }}>
+                                <span>Laki-laki</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="jenis_kelamin_radio" value="Perempuan" {{ old('jenis_kelamin', $asesi->jenis_kelamin) == 'Perempuan' ? 'checked' : '' }}>
+                                <span>Perempuan</span>
+                            </label>
+                        </div>
+                        <input type="hidden" id="jenis_kelamin" name="jenis_kelamin" value="{{ old('jenis_kelamin', $asesi->jenis_kelamin) }}" required>
+                        @error('jenis_kelamin')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-                <div class="form-row">
                     <div class="form-group">
-                        <label for="jenis_kelamin">Jenis Kelamin</label>
-                        <select id="jenis_kelamin" name="jenis_kelamin" class="form-control">
-                            <option value="">Pilih</option>
-                            <option value="Laki-laki" {{ old('jenis_kelamin', $asesi->jenis_kelamin) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                            <option value="Perempuan" {{ old('jenis_kelamin', $asesi->jenis_kelamin) == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="kebangsaan">Kebangsaan</label>
-                        <input type="text" id="kebangsaan" name="kebangsaan" class="form-control"
-                               value="{{ old('kebangsaan', $asesi->kebangsaan) }}" placeholder="Contoh: Indonesia">
-                    </div>
-                    <div class="form-group">
-                        <label for="kewarganegaraan">Kewarganegaraan</label>
-                        <input type="text" id="kewarganegaraan" name="kewarganegaraan" class="form-control"
-                               value="{{ old('kewarganegaraan', $asesi->kewarganegaraan) }}" placeholder="Contoh: WNI">
+                        <label for="kebangsaan">Kebangsaan <span class="required">*</span></label>
+                        <input type="text" id="kebangsaan" name="kebangsaan" class="form-control @error('kebangsaan') is-invalid @enderror" value="{{ old('kebangsaan', $asesi->kebangsaan) }}" required>
+                        @error('kebangsaan')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
             </div>
@@ -442,6 +438,29 @@
     textarea.form-control { resize: vertical; min-height: 80px; }
     select.form-control { cursor: pointer; }
 
+    .radio-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .radio-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #f8fafc;
+        font-size: 13px;
+        color: #334155;
+        cursor: pointer;
+    }
+
+    .radio-label input[type="radio"] {
+        accent-color: #0073bd;
+    }
+
     /* Skema Grid */
     .skema-grid {
         display: grid;
@@ -576,6 +595,16 @@ document.addEventListener('DOMContentLoaded', function () {
             ];
         })
     );
+
+    // Handle jenis_kelamin radio buttons
+    const jeniKelaminRadios = document.querySelectorAll('input[name="jenis_kelamin_radio"]');
+    const jeniKelaminHidden = document.getElementById('jenis_kelamin');
+    
+    jeniKelaminRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            jeniKelaminHidden.value = this.value;
+        });
+    });
 
     if (!jurusanSelect || !skemaGrid) return;
 

@@ -129,7 +129,7 @@ class AsesiController extends Controller
             'tempat_lahir' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date',
             'jenis_kelamin' => 'required|in:L,P,Laki-laki,Perempuan',
-            'kewarganegaraan' => 'required|string|max:100',
+            'kebangsaan' => 'required|string|max:100',
             'alamat' => 'required|string',
             'kode_pos' => 'required|string|max:10',
             'telepon_hp' => 'required|string|max:20',

@@ -501,6 +501,7 @@
                         <tr>
                             <td colspan="2" style="padding:9px 14px;background:#f8fafc;font-weight:700;border-bottom:1px solid #d1d5db;">Ditinjau Oleh Asesor :</td>
                         </tr>
+                        @if($asesor)
                         <tr>
                             <td style="padding:9px 14px;width:38%;border-bottom:1px solid #eff0f1;color:#64748b;">Nama :</td>
                             <td style="padding:9px 14px;border-bottom:1px solid #eff0f1;font-weight:500;">{{ $asesor->nama }}</td>
@@ -579,6 +580,13 @@
                                 </div>
                             </td>
                         </tr>
+                        @else
+                        <tr>
+                            <td colspan="2" style="padding:14px;text-align:center;color:#878ca3;font-size:13px;">
+                                Tidak ada data asesor
+                            </td>
+                        </tr>
+                        @endif
                     </table>
                 </td>
             </tr>

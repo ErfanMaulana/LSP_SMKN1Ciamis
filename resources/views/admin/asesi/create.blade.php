@@ -93,9 +93,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="kewarganegaraan">Kewarganegaraan <span class="required">*</span></label>
-                        <input type="text" id="kewarganegaraan" name="kewarganegaraan" class="form-control @error('kewarganegaraan') is-invalid @enderror" value="{{ old('kewarganegaraan', 'Indonesia') }}" required>
-                        @error('kewarganegaraan')
+                        <label for="kebangsaan">Kebangsaan <span class="required">*</span></label>
+                        <input type="text" id="kebangsaan" name="kebangsaan" class="form-control @error('kebangsaan') is-invalid @enderror" value="{{ old('kebangsaan', 'Indonesia') }}" required>
+                        @error('kebangsaan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

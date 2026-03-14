@@ -305,7 +305,7 @@ class DashboardController extends Controller
         $kCount  = $answers->where('status', 'K')->count();
         $bkCount = $answers->where('status', 'BK')->count();
 
-        $savedSignature = $asesor->saved_tanda_tangan;
+        $savedSignature = $asesor ? $asesor->saved_tanda_tangan : null;
 
         return view('asesor.asesi.review', compact(
             'account', 'asesor', 'asesi', 'skema', 'answers', 'pivot', 'kCount', 'bkCount', 'savedSignature'
