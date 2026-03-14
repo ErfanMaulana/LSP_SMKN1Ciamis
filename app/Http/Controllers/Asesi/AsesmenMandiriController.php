@@ -201,6 +201,58 @@ class AsesmenMandiriController extends Controller
     }
 
     /**
+     * Show ujikom result from asesor scoring (status only, no numeric score shown).
+     */
+    public function hasilUjikom()
+    {
+        $account = Auth::guard('account')->user();
+        $asesi = $this->getAsesi();
+
+        if (!$asesi) {
+            return redirect()->route('asesi.dashboard')
+                ->with('error', 'Data asesi tidak ditemukan.');
+        }
+
+        $nilaiAgg = DB::table('asesor_nilai_elemens')
+            ->selectRaw('asesi_nik, skema_id, COUNT(*) as total_elemen, SUM(CASE WHEN status = "K" THEN 1 ELSE 0 END) as total_k, MAX(updated_at) as terakhir_dinilai, MAX(asesor_id) as asesor_id')
+            ->where('asesi_nik', $asesi->NIK)
+            ->groupBy('asesi_nik', 'skema_id');
+
+        $hasilUjikom = DB::table('asesi_skema as aks')
+            ->join('skemas as s', 'aks.skema_id', '=', 's.id')
+            ->leftJoinSub($nilaiAgg, 'nilai', function ($join) {
+                $join->on('aks.asesi_nik', '=', 'nilai.asesi_nik')
+                    ->on('aks.skema_id', '=', 'nilai.skema_id');
+            })
+            ->leftJoin('asesor as a', 'a.ID_asesor', '=', 'nilai.asesor_id')
+            ->where('aks.asesi_nik', $asesi->NIK)
+            ->where('aks.status', 'selesai')
+            ->select([
+                'aks.skema_id',
+                'aks.status',
+                'aks.tanggal_selesai',
+                's.nama_skema',
+                's.nomor_skema',
+                'nilai.total_elemen',
+                'nilai.total_k',
+                'nilai.terakhir_dinilai',
+                'a.nama as asesor_nama',
+            ])
+            ->orderByDesc('aks.tanggal_selesai')
+            ->get()
+            ->map(function ($row) {
+                $hasPenilaian = $row->total_elemen !== null && (int) $row->total_elemen > 0;
+                $row->status_penilaian = $hasPenilaian ? 'sudah_dinilai' : 'belum_dinilai';
+                $row->hasil_ujikom = $hasPenilaian && (int) $row->total_k === (int) $row->total_elemen
+                    ? 'kompeten'
+                    : 'belum_kompeten';
+                return $row;
+            });
+
+        return view('asesi.hasil-ujikom.index', compact('account', 'asesi', 'hasilUjikom'));
+    }
+
+    /**
      * View completed asesmen mandiri result
      */
     public function result($skemaId)

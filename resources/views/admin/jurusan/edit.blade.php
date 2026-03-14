@@ -22,7 +22,6 @@
         </div>
 
         <form action="{{ route('admin.jurusan.update', $jurusan->ID_jurusan) }}" method="POST">
-        <form action="{{ route('admin.jurusan.update', $jurusan->ID_jurusan) }}" method="POST">
             @csrf
             @method('PUT')
             
@@ -70,6 +69,34 @@
                     @error('misi')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                </div>
+
+                <div class="form-group">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
+                        <label style="margin-bottom:0;">Data Kelas (One-to-Many)</label>
+                        <button type="button" id="addKelasBtn" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-plus-lg"></i> Tambah Kelas
+                        </button>
+                    </div>
+                    <div id="kelasContainer" class="kelas-container">
+                        @php
+                            $kelasOld = old('kelas', $jurusan->kelasItems->pluck('nama_kelas')->toArray());
+                            if (empty($kelasOld)) $kelasOld = [''];
+                        @endphp
+                        @foreach($kelasOld as $idx => $kelasNama)
+                            <div class="kelas-row">
+                                <input type="text" name="kelas[]" class="form-control @error('kelas.' . $idx) is-invalid @enderror"
+                                    value="{{ $kelasNama }}" placeholder="Contoh: XII RPL 1">
+                                <button type="button" class="btn btn-danger btn-sm remove-kelas-btn">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                            @error('kelas.' . $idx)
+                                <div class="invalid-feedback" style="display:block; margin-top:-10px; margin-bottom:10px;">{{ $message }}</div>
+                            @enderror
+                        @endforeach
+                    </div>
+                    <small class="form-text">Tambah, ubah, atau hapus kelas jurusan langsung dari form ini.</small>
                 </div>
             </div>
 
@@ -242,6 +269,11 @@
         transition: all 0.3s;
     }
 
+    .btn-sm {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+
     .btn-primary {
         background: #0073bd;
         color: white;
@@ -266,6 +298,28 @@
         font-family: inherit;
     }
 
+    .kelas-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .kelas-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .btn-danger {
+        background: #ef4444;
+        color: #fff;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+    }
+
     @media (max-width: 768px) {
         .page-header {
             flex-direction: column;
@@ -282,4 +336,34 @@
         }
     }
 </style>
+
+<script>
+    (function () {
+        const container = document.getElementById('kelasContainer');
+        const addBtn = document.getElementById('addKelasBtn');
+
+        function bindRemove(btn) {
+            btn.addEventListener('click', function () {
+                const rows = container.querySelectorAll('.kelas-row');
+                if (rows.length <= 1) {
+                    const input = rows[0].querySelector('input[name="kelas[]"]');
+                    if (input) input.value = '';
+                    return;
+                }
+                btn.closest('.kelas-row').remove();
+            });
+        }
+
+        container.querySelectorAll('.remove-kelas-btn').forEach(bindRemove);
+
+        addBtn.addEventListener('click', function () {
+            const row = document.createElement('div');
+            row.className = 'kelas-row';
+            row.innerHTML = '<input type="text" name="kelas[]" class="form-control" placeholder="Contoh: XII RPL 1">' +
+                '<button type="button" class="btn btn-danger btn-sm remove-kelas-btn"><i class="bi bi-trash"></i></button>';
+            container.appendChild(row);
+            bindRemove(row.querySelector('.remove-kelas-btn'));
+        });
+    })();
+</script>
 @endsection

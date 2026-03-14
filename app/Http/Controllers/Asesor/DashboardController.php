@@ -7,6 +7,7 @@ use App\Models\Asesor;
 use App\Models\Asesi;
 use App\Models\Skema;
 use App\Models\JawabanElemen;
+use App\Models\AsesorNilaiElemen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -101,6 +102,176 @@ class DashboardController extends Controller
         $skema = count($skemaIds) === 1 ? Skema::find($skemaIds[0]) : null;
 
         return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema'));
+    }
+
+    /**
+     * Halaman utama Entry Penilaian: menampilkan asesi yang sudah dinilai asesor.
+     */
+    public function entryPenilaianIndex()
+    {
+        $account = Auth::guard('account')->user();
+        $asesor  = $this->getAsesor();
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+
+        if (!count($skemaIds) || !$asesor) {
+            $asesiData = collect();
+            $sudahDinilai = collect();
+            $belumDinilai = collect();
+            return view('asesor.penilaian.index', compact('account', 'asesor', 'asesiData', 'sudahDinilai', 'belumDinilai'));
+        }
+
+        // Ambil semua asesi dengan status selesai di skema asesor
+        $asesiData = DB::table('asesi_skema as aks')
+            ->leftJoinSub(
+                DB::table('asesor_nilai_elemens')
+                    ->where('asesor_id', $asesor->ID_asesor)
+                    ->selectRaw('asesi_nik, skema_id, COUNT(*) as total_elemen, AVG(nilai) as rata_rata, SUM(CASE WHEN status = "K" THEN 1 ELSE 0 END) as total_k, MAX(updated_at) as terakhir_dinilai')
+                    ->groupBy('asesi_nik', 'skema_id'),
+                'nilai',
+                function ($join) {
+                    $join->on('aks.asesi_nik', '=', 'nilai.asesi_nik')
+                         ->on('aks.skema_id', '=', 'nilai.skema_id');
+                }
+            )
+            ->select([
+                'aks.asesi_nik',
+                'aks.skema_id',
+                'aks.status',
+                'aks.rekomendasi',
+                'aks.tanggal_selesai',
+                'aks.updated_at',
+                'nilai.total_elemen',
+                'nilai.rata_rata',
+                'nilai.total_k',
+                'nilai.terakhir_dinilai',
+            ])
+            ->whereIn('aks.skema_id', $skemaIds)
+            ->where('aks.status', 'selesai')
+            ->orderByDesc('aks.tanggal_selesai')
+            ->get()
+            ->map(function ($row) use ($asesor) {
+                $row->asesi = Asesi::where('NIK', $row->asesi_nik)->first();
+                $row->skema = Skema::find($row->skema_id);
+                $row->sudah_dinilai = $row->total_elemen !== null;
+                return $row;
+            });
+
+        // Pisahkan data yang sudah dinilai dan belum dinilai
+        $sudahDinilai = $asesiData->filter(fn($item) => $item->sudah_dinilai);
+        $belumDinilai = $asesiData->filter(fn($item) => !$item->sudah_dinilai);
+
+        return view('asesor.penilaian.index', compact('account', 'asesor', 'asesiData', 'sudahDinilai', 'belumDinilai'));
+    }
+
+    /**
+     * Tombol "Isi Nilai Asesi": cari kandidat lalu redirect ke form input nilai per elemen.
+     */
+    public function entryPenilaianCreate()
+    {
+        $asesor = $this->getAsesor();
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+
+        if (!count($skemaIds) || !$asesor) {
+            return redirect()->route('asesor.entry-penilaian')
+                ->with('error', 'Skema asesor belum ditetapkan.');
+        }
+
+        $target = DB::table('asesi_skema as aks')
+            ->whereIn('aks.skema_id', $skemaIds)
+            ->where('aks.status', 'selesai')
+            ->orderByRaw("CASE WHEN aks.rekomendasi IS NULL OR aks.rekomendasi = '' THEN 0 ELSE 1 END")
+            ->orderByDesc('aks.tanggal_selesai')
+            ->first();
+
+        if (!$target) {
+            return redirect()->route('asesor.entry-penilaian')
+                ->with('error', 'Belum ada asesi dengan status selesai untuk diisi nilainya.');
+        }
+
+        return redirect()->route('asesor.entry-penilaian.form', $target->asesi_nik);
+    }
+
+    /**
+     * Form input nilai asesor per elemen.
+     */
+    public function entryPenilaianForm($asesiNik)
+    {
+        $account = Auth::guard('account')->user();
+        $asesor  = $this->getAsesor();
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+
+        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->first();
+
+        abort_unless($pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
+        $skema = Skema::with(['units.elemens'])->findOrFail($pivot->skema_id);
+        $elemenIds = $skema->units->flatMap(fn($unit) => $unit->elemens->pluck('id'))->values()->all();
+
+        $existingNilai = AsesorNilaiElemen::query()
+            ->where('asesor_id', $asesor?->ID_asesor)
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $pivot->skema_id)
+            ->whereIn('elemen_id', $elemenIds)
+            ->get()
+            ->keyBy('elemen_id');
+
+        return view('asesor.penilaian.form', compact('account', 'asesor', 'asesi', 'skema', 'pivot', 'existingNilai'));
+    }
+
+    /**
+     * Simpan nilai asesor per elemen (angka) dan status K/BK.
+     */
+    public function entryPenilaianStore(Request $request, $asesiNik)
+    {
+        $asesor  = $this->getAsesor();
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->first();
+
+        abort_unless($pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
+        $skema = Skema::with(['units.elemens'])->findOrFail($pivot->skema_id);
+        $elemens = $skema->units->flatMap(fn($unit) => $unit->elemens)->values();
+
+        $request->validate([
+            'nilai' => 'required|array',
+            'nilai.*' => 'required|numeric|min:0|max:100',
+        ], [
+            'nilai.required' => 'Nilai per elemen wajib diisi.',
+            'nilai.*.required' => 'Semua elemen harus memiliki nilai.',
+            'nilai.*.numeric' => 'Nilai harus berupa angka.',
+            'nilai.*.min' => 'Nilai minimal 0.',
+            'nilai.*.max' => 'Nilai maksimal 100.',
+        ]);
+
+        foreach ($elemens as $elemen) {
+            $nilai = (float) $request->input('nilai.' . $elemen->id, 0);
+            $status = $nilai >= 75 ? 'K' : 'BK';
+
+            AsesorNilaiElemen::updateOrCreate(
+                [
+                    'asesi_nik' => $asesiNik,
+                    'skema_id'  => $pivot->skema_id,
+                    'elemen_id' => $elemen->id,
+                    'asesor_id' => $asesor?->ID_asesor,
+                ],
+                [
+                    'nilai'  => (int) round($nilai),
+                    'status' => $status,
+                ]
+            );
+        }
+
+        return redirect()->route('asesor.entry-penilaian.form', $asesiNik)
+            ->with('success', 'Nilai per elemen berhasil disimpan.');
     }
 
     /**

@@ -18,7 +18,7 @@
 
     <!-- Statistics Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
+        <a href="{{ route('admin.asesor.index') }}" class="stat-card {{ $cardFilter == '' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-people"></i>
             </div>
@@ -26,9 +26,9 @@
                 <div class="stat-label">TOTAL ASESOR</div>
                 <div class="stat-value">{{ $stats['total'] }}</div>
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a href="{{ route('admin.asesor.index', ['card_filter' => 'with_skema']) }}" class="stat-card {{ $cardFilter == 'with_skema' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-patch-check"></i>
             </div>
@@ -36,9 +36,9 @@
                 <div class="stat-label">DENGAN SKEMA</div>
                 <div class="stat-value">{{ $stats['with_skema'] }}</div>
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a href="{{ route('admin.asesor.index', ['card_filter' => 'without_skema']) }}" class="stat-card {{ $cardFilter == 'without_skema' ? 'stat-card-active' : '' }}">
             <div class="stat-icon blue">
                 <i class="bi bi-exclamation-triangle"></i>
             </div>
@@ -46,32 +46,42 @@
                 <div class="stat-label">TANPA SKEMA</div>
                 <div class="stat-value">{{ $stats['without_skema'] }}</div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Search and Filter Section -->
     <div class="card">
         <div class="card-body">
+            <form method="GET" action="{{ route('admin.asesor.index') }}" id="filterForm">
+            @if($cardFilter)
+                <input type="hidden" name="card_filter" value="{{ $cardFilter }}">
+            @endif
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Cari berdasarkan nama atau ID...">
+                    <input type="text" name="search" placeholder="Cari berdasarkan nama atau ID..."
+                           value="{{ request('search') }}" autocomplete="off">
                 </div>
                 <div class="filter-group">
-                    <select class="filter-select">
-                        <option>Keahlian: Semua</option>
-                        <option>Software Engineering</option>
-                        <option>Cloud Infrastructure</option>
-                        <option>Network Systems</option>
-                        <option>Data Analysis</option>
+                    <select class="filter-select" name="keahlian" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">Keahlian: Semua</option>
+                        @foreach($skemaList as $skema)
+                            <option value="{{ $skema->id }}" {{ request('keahlian') == $skema->id ? 'selected' : '' }}>
+                                {{ $skema->nama_skema }}
+                            </option>
+                        @endforeach
                     </select>
-                    <select class="filter-select">
-                        <option>Status: Semua</option>
-                        <option>Aktif</option>
-                        <option>Tidak Aktif</option>
-                    </select>
+                    <button type="submit" class="btn-filter-search">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    @if(request('search') || request('keahlian') || request('card_filter'))
+                    <a href="{{ route('admin.asesor.index') }}" class="btn-filter-reset" title="Reset filter">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                    @endif
                 </div>
             </div>
+            </form>
 
             <!-- Table -->
             <div class="table-container">
@@ -247,11 +257,21 @@
         gap: 16px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         transition: all 0.2s;
+        text-decoration: none;
+        cursor: pointer;
+        border: 2px solid transparent;
     }
 
     .stat-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.2);
         transform: translateY(-2px);
+        border-color: #bfdbfe;
+    }
+
+    .stat-card-active {
+        border-color: #0073bd !important;
+        box-shadow: 0 4px 16px rgba(0, 115, 189, 0.25) !important;
+        background: #f0f9ff;
     }
 
     .stat-icon {
@@ -380,6 +400,35 @@
     .filter-select:hover {
         border-color: #cbd5e1;
     }
+
+    .btn-filter-search {
+        padding: 9px 14px;
+        background: #0073bd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+    }
+    .btn-filter-search:hover { background: #005f99; }
+
+    .btn-filter-reset {
+        padding: 9px 12px;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-filter-reset:hover { background: #fecaca; }
 
     /* Table */
     .table-container {
@@ -627,5 +676,16 @@
             });
         }
     });
+
+    // Submit filter form on Enter key
+    const searchInputAsesor = document.querySelector('input[name="search"]');
+    if (searchInputAsesor) {
+        searchInputAsesor.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('filterForm').submit();
+            }
+        });
+    }
 </script>
 @endsection

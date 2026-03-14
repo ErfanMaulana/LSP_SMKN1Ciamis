@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AdminManagementController;
 use App\Http\Controllers\Admin\AsesmenMandiriController;
+use App\Http\Controllers\Admin\NilaiAsesorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,6 +47,9 @@ Route::prefix('admin')->group(function () {
             Route::get('/asesi', [AsesiController::class, 'index'])->name('admin.asesi.index');
             Route::get('/asesi/create', [AsesiController::class, 'create'])->name('admin.asesi.create')->middleware('permission:asesi.create');
             Route::post('/asesi', [AsesiController::class, 'store'])->name('admin.asesi.store')->middleware('permission:asesi.create');
+            Route::post('/asesi/import-activated', [AsesiController::class, 'importActivated'])->name('admin.asesi.import-activated')->middleware('permission:asesi.create');
+            Route::get('/asesi/template-activated', [AsesiController::class, 'downloadActivatedTemplate'])->name('admin.asesi.template-activated')->middleware('permission:asesi.view');
+            Route::get('/asesi/export-activated', [AsesiController::class, 'exportActivated'])->name('admin.asesi.export-activated')->middleware('permission:asesi.view');
             Route::get('/asesi/{nik}/edit', [AsesiController::class, 'edit'])->name('admin.asesi.edit')->middleware('permission:asesi.edit');
             Route::put('/asesi/{nik}', [AsesiController::class, 'update'])->name('admin.asesi.update')->middleware('permission:asesi.edit');
             Route::delete('/asesi/{nik}', [AsesiController::class, 'destroy'])->name('admin.asesi.destroy')->middleware('permission:asesi.delete');
@@ -54,6 +58,8 @@ Route::prefix('admin')->group(function () {
         // Verifikasi Asesi
         Route::middleware('permission:verifikasi-asesi.view')->group(function () {
             Route::get('/asesi-verifikasi', [AsesiController::class, 'verifikasi'])->name('admin.asesi.verifikasi');
+            Route::post('/asesi-verifikasi/bulk-approve', [AsesiController::class, 'bulkApprove'])->name('admin.asesi.bulk-approve')->middleware('permission:verifikasi-asesi.approve');
+            Route::post('/asesi-verifikasi/bulk-reject', [AsesiController::class, 'bulkReject'])->name('admin.asesi.bulk-reject')->middleware('permission:verifikasi-asesi.reject');
             Route::get('/asesi-verifikasi/{nik}', [AsesiController::class, 'showVerifikasi'])->name('admin.asesi.verifikasi.show');
             Route::post('/asesi-verifikasi/{nik}/approve', [AsesiController::class, 'approve'])->name('admin.asesi.approve')->middleware('permission:verifikasi-asesi.approve');
             Route::post('/asesi-verifikasi/{nik}/reject', [AsesiController::class, 'reject'])->name('admin.asesi.reject')->middleware('permission:verifikasi-asesi.reject');
@@ -74,6 +80,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/jurusan', [JurusanController::class, 'index'])->name('admin.jurusan.index');
             Route::get('/jurusan/create', [JurusanController::class, 'create'])->name('admin.jurusan.create')->middleware('permission:jurusan.create');
             Route::post('/jurusan', [JurusanController::class, 'store'])->name('admin.jurusan.store')->middleware('permission:jurusan.create');
+            Route::get('/jurusan/{ID_jurusan}', [JurusanController::class, 'show'])->name('admin.jurusan.show');
             Route::get('/jurusan/{ID_jurusan}/edit', [JurusanController::class, 'edit'])->name('admin.jurusan.edit')->middleware('permission:jurusan.edit');
             Route::put('/jurusan/{ID_jurusan}', [JurusanController::class, 'update'])->name('admin.jurusan.update')->middleware('permission:jurusan.edit');
             Route::delete('/jurusan/{ID_jurusan}', [JurusanController::class, 'destroy'])->name('admin.jurusan.destroy')->middleware('permission:jurusan.delete');
@@ -211,6 +218,8 @@ Route::prefix('admin')->group(function () {
         Route::middleware('permission:asesmen-mandiri.view')->group(function () {
             Route::get('/asesmen-mandiri', [AsesmenMandiriController::class, 'index'])->name('admin.asesmen-mandiri.index');
             Route::get('/asesmen-mandiri/{asesiNik}/{skemaId}', [AsesmenMandiriController::class, 'show'])->name('admin.asesmen-mandiri.show');
+            Route::get('/nilai-asesor', [NilaiAsesorController::class, 'index'])->name('admin.nilai-asesor.index');
+            Route::get('/nilai-asesor/{asesiNik}/{skemaId}', [NilaiAsesorController::class, 'show'])->name('admin.nilai-asesor.show');
         });
     });
 });

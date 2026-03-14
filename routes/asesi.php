@@ -39,6 +39,7 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::get('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'show'])->name('asesmen-mandiri.show');
             Route::post('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'store'])->name('asesmen-mandiri.store');
             Route::get('/asesmen-mandiri/{skemaId}/result', [AsesmenMandiriController::class, 'result'])->name('asesmen-mandiri.result');
+            Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
 
             // Profil
             Route::get('/profil', [ProfileController::class, 'edit'])->name('profil.edit');

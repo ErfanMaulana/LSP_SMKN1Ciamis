@@ -20,53 +20,25 @@
         /* ── Sidebar ─────────────────────────────────────── */
         .sidebar {
             width: 260px;
-            background: linear-gradient(180deg, #1e3a5f 0%, #1a3050 100%);
-            color: #e2e8f0;
+            background: #ffffff;
+            color: #475569;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             z-index: 1000;
             transition: all 0.3s ease;
+            border-right: 1px solid #e2e8f0;
         }
 
         .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-track { background: #1a3050; }
-        .sidebar::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
         .sidebar-header {
             padding: 25px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid #e2e8f0;
             text-align: center;
         }
-
-        .sidebar-header .user-icon {
-            width: 64px;
-            height: 64px;
-            background: #0073bd;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 12px;
-            font-size: 30px;
-            color: white;
-            box-shadow: 0 4px 14px rgba(37,99,235,0.4);
-        }
-
-        .sidebar-header h4 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 3px; }
-        .sidebar-header .role-badge {
-            display: inline-block;
-            background: rgba(59,130,246,0.3);
-            color: #93c5fd;
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            padding: 3px 10px;
-            border-radius: 20px;
-            margin-bottom: 6px;
-        }
-        .sidebar-header .noreg { font-size: 11px; color: #93c5fd; font-family: monospace; }
 
         .sidebar-menu { padding: 16px 0; }
 
@@ -74,7 +46,7 @@
             padding: 10px 20px 4px;
             font-size: 10px;
             font-weight: 700;
-            color: #60a5fa;
+            color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 1.2px;
         }
@@ -83,14 +55,14 @@
             display: flex;
             align-items: center;
             padding: 11px 20px;
-            color: #bfdbfe;
+            color: #475569;
             text-decoration: none;
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
         }
 
-        .menu-item:hover { background: rgba(59,130,246,0.15); color: #fff; }
-        .menu-item.active { background: rgba(59,130,246,0.2); color: #fff; border-left-color: #3b82f6; }
+        .menu-item:hover { background: rgba(0,115,189,0.07); color: #0073bd; }
+        .menu-item.active { background: rgba(0,115,189,0.10); color: #0073bd; border-left-color: #0073bd; font-weight: 600; }
         .menu-item.disabled { opacity: 0.4; pointer-events: none; }
 
         .menu-item i { font-size: 17px; width: 22px; margin-right: 12px; }
@@ -121,7 +93,7 @@
             z-index: 100;
         }
 
-        .topbar h1 { font-size: 20px; color: #1e3a5f; font-weight: 700; }
+        .topbar h1 { font-size: 20px; color: #1e293b; font-weight: 700; }
 
         .topbar-right { display: flex; align-items: center; gap: 16px; }
 
@@ -155,7 +127,7 @@
         }
 
         .profile-toggle:hover {
-            background: rgba(59, 130, 246, 0.1);
+            background: rgba(0, 115, 189, 0.1);
         }
 
         .profile-menu {
@@ -254,7 +226,7 @@
         }
 
         .profile-menu-item:hover i {
-            color: #2563eb;
+            color: #0073bd;
         }
 
         .profile-divider {
@@ -301,7 +273,7 @@
 
         /* ── Mobile ──────────────────────────────────────── */
         .mobile-toggle {
-            display: none; background: #1e3a5f; color: white;
+            display: none; background: #0073bd; color: white;
             border: none; padding: 9px 14px; border-radius: 6px;
             cursor: pointer; font-size: 19px;
         }
@@ -323,12 +295,7 @@
     {{-- Sidebar --}}
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="user-icon">
-                <i class="bi bi-person-badge-fill"></i>
-            </div>
-            <h4>{{ $asesor->nama ?? 'Asesor' }}</h4>
-            <div class="role-badge">Asesor LSP</div>
-            <div class="noreg">{{ $account->id ?? '-' }}</div>
+            <img src="{{ asset('images/lsp.png') }}" alt="Logo LSP" style="max-width: 120px; max-height: 80px; object-fit: contain;">
         </div>
 
         <nav class="sidebar-menu">
@@ -340,8 +307,14 @@
 
             <div class="menu-section-title">PENILAIAN</div>
 
+                <a href="{{ route('asesor.entry-penilaian') }}"
+                    class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') || request()->routeIs('asesor.asesi.review') ? 'active' : '' }}">
+                     <i class="bi bi-journal-check"></i>
+                     <span>Entry Penilaian</span>
+                </a>
+
             <a href="{{ route('asesor.asesi.index') }}"
-               class="menu-item {{ request()->routeIs('asesor.asesi.*') ? 'active' : '' }}">
+                    class="menu-item {{ request()->routeIs('asesor.asesi.index') ? 'active' : '' }}">
                 <i class="bi bi-people"></i>
                 <span>Daftar Asesi</span>
             </a>

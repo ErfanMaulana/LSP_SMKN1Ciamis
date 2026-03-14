@@ -68,9 +68,28 @@ class JurusanController extends Controller
             'kode_jurusan' => 'required|string|max:10|unique:jurusan,kode_jurusan',
             'visi'         => 'nullable|string',
             'misi'         => 'nullable|string',
+            'kelas'        => 'nullable|array',
+            'kelas.*'      => 'nullable|string|max:100',
         ]);
 
-        Jurusan::create($validated);
+        $jurusan = Jurusan::create([
+            'nama_jurusan' => $validated['nama_jurusan'],
+            'kode_jurusan' => $validated['kode_jurusan'],
+            'visi' => $validated['visi'] ?? null,
+            'misi' => $validated['misi'] ?? null,
+        ]);
+
+        $kelasRows = collect($validated['kelas'] ?? [])
+            ->map(fn($item) => trim((string) $item))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($kelasRows->isNotEmpty()) {
+            $jurusan->kelasItems()->createMany(
+                $kelasRows->map(fn($nama) => ['nama_kelas' => $nama])->all()
+            );
+        }
 
         return redirect()->route('admin.jurusan.index')->with('success', 'Jurusan berhasil ditambahkan!');
     }
@@ -81,7 +100,7 @@ class JurusanController extends Controller
     public function show($ID_jurusan)
     {
         $jurusan = Jurusan::withCount(['asesi', 'skemas'])
-            ->with('skemas')
+            ->with(['skemas', 'kelasItems'])
             ->findOrFail($ID_jurusan);
         
         return view('admin.jurusan.show', compact('jurusan'));
@@ -92,7 +111,7 @@ class JurusanController extends Controller
      */
     public function edit($ID_jurusan)
     {
-        $jurusan = Jurusan::findOrFail($ID_jurusan);
+        $jurusan = Jurusan::with('kelasItems')->findOrFail($ID_jurusan);
         return view('admin.jurusan.edit', compact('jurusan'));
     }
 
@@ -108,9 +127,29 @@ class JurusanController extends Controller
             'kode_jurusan' => 'required|string|max:10|unique:jurusan,kode_jurusan,' . $ID_jurusan . ',ID_jurusan',
             'visi'         => 'nullable|string',
             'misi'         => 'nullable|string',
+            'kelas'        => 'nullable|array',
+            'kelas.*'      => 'nullable|string|max:100',
         ]);
 
-        $jurusan->update($validated);
+        $jurusan->update([
+            'nama_jurusan' => $validated['nama_jurusan'],
+            'kode_jurusan' => $validated['kode_jurusan'],
+            'visi' => $validated['visi'] ?? null,
+            'misi' => $validated['misi'] ?? null,
+        ]);
+
+        $kelasRows = collect($validated['kelas'] ?? [])
+            ->map(fn($item) => trim((string) $item))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $jurusan->kelasItems()->delete();
+        if ($kelasRows->isNotEmpty()) {
+            $jurusan->kelasItems()->createMany(
+                $kelasRows->map(fn($nama) => ['nama_kelas' => $nama])->all()
+            );
+        }
 
         return redirect()->route('admin.jurusan.index')->with('success', 'Jurusan berhasil diperbarui!');
     }

@@ -355,6 +355,14 @@
                     @endforeach
                 </select>
             </div>
+
+            <div class="reg-group">
+                <label>Kelas</label>
+                <select name="kelas" id="kelas-select" class="reg-control {{ $errors->has('kelas') ? 'is-invalid' : '' }}">
+                    <option value="">Pilih Jurusan dulu</option>
+                </select>
+                @error('kelas')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
         </div>
 
         <!-- Data Pekerjaan/Sekolah -->
@@ -424,9 +432,18 @@
 <script>
 (function () {
     const skemaData = @json($skemaList->map(fn($s) => ['id' => $s->id, 'jurusan_id' => $s->jurusan_id, 'nama' => $s->nama_skema]));
+    const jurusanKelasMap = @json(
+        $jurusanList->mapWithKeys(function ($j) {
+            return [
+                (string) $j->ID_jurusan => $j->kelasItems->pluck('nama_kelas')->values(),
+            ];
+        })
+    );
     const jurusanSel = document.getElementById('jurusan-select');
     const skemaSel   = document.getElementById('skema-select');
+    const kelasSel   = document.getElementById('kelas-select');
     const savedSkema = '{{ old('skema_id', $asesi?->skemas->first()?->id ?? '') }}';
+    const savedKelas = '{{ old('kelas', $asesi->kelas ?? '') }}';
 
     function filterSkema(jurusanId) {
         skemaSel.innerHTML = '';
@@ -447,13 +464,37 @@
         });
     }
 
+    function syncKelas(jurusanId) {
+        if (!kelasSel) return;
+
+        kelasSel.innerHTML = '';
+        const kelasList = jurusanKelasMap[String(jurusanId)] || [];
+
+        const def = document.createElement('option');
+        def.value = '';
+        def.textContent = jurusanId
+            ? (kelasList.length ? 'Pilih Kelas' : 'Belum ada kelas pada jurusan ini')
+            : 'Pilih Jurusan dulu';
+        kelasSel.appendChild(def);
+
+        kelasList.forEach(function (kelasNama) {
+            const opt = document.createElement('option');
+            opt.value = kelasNama;
+            opt.textContent = kelasNama;
+            if (savedKelas && savedKelas === kelasNama) opt.selected = true;
+            kelasSel.appendChild(opt);
+        });
+    }
+
     // Init on page load
     if (jurusanSel.value) {
         filterSkema(jurusanSel.value);
+        syncKelas(jurusanSel.value);
     }
 
     jurusanSel.addEventListener('change', function () {
         filterSkema(this.value);
+        syncKelas(this.value);
     });
 })();
 </script>

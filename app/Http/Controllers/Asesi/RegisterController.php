@@ -28,7 +28,7 @@ class RegisterController extends Controller
                 ->with('info', 'Pendaftaran Anda sudah disetujui.');
         }
 
-        $jurusanList = Jurusan::all();
+        $jurusanList = Jurusan::with('kelasItems')->get();
         $skemaList   = Skema::orderBy('jurusan_id')->orderBy('nama_skema')->get();
 
         // Parse NIK to auto-fill tanggal_lahir and jenis_kelamin
@@ -100,6 +100,7 @@ class RegisterController extends Controller
             'pekerjaan'             => 'required|string|max:255',
             'pendidikan_terakhir'   => 'required|string|max:255',
             'ID_jurusan'            => 'required|exists:jurusan,ID_jurusan',
+            'kelas'                 => 'nullable|string|max:50',
             'skema_id'              => 'required|exists:skemas,id',
             'nama_lembaga'          => 'required|string|max:255',
             'alamat_lembaga'        => 'required|string',

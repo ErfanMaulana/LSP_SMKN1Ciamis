@@ -33,13 +33,13 @@ class RolePermissionSeeder extends Seeder
                 'verifikasi-asesi.approve' => 'Approve Asesi',
                 'verifikasi-asesi.reject'  => 'Reject Asesi',
             ],
-            'Akun Asesi' => [
-                'akun-asesi.view'   => 'Lihat Akun Asesi',
-                'akun-asesi.create' => 'Tambah Akun Asesi',
-                'akun-asesi.delete' => 'Hapus Akun Asesi',
-                'akun-asesi.reset'  => 'Reset Password Akun Asesi',
-                'akun-asesi.import' => 'Import Akun Asesi',
-            ],
+            // 'Akun Asesi' => [
+            //     'akun-asesi.view'   => 'Lihat Akun Asesi',
+            //     'akun-asesi.create' => 'Tambah Akun Asesi',
+            //     'akun-asesi.delete' => 'Hapus Akun Asesi',
+            //     'akun-asesi.reset'  => 'Reset Password Akun Asesi',
+            //     'akun-asesi.import' => 'Import Akun Asesi',
+            // ],
             'Kelompok' => [
                 'kelompok.view'   => 'Lihat Kelompok',
                 'kelompok.create' => 'Tambah Kelompok',
