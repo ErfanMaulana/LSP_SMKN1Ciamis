@@ -173,7 +173,7 @@
             </div>
             <div class="detail-meta-item">
                 <i class="bi bi-calendar-event"></i>
-                <span>{{ $berita->tanggal_publikasi->format('d F Y') }}</span>
+                <span>{{ \Carbon\Carbon::parse($berita->tanggal_publikasi)->locale('id')->translatedFormat('d F Y') }}</span>
             </div>
             <div class="detail-meta-item">
                 <span class="status-badge {{ $berita->status }}">

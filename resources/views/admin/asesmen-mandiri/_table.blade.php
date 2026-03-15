@@ -46,7 +46,7 @@
                     @endif
                 </td>
                 <td style="font-size:12px;color:#64748b">
-                    {{ $item->updated_at ? \Carbon\Carbon::parse($item->updated_at)->format('d M Y H:i') : '-' }}
+                    {{ $item->updated_at ? \Carbon\Carbon::parse($item->updated_at)->locale('id')->translatedFormat('d M Y H:i') : '-' }}
                 </td>
                 <td>
                     @if($item->status !== 'belum_mulai')

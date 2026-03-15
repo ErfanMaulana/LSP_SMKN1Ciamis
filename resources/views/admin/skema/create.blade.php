@@ -112,7 +112,7 @@
     .form-actions {
         display: flex;
         gap: 12px;
-        justify-content: flex-end;
+        justify-content: flex-start;
         padding-top: 25px;
         margin-top: 30px;
         border-top: 2px solid #f1f5f9;

@@ -8,7 +8,7 @@
             <i class="bi bi-people"></i> {{ $item->asesi_count }}
         </span>
     </td>
-    <td>{{ $item->created_at ? $item->created_at->format('d M Y') : '-' }}</td>
+    <td>{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->locale('id')->translatedFormat('d M Y') : '-' }}</td>
     <td style="text-align:center;">
         <div class="action-menu">
             <button class="action-btn" onclick="toggleMenu(this)">

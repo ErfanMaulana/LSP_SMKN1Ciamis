@@ -5,24 +5,24 @@
 
 @section('content')
 <style>
-    .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
-    .page-header h2 { font-size:24px; font-weight:700; color:#1e293b; }
-    .page-header .subtitle { font-size:14px; color:#64748b; margin-top:4px; }
-    .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; border:none; transition:all .2s; }
-    .btn-primary { background:#0061A5; color:white; }
-    .btn-primary:hover { background:#00509e; }
-    .btn-outline { background:transparent; border:1.5px solid #cbd5e1; color:#64748b; }
-    .btn-outline:hover { border-color:#0061A5; color:#0061A5; }
-    .card { background:white; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #e2e8f0; margin-bottom:24px; }
-    .card-header { padding:18px 24px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; gap:10px; }
-    .card-header h3 { font-size:16px; font-weight:700; color:#1e293b; }
-    .card-body { padding:24px; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; flex-wrap: wrap; }
+    .page-header h2 { font-size: 22px; font-weight: 700; color: #0F172A; margin: 0; }
+    .page-header p { font-size: 13px; color: #64748b; margin: 4px 0 0; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; border: none; transition: all 0.3s; }
+    .btn-primary { background: #0073bd; color: white; }
+    .btn-primary:hover { background: #0073bd; transform: translateY(-1px); }
+    .btn-secondary { background: #64748b; color: white; }
+    .btn-secondary:hover { background: #475569; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); margin-bottom: 24px; overflow: hidden; }
+    .card-header { padding: 14px 24px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 10px; }
+    .card-header h3 { font-size: 14px; font-weight: 600; color: #0F172A; margin: 0; }
+    .card-body { padding: 24px; }
     .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
     @media(max-width:768px){ .form-grid { grid-template-columns:1fr; } }
     .form-group label { display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; }
     .form-group label .required { color:#ef4444; }
-    .form-control { width:100%; padding:10px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px; outline:none; transition:border-color .2s; box-sizing:border-box; }
-    .form-control:focus { border-color:#0061A5; box-shadow:0 0 0 3px rgba(0,97,165,.1); }
+    .form-control { width: 100%; padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; outline: none; transition: border-color .2s; box-sizing: border-box; font-family: inherit; }
+    .form-control:focus { border-color: #0061a5; box-shadow: 0 0 0 3px rgba(0,97,165,.1); }
     .error-text { font-size:12px; color:#ef4444; margin-top:4px; }
     .form-hint { font-size:12px; color:#94a3b8; margin-top:5px; }
     .alert-danger { background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; padding:14px 20px; border-radius:10px; font-size:14px; margin-bottom:20px; }
@@ -63,7 +63,7 @@
     .asesi-empty-msg { padding:24px; text-align:center; color:#94a3b8; font-size:13px; }
     .locked-box { display:flex; align-items:center; gap:10px; padding:14px 16px; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; color:#94a3b8; font-size:13px; }
     .locked-box i { font-size:18px; }
-    .form-actions { display:flex; gap:12px; padding-top:8px; }
+    .form-actions { display: flex; gap: 12px; margin-top: 30px; padding-top: 25px; border-top: 2px solid #f1f5f9; }
 </style>
 
 @if($errors->any())
@@ -80,7 +80,7 @@
         <h2>Tambah Kelompok Baru</h2>
         <p class="subtitle">Pilih skema terlebih dahulu, lalu pilih asesor dan asesi yang sesuai</p>
     </div>
-    <a href="{{ route('admin.kelompok.index') }}" class="btn btn-outline">
+    <a href="{{ route('admin.kelompok.index') }}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Kembali
     </a>
 </div>
@@ -181,8 +181,8 @@
     </div>
 
     <div class="form-actions">
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Simpan Kelompok</button>
-        <a href="{{ route('admin.kelompok.index') }}" class="btn btn-outline">Batal</a>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Simpan</button>
+        <a href="{{ route('admin.kelompok.index') }}" class="btn btn-secondary">Batal</a>
     </div>
     <div id="asesi-hidden-inputs"></div>
 </form>

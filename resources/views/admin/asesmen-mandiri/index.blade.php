@@ -12,26 +12,72 @@
     .page-header p  { font-size: 13px; color: #64748b; margin: 4px 0 0; }
 
     .stats-grid {
-        display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
-        gap: 16px; margin-bottom: 24px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-bottom: 24px;
     }
+
     .stat-card {
-        background: white; border-radius: 12px; padding: 18px 20px;
-        display: flex; align-items: center; gap: 14px;
-        box-shadow: 0 1px 3px rgba(0,0,0,.08); transition: all 0.2s;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+        text-decoration: none;
+        cursor: pointer;
+        border: 2px solid transparent;
     }
-    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.2);
+        transform: translateY(-2px);
+        border-color: #bfdbfe;
+    }
+
     .stat-icon {
-        width: 46px; height: 46px; border-radius: 10px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 20px; color: #fff; flex-shrink: 0;
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        flex-shrink: 0;
     }
-    .stat-icon.blue   { background: linear-gradient(135deg,#0073bd,#0061a5); }
-    .stat-icon.gray   { background: linear-gradient(135deg,#94a3b8,#64748b); }
-    .stat-icon.yellow  { background: linear-gradient(135deg,#f59e0b,#d97706); }
-    .stat-icon.green  { background: linear-gradient(135deg,#10b981,#059669); }
-    .stat-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing:.5px; }
-    .stat-value { font-size: 24px; font-weight: 700; color: #0F172A; margin-top: 2px; }
+
+    .stat-icon.blue { background: linear-gradient(135deg, #0073bd, #0073bd); }
+    .stat-icon.gray { background: linear-gradient(135deg, #94a3b8, #64748b); }
+    .stat-icon.yellow { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+
+    .stat-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0F172A;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
 
     .toolbar {
         display: flex; align-items: center; justify-content: space-between;
@@ -101,28 +147,28 @@
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-icon blue"><i class="bi bi-journal-text"></i></div>
-        <div>
+        <div class="stat-content">
             <div class="stat-label">Total</div>
             <div class="stat-value">{{ $stats->total ?? 0 }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon gray"><i class="bi bi-hourglass"></i></div>
-        <div>
+        <div class="stat-icon blue"><i class="bi bi-hourglass"></i></div>
+        <div class="stat-content">
             <div class="stat-label">Belum Mulai</div>
             <div class="stat-value">{{ $stats->belum_mulai ?? 0 }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon yellow"><i class="bi bi-pencil-square"></i></div>
-        <div>
+        <div class="stat-icon blue"><i class="bi bi-pencil-square"></i></div>
+        <div class="stat-content">
             <div class="stat-label">Sedang Mengerjakan</div>
             <div class="stat-value">{{ $stats->sedang_mengerjakan ?? 0 }}</div>
         </div>
     </div>
     <div class="stat-card">
-        <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
-        <div>
+        <div class="stat-icon blue"><i class="bi bi-check-circle"></i></div>
+        <div class="stat-content">
             <div class="stat-label">Selesai</div>
             <div class="stat-value">{{ $stats->selesai ?? 0 }}</div>
         </div>

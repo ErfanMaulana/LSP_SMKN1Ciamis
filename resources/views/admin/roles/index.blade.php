@@ -98,18 +98,14 @@
 
     .action-dropdown {
         display: none;
-        position: absolute;
-        left: 0;
-        right: 0;
-        margin: 0 auto;
-        top: 100%;
+        position: fixed;
         margin-top: 4px;
         background: white;
         border-radius: 8px;
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-        width: fit-content;
-        z-index: 1000;
-        overflow: hidden;
+        min-width: 160px;
+        z-index: 9990;
+        overflow: visible;
     }
 
     .action-dropdown.show {
@@ -301,21 +297,37 @@
         }, 500);
     });
 
-    // Action Menu Toggle
+    // Action Menu Toggle with Fixed Positioning
     function toggleMenu(button) {
-        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
-            if (dropdown !== button.nextElementSibling) {
-                dropdown.classList.remove('show');
-            }
+        const dropdown = button.nextElementSibling;
+        const isOpen = dropdown.classList.contains('show');
+
+        // Close all open dropdowns
+        document.querySelectorAll('.action-dropdown.show').forEach(d => {
+            d.classList.remove('show');
+            d.style.top = '';
+            d.style.left = '';
         });
-        button.nextElementSibling.classList.toggle('show');
+
+        if (!isOpen) {
+            const rect = button.getBoundingClientRect();
+            dropdown.classList.add('show');
+            // Position below the button, aligned to its right edge
+            const dropW = 160;
+            let left = rect.right - dropW;
+            if (left < 8) left = 8;
+            dropdown.style.top  = (rect.bottom + 4) + 'px';
+            dropdown.style.left = left + 'px';
+        }
     }
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
         if (!event.target.closest('.action-menu')) {
-            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
-                dropdown.classList.remove('show');
+            document.querySelectorAll('.action-dropdown.show').forEach(d => {
+                d.classList.remove('show');
+                d.style.top = '';
+                d.style.left = '';
             });
         }
     });

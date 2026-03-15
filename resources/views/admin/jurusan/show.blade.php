@@ -131,7 +131,7 @@
                     <label>Dibuat pada</label>
                     <div class="detail-value">
                         @if($jurusan->created_at)
-                            {{ $jurusan->created_at->format('d F Y, H:i') }} WIB
+                            {{ \Carbon\Carbon::parse($jurusan->created_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
                         @else
                             <span class="text-muted">-</span>
                         @endif
@@ -142,7 +142,7 @@
                     <label>Terakhir diupdate</label>
                     <div class="detail-value">
                         @if($jurusan->updated_at)
-                            {{ $jurusan->updated_at->format('d F Y, H:i') }} WIB
+                            {{ \Carbon\Carbon::parse($jurusan->updated_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
                         @else
                             <span class="text-muted">-</span>
                         @endif

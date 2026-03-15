@@ -326,7 +326,7 @@
                     <div class="berita-title">{{ $item->judul }}</div>
                 </td>
                 <td>{{ $item->penulis }}</td>
-                <td>{{ $item->tanggal_publikasi->format('d M Y') }}</td>
+                <td>{{ \Carbon\Carbon::parse($item->tanggal_publikasi)->locale('id')->translatedFormat('d M Y') }}</td>
                 <td>
                     <span class="status-badge {{ $item->status }}">
                         {{ $item->status == 'published' ? 'Published' : 'Draft' }}

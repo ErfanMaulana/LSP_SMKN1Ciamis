@@ -571,7 +571,7 @@
                 </div>
                 <div class="info-item">
                     <span class="info-label">Tempat, Tanggal Lahir</span>
-                    <span class="info-value">{{ $asesi->tempat_lahir ?? '-' }}, {{ $asesi->tanggal_lahir ? $asesi->tanggal_lahir->format('d M Y') : '-' }}</span>
+                    <span class="info-value">{{ $asesi->tempat_lahir ?? '-' }}, {{ $asesi->tanggal_lahir ? \Carbon\Carbon::parse($asesi->tanggal_lahir)->locale('id')->translatedFormat('d M Y') : '-' }}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">Jenis Kelamin</span>
@@ -762,7 +762,7 @@
                         </h4>
                         <p>
                             Diverifikasi oleh <strong>{{ $asesi->verifiedBy->name ?? 'Admin' }}</strong>
-                            pada {{ $asesi->verified_at ? $asesi->verified_at->format('d M Y, H:i') : '-' }}
+                            pada {{ $asesi->verified_at ? \Carbon\Carbon::parse($asesi->verified_at)->locale('id')->translatedFormat('d M Y, H:i') : '-' }}
                         </p>
                         @if($asesi->catatan_admin)
                             <p style="margin-top:8px;"><strong>Catatan:</strong> {{ $asesi->catatan_admin }}</p>

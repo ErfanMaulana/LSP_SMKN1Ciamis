@@ -18,22 +18,76 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
         margin-bottom: 24px;
     }
-    .stat-card { background: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s; }
-    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
-    .stat-icon {
-        width: 50px; height: 50px; border-radius: 12px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 22px; color: #fff; flex-shrink: 0;
+
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+        text-decoration: none;
+        cursor: pointer;
+        border: 2px solid transparent;
     }
-    .stat-icon.blue   { background: linear-gradient(135deg,#0073bd,#0061a5); }
-    .stat-icon.green  { background: linear-gradient(135deg,#10b981,#059669); }
-    .stat-icon.red    { background: linear-gradient(135deg,#ef4444,#dc2626); }
-    .stat-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing:.5px; }
-    .stat-value { font-size: 26px; font-weight: 700; color: #0F172A; line-height: 1.2; margin-top: 2px; }
+
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.2);
+        transform: translateY(-2px);
+        border-color: #bfdbfe;
+    }
+
+    .stat-card-active {
+        border-color: #0073bd !important;
+        box-shadow: 0 4px 16px rgba(0, 115, 189, 0.25) !important;
+        background: #f0f9ff;
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .stat-icon.blue { background: linear-gradient(135deg, #0073bd, #0073bd); }
+    .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+    .stat-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+    .stat-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0F172A;
+        display: flex;
+        align-items: baseline;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
 
     .toolbar {
         display: flex; align-items: center; justify-content: space-between;
@@ -161,7 +215,7 @@
     .action-menu { position: relative; }
     .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
     .action-btn:hover { background: #f1f5f9; }
-    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 170px; z-index: 1000; overflow: hidden; }
+    .action-dropdown { display: none; position: fixed; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 170px; z-index: 9990; overflow: visible; }
     .action-dropdown.show { display: block; }
     .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
     .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
@@ -193,21 +247,21 @@
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-icon blue"><i class="bi bi-building"></i></div>
-        <div>
+        <div class="stat-content">
             <div class="stat-label">Total TUK</div>
             <div class="stat-value">{{ $stats['total'] }}</div>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-icon blue"><i class="bi bi-check-circle"></i></div>
-        <div>
+        <div class="stat-content">
             <div class="stat-label">TUK Aktif</div>
             <div class="stat-value">{{ $stats['aktif'] }}</div>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-icon blue"><i class="bi bi-x-circle"></i></div>
-        <div>
+        <div class="stat-content">
             <div class="stat-label">Non-Aktif</div>
             <div class="stat-value">{{ $stats['nonaktif'] }}</div>
         </div>
@@ -342,14 +396,34 @@
 @section('scripts')
 <script>
 function toggleMenu(button) {
+    const dropdown = button.nextElementSibling;
+    const isOpen = dropdown.classList.contains('show');
+
+    // Close all open dropdowns
     document.querySelectorAll('.action-dropdown.show').forEach(d => {
-        if (d !== button.nextElementSibling) d.classList.remove('show');
+        d.classList.remove('show');
+        d.style.top = '';
+        d.style.left = '';
     });
-    button.nextElementSibling.classList.toggle('show');
+
+    if (!isOpen) {
+        const rect = button.getBoundingClientRect();
+        dropdown.classList.add('show');
+        // Position below the button, aligned to its right edge
+        const dropW = 170;
+        let left = rect.right - dropW;
+        if (left < 8) left = 8;
+        dropdown.style.top  = (rect.bottom + 4) + 'px';
+        dropdown.style.left = left + 'px';
+    }
 }
 document.addEventListener('click', e => {
     if (!e.target.closest('.action-menu')) {
-        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.action-dropdown.show').forEach(d => {
+            d.classList.remove('show');
+            d.style.top = '';
+            d.style.left = '';
+        });
     }
 });
 </script>

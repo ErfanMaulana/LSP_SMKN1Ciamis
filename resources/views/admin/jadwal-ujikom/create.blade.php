@@ -6,15 +6,12 @@
 
 @section('styles')
 <style>
-    .form-card {
-        background: white; border-radius: 12px; padding: 32px;
-        box-shadow: 0 1px 3px rgba(0,0,0,.08); max-width: 860px;
-    }
-    .form-card h3 {
-        font-size: 16px; font-weight: 700; color: #0F172A;
-        margin-bottom: 20px; padding-bottom: 12px;
-        border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px;
-    }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; }
+    .page-header h2 { font-size: 22px; font-weight: 700; color: #0F172A; margin: 0; }
+    
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .card-body { padding: 32px; }
+    
     .form-section-title {
         font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase;
         letter-spacing: .5px; margin: 20px 0 12px; padding-bottom: 8px;
@@ -54,32 +51,28 @@
     .validation-error.show { display: flex; }
     .form-group.has-error .form-control { border-color: #ef4444; }
 
-    .form-actions { display: flex; gap: 12px; margin-top: 24px; }
-    .btn-submit {
-        padding: 10px 24px; background: #0061a5; color: #fff; border: none;
-        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-        display: inline-flex; align-items: center; gap: 8px;
-    }
-    .btn-submit:hover { background: #003961; }
-    .btn-cancel {
-        padding: 10px 20px; background: #f1f5f9; color: #475569; border: none;
-        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-        text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-    }
-    .btn-cancel:hover { background: #e2e8f0; }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s; }
+    .btn-primary { background: #0073bd; color: white; }
+    .btn-primary:hover { background: #0073bd; transform: translateY(-1px); }
+    .btn-secondary { background: #64748b; color: white; }
+    .btn-secondary:hover { background: #475569; }
+    
+    .form-actions { display: flex; gap: 12px; margin-top: 30px; padding-top: 25px; border-top: 2px solid #f1f5f9; }
+    
     @media(max-width:640px) { .form-grid { grid-template-columns: 1fr; } }
 </style>
 @endsection
 
 @section('content')
-<div style="margin-bottom:16px;">
-    <a href="{{ route('admin.jadwal-ujikom.index') }}" style="color:#64748b;text-decoration:none;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
-        <i class="bi bi-arrow-left"></i> Kembali ke Daftar Jadwal
+<div class="page-header">
+    <h2>Tambah Jadwal Uji Kompetensi</h2>
+    <a href="{{ route('admin.jadwal-ujikom.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
     </a>
 </div>
 
-<div class="form-card">
-    <h3><i class="bi bi-calendar-plus" style="color:#0061a5;"></i> Tambah Jadwal Uji Kompetensi</h3>
+<div class="card">
+    <div class="card-body">
 
     <form method="POST" action="{{ route('admin.jadwal-ujikom.store') }}">
         {{-- FORM BARU: cukup pilih kelompok + waktu + TUK --}}
@@ -209,14 +202,14 @@
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn-submit">
-                <i class="bi bi-calendar-plus"></i> Simpan Jadwal
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Simpan
             </button>
-            <a href="{{ route('admin.jadwal-ujikom.index') }}" class="btn-cancel">
+            <a href="{{ route('admin.jadwal-ujikom.index') }}" class="btn btn-secondary">
                 <i class="bi bi-x-circle"></i> Batal
             </a>
         </div>
-    </form>
+    </div>
 </div>
 @endsection
 

@@ -103,12 +103,12 @@
 
         @if($pivot->tanggal_mulai)
             <div class="info-label">Mulai Mengerjakan</div>
-            <div class="info-value">{{ \Carbon\Carbon::parse($pivot->tanggal_mulai)->format('d M Y H:i') }}</div>
+            <div class="info-value">{{ \Carbon\Carbon::parse($pivot->tanggal_mulai)->locale('id')->translatedFormat('d M Y H:i') }}</div>
         @endif
 
         @if($pivot->tanggal_selesai)
             <div class="info-label">Selesai</div>
-            <div class="info-value">{{ \Carbon\Carbon::parse($pivot->tanggal_selesai)->format('d M Y H:i') }}</div>
+            <div class="info-value">{{ \Carbon\Carbon::parse($pivot->tanggal_selesai)->locale('id')->translatedFormat('d M Y H:i') }}</div>
         @endif
     </div>
     <div class="info-header-right">
@@ -148,7 +148,7 @@
         @endif
         @if($pivot->reviewed_at)
             <div class="info-label">Tanggal Review</div>
-            <div class="info-value">{{ \Carbon\Carbon::parse($pivot->reviewed_at)->format('d M Y H:i') }}</div>
+            <div class="info-value">{{ \Carbon\Carbon::parse($pivot->reviewed_at)->locale('id')->translatedFormat('d M Y H:i') }}</div>
         @endif
         @if($pivot->catatan_asesor)
             <div class="info-label">Catatan Asesor</div>
@@ -167,7 +167,7 @@
                     <div class="info-label">Asesi</div>
                     <img src="{{ $pivot->tanda_tangan }}" alt="Tanda Tangan Asesi" class="signature-img">
                     @if($pivot->tanggal_tanda_tangan)
-                        <div style="font-size:11px;color:#94a3b8;margin-top:4px">{{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan)->format('d M Y H:i') }}</div>
+                        <div style="font-size:11px;color:#94a3b8;margin-top:4px">{{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan)->locale('id')->translatedFormat('d M Y H:i') }}</div>
                     @endif
                 </div>
             @endif
@@ -176,7 +176,7 @@
                     <div class="info-label">Asesor</div>
                     <img src="{{ $pivot->tanda_tangan_asesor }}" alt="Tanda Tangan Asesor" class="signature-img">
                     @if($pivot->tanggal_tanda_tangan_asesor)
-                        <div style="font-size:11px;color:#94a3b8;margin-top:4px">{{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan_asesor)->format('d M Y H:i') }}</div>
+                        <div style="font-size:11px;color:#94a3b8;margin-top:4px">{{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan_asesor)->locale('id')->translatedFormat('d M Y H:i') }}</div>
                     @endif
                 </div>
             @endif

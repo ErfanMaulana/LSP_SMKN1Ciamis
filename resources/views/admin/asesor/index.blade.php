@@ -120,11 +120,7 @@
                             </td>
                             <td>
                                 <div style="font-size:13px;font-weight:600;color:#1e293b;">{{ $item->no_met ?? '—' }}</div>
-                                @if($item->account)
-                                    <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Password awal: {{ $item->no_met }}</div>
-                                @else
-                                    <span style="font-size:11px;background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:20px;">Belum ada akun</span>
-                                @endif
+                               
                             </td>
                             <td>
                                 <span class="badge badge-active">AKTIF</span>
@@ -135,6 +131,9 @@
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-dropdown">
+                                        <a href="{{ route('admin.asesor.show', $item->ID_asesor) }}">
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </a>
                                         <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
@@ -556,16 +555,14 @@
 
     .action-dropdown {
         display: none;
-        position: absolute;
-        right: 0;
-        top: 100%;
+        position: fixed;
         margin-top: 4px;
         background: white;
         border-radius: 8px;
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
         min-width: 160px;
-        z-index: 1000;
-        overflow: hidden;
+        z-index: 9990;
+        overflow: visible;
     }
 
     .action-dropdown.show {
@@ -666,22 +663,35 @@
 
 <script>
     function toggleMenu(button) {
-        // Close all other dropdowns
-        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
-            if (dropdown !== button.nextElementSibling) {
-                dropdown.classList.remove('show');
-            }
+        const dropdown = button.nextElementSibling;
+        const isOpen = dropdown.classList.contains('show');
+
+        // Close all open dropdowns
+        document.querySelectorAll('.action-dropdown.show').forEach(d => {
+            d.classList.remove('show');
+            d.style.top = '';
+            d.style.left = '';
         });
-        
-        // Toggle current dropdown
-        button.nextElementSibling.classList.toggle('show');
+
+        if (!isOpen) {
+            const rect = button.getBoundingClientRect();
+            dropdown.classList.add('show');
+            // Position below the button, aligned to its right edge
+            const dropW = 160;
+            let left = rect.right - dropW;
+            if (left < 8) left = 8;
+            dropdown.style.top  = (rect.bottom + 4) + 'px';
+            dropdown.style.left = left + 'px';
+        }
     }
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
         if (!event.target.closest('.action-menu')) {
-            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
-                dropdown.classList.remove('show');
+            document.querySelectorAll('.action-dropdown.show').forEach(d => {
+                d.classList.remove('show');
+                d.style.top = '';
+                d.style.left = '';
             });
         }
     });

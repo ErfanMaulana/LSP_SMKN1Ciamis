@@ -5,15 +5,12 @@
 
 @section('styles')
 <style>
-    .form-card {
-        background: white; border-radius: 12px; padding: 32px;
-        box-shadow: 0 1px 3px rgba(0,0,0,.08); max-width: 860px;
-    }
-    .form-card h3 {
-        font-size: 16px; font-weight: 700; color: #0F172A;
-        margin-bottom: 20px; padding-bottom: 12px;
-        border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px;
-    }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 12px; }
+    .page-header h2 { font-size: 22px; font-weight: 700; color: #0F172A; margin: 0; }
+    
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .card-body { padding: 32px; }
+    
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .form-full { grid-column: 1 / -1; }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
@@ -29,32 +26,28 @@
     .invalid-feedback { font-size: 12px; color: #ef4444; margin-top: 2px; }
     .required { color: #ef4444; margin-left: 2px; }
 
-    .form-actions { display: flex; gap: 12px; margin-top: 24px; }
-    .btn-submit {
-        padding: 10px 24px; background: #0061a5; color: #fff; border: none;
-        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-        display: inline-flex; align-items: center; gap: 8px;
-    }
-    .btn-submit:hover { background: #003961; }
-    .btn-cancel {
-        padding: 10px 20px; background: #f1f5f9; color: #475569; border: none;
-        border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
-        text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-    }
-    .btn-cancel:hover { background: #e2e8f0; }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: all 0.3s; }
+    .btn-primary { background: #0073bd; color: white; }
+    .btn-primary:hover { background: #0073bd; transform: translateY(-1px); }
+    .btn-secondary { background: #64748b; color: white; }
+    .btn-secondary:hover { background: #475569; }
+    
+    .form-actions { display: flex; gap: 12px; margin-top: 30px; padding-top: 25px; border-top: 2px solid #f1f5f9; }
+    
     @media(max-width:640px) { .form-grid { grid-template-columns: 1fr; } }
 </style>
 @endsection
 
 @section('content')
-<div style="margin-bottom:16px;">
-    <a href="{{ route('admin.tuk.index') }}" style="color:#64748b;text-decoration:none;font-size:14px;display:inline-flex;align-items:center;gap:6px;">
-        <i class="bi bi-arrow-left"></i> Kembali ke Daftar TUK
+<div class="page-header">
+    <h2>Tambah Tempat Uji Kompetensi (TUK)</h2>
+    <a href="{{ route('admin.tuk.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
     </a>
 </div>
 
-<div class="form-card">
-    <h3><i class="bi bi-building-add" style="color:#0061a5;"></i> Tambah Tempat Uji Kompetensi (TUK)</h3>
+<div class="card">
+    <div class="card-body">
 
     <form method="POST" action="{{ route('admin.tuk.store') }}">
         @csrf
@@ -156,13 +149,13 @@
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn-submit">
-                <i class="bi bi-plus-circle"></i> Simpan TUK
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Simpan
             </button>
-            <a href="{{ route('admin.tuk.index') }}" class="btn-cancel">
+            <a href="{{ route('admin.tuk.index') }}" class="btn btn-secondary">
                 <i class="bi bi-x-circle"></i> Batal
             </a>
         </div>
-    </form>
+    </div>
 </div>
 @endsection

@@ -195,7 +195,7 @@
                                 <span class="badge {{ $badgeClass }}">{{ $statusLabel }}</span>
                             </td>
                             <td>
-                                <span class="date-text">{{ $item->created_at ? $item->created_at->format('M d, Y') : 'N/A' }}</span>
+                                <span class="date-text">{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->locale('id')->translatedFormat('d M Y') : 'N/A' }}</span>
                             </td>
                             <td>
                                 <div class="action-menu">
@@ -340,7 +340,7 @@
                                 <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Password awal: NIK</div>
                             </td>
                             <td>
-                                <span class="date-text">{{ $akun->created_at ? $akun->created_at->format('M d, Y') : 'N/A' }}</span>
+                                <span class="date-text">{{ $akun->created_at ? \Carbon\Carbon::parse($akun->created_at)->locale('id')->translatedFormat('d M Y') : 'N/A' }}</span>
                             </td>
                             <td>
                                 <div class="action-menu">

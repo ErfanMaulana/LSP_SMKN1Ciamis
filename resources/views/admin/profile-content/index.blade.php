@@ -93,11 +93,11 @@
                                 </form>
                             </td>
                             <td>
-                                <div class="dropdown-action">
-                                    <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                                <div class="action-menu">
+                                    <button class="action-btn" onclick="toggleMenu(this)">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
-                                    <div class="dropdown-menu">
+                                    <div class="action-dropdown">
                                         <a href="{{ route('admin.profile-content.edit', $item->id) }}" class="dropdown-item">
                                             <i class="bi bi-pencil"></i> Ubah
                                         </a>
@@ -167,11 +167,11 @@
                                 </form>
                             </td>
                             <td>
-                                <div class="dropdown-action">
-                                    <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                                <div class="action-menu">
+                                    <button class="action-btn" onclick="toggleMenu(this)">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
-                                    <div class="dropdown-menu">
+                                    <div class="action-dropdown">
                                         <a href="{{ route('admin.profile-content.vision-mission.edit', $vision->id) }}" class="dropdown-item">
                                             <i class="bi bi-pencil"></i> Ubah
                                         </a>
@@ -241,11 +241,11 @@
                                 </form>
                             </td>
                             <td>
-                                <div class="dropdown-action">
-                                    <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                                <div class="action-menu">
+                                    <button class="action-btn" onclick="toggleMenu(this)">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
-                                    <div class="dropdown-menu">
+                                    <div class="action-dropdown">
                                         <a href="{{ route('admin.profile-content.vision-mission.edit', $mission->id) }}" class="dropdown-item">
                                             <i class="bi bi-pencil"></i> Ubah
                                         </a>
@@ -446,31 +446,15 @@
     }
 
     /* Dropdown Action */
-    .dropdown-action { position: relative; display: inline-block; }
-    .btn-dropdown {
-        background: none; border: none; padding: 8px; cursor: pointer; color: #64748b;
-        border-radius: 6px; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
-    }
-    .btn-dropdown:hover { background: #f1f5f9; color: #0F172A; }
-    .btn-dropdown i { font-size: 18px; }
-    .dropdown-menu {
-        position: absolute; right: 0; top: 100%; margin-top: 4px; background: white;
-        border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        min-width: 160px; z-index: 1000; opacity: 0; visibility: hidden; transform: translateY(-10px);
-        transition: all 0.2s;
-    }
-    .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
-    .dropdown-item {
-        display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #475569;
-        text-decoration: none; font-size: 14px; transition: all 0.2s; border: none; background: none;
-        width: 100%; text-align: left; cursor: pointer;
-    }
-    .dropdown-item:first-child { border-radius: 8px 8px 0 0; }
-    .dropdown-item:last-child { border-radius: 0 0 8px 8px; }
-    .dropdown-item:hover { background: #f8fafc; color: #0F172A; }
-    .dropdown-item i { font-size: 16px; }
-    .dropdown-item.danger { color: #dc2626; }
-    .dropdown-item.danger:hover { background: #fef2f2; color: #dc2626; }
+    .action-menu { position: relative; display: inline-block; }
+    .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .action-btn:hover { background: #f1f5f9; }
+    .action-dropdown { display: none; position: fixed; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 160px; z-index: 9990; overflow: hidden; }
+    .action-dropdown.show { display: block; }
+    .dropdown-item, .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
+    .dropdown-item:hover, .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
+    .dropdown-item.danger { color: #475569; }
+    .action-dropdown button[type="submit"]:hover { background: #fef2f2; color: #dc2626; }
 
     /* Empty state */
     .empty-state {
@@ -503,27 +487,28 @@
 @endsection
 @section('scripts')
 <script>
-function toggleDropdown(button) {
+function toggleMenu(button) {
     const dropdown = button.nextElementSibling;
-    const allDropdowns = document.querySelectorAll('.dropdown-menu');
+    const isVisible = dropdown.classList.contains('show');
     
     // Close all other dropdowns
-    allDropdowns.forEach(menu => {
-        if (menu !== dropdown) {
-            menu.classList.remove('show');
-        }
+    document.querySelectorAll('.action-dropdown.show').forEach(d => {
+        if (d !== dropdown) d.classList.remove('show');
     });
     
-    // Toggle current dropdown
+    if (!isVisible) {
+        // Calculate position
+        const rect = button.getBoundingClientRect();
+        dropdown.style.top = (rect.bottom + 4) + 'px';
+        dropdown.style.left = (rect.right - 160) + 'px';
+    }
+    
     dropdown.classList.toggle('show');
 }
 
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    if (!event.target.closest('.dropdown-action')) {
-        document.querySelectorAll('.dropdown-menu').forEach(menu => {
-            menu.classList.remove('show');
-        });
+document.addEventListener('click', e => {
+    if (!e.target.closest('.action-menu')) {
+        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
     }
 });
 </script>

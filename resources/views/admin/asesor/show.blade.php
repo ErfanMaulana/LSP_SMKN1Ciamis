@@ -23,11 +23,6 @@
             
             <div class="detail-grid">
                 <div class="detail-item">
-                    <label>ID Asesor</label>
-                    <div class="detail-value">{{ $asesor->ID_asesor }}</div>
-                </div>
-
-                <div class="detail-item">
                     <label>Nama Lengkap</label>
                     <div class="detail-value">{{ $asesor->nama }}</div>
                 </div>
@@ -127,7 +122,7 @@
                     <label>Dibuat pada</label>
                     <div class="detail-value">
                         @if($asesor->created_at)
-                            {{ $asesor->created_at->format('d F Y, H:i') }} WIB
+                            {{ \Carbon\Carbon::parse($asesor->created_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
                         @else
                             <span class="text-muted">-</span>
                         @endif
@@ -138,7 +133,7 @@
                     <label>Terakhir diupdate</label>
                     <div class="detail-value">
                         @if($asesor->updated_at)
-                            {{ $asesor->updated_at->format('d F Y, H:i') }} WIB
+                            {{ \Carbon\Carbon::parse($asesor->updated_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
                         @else
                             <span class="text-muted">-</span>
                         @endif

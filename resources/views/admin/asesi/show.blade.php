@@ -76,7 +76,7 @@
                     <label>Tanggal Lahir</label>
                     <div class="detail-value">
                         @if($asesi->tanggal_lahir)
-                            {{ \Carbon\Carbon::parse($asesi->tanggal_lahir)->format('d F Y') }}
+                            {{ \Carbon\Carbon::parse($asesi->tanggal_lahir)->locale('id')->translatedFormat('d F Y') }}
                         @else
                             <span class="text-muted">-</span>
                         @endif
@@ -345,7 +345,7 @@
                     <label>Dibuat pada</label>
                     <div class="detail-value">
                         @if($asesi->created_at)
-                            {{ $asesi->created_at->format('d F Y, H:i') }} WIB
+                            {{ \Carbon\Carbon::parse($asesi->created_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
                         @else
                             <span class="text-muted">-</span>
                         @endif
@@ -356,7 +356,7 @@
                     <label>Terakhir diupdate</label>
                     <div class="detail-value">
                         @if($asesi->updated_at)
-                            {{ $asesi->updated_at->format('d F Y, H:i') }} WIB
+                            {{ \Carbon\Carbon::parse($asesi->updated_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
                         @else
                             <span class="text-muted">-</span>
                         @endif

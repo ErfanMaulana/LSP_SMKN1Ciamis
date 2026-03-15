@@ -37,7 +37,7 @@
                 {{ $statusLabel }}
             </span>
         </td>
-        <td>{{ $account->created_at?->format('d M Y H:i') ?? '-' }}</td>
+        <td>{{ $account->created_at?->locale('id') ? \Carbon\Carbon::parse($account->created_at)->locale('id')->translatedFormat('d M Y H:i') : '-' }}</td>
         <td style="text-align:center;">
             <div class="actions-wrapper">
                 <button class="action-btn" onclick="toggleActionsDropdown(event, this)">

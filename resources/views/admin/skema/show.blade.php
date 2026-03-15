@@ -173,7 +173,7 @@
                     <label>Dibuat pada</label>
                     <div class="detail-value">
                         @if($skema->created_at)
-                            {{ $skema->created_at->format('d F Y, H:i') }} WIB
+                            {{ \Carbon\Carbon::parse($skema->created_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
                         @else
                             <span class="text-muted">-</span>
                         @endif
@@ -184,7 +184,7 @@
                     <label>Terakhir diupdate</label>
                     <div class="detail-value">
                         @if($skema->updated_at)
-                            {{ $skema->updated_at->format('d F Y, H:i') }} WIB
+                            {{ \Carbon\Carbon::parse($skema->updated_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
                         @else
                             <span class="text-muted">-</span>
                         @endif

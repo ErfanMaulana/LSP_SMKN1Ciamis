@@ -22,7 +22,7 @@
         <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? '-' }}</span>
     </td>
     <td>
-        <span class="date-text">{{ $item->created_at ? $item->created_at->format('M d, Y') : '-' }}</span>
+        <span class="date-text">{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->locale('id')->translatedFormat('d M Y') : '-' }}</span>
     </td>
     <td>
         @if($item->status === 'pending')
