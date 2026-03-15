@@ -74,7 +74,75 @@
     .btn-outline-danger { background: transparent; border: 1px solid #ef4444; color: #ef4444; }
     .btn-outline-danger:hover { background: #ef4444; color: white; }
 
-    .action-btns { display: flex; gap: 6px; }
+    /* Action Menu */
+    .action-menu {
+        position: relative;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+        background: #f1f5f9;
+    }
+
+    .action-dropdown {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        top: 100%;
+        margin-top: 4px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+        width: fit-content;
+        z-index: 1000;
+        overflow: hidden;
+    }
+
+    .action-dropdown.show {
+        display: block;
+    }
+
+    .action-dropdown a,
+    .action-dropdown button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 16px;
+        border: none;
+        background: none;
+        text-align: left;
+        font-size: 14px;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .action-dropdown a:hover,
+    .action-dropdown button:hover {
+        background: #f8fafc;
+        color: #0F172A;
+    }
+
+    .action-dropdown button:last-child:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
 
     .empty-state {
         text-align: center; padding: 60px 20px; color: #94a3b8;
@@ -167,16 +235,20 @@
                 <td><span class="badge badge-primary">{{ $role->permissions_count }} permissions</span></td>
                 <td><span class="badge badge-success">{{ $role->admins_count }} admin</span></td>
                 <td>
-                    <div class="action-btns">
-                        <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-sm btn-outline-primary" title="Edit">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                        @if(!$role->is_super_admin)
-                        <button class="btn btn-sm btn-outline-danger" title="Hapus"
-                                onclick="confirmDelete({{ $role->id }}, '{{ $role->display_name }}')">
-                            <i class="bi bi-trash"></i>
+                    <div class="action-menu">
+                        <button class="action-btn" onclick="toggleMenu(this)">
+                            <i class="bi bi-three-dots-vertical"></i>
                         </button>
-                        @endif
+                        <div class="action-dropdown">
+                            <a href="{{ route('admin.roles.edit', $role) }}" title="Edit">
+                                <i class="bi bi-pencil" style="font-size: 16px;"></i> Edit
+                            </a>
+                            @if(!$role->is_super_admin)
+                            <button type="button" onclick="confirmDelete({{ $role->id }}, '{{ $role->display_name }}')" title="Hapus">
+                                <i class="bi bi-trash" style="font-size: 16px;"></i> Hapus
+                            </button>
+                            @endif
+                        </div>
                     </div>
                 </td>
             </tr>
@@ -229,12 +301,37 @@
         }, 500);
     });
 
+    // Action Menu Toggle
+    function toggleMenu(button) {
+        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+            if (dropdown !== button.nextElementSibling) {
+                dropdown.classList.remove('show');
+            }
+        });
+        button.nextElementSibling.classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+        }
+    });
+
     // Delete modal
     function confirmDelete(id, name) {
+        closeMenus();
         document.getElementById('deleteRoleName').textContent = name;
         document.getElementById('deleteForm').action = '/admin/roles/' + id;
         document.getElementById('deleteModal').classList.add('active');
     }
+
+    function closeMenus() {
+        document.querySelectorAll('.action-dropdown').forEach(m => m.classList.remove('show'));
+    }
+
     function closeDeleteModal() {
         document.getElementById('deleteModal').classList.remove('active');
     }
@@ -242,7 +339,10 @@
         if (e.target === this) closeDeleteModal();
     });
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeDeleteModal();
+        if (e.key === 'Escape') {
+            closeDeleteModal();
+            closeMenus();
+        }
     });
 </script>
 @endsection

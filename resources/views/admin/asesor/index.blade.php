@@ -105,7 +105,7 @@
                                     </div>
                                     <div class="user-details">
                                         <div class="user-name">{{ $item->nama }}</div>
-                                        <div class="user-id">ID: {{ $item->ID_asesor }}</div>
+                                        
                                     </div>
                                 </div>
                             </td>
@@ -433,6 +433,9 @@
     /* Table */
     .table-container {
         overflow-x: auto;
+        overflow-y: visible;
+        padding-bottom: 200px;
+        margin-bottom: -200px;
     }
 
     .data-table {
@@ -455,6 +458,7 @@
     .data-table tbody td {
         padding: 16px;
         border-bottom: 1px solid #f1f5f9;
+        overflow: visible;
     }
 
     .data-table tbody tr {
@@ -560,7 +564,7 @@
         border-radius: 8px;
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
         min-width: 160px;
-        z-index: 10;
+        z-index: 1000;
         overflow: hidden;
     }
 
@@ -591,7 +595,12 @@
         color: #0F172A;
     }
 
-    .action-dropdown button[type="submit"]:hover {
+    .action-dropdown form:not(:last-of-type) button:hover {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .action-dropdown form:last-of-type button:hover {
         background: #fef2f2;
         color: #dc2626;
     }

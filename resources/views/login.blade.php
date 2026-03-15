@@ -382,7 +382,7 @@
                 panelDesc:             'Kelola penilaian dan hasil uji kompetensi peserta.',
                 identifierLabel:       'No MET',
                 identifierIcon:        'bi-card-text',
-                identifierPlaceholder: 'Masukkan nomor registrasi',
+                identifierPlaceholder: 'Masukkan nomor MET',
             },
         };
 

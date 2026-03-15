@@ -14,7 +14,7 @@
         gap: 12px;
     }
     .page-header h2 { font-size: 22px; font-weight: 700; color: #0F172A; margin: 0; }
-    .page-header p  { font-size: 13px; color: #64748b; margin: 4px 0 0; }
+    .page-header p  { font-size: 14px; color: #64748b; margin: 4px 0 0; }
 
     .stats-grid {
         display: grid;
@@ -39,6 +39,87 @@
         display: flex; align-items: center; justify-content: space-between;
         gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
     }
+    .filter-section {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 0;
+        flex-wrap: wrap;
+    }
+    .search-box {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+    }
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 42px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+    .search-box input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+    .filter-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+    }
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+    .btn-filter-search {
+        padding: 9px 14px;
+        background: #0073bd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+    }
+    .btn-filter-search:hover { background: #005f99; }
+    .btn-filter-reset {
+        padding: 9px 12px;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-filter-reset:hover { background: #fecaca; }
     .filter-form { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
     .filter-form input, .filter-form select {
         padding: 9px 14px; border: 1px solid #d1d5db; border-radius: 8px;
@@ -51,18 +132,19 @@
         border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
     .btn-add {
-        padding: 9px 18px; background: #0061a5; color: #fff;
-        border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
-        cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-        white-space: nowrap;
+        padding: 10px 20px; background: #0073bd; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+        cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+        white-space: nowrap; transition: all 0.2s;
     }
     .btn-add:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
 
-    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: hidden; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: visible; padding-bottom: 200px; margin-bottom: -200px; }
+    .card-body { padding: 24px; }
     table { width: 100%; border-collapse: collapse; }
     th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #64748b;
          text-transform: uppercase; letter-spacing: .5px; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
-    td { padding: 14px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+    td { padding: 14px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f1f5f9; vertical-align: middle; overflow: visible; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f8fafc; }
 
@@ -79,11 +161,12 @@
     .action-menu { position: relative; }
     .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
     .action-btn:hover { background: #f1f5f9; }
-    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 170px; z-index: 10; overflow: hidden; }
+    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 170px; z-index: 1000; overflow: hidden; }
     .action-dropdown.show { display: block; }
     .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
     .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
-    .action-dropdown button[type="submit"]:last-child:hover { background: #fef2f2; color: #dc2626; }
+    .action-dropdown form:not(:last-of-type) button:hover { background: #dcfce7; color: #16a34a; }
+    .action-dropdown form:last-of-type button:hover { background: #fef2f2; color: #dc2626; }
 
     .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
     .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
@@ -102,7 +185,7 @@
         <p>Kelola data tempat uji kompetensi untuk pelaksanaan ujian sertifikasi</p>
     </div>
     <a href="{{ route('admin.tuk.create') }}" class="btn-add">
-        <i class="bi bi-plus-lg"></i> Tambah TUK
+        <i class="bi bi-plus-circle"></i> Tambah TUK
     </a>
 </div>
 
@@ -132,36 +215,51 @@
 </div>
 
 <!-- Toolbar -->
-<form method="GET" class="toolbar">
-    <div class="filter-form">
-        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama TUK, kode, kota...">
-        <select name="status">
-            <option value="all"     {{ $status === 'all'     ? 'selected' : '' }}>Semua Status</option>
-            <option value="aktif"   {{ $status === 'aktif'   ? 'selected' : '' }}>Aktif</option>
-            <option value="nonaktif"{{ $status === 'nonaktif'? 'selected' : '' }}>Non-Aktif</option>
-        </select>
-        <button type="submit" class="btn-search"><i class="bi bi-search"></i> Cari</button>
-        @if($search || $status !== 'all')
-        <a href="{{ route('admin.tuk.index') }}" style="padding:9px 14px;color:#64748b;text-decoration:none;font-size:13px;">Reset</a>
-        @endif
+<div class="card">
+    <div class="card-body">
+        <form method="GET" id="filterForm">
+        <div class="filter-section">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" name="search" placeholder="Cari nama TUK, kode, kota..."
+                       value="{{ $search }}" autocomplete="off">
+            </div>
+            <div class="filter-group">
+                <select class="filter-select" name="status" onchange="document.getElementById('filterForm').submit()">
+                    <option value="all"     {{ $status === 'all'     ? 'selected' : '' }}>Semua Status</option>
+                    <option value="aktif"   {{ $status === 'aktif'   ? 'selected' : '' }}>Aktif</option>
+                    <option value="nonaktif"{{ $status === 'nonaktif'? 'selected' : '' }}>Non-Aktif</option>
+                </select>
+                <button type="submit" class="btn-filter-search">
+                    <i class="bi bi-search"></i>
+                </button>
+                @if($search || $status !== 'all')
+                <a href="{{ route('admin.tuk.index') }}" class="btn-filter-reset" id="resetBtn" style="display:none;" title="Reset filter">
+                     <i class="bi bi-x-lg"></i>
+                </a>
+                @endif
+            </div>
+        </div>
+        </form>
     </div>
-</form>
+</div>
 
 <!-- Table -->
 <div class="card">
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Nama TUK</th>
-                <th>Tipe</th>
-                <th>Kota</th>
-                <th>Kapasitas</th>
-                <th>Jadwal</th>
-                <th>Status</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
+    <div class="card-body">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nama TUK</th>
+                    <th>Tipe</th>
+                    <th>Kota</th>
+                    <th>Kapasitas</th>
+                    <th>Jadwal</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
         <tbody>
             @forelse($tuks as $i => $tuk)
             <tr>
@@ -233,6 +331,7 @@
             @endforelse
         </tbody>
     </table>
+    </div>
     @if($tuks->hasPages())
     <div class="pagination-wrap">{{ $tuks->links() }}</div>
     @endif

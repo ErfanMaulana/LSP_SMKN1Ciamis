@@ -3,27 +3,25 @@
     <td>{{ $jurusan->firstItem() + $i }}</td>
     <td class="jurusan-name">{{ $item->nama_jurusan }}</td>
     <td><span class="jurusan-code">{{ $item->kode_jurusan ?? '-' }}</span></td>
-    <td><span class="visi-text" title="{{ $item->visi }}">{{ $item->visi ? Str::limit($item->visi, 60) : '-' }}</span></td>
     <td>
         <span class="asesi-badge {{ $item->asesi_count == 0 ? 'empty' : '' }}">
             <i class="bi bi-people"></i> {{ $item->asesi_count }}
         </span>
     </td>
     <td>{{ $item->created_at ? $item->created_at->format('d M Y') : '-' }}</td>
-    <td>
-        <div class="dropdown-action">
-            <button type="button" class="btn-dropdown" onclick="toggleDropdown(event)">
+    <td style="text-align:center;">
+        <div class="action-menu">
+            <button class="action-btn" onclick="toggleMenu(this)">
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
-            <div class="dropdown-menu">
-                <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}" class="dropdown-item">
-                    <i class="bi bi-pencil-square"></i> Ubah
+            <div class="action-dropdown">
+                <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}">
+                    <i class="bi bi-pencil"></i> Ubah
                 </a>
-                <a href="{{ route('admin.jurusan.show', $item->ID_jurusan) }}" class="dropdown-item">
+                <a href="{{ route('admin.jurusan.show', $item->ID_jurusan) }}">
                     <i class="bi bi-eye"></i> Lihat Detail
                 </a>
-                <button type="button" class="dropdown-item danger"
-                    onclick="confirmDelete({{ $item->ID_jurusan }}, '{{ addslashes($item->nama_jurusan) }}', {{ $item->asesi_count }})">
+                <button type="button" onclick="confirmDelete({{ $item->ID_jurusan }}, '{{ addslashes($item->nama_jurusan) }}', {{ $item->asesi_count }})">
                     <i class="bi bi-trash"></i> Hapus
                 </button>
             </div>

@@ -112,7 +112,7 @@
                                 </th>
                                 <th>ASESI</th>
                                 <th>NIK</th>
-                                <th>JURUSAN</th>
+                               
                                 <th>TANGGAL DAFTAR</th>
                                 <th>STATUS</th>
                                 <th style="text-align:center;">AKSI</th>
@@ -138,16 +138,14 @@
                                         @endif
                                         <div class="user-details">
                                             <div class="user-name">{{ $item->nama }}</div>
-                                            <div class="user-id">{{ $item->email ?? '-' }}</div>
+                                            
                                         </div>
                                     </div>
                                 </td>
                                 <td>
                                     <span class="nik-text">{{ $item->NIK }}</span>
                                 </td>
-                                <td>
-                                    <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? '-' }}</span>
-                                </td>
+                                
                                 <td>
                                     <span class="date-text">{{ $item->created_at ? $item->created_at->format('M d, Y') : '-' }}</span>
                                 </td>
@@ -161,36 +159,29 @@
                                     @endif
                                 </td>
                                 <td style="text-align:center;">
-                                    <div style="display:flex;gap:6px;align-items:center;justify-content:center;">
-                                        <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}"
-                                           title="Review Detail"
-                                           style="width:32px;height:32px;border-radius:8px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;"
-                                           onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        @if($item->status === 'pending')
-                                        <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;">
-                                            @csrf
-                                            <button type="submit"
-                                                    title="Setujui"
-                                                    onclick="return confirm('Setujui pendaftaran {{ addslashes($item->nama) }}?')"
-                                                    style="width:32px;height:32px;border-radius:8px;background:#f0fdf4;color:#16a34a;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;"
-                                                    onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'">
-                                                <i class="bi bi-check-lg"></i>
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('admin.asesi.reject', $item->NIK) }}" method="POST" style="margin:0;">
-                                            @csrf
-                                            <button type="submit"
-                                                    title="Tolak"
-                                                    onclick="return confirm('Tolak pendaftaran {{ addslashes($item->nama) }}?')"
-                                                    style="width:32px;height:32px;border-radius:8px;background:#fff1f2;color:#e11d48;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;"
-                                                    onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'">
-                                                <i class="bi bi-x-lg"></i>
-
-                                            </button>
-                                        </form>
-                                        @endif
+                                    <div class="action-menu">
+                                        <button class="action-btn" onclick="toggleMenu(this)">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <div class="action-dropdown">
+                                            <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" title="Review Detail">
+                                                <i class="bi bi-eye" style="font-size: 16px;"></i> Lihat Detail
+                                            </a>
+                                            @if($item->status === 'pending')
+                                            <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;">
+                                                @csrf
+                                                <button type="submit" title="Setujui" onclick="return confirm('Setujui pendaftaran {{ addslashes($item->nama) }}?')">
+                                                    <i class="bi bi-check-lg" style="font-size: 16px;"></i> Setujui
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.asesi.reject', $item->NIK) }}" method="POST" style="margin:0;">
+                                                @csrf
+                                                <button type="submit" title="Tolak" onclick="return confirm('Tolak pendaftaran {{ addslashes($item->nama) }}?')">
+                                                    <i class="bi bi-x-lg" style="font-size: 16px;"></i> Tolak
+                                                </button>
+                                            </form>
+                                            @endif
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -643,6 +634,78 @@
         margin: 0;
     }
 
+    /* Action Menu */
+    .action-menu {
+        position: relative;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+        background: #f1f5f9;
+    }
+
+    .action-dropdown {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        top: 100%;
+        margin-top: 4px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+        width: fit-content;
+        z-index: 1000;
+        overflow: hidden;
+    }
+
+    .action-dropdown.show {
+        display: block;
+    }
+
+    .action-dropdown a,
+    .action-dropdown button,
+    .action-dropdown form button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 16px;
+        border: none;
+        background: none;
+        text-align: left;
+        font-size: 14px;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .action-dropdown a:hover,
+    .action-dropdown button:hover,
+    .action-dropdown form button:hover {
+        background: #f8fafc;
+        color: #0F172A;
+    }
+
+    .action-dropdown form:last-child button:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
     @media (max-width: 768px) {
         .stats-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -752,7 +815,26 @@
 
 @section('scripts')
 <script>
-(function () {
+    // Action Menu Toggle
+    function toggleMenu(button) {
+        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+            if (dropdown !== button.nextElementSibling) {
+                dropdown.classList.remove('show');
+            }
+        });
+        button.nextElementSibling.classList.toggle('show');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+        }
+    });
+
+    (function () {
     // Checkbox listeners
     function attachBulkListeners() {
         document.querySelectorAll('.bulk-checkbox').forEach(function(cb) {
@@ -787,7 +869,12 @@
         return Array.from(document.querySelectorAll('.bulk-checkbox:checked')).map(function(cb) { return cb.value; });
     }
 
+    function closeMenus() {
+        document.querySelectorAll('.action-dropdown').forEach(m => m.classList.remove('show'));
+    }
+
     window.submitBulkApprove = function() {
+        closeMenus();
         var niks = getSelectedNiks();
         if (niks.length === 0) return;
         if (!confirm('Setujui ' + niks.length + ' asesi terpilih?')) return;
@@ -802,6 +889,7 @@
     };
 
     window.openBulkRejectModal = function() {
+        closeMenus();
         var niks = getSelectedNiks();
         if (niks.length === 0) return;
         var container = document.getElementById('bulk-reject-niks');

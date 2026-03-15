@@ -23,15 +23,10 @@
         <div class="stat-body">
             <div class="stat-label">TOTAL ASESI</div>
             <div class="stat-number">{{ $stats['totalAsesi'] }}</div>
-            @if($verifikasi['pending'] > 0)
-            <div class="stat-badge badge-warn">
-                <i class="bi bi-clock-fill"></i> {{ $verifikasi['pending'] }} menunggu verifikasi
-            </div>
-            @endif
         </div>
     </a>
 
-    <a href="{{ route('admin.asesor.index') }}" class="stat-card stat-indigo">
+    <a href="{{ route('admin.asesor.index') }}" class="stat-card stat-blue">
         <div class="stat-icon-wrap"><i class="bi bi-person-badge-fill"></i></div>
         <div class="stat-body">
             <div class="stat-label">TOTAL ASESOR</div>
@@ -39,7 +34,7 @@
         </div>
     </a>
 
-    <a href="{{ route('admin.jurusan.index') }}" class="stat-card stat-teal">
+    <a href="{{ route('admin.jurusan.index') }}" class="stat-card stat-blue">
         <div class="stat-icon-wrap"><i class="bi bi-mortarboard-fill"></i></div>
         <div class="stat-body">
             <div class="stat-label">TOTAL JURUSAN</div>
@@ -47,7 +42,7 @@
         </div>
     </a>
 
-    <a href="{{ route('admin.skema.index') }}" class="stat-card stat-purple">
+    <a href="{{ route('admin.skema.index') }}" class="stat-card stat-blue">
         <div class="stat-icon-wrap"><i class="bi bi-patch-check-fill"></i></div>
         <div class="stat-body">
             <div class="stat-label">TOTAL SKEMA</div>
@@ -55,7 +50,7 @@
         </div>
     </a>
 
-    <div class="stat-card stat-orange">
+    <div class="stat-card stat-blue">
         <div class="stat-icon-wrap"><i class="bi bi-building-fill"></i></div>
         <div class="stat-body">
             <div class="stat-label">TOTAL MITRA</div>
@@ -195,7 +190,7 @@
 <style>
 /* ── Welcome ──────────────────────────────────────────────────────── */
 .welcome-card {
-    background: linear-gradient(135deg, #0073bd 0%, #004f90 100%);
+    background:#0073bd;
     padding: 28px 32px;
     border-radius: 14px;
     margin-bottom: 24px;

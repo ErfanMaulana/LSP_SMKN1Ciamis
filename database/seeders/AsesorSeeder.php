@@ -1,13 +1,13 @@
-    <?php
+<?php
 
-    namespace Database\Seeders;
+namespace Database\Seeders;
 
-    use Illuminate\Database\Seeder;
-    use App\Models\Asesor;
-    use App\Models\Account;
-    use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Seeder;
+use App\Models\Asesor;
+use App\Models\Account;
+use Illuminate\Support\Facades\Hash;
 
-    class AsesorSeeder extends Seeder
+class AsesorSeeder extends Seeder
     {
         public function run(): void
         {

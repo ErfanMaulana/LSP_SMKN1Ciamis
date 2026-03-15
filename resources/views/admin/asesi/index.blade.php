@@ -305,9 +305,7 @@
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
                 <p style="font-size:14px;color:#64748b;margin:0;">Akun berikut memiliki role <strong>asesi</strong> namun tidak memiliki data profil asesi yang terdaftar.</p>
                 <div style="display:flex;gap:10px;">
-                    <button class="btn btn-primary" onclick="openAsesiCreateModal()" style="white-space:nowrap;background:#2563eb;">
-                        <i class="bi bi-plus-circle"></i> Tambah Akun
-                    </button>
+                    
                     <button class="btn btn-primary" onclick="openAsesiImportModal()" style="white-space:nowrap;">
                         <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
                     </button>
@@ -1029,7 +1027,7 @@
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
         min-width: 160px;
         z-index: 9990;
-        overflow: hidden;
+        overflow: show;
     }
 
     .action-dropdown.show {
@@ -1059,7 +1057,9 @@
         color: #0F172A;
     }
 
-    .action-dropdown button[type="submit"]:hover {
+    
+
+    .action-dropdown form:last-of-type button:hover {
         background: #fef2f2;
         color: #dc2626;
     }

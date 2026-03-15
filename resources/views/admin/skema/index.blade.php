@@ -64,42 +64,41 @@
     <!-- Main Content Card -->
     <div class="card">
         <div class="card-body">
-            <!-- Toolbar -->
-            <div class="toolbar">
-                <form method="GET" action="{{ route('admin.skema.index') }}" class="search-form">
-                    <input type="hidden" name="jenis_skema" value="{{ request('jenis_skema', 'all') }}">
-                    <input type="hidden" name="sort" value="{{ request('sort', 'created_at') }}">
-                    <input type="hidden" name="order" value="{{ request('order', 'desc') }}">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau nomor skema...">
-                    <button type="submit"><i class="bi bi-search"></i> Cari</button>
-                    @if(request('search'))
-                        <a href="{{ route('admin.skema.index') }}" class="btn-clear" title="Clear">
-                            <i class="bi bi-x"></i>
-                        </a>
+            <!-- Filter Section -->
+            <form method="GET" action="{{ route('admin.skema.index') }}" id="filterForm">
+            <div class="filter-section">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" name="search" placeholder="Cari nama atau nomor skema..."
+                           value="{{ request('search') }}" autocomplete="off">
+                </div>
+                <div class="filter-group">
+                    <select class="filter-select" name="jenis_skema" onchange="document.getElementById('filterForm').submit()">
+                        <option value="all" {{ request('jenis_skema', 'all') === 'all' ? 'selected' : '' }}>Semua Jenis</option>
+                        <option value="KKNI" {{ request('jenis_skema') === 'KKNI' ? 'selected' : '' }}>KKNI</option>
+                        <option value="Okupasi" {{ request('jenis_skema') === 'Okupasi' ? 'selected' : '' }}>Okupasi</option>
+                        <option value="Klaster" {{ request('jenis_skema') === 'Klaster' ? 'selected' : '' }}>Klaster</option>
+                    </select>
+                    <select class="filter-select" name="sort" onchange="document.getElementById('filterForm').submit()">
+                        <option value="created_at" {{ request('sort', 'created_at') === 'created_at' ? 'selected' : '' }}>Tanggal Dibuat</option>
+                        <option value="nama_skema" {{ request('sort') === 'nama_skema' ? 'selected' : '' }}>Nama Skema</option>
+                        <option value="nomor_skema" {{ request('sort') === 'nomor_skema' ? 'selected' : '' }}>Nomor Skema</option>
+                    </select>
+                    <select class="filter-select" name="order" onchange="document.getElementById('filterForm').submit()">
+                        <option value="asc" {{ request('order', 'desc') === 'asc' ? 'selected' : '' }}>A → Z</option>
+                        <option value="desc" {{ request('order', 'desc') === 'desc' ? 'selected' : '' }}>Z → A</option>
+                    </select>
+                    <button type="submit" class="btn-filter-search">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    @if(request('search') || request('jenis_skema', 'all') !== 'all' || request('sort', 'created_at') !== 'created_at' || request('order', 'desc') !== 'desc')
+                    <a href="{{ route('admin.skema.index') }}" class="btn-filter-reset" title="Reset filter">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
                     @endif
-                </form>
-
-                <div class="filters">
-                    <form method="GET" action="{{ route('admin.skema.index') }}" class="filter-form" id="filterForm">
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-                        <select name="jenis_skema" onchange="document.getElementById('filterForm').submit()">
-                            <option value="all" {{ request('jenis_skema', 'all') === 'all' ? 'selected' : '' }}>Semua Jenis</option>
-                            <option value="KKNI" {{ request('jenis_skema') === 'KKNI' ? 'selected' : '' }}>KKNI</option>
-                            <option value="Okupasi" {{ request('jenis_skema') === 'Okupasi' ? 'selected' : '' }}>Okupasi</option>
-                            <option value="Klaster" {{ request('jenis_skema') === 'Klaster' ? 'selected' : '' }}>Klaster</option>
-                        </select>
-                        <select name="sort" onchange="document.getElementById('filterForm').submit()">
-                            <option value="created_at" {{ request('sort', 'created_at') === 'created_at' ? 'selected' : '' }}>Tanggal Dibuat</option>
-                            <option value="nama_skema" {{ request('sort') === 'nama_skema' ? 'selected' : '' }}>Nama Skema</option>
-                            <option value="nomor_skema" {{ request('sort') === 'nomor_skema' ? 'selected' : '' }}>Nomor Skema</option>
-                        </select>
-                        <select name="order" onchange="document.getElementById('filterForm').submit()">
-                            <option value="asc" {{ request('order', 'desc') === 'asc' ? 'selected' : '' }}>A → Z</option>
-                            <option value="desc" {{ request('order', 'desc') === 'desc' ? 'selected' : '' }}>Z → A</option>
-                        </select>
-                    </form>
                 </div>
             </div>
+            </form>
 
             <!-- Table -->
             <div class="table-container">
@@ -138,8 +137,7 @@
                             </td>
                             <td>
                                 @if($skema->jurusan)
-                                    <span class="text-xs font-medium">{{ $skema->jurusan->nama_jurusan }}</span>
-                                    <span class="text-xs text-muted d-block">{{ $skema->jurusan->kode_jurusan }}</span>
+                                    <span style="font-size:12px;color:#000000;">{{ $skema->jurusan->nama_jurusan }}</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
@@ -150,7 +148,7 @@
                             <td>
                                 <div class="action-menu">
                                     <button class="action-btn" onclick="toggleMenu(this)">
-                                        <i class="bi bi-three-dots"></i>
+                                        <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-dropdown">
                                         <a href="{{ route('admin.skema.edit', $skema->id) }}">
@@ -362,6 +360,110 @@
         padding: 24px;
     }
 
+    /* Filter Section */
+    .filter-section {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 42px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .btn-filter-search {
+        padding: 9px 14px;
+        background: #0073bd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+    }
+
+    .btn-filter-search:hover {
+        background: #005f99;
+    }
+
+    .btn-filter-reset {
+        padding: 9px 12px;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .btn-filter-reset:hover {
+        background: #fecaca;
+    }
+
     /* Toolbar */
     .toolbar {
         display: flex;
@@ -468,6 +570,9 @@
     /* Table */
     .table-container {
         overflow-x: auto;
+        overflow-y: visible;
+        padding-bottom: 200px;
+        margin-bottom: -200px;
     }
 
     .data-table {
@@ -490,6 +595,7 @@
     .data-table tbody td {
         padding: 16px;
         border-bottom: 1px solid #f1f5f9;
+        overflow: visible;
     }
 
     .data-table tbody tr {
@@ -614,14 +720,15 @@
     .action-dropdown {
         display: none;
         position: absolute;
-        right: 0;
+        left: 50%;
+        transform: translateX(-50%);
         top: 100%;
         margin-top: 4px;
         background: white;
         border-radius: 8px;
         box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-        min-width: 160px;
-        z-index: 10;
+        width: fit-content;
+        z-index: 1000;
         overflow: hidden;
     }
 

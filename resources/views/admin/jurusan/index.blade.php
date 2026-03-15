@@ -83,6 +83,21 @@
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
+    .btn-filter-reset {
+        padding: 9px 12px;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .btn-filter-reset:hover { background: #fecaca; }
+
     .btn {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 9px 18px; border-radius: 8px; font-size: 14px;
@@ -134,41 +149,75 @@
         background: #dbeafe; color: #1d4ed8;
     }
     .asesi-badge.empty { background: #f1f5f9; color: #94a3b8; }
-    .dropdown-action { position: relative; display: flex; align-items: center; justify-content: center; }
-    .btn-dropdown {
-        background: none; border: none; padding: 8px; color: #64748b;
-        cursor: pointer; border-radius: 6px; transition: all 0.2s;
-        display: flex; align-items: center; justify-content: center;
+    
+    /* Action Menu */
+    .action-menu {
+        position: relative;
     }
-    .btn-dropdown:hover { background: #f1f5f9; color: #0F172A; }
-    .btn-dropdown i { font-size: 18px; }
-    .dropdown-menu {
-        position: absolute; right: 0; top: 100%; margin-top: 4px;
-        background: white; border: 1px solid #e2e8f0; border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        min-width: 160px; z-index: 1000;
-        opacity: 0; visibility: hidden; transform: translateY(-10px);
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         transition: all 0.2s;
     }
-    .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
-    .dropdown-item {
-        display: flex; align-items: center; gap: 8px;
-        padding: 10px 16px; font-size: 14px; color: #475569;
-        text-decoration: none; border: none; background: none; cursor: pointer;
-        transition: all 0.2s; width: 100%; text-align: left;
+
+    .action-btn:hover {
+        background: #f1f5f9;
     }
-    .dropdown-item:first-child { border-radius: 8px 8px 0 0; }
-    .dropdown-item:last-child { border-radius: 0 0 8px 8px; }
-    .dropdown-item:hover {
-        background: #f8fafc; color: #0F172A;
+
+    .action-dropdown {
+        display: none;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 100%;
+        margin-top: 4px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+        width: fit-content;
+        z-index: 1000;
+        overflow: hidden;
     }
-    .dropdown-item.danger {
+
+    .action-dropdown.show {
+        display: block;
+    }
+
+    .action-dropdown a,
+    .action-dropdown button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 16px;
+        border: none;
+        background: none;
+        text-align: left;
+        font-size: 14px;
+        color: #475569;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    .action-dropdown a:hover,
+    .action-dropdown button:hover {
+        background: #f8fafc;
+        color: #0F172A;
+    }
+
+    .action-dropdown button:last-child:hover {
+        background: #fef2f2;
         color: #dc2626;
     }
-    .dropdown-item.danger:hover {
-        background: #fef2f2; color: #dc2626;
-    }
-    .dropdown-item i { font-size: 15px; }
 
     .empty-state { text-align: center; padding: 60px 20px; }
     .empty-state i { font-size: 48px; color: #d1d5db; display: block; margin-bottom: 12px; }
@@ -298,7 +347,9 @@
             <option value="asesi_count">Jumlah Asesi</option>
             <option value="created_at">Tanggal Dibuat</option>
         </select>
-        
+        <a href="{{ route('admin.jurusan.index') }}" class="btn-filter-reset" id="resetBtn" style="display:none;" title="Reset filter">
+            <i class="bi bi-x-lg"></i>
+        </a>
     </div>
 </div>
 
@@ -326,7 +377,6 @@
                         @if($sort==='kode_jurusan') <i class="bi bi-arrow-{{ $order==='asc'?'up':'down' }}-short"></i> @endif
                     </a>
                 </th>
-                <th>Visi</th>
                 <th>
                     <a href="{{ route('admin.jurusan.index', ['search'=>$search,'sort'=>'asesi_count','order'=>$sort==='asesi_count'&&$order==='asc'?'desc':'asc']) }}">
                         Asesi
@@ -444,6 +494,14 @@ function performSearch() {
 
 // Debounced search on input
 searchInput.addEventListener('input', function() {
+    // Show/hide reset button based on search input
+    const resetBtn = document.getElementById('resetBtn');
+    if (searchInput.value.trim()) {
+        resetBtn.style.display = 'inline-flex';
+    } else {
+        resetBtn.style.display = 'none';
+    }
+    
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(performSearch, 500);
 });
@@ -452,23 +510,24 @@ searchInput.addEventListener('input', function() {
 sortSelect.addEventListener('change', performSearch);
 orderSelect.addEventListener('change', performSearch);
 
-// Dropdown Toggle Function
-function toggleDropdown(event) {
-    event.stopPropagation();
-    const button = event.currentTarget;
-    const dropdown = button.nextElementSibling;
-    const allDropdowns = document.querySelectorAll('.dropdown-menu');
-    
-    // Close all other dropdowns
-    allDropdowns.forEach(menu => {
-        if (menu !== dropdown) {
-            menu.classList.remove('show');
+// Action Menu Toggle Function
+function toggleMenu(button) {
+    document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+        if (dropdown !== button.nextElementSibling) {
+            dropdown.classList.remove('show');
         }
     });
-    
-    // Toggle current dropdown
-    dropdown.classList.toggle('show');
+    button.nextElementSibling.classList.toggle('show');
 }
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.action-menu')) {
+        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+            dropdown.classList.remove('show');
+        });
+    }
+});
 
 function confirmDelete(id, nama, asesiCount) {
     closeMenus();
@@ -487,7 +546,7 @@ function closeModal() {
 }
 
 function closeMenus() {
-    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+    document.querySelectorAll('.action-dropdown').forEach(m => m.classList.remove('show'));
 }
 
 document.getElementById('deleteModal').addEventListener('click', function(e) {
