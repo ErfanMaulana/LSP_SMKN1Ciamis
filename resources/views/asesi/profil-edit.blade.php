@@ -1,7 +1,7 @@
 ﻿@extends('asesi.layout')
 
-@section('title', 'My Profile')
-@section('page-title', 'My Profile')
+@section('title', 'Profil Saya')
+@section('page-title', 'Profil Saya')
 
 @section('styles')
 <style>
@@ -24,12 +24,12 @@
     .card-header-icon {
         width: 40px;
         height: 40px;
-        background: #d1fae5;
+        background: #dbeafe;
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #14532d;
+        color: #0c4a6e;
         font-size: 18px;
         flex-shrink: 0;
     }
@@ -76,9 +76,9 @@
 
     .form-control:focus {
         outline: none;
-        border-color: #14532d;
+        border-color: #0073bd;
         background: white;
-        box-shadow: 0 0 0 3px rgba(20, 83, 45, 0.1);
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     .form-control.is-invalid {
@@ -101,20 +101,27 @@
         color: #9ca3af;
         font-size: 15px;
         pointer-events: none;
+        z-index: 1;
     }
-    .input-icon-wrap .form-control { padding-left: 36px; }
+    .input-icon-wrap .form-control { padding-left: 36px; padding-right: 40px; }
 
     .toggle-pw {
         position: absolute;
-        right: 12px;
+        right: 10px;
         top: 50%;
         transform: translateY(-50%);
         background: none;
         border: none;
         color: #9ca3af;
         cursor: pointer;
-        padding: 0;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
         font-size: 16px;
+        transition: color 0.2s;
+        line-height: 1;
     }
     .toggle-pw:hover { color: #374151; }
 
@@ -144,11 +151,11 @@
         align-items: center;
         gap: 6px;
         padding: 10px 16px;
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
+        background: #f0f9ff;
+        border: 1px solid #bfdbfe;
         border-radius: 8px;
         font-size: 13px;
-        color: #14532d;
+        color: #0c4a6e;
         margin-bottom: 20px;
     }
 
@@ -175,28 +182,28 @@
     }
 
     .btn-primary {
-        background: #14532d;
+        background: #0073bd;
         color: white;
-        box-shadow: 0 2px 8px rgba(20, 83, 45, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 115, 189, 0.3);
     }
 
-    .btn-primary:hover { background: #166534; transform: translateY(-1px); }
+    .btn-primary:hover { background: #0061a5; transform: translateY(-1px); }
 </style>
 @endsection
 
 @section('content')
-<div class="card" style="max-width:520px;">
+<div class="card">
     <div class="card-header">
         <div class="card-header-icon"><i class="bi bi-shield-lock-fill"></i></div>
         <div>
-            <h3>Change Password</h3>
-            <p>Use a strong password that is hard to guess</p>
+            <h3>Ubah Kata Sandi</h3>
+            <p>Gunakan kata sandi yang kuat dan sulit ditebak</p>
         </div>
     </div>
     <div class="card-body">
         <div class="info-badge">
             <i class="bi bi-info-circle-fill"></i>
-            Registration No: <strong>{{ $account->id }}</strong>
+            No. Registrasi: <strong>{{ $account->id }}</strong>
         </div>
 
         <form method="POST" action="{{ route('asesi.profil.password') }}">
@@ -204,29 +211,29 @@
             @method('PUT')
 
             <div class="form-group">
-                <label>Current Password <span class="required">*</span></label>
+                <label>Kata Sandi Saat Ini <span class="required">*</span></label>
                 <div class="input-icon-wrap">
                     <i class="bi bi-lock-fill"></i>
                     <input type="password" id="current_password" name="current_password"
                         class="form-control {{ $errors->has('current_password') ? 'is-invalid' : '' }}"
-                        placeholder="Enter your current password" style="padding-right: 40px;">
+                        placeholder="Masukkan kata sandi saat ini" style="padding-right: 40px;">
                     <button type="button" class="toggle-pw" onclick="togglePw('current_password', this)">
-                        <i class="bi bi-eye-fill"></i>
+                   
                     </button>
                 </div>
                 @error('current_password') <div class="invalid-feedback">{{ $message }}</div> @enderror
             </div>
 
             <div class="form-group">
-                <label>New Password <span class="required">*</span></label>
+                <label>Kata Sandi Baru <span class="required">*</span></label>
                 <div class="input-icon-wrap">
                     <i class="bi bi-key-fill"></i>
                     <input type="password" id="new_password" name="password"
                         class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}"
-                        placeholder="Minimum 8 characters" style="padding-right: 40px;"
+                        placeholder="Minimal 8 karakter" style="padding-right: 40px;"
                         oninput="checkStrength(this.value)">
                     <button type="button" class="toggle-pw" onclick="togglePw('new_password', this)">
-                        <i class="bi bi-eye-fill"></i>
+                        
                     </button>
                 </div>
                 <div class="password-strength">
@@ -237,21 +244,21 @@
             </div>
 
             <div class="form-group">
-                <label>Confirm New Password <span class="required">*</span></label>
+                <label>Konfirmasi Kata Sandi Baru <span class="required">*</span></label>
                 <div class="input-icon-wrap">
                     <i class="bi bi-key-fill"></i>
                     <input type="password" id="confirm_password" name="password_confirmation"
                         class="form-control"
-                        placeholder="Re-enter new password" style="padding-right: 40px;">
+                        placeholder="Masukkan ulang kata sandi baru" style="padding-right: 40px;">
                     <button type="button" class="toggle-pw" onclick="togglePw('confirm_password', this)">
-                        <i class="bi bi-eye-fill"></i>
+                       
                     </button>
                 </div>
             </div>
 
             <div class="form-footer">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-shield-check"></i> Save Password
+                    <i class="bi bi-shield-check"></i> Simpan Kata Sandi
                 </button>
             </div>
         </form>
@@ -284,10 +291,10 @@
 
         const levels = [
             { pct: '0%',   color: '#e5e7eb', label: '' },
-            { pct: '25%',  color: '#ef4444', label: 'Very weak' },
-            { pct: '50%',  color: '#f97316', label: 'Weak' },
-            { pct: '75%',  color: '#eab308', label: 'Fair' },
-            { pct: '100%', color: '#22c55e', label: 'Strong' },
+            { pct: '25%',  color: '#ef4444', label: 'Sangat lemah' },
+            { pct: '50%',  color: '#f97316', label: 'Lemah' },
+            { pct: '75%',  color: '#eab308', label: 'Cukup' },
+            { pct: '100%', color: '#0ea5e9', label: 'Kuat' },
         ];
 
         bar.style.width      = levels[score].pct;

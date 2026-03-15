@@ -68,9 +68,9 @@ Route::prefix('admin')->group(function () {
         // Asesor CRUD
         Route::middleware('permission:asesor.view')->group(function () {
             Route::get('/asesor', [AsesorController::class, 'index'])->name('admin.asesor.index');
-            Route::get('/asesor/{ID_asesor}', [AsesorController::class, 'show'])->name('admin.asesor.show');
             Route::get('/asesor/create', [AsesorController::class, 'create'])->name('admin.asesor.create')->middleware('permission:asesor.create');
             Route::post('/asesor', [AsesorController::class, 'store'])->name('admin.asesor.store')->middleware('permission:asesor.create');
+            Route::get('/asesor/{ID_asesor}', [AsesorController::class, 'show'])->name('admin.asesor.show');
             Route::get('/asesor/{ID_asesor}/edit', [AsesorController::class, 'edit'])->name('admin.asesor.edit')->middleware('permission:asesor.edit');
             Route::put('/asesor/{ID_asesor}', [AsesorController::class, 'update'])->name('admin.asesor.update')->middleware('permission:asesor.edit');
             Route::delete('/asesor/{ID_asesor}', [AsesorController::class, 'destroy'])->name('admin.asesor.destroy')->middleware('permission:asesor.delete');

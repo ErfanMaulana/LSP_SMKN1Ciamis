@@ -31,7 +31,7 @@
     .dd-trigger.open { border-color:#0061A5; box-shadow:0 0 0 3px rgba(0,97,165,.1); }
     .dd-trigger .chevron { font-size:12px; color:#94a3b8; transition:transform .2s; flex-shrink:0; }
     .dd-trigger.open .chevron { transform:rotate(180deg); }
-    .dd-panel { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; background:white; border:1px solid #e2e8f0; border-radius:8px; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,.12); max-height:260px; flex-direction:column; }
+    .dd-panel { display:none; position:fixed; background:white; border:1px solid #e2e8f0; border-radius:8px; z-index:9990; box-shadow:0 8px 24px rgba(0,0,0,.12); max-height:260px; flex-direction:column; }
     .dd-panel.open { display:flex; }
     .dd-search { padding:8px 10px; border-bottom:1px solid #f1f5f9; }
     .dd-search input { width:100%; padding:7px 10px; border:1px solid #e2e8f0; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box; }
@@ -202,6 +202,15 @@ function toggleDd(key) {
     const panel   = document.getElementById(key+'Panel');
     const trigger = document.getElementById(key+'Trigger');
     const open    = !panel.classList.contains('open');
+    
+    if (open) {
+        // Calculate position
+        const rect = trigger.getBoundingClientRect();
+        panel.style.top = (rect.bottom + 4) + 'px';
+        panel.style.left = (rect.left) + 'px';
+        panel.style.width = rect.width + 'px';
+    }
+    
     panel.classList.toggle('open', open);
     trigger.classList.toggle('open', open);
     if (open) panel.querySelector('.dd-search input').focus();

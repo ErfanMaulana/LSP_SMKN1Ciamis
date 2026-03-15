@@ -60,7 +60,7 @@
 
     .skema-badge.belum { background: #f3f4f6; color: #6b7280; }
     .skema-badge.sedang { background: #fef3c7; color: #d97706; }
-    .skema-badge.selesai { background: #d1fae5; color: #059669; }
+    .skema-badge.selesai { background: #dbeafe; color: #0073bd; }
 
     .skema-icon {
         width: 50px;

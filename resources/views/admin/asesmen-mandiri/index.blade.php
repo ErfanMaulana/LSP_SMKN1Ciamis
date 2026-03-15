@@ -138,7 +138,7 @@
 @section('content')
 <div class="page-header">
     <div>
-        <h2><i class="bi bi-journal-check" style="color:#0061a5"></i> Asesmen Mandiri</h2>
+        <h2>Asesmen Mandiri</h2>
         <p>Monitoring status dan hasil asesmen mandiri seluruh asesi</p>
     </div>
 </div>

@@ -86,8 +86,8 @@
     .stat-item.belum .stat-value { color: #fecaca; }
 
     .completion-badge {
-        background: #d1fae5;
-        color: #065f46;
+        background: #dbeafe;
+        color: #0c4a6e;
         padding: 16px 24px;
         border-radius: 10px;
         display: flex;
@@ -161,8 +161,8 @@
     }
 
     .status-badge.kompeten {
-        background: #d1fae5;
-        color: #065f46;
+        background: #dbeafe;
+        color: #0c4a6e;
     }
 
     .status-badge.belum {
@@ -224,12 +224,12 @@
     }
 
     .btn-back {
-        background: #14532d;
+        background: #1e40af;
         color: white;
     }
 
     .btn-back:hover {
-        background: #166534;
+        background: #0061a5;
     }
 
     @media print {

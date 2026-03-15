@@ -404,7 +404,7 @@
 @section('content')
 <div class="page-header">
     <div>
-        <h2><i class="bi bi-clipboard-data" style="color:#0061a5"></i> Tabel Nilai Asesor</h2>
+        <h2>Tabel Nilai Asesor</h2>
         <p>Monitoring nilai hasil input asesor untuk setiap asesi dan skema</p>
     </div>
     <button type="button" class="btn-kkm-setting" onclick="openKkmModal()" title="Atur KKM">
