@@ -57,7 +57,7 @@ class SearchController extends Controller
                     'url'      => route('admin.asesor.index') . '?search=' . urlencode($asesor->nama),
                     'category' => 'Asesor',
                     'icon'     => 'bi-person-badge',
-                    'color'    => '#7c3aed',
+                    'color'    => '#0061A5',
                 ];
             }
         }

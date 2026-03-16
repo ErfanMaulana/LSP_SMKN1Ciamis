@@ -5,14 +5,13 @@
 
 @section('content')
 <style>
-    .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
-    .page-header h2 { font-size:24px; font-weight:700; color:#1e293b; }
-    .page-header .subtitle { font-size:14px; color:#64748b; margin-top:4px; }
-    .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; border:none; transition:all .2s; }
-    .btn-primary { background:#0061A5; color:white; }
-    .btn-primary:hover { background:#00509e; }
-    .btn-outline { background:transparent; border:1.5px solid #cbd5e1; color:#64748b; }
-    .btn-outline:hover { border-color:#0061A5; color:#0061A5; }
+    .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }
+    .page-header h2 { font-size:24px; color:#0F172A; font-weight:700; margin:0; }
+    .btn { padding:10px 20px; border:none; border-radius:6px; font-size:14px; font-weight:500; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:all 0.3s; text-decoration:none; }
+    .btn-primary { background:#0073bd; color:white; }
+    .btn-primary:hover { background:#005a94; transform:translateY(-1px); box-shadow:0 4px 12px rgba(0, 115, 189, 0.3); }
+    .btn-secondary { background:#64748b; color:white; }
+    .btn-secondary:hover { background:#475569; }
     .card { background:white; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #e2e8f0; margin-bottom:24px; }
     .card-header { padding:18px 24px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; gap:10px; }
     .card-header h3 { font-size:16px; font-weight:700; color:#1e293b; }
@@ -63,7 +62,7 @@
     .asesi-empty-msg { padding:24px; text-align:center; color:#94a3b8; font-size:13px; }
     .locked-box { display:flex; align-items:center; gap:10px; padding:14px 16px; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:8px; color:#94a3b8; font-size:13px; }
     .locked-box i { font-size:18px; }
-    .form-actions { display:flex; gap:12px; padding-top:8px; }
+    .form-actions { display:flex; gap:12px; margin-top:30px; padding-top:25px; border-top:2px solid #f1f5f9; }
 </style>
 
 @if($errors->any())
@@ -76,11 +75,8 @@
 @endif
 
 <div class="page-header">
-    <div>
-        <h2>Edit Kelompok</h2>
-        <p class="subtitle">{{ $kelompok->nama_kelompok }}</p>
-    </div>
-    <a href="{{ route('admin.kelompok.index') }}" class="btn btn-outline">
+    <h2>Edit Kelompok</h2>
+    <a href="{{ route('admin.kelompok.index') }}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Kembali
     </a>
 </div>
@@ -183,8 +179,8 @@
     </div>
 
     <div class="form-actions">
-        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Simpan Perubahan</button>
-        <a href="{{ route('admin.kelompok.index') }}" class="btn btn-outline">Batal</a>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Simpan Perubahan</button>
+        <a href="{{ route('admin.kelompok.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Batal</a>
     </div>
     <div id="asesi-hidden-inputs"></div>
 </form>

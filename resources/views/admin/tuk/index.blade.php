@@ -171,9 +171,10 @@
         display: inline-flex;
         align-items: center;
         text-decoration: none;
-        transition: background 0.2s;
+        transition: all 0.2s;
     }
     .btn-filter-reset:hover { background: #fecaca; }
+    .btn-filter-reset.hidden { display: none !important; }
     .filter-form { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
     .filter-form input, .filter-form select {
         padding: 9px 14px; border: 1px solid #d1d5db; border-radius: 8px;
@@ -287,11 +288,9 @@
                 <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
                     <i class="bi bi-search"></i>
                 </button>
-                @if($search || $status !== 'all')
-                <button type="button" class="btn-filter-reset" onclick="resetFilters()" title="Reset filter">
+                <button type="button" id="resetButton" class="btn-filter-reset hidden" onclick="resetFilters()" title="Reset filter">
                      <i class="bi bi-x-lg"></i>
                 </button>
-                @endif
             </div>
         </div>
         </form>
@@ -444,12 +443,36 @@
     // Initial attachment
     attachActionMenuListeners();
 
+    // Check filter state and show/hide reset button
+    function updateResetButtonVisibility() {
+        const searchInput = document.getElementById('searchInput');
+        const statusSelect = document.querySelector('select[name="status"]');
+        const resetButton = document.getElementById('resetButton');
+        
+        const hasSearch = searchInput.value.trim() !== '';
+        const hasStatusFilter = statusSelect.value !== 'all';
+        
+        if (hasSearch || hasStatusFilter) {
+            resetButton.classList.remove('hidden');
+        } else {
+            resetButton.classList.add('hidden');
+        }
+    }
+
     // Reset filters
     function resetFilters() {
         document.getElementById('searchInput').value = '';
         document.querySelector('select[name="status"]').value = 'all';
+        updateResetButtonVisibility();
         performAjaxSearch();
     }
+
+    // Add event listeners to show/hide reset button
+    document.getElementById('searchInput').addEventListener('input', updateResetButtonVisibility);
+    document.querySelector('select[name="status"]').addEventListener('change', updateResetButtonVisibility);
+
+    // Initial check
+    updateResetButtonVisibility();
 
     function toggleMenu(event, button) {
         event.stopPropagation();

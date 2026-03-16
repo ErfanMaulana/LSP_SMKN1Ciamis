@@ -91,7 +91,7 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Update
+                    <i class="bi bi-save"></i> Simpan Perubahan
                 </button>
                 <a href="{{ route('admin.asesor.index') }}" class="btn btn-secondary">
                     <i class="bi bi-x-circle"></i> Batal

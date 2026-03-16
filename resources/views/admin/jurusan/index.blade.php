@@ -346,19 +346,7 @@
 </div>
 
 <!-- Toolbar -->
-<div class="card">
-    <div class="card-body" style="padding:20px;">
-        <form method="GET" action="{{ route('admin.jurusan.index') }}" id="filterForm">
-            <div class="filter-section">
-                <div class="search-box">
-                    <i class="bi bi-search"></i>
-                    <input type="text" name="search" id="searchInput" placeholder="Cari nama atau kode jurusan..." 
-                           value="{{ request('search') }}" autocomplete="off">
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
+
 
 <!-- Table -->
 <div class="card">

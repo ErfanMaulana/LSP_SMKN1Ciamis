@@ -305,7 +305,6 @@
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
                 <p style="font-size:14px;color:#64748b;margin:0;">Akun berikut memiliki role <strong>asesi</strong> namun tidak memiliki data profil asesi yang terdaftar.</p>
                 <div style="display:flex;gap:10px;">
-                    
                     <button class="btn btn-primary" onclick="openAsesiImportModal()" style="white-space:nowrap;">
                         <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
                     </button>

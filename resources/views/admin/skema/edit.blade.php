@@ -276,7 +276,7 @@
         justify-content: center;
         width: 24px;
         height: 24px;
-        background: #8b5cf6;
+        background: #0073bd;
         color: white;
         border-radius: 6px;
         font-size: 11px;

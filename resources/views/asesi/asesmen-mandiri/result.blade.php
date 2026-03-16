@@ -249,9 +249,6 @@
 @endsection
 
 @section('content')
-<a href="{{ route('asesi.asesmen-mandiri.index') }}" class="back-link">
-    <i class="bi bi-arrow-left"></i> Kembali ke Daftar Skema
-</a>
 
 @php
     $totalKompeten = $answers->where('status', 'K')->count();

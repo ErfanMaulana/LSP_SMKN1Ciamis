@@ -663,9 +663,7 @@
 @endsection
 
 @section('content')
-<a href="{{ route('asesi.asesmen-mandiri.index') }}" class="back-link">
-    <i class="bi bi-arrow-left"></i> Kembali ke Daftar Skema
-</a>
+
 
 <!-- Skema Header -->
 <div class="skema-header">
