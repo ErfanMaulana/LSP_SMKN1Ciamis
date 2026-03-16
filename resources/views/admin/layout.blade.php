@@ -814,7 +814,7 @@
                 @endif
 
                 <!-- PROGRAM SERTIFIKASI Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view', 'nilai-asesor.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>PROGRAM SERTIFIKASI</span>
@@ -840,11 +840,13 @@
                                     <i class="bi bi-journal-check"></i>
                                     <span>Asesmen Mandiri</span>
                                 </a>
+                            @endif
 
+                            @if(Auth::guard('admin')->user()->hasPermission('nilai-asesor.view'))
                                 <a href="{{ route('admin.nilai-asesor.index') }}"
                                     class="menu-item {{ request()->routeIs('admin.nilai-asesor.*') ? 'active' : '' }}">
                                     <i class="bi bi-clipboard-data"></i>
-                                    <span>Nilai Asesor</span>
+                                    <span>Nilai</span>
                                 </a>
                             @endif
 

@@ -63,7 +63,10 @@ class AsesiController extends Controller
         }
         $query->orderBy('nama', $sortOrder);
         
-        $asesi = $query->paginate(10)->appends($request->except('page'));
+        $perPage = (int) $request->query('per_page', 10);
+        $perPage = max(5, min(100, $perPage));
+
+        $asesi = $query->paginate($perPage)->appends($request->except('page'));
         
         // Statistik dinamis
         $totalAsesi = Asesi::count();
@@ -1060,5 +1063,52 @@ class AsesiController extends Controller
         if ($skipped) $msg .= ' ' . $skipped . ' dilewati (bukan pending atau tidak ditemukan).';
 
         return redirect()->route('admin.asesi.verifikasi')->with('success', $msg);
+    }
+
+    /**
+     * Bulk delete multiple asesi.
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'niks' => 'required|array|min:1',
+            'niks.*' => 'string',
+        ]);
+
+        $deleted = 0;
+        $skipped = 0;
+
+        foreach ($request->input('niks') as $nik) {
+            $asesi = Asesi::where('NIK', $nik)->first();
+            if (!$asesi) {
+                $skipped++;
+                continue;
+            }
+
+            try {
+                // Delete related account if exists
+                if ($asesi->account) {
+                    $asesi->account->delete();
+                }
+                // Delete asesi record
+                $asesi->delete();
+                $deleted++;
+            } catch (\Exception $e) {
+                \Log::error('Bulk delete asesi error: ' . $e->getMessage());
+                $skipped++;
+            }
+        }
+
+        $msg = $deleted . ' asesi berhasil dihapus.';
+        if ($skipped) {
+            $msg .= ' ' . $skipped . ' tidak dihapus (tidak ditemukan atau ada error).';
+        }
+
+        // Detect which page to return to
+        if ($request->input('from_verifikasi')) {
+            return redirect()->route('admin.asesi.verifikasi')->with('success', $msg);
+        }
+
+        return redirect()->route('admin.asesi.index')->with('success', $msg);
     }
 }

@@ -83,6 +83,7 @@ class RolePermissionSeeder extends Seeder
             ],
             'Asesmen Mandiri' => [
                 'asesmen-mandiri.view' => 'Lihat Asesmen Mandiri',
+                'nilai-asesor.view'    => 'Lihat Nilai',
             ],
             'Carousel' => [
                 'carousel.view'   => 'Lihat Carousel',
@@ -129,7 +130,7 @@ class RolePermissionSeeder extends Seeder
         $allPermissionIds = [];
         foreach ($permissionGroups as $group => $permissions) {
             foreach ($permissions as $name => $displayName) {
-                $perm = Permission::firstOrCreate(
+                $perm = Permission::updateOrCreate(
                     ['name' => $name],
                     ['display_name' => $displayName, 'group' => $group]
                 );
@@ -137,7 +138,7 @@ class RolePermissionSeeder extends Seeder
             }
         }
 
-        $superAdmin = Role::firstOrCreate(
+        $superAdmin = Role::updateOrCreate(
             ['name' => 'super-admin'],
             [
                 'display_name' => 'Super Admin',
@@ -147,21 +148,21 @@ class RolePermissionSeeder extends Seeder
         );
         $superAdmin->permissions()->sync($allPermissionIds);
 
-        $operator = Role::firstOrCreate(
-            ['name' => 'operator'],
-            [
-                'display_name' => 'Operator',
-                'description'  => 'Manages day-to-day operations',
-                'is_super_admin' => false,
-            ]
-        );
-        $operatorPerms = Permission::whereIn('group', [
-            'Dashboard', 'Asesi', 'Verifikasi Asesi', 'Akun Asesi', 'Kelompok',
-        ])->pluck('id');
-        $operator->permissions()->sync($operatorPerms);
+        // $operator = Role::firstOrCreate(
+        //     ['name' => 'operator'],
+        //     [
+        //         'display_name' => 'Operator',
+        //         'description'  => 'Manages day-to-day operations',
+        //         'is_super_admin' => false,
+        //     ]
+        // );
+        // $operatorPerms = Permission::whereIn('group', [
+        //     'Dashboard', 'Asesi', 'Verifikasi Asesi', 'Akun Asesi', 'Kelompok',
+        // ])->pluck('id');
+        // $operator->permissions()->sync($operatorPerms);
 
         // Admin Web Role - Manages frontend website
-        $adminWeb = Role::firstOrCreate(
+        $adminWeb = Role::updateOrCreate(
             ['name' => 'admin-web'],
             [
                 'display_name' => 'Admin Web',
@@ -175,7 +176,7 @@ class RolePermissionSeeder extends Seeder
         $adminWeb->permissions()->sync($adminWebPerms);
 
         // Admin LSP Role - Manages assessment and operational features
-        $adminLsp = Role::firstOrCreate(
+        $adminLsp = Role::updateOrCreate(
             ['name' => 'admin-lsp'],
             [
                 'display_name' => 'Admin LSP',
@@ -191,8 +192,8 @@ class RolePermissionSeeder extends Seeder
         $adminLsp->permissions()->sync($adminLspPerms);
 
         $admin = Admin::first();
-        if ($admin && !$admin->roles()->where('role_id', $superAdmin->id)->exists()) {
-            $admin->roles()->attach($superAdmin->id);
+        if ($admin) {
+            $admin->roles()->syncWithoutDetaching([$superAdmin->id]);
         }
     }
 }

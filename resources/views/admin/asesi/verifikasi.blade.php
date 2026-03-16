@@ -92,6 +92,13 @@
             </div>
 
             @if($asesi->count() > 0)
+                <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+                    <button type="button" id="toggle-bulk-mode"
+                        style="padding:7px 12px;background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                        <i class="bi bi-ui-checks-grid"></i> Bulk
+                    </button>
+                </div>
+
                 <!-- Bulk Action Bar -->
                 <div id="bulk-action-bar" style="display:none;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px 16px;margin-bottom:16px;align-items:center;gap:12px;flex-wrap:wrap;">
                     <span id="bulk-count-text" style="font-size:14px;color:#0073bd;font-weight:600;">0 item dipilih</span>
@@ -103,6 +110,10 @@
                     <button type="button" onclick="openBulkRejectModal()"
                         style="padding:8px 18px;background:#e11d48;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
                         <i class="bi bi-x-lg"></i> Tolak Pilihan
+                    </button>
+                    <button type="button" onclick="openBulkDeleteModal()"
+                        style="padding:8px 18px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                        <i class="bi bi-trash"></i> Hapus Pilihan
                     </button>
                     <button type="button" onclick="clearBulkSelection()"
                         style="padding:8px 14px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;">
@@ -116,13 +127,20 @@
                     <div id="bulk-approve-niks"></div>
                 </form>
 
+                <!-- Bulk Delete Hidden Form -->
+                <form id="bulk-delete-form" method="POST" action="{{ route('admin.asesi.bulk-delete') }}" style="display:none;">
+                    @csrf
+                    <input type="hidden" name="from_verifikasi" value="1">
+                    <div id="bulk-delete-niks"></div>
+                </form>
+
                 <!-- Table -->
                 <div class="table-container">
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th style="width:44px;text-align:center;">
-                                    <input type="checkbox" id="bulk-select-all" title="Pilih semua pending"
+                                <th class="bulk-col" style="display:none;width:44px;text-align:center;">
+                                    <input type="checkbox" id="bulk-select-all" title="Pilih semua"
                                         style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
                                 </th>
                                 <th>ASESI</th>
@@ -136,11 +154,9 @@
                         <tbody>
                             @foreach($asesi as $item)
                             <tr>
-                                <td style="text-align:center;">
-                                    @if($item->status === 'pending')
+                                <td class="bulk-col" style="display:none;text-align:center;">
                                     <input type="checkbox" class="bulk-checkbox" value="{{ $item->NIK }}"
                                         style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
-                                    @endif
                                 </td>
                                 <td>
                                     <div class="user-info">
@@ -830,7 +846,29 @@
     </div>
 </div>
 
-@section('scripts')
+<!-- Bulk Delete Modal -->
+<div id="bulk-delete-modal" class="bulk-modal-overlay">
+    <div class="bulk-modal-box">
+        <h3><i class="bi bi-trash" style="color:#dc2626;margin-right:8px;"></i>Hapus Asesi Terpilih</h3>
+        <p class="modal-sub" id="bulk-delete-count-text">0 asesi akan dihapus</p>
+        <p style="color:#e11d48;font-size:13px;background:#fee2e2;padding:12px;border-radius:6px;margin-bottom:16px;">
+            <i class="bi bi-exclamation-triangle"></i> Perhatian: Tindakan ini tidak dapat dibatalkan. Data asesi dan akun akan dihapus sepenuhnya.
+        </p>
+        <form id="bulk-delete-form-modal" method="POST" action="{{ route('admin.asesi.bulk-delete') }}">
+            @csrf
+            <input type="hidden" name="from_verifikasi" value="1">
+            <div id="bulk-delete-niks-modal"></div>
+            <div class="bulk-modal-actions">
+                <button type="button" onclick="closeBulkDeleteModal()"
+                    style="padding:9px 20px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">Batal</button>
+                <button type="submit"
+                    style="padding:9px 20px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="bi bi-trash"></i> Konfirmasi Hapus
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 <script>
     // Action Menu Toggle with Fixed Positioning
     function toggleMenu(button) {
@@ -868,6 +906,31 @@
     });
 
     (function () {
+    var isBulkModeActive = false;
+
+    function setBulkMode(active) {
+        isBulkModeActive = !!active;
+        document.querySelectorAll('.bulk-col').forEach(function(el) {
+            el.style.display = isBulkModeActive ? '' : 'none';
+        });
+
+        var toggleBtn = document.getElementById('toggle-bulk-mode');
+        if (toggleBtn) {
+            if (isBulkModeActive) {
+                toggleBtn.innerHTML = '<i class="bi bi-x-circle"></i> Tutup';
+                toggleBtn.style.background = '#f8fafc';
+                toggleBtn.style.color = '#475569';
+                toggleBtn.style.border = '1px solid #94a3b8';
+            } else {
+                toggleBtn.innerHTML = '<i class="bi bi-ui-checks-grid"></i> Bulk';
+                toggleBtn.style.background = '#fff';
+                toggleBtn.style.color = '#64748b';
+                toggleBtn.style.border = '1px solid #cbd5e1';
+                clearBulkSelection();
+            }
+        }
+    }
+
     // Checkbox listeners
     function attachBulkListeners() {
         document.querySelectorAll('.bulk-checkbox').forEach(function(cb) {
@@ -885,6 +948,11 @@
     }
 
     function updateBulkBar() {
+        if (!isBulkModeActive) {
+            var barHidden = document.getElementById('bulk-action-bar');
+            if (barHidden) barHidden.style.display = 'none';
+            return;
+        }
         var checked = document.querySelectorAll('.bulk-checkbox:checked');
         var all     = document.querySelectorAll('.bulk-checkbox');
         var bar     = document.getElementById('bulk-action-bar');
@@ -908,6 +976,7 @@
 
     window.submitBulkApprove = function() {
         closeMenus();
+        if (!isBulkModeActive) return;
         var niks = getSelectedNiks();
         if (niks.length === 0) return;
         if (!confirm('Setujui ' + niks.length + ' asesi terpilih?')) return;
@@ -923,6 +992,7 @@
 
     window.openBulkRejectModal = function() {
         closeMenus();
+        if (!isBulkModeActive) return;
         var niks = getSelectedNiks();
         if (niks.length === 0) return;
         var container = document.getElementById('bulk-reject-niks');
@@ -949,13 +1019,45 @@
         updateBulkBar();
     };
 
+    window.openBulkDeleteModal = function() {
+        closeMenus();
+        if (!isBulkModeActive) return;
+        var niks = getSelectedNiks();
+        if (niks.length === 0) return;
+        var container = document.getElementById('bulk-delete-niks-modal');
+        container.innerHTML = '';
+        niks.forEach(function(nik) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = 'niks[]'; inp.value = nik;
+            container.appendChild(inp);
+        });
+        var countEl = document.getElementById('bulk-delete-count-text');
+        if (countEl) countEl.textContent = niks.length + ' asesi akan dihapus';
+        document.getElementById('bulk-delete-modal').classList.add('active');
+    };
+
+    window.closeBulkDeleteModal = function() {
+        document.getElementById('bulk-delete-modal').classList.remove('active');
+    };
+
     // Close modal on backdrop click
     document.getElementById('bulk-reject-modal').addEventListener('click', function(e) {
         if (e.target === this) closeBulkRejectModal();
     });
 
+    document.getElementById('bulk-delete-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeBulkDeleteModal();
+    });
+
+    var toggleBulkModeBtn = document.getElementById('toggle-bulk-mode');
+    if (toggleBulkModeBtn) {
+        toggleBulkModeBtn.addEventListener('click', function() {
+            setBulkMode(!isBulkModeActive);
+        });
+    }
+
+    setBulkMode(false);
     attachBulkListeners();
 }());
 </script>
-@endsection
 @endsection

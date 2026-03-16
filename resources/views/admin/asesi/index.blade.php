@@ -99,6 +99,7 @@
             @if($cardFilter)
                 <input type="hidden" name="card_filter" value="{{ $cardFilter }}">
             @endif
+                <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
@@ -133,17 +134,45 @@
             </div>
             </form>
 
-            <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:14px;">
+                <button type="button" id="toggle-bulk-mode-data"
+                    style="padding:7px 12px;background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="bi bi-ui-checks-grid"></i> Bulk
+                </button>
                 <button type="button" class="btn btn-outline" onclick="openAsesiExportModal()">
                     <i class="bi bi-download"></i> Export Data Asesi
                 </button>
             </div>
+
+            <!-- Bulk Action Bar -->
+            <div id="bulk-action-bar-data" style="display:none;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px 16px;margin-bottom:16px;align-items:center;gap:12px;flex-wrap:wrap;">
+                <span id="bulk-count-text-data" style="font-size:14px;color:#0073bd;font-weight:600;">0 item dipilih</span>
+                <div style="flex:1;"></div>
+                <button type="button" onclick="openBulkDeleteModalData()"
+                    style="padding:8px 18px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="bi bi-trash"></i> Hapus Pilihan
+                </button>
+                <button type="button" onclick="clearBulkSelectionData()"
+                    style="padding:8px 14px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;">
+                    Batal
+                </button>
+            </div>
+
+            <!-- Bulk Delete Hidden Form -->
+            <form id="bulk-delete-form-data" method="POST" action="{{ route('admin.asesi.bulk-delete') }}" style="display:none;">
+                @csrf
+                <div id="bulk-delete-niks-data"></div>
+            </form>
 
             <!-- Table -->
             <div class="table-container">
                 <table class="data-table">
                     <thead>
                         <tr>
+                            <th class="bulk-col-data" style="display:none;width:44px;text-align:center;">
+                                <input type="checkbox" id="bulk-select-all-data" title="Pilih semua"
+                                    style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
+                            </th>
                             <th>NAMA</th>
                             <th>SKEMA/PROGRAM</th>
                             <th>AKUN</th>
@@ -155,6 +184,10 @@
                     <tbody>
                         @forelse($asesi as $item)
                         <tr>
+                            <td class="bulk-col-data" style="display:none;text-align:center;">
+                                <input type="checkbox" class="bulk-checkbox-data" value="{{ $item->NIK }}"
+                                    style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
+                            </td>
                             <td>
                                 <div class="user-info">
                                     <div class="user-avatar-initials">
@@ -256,6 +289,20 @@
                         </a>
                     @endif
                 </div>
+                <form method="GET" action="{{ route('admin.asesi.index') }}" style="display:flex;align-items:center;gap:6px;">
+                    @foreach(request()->except('page', 'per_page') as $key => $value)
+                        @if(is_array($value))
+                            @foreach($value as $v)
+                                <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                            @endforeach
+                        @else
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
+                    <span style="font-size:12px;color:#64748b;">Per halaman</span>
+                    <input type="number" id="per-page-input" name="per_page" min="5" max="100" value="{{ request('per_page', 10) }}"
+                        style="width:72px;height:34px;border:1px solid #e2e8f0;border-radius:8px;padding:0 8px;font-size:13px;color:#334155;">
+                </form>
             </div>
         </div>
     </div><!-- /.card -->
@@ -377,6 +424,33 @@
     </div><!-- /#tab-akun-orphan.tab-pane -->
 
 </div><!-- /.asesi-management -->
+
+<!-- BULK DELETE MODAL -->
+<div id="bulk-delete-modal-data" class="bulk-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:14px;padding:28px;width:100%;max-width:560px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+        <h3 style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px 0;display:flex;align-items:center;gap:8px;">
+            <i class="bi bi-trash" style="color:#dc2626;"></i>Hapus Asesi Terpilih
+        </h3>
+        <p style="margin:8px 0 16px 0;color:#94a3b8;font-size:13px;">
+            <span id="bulk-delete-count-text-data">0 asesi akan dihapus</span>
+        </p>
+        <p style="color:#e11d48;font-size:13px;background:#fee2e2;padding:12px;border-radius:6px;margin-bottom:16px;">
+            <i class="bi bi-exclamation-triangle"></i> Perhatian: Tindakan ini tidak dapat dibatalkan. Data asesi dan akun akan dihapus sepenuhnya.
+        </p>
+        <form id="bulk-delete-form-modal-data" method="POST" action="{{ route('admin.asesi.bulk-delete') }}">
+            @csrf
+            <div id="bulk-delete-niks-modal-data"></div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
+                <button type="button" onclick="closeBulkDeleteModalData()"
+                    style="padding:9px 20px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">Batal</button>
+                <button type="submit"
+                    style="padding:9px 20px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+                    <i class="bi bi-trash"></i> Konfirmasi Hapus
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- IMPORT DATA AKTIVASI MODAL -->
 <div id="asesi-activated-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
@@ -1305,6 +1379,66 @@
         .catch(error => console.error('Search error:', error));
     }
 
+    // Apply per-page using AJAX and refresh table + pagination area
+    function applyPerPageAjax(rawValue) {
+        const perPage = Math.max(5, Math.min(100, parseInt(rawValue, 10) || 10));
+        const form = document.getElementById('filterForm');
+        if (!form) return;
+
+        var hiddenPerPage = form.querySelector('input[name="per_page"]');
+        if (hiddenPerPage) hiddenPerPage.value = perPage;
+
+        const params = new URLSearchParams(new FormData(form));
+        params.set('per_page', perPage);
+        params.set('page', '1');
+
+        fetch('{{ route("admin.asesi.index") }}?' + params.toString(), {
+            headers: { 'Accept': 'text/html' }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const newTbody = doc.querySelector('.data-table tbody');
+            const oldTbody = document.querySelector('.data-table tbody');
+            if (newTbody && oldTbody) {
+                oldTbody.innerHTML = newTbody.innerHTML;
+            }
+
+            const newPagination = doc.querySelector('.pagination-container');
+            const oldPagination = document.querySelector('.pagination-container');
+            if (newPagination && oldPagination) {
+                oldPagination.outerHTML = newPagination.outerHTML;
+            }
+
+            history.replaceState({}, '', '{{ route("admin.asesi.index") }}?' + params.toString());
+
+            attachActionMenuListeners();
+            attachBulkListenersData();
+            bindPerPageInputAjax();
+            updateBulkBarData();
+        })
+        .catch(error => console.error('Per-page AJAX error:', error));
+    }
+
+    function bindPerPageInputAjax() {
+        const perPageInput = document.getElementById('per-page-input');
+        if (!perPageInput || perPageInput.dataset.bound === '1') return;
+
+        let timer = null;
+        perPageInput.addEventListener('input', function() {
+            clearTimeout(timer);
+            timer = setTimeout(() => applyPerPageAjax(this.value), 300);
+        });
+
+        perPageInput.addEventListener('change', function() {
+            applyPerPageAjax(this.value);
+        });
+
+        perPageInput.dataset.bound = '1';
+    }
+
     // Update filter on dropdown change (jurusan and status)
     const filterSelects = document.querySelectorAll('.filter-select');
     filterSelects.forEach(select => {
@@ -1323,6 +1457,7 @@
 
     // Initial attachment
     attachActionMenuListeners();
+    bindPerPageInputAjax();
 
     // Reset filters
     function resetFilters() {
@@ -1804,6 +1939,112 @@
 
     // Initial badges state
     syncExportSkemaByJurusan();
+
+    // Bulk Delete Functions for Data Asesi Table
+    var isBulkModeDataActive = false;
+
+    function setBulkModeData(active) {
+        isBulkModeDataActive = !!active;
+        document.querySelectorAll('.bulk-col-data').forEach(function(el) {
+            el.style.display = isBulkModeDataActive ? '' : 'none';
+        });
+
+        var toggleBtn = document.getElementById('toggle-bulk-mode-data');
+        if (toggleBtn) {
+            if (isBulkModeDataActive) {
+                toggleBtn.innerHTML = '<i class="bi bi-x-circle"></i> Tutup';
+                toggleBtn.style.background = '#f8fafc';
+                toggleBtn.style.color = '#475569';
+                toggleBtn.style.border = '1px solid #94a3b8';
+            } else {
+                toggleBtn.innerHTML = '<i class="bi bi-ui-checks-grid"></i> Bulk';
+                toggleBtn.style.background = '#fff';
+                toggleBtn.style.color = '#64748b';
+                toggleBtn.style.border = '1px solid #cbd5e1';
+                clearBulkSelectionData();
+            }
+        }
+    }
+
+    function attachBulkListenersData() {
+        document.querySelectorAll('.bulk-checkbox-data').forEach(function(cb) {
+            cb.addEventListener('change', updateBulkBarData);
+        });
+        var selectAll = document.getElementById('bulk-select-all-data');
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                document.querySelectorAll('.bulk-checkbox-data').forEach(function(cb) {
+                    cb.checked = selectAll.checked;
+                });
+                updateBulkBarData();
+            });
+        }
+    }
+
+    function updateBulkBarData() {
+        if (!isBulkModeDataActive) {
+            var barHidden = document.getElementById('bulk-action-bar-data');
+            if (barHidden) barHidden.style.display = 'none';
+            return;
+        }
+        var checked = document.querySelectorAll('.bulk-checkbox-data:checked');
+        var all = document.querySelectorAll('.bulk-checkbox-data');
+        var bar = document.getElementById('bulk-action-bar-data');
+        if (bar) bar.style.display = checked.length > 0 ? 'flex' : 'none';
+        var countEl = document.getElementById('bulk-count-text-data');
+        if (countEl) countEl.textContent = checked.length + ' item dipilih';
+        var selectAll = document.getElementById('bulk-select-all-data');
+        if (selectAll) {
+            selectAll.indeterminate = checked.length > 0 && checked.length < all.length;
+            selectAll.checked = all.length > 0 && checked.length === all.length;
+        }
+    }
+
+    function getSelectedNiksData() {
+        return Array.from(document.querySelectorAll('.bulk-checkbox-data:checked')).map(function(cb) { return cb.value; });
+    }
+
+    window.openBulkDeleteModalData = function() {
+        if (!isBulkModeDataActive) return;
+        var niks = getSelectedNiksData();
+        if (niks.length === 0) return;
+        var container = document.getElementById('bulk-delete-niks-modal-data');
+        container.innerHTML = '';
+        niks.forEach(function(nik) {
+            var inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = 'niks[]'; inp.value = nik;
+            container.appendChild(inp);
+        });
+        var countEl = document.getElementById('bulk-delete-count-text-data');
+        if (countEl) countEl.textContent = niks.length + ' asesi akan dihapus';
+        document.getElementById('bulk-delete-modal-data').style.display = 'flex';
+    };
+
+    window.closeBulkDeleteModalData = function() {
+        document.getElementById('bulk-delete-modal-data').style.display = 'none';
+    };
+
+    window.clearBulkSelectionData = function() {
+        document.querySelectorAll('.bulk-checkbox-data').forEach(function(cb) { cb.checked = false; });
+        var selectAll = document.getElementById('bulk-select-all-data');
+        if (selectAll) { selectAll.checked = false; selectAll.indeterminate = false; }
+        updateBulkBarData();
+    };
+
+    // Close modal on backdrop click
+    document.getElementById('bulk-delete-modal-data').addEventListener('click', function(e) {
+        if (e.target === this) closeBulkDeleteModalData();
+    });
+
+    var toggleBulkModeDataBtn = document.getElementById('toggle-bulk-mode-data');
+    if (toggleBulkModeDataBtn) {
+        toggleBulkModeDataBtn.addEventListener('click', function() {
+            setBulkModeData(!isBulkModeDataActive);
+        });
+    }
+
+    setBulkModeData(false);
+    attachBulkListenersData();
 </script>
 
 @endsection
