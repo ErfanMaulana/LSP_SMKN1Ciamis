@@ -69,11 +69,26 @@
                     <i class="bi bi-search"></i>
                     <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" style="display:flex;gap:8px;width:100%;">
                         <input type="hidden" name="status" value="{{ $status }}">
+                        <input type="hidden" name="reject_type" value="{{ $rejectType }}">
                         <input type="hidden" name="per_page" value="{{ $perPage }}">
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NIK, atau email..." style="flex:1;">
                         <button type="submit" style="padding:10px 16px;background:#0073bd;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:500;">Cari</button>
                     </form>
                 </div>
+                @if($status === 'rejected')
+                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                        <label style="font-size:13px;font-weight:500;color:#64748b;white-space:nowrap;">Filter Penolakan:</label>
+                        <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" style="display:flex;gap:8px;">
+                            <input type="hidden" name="status" value="rejected">
+                            <input type="hidden" name="per_page" value="{{ $perPage }}">
+                            <select name="reject_type" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;background:#fff;color:#475569;cursor:pointer;min-width:200px;" onchange="this.form.submit();">
+                                <option value="">Semua Penolakan ({{ $counts['rejected'] }})</option>
+                                <option value="temporary" {{ $rejectType === 'temporary' ? 'selected' : '' }}>Ditolak Sementara ({{ $counts['rejected_temporary'] }})</option>
+                                <option value="permanent" {{ $rejectType === 'permanent' ? 'selected' : '' }}>Ditolak Permanen ({{ $counts['rejected_permanent'] }})</option>
+                            </select>
+                        </form>
+                    </div>
+                @endif
             </div>
 
             @if($asesi->count() > 0)
@@ -154,8 +169,10 @@
                                         <span class="badge badge-pending">Menunggu</span>
                                     @elseif($item->status === 'approved')
                                         <span class="badge badge-approved">Disetujui</span>
+                                    @elseif($item->status === 'banned')
+                                        <span class="badge badge-rejected">Ditolak Permanen</span>
                                     @else
-                                        <span class="badge badge-rejected">Ditolak</span>
+                                        <span class="badge badge-rejected">Ditolak Sementara</span>
                                     @endif
                                 </td>
                                 <td style="text-align:center;">

@@ -735,6 +735,9 @@ class AsesiController extends Controller
         // Get the filter status from query parameter
         $status = $request->query('status', '');
         
+        // Get reject type filter (sementara/permanen)
+        $rejectType = $request->query('reject_type', '');
+        
         // Get search query
         $search = $request->query('search');
         
@@ -752,8 +755,20 @@ class AsesiController extends Controller
         $query = Asesi::with('jurusan');
         
         // Apply status filter if provided
-        if (in_array($status, ['pending', 'approved', 'rejected'])) {
-            $query->where('status', $status);
+        if ($status === 'pending') {
+            $query->where('status', 'pending');
+        } elseif ($status === 'approved') {
+            $query->where('status', 'approved');
+        } elseif ($status === 'rejected') {
+            // Include both 'rejected' (sementara) and 'banned' (permanen)
+            $query->whereIn('status', ['rejected', 'banned']);
+            
+            // Apply reject_type filter if provided
+            if ($rejectType === 'temporary') {
+                $query->where('status', 'rejected');
+            } elseif ($rejectType === 'permanent') {
+                $query->where('status', 'banned');
+            }
         }
         
         // Apply jurusan filter if provided
@@ -786,7 +801,9 @@ class AsesiController extends Controller
         $counts = [
             'pending' => Asesi::where('status', 'pending')->count(),
             'approved' => Asesi::where('status', 'approved')->count(),
-            'rejected' => Asesi::where('status', 'rejected')->count(),
+            'rejected' => Asesi::whereIn('status', ['rejected', 'banned'])->count(),
+            'rejected_temporary' => Asesi::where('status', 'rejected')->count(),
+            'rejected_permanent' => Asesi::where('status', 'banned')->count(),
             'total' => Asesi::count(),
         ];
         
@@ -798,7 +815,7 @@ class AsesiController extends Controller
             return view('admin.asesi.partials.verifikasi-table-rows', compact('asesi'))->render();
         }
         
-        return view('admin.asesi.verifikasi', compact('asesi', 'status', 'counts', 'jurusanList', 'perPage'));
+        return view('admin.asesi.verifikasi', compact('asesi', 'status', 'rejectType', 'counts', 'jurusanList', 'perPage'));
     }
 
     /**
