@@ -64,7 +64,7 @@
 
                 <div class="form-group">
                     <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
-                        <label style="margin-bottom:0;">Data Kelas (One-to-Many)</label>
+                        <label style="margin-bottom:0;">Kelas</label>
                         <button type="button" id="addKelasBtn" class="btn btn-secondary btn-sm">
                             <i class="bi bi-plus-lg"></i> Tambah Kelas
                         </button>
@@ -74,7 +74,7 @@
                         @foreach($kelasOld as $idx => $kelasNama)
                             <div class="kelas-row">
                                 <input type="text" name="kelas[]" class="form-control @error('kelas.' . $idx) is-invalid @enderror"
-                                    value="{{ $kelasNama }}" placeholder="Contoh: XII RPL 1">
+                                    value="{{ $kelasNama }}" placeholder="Contoh: AKL 1">
                                 <button type="button" class="btn btn-danger btn-sm remove-kelas-btn">
                                     <i class="bi bi-trash"></i>
                                 </button>

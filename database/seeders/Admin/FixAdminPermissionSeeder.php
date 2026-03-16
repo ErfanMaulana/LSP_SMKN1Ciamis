@@ -1,0 +1,47 @@
+<?php
+
+namespace Database\Seeders\Admin;
+
+use App\Models\Admin;
+use App\Models\Permission;
+use App\Models\Role;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
+class FixAdminPermissionSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $superAdminRole = Role::firstOrCreate(
+            ['is_super_admin' => true],
+            [
+                'name' => 'super_admin',
+                'display_name' => 'Super Administrator',
+                'description' => 'Full access to all features'
+            ]
+        );
+
+        $admin = Admin::where('username', 'superadmin')->first();
+
+        if (!$admin) {
+            $admin = Admin::create([
+                'name' => 'Super Administrator',
+                'email' => 'superadmin@lsp.local',
+                'username' => 'superadmin',
+                'password' => Hash::make('superadmin123'),
+            ]);
+            echo "✓ Admin created" . PHP_EOL;
+        } else {
+            echo "✓ Admin already exists" . PHP_EOL;
+        }
+
+        if (!$admin->roles()->where('role_id', $superAdminRole->id)->exists()) {
+            $admin->roles()->attach($superAdminRole->id);
+            echo "✓ Role assigned to admin" . PHP_EOL;
+        }
+
+        echo "✓ Setup complete!" . PHP_EOL;
+        echo "Username: superadmin" . PHP_EOL;
+        echo "Password: superadmin123" . PHP_EOL;
+    }
+}

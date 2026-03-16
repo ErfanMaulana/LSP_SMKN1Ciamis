@@ -59,11 +59,11 @@ class AkunAsesiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'NIK'  => 'required|string|size:16|unique:accounts,NIK',
+            'NIK'  => 'required|regex:/^\d{16}$/|unique:accounts,NIK',
             'nama' => 'required|string|max:255',
         ], [
             'NIK.required' => 'NIK wajib diisi.',
-            'NIK.size'     => 'NIK harus terdiri dari 16 digit.',
+            'NIK.regex'    => 'NIK harus terdiri dari 16 digit angka.',
             'NIK.unique'   => 'NIK sudah terdaftar.',
             'nama.required'=> 'Nama wajib diisi.',
         ]);

@@ -1,13 +1,19 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Dashboard') - Asesor LSP SMKN 1 Ciamis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -15,7 +21,10 @@
             overflow-x: hidden;
         }
 
-        .asesor-wrapper { display: flex; min-height: 100vh; }
+        .asesor-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
 
         /* ── Sidebar ─────────────────────────────────────── */
         .sidebar {
@@ -30,9 +39,18 @@
             border-right: 1px solid #e2e8f0;
         }
 
-        .sidebar::-webkit-scrollbar { width: 4px; }
-        .sidebar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .sidebar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .sidebar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
 
         .sidebar-header {
             padding: 25px 20px;
@@ -40,7 +58,9 @@
             text-align: center;
         }
 
-        .sidebar-menu { padding: 16px 0; }
+        .sidebar-menu {
+            padding: 16px 0;
+        }
 
         .menu-section-title {
             padding: 10px 20px 4px;
@@ -61,12 +81,33 @@
             border-left: 3px solid transparent;
         }
 
-        .menu-item:hover { background: rgba(0,115,189,0.07); color: #0073bd; }
-        .menu-item.active { background: rgba(0,115,189,0.10); color: #0073bd; border-left-color: #0073bd; font-weight: 600; }
-        .menu-item.disabled { opacity: 0.4; pointer-events: none; }
+        .menu-item:hover {
+            background: rgba(0, 115, 189, 0.07);
+            color: #0073bd;
+        }
 
-        .menu-item i { font-size: 17px; width: 22px; margin-right: 12px; }
-        .menu-item span { font-size: 13.5px; font-weight: 500; }
+        .menu-item.active {
+            background: rgba(0, 115, 189, 0.10);
+            color: #0073bd;
+            border-left-color: #0073bd;
+            font-weight: 600;
+        }
+
+        .menu-item.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .menu-item i {
+            font-size: 17px;
+            width: 22px;
+            margin-right: 12px;
+        }
+
+        .menu-item span {
+            font-size: 13.5px;
+            font-weight: 500;
+        }
 
         .menu-badge {
             margin-left: auto;
@@ -79,12 +120,15 @@
         }
 
         /* ── Main ────────────────────────────────────────── */
-        .main-content { flex: 1; margin-left: 260px; }
+        .main-content {
+            flex: 1;
+            margin-left: 260px;
+        }
 
         .topbar {
             background: white;
             padding: 14px 28px;
-            box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -93,21 +137,46 @@
             z-index: 100;
         }
 
-        .topbar h1 { font-size: 20px; color: #1e293b; font-weight: 700; }
-
-        .topbar-right { display: flex; align-items: center; gap: 16px; }
-
-        .user-avatar-sm {
-            width: 38px; height: 38px;
-            background: #0073bd;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: 700; font-size: 15px;
+        .topbar h1 {
+            font-size: 20px;
+            color: #1e293b;
+            font-weight: 700;
         }
 
-        .user-details { display: flex; flex-direction: column; }
-        .user-name { font-size: 13px; font-weight: 600; color: #1e293b; }
-        .user-role { font-size: 11px; color: #64748b; }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar-sm {
+            width: 38px;
+            height: 38px;
+            background: #0073bd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: #64748b;
+        }
 
         /* Profile Dropdown */
         .profile-dropdown {
@@ -262,184 +331,225 @@
             text-align: center;
         }
 
-        .content-wrapper { padding: 28px; }
+        .content-wrapper {
+            padding: 28px;
+        }
 
         .alert {
-            padding: 13px 16px; border-radius: 8px; margin-bottom: 18px;
-            font-size: 14px; display: flex; align-items: center; gap: 10px;
+            padding: 13px 16px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
-        .alert-error   { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
 
         /* ── Mobile ──────────────────────────────────────── */
         .mobile-toggle {
-            display: none; background: #0073bd; color: white;
-            border: none; padding: 9px 14px; border-radius: 6px;
-            cursor: pointer; font-size: 19px;
+            display: none;
+            background: #0073bd;
+            color: white;
+            border: none;
+            padding: 9px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 19px;
         }
 
         @media (max-width: 768px) {
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.active { transform: translateX(0); }
-            .main-content { margin-left: 0; }
-            .mobile-toggle { display: block; }
-            .content-wrapper { padding: 16px; }
-            .user-details { display: none; }
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .content-wrapper {
+                padding: 16px;
+            }
+
+            .user-details {
+                display: none;
+            }
         }
     </style>
     @yield('styles')
 </head>
+
 <body>
-<div class="asesor-wrapper">
+    <div class="asesor-wrapper">
 
-    {{-- Sidebar --}}
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <img src="{{ asset('images/lsp.png') }}" alt="Logo LSP" style="width: 54px; height: 54px; object-fit: contain;">
-        </div>
-
-        <nav class="sidebar-menu">
-            <a href="{{ route('asesor.dashboard') }}"
-               class="menu-item {{ request()->routeIs('asesor.dashboard') ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i>
-                <span>Dashboard</span>
-            </a>
-
-            <div class="menu-section-title">PENILAIAN</div>
-
-            <a href="{{ route('asesor.jadwal.index') }}"
-               class="menu-item {{ request()->routeIs('asesor.jadwal.*') ? 'active' : '' }}">
-                <i class="bi bi-calendar3"></i>
-                <span>Jadwal Saya</span>
-            </a>
-
-            <a href="{{ route('asesor.kelompok.index') }}"
-               class="menu-item {{ request()->routeIs('asesor.kelompok.*') ? 'active' : '' }}">
-                <i class="bi bi-people-fill"></i>
-                <span>Kelompok Saya</span>
-            </a>
-
-                <a href="{{ route('asesor.entry-penilaian') }}"
-                    class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') || request()->routeIs('asesor.asesi.review') ? 'active' : '' }}">
-                     <i class="bi bi-journal-check"></i>
-                     <span>Entry Penilaian</span>
-                </a>
-
-            <a href="{{ route('asesor.asesi.index') }}"
-                    class="menu-item {{ request()->routeIs('asesor.asesi.index') ? 'active' : '' }}">
-                <i class="bi bi-people"></i>
-                <span>Daftar Asesi</span>
-            </a>
-
-            <div class="menu-section-title">AKUN</div>
-
-            <a href="#" class="menu-item disabled">
-                <i class="bi bi-person-circle"></i>
-                <span>Profil Saya</span>
-            </a>
-
-            <a href="#" class="menu-item disabled">
-                <i class="bi bi-key"></i>
-                <span>Ubah Password</span>
-            </a>
-        </nav>
-    </aside>
-
-    {{-- Main --}}
-    <main class="main-content">
-        <div class="topbar">
-            <div style="display:flex;align-items:center;gap:14px;">
-                <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('active')">
-                    <i class="bi bi-list"></i>
-                </button>
-                <h1>@yield('page-title', 'Dashboard')</h1>
+        {{-- Sidebar --}}
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ asset('images/lsp.png') }}" alt="Logo LSP"
+                    style="max-width: 120px; max-height: 80px; object-fit: contain;">
             </div>
 
-            <div class="topbar-right">
-                <div class="profile-dropdown" id="profileDropdown">
-                    <button class="profile-toggle" onclick="toggleProfileMenu(event)">
-                        <div class="user-avatar-sm">
-                            {{ strtoupper(substr($asesor->nama ?? 'A', 0, 1)) }}
-                        </div>
-                        <div class="user-details">
-                            <span class="user-name">{{ $asesor->nama ?? 'Asesor' }}</span>
-                            <span class="user-role">Asesor</span>
-                        </div>
-                        <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
-                    </button>
+            <nav class="sidebar-menu">
+                <a href="{{ route('asesor.dashboard') }}"
+                    class="menu-item {{ request()->routeIs('asesor.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
 
-                    <div class="profile-menu" id="profileMenu">
-                        <div class="profile-header">
-                            <div class="profile-avatar-lg">
+                <div class="menu-section-title">PENILAIAN</div>
+
+                <a href="{{ route('asesor.asesi.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.asesi.index') ? 'active' : '' }}">
+                    <i class="bi bi-people"></i>
+                    <span>Daftar Asesi</span>
+                </a>
+                <a href="{{ route('asesor.entry-penilaian') }}"
+                    class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') || request()->routeIs('asesor.asesi.review') ? 'active' : '' }}">
+                    <i class="bi bi-journal-check"></i>
+                    <span>Entry Penilaian</span>
+                </a>
+                <a href="{{ route('asesor.jadwal.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.jadwal.*') ? 'active' : '' }}">
+                    <i class="bi bi-calendar3"></i>
+                    <span>Jadwal</span>
+                </a>
+
+                <a href="{{ route('asesor.kelompok.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.kelompok.*') ? 'active' : '' }}">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Kelompok</span>
+                </a>
+
+                <div class="menu-section-title">AKUN</div>
+
+                <a href="#" class="menu-item disabled">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Profil Saya</span>
+                </a>
+
+                <a href="#" class="menu-item disabled">
+                    <i class="bi bi-key"></i>
+                    <span>Ubah Password</span>
+                </a>
+            </nav>
+        </aside>
+
+        {{-- Main --}}
+        <main class="main-content">
+            <div class="topbar">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="mobile-toggle"
+                        onclick="document.getElementById('sidebar').classList.toggle('active')">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <h1>@yield('page-title', 'Dashboard')</h1>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <button class="profile-toggle" onclick="toggleProfileMenu(event)">
+                            <div class="user-avatar-sm">
                                 {{ strtoupper(substr($asesor->nama ?? 'A', 0, 1)) }}
                             </div>
-                            <div class="profile-header-info">
-                                <h4 class="profile-header-name">{{ $asesor->nama ?? 'Asesor' }}</h4>
-                                <p class="profile-header-role">Asesor LSP</p>
+                            <div class="user-details">
+                                <span class="user-name">{{ $asesor->nama ?? 'Asesor' }}</span>
+                                <span class="user-role">Asesor</span>
                             </div>
-                        </div>
+                            <i class="bi bi-chevron-down" style="font-size: 16px; color: #64748b;"></i>
+                        </button>
 
-                        <div class="profile-body">
-                            <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
-                                <i class="bi bi-person"></i>
-                                <span>Profil</span>
-                            </a>
-                            <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
-                                <i class="bi bi-gear"></i>
-                                <span>Pengaturan</span>
-                            </a>
-                            <div class="profile-divider"></div>
-                            <form method="POST" action="{{ route('asesor.logout') }}"
-                                style="width: 100%; margin: 0;">
-                                @csrf
-                                <button type="submit" class="profile-logout">
-                                    <i class="bi bi-box-arrow-right"></i>
-                                    <span>Logout</span>
-                                </button>
-                            </form>
+                        <div class="profile-menu" id="profileMenu">
+                            <div class="profile-header">
+                                <div class="profile-avatar-lg">
+                                    {{ strtoupper(substr($asesor->nama ?? 'A', 0, 1)) }}
+                                </div>
+                                <div class="profile-header-info">
+                                    <h4 class="profile-header-name">{{ $asesor->nama ?? 'Asesor' }}</h4>
+                                    <p class="profile-header-role">Asesor LSP</p>
+                                </div>
+                            </div>
+
+                            <div class="profile-body">
+                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                    <i class="bi bi-person"></i>
+                                    <span>Profil</span>
+                                </a>
+                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                    <i class="bi bi-gear"></i>
+                                    <span>Pengaturan</span>
+                                </a>
+                                <div class="profile-divider"></div>
+                                <form method="POST" action="{{ route('asesor.logout') }}"
+                                    style="width: 100%; margin: 0;">
+                                    @csrf
+                                    <button type="submit" class="profile-logout">
+                                        <i class="bi bi-box-arrow-right"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="content-wrapper">
-            @if(session('success'))
-                <div class="alert alert-success">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>{!! session('success') !!}</span>
-                </div>
-            @endif
-            @if(session('error'))
-                <div class="alert alert-error">
-                    <i class="bi bi-exclamation-circle-fill"></i>
-                    <span>{{ session('error') }}</span>
-                </div>
-            @endif
+            <div class="content-wrapper">
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>{!! session('success') !!}</span>
+                    </div>
+                @endif
+                @if(session('error'))
+                    <div class="alert alert-error">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                @endif
 
-            @yield('content')
-        </div>
-    </main>
-</div>
+                @yield('content')
+            </div>
+        </main>
+    </div>
 
-<script>
-    function toggleProfileMenu(event) {
-        event.stopPropagation();
-        const menu = document.getElementById('profileMenu');
-        menu.classList.toggle('show');
-    }
-
-    // Close profile menu when clicking outside
-    document.addEventListener('click', function (event) {
-        const profileDropdown = document.getElementById('profileDropdown');
-        const profileMenu = document.getElementById('profileMenu');
-
-        if (profileDropdown && !profileDropdown.contains(event.target)) {
-            if (profileMenu) profileMenu.classList.remove('show');
+    <script>
+        function toggleProfileMenu(event) {
+            event.stopPropagation();
+            const menu = document.getElementById('profileMenu');
+            menu.classList.toggle('show');
         }
-    });
-</script>
 
-@yield('scripts')
+        // Close profile menu when clicking outside
+        document.addEventListener('click', function (event) {
+            const profileDropdown = document.getElementById('profileDropdown');
+            const profileMenu = document.getElementById('profileMenu');
+
+            if (profileDropdown && !profileDropdown.contains(event.target)) {
+                if (profileMenu) profileMenu.classList.remove('show');
+            }
+        });
+    </script>
+
+    @yield('scripts')
 </body>
+
 </html>

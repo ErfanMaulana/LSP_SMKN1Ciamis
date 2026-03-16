@@ -14,7 +14,7 @@
                     ['route' => 'front.home',           'label' => 'Beranda'],
                     ['route' => 'front.profil',         'label' => 'Profil LSP'],
                     ['route' => 'front.kompetensi.index',  'label' => 'Kompetensi & Data Skema'],
-                    ['route' => 'front.berita.index',   'label' => 'Berita'],
+                    ['route' => 'front.daftar',         'label' => 'Daftar LSP'],
                     ['route' => 'front.kontak',         'label' => 'Kontak'],
                 ];
             @endphp

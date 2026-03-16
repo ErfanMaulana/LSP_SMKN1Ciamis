@@ -12,12 +12,6 @@
             <p class="subtitle">Kelola dan pantau semua kandidat dalam sistem sertifikasi.</p>
         </div>
         <div class="header-actions">
-            <button type="button" class="btn btn-outline" onclick="openAsesiExportModal()">
-                <i class="bi bi-download"></i> Export Data Asesi
-            </button>
-            <button type="button" class="btn btn-outline" onclick="openAsesiActivatedImportModal()">
-                <i class="bi bi-file-earmark-arrow-up"></i> Import Data Aktivasi
-            </button>
             <a href="{{ route('admin.asesi.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Tambah Asesi Baru
             </a>
@@ -138,6 +132,12 @@
                 </div>
             </div>
             </form>
+
+            <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+                <button type="button" class="btn btn-outline" onclick="openAsesiExportModal()">
+                    <i class="bi bi-download"></i> Export Data Asesi
+                </button>
+            </div>
 
             <!-- Table -->
             <div class="table-container">
@@ -305,6 +305,9 @@
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
                 <p style="font-size:14px;color:#64748b;margin:0;">Akun berikut memiliki role <strong>asesi</strong> namun tidak memiliki data profil asesi yang terdaftar.</p>
                 <div style="display:flex;gap:10px;">
+                    <button class="btn btn-outline" onclick="openAsesiCreateModal()" style="white-space:nowrap;">
+                        <i class="bi bi-person-plus"></i> Tambah Akun
+                    </button>
                     <button class="btn btn-primary" onclick="openAsesiImportModal()" style="white-space:nowrap;">
                         <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
                     </button>
@@ -440,18 +443,24 @@
                         <span id="export-jurusan-toggle-text">Pilih jurusan</span>
                         <i class="bi bi-chevron-down" style="color:#64748b;"></i>
                     </button>
-                    <div id="export-jurusan-menu" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background:#fff;border:1px solid #e2e8f0;border-radius:8px;max-height:220px;overflow:auto;padding:6px;box-shadow:0 8px 24px rgba(15,23,42,.15);">
+                    <div id="export-jurusan-menu" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:6px;box-shadow:0 8px 24px rgba(15,23,42,.15);min-width:100%;">
+                        <div style="padding:4px 4px 6px;">
+                            <input type="text" id="export-jurusan-search" placeholder="Cari jurusan..." autocomplete="off"
+                                   style="width:100%;padding:8px 10px;border:1px solid #dbe3ee;border-radius:7px;font-size:13px;outline:none;">
+                        </div>
                         <label id="export-jurusan-all-label" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;background:#f0f9ff;">
                             <input type="checkbox" id="export-jurusan-all-cb" style="width:16px;height:16px;accent-color:#0073bd;" checked>
                             <span style="font-size:13px;font-weight:600;color:#0073bd;">Semua Jurusan</span>
                         </label>
                         <div style="height:1px;background:#e2e8f0;margin:4px 0;"></div>
-                        @foreach($jurusanList as $jur)
-                            <label style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;">
-                                <input type="checkbox" class="export-jurusan-option" value="{{ $jur->ID_jurusan }}" data-label="{{ $jur->nama_jurusan }}">
-                                <span style="font-size:14px;color:#1e293b;">{{ $jur->nama_jurusan }}</span>
-                            </label>
-                        @endforeach
+                        <div id="export-jurusan-options" style="max-height:145px;overflow-y:auto;">
+                            @foreach($jurusanList as $jur)
+                                <label class="export-jurusan-item" data-label="{{ strtolower($jur->nama_jurusan) }}" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;width:100%;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                    <input type="checkbox" class="export-jurusan-option" value="{{ $jur->ID_jurusan }}" data-label="{{ $jur->nama_jurusan }}" style="flex-shrink:0;">
+                                    <span style="font-size:13px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;">{{ $jur->nama_jurusan }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
                 <small style="color:#64748b;font-size:12px;display:block;margin-top:4px;">Klik untuk pilih lebih dari satu jurusan.</small>
@@ -465,27 +474,61 @@
                         <span id="export-skema-toggle-text">Pilih skema</span>
                         <i class="bi bi-chevron-down" style="color:#64748b;"></i>
                     </button>
-                    <div id="export-skema-menu" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background:#fff;border:1px solid #e2e8f0;border-radius:8px;max-height:230px;overflow:auto;padding:6px;box-shadow:0 8px 24px rgba(15,23,42,.15);">
+                    <div id="export-skema-menu" style="display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:6px;box-shadow:0 8px 24px rgba(15,23,42,.15);min-width:100%;">
+                        <div style="padding:4px 4px 6px;">
+                            <input type="text" id="export-skema-search" placeholder="Cari skema..." autocomplete="off"
+                                   style="width:100%;padding:8px 10px;border:1px solid #dbe3ee;border-radius:7px;font-size:13px;outline:none;">
+                        </div>
                         <label id="export-skema-all-label" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;background:#f0f9ff;">
                             <input type="checkbox" id="export-skema-all-cb" style="width:16px;height:16px;accent-color:#0073bd;" checked>
                             <span style="font-size:13px;font-weight:600;color:#0073bd;">Semua Skema</span>
                         </label>
                         <div style="height:1px;background:#e2e8f0;margin:4px 0;"></div>
-                        @foreach($skemaList as $skema)
-                            <label class="export-skema-item" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;" data-jurusan="{{ $skema->jurusan_id ?? '' }}">
-                                <input type="checkbox" class="export-skema-option" value="{{ $skema->id }}" data-label="{{ $skema->nama_skema }}" data-jurusan="{{ $skema->jurusan_id ?? '' }}">
-                                <span style="font-size:14px;color:#1e293b;">{{ $skema->nama_skema }}</span>
-                            </label>
-                        @endforeach
+                        <div id="export-skema-options" style="max-height:150px;overflow-y:auto;">
+                            @foreach($skemaList as $skema)
+                                <label class="export-skema-item" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;width:100%;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" data-jurusan="{{ $skema->jurusan_id ?? '' }}" data-label="{{ strtolower($skema->nama_skema) }}">
+                                    <input type="checkbox" class="export-skema-option" value="{{ $skema->id }}" data-label="{{ $skema->nama_skema }}" data-jurusan="{{ $skema->jurusan_id ?? '' }}" style="flex-shrink:0;">
+                                    <span style="font-size:13px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;">{{ $skema->nama_skema }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
                 <small style="color:#64748b;font-size:12px;display:block;margin-top:4px;">Klik untuk pilih lebih dari satu skema.</small>
                 <div id="export-skema-badges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
             </div>
 
+            <div style="margin-bottom:14px;">
+                <label for="export-status-asesmen" style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151;">Filter Status Asesmen</label>
+                <select id="export-status-asesmen" name="status_asesmen" style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#fff;color:#1e293b;">
+                    <option value="">Semua Status</option>
+                    <option value="pending">Menunggu</option>
+                    <option value="approved">Disetujui</option>
+                    <option value="rejected">Ditolak</option>
+                </select>
+                <small style="color:#64748b;font-size:12px;display:block;margin-top:4px;">Bisa ditumpuk dengan filter jurusan dan skema.</small>
+                <div id="export-status-badges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+            </div>
+
+            <div style="margin-bottom:14px;">
+                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151;">Filter Tanggal Daftar</label>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                    <div>
+                        <label for="export-tanggal-dari" style="display:block;font-size:12px;color:#64748b;margin-bottom:4px;">Dari</label>
+                        <input type="date" id="export-tanggal-dari" name="tanggal_dari" style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#fff;color:#1e293b;">
+                    </div>
+                    <div>
+                        <label for="export-tanggal-sampai" style="display:block;font-size:12px;color:#64748b;margin-bottom:4px;">Sampai</label>
+                        <input type="date" id="export-tanggal-sampai" name="tanggal_sampai" style="width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#fff;color:#1e293b;">
+                    </div>
+                </div>
+                <small style="color:#64748b;font-size:12px;display:block;margin-top:4px;">Bisa isi salah satu tanggal saja atau keduanya.</small>
+                <div id="export-tanggal-badges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+            </div>
+
             <div style="background:#eff6ff;border-left:3px solid #0073bd;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:12px;color:#0f3a5f;line-height:1.6;">
                 Export memakai template yang sama: no, nama asesi, nik, tempat lahir, tanggal lahir, jenis kelamin, tempat tinggal, telp, email.
-                Filter jurusan dan skema dapat dipakai bersamaan (ditumpuk).
+                Filter jurusan, skema, status asesmen, dan tanggal daftar dapat dipakai bersamaan (ditumpuk).
             </div>
 
             <div style="display:flex;gap:10px;">
@@ -512,9 +555,10 @@
             <input type="hidden" name="source" value="asesi_tab">
             <div style="margin-bottom:14px;">
                 <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151;">NIK <span style="color:#ef4444;">*</span></label>
-                <input type="text" name="NIK" required maxlength="16" minlength="16" pattern="\d{16}"
+                <input type="text" id="asesi-create-nik" name="NIK" required maxlength="16" minlength="16" pattern="\d{16}" inputmode="numeric"
                        placeholder="Masukkan 16 digit NIK"
                        style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:'Courier New',monospace;letter-spacing:1px;outline:none;box-sizing:border-box;">
+                <small id="asesi-create-nik-error" style="display:none;color:#dc2626;font-size:12px;margin-top:6px;">NIK harus terdiri dari 16 digit angka.</small>
             </div>
             <div style="margin-bottom:18px;">
                 <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151;">Nama Lengkap <span style="color:#ef4444;">*</span></label>
@@ -1354,8 +1398,19 @@
         if (allJurCb) allJurCb.checked = true;
         var allSkemaCb = document.getElementById('export-skema-all-cb');
         if (allSkemaCb) allSkemaCb.checked = true;
+        var statusSelect = document.getElementById('export-status-asesmen');
+        if (statusSelect) statusSelect.value = '';
+        var tanggalDariInput = document.getElementById('export-tanggal-dari');
+        if (tanggalDariInput) tanggalDariInput.value = '';
+        var tanggalSampaiInput = document.getElementById('export-tanggal-sampai');
+        if (tanggalSampaiInput) tanggalSampaiInput.value = '';
+        var jurusanSearchInput = document.getElementById('export-jurusan-search');
+        if (jurusanSearchInput) jurusanSearchInput.value = '';
+        var skemaSearchInput = document.getElementById('export-skema-search');
+        if (skemaSearchInput) skemaSearchInput.value = '';
         document.getElementById('asesi-export-modal').style.display = 'flex';
         closeAllExportDropdowns();
+        applyExportJurusanSearch();
         syncExportSkemaByJurusan();
         renderExportBadges();
     }
@@ -1429,16 +1484,54 @@
     function renderExportBadges() {
         var jurusanLabels = getCheckedLabels('.export-jurusan-option');
         var skemaLabels = getCheckedLabels('.export-skema-option');
+        var statusSelect = document.getElementById('export-status-asesmen');
+        var tanggalDariInput = document.getElementById('export-tanggal-dari');
+        var tanggalSampaiInput = document.getElementById('export-tanggal-sampai');
+
+        var statusLabelMap = {
+            pending: 'Menunggu',
+            approved: 'Disetujui',
+            rejected: 'Ditolak'
+        };
+
+        var statusValue = statusSelect ? statusSelect.value : '';
+        var statusLabels = statusValue ? [statusLabelMap[statusValue] || statusValue] : [];
+
+        var tanggalDari = tanggalDariInput ? tanggalDariInput.value : '';
+        var tanggalSampai = tanggalSampaiInput ? tanggalSampaiInput.value : '';
+        var tanggalLabels = [];
+        if (tanggalDari && tanggalSampai) {
+            tanggalLabels = ['Dari ' + tanggalDari + ' s/d ' + tanggalSampai];
+        } else if (tanggalDari) {
+            tanggalLabels = ['Dari ' + tanggalDari];
+        } else if (tanggalSampai) {
+            tanggalLabels = ['Sampai ' + tanggalSampai];
+        }
 
         renderBadgeList('export-jurusan-badges', jurusanLabels, 'Semua Jurusan');
         renderBadgeList('export-skema-badges', skemaLabels, 'Semua Skema');
+        renderBadgeList('export-status-badges', statusLabels, 'Semua Status');
+        renderBadgeList('export-tanggal-badges', tanggalLabels, 'Semua Tanggal');
         updateExportToggleText();
         rebuildExportHiddenInputs();
+    }
+
+    function applyExportJurusanSearch() {
+        var searchInput = document.getElementById('export-jurusan-search');
+        var keyword = ((searchInput ? searchInput.value : '') || '').trim().toLowerCase();
+
+        Array.from(document.querySelectorAll('.export-jurusan-item')).forEach(function(item) {
+            var label = (item.getAttribute('data-label') || '').toLowerCase();
+            var visible = !keyword || label.indexOf(keyword) !== -1;
+            item.style.display = visible ? '' : 'none';
+        });
     }
 
     function syncExportSkemaByJurusan() {
         var selectedJurusan = getCheckedValues('.export-jurusan-option');
         var useFilter = selectedJurusan.length > 0;
+        var skemaSearchInput = document.getElementById('export-skema-search');
+        var keyword = ((skemaSearchInput ? skemaSearchInput.value : '') || '').trim().toLowerCase();
 
         // Sync "Semua Jurusan" visual state
         var allJurCb = document.getElementById('export-jurusan-all-cb');
@@ -1449,10 +1542,15 @@
             if (!checkbox) return;
 
             var jurusanId = checkbox.getAttribute('data-jurusan') || '';
-            var visible = !useFilter || (jurusanId !== '' && selectedJurusan.indexOf(jurusanId) !== -1);
+            var label = (item.getAttribute('data-label') || '').toLowerCase();
+            var allowedByJurusan = !useFilter || (jurusanId !== '' && selectedJurusan.indexOf(jurusanId) !== -1);
+            var allowedBySearch = !keyword || label.indexOf(keyword) !== -1;
+            var visible = allowedByJurusan && allowedBySearch;
 
             item.style.display = visible ? '' : 'none';
-            if (!visible) checkbox.checked = false;
+
+            // If hidden because selected jurusan doesn't match, uncheck to keep filter valid.
+            if (!allowedByJurusan) checkbox.checked = false;
         });
 
         // Sync "Semua Skema" visual state
@@ -1468,11 +1566,60 @@
         if (el) el.addEventListener('click', function(e) { if (e.target === this) this.style.display = 'none'; });
     });
 
+    function validateAsesiCreateNik(showWhenEmpty) {
+        var input = document.getElementById('asesi-create-nik');
+        var error = document.getElementById('asesi-create-nik-error');
+        if (!input || !error) return true;
+
+        var val = (input.value || '').trim();
+        var valid = /^\d{16}$/.test(val);
+
+        if (!val && !showWhenEmpty) {
+            error.style.display = 'none';
+            return false;
+        }
+
+        if (!valid) {
+            error.style.display = 'block';
+            return false;
+        }
+
+        error.style.display = 'none';
+        return true;
+    }
+
     function openAsesiCreateModal() {
         document.getElementById('asesi-create-modal').style.display = 'flex';
+        validateAsesiCreateNik(false);
     }
     function closeAsesiCreateModal() {
         document.getElementById('asesi-create-modal').style.display = 'none';
+    }
+
+    var asesiCreateNikInput = document.getElementById('asesi-create-nik');
+    if (asesiCreateNikInput) {
+        asesiCreateNikInput.addEventListener('blur', function() {
+            validateAsesiCreateNik(false);
+        });
+
+        asesiCreateNikInput.addEventListener('input', function() {
+            var sanitized = this.value.replace(/\D/g, '').slice(0, 16);
+            if (this.value !== sanitized) this.value = sanitized;
+            if ((this.value || '').length === 16) {
+                validateAsesiCreateNik(false);
+            }
+        });
+    }
+
+    var asesiCreateForm = document.querySelector('#asesi-create-modal form');
+    if (asesiCreateForm) {
+        asesiCreateForm.addEventListener('submit', function(e) {
+            if (!validateAsesiCreateNik(true)) {
+                e.preventDefault();
+                var nikInput = document.getElementById('asesi-create-nik');
+                if (nikInput) nikInput.focus();
+            }
+        });
     }
 
     // Drag-and-drop on import drop zone
@@ -1537,6 +1684,8 @@
     var exportJurusanMenu = document.getElementById('export-jurusan-menu');
     var exportSkemaToggle = document.getElementById('export-skema-toggle');
     var exportSkemaMenu = document.getElementById('export-skema-menu');
+    var exportJurusanSearch = document.getElementById('export-jurusan-search');
+    var exportSkemaSearch = document.getElementById('export-skema-search');
 
     if (exportJurusanToggle && exportJurusanMenu) {
         exportJurusanToggle.addEventListener('click', function(e) {
@@ -1544,6 +1693,10 @@
             var isOpen = exportJurusanMenu.style.display === 'block';
             closeAllExportDropdowns();
             exportJurusanMenu.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen) {
+                applyExportJurusanSearch();
+                if (exportJurusanSearch) exportJurusanSearch.focus();
+            }
         });
     }
 
@@ -1553,6 +1706,22 @@
             var isOpen = exportSkemaMenu.style.display === 'block';
             closeAllExportDropdowns();
             exportSkemaMenu.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen) {
+                syncExportSkemaByJurusan();
+                if (exportSkemaSearch) exportSkemaSearch.focus();
+            }
+        });
+    }
+
+    if (exportJurusanSearch) {
+        exportJurusanSearch.addEventListener('input', function() {
+            applyExportJurusanSearch();
+        });
+    }
+
+    if (exportSkemaSearch) {
+        exportSkemaSearch.addEventListener('input', function() {
+            syncExportSkemaByJurusan();
         });
     }
 
@@ -1602,6 +1771,27 @@
             } else {
                 this.checked = true; // can't uncheck without selecting individual
             }
+            renderExportBadges();
+        });
+    }
+
+    var exportStatusAsesmen = document.getElementById('export-status-asesmen');
+    if (exportStatusAsesmen) {
+        exportStatusAsesmen.addEventListener('change', function() {
+            renderExportBadges();
+        });
+    }
+
+    var exportTanggalDari = document.getElementById('export-tanggal-dari');
+    if (exportTanggalDari) {
+        exportTanggalDari.addEventListener('change', function() {
+            renderExportBadges();
+        });
+    }
+
+    var exportTanggalSampai = document.getElementById('export-tanggal-sampai');
+    if (exportTanggalSampai) {
+        exportTanggalSampai.addEventListener('change', function() {
             renderExportBadges();
         });
     }

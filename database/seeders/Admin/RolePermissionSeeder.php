@@ -1,0 +1,168 @@
+<?php
+
+namespace Database\Seeders\Admin;
+
+use App\Models\Admin;
+use App\Models\Permission;
+use App\Models\Role;
+use Illuminate\Database\Seeder;
+
+class RolePermissionSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $permissionGroups = [
+            'Dashboard' => [
+                'dashboard.view' => 'Lihat Dashboard',
+            ],
+            'Asesor' => [
+                'asesor.view'   => 'Lihat Asesor',
+                'asesor.create' => 'Tambah Asesor',
+                'asesor.edit'   => 'Edit Asesor',
+                'asesor.delete' => 'Hapus Asesor',
+            ],
+            'Asesi' => [
+                'asesi.view'   => 'Lihat Asesi',
+                'asesi.create' => 'Tambah Asesi',
+                'asesi.edit'   => 'Edit Asesi',
+                'asesi.delete' => 'Hapus Asesi',
+            ],
+            'Verifikasi Asesi' => [
+                'verifikasi-asesi.view'    => 'Lihat Verifikasi Asesi',
+                'verifikasi-asesi.approve' => 'Approve Asesi',
+                'verifikasi-asesi.reject'  => 'Reject Asesi',
+            ],
+            'Akun Asesi' => [
+                'akun-asesi.view'   => 'Lihat Akun Asesi',
+                'akun-asesi.create' => 'Tambah Akun Asesi',
+                'akun-asesi.delete' => 'Hapus Akun Asesi',
+                'akun-asesi.reset'  => 'Reset Password Akun Asesi',
+                'akun-asesi.import' => 'Import Akun Asesi',
+            ],
+            'Kelompok' => [
+                'kelompok.view'   => 'Lihat Kelompok',
+                'kelompok.create' => 'Tambah Kelompok',
+                'kelompok.edit'   => 'Edit Kelompok',
+                'kelompok.delete' => 'Hapus Kelompok',
+                'kelompok.manage' => 'Kelola Anggota Kelompok',
+            ],
+            'Mitra' => [
+                'mitra.view'   => 'Lihat Mitra',
+                'mitra.create' => 'Tambah Mitra',
+                'mitra.edit'   => 'Edit Mitra',
+                'mitra.delete' => 'Hapus Mitra',
+            ],
+            'Jurusan' => [
+                'jurusan.view'   => 'Lihat Jurusan',
+                'jurusan.create' => 'Tambah Jurusan',
+                'jurusan.edit'   => 'Edit Jurusan',
+                'jurusan.delete' => 'Hapus Jurusan',
+            ],
+            'Skema' => [
+                'skema.view'   => 'Lihat Skema',
+                'skema.create' => 'Tambah Skema',
+                'skema.edit'   => 'Edit Skema',
+                'skema.delete' => 'Hapus Skema',
+            ],
+            'TUK' => [
+                'tuk.view'   => 'Lihat TUK',
+                'tuk.create' => 'Tambah TUK',
+                'tuk.edit'   => 'Edit TUK',
+                'tuk.delete' => 'Hapus TUK',
+            ],
+            'Jadwal Ujikom' => [
+                'jadwal-ujikom.view'   => 'Lihat Jadwal Ujikom',
+                'jadwal-ujikom.create' => 'Tambah Jadwal Ujikom',
+                'jadwal-ujikom.edit'   => 'Edit Jadwal Ujikom',
+                'jadwal-ujikom.delete' => 'Hapus Jadwal Ujikom',
+                'jadwal-ujikom.status' => 'Ubah Status Jadwal',
+            ],
+            'Penugasan Asesor' => [
+                'penugasan-asesor.view'   => 'Lihat Penugasan Asesor',
+                'penugasan-asesor.assign' => 'Assign Asesor',
+            ],
+            'Asesmen Mandiri' => [
+                'asesmen-mandiri.view' => 'Lihat Asesmen Mandiri',
+            ],
+            'Carousel' => [
+                'carousel.view'   => 'Lihat Carousel',
+                'carousel.create' => 'Tambah Carousel',
+                'carousel.edit'   => 'Edit Carousel',
+                'carousel.delete' => 'Hapus Carousel',
+            ],
+            'Berita' => [
+                'berita.view'   => 'Lihat Berita',
+                'berita.create' => 'Tambah Berita',
+                'berita.edit'   => 'Edit Berita',
+                'berita.delete' => 'Hapus Berita',
+            ],
+            'Kontak' => [
+                'kontak.view' => 'Lihat Kontak',
+                'kontak.edit' => 'Edit Kontak',
+            ],
+            'Sosial Media' => [
+                'socialmedia.view'   => 'Lihat Sosial Media',
+                'socialmedia.create' => 'Tambah Sosial Media',
+                'socialmedia.edit'   => 'Edit Sosial Media',
+                'socialmedia.delete' => 'Hapus Sosial Media',
+            ],
+            'Konten Profil' => [
+                'profile-content.view'   => 'Lihat Konten Profil',
+                'profile-content.create' => 'Tambah Konten Profil',
+                'profile-content.edit'   => 'Edit Konten Profil',
+                'profile-content.delete' => 'Hapus Konten Profil',
+            ],
+            'Manajemen Admin' => [
+                'admin.view'   => 'Lihat Admin',
+                'admin.create' => 'Tambah Admin',
+                'admin.edit'   => 'Edit Admin',
+                'admin.delete' => 'Hapus Admin',
+            ],
+            'Role & Permission' => [
+                'role.view'   => 'Lihat Role',
+                'role.create' => 'Tambah Role',
+                'role.edit'   => 'Edit Role',
+                'role.delete' => 'Hapus Role',
+            ],
+        ];
+
+        $allPermissionIds = [];
+        foreach ($permissionGroups as $group => $permissions) {
+            foreach ($permissions as $name => $displayName) {
+                $perm = Permission::firstOrCreate(
+                    ['name' => $name],
+                    ['display_name' => $displayName, 'group' => $group]
+                );
+                $allPermissionIds[] = $perm->id;
+            }
+        }
+
+        $superAdmin = Role::firstOrCreate(
+            ['name' => 'super-admin'],
+            [
+                'display_name' => 'Super Admin',
+                'description'  => 'Full access to all features',
+                'is_super_admin' => true,
+            ]
+        );
+        $superAdmin->permissions()->sync($allPermissionIds);
+
+        $operator = Role::firstOrCreate(
+            ['name' => 'operator'],
+            [
+                'display_name' => 'Operator',
+                'description'  => 'Manages day-to-day operations',
+                'is_super_admin' => false,
+            ]
+        );
+        $operatorPerms = Permission::whereIn('group', [
+            'Dashboard', 'Asesi', 'Verifikasi Asesi', 'Akun Asesi', 'Kelompok',
+        ])->pluck('id');
+        $operator->permissions()->sync($operatorPerms);
+
+        $admin = Admin::first();
+        if ($admin && !$admin->roles()->where('role_id', $superAdmin->id)->exists()) {
+            $admin->roles()->attach($superAdmin->id);
+        }
+    }
+}

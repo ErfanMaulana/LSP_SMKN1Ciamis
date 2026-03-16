@@ -376,13 +376,15 @@
                 identifierLabel:       'NIK (NOMOR INDUK KEPENDUDUKAN)',
                 identifierIcon:        'bi-person-vcard',
                 identifierPlaceholder: 'Masukkan NIK Anda',
+                    maxlength:             16,
             },
             asesor: {
                 panelTitle:            'Portal Asesor',
                 panelDesc:             'Kelola penilaian dan hasil uji kompetensi peserta.',
                 identifierLabel:       'No MET',
                 identifierIcon:        'bi-card-text',
-                identifierPlaceholder: 'Masukkan nomor MET',
+                identifierPlaceholder: 'Masukkan nomor registrasi',
+                    maxlength:             50,
             },
         };
 
@@ -421,6 +423,7 @@
             identifierLabel.textContent = cfg.identifierLabel;
             identifierIcon.className    = `bi ${cfg.identifierIcon} input-icon`;
             identifierInput.placeholder = cfg.identifierPlaceholder;
+                identifierInput.maxLength   = cfg.maxlength;
         }
 
         roleSelect.addEventListener('change', () => {

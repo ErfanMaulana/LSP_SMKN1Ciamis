@@ -14,167 +14,31 @@
         gap: 12px;
     }
     .page-header h2 { font-size: 22px; font-weight: 700; color: #0F172A; margin: 0; }
-    .page-header p  { font-size: 14px; color: #64748b; margin: 4px 0 0; }
+    .page-header p  { font-size: 13px; color: #64748b; margin: 4px 0 0; }
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
         margin-bottom: 24px;
     }
-
-    .stat-card {
-        background: white;
-        border-radius: 12px;
-        padding: 20px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s;
-        text-decoration: none;
-        cursor: pointer;
-        border: 2px solid transparent;
-    }
-
-    .stat-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.2);
-        transform: translateY(-2px);
-        border-color: #bfdbfe;
-    }
-
-    .stat-card-active {
-        border-color: #0073bd !important;
-        box-shadow: 0 4px 16px rgba(0, 115, 189, 0.25) !important;
-        background: #f0f9ff;
-    }
-
+    .stat-card { background: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s; }
+    .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
     .stat-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        color: white;
-        flex-shrink: 0;
+        width: 50px; height: 50px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px; color: #fff; flex-shrink: 0;
     }
-
-    .stat-icon.blue { background: linear-gradient(135deg, #0073bd, #0073bd); }
-    .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
-    .stat-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
-
-    .stat-content {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .stat-label {
-        font-size: 10px;
-        font-weight: 600;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 4px;
-    }
-
-    .stat-value {
-        font-size: 28px;
-        font-weight: 700;
-        color: #0F172A;
-        display: flex;
-        align-items: baseline;
-        gap: 8px;
-        flex-wrap: wrap;
-    }
+    .stat-icon.blue   { background: linear-gradient(135deg,#0073bd,#0061a5); }
+    .stat-icon.green  { background: linear-gradient(135deg,#10b981,#059669); }
+    .stat-icon.red    { background: linear-gradient(135deg,#ef4444,#dc2626); }
+    .stat-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing:.5px; }
+    .stat-value { font-size: 26px; font-weight: 700; color: #0F172A; line-height: 1.2; margin-top: 2px; }
 
     .toolbar {
         display: flex; align-items: center; justify-content: space-between;
         gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
     }
-    .filter-section {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 0;
-        flex-wrap: wrap;
-    }
-    .search-box {
-        flex: 1;
-        min-width: 300px;
-        position: relative;
-    }
-    .search-box i {
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
-        font-size: 16px;
-    }
-    .search-box input {
-        width: 100%;
-        padding: 10px 14px 10px 42px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 14px;
-        transition: all 0.2s;
-    }
-    .search-box input:focus {
-        outline: none;
-        border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
-    }
-    .filter-group {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-    .filter-select {
-        padding: 10px 36px 10px 14px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 14px;
-        background: white;
-        cursor: pointer;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        transition: all 0.2s;
-    }
-    .filter-select:hover {
-        border-color: #cbd5e1;
-    }
-    .btn-filter-search {
-        padding: 9px 14px;
-        background: #0073bd;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        transition: background 0.2s;
-    }
-    .btn-filter-search:hover { background: #005f99; }
-    .btn-filter-reset {
-        padding: 9px 12px;
-        background: #fee2e2;
-        color: #dc2626;
-        border: none;
-        border-radius: 8px;
-        font-size: 13px;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        text-decoration: none;
-        transition: all 0.2s;
-    }
-    .btn-filter-reset:hover { background: #fecaca; }
-    .btn-filter-reset.hidden { display: none !important; }
     .filter-form { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
     .filter-form input, .filter-form select {
         padding: 9px 14px; border: 1px solid #d1d5db; border-radius: 8px;
@@ -187,19 +51,18 @@
         border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
     }
     .btn-add {
-        padding: 10px 20px; background: #0073bd; color: #fff;
-        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
-        cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-        white-space: nowrap; transition: all 0.2s;
+        padding: 9px 18px; background: #0061a5; color: #fff;
+        border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+        cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        white-space: nowrap;
     }
     .btn-add:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
 
-    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: visible; padding-bottom: 200px; margin-bottom: -200px; }
-    .card-body { padding: 24px; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
     th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #64748b;
          text-transform: uppercase; letter-spacing: .5px; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
-    td { padding: 14px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f1f5f9; vertical-align: middle; overflow: visible; }
+    td { padding: 14px 16px; font-size: 13px; color: #374151; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f8fafc; }
 
@@ -216,12 +79,11 @@
     .action-menu { position: relative; }
     .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
     .action-btn:hover { background: #f1f5f9; }
-    .action-dropdown { display: none; position: fixed; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 170px; z-index: 9990; overflow: visible; }
+    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 170px; z-index: 10; overflow: hidden; }
     .action-dropdown.show { display: block; }
     .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
     .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
-    .action-dropdown form:not(:last-of-type) button:hover { background: #dcfce7; color: #16a34a; }
-    .action-dropdown form:last-of-type button:hover { background: #fef2f2; color: #dc2626; }
+    .action-dropdown button[type="submit"]:last-child:hover { background: #fef2f2; color: #dc2626; }
 
     .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
     .empty-state i { font-size: 48px; margin-bottom: 12px; display: block; }
@@ -240,7 +102,7 @@
         <p>Kelola data tempat uji kompetensi untuk pelaksanaan ujian sertifikasi</p>
     </div>
     <a href="{{ route('admin.tuk.create') }}" class="btn-add">
-        <i class="bi bi-plus-circle"></i> Tambah TUK
+        <i class="bi bi-plus-lg"></i> Tambah TUK
     </a>
 </div>
 
@@ -248,21 +110,21 @@
 <div class="stats-grid">
     <div class="stat-card">
         <div class="stat-icon blue"><i class="bi bi-building"></i></div>
-        <div class="stat-content">
+        <div>
             <div class="stat-label">Total TUK</div>
             <div class="stat-value">{{ $stats['total'] }}</div>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-icon blue"><i class="bi bi-check-circle"></i></div>
-        <div class="stat-content">
+        <div>
             <div class="stat-label">TUK Aktif</div>
             <div class="stat-value">{{ $stats['aktif'] }}</div>
         </div>
     </div>
     <div class="stat-card">
         <div class="stat-icon blue"><i class="bi bi-x-circle"></i></div>
-        <div class="stat-content">
+        <div>
             <div class="stat-label">Non-Aktif</div>
             <div class="stat-value">{{ $stats['nonaktif'] }}</div>
         </div>
@@ -270,50 +132,37 @@
 </div>
 
 <!-- Toolbar -->
-<div class="card">
-    <div class="card-body">
-        <form method="GET" id="filterForm">
-        <div class="filter-section">
-            <div class="search-box">
-                <i class="bi bi-search"></i>
-                <input type="text" name="search" id="searchInput" placeholder="Cari nama TUK, kode, kota..."
-                       value="{{ $search }}" autocomplete="off">
-            </div>
-            <div class="filter-group">
-                <select class="filter-select" name="status" onchange="performAjaxSearch()">
-                    <option value="all"     {{ $status === 'all'     ? 'selected' : '' }}>Semua Status</option>
-                    <option value="aktif"   {{ $status === 'aktif'   ? 'selected' : '' }}>Aktif</option>
-                    <option value="nonaktif"{{ $status === 'nonaktif'? 'selected' : '' }}>Non-Aktif</option>
-                </select>
-                <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
-                    <i class="bi bi-search"></i>
-                </button>
-                <button type="button" id="resetButton" class="btn-filter-reset hidden" onclick="resetFilters()" title="Reset filter">
-                     <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-        </div>
-        </form>
+<form method="GET" class="toolbar">
+    <div class="filter-form">
+        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama TUK, kode, kota...">
+        <select name="status">
+            <option value="all"     {{ $status === 'all'     ? 'selected' : '' }}>Semua Status</option>
+            <option value="aktif"   {{ $status === 'aktif'   ? 'selected' : '' }}>Aktif</option>
+            <option value="nonaktif"{{ $status === 'nonaktif'? 'selected' : '' }}>Non-Aktif</option>
+        </select>
+        <button type="submit" class="btn-search"><i class="bi bi-search"></i> Cari</button>
+        @if($search || $status !== 'all')
+        <a href="{{ route('admin.tuk.index') }}" style="padding:9px 14px;color:#64748b;text-decoration:none;font-size:13px;">Reset</a>
+        @endif
     </div>
-</div>
+</form>
 
 <!-- Table -->
 <div class="card">
-    <div class="card-body">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Nama TUK</th>
-                    <th>Tipe</th>
-                    <th>Kota</th>
-                    <th>Kapasitas</th>
-                    <th>Jadwal</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-        <tbody id="tukTableBody">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Nama TUK</th>
+                <th>Tipe</th>
+                <th>Kota</th>
+                <th>Kapasitas</th>
+                <th>Jadwal</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
             @forelse($tuks as $i => $tuk)
             <tr>
                 <td style="color:#94a3b8;font-weight:600;">{{ $tuks->firstItem() + $i }}</td>
@@ -344,7 +193,7 @@
                 </td>
                 <td>
                     <div class="action-menu">
-                        <button class="action-btn" onclick="toggleMenu(event, this)">
+                        <button class="action-btn" onclick="toggleMenu(this)">
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <div class="action-dropdown">
@@ -384,7 +233,6 @@
             @endforelse
         </tbody>
     </table>
-    </div>
     @if($tuks->hasPages())
     <div class="pagination-wrap">{{ $tuks->links() }}</div>
     @endif
@@ -394,117 +242,16 @@
 
 @section('scripts')
 <script>
-    // Perform AJAX search and filter
-    function performAjaxSearch() {
-        const formData = new FormData(document.getElementById('filterForm'));
-        const params = new URLSearchParams(formData);
-        
-        fetch('{{ route("admin.tuk.index") }}?' + params.toString(), {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'text/html'
-            }
-        })
-        .then(response => response.text())
-        .then(html => {
-            // Replace table body with new rows
-            const tableBody = document.getElementById('tukTableBody');
-            if (tableBody) {
-                tableBody.innerHTML = html;
-            }
-            // Re-attach event listeners to action menus
-            attachActionMenuListeners();
-        })
-        .catch(error => console.error('Search error:', error));
-    }
-
-    // Real-time search on input
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                performAjaxSearch();
-            }
-        });
-        searchInput.addEventListener('input', function(e) {
-            performAjaxSearch();
-        });
-    }
-
-    // Attach click handlers to action menus
-    function attachActionMenuListeners() {
-        document.querySelectorAll('.action-btn').forEach(btn => {
-            btn.removeEventListener('click', toggleMenu);
-            btn.addEventListener('click', function() { toggleMenu(this); });
-        });
-    }
-
-    // Initial attachment
-    attachActionMenuListeners();
-
-    // Check filter state and show/hide reset button
-    function updateResetButtonVisibility() {
-        const searchInput = document.getElementById('searchInput');
-        const statusSelect = document.querySelector('select[name="status"]');
-        const resetButton = document.getElementById('resetButton');
-        
-        const hasSearch = searchInput.value.trim() !== '';
-        const hasStatusFilter = statusSelect.value !== 'all';
-        
-        if (hasSearch || hasStatusFilter) {
-            resetButton.classList.remove('hidden');
-        } else {
-            resetButton.classList.add('hidden');
-        }
-    }
-
-    // Reset filters
-    function resetFilters() {
-        document.getElementById('searchInput').value = '';
-        document.querySelector('select[name="status"]').value = 'all';
-        updateResetButtonVisibility();
-        performAjaxSearch();
-    }
-
-    // Add event listeners to show/hide reset button
-    document.getElementById('searchInput').addEventListener('input', updateResetButtonVisibility);
-    document.querySelector('select[name="status"]').addEventListener('change', updateResetButtonVisibility);
-
-    // Initial check
-    updateResetButtonVisibility();
-
-    function toggleMenu(event, button) {
-        event.stopPropagation();
-        const dropdown = button.nextElementSibling;
-        const isOpen = dropdown.classList.contains('show');
-
-        // Close all open dropdowns
-        document.querySelectorAll('.action-dropdown.show').forEach(d => {
-            d.classList.remove('show');
-            d.style.top = '';
-            d.style.left = '';
-        });
-
-        if (!isOpen) {
-            const rect = button.getBoundingClientRect();
-            dropdown.classList.add('show');
-            // Position below the button, aligned to its right edge
-            const dropW = 170;
-            let left = rect.right - dropW;
-            if (left < 8) left = 8;
-            dropdown.style.top  = (rect.bottom + 4) + 'px';
-            dropdown.style.left = left + 'px';
-        }
-    }
-    document.addEventListener('click', e => {
-        if (!e.target.closest('.action-menu')) {
-            document.querySelectorAll('.action-dropdown.show').forEach(d => {
-                d.classList.remove('show');
-                d.style.top = '';
-                d.style.left = '';
-            });
-        }
+function toggleMenu(button) {
+    document.querySelectorAll('.action-dropdown.show').forEach(d => {
+        if (d !== button.nextElementSibling) d.classList.remove('show');
     });
+    button.nextElementSibling.classList.toggle('show');
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.action-menu')) {
+        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
+    }
+});
 </script>
 @endsection

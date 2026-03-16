@@ -18,7 +18,7 @@
     }
 
     .back-link:hover {
-        color: #0073bd;
+        color: #16a34a;
     }
 
     .skema-header {
@@ -42,7 +42,7 @@
     .skema-header-icon {
         width: 56px;
         height: 56px;
-        background: linear-gradient(135deg, #0073bd 0%, #0061a5 100%);
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -90,8 +90,8 @@
     }
 
     .instructions-box {
-        background: #f0f9ff;
-        border: 1px solid #bfdbfe;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 24px;
@@ -99,7 +99,7 @@
 
     .instructions-box h3 {
         font-size: 15px;
-        color: #0061a5;
+        color: #166534;
         margin-bottom: 12px;
         display: flex;
         align-items: center;
@@ -113,7 +113,7 @@
 
     .instructions-box li {
         font-size: 13px;
-        color: #0c4a6e;
+        color: #15803d;
         margin-bottom: 6px;
         line-height: 1.5;
     }
@@ -132,7 +132,7 @@
     }
 
     .unit-header {
-        background: #0061a5;
+        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
         padding: 20px 24px;
         color: white;
     }
@@ -208,7 +208,7 @@
     .elemen-number {
         font-size: 12px;
         font-weight: 700;
-        color: #0073bd;
+        color: #16a34a;
         margin-bottom: 4px;
     }
 
@@ -241,13 +241,13 @@
     .radio-option input[type="radio"] {
         width: 18px;
         height: 18px;
-        accent-color: #0073bd;
+        accent-color: #16a34a;
     }
 
     .radio-option.kompeten span {
         font-size: 13px;
         font-weight: 600;
-        color: #0073bd;
+        color: #16a34a;
     }
 
     .radio-option.belum span {
@@ -314,8 +314,8 @@
 
     .bukti-input:focus {
         outline: none;
-        border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+        border-color: #16a34a;
+        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
     }
 
     .bukti-input::placeholder {
@@ -344,7 +344,7 @@
     }
 
     .progress-info strong {
-        color: #0073bd;
+        color: #16a34a;
     }
 
     .btn-group {
@@ -376,13 +376,13 @@
     }
 
     .btn-submit {
-        background: linear-gradient(135deg, #0073bd 0%, #0061a5 100%);
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
         color: white;
     }
 
     .btn-submit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.4);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
     }
 
     /* Rekomendasi Banner */
@@ -397,8 +397,8 @@
     }
 
     .rekomendasi-banner.lanjut {
-        background: #f0f9ff;
-        border-color: #0073bd;
+        background: #f0fdf4;
+        border-color: #22c55e;
     }
 
     .rekomendasi-banner.tidak_lanjut {
@@ -418,8 +418,8 @@
     }
 
     .rekomendasi-banner.lanjut .banner-icon {
-        background: #dbeafe;
-        color: #0073bd;
+        background: #dcfce7;
+        color: #16a34a;
     }
 
     .rekomendasi-banner.tidak_lanjut .banner-icon {
@@ -439,7 +439,7 @@
         flex-wrap: wrap;
     }
 
-    .rekomendasi-banner.lanjut .banner-title { color: #0c4a6e; }
+    .rekomendasi-banner.lanjut .banner-title { color: #15803d; }
     .rekomendasi-banner.tidak_lanjut .banner-title { color: #be123c; }
 
     .rekomendasi-banner .banner-meta {
@@ -458,7 +458,7 @@
         border-left: 3px solid;
     }
 
-    .rekomendasi-banner.lanjut .banner-catatan { border-color: #0073bd; }
+    .rekomendasi-banner.lanjut .banner-catatan { border-color: #22c55e; }
     .rekomendasi-banner.tidak_lanjut .banner-catatan { border-color: #f43f5e; }
 
     .rekomendasi-badge-pill {
@@ -471,7 +471,7 @@
         font-weight: 700;
     }
 
-    .rekomendasi-badge-pill.lanjut { background: #dbeafe; color: #0c4a6e; }
+    .rekomendasi-badge-pill.lanjut { background: #dcfce7; color: #15803d; }
     .rekomendasi-badge-pill.tidak_lanjut { background: #ffe4e6; color: #be123c; }
 
     /* Signature Pad */
@@ -510,13 +510,13 @@
     }
 
     .signature-canvas-wrapper.active {
-        border-color: #0073bd;
+        border-color: #16a34a;
         background: #fff;
     }
 
     .signature-canvas-wrapper.has-signature {
         border-style: solid;
-        border-color: #0073bd;
+        border-color: #16a34a;
     }
 
     .signature-canvas {
@@ -608,7 +608,7 @@
     .signature-saved-meta {
         margin-top: 10px;
         font-size: 13px;
-        color: #0073bd;
+        color: #16a34a;
         font-weight: 600;
         display: flex;
         align-items: center;
@@ -663,7 +663,9 @@
 @endsection
 
 @section('content')
-
+<a href="{{ route('asesi.asesmen-mandiri.index') }}" class="back-link">
+    <i class="bi bi-arrow-left"></i> Kembali ke Daftar Skema
+</a>
 
 <!-- Skema Header -->
 <div class="skema-header">
@@ -882,8 +884,8 @@
                         <div style="font-size:12px;color:#64748b;margin-top:4px;">Asesmen dapat / tidak dapat dilanjutkan</div>
                     </td>
                     <td style="border:1px solid #d1d5db;padding:14px 20px;">
-                        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:2px solid {{ $pivot->rekomendasi === 'lanjut' ? '#0073bd' : '#dc2626' }};background:{{ $pivot->rekomendasi === 'lanjut' ? '#f0f9ff' : '#fff1f2' }};">
-                            <span style="font-weight:600;color:{{ $pivot->rekomendasi === 'lanjut' ? '#0c4a6e' : '#991b1b' }};">
+                        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:2px solid {{ $pivot->rekomendasi === 'lanjut' ? '#059669' : '#dc2626' }};background:{{ $pivot->rekomendasi === 'lanjut' ? '#f0fdf4' : '#fff1f2' }};">
+                            <span style="font-weight:600;color:{{ $pivot->rekomendasi === 'lanjut' ? '#065f46' : '#991b1b' }};">
                                 {{ $pivot->rekomendasi === 'lanjut' ? '✓' : '✗' }} &nbsp;Asesmen <u>{{ $pivot->rekomendasi === 'lanjut' ? 'dapat' : 'tidak dapat' }}</u> dilanjutkan
                             </span>
                         </div>
@@ -982,13 +984,13 @@
                 <i class="bi bi-lock-fill" style="color:#94a3b8;"></i> Asesmen telah direkomendasikan asesor — tidak dapat diubah
             </span>
             @elseif($pivot && $pivot->status === 'selesai')
-            <div style="display:flex;align-items:center;gap:12px;background:#f0f9ff;border:1px solid #bfdbfe;border-radius:10px;padding:14px 20px;">
-                <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#a0d3ff);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                    <i class="bi bi-hourglass-split" style="font-size:18px;color:#0c4a6e;"></i>
+            <div style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d1fae5,#a7f3d0);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-hourglass-split" style="font-size:18px;color:#065f46;"></i>
                 </div>
                 <div>
-                    <div style="font-size:13.5px;font-weight:700;color:#0c4a6e;">Asesmen Selesai — Menunggu Rekomendasi Asesor</div>
-                    <div style="font-size:12.5px;color:#0061a5;margin-top:2px;">Jawaban Anda telah tersimpan. Mohon tunggu hingga asesor memberikan rekomendasi untuk melanjutkan proses sertifikasi.</div>
+                    <div style="font-size:13.5px;font-weight:700;color:#065f46;">Asesmen Selesai — Menunggu Rekomendasi Asesor</div>
+                    <div style="font-size:12.5px;color:#166534;margin-top:2px;">Jawaban Anda telah tersimpan. Mohon tunggu hingga asesor memberikan rekomendasi untuk melanjutkan proses sertifikasi.</div>
                 </div>
             </div>
             @else

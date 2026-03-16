@@ -8,8 +8,6 @@ use App\Http\Controllers\Admin\JurusanController;
 use App\Http\Controllers\Admin\CarouselController;
 use App\Http\Controllers\Admin\SkemaController;
 use App\Http\Controllers\Admin\SocialMediaController;
-use App\Http\Controllers\Admin\BeritaController;
-use App\Http\Controllers\Admin\KontakController;
 use App\Http\Controllers\Admin\ProfileContentController;
 use App\Http\Controllers\Admin\TukController;
 use App\Http\Controllers\Admin\JadwalUjikomController;
@@ -21,6 +19,9 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\AdminManagementController;
 use App\Http\Controllers\Admin\AsesmenMandiriController;
 use App\Http\Controllers\Admin\NilaiAsesorController;
+use App\Http\Controllers\Admin\BeritaController;
+use App\Http\Controllers\Admin\KontakController;
+use App\Http\Controllers\Admin\MitraController;
 
 /*
 |--------------------------------------------------------------------------
@@ -78,6 +79,16 @@ Route::prefix('admin')->group(function () {
             Route::delete('/asesor/{ID_asesor}', [AsesorController::class, 'destroy'])->name('admin.asesor.destroy')->middleware('permission:asesor.delete');
         });
         
+        // Mitra CRUD
+        Route::middleware('permission:mitra.view')->group(function () {
+            Route::get('/mitra', [MitraController::class, 'index'])->name('admin.mitra.index');
+            Route::get('/mitra/create', [MitraController::class, 'create'])->name('admin.mitra.create')->middleware('permission:mitra.create');
+            Route::post('/mitra', [MitraController::class, 'store'])->name('admin.mitra.store')->middleware('permission:mitra.create');
+            Route::get('/mitra/{no_mou}/edit', [MitraController::class, 'edit'])->name('admin.mitra.edit')->middleware('permission:mitra.edit');
+            Route::put('/mitra/{no_mou}', [MitraController::class, 'update'])->name('admin.mitra.update')->middleware('permission:mitra.edit');
+            Route::delete('/mitra/{no_mou}', [MitraController::class, 'destroy'])->name('admin.mitra.destroy')->middleware('permission:mitra.delete');
+        });
+
         // Jurusan CRUD
         Route::middleware('permission:jurusan.view')->group(function () {
             Route::get('/jurusan', [JurusanController::class, 'index'])->name('admin.jurusan.index');
@@ -121,7 +132,7 @@ Route::prefix('admin')->group(function () {
             Route::delete('/berita/{id}', [BeritaController::class, 'destroy'])->name('admin.berita.destroy')->middleware('permission:berita.delete');
         });
 
-        // Kontak (Information Only)
+        // Kontak (single page CRUD)
         Route::middleware('permission:kontak.view')->group(function () {
             Route::get('/kontak', [KontakController::class, 'index'])->name('admin.kontak.index');
             Route::get('/kontak/edit', [KontakController::class, 'edit'])->name('admin.kontak.edit')->middleware('permission:kontak.edit');

@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use Database\Seeders\Profiles\DemoSeeder;
+use Database\Seeders\Profiles\DeploySeeder;
+use Database\Seeders\Profiles\TestingSeeder;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,28 +17,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create test user only if not exists
-        if (!User::where('email', 'test@example.com')->exists()) {
-            User::factory()->create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
-            ]);
+        $profile = env('SEED_PROFILE');
+
+        if (!$profile) {
+            $profile = app()->environment('production') ? 'deploy' : 'testing';
         }
 
-        // Run all seeders
-        $this->call([
-            AdminSeeder::class,
-            JurusanSeeder::class,
-            MitraSeeder::class,
-            AsesorSeeder::class,
-            AsesiSeeder::class,
-            SkemaSeederRPL::class,
-            SkemaDKVSeeder::class,
-            SkemaKLNSeeder::class,
-            SkemaMPLBSeeder::class,
-            SkemaPMSeeder::class,
-            SkemaAKLSeeder::class,            SkemaHTLSeeder::class,            ProfileContentSeeder::class,
-            ProfileVisionMissionSeeder::class,
-        ]);
+        match ($profile) {
+            'deploy' => $this->call([DeploySeeder::class]),
+            'demo' => $this->call([DemoSeeder::class]),
+            default => $this->call([TestingSeeder::class]),
+        };
     }
 }

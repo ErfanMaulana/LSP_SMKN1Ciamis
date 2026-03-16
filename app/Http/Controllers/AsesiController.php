@@ -340,7 +340,7 @@ class AsesiController extends Controller
     }
 
     /**
-     * Export data asesi aktivasi dengan filter jurusan + skema (bisa ditumpuk).
+     * Export data asesi aktivasi dengan filter jurusan, skema, status, dan tanggal daftar (bisa ditumpuk).
      */
     public function exportActivated(Request $request)
     {
@@ -349,6 +349,9 @@ class AsesiController extends Controller
             'jurusan.*' => 'nullable|exists:jurusan,ID_jurusan',
             'skema' => 'nullable|array',
             'skema.*' => 'nullable|exists:skemas,id',
+            'status_asesmen' => 'nullable|in:pending,approved,rejected',
+            'tanggal_dari' => 'nullable|date',
+            'tanggal_sampai' => 'nullable|date',
         ]);
 
         $query = Asesi::query()
@@ -367,6 +370,27 @@ class AsesiController extends Controller
             $query->whereHas('skemas', function ($q) use ($skemaIds) {
                 $q->whereIn('skemas.id', $skemaIds);
             });
+        }
+
+        $statusAsesmen = $validated['status_asesmen'] ?? null;
+        if (!empty($statusAsesmen)) {
+            $query->where('status', $statusAsesmen);
+        }
+
+        $tanggalDari = $validated['tanggal_dari'] ?? null;
+        $tanggalSampai = $validated['tanggal_sampai'] ?? null;
+
+        // Keep date range usable even if user selects dates in reverse order.
+        if (!empty($tanggalDari) && !empty($tanggalSampai) && $tanggalDari > $tanggalSampai) {
+            [$tanggalDari, $tanggalSampai] = [$tanggalSampai, $tanggalDari];
+        }
+
+        if (!empty($tanggalDari)) {
+            $query->whereDate('created_at', '>=', $tanggalDari);
+        }
+
+        if (!empty($tanggalSampai)) {
+            $query->whereDate('created_at', '<=', $tanggalSampai);
         }
 
         $asesiRows = $query->orderBy('nama')->get();
