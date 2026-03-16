@@ -69,32 +69,35 @@
                 <h3>Permissions</h3>
                 <p style="font-size:13px;color:#64748b;margin-bottom:20px;">Centang permission yang akan diberikan ke role ini.</p>
 
-                <div class="permission-groups">
-                    @foreach($permissions as $group => $perms)
-                    <div class="permission-group">
-                        <div class="permission-group-header">
-                            <label class="group-toggle">
-                                <input type="checkbox" class="group-checkbox" data-group="{{ Str::slug($group) }}"
-                                    onchange="toggleGroup(this)">
-                                <span>{{ $group }}</span>
-                                <small>({{ $perms->count() }})</small>
-                            </label>
+                @foreach($permissionModules as $module => $groups)
+                    <div class="module-title">{{ $module }}</div>
+                    <div class="permission-groups" style="margin-bottom: 18px;">
+                        @foreach($groups as $group => $perms)
+                        <div class="permission-group">
+                            <div class="permission-group-header">
+                                <label class="group-toggle">
+                                    <input type="checkbox" class="group-checkbox" data-group="{{ Str::slug($group) }}"
+                                        onchange="toggleGroup(this)">
+                                    <span>{{ $group }}</span>
+                                    <small>({{ $perms->count() }})</small>
+                                </label>
+                            </div>
+                            <div class="permission-group-body">
+                                @foreach($perms as $perm)
+                                <label class="permission-item">
+                                    <input type="checkbox" name="permissions[]" value="{{ $perm->id }}"
+                                           class="perm-checkbox group-{{ Str::slug($group) }}"
+                                           {{ in_array($perm->id, old('permissions', $rolePermissionIds)) ? 'checked' : '' }}
+                                           onchange="updateGroupCheckbox('{{ Str::slug($group) }}')">
+                                    <span>{{ $perm->display_name }}</span>
+                                    <code>{{ $perm->name }}</code>
+                                </label>
+                                @endforeach
+                            </div>
                         </div>
-                        <div class="permission-group-body">
-                            @foreach($perms as $perm)
-                            <label class="permission-item">
-                                <input type="checkbox" name="permissions[]" value="{{ $perm->id }}"
-                                       class="perm-checkbox group-{{ Str::slug($group) }}"
-                                       {{ in_array($perm->id, old('permissions', $rolePermissionIds)) ? 'checked' : '' }}
-                                       onchange="updateGroupCheckbox('{{ Str::slug($group) }}')">
-                                <span>{{ $perm->display_name }}</span>
-                                <code>{{ $perm->name }}</code>
-                            </label>
-                            @endforeach
-                        </div>
+                        @endforeach
                     </div>
-                    @endforeach
-                </div>
+                @endforeach
             </div>
             @endif
 
@@ -158,6 +161,15 @@
 
     .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
     .alert-danger { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+
+    .module-title {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        color: #64748b;
+        text-transform: uppercase;
+        margin: 8px 0 10px;
+    }
 
     .permission-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
     .permission-group { border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; background: #fafbfc; }

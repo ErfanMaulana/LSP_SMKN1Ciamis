@@ -18,7 +18,7 @@ use App\Http\Controllers\Front\KontakController;
 
 Route::name('front.')->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
-    Route::redirect('/daftar-lsp', '/#daftar-lsp')->name('daftar');
+    Route::redirect('/daftar-lsp', '/berita')->name('daftar');
     Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
 
     // Berita Routes

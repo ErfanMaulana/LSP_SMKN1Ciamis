@@ -868,7 +868,7 @@
                 @endif
 
                 <!-- WEBSITE Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['carousel.view', 'berita.view', 'socialmedia.view', 'profile-content.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['carousel.view', 'berita.view', 'kontak.view', 'socialmedia.view', 'profile-content.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>WEBSITE</span>
@@ -1182,8 +1182,51 @@
                     grouped[r.category].push(r);
                 });
 
+                // Keep category order aligned with sidebar modules
+                var categoryOrder = {
+                    // Dashboard / Admin
+                    'Dashboard': 1,
+                    'Manajemen Admin': 2,
+                    'Role & Permission': 3,
+
+                    // Data Master
+                    'Asesi': 10,
+                    'Asesor': 11,
+                    'Akun Asesi': 12,
+                    'Jurusan': 13,
+                    'TUK': 14,
+                    'Skema': 15,
+                    'Mitra': 16,
+
+                    // Program Sertifikasi
+                    'Verifikasi Asesi': 20,
+                    'Asesmen Mandiri': 21,
+                    'Nilai Asesor': 22,
+                    'Kelompok': 23,
+                    'Jadwal Ujikom': 24,
+                    'Penugasan Asesor': 25,
+
+                    // Website
+                    'Carousel': 30,
+                    'Berita': 31,
+                    'Kontak': 32,
+                    'Sosial Media': 33,
+                    'Konten Profil': 34
+                };
+
+                var sortedCategories = Object.keys(grouped).sort(function (a, b) {
+                    var orderA = categoryOrder[a] || 999;
+                    var orderB = categoryOrder[b] || 999;
+
+                    if (orderA === orderB) {
+                        return a.localeCompare(b);
+                    }
+
+                    return orderA - orderB;
+                });
+
                 var html = '';
-                for (var cat in grouped) {
+                sortedCategories.forEach(function (cat) {
                     html += '<div class="search-category-label">' + cat + '</div>';
                     grouped[cat].forEach(function (item) {
                         html += '<a href="' + item.url + '" class="search-result-item">';
@@ -1195,7 +1238,7 @@
                         html += '<span class="search-result-category-badge" style="background:' + item.color + '15;color:' + item.color + '">' + cat + '</span>';
                         html += '</a>';
                     });
-                }
+                });
 
                 searchResults.innerHTML = html;
                 searchResults.classList.add('show');
