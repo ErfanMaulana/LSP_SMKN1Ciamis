@@ -38,7 +38,8 @@ class AdminController extends Controller
         if ($admin && Hash::check($request->password, $admin->password)) {
             Auth::guard('admin')->login($admin, $request->filled('remember'));
             
-            return redirect()->route('admin.dashboard')->with('success', 'Login berhasil!');
+            // Redirect ke halaman pertama yang admin punya akses berdasarkan sidebar menu
+            return redirect($admin->getFirstAccessibleRoute())->with('success', 'Login berhasil!');
         }
 
         return back()->withErrors([

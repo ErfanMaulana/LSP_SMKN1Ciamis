@@ -108,4 +108,43 @@ class Admin extends Authenticatable
             $q->whereIn('roles.id', $this->roles()->pluck('roles.id'));
         })->pluck('name');
     }
+
+    /**
+     * Get the first accessible menu route based on admin's permissions.
+     * Follows sidebar menu structure order.
+     */
+    public function getFirstAccessibleRoute(): string
+    {
+        // Menu items in sidebar order: [route => permission_required]
+        $menuItems = [
+            'admin.dashboard' => 'dashboard.view',
+            'admin.admin-management.index' => 'admin.view',
+            'admin.roles.index' => 'role.view',
+            'admin.asesi.index' => 'asesi.view',
+            'admin.asesor.index' => 'asesor.view',
+            'admin.jurusan.index' => 'jurusan.view',
+            'admin.tuk.index' => 'tuk.view',
+            'admin.skema.index' => 'skema.view',
+            'admin.asesi.verifikasi' => 'verifikasi-asesi.view',
+            'admin.asesmen-mandiri.index' => 'asesmen-mandiri.view',
+            'admin.nilai-asesor.index' => 'asesmen-mandiri.view',
+            'admin.kelompok.index' => 'kelompok.view',
+            'admin.jadwal-ujikom.index' => 'jadwal-ujikom.view',
+            'admin.carousel.index' => 'carousel.view',
+            'admin.berita.index' => 'berita.view',
+            'admin.kontak.index' => 'kontak.view',
+            'admin.socialmedia.index' => 'socialmedia.view',
+            'admin.profile-content.index' => 'profile-content.view',
+        ];
+
+        // Find first accessible route
+        foreach ($menuItems as $route => $permission) {
+            if ($this->hasPermission($permission)) {
+                return route($route);
+            }
+        }
+
+        // Fallback to dashboard (should not happen for valid admins)
+        return route('admin.dashboard');
+    }
 }

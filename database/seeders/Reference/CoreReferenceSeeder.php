@@ -2,8 +2,6 @@
 
 namespace Database\Seeders\Reference;
 
-use Database\Seeders\Admin\AdminSeeder;
-use Database\Seeders\Admin\RolePermissionSeeder;
 use Database\Seeders\Reference\CarouselSeeder;
 use Database\Seeders\Reference\JurusanSeeder;
 use Database\Seeders\Reference\ProfileContentSeeder;
@@ -22,12 +20,13 @@ class CoreReferenceSeeder extends Seeder
 {
     /**
      * Seed data referensi yang aman dipakai untuk deploy.
+     * 
+     * Note: Admin dan Role seeders dipindahkan ke DeploySeeder
+     * sebagai kebutuhan utama deployment.
      */
     public function run(): void
     {
         $this->call([
-            RolePermissionSeeder::class,
-            AdminSeeder::class,
             JurusanSeeder::class,
             SkemaSeederRPL::class,
             SkemaDKVSeeder::class,

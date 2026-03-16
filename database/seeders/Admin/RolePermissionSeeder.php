@@ -160,6 +160,36 @@ class RolePermissionSeeder extends Seeder
         ])->pluck('id');
         $operator->permissions()->sync($operatorPerms);
 
+        // Admin Web Role - Manages frontend website
+        $adminWeb = Role::firstOrCreate(
+            ['name' => 'admin-web'],
+            [
+                'display_name' => 'Admin Web',
+                'description'  => 'Manages website content and settings',
+                'is_super_admin' => false,
+            ]
+        );
+        $adminWebPerms = Permission::whereIn('group', [
+            'Dashboard', 'Carousel', 'Berita', 'Kontak', 'Sosial Media', 'Konten Profil',
+        ])->pluck('id');
+        $adminWeb->permissions()->sync($adminWebPerms);
+
+        // Admin LSP Role - Manages assessment and operational features
+        $adminLsp = Role::firstOrCreate(
+            ['name' => 'admin-lsp'],
+            [
+                'display_name' => 'Admin LSP',
+                'description'  => 'Manages assessment operations and data',
+                'is_super_admin' => false,
+            ]
+        );
+        $adminLspPerms = Permission::whereIn('group', [
+            'Asesor', 'Asesi', 'Verifikasi Asesi', 'Akun Asesi', 'Kelompok',
+            'Mitra', 'Jurusan', 'Skema', 'TUK', 'Jadwal Ujikom', 
+            'Penugasan Asesor', 'Asesmen Mandiri', 'Manajemen Admin', 'Role & Permission',
+        ])->pluck('id');
+        $adminLsp->permissions()->sync($adminLspPerms);
+
         $admin = Admin::first();
         if ($admin && !$admin->roles()->where('role_id', $superAdmin->id)->exists()) {
             $admin->roles()->attach($superAdmin->id);
