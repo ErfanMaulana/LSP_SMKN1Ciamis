@@ -127,13 +127,13 @@
                         <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
                         <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
                     </select>
-                    <button type="submit" class="btn-filter-search">
+                    <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
                         <i class="bi bi-search"></i>
                     </button>
                     @if(request('search') || request('jurusan') || request('status'))
-                    <a href="{{ route('admin.asesi.index') }}" class="btn-filter-reset" title="Reset filter">
+                    <button type="button" class="btn-filter-reset" title="Reset filter" onclick="resetFilters()">
                         <i class="bi bi-x-lg"></i>
-                    </a>
+                    </button>
                     @endif
                 </div>
             </div>
@@ -199,7 +199,7 @@
                             </td>
                             <td>
                                 <div class="action-menu">
-                                    <button class="action-btn" onclick="toggleMenu(this)">
+                                    <button class="action-btn" onclick="toggleMenu(event, this)">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-dropdown">
@@ -344,7 +344,7 @@
                             </td>
                             <td>
                                 <div class="action-menu">
-                                    <button class="action-btn" onclick="toggleMenu(this)">
+                                    <button class="action-btn" onclick="toggleMenu(event, this)">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-dropdown">
@@ -998,7 +998,7 @@
 
     /* Action Menu */
     .action-menu {
-        position: relative;
+        position: relative;   
     }
 
     .action-btn {
@@ -1179,7 +1179,8 @@
 </style>
 
 <script>
-    function toggleMenu(button) {
+    function toggleMenu(event, button) {
+        event.stopPropagation();
         const dropdown = button.nextElementSibling;
         const isOpen = dropdown.classList.contains('show');
 
@@ -1228,9 +1229,64 @@
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                document.getElementById('filterForm').submit();
+                performAjaxSearch();
             }
         });
+        // Add real-time search on input
+        searchInput.addEventListener('input', function(e) {
+            performAjaxSearch();
+        });
+    }
+
+    // Perform AJAX search and filter
+    function performAjaxSearch() {
+        const formData = new FormData(document.getElementById('filterForm'));
+        const params = new URLSearchParams(formData);
+        
+        fetch('{{ route("admin.asesi.index") }}?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Replace table body with new rows
+            const tableBody = document.querySelector('.data-table tbody');
+            if (tableBody) {
+                tableBody.innerHTML = html;
+            }
+            // Re-attach event listeners to action menus
+            attachActionMenuListeners();
+        })
+        .catch(error => console.error('Search error:', error));
+    }
+
+    // Update filter on dropdown change (jurusan and status)
+    const filterSelects = document.querySelectorAll('.filter-select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            performAjaxSearch();
+        });
+    });
+
+    // Attach click handlers to action menus
+    function attachActionMenuListeners() {
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.removeEventListener('click', toggleMenu);
+            btn.addEventListener('click', function() { toggleMenu(this); });
+        });
+    }
+
+    // Initial attachment
+    attachActionMenuListeners();
+
+    // Reset filters
+    function resetFilters() {
+        document.querySelector('input[name="search"]').value = '';
+        document.querySelector('select[name="jurusan"]').value = '';
+        document.querySelector('select[name="status"]').value = '';
+        performAjaxSearch();
     }
 
     function switchTab(tabId, btn) {

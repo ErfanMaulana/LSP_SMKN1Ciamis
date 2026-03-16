@@ -26,18 +26,18 @@
         </span>
     </td>
     <td>
-        <div class="dropdown-action">
-            <button class="btn-dropdown" onclick="toggleDropdown(this)">
+        <div class="action-menu">
+            <button class="action-btn" onclick="toggleMenu(event, this)">
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
-            <div class="dropdown-menu">
-                <a href="{{ route('admin.tuk.edit', $tuk->id) }}" class="dropdown-item">
+            <div class="action-dropdown">
+                <a href="{{ route('admin.tuk.edit', $tuk->id) }}">
                     <i class="bi bi-pencil"></i> Ubah
                 </a>
                 <form action="{{ route('admin.tuk.toggle', $tuk->id) }}" method="POST" style="margin: 0;">
                     @csrf
                     @method('PATCH')
-                    <button type="submit" class="dropdown-item">
+                    <button type="submit">
                         <i class="bi bi-{{ $tuk->status === 'aktif' ? 'pause-circle' : 'play-circle' }}"></i>
                         {{ $tuk->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
                     </button>
@@ -45,7 +45,7 @@
                 <form action="{{ route('admin.tuk.destroy', $tuk->id) }}" method="POST" style="margin: 0;">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="dropdown-item danger" onclick="return confirm('Apakah Anda yakin ingin menghapus TUK {{ addslashes($tuk->nama_tuk) }}?')">
+                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus TUK {{ addslashes($tuk->nama_tuk) }}?')">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>
@@ -55,11 +55,6 @@
 </tr>
 @empty
 <tr>
-    <td colspan="8">
-        <div class="empty-state">
-            <i class="bi bi-building-x"></i>
-            <p>Belum ada data TUK yang ditemukan.</p>
-        </div>
-    </td>
+    <td colspan="8" class="text-center">Tidak ada data TUK</td>
 </tr>
 @endforelse

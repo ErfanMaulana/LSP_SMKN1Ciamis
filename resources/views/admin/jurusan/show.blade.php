@@ -114,7 +114,7 @@
                         <div class="skema-name">{{ $skema->nama_skema }}</div>
                         <div class="skema-number">{{ $skema->nomor_skema }}</div>
                     </div>
-                    <a href="{{ route('admin.skema.show', $skema->id) }}" class="skema-link">
+                    <a href="{{ route('admin.skema.edit', $skema->id) }}" class="skema-link">
                         <i class="bi bi-arrow-right-circle"></i>
                     </a>
                 </div>

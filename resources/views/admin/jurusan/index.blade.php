@@ -115,11 +115,22 @@
         background: #fff; border-radius: 12px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid #e5e7eb; overflow: hidden;
     }
+    .card-body {
+        padding: 20px;
+    }
     .card-header {
         padding: 14px 20px; border-bottom: 1px solid #e5e7eb;
         display: flex; align-items: center; justify-content: space-between;
     }
     .card-header h3 { font-size: 14px; font-weight: 600; color: #1e293b; margin: 0; }
+
+    .filter-section {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
 
     .data-table { width: 100%; border-collapse: collapse; }
     .data-table thead th {
@@ -153,6 +164,9 @@
     /* Action Menu */
     .action-menu {
         position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .action-btn {
@@ -332,21 +346,17 @@
 </div>
 
 <!-- Toolbar -->
-<div class="toolbar">
-    <div class="search-box">
-        <i class="bi bi-search"></i>
-        <input type="text" id="searchInput" placeholder="Cari nama atau kode jurusan..." autocomplete="off">
-    </div>
-    <div class="filter-controls">
-        <select class="filter-select" id="sortSelect">
-            <option value="nama_jurusan">Nama</option>
-            <option value="kode_jurusan">Kode</option>
-            <option value="asesi_count">Jumlah Asesi</option>
-            <option value="created_at">Tanggal Dibuat</option>
-        </select>
-        <a href="{{ route('admin.jurusan.index') }}" class="btn-filter-reset" id="resetBtn" style="display:none;" title="Reset filter">
-            <i class="bi bi-x-lg"></i>
-        </a>
+<div class="card">
+    <div class="card-body" style="padding:20px;">
+        <form method="GET" action="{{ route('admin.jurusan.index') }}" id="filterForm">
+            <div class="filter-section">
+                <div class="search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" name="search" id="searchInput" placeholder="Cari nama atau kode jurusan..." 
+                           value="{{ request('search') }}" autocomplete="off">
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -430,117 +440,90 @@
 
 @section('scripts')
 <script>
-// AJAX Search Implementation
-let searchTimeout;
-const searchInput = document.getElementById('searchInput');
-const sortSelect = document.getElementById('sortSelect');
-const orderSelect = document.getElementById('orderSelect');
-const tableBody = document.getElementById('jurusanTableBody');
-
-// Set initial values from server
-sortSelect.value = '{{ $sort }}';
-orderSelect.value = '{{ $order }}';
-
-function performSearch() {
-    const searchValue = searchInput.value;
-    const sortValue = sortSelect.value;
-    const orderValue = orderSelect.value;
-    
-    // Build query parameters
-    const params = new URLSearchParams();
-    if (searchValue) params.append('search', searchValue);
-    if (sortValue) params.append('sort', sortValue);
-    if (orderValue) params.append('order', orderValue);
-    
-    // Show loading state
-    tableBody.innerHTML = `
-        <tr>
-            <td colspan="7" style="text-align:center; padding:40px;">
-                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; margin-bottom: 12px;">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p style="color: #64748b; margin: 0;">Mencari data...</p>
-            </td>
-        </tr>
-    `;
-    
-    // Perform AJAX request
-    fetch(`{{ route('admin.jurusan.index') }}?${params.toString()}`, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'text/html'
-        }
-    })
-    .then(response => response.text())
-    .then(html => {
-        tableBody.innerHTML = html;
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="7" style="text-align:center; padding:40px;">
-                    <i class="bi bi-exclamation-triangle" style="font-size:48px; color:#ef4444; display:block; margin-bottom:12px;"></i>
-                    <p style="color: #64748b; margin: 0;">Terjadi kesalahan saat memuat data</p>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-// Debounced search on input
-searchInput.addEventListener('input', function() {
-    // Show/hide reset button based on search input
-    const resetBtn = document.getElementById('resetBtn');
-    if (searchInput.value.trim()) {
-        resetBtn.style.display = 'inline-flex';
-    } else {
-        resetBtn.style.display = 'none';
+    // Perform AJAX search and filter
+    function performAjaxSearch() {
+        const formData = new FormData(document.getElementById('filterForm'));
+        const params = new URLSearchParams(formData);
+        
+        fetch('{{ route("admin.jurusan.index") }}?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Replace table body with new rows
+            const tableBody = document.getElementById('jurusanTableBody');
+            if (tableBody) {
+                tableBody.innerHTML = html;
+            }
+            // Re-attach event listeners to action menus
+            attachActionMenuListeners();
+        })
+        .catch(error => console.error('Search error:', error));
     }
-    
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(performSearch, 500);
-});
 
-// Immediate search on filter change
-sortSelect.addEventListener('change', performSearch);
-orderSelect.addEventListener('change', performSearch);
-
-// Action Menu Toggle Function
-function toggleMenu(button) {
-    const dropdown = button.nextElementSibling;
-    const isOpen = dropdown.classList.contains('show');
-
-    // Close all open dropdowns
-    document.querySelectorAll('.action-dropdown.show').forEach(d => {
-        d.classList.remove('show');
-        d.style.top = '';
-        d.style.left = '';
-    });
-
-    if (!isOpen) {
-        const rect = button.getBoundingClientRect();
-        dropdown.classList.add('show');
-        // Position below the button, aligned to its right edge
-        const dropW = 160;
-        let left = rect.right - dropW;
-        if (left < 8) left = 8;
-        dropdown.style.top  = (rect.bottom + 4) + 'px';
-        dropdown.style.left = left + 'px';
-    }
-}
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(event) {
-    if (!event.target.closest('.action-menu')) {
-        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
-            dropdown.classList.remove('show');
-            dropdown.style.top = '';
-            dropdown.style.left = '';
+    // Real-time search on input
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performAjaxSearch();
+            }
+        });
+        searchInput.addEventListener('input', function(e) {
+            performAjaxSearch();
         });
     }
-});
+
+    // Attach click handlers to action menus
+    function attachActionMenuListeners() {
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.removeEventListener('click', toggleMenu);
+            btn.addEventListener('click', function() { toggleMenu(this); });
+        });
+    }
+
+    // Initial attachment
+    attachActionMenuListeners();
+
+    // Action Menu Toggle Function
+    function toggleMenu(event, button) {
+        event.stopPropagation();
+        const dropdown = button.nextElementSibling;
+        const isOpen = dropdown.classList.contains('show');
+
+        // Close all open dropdowns
+        document.querySelectorAll('.action-dropdown.show').forEach(d => {
+            d.classList.remove('show');
+            d.style.top = '';
+            d.style.left = '';
+        });
+
+        if (!isOpen) {
+            const rect = button.getBoundingClientRect();
+            dropdown.classList.add('show');
+            // Position below the button, aligned to its right edge
+            const dropW = 160;
+            let left = rect.right - dropW;
+            if (left < 8) left = 8;
+            dropdown.style.top  = (rect.bottom + 4) + 'px';
+            dropdown.style.left = left + 'px';
+        }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+                dropdown.style.top = '';
+                dropdown.style.left = '';
+            });
+        }
+    });
 
 function confirmDelete(id, nama, asesiCount) {
     closeMenus();

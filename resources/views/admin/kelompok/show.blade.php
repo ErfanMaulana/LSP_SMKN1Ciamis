@@ -10,7 +10,7 @@
     .page-header .subtitle { font-size:14px; color:#64748b; margin-top:4px; }
     .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; border:none; transition:all .2s; }
     .btn-primary { background:#0061A5; color:white; }
-    .btn-primary:hover { background:#00509e; color:white; }
+    .btn-primary:hover { background:#003961; color:white; }
     .btn-danger { background:#ef4444; color:white; }
     .btn-danger:hover { background:#dc2626; color:white; }
     .btn-secondary { background:#64748b; color:white; }
@@ -157,7 +157,7 @@
     {{-- Asesi Tersedia --}}
     <div class="card">
         <div class="card-header">
-            <h3><i class="bi bi-person-plus-fill" style="color:#16a34a;"></i> Tambah Asesi <span class="badge badge-green">{{ $asesiTersedia->count() }}</span></h3>
+            <h3><i class="bi bi-person-plus-fill" style="color:#0061A5;"></i> Tambah Asesi <span class="badge badge-blue">{{ $asesiTersedia->count() }}</span></h3>
         </div>
 
         @if($asesiTersedia->isNotEmpty())
@@ -214,7 +214,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-success btn-sm"
+                                        <button type="button" class="btn btn-primary btn-sm"
                                                 onclick="tugaskanSatu('{{ $asesi->NIK }}')">
                                             <i class="bi bi-plus-circle"></i> Tugaskan
                                         </button>
@@ -234,7 +234,7 @@
         @else
             <div class="card-body">
                 <div class="empty-state">
-                    <i class="bi bi-person-check-fill" style="color:#16a34a;"></i>
+                    <i class="bi bi-person-check-fill" style="color:#0061A5;"></i>
                     <p>Semua asesi yang telah diverifikasi sudah ditugaskan.</p>
                 </div>
             </div>

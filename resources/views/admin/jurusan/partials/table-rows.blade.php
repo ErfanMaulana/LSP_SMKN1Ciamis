@@ -11,15 +11,16 @@
     <td>{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->locale('id')->translatedFormat('d M Y') : '-' }}</td>
     <td style="text-align:center;">
         <div class="action-menu">
-            <button class="action-btn" onclick="toggleMenu(this)">
+            <button class="action-btn" onclick="toggleMenu(event, this)">
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
             <div class="action-dropdown">
-                <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}">
-                    <i class="bi bi-pencil"></i> Ubah
-                </a>
+                
                 <a href="{{ route('admin.jurusan.show', $item->ID_jurusan) }}">
                     <i class="bi bi-eye"></i> Lihat Detail
+                </a>
+                <a href="{{ route('admin.jurusan.edit', $item->ID_jurusan) }}">
+                    <i class="bi bi-pencil"></i> Edit
                 </a>
                 <button type="button" onclick="confirmDelete({{ $item->ID_jurusan }}, '{{ addslashes($item->nama_jurusan) }}', {{ $item->asesi_count }})">
                     <i class="bi bi-trash"></i> Hapus

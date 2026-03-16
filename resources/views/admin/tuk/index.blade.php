@@ -275,22 +275,22 @@
         <div class="filter-section">
             <div class="search-box">
                 <i class="bi bi-search"></i>
-                <input type="text" name="search" placeholder="Cari nama TUK, kode, kota..."
+                <input type="text" name="search" id="searchInput" placeholder="Cari nama TUK, kode, kota..."
                        value="{{ $search }}" autocomplete="off">
             </div>
             <div class="filter-group">
-                <select class="filter-select" name="status" onchange="document.getElementById('filterForm').submit()">
+                <select class="filter-select" name="status" onchange="performAjaxSearch()">
                     <option value="all"     {{ $status === 'all'     ? 'selected' : '' }}>Semua Status</option>
                     <option value="aktif"   {{ $status === 'aktif'   ? 'selected' : '' }}>Aktif</option>
                     <option value="nonaktif"{{ $status === 'nonaktif'? 'selected' : '' }}>Non-Aktif</option>
                 </select>
-                <button type="submit" class="btn-filter-search">
+                <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
                     <i class="bi bi-search"></i>
                 </button>
                 @if($search || $status !== 'all')
-                <a href="{{ route('admin.tuk.index') }}" class="btn-filter-reset" id="resetBtn" style="display:none;" title="Reset filter">
+                <button type="button" class="btn-filter-reset" onclick="resetFilters()" title="Reset filter">
                      <i class="bi bi-x-lg"></i>
-                </a>
+                </button>
                 @endif
             </div>
         </div>
@@ -314,7 +314,7 @@
                     <th>Aksi</th>
                 </tr>
             </thead>
-        <tbody>
+        <tbody id="tukTableBody">
             @forelse($tuks as $i => $tuk)
             <tr>
                 <td style="color:#94a3b8;font-weight:600;">{{ $tuks->firstItem() + $i }}</td>
@@ -345,7 +345,7 @@
                 </td>
                 <td>
                     <div class="action-menu">
-                        <button class="action-btn" onclick="toggleMenu(this)">
+                        <button class="action-btn" onclick="toggleMenu(event, this)">
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <div class="action-dropdown">
@@ -395,36 +395,93 @@
 
 @section('scripts')
 <script>
-function toggleMenu(button) {
-    const dropdown = button.nextElementSibling;
-    const isOpen = dropdown.classList.contains('show');
-
-    // Close all open dropdowns
-    document.querySelectorAll('.action-dropdown.show').forEach(d => {
-        d.classList.remove('show');
-        d.style.top = '';
-        d.style.left = '';
-    });
-
-    if (!isOpen) {
-        const rect = button.getBoundingClientRect();
-        dropdown.classList.add('show');
-        // Position below the button, aligned to its right edge
-        const dropW = 170;
-        let left = rect.right - dropW;
-        if (left < 8) left = 8;
-        dropdown.style.top  = (rect.bottom + 4) + 'px';
-        dropdown.style.left = left + 'px';
+    // Perform AJAX search and filter
+    function performAjaxSearch() {
+        const formData = new FormData(document.getElementById('filterForm'));
+        const params = new URLSearchParams(formData);
+        
+        fetch('{{ route("admin.tuk.index") }}?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Replace table body with new rows
+            const tableBody = document.getElementById('tukTableBody');
+            if (tableBody) {
+                tableBody.innerHTML = html;
+            }
+            // Re-attach event listeners to action menus
+            attachActionMenuListeners();
+        })
+        .catch(error => console.error('Search error:', error));
     }
-}
-document.addEventListener('click', e => {
-    if (!e.target.closest('.action-menu')) {
+
+    // Real-time search on input
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performAjaxSearch();
+            }
+        });
+        searchInput.addEventListener('input', function(e) {
+            performAjaxSearch();
+        });
+    }
+
+    // Attach click handlers to action menus
+    function attachActionMenuListeners() {
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.removeEventListener('click', toggleMenu);
+            btn.addEventListener('click', function() { toggleMenu(this); });
+        });
+    }
+
+    // Initial attachment
+    attachActionMenuListeners();
+
+    // Reset filters
+    function resetFilters() {
+        document.getElementById('searchInput').value = '';
+        document.querySelector('select[name="status"]').value = 'all';
+        performAjaxSearch();
+    }
+
+    function toggleMenu(event, button) {
+        event.stopPropagation();
+        const dropdown = button.nextElementSibling;
+        const isOpen = dropdown.classList.contains('show');
+
+        // Close all open dropdowns
         document.querySelectorAll('.action-dropdown.show').forEach(d => {
             d.classList.remove('show');
             d.style.top = '';
             d.style.left = '';
         });
+
+        if (!isOpen) {
+            const rect = button.getBoundingClientRect();
+            dropdown.classList.add('show');
+            // Position below the button, aligned to its right edge
+            const dropW = 170;
+            let left = rect.right - dropW;
+            if (left < 8) left = 8;
+            dropdown.style.top  = (rect.bottom + 4) + 'px';
+            dropdown.style.left = left + 'px';
+        }
     }
-});
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach(d => {
+                d.classList.remove('show');
+                d.style.top = '';
+                d.style.left = '';
+            });
+        }
+    });
 </script>
 @endsection

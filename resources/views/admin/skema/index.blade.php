@@ -69,32 +69,32 @@
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <input type="text" name="search" placeholder="Cari nama atau nomor skema..."
+                    <input type="text" name="search" id="searchInput" placeholder="Cari nama atau nomor skema..."
                            value="{{ request('search') }}" autocomplete="off">
                 </div>
                 <div class="filter-group">
-                    <select class="filter-select" name="jenis_skema" onchange="document.getElementById('filterForm').submit()">
+                    <select class="filter-select" name="jenis_skema" onchange="performAjaxSearch()">
                         <option value="all" {{ request('jenis_skema', 'all') === 'all' ? 'selected' : '' }}>Semua Jenis</option>
                         <option value="KKNI" {{ request('jenis_skema') === 'KKNI' ? 'selected' : '' }}>KKNI</option>
                         <option value="Okupasi" {{ request('jenis_skema') === 'Okupasi' ? 'selected' : '' }}>Okupasi</option>
                         <option value="Klaster" {{ request('jenis_skema') === 'Klaster' ? 'selected' : '' }}>Klaster</option>
                     </select>
-                    <select class="filter-select" name="sort" onchange="document.getElementById('filterForm').submit()">
+                    <select class="filter-select" name="sort" onchange="performAjaxSearch()">
                         <option value="created_at" {{ request('sort', 'created_at') === 'created_at' ? 'selected' : '' }}>Tanggal Dibuat</option>
                         <option value="nama_skema" {{ request('sort') === 'nama_skema' ? 'selected' : '' }}>Nama Skema</option>
                         <option value="nomor_skema" {{ request('sort') === 'nomor_skema' ? 'selected' : '' }}>Nomor Skema</option>
                     </select>
-                    <select class="filter-select" name="order" onchange="document.getElementById('filterForm').submit()">
+                    <select class="filter-select" name="order" onchange="performAjaxSearch()">
                         <option value="asc" {{ request('order', 'desc') === 'asc' ? 'selected' : '' }}>A → Z</option>
                         <option value="desc" {{ request('order', 'desc') === 'desc' ? 'selected' : '' }}>Z → A</option>
                     </select>
-                    <button type="submit" class="btn-filter-search">
+                    <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
                         <i class="bi bi-search"></i>
                     </button>
                     @if(request('search') || request('jenis_skema', 'all') !== 'all' || request('sort', 'created_at') !== 'created_at' || request('order', 'desc') !== 'desc')
-                    <a href="{{ route('admin.skema.index') }}" class="btn-filter-reset" title="Reset filter">
+                    <button type="button" class="btn-filter-reset" onclick="resetFilters()" title="Reset filter">
                         <i class="bi bi-x-lg"></i>
-                    </a>
+                    </button>
                     @endif
                 </div>
             </div>
@@ -113,7 +113,7 @@
                             <th>AKSI</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="skemaTableBody">
                         @forelse($skemas as $skema)
                         <tr>
                             <td>
@@ -147,12 +147,16 @@
                             </td>
                             <td>
                                 <div class="action-menu">
-                                    <button class="action-btn" onclick="toggleMenu(this)">
+                                    <button class="action-btn" onclick="toggleMenu(event, this)">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-dropdown">
+                                        
                                         <a href="{{ route('admin.skema.edit', $skema->id) }}">
-                                            <i class="bi bi-eye"></i> View
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </a>
+                                        <a href="{{ route('admin.skema.edit', $skema->id) }}">
+                                            <i class="bi bi-pencil"></i> Edit
                                         </a>
                                         <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;">
                                             @csrf
@@ -698,6 +702,9 @@
     /* Action Menu */
     .action-menu {
         position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .action-btn {
@@ -825,7 +832,8 @@
 </style>
 
 <script>
-    function toggleMenu(button) {
+    function toggleMenu(event, button) {
+        event.stopPropagation();
         const dropdown = button.nextElementSibling;
         const isOpen = dropdown.classList.contains('show');
 
@@ -858,5 +866,68 @@
             });
         }
     });
+
+    // Close dropdown on scroll (so it doesn't float away from button)
+    window.addEventListener('scroll', function() {
+        document.querySelectorAll('.action-dropdown.show').forEach(d => {
+            d.classList.remove('show');
+            d.style.top = '';
+            d.style.left = '';
+        });
+    }, true);
+
+    // Submit filter form on Enter key in search input
+    const searchInput = document.querySelector('input[name="search"]');
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performAjaxSearch();
+            }
+        });
+        // Add real-time search on input
+        searchInput.addEventListener('input', function(e) {
+            performAjaxSearch();
+        });
+    }
+
+    // Perform AJAX search and filter
+    function performAjaxSearch() {
+        const formData = new FormData(document.getElementById('filterForm'));
+        const params = new URLSearchParams(formData);
+        
+        fetch('{{ route("admin.skema.index") }}?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Replace table body with new rows
+            const tableBody = document.getElementById('skemaTableBody');
+            if (tableBody) {
+                tableBody.innerHTML = html;
+            }
+        })
+        .catch(error => console.error('Search error:', error));
+    }
+
+    // Update filter on dropdown change (jenis_skema, sort, order)
+    const filterSelects = document.querySelectorAll('.filter-select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            performAjaxSearch();
+        });
+    });
+
+    // Reset filters
+    function resetFilters() {
+        document.querySelector('input[name="search"]').value = '';
+        document.querySelector('select[name="jenis_skema"]').value = 'all';
+        document.querySelector('select[name="sort"]').value = 'created_at';
+        document.querySelector('select[name="order"]').value = 'desc';
+        performAjaxSearch();
+    }
 </script>
 @endsection

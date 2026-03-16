@@ -63,7 +63,7 @@
                            value="{{ request('search') }}" autocomplete="off">
                 </div>
                 <div class="filter-group">
-                    <select class="filter-select" name="keahlian" onchange="document.getElementById('filterForm').submit()">
+                    <select class="filter-select" name="keahlian" onchange="performAjaxSearch()">
                         <option value="">Keahlian: Semua</option>
                         @foreach($skemaList as $skema)
                             <option value="{{ $skema->id }}" {{ request('keahlian') == $skema->id ? 'selected' : '' }}>
@@ -71,13 +71,13 @@
                             </option>
                         @endforeach
                     </select>
-                    <button type="submit" class="btn-filter-search">
+                    <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
                         <i class="bi bi-search"></i>
                     </button>
                     @if(request('search') || request('keahlian') || request('card_filter'))
-                    <a href="{{ route('admin.asesor.index') }}" class="btn-filter-reset" title="Reset filter">
+                    <button type="button" class="btn-filter-reset" title="Reset filter" onclick="resetFilters()">
                         <i class="bi bi-x-lg"></i>
-                    </a>
+                    </button>
                     @endif
                 </div>
             </div>
@@ -127,7 +127,7 @@
                             </td>
                             <td>
                                 <div class="action-menu">
-                                    <button class="action-btn" onclick="toggleMenu(this)">
+                                    <button class="action-btn" onclick="toggleMenu(event, this)">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-dropdown">
@@ -662,7 +662,8 @@
 </style>
 
 <script>
-    function toggleMenu(button) {
+    function toggleMenu(event, button) {
+        event.stopPropagation();
         const dropdown = button.nextElementSibling;
         const isOpen = dropdown.classList.contains('show');
 
@@ -702,9 +703,55 @@
         searchInputAsesor.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                document.getElementById('filterForm').submit();
+                performAjaxSearch();
             }
         });
+        // Add real-time search on input
+        searchInputAsesor.addEventListener('input', function(e) {
+            performAjaxSearch();
+        });
+    }
+
+    // Perform AJAX search and filter
+    function performAjaxSearch() {
+        const formData = new FormData(document.getElementById('filterForm'));
+        const params = new URLSearchParams(formData);
+        
+        fetch('{{ route("admin.asesor.index") }}?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            // Replace table body with new rows
+            const tableBody = document.querySelector('.data-table tbody');
+            if (tableBody) {
+                tableBody.innerHTML = html;
+            }
+            // Re-attach event listeners to action menus
+            attachActionMenuListeners();
+        })
+        .catch(error => console.error('Search error:', error));
+    }
+
+    // Attach click handlers to action menus
+    function attachActionMenuListeners() {
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.removeEventListener('click', toggleMenu);
+            btn.addEventListener('click', function() { toggleMenu(this); });
+        });
+    }
+
+    // Initial attachment
+    attachActionMenuListeners();
+
+    // Reset filters
+    function resetFilters() {
+        document.querySelector('input[name="search"]').value = '';
+        document.querySelector('select[name="keahlian"]').value = '';
+        performAjaxSearch();
     }
 </script>
 @endsection

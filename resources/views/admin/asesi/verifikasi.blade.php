@@ -637,6 +637,10 @@
     /* Action Menu */
     .action-menu {
         position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
     }
 
     .action-btn {
