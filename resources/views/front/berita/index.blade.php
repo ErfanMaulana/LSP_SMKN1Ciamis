@@ -7,7 +7,7 @@
 <!-- Page Header -->
 <section class="bg-blue-600 text-white py-16">
     <div class="max-w-6xl mx-auto px-6">
-        <h1 class="text-4xl font-bold mb-3">Berita & Pengumuman</h1>
+        <h1 class="text-4xl font-bold mb-3">Berita & Berita</h1>
         <p class="text-blue-100 text-lg">Informasi terbaru seputar LSP SMKN 1 Ciamis</p>
     </div>
 </section>
