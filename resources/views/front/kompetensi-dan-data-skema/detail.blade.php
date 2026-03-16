@@ -5,7 +5,7 @@
 @section('content')
 
 <!-- Breadcrumb -->
-<section class="bg-white py-4 border-b">
+<section class="bg-white py-4">
     <div class="max-w-6xl mx-auto px-6">
         <div class="flex items-center gap-2 text-sm text-gray-600">
             <a href="{{ route('front.kompetensi.index') }}" class="hover:text-blue-600">Kompetensi</a>
@@ -16,7 +16,7 @@
 </section>
 
 <!-- Header Section -->
-<section class="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-12">
+<section class="bg-blue-600 text-white py-12">
     <div class="max-w-6xl mx-auto px-6">
         <div class="flex items-center gap-6 mb-6">
             <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">

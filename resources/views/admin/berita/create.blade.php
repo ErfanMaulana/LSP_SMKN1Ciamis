@@ -161,7 +161,7 @@
             @error('gambar')
                 <div class="form-error">{{ $message }}</div>
             @enderror
-            <div class="form-hint">Format: JPG, PNG, GIF. Maksimal 2MB</div>
+            <div class="form-hint">Format: JPG, PNG, GIF. Maksimal 5MB</div>
             <div class="image-preview" id="imagePreview">
                 <img src="" alt="Preview">
             </div>

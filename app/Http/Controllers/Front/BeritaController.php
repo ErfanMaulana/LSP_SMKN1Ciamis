@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\Berita;
+use App\Models\SocialMedia;
 use Illuminate\Http\Request;
 
 class BeritaController extends Controller
@@ -16,7 +17,8 @@ class BeritaController extends Controller
         $search = $request->get('search');
         
         $query = Berita::where('status', 'published')
-            ->orderBy('tanggal_publikasi', 'desc');
+            ->orderBy('tanggal_publikasi', 'desc')
+            ->orderBy('created_at', 'desc');
         
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -30,6 +32,7 @@ class BeritaController extends Controller
         // Get latest 3 news for sidebar
         $latestBerita = Berita::where('status', 'published')
             ->orderBy('tanggal_publikasi', 'desc')
+            ->orderBy('created_at', 'desc')
             ->take(3)
             ->get();
         
@@ -52,6 +55,11 @@ class BeritaController extends Controller
             ->take(3)
             ->get();
         
-        return view('front.berita.show', compact('berita', 'relatedBerita'));
+        // Get active social media
+        $socialMedias = SocialMedia::where('is_active', true)
+            ->orderBy('urutan')
+            ->get();
+        
+        return view('front.berita.show', compact('berita', 'relatedBerita', 'socialMedias'));
     }
 }

@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\JurusanController;
 use App\Http\Controllers\Admin\CarouselController;
 use App\Http\Controllers\Admin\SkemaController;
 use App\Http\Controllers\Admin\SocialMediaController;
+use App\Http\Controllers\Admin\BeritaController;
+use App\Http\Controllers\Admin\KontakController;
 use App\Http\Controllers\Admin\ProfileContentController;
 use App\Http\Controllers\Admin\TukController;
 use App\Http\Controllers\Admin\JadwalUjikomController;
@@ -106,6 +108,24 @@ Route::prefix('admin')->group(function () {
             Route::put('/carousel/{id}', [CarouselController::class, 'update'])->name('admin.carousel.update')->middleware('permission:carousel.edit');
             Route::delete('/carousel/{id}', [CarouselController::class, 'destroy'])->name('admin.carousel.destroy')->middleware('permission:carousel.delete');
             Route::patch('/carousel/{id}/toggle', [CarouselController::class, 'toggleStatus'])->name('admin.carousel.toggle')->middleware('permission:carousel.edit');
+        });
+
+        // Berita CRUD
+        Route::middleware('permission:berita.view')->group(function () {
+            Route::get('/berita', [BeritaController::class, 'index'])->name('admin.berita.index');
+            Route::get('/berita/create', [BeritaController::class, 'create'])->name('admin.berita.create')->middleware('permission:berita.create');
+            Route::post('/berita', [BeritaController::class, 'store'])->name('admin.berita.store')->middleware('permission:berita.create');
+            Route::get('/berita/{id}', [BeritaController::class, 'show'])->name('admin.berita.show');
+            Route::get('/berita/{id}/edit', [BeritaController::class, 'edit'])->name('admin.berita.edit')->middleware('permission:berita.edit');
+            Route::put('/berita/{id}', [BeritaController::class, 'update'])->name('admin.berita.update')->middleware('permission:berita.edit');
+            Route::delete('/berita/{id}', [BeritaController::class, 'destroy'])->name('admin.berita.destroy')->middleware('permission:berita.delete');
+        });
+
+        // Kontak (Information Only)
+        Route::middleware('permission:kontak.view')->group(function () {
+            Route::get('/kontak', [KontakController::class, 'index'])->name('admin.kontak.index');
+            Route::get('/kontak/edit', [KontakController::class, 'edit'])->name('admin.kontak.edit')->middleware('permission:kontak.edit');
+            Route::put('/kontak', [KontakController::class, 'update'])->name('admin.kontak.update')->middleware('permission:kontak.edit');
         });
 
         // Social Media CRUD

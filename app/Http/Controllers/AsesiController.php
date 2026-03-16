@@ -559,10 +559,10 @@ class AsesiController extends Controller
         }
 
         $toGender = function ($val): string {
-            if ($val === 'L') {
+            if ($val === 'L' || $val === 'Laki-laki') {
                 return 'Laki-laki';
             }
-            if ($val === 'P') {
+            if ($val === 'P' || $val === 'Perempuan') {
                 return 'Perempuan';
             }
             return '';

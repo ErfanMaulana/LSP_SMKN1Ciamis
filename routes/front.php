@@ -5,6 +5,7 @@ use App\Http\Controllers\Front\RegisterController;
 use App\Http\Controllers\Front\KompetensiController;
 use App\Http\Controllers\Front\ProfilController;
 use App\Http\Controllers\Front\BeritaController;
+use App\Http\Controllers\Front\KontakController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,7 +19,7 @@ use App\Http\Controllers\Front\BeritaController;
 Route::name('front.')->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
     Route::redirect('/daftar-lsp', '/#daftar-lsp')->name('daftar');
-    Route::redirect('/kontak', '/#kontak')->name('kontak');
+    Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
 
     // Berita Routes
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');

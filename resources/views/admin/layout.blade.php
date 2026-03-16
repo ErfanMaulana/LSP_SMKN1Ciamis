@@ -868,7 +868,7 @@
                 @endif
 
                 <!-- WEBSITE Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['carousel.view', 'socialmedia.view', 'profile-content.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['carousel.view', 'berita.view', 'socialmedia.view', 'profile-content.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>WEBSITE</span>
@@ -880,6 +880,22 @@
                                     class="menu-item {{ request()->routeIs('admin.carousel.*') ? 'active' : '' }}">
                                     <i class="bi bi-images"></i>
                                     <span>Banner Carousel</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('berita.view'))
+                                <a href="{{ route('admin.berita.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.berita.*') ? 'active' : '' }}">
+                                    <i class="bi bi-newspaper"></i>
+                                    <span>Berita</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('kontak.view'))
+                                <a href="{{ route('admin.kontak.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.kontak.*') ? 'active' : '' }}">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>Kontak</span>
                                 </a>
                             @endif
 

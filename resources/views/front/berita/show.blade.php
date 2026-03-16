@@ -4,20 +4,20 @@
 
 @section('content')
 
-<!-- Page Header -->
-<section class="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-12">
-    <div class="max-w-4xl mx-auto px-6">
-        <nav class="text-sm mb-4">
-            <ol class="flex items-center gap-2 text-blue-200">
-                <li><a href="{{ route('front.home') }}" class="hover:text-white transition">Beranda</a></li>
-                <li><i class="bi bi-chevron-right text-xs"></i></li>
-                <li><a href="{{ route('front.berita.index') }}" class="hover:text-white transition">Berita</a></li>
-                <li><i class="bi bi-chevron-right text-xs"></i></li>
-                <li class="text-white">{{ Str::limit($berita->judul, 50) }}</li>
-            </ol>
-        </nav>
+<!-- Breadcrumb -->
+<section class="bg-white py-4">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+            <a href="{{ route('front.home') }}" class="hover:text-blue-600">Beranda</a>
+            <i class="bi bi-chevron-right"></i>
+            <a href="{{ route('front.berita.index') }}" class="hover:text-blue-600">Berita</a>
+            <i class="bi bi-chevron-right"></i>
+            <span class="text-gray-900 font-semibold">{{ Str::limit($berita->judul, 50) }}</span>
+        </div>
     </div>
 </section>
+
+<!-- Page Header -->
 
 <!-- Content -->
 <section class="py-12 bg-gray-50">
@@ -160,44 +160,33 @@
                         Dapatkan update berita dan informasi terbaru dari LSP SMKN 1 Ciamis.
                     </p>
                     <div class="space-y-2">
-                        <a href="#" class="flex items-center gap-3 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition">
-                            <i class="bi bi-facebook text-xl"></i>
-                            <span class="text-sm font-medium">Facebook</span>
+                        @forelse($socialMedias as $social)
+                        <a href="{{ $social->url }}" 
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="flex items-center gap-3 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition">
+                            @php
+                                $iconMap = [
+                                    'facebook' => 'bi-facebook',
+                                    'instagram' => 'bi-instagram',
+                                    'tiktok' => 'bi-tiktok',
+                                    'youtube' => 'bi-youtube',
+                                    'twitter' => 'bi-twitter',
+                                    'linkedin' => 'bi-linkedin',
+                                    'whatsapp' => 'bi-whatsapp',
+                                ];
+                                $icon = $iconMap[strtolower($social->platform)] ?? 'bi-link-45deg';
+                            @endphp
+                            <i class="bi {{ $icon }} text-xl"></i>
+                            <span class="text-sm font-medium">{{ $social->name }}</span>
                         </a>
-                        <a href="#" class="flex items-center gap-3 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition">
-                            <i class="bi bi-instagram text-xl"></i>
-                            <span class="text-sm font-medium">Instagram</span>
-                        </a>
-                        <a href="#" class="flex items-center gap-3 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition">
-                            <i class="bi bi-youtube text-xl"></i>
-                            <span class="text-sm font-medium">YouTube</span>
-                        </a>
+                        @empty
+                        <p class="text-blue-100 text-sm italic">Tidak ada social media yang aktif</p>
+                        @endforelse
                     </div>
                 </div>
 
-                <!-- Navigation Widget -->
-                <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">
-                        <i class="bi bi-list-ul text-blue-600"></i> Menu Lainnya
-                    </h3>
-                    <nav class="space-y-2">
-                        <a href="{{ route('front.home') }}" 
-                           class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
-                            <i class="bi bi-house-door text-blue-600"></i>
-                            <span class="text-gray-700">Beranda</span>
-                        </a>
-                        <a href="{{ route('front.profil') }}" 
-                           class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
-                            <i class="bi bi-info-circle text-blue-600"></i>
-                            <span class="text-gray-700">Profil LSP</span>
-                        </a>
-                        <a href="{{ route('front.kompetensi.index') }}" 
-                           class="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
-                            <i class="bi bi-mortarboard text-blue-600"></i>
-                            <span class="text-gray-700">Kompetensi</span>
-                        </a>
-                    </nav>
-                </div>
+                
                 
             </div>
             

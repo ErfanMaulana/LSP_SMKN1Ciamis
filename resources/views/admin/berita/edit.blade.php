@@ -186,7 +186,7 @@
             @error('gambar')
                 <div class="form-error">{{ $message }}</div>
             @enderror
-            <div class="form-hint">Upload gambar baru untuk mengganti gambar saat ini. Format: JPG, PNG, GIF. Maksimal 2MB</div>
+            <div class="form-hint">Upload gambar baru untuk mengganti gambar saat ini. Format: JPG, PNG, GIF. Maksimal 5MB</div>
             <div class="image-preview" id="imagePreview" style="display: none;">
                 <p style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Preview gambar baru:</p>
                 <img src="" alt="Preview">
