@@ -30,7 +30,9 @@ jobs:
             composer dump-autoload
             npm install
             npm run build
+            php artisan optimize:clear
             php artisan migrate --force
-            php artisan cache:clear
+            php artisan db:seed --class='Database\\Seeders\\Admin\\RolePermissionSeeder' --force
+            php artisan route:list | grep admin/asesi/bulk-delete
             php artisan config:cache
         "
