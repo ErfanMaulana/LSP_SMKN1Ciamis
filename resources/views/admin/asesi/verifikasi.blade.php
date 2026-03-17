@@ -725,6 +725,119 @@
         }
     }
 
+    @media (max-width: 640px) {
+        .page-header {
+            margin-bottom: 18px;
+            gap: 10px;
+        }
+
+        .page-header h2 {
+            font-size: 20px;
+            line-height: 1.2;
+        }
+
+        .subtitle {
+            font-size: 12px;
+        }
+
+        .card-body {
+            padding: 12px;
+        }
+
+        .stats-grid {
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 14px;
+            gap: 12px;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+        }
+
+        .search-box > form {
+            flex-direction: column;
+            align-items: stretch;
+            position: relative;
+        }
+
+        .search-box input {
+            height: 42px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .search-box i {
+            top: 21px;
+            transform: translateY(-50%);
+        }
+
+        .search-box > form button {
+            width: 100%;
+        }
+
+        .data-table thead th,
+        .data-table tbody td {
+            padding: 10px 12px;
+        }
+
+        .pagination-container {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .pagination-info {
+            font-size: 12px;
+        }
+
+        #bulk-action-bar {
+            padding: 10px 12px !important;
+            gap: 8px !important;
+        }
+
+        #bulk-action-bar > div[style*="flex:1"] {
+            display: none;
+        }
+
+        #bulk-action-bar button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .bulk-modal-box {
+            padding: 18px;
+        }
+
+        .bulk-modal-actions {
+            flex-direction: column-reverse;
+        }
+
+        .bulk-modal-actions button {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
     /* Bulk Reject Modal */
     .bulk-modal-overlay {
         display: none;

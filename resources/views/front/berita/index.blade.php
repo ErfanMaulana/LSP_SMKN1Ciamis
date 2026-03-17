@@ -5,16 +5,16 @@
 @section('content')
 
 <!-- Page Header -->
-<section class="bg-blue-600 text-white py-16">
-    <div class="max-w-6xl mx-auto px-6">
-        <h1 class="text-4xl font-bold mb-3">Berita & Pengumuman</h1>
-        <p class="text-blue-100 text-lg">Informasi terbaru seputar LSP SMKN 1 Ciamis</p>
+<section class="bg-blue-600 text-white py-10 sm:py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3">Berita & Pengumuman</h1>
+        <p class="text-blue-100 text-sm sm:text-base lg:text-lg">Informasi terbaru seputar LSP SMKN 1 Ciamis</p>
     </div>
 </section>
 
 <!-- Content -->
-<section class="py-12 bg-gray-50">
-    <div class="max-w-6xl mx-auto px-6">
+<section class="py-8 sm:py-12 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
         
         <!-- Search Bar -->
         <div class="mb-8">
@@ -45,7 +45,7 @@
         </div>
         @endif
 
-        <div class="grid lg:grid-cols-3 gap-8">
+        <div class="grid lg:grid-cols-3 gap-6 lg:gap-8">
             
             <!-- Main Content -->
             <div class="lg:col-span-2">
@@ -63,8 +63,8 @@
                                      onerror="this.onerror=null; this.src='{{ asset('storage/berita/default.png') }}'">
                             </div>
                             @endif
-                            <div class="p-6 {{ $berita->gambar ? 'md:w-2/3' : 'w-full' }}">
-                                <div class="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                            <div class="p-4 sm:p-6 {{ $berita->gambar ? 'md:w-2/3' : 'w-full' }}">
+                                <div class="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500 mb-3">
                                     <span class="flex items-center gap-1">
                                         <i class="bi bi-calendar3"></i>
                                         {{ $berita->tanggal_publikasi->format('d M Y') }}
@@ -75,7 +75,7 @@
                                     </span>
                                 </div>
                                 
-                                <h2 class="text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition">
+                                <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-3 hover:text-blue-600 transition">
                                     <a href="{{ route('front.berita.show', $berita->slug) }}">
                                         {{ $berita->judul }}
                                     </a>
@@ -124,7 +124,7 @@
                 
                 <!-- Latest News Widget -->
                 @if($latestBerita->count() > 0)
-                <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 pb-3 border-b">
                         <i class="bi bi-clock-history text-blue-600"></i> Berita Terbaru
                     </h3>
@@ -143,7 +143,7 @@
                             </div>
                             @endif
                             <div class="flex-1 min-w-0">
-                                <h4 class="font-semibold text-gray-900 group-hover:text-blue-600 transition line-clamp-2 mb-1">
+                                <h4 class="text-sm sm:text-base font-semibold text-gray-900 group-hover:text-blue-600 transition line-clamp-2 mb-1">
                                     {{ $item->judul }}
                                 </h4>
                                 <p class="text-xs text-gray-500">
@@ -157,7 +157,7 @@
                 @endif
 
                 <!-- Info Widget -->
-                <div class="bg-blue-600 text-white rounded-xl shadow-md p-6">
+                <div class="bg-blue-600 text-white rounded-xl shadow-md p-5 sm:p-6">
                     <h3 class="text-lg font-bold mb-3">
                         <i class="bi bi-info-circle"></i> Informasi
                     </h3>

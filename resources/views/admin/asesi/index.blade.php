@@ -52,7 +52,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">DALAM PENILAIAN</div>
-                <div class="stat-value">{{ number_format($inAssessment) }} <span class="stat-subtitle">Aktif</span></div>
+                <div class="stat-value">{{ number_format($inAssessment) }}</div>
             </div>
         </a>
 
@@ -62,7 +62,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">TERSERTIFIKASI</div>
-                <div class="stat-value">{{ number_format($certified) }} <span class="stat-subtitle">Total</span></div>
+                <div class="stat-value">{{ number_format($certified) }}</div>
             </div>
         </a>
     </div>
@@ -1174,6 +1174,38 @@
 
     .tab-pane {
         /* visible by default for tab-asesi; hidden via inline style for others */
+    }
+
+    @media (max-width: 640px) {
+        .stats-grid {
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 14px;
+            gap: 12px;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 

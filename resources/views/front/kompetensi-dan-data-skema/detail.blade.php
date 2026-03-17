@@ -5,9 +5,9 @@
 @section('content')
 
 <!-- Breadcrumb -->
-<section class="bg-white py-4">
-    <div class="max-w-6xl mx-auto px-6">
-        <div class="flex items-center gap-2 text-sm text-gray-600">
+<section class="bg-white py-3 sm:py-4">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-600 overflow-x-auto whitespace-nowrap pb-1">
             <a href="{{ route('front.kompetensi.index') }}" class="hover:text-blue-600">Kompetensi</a>
             <i class="bi bi-chevron-right"></i>
             <span class="text-gray-900 font-semibold">{{ $jurusan['nama'] }}</span>
@@ -16,38 +16,38 @@
 </section>
 
 <!-- Header Section -->
-<section class="bg-blue-600 text-white py-12">
-    <div class="max-w-6xl mx-auto px-6">
-        <div class="flex items-center gap-6 mb-6">
+<section class="bg-blue-600 text-white py-8 sm:py-12">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="flex items-center gap-4 sm:gap-6 mb-4 sm:mb-6">
             <div class="bg-white bg-opacity-20 px-4 py-2 rounded-lg">
-                <span class="text-2xl text-blue-600 font-bold">{{ $jurusan['kode'] }}</span>
+                <span class="text-xl sm:text-2xl text-blue-600 font-bold">{{ $jurusan['kode'] }}</span>
             </div>
         </div>
-        <h1 class="text-4xl font-bold mb-4">{{ $jurusan['nama'] }}</h1>
-        <p class="text-blue-100 text-lg">Program Kompetensi SMKN 1 Ciamis</p>
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4">{{ $jurusan['nama'] }}</h1>
+        <p class="text-blue-100 text-sm sm:text-base lg:text-lg">Program Kompetensi SMKN 1 Ciamis</p>
     </div>
 </section>
 
 <!-- Content Section -->
-<section class="bg-gray-100 py-16">
-    <div class="max-w-6xl mx-auto px-6">
+<section class="bg-gray-100 py-8 sm:py-12 lg:py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
             <!-- Main Content -->
             <div class="lg:col-span-2">
                 <!-- Visi & Misi -->
-                <div class="bg-white rounded-xl shadow-sm p-8 mb-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Visi & Misi</h2>
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-5 sm:mb-6">Visi & Misi</h2>
                     
                     <div class="mb-8">
-                        <h3 class="text-lg font-semibold text-blue-600 mb-3">Visi</h3>
+                        <h3 class="text-base sm:text-lg font-semibold text-blue-600 mb-3">Visi</h3>
                         <p class="text-gray-700 leading-relaxed">
                             {{ $jurusan['visi'] }}
                         </p>
                     </div>
 
                     <div>
-                        <h3 class="text-lg font-semibold text-blue-600 mb-3">Misi</h3>
+                        <h3 class="text-base sm:text-lg font-semibold text-blue-600 mb-3">Misi</h3>
                         <ul class="space-y-3">
                             @foreach($jurusan['misi'] as $m)
                             <li class="flex gap-3 text-gray-700">
@@ -60,8 +60,8 @@
                 </div>
 
                 <!-- Deskripsi -->
-                <div class="bg-white rounded-xl shadow-sm p-8">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Tentang Program</h2>
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:p-8">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Tentang Program</h2>
                     <p class="text-gray-700 leading-relaxed mb-4">
                         {{ $jurusan['deskripsi'] }}
                     </p>
@@ -71,7 +71,7 @@
             <!-- Sidebar -->
             <div>
                 <!-- Info Card -->
-                <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:sticky lg:top-24">
                     <h3 class="text-lg font-bold text-gray-900 mb-6">Informasi Program</h3>
                     
                     <div class="space-y-5">
