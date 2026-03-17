@@ -24,7 +24,8 @@ jobs:
             eval \$(ssh-agent -s)
             ssh-add ~/.ssh/wisnu
             cd web
-            git pull origin main
+            git fetch --all
+            git reset --hard origin/main
             composer install
             composer dump-autoload
             npm install
