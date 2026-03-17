@@ -5,9 +5,9 @@
 @section('content')
 
 <!-- Breadcrumb -->
-<section class="bg-white py-4">
-    <div class="max-w-6xl mx-auto px-6">
-        <div class="flex items-center gap-2 text-sm text-gray-600">
+<section class="bg-white py-3 sm:py-4">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-600 overflow-x-auto whitespace-nowrap pb-1">
             <a href="{{ route('front.home') }}" class="hover:text-blue-600">Beranda</a>
             <i class="bi bi-chevron-right"></i>
             <a href="{{ route('front.berita.index') }}" class="hover:text-blue-600">Berita</a>
@@ -20,8 +20,8 @@
 <!-- Page Header -->
 
 <!-- Content -->
-<section class="py-12 bg-gray-50">
-    <div class="max-w-6xl mx-auto px-6">
+<section class="py-8 sm:py-12 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
         
         <div class="grid lg:grid-cols-3 gap-8">
             
@@ -38,10 +38,10 @@
                     </div>
                     @endif
                     
-                    <div class="p-8">
+                    <div class="p-4 sm:p-6 lg:p-8">
                         <!-- Header -->
                         <div class="mb-6">
-                            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                                 {{ $berita->judul }}
                             </h1>
                             
@@ -71,22 +71,22 @@
                         <!-- Share Buttons -->
                         <div class="mt-8 pt-6 border-t">
                             <p class="text-sm text-gray-600 mb-3 font-semibold">Bagikan artikel ini:</p>
-                            <div class="flex gap-3">
+                            <div class="flex flex-wrap gap-3">
                                 <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('front.berita.show', $berita->slug)) }}" 
                                    target="_blank"
-                                   class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                                   class="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">
                                     <i class="bi bi-facebook"></i>
                                     <span class="text-sm font-medium">Facebook</span>
                                 </a>
                                 <a href="https://twitter.com/intent/tweet?url={{ urlencode(route('front.berita.show', $berita->slug)) }}&text={{ urlencode($berita->judul) }}" 
                                    target="_blank"
-                                   class="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition">
+                                   class="flex items-center gap-2 bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600 transition text-sm">
                                     <i class="bi bi-twitter"></i>
                                     <span class="text-sm font-medium">Twitter</span>
                                 </a>
                                 <a href="https://wa.me/?text={{ urlencode($berita->judul . ' - ' . route('front.berita.show', $berita->slug)) }}" 
                                    target="_blank"
-                                   class="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                                   class="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm">
                                     <i class="bi bi-whatsapp"></i>
                                     <span class="text-sm font-medium">WhatsApp</span>
                                 </a>

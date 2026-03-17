@@ -272,6 +272,8 @@
         @media (max-width: 768px) {
             .login-wrapper {
                 flex-direction: column;
+                border-radius: 12px;
+                min-height: auto;
             }
 
             .left-panel {
@@ -289,6 +291,63 @@
 
             .right-panel {
                 padding: 40px 30px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .login-wrapper {
+                margin-top: 12px;
+            }
+
+            .left-panel {
+                padding: 26px 20px;
+                min-height: 160px;
+            }
+
+            .left-panel h1 {
+                font-size: 24px;
+                margin-bottom: 12px;
+            }
+
+            .left-panel p {
+                font-size: 12px;
+                line-height: 1.5;
+            }
+
+            .right-panel {
+                padding: 24px 20px;
+            }
+
+            .logo {
+                width: 52px;
+                height: 52px;
+                margin-bottom: 14px;
+            }
+
+            .logo img {
+                width: 64px !important;
+                height: 64px !important;
+            }
+
+            .login-header {
+                margin-bottom: 22px;
+            }
+
+            .login-header h2 {
+                font-size: 24px;
+            }
+
+            .form-group {
+                margin-bottom: 14px;
+            }
+
+            .btn-login {
+                padding: 12px;
             }
         }
     </style>

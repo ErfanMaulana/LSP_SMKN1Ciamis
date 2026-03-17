@@ -1,7 +1,7 @@
 :root {
-  --blue: #0073bd;
+  --blue: #0061a5;
   --blue-light: #eff6ff;
-  --blue-accent: #0073bd;
+  --blue-accent: #0061a5;
   --gray-bg: #f4f6fb;
   --text-dark: #1a2340;
   --text-muted: #6b7a99;
@@ -9,11 +9,11 @@
 }
 
 /* ===================== HERO ===================== */
-.hero-section { background: #0073bd; padding: 3rem 0 3.5rem; }
+.hero-section { background: #0061a5; padding: 3rem 0 3.5rem; }
 .card-hero { background: #fff; border-radius: 14px; box-shadow: 0 4px 24px rgba(0,0,0,.12); }
 .section-icon { width: 36px; height: 36px; background: var(--blue-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--blue-accent); font-size: 1rem; flex-shrink: 0; }
 .card-title-h { font-size: 1.125rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0; }
-.hero-text { font-size: 0.9375rem; line-height: 1.7; color: #444; margin-top: .8rem; }
+.hero-text { font-size: 0.9375rem; line-height: 1.7; color: #444; margin-top: .8rem; text-align: justify; text-justify: inter-word; }
 
 /* Milestone */
 .milestone-wrap { display: flex; flex-direction: column; gap: 1.1rem; margin-top: .8rem; }
@@ -29,7 +29,7 @@
 .vm-section { background: #f7f9ff; padding: 4rem 0; }
 .section-title { font-size: 1.75rem; font-weight: 800; color: var(--text-dark); text-align: center; }
 .section-underline { width: 50px; height: 4px; background: var(--blue-accent); border-radius: 4px; margin: .6rem auto 2.5rem; }
-.card-visi { background: #0073bd; border-radius: 16px; padding: 2.2rem; color: #fff; height: 100%; text-align: center; }
+.card-visi { background: #0061a5; border-radius: 16px; padding: 2.2rem; color: #fff; height: 100%; text-align: center; }
 .visi-icon { font-size: 2.2rem; margin-bottom: 1rem; }
 .card-visi h5 { font-weight: 700; font-size: 1.125rem; margin-bottom: 1rem; }
 .card-visi p { font-size: 0.9375rem; line-height: 1.8; font-style: italic; opacity: .92; }
@@ -57,16 +57,41 @@
 .scope-card { background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 2px 12px rgba(0,0,0,.06); border: 1px solid var(--border); height: 100%; transition: transform .2s, box-shadow .2s; display: flex; flex-direction: column; text-align: center; }
 .scope-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(30,92,191,.13); }
 .scope-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: .9rem; margin-left: auto; margin-right: auto; }
-.ic-blue { background: #dbeafe; color: #0073bd; }
-.ic-green { background: #dbeafe; color: #0073bd; }
+.ic-blue { background: #dbeafe; color: #0061a5; }
+.ic-green { background: #dbeafe; color: #0061a5; }
 .ic-orange { background: #ffedd5; color: #ea580c; }
 .ic-purple { background: #ede9fe; color: #7c3aed; }
 .scope-card h6 { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: .4rem; }
 .scope-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .8rem; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .skema-badge { background: var(--blue-light); color: var(--blue-accent); font-size: 0.8125rem; font-weight: 600; padding: .22rem .7rem; border-radius: 20px; display: inline-block; margin-top: auto; }
 
+.hero-section,
+.vm-section,
+.km-section,
+.rl-section {
+  overflow-x: clip;
+}
+
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 768px) {
+  .hero-section { padding: 2rem 0 2.5rem; }
+  .vm-section,
+  .km-section,
+  .rl-section { padding: 2.5rem 0; }
+
+  .card-hero,
+  .card-visi,
+  .card-misi,
+  .stat-card,
+  .scope-card { border-radius: 12px; }
+
+  .card-visi,
+  .card-misi { padding: 1.25rem; }
+
+  .misi-item { margin-bottom: .75rem; }
+  .section-subtitle { margin-bottom: 1.5rem; }
+  .stat-card { padding: 1rem; }
+
   .stat-number { font-size: 1.5rem; }
   .section-title { font-size: 1.4rem; }
   .km-left h4, .km-sasaran-title { font-size: 1.125rem; }
@@ -79,4 +104,16 @@
   .stat-desc { font-size: 0.8125rem; }
   .scope-card h6 { font-size: 0.9375rem; }
   .scope-card p { font-size: 0.8125rem; }
+}
+
+@media (max-width: 640px) {
+  .section-title { font-size: 1.25rem; }
+  .section-subtitle { font-size: 0.875rem; }
+  .section-underline { margin-bottom: 1.5rem; }
+  .km-left p { line-height: 1.65; }
+  .prinsip-tag { font-size: 0.75rem; padding: .28rem .62rem; }
+  .stat-number { font-size: 1.35rem; }
+  .stat-label { font-size: 0.72rem; }
+  .stat-desc { font-size: 0.78rem; }
+  .scope-card { padding: 1.1rem; }
 }

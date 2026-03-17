@@ -234,6 +234,38 @@
     .alert-error {
         background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;
     }
+
+    @media (max-width: 640px) {
+        .stats-grid {
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 14px;
+            gap: 12px;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 @endsection
 

@@ -599,6 +599,21 @@
 
         .content-wrapper {
             padding: 30px;
+            max-width: 100%;
+        }
+
+        .admin-table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .admin-table-scroll table {
+            width: 100%;
+        }
+
+        .sidebar-backdrop {
+            display: none;
         }
 
         .alert {
@@ -643,14 +658,33 @@
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
+                width: min(84vw, 300px);
+                box-shadow: 8px 0 24px rgba(15, 23, 42, 0.22);
             }
 
             .sidebar.active {
                 transform: translateX(0);
             }
 
+            .sidebar-backdrop {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.45);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.2s ease;
+                z-index: 999;
+            }
+
+            .sidebar-backdrop.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
             .main-content {
                 margin-left: 0;
+                width: 100%;
             }
 
             .mobile-toggle {
@@ -663,6 +697,49 @@
 
             .content-wrapper {
                 padding: 20px 15px;
+            }
+
+            .content-wrapper .page-header,
+            .content-wrapper .toolbar,
+            .content-wrapper .header-actions,
+            .content-wrapper .filter-section,
+            .content-wrapper .filter-group,
+            .content-wrapper .form-actions {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+            }
+
+            .content-wrapper .header-actions .btn,
+            .content-wrapper .filter-group .btn,
+            .content-wrapper .form-actions .btn,
+            .content-wrapper .page-header .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .content-wrapper .search-box,
+            .content-wrapper .filter-controls {
+                min-width: 0 !important;
+                width: 100% !important;
+            }
+
+            .content-wrapper .filter-select,
+            .content-wrapper select,
+            .content-wrapper input,
+            .content-wrapper textarea,
+            .content-wrapper .form-control {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .content-wrapper table {
+                min-width: 640px;
+            }
+
+            .content-wrapper [style*="grid-template-columns:1fr 1fr"],
+            .content-wrapper [style*="grid-template-columns: 1fr 1fr"] {
+                grid-template-columns: 1fr !important;
             }
 
             .topbar {
@@ -699,6 +776,11 @@
             .profile-toggle .user-details,
             .profile-toggle .bi-chevron-down {
                 display: none;
+            }
+
+            .profile-menu {
+                right: 0;
+                min-width: min(92vw, 320px);
             }
         }
     </style>
@@ -922,6 +1004,8 @@
             </nav>
         </aside>
 
+        <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar(false)"></div>
+
         <!-- Main Content -->
         <main class="main-content">
             <div class="topbar">
@@ -1012,8 +1096,15 @@
     </div>
 
     <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
+        function toggleSidebar(forceState) {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            const shouldOpen = typeof forceState === 'boolean' ? forceState : !sidebar.classList.contains('active');
+
+            sidebar.classList.toggle('active', shouldOpen);
+            if (backdrop) {
+                backdrop.classList.toggle('active', shouldOpen);
+            }
         }
 
         function toggleProfileMenu(event) {
@@ -1064,8 +1155,26 @@
 
             if (window.innerWidth <= 768) {
                 if (!sidebar.contains(event.target) && !toggle.contains(event.target)) {
-                    sidebar.classList.remove('active');
+                    toggleSidebar(false);
                 }
+            }
+        });
+
+        // Normalize tables for mobile scrolling across admin pages
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.content-wrapper table').forEach(function (table) {
+                if (table.closest('.admin-table-scroll')) return;
+
+                var wrapper = document.createElement('div');
+                wrapper.className = 'admin-table-scroll';
+                table.parentNode.insertBefore(wrapper, table);
+                wrapper.appendChild(table);
+            });
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 768) {
+                toggleSidebar(false);
             }
         });
 

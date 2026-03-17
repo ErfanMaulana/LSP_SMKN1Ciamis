@@ -1,4 +1,4 @@
-<section class="relative min-h-[90vh] flex items-center overflow-hidden">
+<section class="relative aspect-video min-h-0 md:min-h-[90vh] md:aspect-auto flex items-center overflow-hidden">
 
     {{-- Slides --}}
     <div id="carousel" class="absolute inset-0 z-0">
@@ -17,28 +17,28 @@
 
     {{-- CONTENT --}}
     <div class="relative z-10 w-full">
-        <div class="max-w-6xl mx-auto px-6 py-24 text-white">
+        <div class="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-24 text-white">
 
         @foreach($carousels as $index => $slide)
         <div class="content-slide {{ $index==0?'block':'hidden' }}">
 
             <div class="max-w-2xl">
 
-                <span class="bg-blue-500/20 text-blue-200 px-4 py-2 rounded-full text-sm">
+                <span class="inline-block bg-blue-500/20 text-blue-100 px-2.5 sm:px-4 py-1 sm:py-2 rounded-full text-[10px] sm:text-sm leading-none">
                     {{ $slide->subtitle }}
                 </span>
 
-                <h1 class="mt-6 text-5xl font-bold leading-tight">
+                <h1 class="mt-2 sm:mt-6 text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight max-w-[14ch] sm:max-w-none line-clamp-2 sm:line-clamp-none">
                     {{ $slide->title }}
                 </h1>
 
-                <p class="mt-6 text-lg text-blue-100">
+                <p class="mt-2 sm:mt-6 text-[10px] leading-tight sm:text-base lg:text-lg text-blue-100 max-w-[95%] sm:max-w-xl line-clamp-2 sm:line-clamp-none">
                     {{ $slide->description }}
                 </p>
 
-                <div class="mt-8 flex gap-4">
+                <div class="mt-2 sm:mt-8 flex gap-3 sm:gap-4 flex-wrap">
                     <a href="{{ $slide->button_link }}"
-                       class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-semibold shadow-lg transition">
+                       class="bg-blue-600 hover:bg-blue-700 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-semibold shadow-lg transition text-xs sm:text-base w-auto text-center">
                         {{ $slide->button_text }}
                     </a>
                 </div>
@@ -53,12 +53,12 @@
 
 
     {{-- NAV --}}
-    <button onclick="prevSlide()" class="absolute left-6 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 w-12 h-12 rounded-full flex items-center justify-center transition cursor-pointer group" title="Slide sebelumnya">
+    <button onclick="prevSlide()" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition cursor-pointer group" title="Slide sebelumnya">
         <svg class="w-6 h-6 text-white group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
         </svg>
     </button>
-    <button onclick="nextSlide()" class="absolute right-6 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 w-12 h-12 rounded-full flex items-center justify-center transition cursor-pointer group" title="Slide berikutnya">
+    <button onclick="nextSlide()" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 z-20 bg-black/30 hover:bg-black/50 w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition cursor-pointer group" title="Slide berikutnya">
         <svg class="w-6 h-6 text-white group-hover:scale-110 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
         </svg>
@@ -69,7 +69,7 @@
 </section>
 
 {{-- Dot Indicators (di luar section, menempel di bawah carousel) --}}
-<div style="margin-top: -44px; position: relative; z-index: 30; display: flex; align-items: center; justify-content: center; gap: 8px; padding-bottom: 16px;">
+<div class="relative z-30 flex items-center justify-center gap-2 px-4 -mt-5 sm:-mt-9 pb-2.5 sm:pb-4">
     @foreach($carousels as $index => $slide)
     <button onclick="goToSlide({{ $index }})"
             class="dot"

@@ -5,21 +5,21 @@
 @section('content')
 
 <!-- Page Header -->
-<section class="bg-blue-600 text-white py-16">
-    <div class="max-w-6xl mx-auto px-6">
-        <h1 class="text-4xl font-bold mb-3">Hubungi Kami</h1>
-        <p class="text-blue-100 text-lg">Kami siap membantu Anda Kapanpun Anda butuh bantuan.</p>
+<section class="bg-blue-600 text-white py-10 sm:py-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3">Hubungi Kami</h1>
+        <p class="text-blue-100 text-sm sm:text-base lg:text-lg">Kami siap membantu Anda kapanpun Anda butuh bantuan.</p>
     </div>
 </section>
 
 <!-- Content -->
-<section class="py-12 bg-gray-50">
-    <div class="max-w-6xl mx-auto px-6">
+<section class="py-8 sm:py-12 bg-gray-50">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="grid lg:grid-cols-2 gap-8">
             
             <!-- Contact Form -->
-            <div class="bg-white rounded-xl shadow-md p-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+            <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-5 sm:mb-6">
                     <i class="bi bi-envelope text-blue-600"></i> Kirim Pesan
                 </h2>
                 <p class="text-gray-600 text-sm mb-6">Isi formulir di bawah ini dan kami akan segera merespons</p>
@@ -71,7 +71,7 @@
             <!-- Contact Information -->
             <div>
                 <!-- Info Widget -->
-                <div class="bg-blue-600 text-white rounded-xl shadow-md p-6 mb-6">
+                <div class="bg-blue-600 text-white rounded-xl shadow-md p-5 sm:p-6 mb-6">
                     <h3 class="text-lg font-bold mb-4">
                         <i class="bi bi-info-circle"></i> Informasi Kontak
                     </h3>
@@ -163,15 +163,15 @@
                     </h3>
                     
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                        <div class="flex justify-between items-center gap-3 pb-3 border-b border-gray-200">
                             <span class="text-gray-700 font-medium">Senin - Kamis</span>
-                            <span class="text-gray-900 font-semibold">
+                            <span class="text-gray-900 font-semibold text-right text-sm sm:text-base">
                                 {{ $kontak->jam_pelayanan['senin_kamis']['awal'] ?? '07:00' }} - {{ $kontak->jam_pelayanan['senin_kamis']['akhir'] ?? '15:00' }}
                             </span>
                         </div>
-                        <div class="flex justify-between items-center pb-3 border-b border-gray-200">
+                        <div class="flex justify-between items-center gap-3 pb-3 border-b border-gray-200">
                             <span class="text-gray-700 font-medium">Jumat</span>
-                            <span class="text-gray-900 font-semibold">
+                            <span class="text-gray-900 font-semibold text-right text-sm sm:text-base">
                                 {{ $kontak->jam_pelayanan['jumat']['awal'] ?? '07:00' }} - {{ $kontak->jam_pelayanan['jumat']['akhir'] ?? '11:30' }}
                             </span>
                         </div>

@@ -12,7 +12,7 @@
 
 <!-- HERO -->
 <section class="hero-section">
-  <div class="max-w-6xl mx-auto px-6">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
       <!-- Sejarah Singkat -->
@@ -42,7 +42,7 @@
 
 <!-- VISI MISI -->
 <section class="vm-section">
-  <div class="max-w-6xl mx-auto px-6">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <h2 class="section-title">Visi & Misi</h2>
     <div class="section-underline"></div>
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -77,7 +77,7 @@
 
 <!-- KEBIJAKAN MUTU -->
 <section class="km-section">
-  <div class="max-w-6xl mx-auto px-6">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
       <div class="lg:col-span-5 km-left">
@@ -92,7 +92,7 @@
 
       <div class="lg:col-span-7">
         <h4 class="km-sasaran-title">Sasaran Mutu</h4>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="stat-card">
             <div class="stat-number">100%</div>
             <div class="stat-label">Kelulusan Pelanggan</div>
@@ -122,7 +122,7 @@
 
 <!-- RUANG LINGKUP -->
 <section class="rl-section">
-  <div class="max-w-6xl mx-auto px-6">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <h2 class="section-title">Ruang Lingkup Sertifikasi</h2>
     <p class="section-subtitle">Berbagai bidang keahlian yang telah terlisensi untuk dilakukan pengujian.</p>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

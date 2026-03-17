@@ -1,8 +1,8 @@
 <footer class="bg-gray-900 text-gray-300 mt-16">
-    <div class="max-w-6xl mx-auto px-6 py-12 flex flex-row justify-between gap-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12 flex flex-col md:flex-row md:justify-between gap-8 md:gap-10">
 
         {{-- Tentang --}}
-        <div>
+        <div class="text-left">
             <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">LSP SMKN 1 Ciamis</h2>
             <p class="text-sm leading-relaxed">
                 Lembaga Sertifikasi Profesi P1 SMKN 1 Ciamis yang melaksanakan sertifikasi kompetensi
@@ -11,7 +11,7 @@
         </div>
 
         {{-- Kontak --}}
-        <div>
+        <div class="text-left">
             <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Kontak</h2>
             <ul class="space-y-2 text-sm">
                 <li>📍 Jl. Jenderal Sudirman No.269, Sindangrasa</li>
@@ -21,7 +21,7 @@
         </div>
 
         {{-- Sosial Media --}}
-        <div>
+        <div class="text-left">
             <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Sosial Media</h2>
             @php
                 $socialMedias = \App\Models\SocialMedia::active()->get();
@@ -56,7 +56,7 @@
 
     </div>
 
-    <div class="border-t border-gray-800 text-center py-4 text-sm">
+    <div class="border-t border-gray-800 text-center px-4 sm:px-6 py-4 text-xs sm:text-sm">
         © {{ date('Y') }} LSP SMKN 1 Ciamis — All rights reserved
     </div>
 </footer>
