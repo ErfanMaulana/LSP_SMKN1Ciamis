@@ -27,7 +27,7 @@ class CarouselController extends Controller
             'title'       => 'required|string|max:255',
             'subtitle'    => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'image'       => 'required|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'image'       => 'required|image|mimes:jpeg,jpg,png,webp',
             'button_text' => 'nullable|string|max:100',
             'button_link' => 'nullable|string|max:255',
             'is_active'   => 'nullable|boolean',
@@ -36,7 +36,6 @@ class CarouselController extends Controller
             'image.required' => 'Gambar banner wajib diupload.',
             'image.image'    => 'File harus berupa gambar.',
             'image.mimes'    => 'Format gambar harus jpeg, jpg, png, atau webp.',
-            'image.max'      => 'Ukuran gambar maksimal 5MB.',
             'title.required' => 'Judul banner wajib diisi.',
         ]);
 
@@ -69,7 +68,7 @@ class CarouselController extends Controller
             'title'       => 'required|string|max:255',
             'subtitle'    => 'nullable|string|max:255',
             'description' => 'nullable|string',
-            'image'       => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'image'       => 'nullable|image|mimes:jpeg,jpg,png,webp',
             'button_text' => 'nullable|string|max:100',
             'button_link' => 'nullable|string|max:255',
             'is_active'   => 'nullable|boolean',
@@ -77,7 +76,6 @@ class CarouselController extends Controller
         ], [
             'image.image' => 'File harus berupa gambar.',
             'image.mimes' => 'Format gambar harus jpeg, jpg, png, atau webp.',
-            'image.max'   => 'Ukuran gambar maksimal 5MB.',
             'title.required' => 'Judul banner wajib diisi.',
         ]);
 
@@ -185,8 +183,9 @@ class CarouselController extends Controller
                 return $file->store('carousels', 'public');
             }
 
-            // Konversi ke WebP dengan kualitas tinggi (90 = kualitas sangat baik)
-            $success = @imagewebp($image, $fullPath, 90);
+            // Konversi ke WebP dengan kualitas tinggi agar detail visual tetap terjaga.
+            // 95 dipilih sebagai kompromi aman antara ukuran file dan kualitas.
+            $success = @imagewebp($image, $fullPath, 95);
             
             // Bersihkan memory
             imagedestroy($image);

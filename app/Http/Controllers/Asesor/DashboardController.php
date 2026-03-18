@@ -119,6 +119,28 @@ class DashboardController extends Controller
     }
 
     /**
+     * Detail kelompok yang diampu asesor login.
+     */
+    public function kelompokShow($id)
+    {
+        $account = Auth::guard('account')->user();
+        $asesor = $this->getAsesor();
+
+        if (!$asesor) {
+            abort(403, 'Profil asesor tidak ditemukan.');
+        }
+
+        $kelompok = Kelompok::with(['skema', 'asesis.jurusan', 'asesors'])
+            ->where('id', $id)
+            ->whereHas('asesors', function ($q) use ($asesor) {
+                $q->where('asesor.ID_asesor', $asesor->ID_asesor);
+            })
+            ->firstOrFail();
+
+        return view('asesor.kelompok.show', compact('account', 'asesor', 'kelompok'));
+    }
+
+    /**
      * Daftar asesi yang terdaftar di skema asesor
      */
     public function asesiIndex(Request $request)

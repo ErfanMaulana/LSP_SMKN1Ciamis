@@ -997,13 +997,33 @@
             <button type="submit" name="save_draft" class="btn btn-save">
                 <i class="bi bi-save"></i> Simpan Sementara
             </button>
-            <button type="submit" name="submit_final" class="btn btn-submit" onclick="return confirm('Apakah Anda yakin ingin menyelesaikan asesmen mandiri ini? Pastikan semua jawaban sudah benar.')">
+            <button type="submit" name="submit_final" class="btn btn-submit">
                 <i class="bi bi-check-circle"></i> Selesaikan Asesmen
             </button>
             @endif
         </div>
     </div>
 </form>
+
+<div id="finalConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:1200;align-items:center;justify-content:center;padding:16px;">
+    <div style="width:100%;max-width:480px;background:#ffffff;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.2);padding:22px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:50%;background:#e0f2fe;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <i class="bi bi-exclamation-circle" style="color:#0369a1;font-size:18px;"></i>
+            </div>
+            <div style="flex:1;">
+                <div style="font-size:16px;font-weight:700;color:#0f172a;">Selesaikan Asesmen?</div>
+                <div style="font-size:13px;color:#475569;line-height:1.6;margin-top:6px;">
+                    Pastikan semua jawaban sudah benar. Setelah dikirim, asesmen akan masuk proses review asesor.
+                </div>
+            </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
+            <button type="button" id="finalConfirmCancel" style="padding:9px 16px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Batal</button>
+            <button type="button" id="finalConfirmOk" style="padding:9px 16px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Ya, Selesaikan</button>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -1129,13 +1149,60 @@
         const submitBtn = document.querySelector('[name="submit_final"]');
         if (submitBtn) {
             submitBtn.addEventListener('click', function(e) {
+                const confirmModal = document.getElementById('finalConfirmModal');
+
                 if (!hasSignature) {
                     e.preventDefault();
                     errorEl.style.display = 'flex';
                     document.querySelector('.signature-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
                     return false;
                 }
+
+                if (submitBtn.dataset.confirmed === '1') {
+                    submitBtn.dataset.confirmed = '0';
+                    return true;
+                }
+
+                e.preventDefault();
+                if (confirmModal) {
+                    confirmModal.style.display = 'flex';
+                }
+                return false;
             });
+
+            const confirmOkBtn = document.getElementById('finalConfirmOk');
+            const confirmCancelBtn = document.getElementById('finalConfirmCancel');
+            const closeConfirmModal = function() {
+                const modal = document.getElementById('finalConfirmModal');
+                if (modal) modal.style.display = 'none';
+            };
+
+            if (confirmCancelBtn) {
+                confirmCancelBtn.addEventListener('click', function() {
+                    closeConfirmModal();
+                });
+            }
+
+            if (confirmOkBtn) {
+                confirmOkBtn.addEventListener('click', function() {
+                    closeConfirmModal();
+                    submitBtn.dataset.confirmed = '1';
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit(submitBtn);
+                    } else {
+                        form.submit();
+                    }
+                });
+            }
+
+            const confirmModal = document.getElementById('finalConfirmModal');
+            if (confirmModal) {
+                confirmModal.addEventListener('click', function(e) {
+                    if (e.target === confirmModal) {
+                        closeConfirmModal();
+                    }
+                });
+            }
         }
     })();
 </script>

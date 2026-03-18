@@ -58,7 +58,7 @@
     {{-- Info --}}
     <div class="info-banner">
         <i class="bi bi-info-circle"></i>
-        <span>Gunakan gambar dengan rasio <strong>16:9</strong> (1920x1080 px) untuk hasil terbaik. Format: JPG, PNG, WebP. Maks 5MB.</span>
+        <span>Gunakan gambar dengan rasio <strong>16:9</strong> (1920x1080 px) untuk hasil terbaik. Format: JPG, PNG, WebP. Gambar akan dikonversi otomatis ke WebP berkualitas tinggi.</span>
     </div>
 
     {{-- Table --}}
@@ -85,7 +85,7 @@
                         <div class="preview-img">
                             <img src="{{ asset('storage/' . $carousel->image) }}" 
                                  alt="{{ $carousel->title }}"
-                                 onerror="this.src='https://via.placeholder.com/320x180/334155/94a3b8?text=No+Image'">
+                                 onerror="this.onerror=null; this.src='{{ asset('images/no-image-banner.svg') }}'">
                         </div>
                     </td>
                     <td>
