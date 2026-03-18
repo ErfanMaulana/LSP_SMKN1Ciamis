@@ -39,6 +39,7 @@ class CoreReferenceSeeder extends Seeder
             ProfileVisionMissionSeeder::class,
             SocialMediaSeeder::class,
             CarouselSeeder::class,
+            PanduanSeeder::class,
         ]);
     }
 }

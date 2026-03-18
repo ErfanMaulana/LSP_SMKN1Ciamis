@@ -16,6 +16,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('/jadwal', [DashboardController::class, 'jadwalIndex'])->name('jadwal.index');
         Route::get('/kelompok', [DashboardController::class, 'kelompokIndex'])->name('kelompok.index');
+        Route::get('/kelompok/{id}', [DashboardController::class, 'kelompokShow'])->name('kelompok.show');
         Route::get('/entry-penilaian', [DashboardController::class, 'entryPenilaianIndex'])->name('entry-penilaian');
         Route::get('/entry-penilaian/create', [DashboardController::class, 'entryPenilaianCreate'])->name('entry-penilaian.create');
         Route::get('/entry-penilaian/{asesiNik}/input', [DashboardController::class, 'entryPenilaianForm'])->name('entry-penilaian.form');

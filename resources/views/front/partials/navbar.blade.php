@@ -11,15 +11,16 @@
         <nav class="hidden md:flex gap-1 text-sm font-medium">
             @php
                 $navLinks = [
-                    ['route' => 'front.home',           'label' => 'Beranda'],
-                    ['route' => 'front.profil',         'label' => 'Profil LSP'],
-                    ['route' => 'front.kompetensi.index',  'label' => 'Kompetensi & Data Skema'],
-                    ['route' => 'front.berita.index',   'label' => 'Berita'],
-                    ['route' => 'front.kontak',         'label' => 'Kontak'],
+                    ['route' => 'front.home', 'active_pattern' => 'front.home', 'label' => 'Beranda'],
+                    ['route' => 'front.profil', 'active_pattern' => 'front.profil', 'label' => 'Profil LSP'],
+                    ['route' => 'front.kompetensi.index', 'active_pattern' => 'front.kompetensi.*', 'label' => 'Kompetensi & Data Skema'],
+                    ['route' => 'front.berita.index', 'active_pattern' => 'front.berita.*', 'label' => 'Berita'],
+                    ['route' => 'front.kontak', 'active_pattern' => 'front.kontak', 'label' => 'Kontak'],
+                    ['route' => 'front.panduan.overview', 'active_pattern' => 'front.panduan.*', 'label' => 'Panduan'],
                 ];
             @endphp
             @foreach($navLinks as $link)
-                @php $active = request()->routeIs($link['route']); @endphp
+                @php $active = request()->routeIs($link['active_pattern']); @endphp
                 <a href="{{ route($link['route']) }}"
                    class="px-4 py-2 rounded-lg transition-colors duration-150
                           {{ $active

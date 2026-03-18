@@ -6,6 +6,7 @@ use App\Http\Controllers\Front\KompetensiController;
 use App\Http\Controllers\Front\ProfilController;
 use App\Http\Controllers\Front\BeritaController;
 use App\Http\Controllers\Front\KontakController;
+use App\Http\Controllers\Front\PanduanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,15 @@ Route::name('front.')->group(function () {
     Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
     Route::redirect('/daftar-lsp', '/berita')->name('daftar');
     Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
+
+    // Panduan Sistem Routes
+    Route::prefix('panduan')->name('panduan.')->group(function () {
+        Route::get('/', [PanduanController::class, 'overview'])->name('overview');
+        Route::get('/alur-keseluruhan-sistem', [PanduanController::class, 'overview'])->name('overview.alur');
+        Route::get('/peran-asesi', [PanduanController::class, 'asesi'])->name('asesi');
+        Route::get('/peran-asesor', [PanduanController::class, 'asesor'])->name('asesor');
+        Route::get('/peran-admin', [PanduanController::class, 'admin'])->name('admin');
+    });
 
     // Berita Routes
     Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');

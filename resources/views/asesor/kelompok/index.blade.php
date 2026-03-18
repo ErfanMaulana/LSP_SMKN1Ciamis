@@ -61,6 +61,30 @@
         padding: 16px 18px;
     }
 
+    .group-actions {
+        margin-top: 12px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-detail {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #0369a1;
+        text-decoration: none;
+        border: 1px solid #bae6fd;
+        background: #f0f9ff;
+        border-radius: 8px;
+        padding: 7px 10px;
+    }
+
+    .btn-detail:hover {
+        background: #e0f2fe;
+    }
+
     .meta-row {
         font-size: 13px;
         color: #334155;
@@ -151,6 +175,12 @@
                                 <div class="asesi-info">Belum ada asesi di kelompok ini.</div>
                             </div>
                         @endforelse
+                    </div>
+
+                    <div class="group-actions">
+                        <a href="{{ route('asesor.kelompok.show', $kelompok->id) }}" class="btn-detail">
+                            <i class="bi bi-eye"></i> Lihat Detail
+                        </a>
                     </div>
                 </div>
             </div>

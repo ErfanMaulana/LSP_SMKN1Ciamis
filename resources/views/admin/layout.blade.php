@@ -180,6 +180,54 @@
             font-weight: 500;
         }
 
+        .menu-item.menu-nested-title {
+            justify-content: space-between;
+            cursor: pointer;
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        .menu-item.menu-nested-title .menu-nested-left {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .menu-item.menu-nested-title .nested-chevron {
+            font-size: 12px;
+            margin-left: auto;
+            color: #94a3b8;
+            transition: transform 0.25s ease;
+        }
+
+        .menu-item.menu-nested-title.collapsed .nested-chevron {
+            transform: rotate(-90deg);
+        }
+
+        .menu-nested-items {
+            max-height: 400px;
+            overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.25s ease;
+            opacity: 1;
+        }
+
+        .menu-nested-items.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+
+        .menu-item.menu-subitem {
+            padding-left: 44px;
+            font-size: 13px;
+        }
+
+        .menu-item.menu-subitem i {
+            font-size: 11px;
+            width: 16px;
+            margin-right: 10px;
+        }
+
         /* Main Content */
         .main-content {
             flex: 1;
@@ -952,7 +1000,7 @@
                 @endif
 
                 <!-- WEBSITE Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['carousel.view', 'berita.view', 'kontak.view', 'socialmedia.view', 'profile-content.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['carousel.view', 'berita.view', 'kontak.view', 'socialmedia.view', 'profile-content.view', 'panduan.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>WEBSITE</span>
@@ -997,6 +1045,44 @@
                                     <i class="bi bi-book-fill"></i>
                                     <span>Konten Profil</span>
                                 </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('panduan.view'))
+                                @php $isPanduanActive = request()->routeIs('admin.panduan.*'); @endphp
+                                <button type="button"
+                                    class="menu-item menu-nested-title {{ $isPanduanActive ? 'active' : '' }} {{ $isPanduanActive ? '' : 'collapsed' }}"
+                                    data-menu-key="panduan"
+                                    data-force-open="{{ $isPanduanActive ? '1' : '0' }}"
+                                    onclick="toggleNestedMenu(this)">
+                                    <span class="menu-nested-left">
+                                        <i class="bi bi-journal-text"></i>
+                                        <span>Panduan</span>
+                                    </span>
+                                    <i class="bi bi-chevron-down nested-chevron"></i>
+                                </button>
+
+                                <div class="menu-nested-items {{ $isPanduanActive ? '' : 'collapsed' }}" data-menu-key="panduan">
+                                    <a href="{{ route('admin.panduan.index', 'alur-keseluruhan-sistem') }}"
+                                        class="menu-item menu-subitem {{ request()->routeIs('admin.panduan.*') && request()->route('section') === 'alur-keseluruhan-sistem' ? 'active' : '' }}">
+                                        <i class="bi bi-dot"></i>
+                                        <span>Alur Keseluruhan Sistem</span>
+                                    </a>
+                                    <a href="{{ route('admin.panduan.index', 'peran-asesi') }}"
+                                        class="menu-item menu-subitem {{ request()->routeIs('admin.panduan.*') && request()->route('section') === 'peran-asesi' ? 'active' : '' }}">
+                                        <i class="bi bi-dot"></i>
+                                        <span>Peran Asesi</span>
+                                    </a>
+                                    <a href="{{ route('admin.panduan.index', 'peran-asesor') }}"
+                                        class="menu-item menu-subitem {{ request()->routeIs('admin.panduan.*') && request()->route('section') === 'peran-asesor' ? 'active' : '' }}">
+                                        <i class="bi bi-dot"></i>
+                                        <span>Peran Asesor</span>
+                                    </a>
+                                    <a href="{{ route('admin.panduan.index', 'peran-admin') }}"
+                                        class="menu-item menu-subitem {{ request()->routeIs('admin.panduan.*') && request()->route('section') === 'peran-admin' ? 'active' : '' }}">
+                                        <i class="bi bi-dot"></i>
+                                        <span>Peran Admin</span>
+                                    </a>
+                                </div>
                             @endif
                         </div>
                     </div>
@@ -1124,6 +1210,20 @@
             localStorage.setItem('menu-' + sectionName, isCollapsed ? 'collapsed' : 'expanded');
         }
 
+        function toggleNestedMenu(element) {
+            const key = element.dataset.menuKey;
+            if (!key) return;
+
+            const items = document.querySelector('.menu-nested-items[data-menu-key="' + key + '"]');
+            if (!items) return;
+
+            element.classList.toggle('collapsed');
+            items.classList.toggle('collapsed');
+
+            const isCollapsed = element.classList.contains('collapsed');
+            localStorage.setItem('nested-menu-' + key, isCollapsed ? 'collapsed' : 'expanded');
+        }
+
         // Restore menu states on page load
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.menu-section-title').forEach(function (title) {
@@ -1134,6 +1234,30 @@
                 if (state === 'collapsed') {
                     title.classList.add('collapsed');
                     title.nextElementSibling.classList.add('collapsed');
+                }
+            });
+
+            document.querySelectorAll('.menu-nested-title').forEach(function (title) {
+                const key = title.dataset.menuKey;
+                const forceOpen = title.dataset.forceOpen === '1';
+                if (!key) return;
+
+                const items = document.querySelector('.menu-nested-items[data-menu-key="' + key + '"]');
+                if (!items) return;
+
+                if (forceOpen) {
+                    title.classList.remove('collapsed');
+                    items.classList.remove('collapsed');
+                    return;
+                }
+
+                const state = localStorage.getItem('nested-menu-' + key);
+                if (state === 'collapsed') {
+                    title.classList.add('collapsed');
+                    items.classList.add('collapsed');
+                } else {
+                    title.classList.remove('collapsed');
+                    items.classList.remove('collapsed');
                 }
             });
         });
@@ -1322,7 +1446,8 @@
                     'Berita': 31,
                     'Kontak': 32,
                     'Sosial Media': 33,
-                    'Konten Profil': 34
+                    'Konten Profil': 34,
+                    'Panduan': 35
                 };
 
                 var sortedCategories = Object.keys(grouped).sort(function (a, b) {

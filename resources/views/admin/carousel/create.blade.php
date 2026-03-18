@@ -26,7 +26,7 @@
                         <div class="upload-placeholder" id="uploadPlaceholder">
                             <i class="bi bi-cloud-arrow-up"></i>
                             <h4>Klik untuk upload gambar</h4>
-                            <p>Format: JPG, PNG, WebP | Maks: 5MB | Rasio: 16:9 (1920x1080 px)</p>
+                            <p>Format: JPG, PNG, WebP | Rasio disarankan: 16:9 (1920x1080 px)</p>
                         </div>
                         <img id="imagePreview" class="preview-image" style="display:none">
                     </div>

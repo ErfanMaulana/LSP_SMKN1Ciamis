@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\NilaiAsesorController;
 use App\Http\Controllers\Admin\BeritaController;
 use App\Http\Controllers\Admin\KontakController;
 use App\Http\Controllers\Admin\MitraController;
+use App\Http\Controllers\Admin\PanduanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -149,6 +150,43 @@ Route::prefix('admin')->group(function () {
             Route::put('/social-media/{id}', [SocialMediaController::class, 'update'])->name('admin.socialmedia.update')->middleware('permission:socialmedia.edit');
             Route::delete('/social-media/{id}', [SocialMediaController::class, 'destroy'])->name('admin.socialmedia.destroy')->middleware('permission:socialmedia.delete');
             Route::patch('/social-media/{id}/toggle', [SocialMediaController::class, 'toggleStatus'])->name('admin.socialmedia.toggle')->middleware('permission:socialmedia.edit');
+        });
+
+        // Panduan Website CRUD (per section)
+        Route::middleware('permission:panduan.view')->group(function () {
+            Route::get('/panduan/{section}', [PanduanController::class, 'index'])
+                ->name('admin.panduan.index')
+                ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin');
+
+            Route::get('/panduan/{section}/create', [PanduanController::class, 'create'])
+                ->name('admin.panduan.create')
+                ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
+                ->middleware('permission:panduan.create');
+
+            Route::post('/panduan/{section}', [PanduanController::class, 'store'])
+                ->name('admin.panduan.store')
+                ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
+                ->middleware('permission:panduan.create');
+
+            Route::get('/panduan/{section}/{id}/edit', [PanduanController::class, 'edit'])
+                ->name('admin.panduan.edit')
+                ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
+                ->middleware('permission:panduan.edit');
+
+            Route::put('/panduan/{section}/{id}', [PanduanController::class, 'update'])
+                ->name('admin.panduan.update')
+                ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
+                ->middleware('permission:panduan.edit');
+
+            Route::delete('/panduan/{section}/{id}', [PanduanController::class, 'destroy'])
+                ->name('admin.panduan.destroy')
+                ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
+                ->middleware('permission:panduan.delete');
+
+            Route::patch('/panduan/{section}/{id}/toggle', [PanduanController::class, 'toggleStatus'])
+                ->name('admin.panduan.toggle')
+                ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
+                ->middleware('permission:panduan.edit');
         });
 
         // Profile Content CRUD

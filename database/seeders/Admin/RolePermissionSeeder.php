@@ -113,6 +113,12 @@ class RolePermissionSeeder extends Seeder
                 'profile-content.edit'   => 'Edit Konten Profil',
                 'profile-content.delete' => 'Hapus Konten Profil',
             ],
+            'Panduan' => [
+                'panduan.view'   => 'Lihat Panduan',
+                'panduan.create' => 'Tambah Poin Panduan',
+                'panduan.edit'   => 'Edit Poin Panduan',
+                'panduan.delete' => 'Hapus Poin Panduan',
+            ],
             'Manajemen Admin' => [
                 'admin.view'   => 'Lihat Admin',
                 'admin.create' => 'Tambah Admin',
@@ -171,7 +177,7 @@ class RolePermissionSeeder extends Seeder
             ]
         );
         $adminWebPerms = Permission::whereIn('group', [
-            'Dashboard', 'Carousel', 'Berita', 'Kontak', 'Sosial Media', 'Konten Profil',
+            'Dashboard', 'Carousel', 'Berita', 'Kontak', 'Sosial Media', 'Konten Profil', 'Panduan',
         ])->pluck('id');
         $adminWeb->permissions()->sync($adminWebPerms);
 

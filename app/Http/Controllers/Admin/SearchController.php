@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Asesi;
 use App\Models\Asesor;
 use App\Models\Kelompok;
+use App\Models\PanduanItem;
 use App\Models\Skema;
 use App\Models\Jurusan;
 use Illuminate\Http\Request;
@@ -114,6 +115,25 @@ class SearchController extends Controller
                     'category' => 'Jurusan',
                     'icon'     => 'bi-mortarboard',
                     'color'    => '#dc2626',
+                ];
+            }
+        }
+
+        // Search Panduan
+        if ($user->hasPermission('panduan.view')) {
+            $panduans = PanduanItem::where('title', 'like', "%{$query}%")
+                ->orWhere('description', 'like', "%{$query}%")
+                ->limit(5)
+                ->get();
+
+            foreach ($panduans as $panduan) {
+                $results[] = [
+                    'title'    => $panduan->title,
+                    'subtitle' => 'Section: ' . str_replace('-', ' ', $panduan->section),
+                    'url'      => route('admin.panduan.index', $panduan->section),
+                    'category' => 'Panduan',
+                    'icon'     => 'bi-journal-text',
+                    'color'    => '#0ea5e9',
                 ];
             }
         }

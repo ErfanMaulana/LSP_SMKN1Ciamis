@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="title desc">
+  <title id="title">Mockup Admin Buat Akun</title>
+  <desc id="desc">Ilustrasi halaman admin untuk membuat akun asesi dan asesor</desc>
+  <rect width="1200" height="700" fill="#f1f5f9"/>
+  <rect x="60" y="40" width="1080" height="620" rx="18" fill="#ffffff" stroke="#cbd5e1"/>
+  <rect x="60" y="40" width="260" height="620" rx="18" fill="#0f172a"/>
+  <text x="95" y="95" font-family="Arial, sans-serif" font-size="24" fill="#ffffff" font-weight="700">Admin Panel</text>
+  <text x="95" y="145" font-family="Arial, sans-serif" font-size="18" fill="#93c5fd">Kelola Akun</text>
+  <rect x="360" y="90" width="740" height="70" rx="12" fill="#eff6ff" stroke="#bfdbfe"/>
+  <text x="390" y="133" font-family="Arial, sans-serif" font-size="28" fill="#1d4ed8" font-weight="700">Buat Akun Asesi / Asesor</text>
+  <rect x="360" y="200" width="340" height="52" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="382" y="233" font-family="Arial, sans-serif" font-size="19" fill="#64748b">Nama Pengguna</text>
+  <rect x="760" y="200" width="340" height="52" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="782" y="233" font-family="Arial, sans-serif" font-size="19" fill="#64748b">Role: Asesi/Asesor</text>
+  <rect x="360" y="276" width="740" height="52" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="382" y="309" font-family="Arial, sans-serif" font-size="19" fill="#64748b">Username / NIK / Email</text>
+  <rect x="360" y="352" width="740" height="52" rx="10" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="382" y="385" font-family="Arial, sans-serif" font-size="19" fill="#64748b">Password Awal</text>
+  <rect x="930" y="432" width="170" height="52" rx="10" fill="#0f766e"/>
+  <text x="1015" y="465" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" fill="#ffffff" font-weight="700">Simpan</text>
+  <text x="70" y="680" font-family="Arial, sans-serif" font-size="18" fill="#475569">Mockup panduan: representasi proses pembuatan akun oleh admin.</text>
+</svg>

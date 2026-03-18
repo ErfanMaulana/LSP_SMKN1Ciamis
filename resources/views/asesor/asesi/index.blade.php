@@ -30,15 +30,15 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         border: 1px solid #e2e8f0; overflow: hidden;
     }
-    .table-card table { width: 100%; border-collapse: collapse; }
+    .table-card table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     .table-card thead th {
-        background: #f8fafc; padding: 13px 16px;
+        background: #f8fafc; padding: 11px 10px;
         text-align: left; font-size: 11.5px; font-weight: 700;
         color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;
         border-bottom: 1px solid #e2e8f0;
     }
     .table-card tbody td {
-        padding: 14px 16px; font-size: 14px; color: #374151;
+        padding: 10px 10px; font-size: 13px; color: #374151;
         border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
     }
@@ -57,9 +57,10 @@
     .btn-review {
         display: inline-flex; align-items: center; gap: 5px;
         background: #0073bd; color: white;
-        padding: 6px 14px; border-radius: 6px;
-        font-size: 12px; font-weight: 500; text-decoration: none;
+        padding: 5px 10px; border-radius: 6px;
+        font-size: 11px; font-weight: 600; text-decoration: none;
         transition: background 0.2s;
+        white-space: nowrap;
     }
     .btn-review:hover { background: #003961; color: white; }
     .btn-review.disabled { background: #94a3b8; pointer-events: none; }
@@ -67,6 +68,24 @@
     .empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
     .empty-state i { font-size: 44px; margin-bottom: 12px; display: block; }
     .empty-state p { font-size: 14px; }
+
+    .period-col {
+        min-width: 150px;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .period-sep {
+        color: #94a3b8;
+        margin: 0 4px;
+    }
+
+    .table-card th:nth-child(2), .table-card td:nth-child(2) { width: 122px; }
+    .table-card th:nth-child(4), .table-card td:nth-child(4) { width: 98px; }
+    .table-card th:nth-child(5), .table-card td:nth-child(5) { width: 118px; }
+    .table-card th:nth-child(6), .table-card td:nth-child(6) { width: 136px; }
+    .table-card th:nth-child(7), .table-card td:nth-child(7) { width: 74px; text-align: center; }
 </style>
 @endsection
 
@@ -94,15 +113,12 @@
     <table>
         <thead>
             <tr>
-                <th>#</th>
                 <th>Nama Asesi</th>
                 <th>NIK</th>
-                <th>No. Reg</th>
                 <th>Jurusan</th>
                 <th>Status Asesmen</th>
                 <th>Rekomendasi</th>
-                <th>Mulai</th>
-                <th>Selesai</th>
+                <th>Periode</th>
                 <th>Aksi</th>
             </tr>
         </thead>
@@ -116,20 +132,18 @@
                     default              => 'badge-belum',
                 };
                 $statusLabel = match($row->status) {
-                    'selesai'            => '✓ Selesai',
-                    'sedang_mengerjakan' => '⏳ Sedang Dikerjakan',
-                    default              => '○ Belum Mulai',
+                    'selesai'            => 'Selesai',
+                    'sedang_mengerjakan' => 'Sedang Dikerjakan',
+                    default              => 'Belum Mulai',
                 };
             @endphp
             <tr>
-                <td style="color:#94a3b8;font-size:13px;">{{ $i + 1 }}</td>
                 <td>
                     <div style="font-weight:600;color:#1e3a5f;">{{ $asesi?->nama ?? '—' }}</div>
-                    <div style="font-size:11px;color:#94a3b8;">{{ $asesi?->email ?? '' }}</div>
+                    <div style="font-size:10px;color:#94a3b8;line-height:1.3;">{{ $asesi?->email ?? '' }}</div>
                 </td>
-                <td><code style="font-size:12px;color:#475569;">{{ $row->asesi_nik }}</code></td>
-                <td>{{ $asesi?->no_reg ?? '—' }}</td>
-                <td>{{ $asesi?->jurusan?->nama_jurusan ?? '—' }}</td>
+                <td><code style="font-size:11px;color:#475569;">{{ $row->asesi_nik }}</code></td>
+                <td><code style="font-size:11px;color:#475569;">{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</code></td>
                 <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
                 <td>
                     @if($row->rekomendasi === 'lanjut')
@@ -140,11 +154,10 @@
                         <span style="font-size:12px;color:#94a3b8;">— Belum direview</span>
                     @endif
                 </td>
-                <td style="font-size:12px;color:#64748b;">
-                    {{ $row->tanggal_mulai ? \Carbon\Carbon::parse($row->tanggal_mulai)->format('d/m/Y') : '—' }}
-                </td>
-                <td style="font-size:12px;color:#64748b;">
-                    {{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('d/m/Y') : '—' }}
+                <td class="period-col">
+                    <span>{{ $row->tanggal_mulai ? \Carbon\Carbon::parse($row->tanggal_mulai)->format('d/m/Y') : '—' }}</span>
+                    <span class="period-sep">s/d</span>
+                    <span>{{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('d/m/Y') : '—' }}</span>
                 </td>
                 <td>
                     @if($row->status === 'selesai')

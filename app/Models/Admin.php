@@ -135,11 +135,16 @@ class Admin extends Authenticatable
             'admin.kontak.index' => 'kontak.view',
             'admin.socialmedia.index' => 'socialmedia.view',
             'admin.profile-content.index' => 'profile-content.view',
+            'admin.panduan.index' => 'panduan.view',
         ];
 
         // Find first accessible route
         foreach ($menuItems as $route => $permission) {
             if ($this->hasPermission($permission)) {
+                if ($route === 'admin.panduan.index') {
+                    return route($route, 'alur-keseluruhan-sistem');
+                }
+
                 return route($route);
             }
         }
