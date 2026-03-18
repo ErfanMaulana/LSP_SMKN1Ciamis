@@ -203,6 +203,80 @@
     }
     .btn-reg-success { background: #14532d; color: white; flex: 1; justify-content: center; }
     .btn-reg-success:hover { background: #166534; }
+
+    @media (max-width: 768px) {
+        .reg-card {
+            padding: 16px;
+            border-radius: 10px;
+        }
+
+        .step-indicator {
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+
+        .step-line {
+            width: 26px;
+        }
+
+        .step-label {
+            font-size: 11px;
+        }
+
+        .upload-card {
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .upload-card-header {
+            gap: 12px;
+        }
+
+        .upload-icon {
+            width: 36px;
+            height: 36px;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+
+        .file-row {
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .file-name {
+            max-width: 100%;
+            width: calc(100% - 30px);
+        }
+
+        .cropper-modal-box {
+            width: calc(100% - 18px);
+            max-height: 92vh;
+        }
+
+        .cropper-modal-body {
+            padding: 10px;
+        }
+
+        .cropper-modal-footer {
+            padding: 10px 12px;
+        }
+
+        .reg-actions {
+            margin-top: 18px;
+            padding-top: 14px;
+        }
+
+        .btn-reg-success {
+            width: 100%;
+        }
+    }
 </style>
 @endsection
 

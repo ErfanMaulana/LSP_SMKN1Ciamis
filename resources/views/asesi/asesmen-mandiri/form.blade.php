@@ -18,7 +18,7 @@
     }
 
     .back-link:hover {
-        color: #16a34a;
+        color: #0073bd;
     }
 
     .skema-header {
@@ -42,7 +42,7 @@
     .skema-header-icon {
         width: 56px;
         height: 56px;
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        background: #0073bd;
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -91,7 +91,7 @@
 
     .instructions-box {
         background: #f0fdf4;
-        border: 1px solid #bbf7d0;
+        border: 1px solid #bbd5f7;
         border-radius: 10px;
         padding: 20px;
         margin-bottom: 24px;
@@ -99,7 +99,7 @@
 
     .instructions-box h3 {
         font-size: 15px;
-        color: #166534;
+        color: #0073bd;
         margin-bottom: 12px;
         display: flex;
         align-items: center;
@@ -113,7 +113,7 @@
 
     .instructions-box li {
         font-size: 13px;
-        color: #15803d;
+        color: #0073bd;
         margin-bottom: 6px;
         line-height: 1.5;
     }
@@ -132,7 +132,7 @@
     }
 
     .unit-header {
-        background: linear-gradient(135deg, #14532d 0%, #166534 100%);
+        background: #0073bd;
         padding: 20px 24px;
         color: white;
     }
@@ -163,6 +163,7 @@
         gap: 24px;
         font-size: 13px;
         opacity: 0.9;
+        flex-wrap: wrap;
     }
 
     .unit-meta span {
@@ -208,7 +209,7 @@
     .elemen-number {
         font-size: 12px;
         font-weight: 700;
-        color: #16a34a;
+        color: #0073bd;
         margin-bottom: 4px;
     }
 
@@ -344,7 +345,7 @@
     }
 
     .progress-info strong {
-        color: #16a34a;
+        color: #0073bd;
     }
 
     .btn-group {
@@ -510,13 +511,13 @@
     }
 
     .signature-canvas-wrapper.active {
-        border-color: #16a34a;
+        border-color: #0073bd;
         background: #fff;
     }
 
     .signature-canvas-wrapper.has-signature {
         border-style: solid;
-        border-color: #16a34a;
+        border-color: #0073bd;
     }
 
     .signature-canvas {
@@ -608,7 +609,7 @@
     .signature-saved-meta {
         margin-top: 10px;
         font-size: 13px;
-        color: #16a34a;
+        color: #0073bd;
         font-weight: 600;
         display: flex;
         align-items: center;
@@ -625,9 +626,120 @@
         gap: 6px;
     }
 
+    .rekom-table-wrap {
+        overflow-x: auto;
+    }
+
+    .rekom-table-wrap + .rekom-table-wrap {
+        margin-top: 10px;
+    }
+
+    .rekom-summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+
+    .waiting-review-box {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 14px 20px;
+    }
+
     @media (max-width: 768px) {
+        .content-wrapper {
+            padding: 12px !important;
+        }
+
+        .back-link {
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .skema-header,
+        .instructions-box,
+        .signature-section {
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .skema-header-top {
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            gap: 10px;
+        }
+
+        .skema-header-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 22px;
+        }
+
+        .skema-header-info h2 {
+            font-size: 17px;
+            line-height: 1.35;
+        }
+
+        .skema-header-info .skema-number {
+            font-size: 12px;
+        }
+
+        .skema-header-meta {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .meta-value {
+            word-break: break-word;
+        }
+
+        .instructions-box ul {
+            padding-left: 18px;
+        }
+
+        .instructions-box li {
+            font-size: 13.5px;
+            line-height: 1.55;
+        }
+
+        .unit-header {
+            padding: 14px;
+        }
+
+        .unit-meta {
+            gap: 10px;
+            font-size: 13px;
+        }
+
+        .unit-title-row {
+            margin-bottom: 6px;
+        }
+
+        .unit-header h3 {
+            font-size: 15px;
+            line-height: 1.35;
+        }
+
+        .unit-number {
+            padding: 5px 11px;
+            font-size: 12px;
+        }
+
+        .unit-question {
+            padding: 12px 14px;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+
         .elemen-header {
             flex-direction: column;
+            padding: 12px 14px;
+            gap: 10px;
         }
 
         .elemen-controls {
@@ -635,10 +747,91 @@
             min-width: auto;
         }
 
+        .radio-group {
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            min-height: 40px;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        .radio-option.kompeten span,
+        .radio-option.belum span {
+            font-size: 14px;
+        }
+
+        .kriteria-item {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .kriteria-list {
+            padding: 12px 14px 12px 14px;
+        }
+
+        .bukti-section {
+            padding: 0 14px 14px 14px;
+        }
+
+        .bukti-input {
+            min-height: 84px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .rekomendasi-banner {
+            padding: 14px;
+            gap: 10px;
+        }
+
+        .rekomendasi-banner .banner-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+        }
+
+        .rekomendasi-banner .banner-title {
+            font-size: 14px;
+        }
+
+        .rekom-table-wrap {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .rekom-table-wrap > table {
+            min-width: 640px;
+        }
+
+        .rekom-summary-table {
+            margin-bottom: 12px;
+        }
+
+        .rekom-summary-table tr,
+        .rekom-summary-table td {
+            display: block;
+            width: 100% !important;
+        }
+
+        .rekom-summary-table td {
+            padding: 10px 12px !important;
+        }
+
+        .rekom-summary-table td + td {
+            border-top: none !important;
+        }
+
         .form-actions {
             flex-direction: column;
             position: relative;
             bottom: auto;
+            padding: 14px;
+            margin-top: 16px;
         }
 
         .btn-group {
@@ -646,8 +839,26 @@
             flex-direction: column;
         }
 
+        .progress-info {
+            font-size: 13px;
+            width: 100%;
+        }
+
+        .waiting-review-box {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 12px 14px;
+            gap: 10px;
+        }
+
         .btn {
             justify-content: center;
+            min-height: 42px;
+        }
+
+        .btn-save,
+        .btn-submit {
+            width: 100%;
         }
 
         .signature-canvas {
@@ -657,6 +868,71 @@
         .signature-actions {
             flex-direction: column;
             gap: 8px;
+            align-items: flex-start;
+        }
+
+        .signature-saved-display img {
+            max-width: 100%;
+        }
+
+        .signature-saved-meta {
+            font-size: 13px;
+            text-align: left;
+            justify-content: flex-start;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .content-wrapper {
+            padding: 10px !important;
+        }
+
+        .skema-header,
+        .instructions-box,
+        .signature-section,
+        .form-actions {
+            padding: 12px;
+        }
+
+        .unit-header {
+            padding: 12px;
+        }
+
+        .unit-question,
+        .elemen-header,
+        .kriteria-list,
+        .bukti-section {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+
+        .radio-group {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .rekomendasi-banner {
+            padding: 12px;
+        }
+
+        .rekomendasi-banner .banner-meta {
+            font-size: 12.5px;
+            line-height: 1.45;
+        }
+
+        .rekomendasi-banner .banner-catatan {
+            font-size: 13px;
+            padding: 8px 10px;
+        }
+
+        .signature-canvas {
+            height: 150px;
+        }
+
+        .btn {
+            padding: 10px 14px;
+            font-size: 14px;
         }
     }
 </style>
@@ -877,33 +1153,36 @@
 
         <div style="padding:22px 24px;">
             {{-- Tabel Rekomendasi --}}
-            <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px;">
-                <tr>
-                    <td style="width:42%;border:1px solid #d1d5db;padding:12px 16px;vertical-align:top;background:#f8fafc;">
-                        <strong>Rekomendasi Untuk Asesi:</strong>
-                        <div style="font-size:12px;color:#64748b;margin-top:4px;">Asesmen dapat / tidak dapat dilanjutkan</div>
-                    </td>
-                    <td style="border:1px solid #d1d5db;padding:14px 20px;">
-                        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:2px solid {{ $pivot->rekomendasi === 'lanjut' ? '#059669' : '#dc2626' }};background:{{ $pivot->rekomendasi === 'lanjut' ? '#f0fdf4' : '#fff1f2' }};">
-                            <span style="font-weight:600;color:{{ $pivot->rekomendasi === 'lanjut' ? '#065f46' : '#991b1b' }};">
-                                {{ $pivot->rekomendasi === 'lanjut' ? '✓' : '✗' }} &nbsp;Asesmen <u>{{ $pivot->rekomendasi === 'lanjut' ? 'dapat' : 'tidak dapat' }}</u> dilanjutkan
-                            </span>
-                        </div>
-                    </td>
-                </tr>
-                @if($pivot->catatan_asesor)
-                <tr>
-                    <td style="border:1px solid #d1d5db;border-top:none;padding:12px 16px;vertical-align:top;background:#f8fafc;">
-                        <strong>Catatan Asesor:</strong>
-                    </td>
-                    <td style="border:1px solid #d1d5db;border-top:none;padding:12px 14px;">
-                        <div style="font-size:13px;color:#374151;line-height:1.6;">{{ $pivot->catatan_asesor }}</div>
-                    </td>
-                </tr>
-                @endif
-            </table>
+            <div class="rekom-table-wrap">
+                <table class="rekom-summary-table">
+                    <tr>
+                        <td style="width:42%;border:1px solid #d1d5db;padding:12px 16px;vertical-align:top;background:#f8fafc;">
+                            <strong>Rekomendasi Untuk Asesi:</strong>
+                            <div style="font-size:12px;color:#64748b;margin-top:4px;">Asesmen dapat / tidak dapat dilanjutkan</div>
+                        </td>
+                        <td style="border:1px solid #d1d5db;padding:14px 20px;">
+                            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:2px solid {{ $pivot->rekomendasi === 'lanjut' ? '#059669' : '#dc2626' }};background:{{ $pivot->rekomendasi === 'lanjut' ? '#f0fdf4' : '#fff1f2' }};">
+                                <span style="font-weight:600;color:{{ $pivot->rekomendasi === 'lanjut' ? '#065f46' : '#991b1b' }};">
+                                    {{ $pivot->rekomendasi === 'lanjut' ? '✓' : '✗' }} &nbsp;Asesmen <u>{{ $pivot->rekomendasi === 'lanjut' ? 'dapat' : 'tidak dapat' }}</u> dilanjutkan
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                    @if($pivot->catatan_asesor)
+                    <tr>
+                        <td style="border:1px solid #d1d5db;border-top:none;padding:12px 16px;vertical-align:top;background:#f8fafc;">
+                            <strong>Catatan Asesor:</strong>
+                        </td>
+                        <td style="border:1px solid #d1d5db;border-top:none;padding:12px 14px;">
+                            <div style="font-size:13px;color:#374151;line-height:1.6;">{{ $pivot->catatan_asesor }}</div>
+                        </td>
+                    </tr>
+                    @endif
+                </table>
+            </div>
 
             {{-- Tabel Tanda Tangan --}}
+            <div class="rekom-table-wrap">
             <table style="width:100%;border-collapse:collapse;font-size:13px;">
                 <tr>
                     {{-- KOLOM ASESI --}}
@@ -969,6 +1248,7 @@
                     </td>
                 </tr>
             </table>
+            </div>
         </div>
     </div>
     @endif
@@ -984,7 +1264,7 @@
                 <i class="bi bi-lock-fill" style="color:#94a3b8;"></i> Asesmen telah direkomendasikan asesor — tidak dapat diubah
             </span>
             @elseif($pivot && $pivot->status === 'selesai')
-            <div style="display:flex;align-items:center;gap:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px 20px;">
+            <div class="waiting-review-box">
                 <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d1fae5,#a7f3d0);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <i class="bi bi-hourglass-split" style="font-size:18px;color:#065f46;"></i>
                 </div>

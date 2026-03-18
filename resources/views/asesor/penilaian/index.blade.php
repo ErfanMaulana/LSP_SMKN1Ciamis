@@ -38,6 +38,7 @@
         gap: 0;
         border-bottom: 1px solid #e2e8f0;
         background: #f8fafc;
+        overflow-x: auto;
     }
     .tab {
         padding: 12px 16px;
@@ -84,7 +85,7 @@
     }
     .btn-primary:hover { background: #005e9b; color: white; }
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; min-width: 980px; }
     thead th {
         text-align: left;
         font-size: 11px;
@@ -152,6 +153,31 @@
         text-align: center;
         padding: 52px 20px;
         color: #94a3b8;
+    }
+
+    @media (max-width: 768px) {
+        .panel-head {
+            padding: 14px;
+        }
+
+        .panel-head h3 {
+            font-size: 15px;
+        }
+
+        .tabs-wrapper {
+            -webkit-overflow-scrolling: touch;
+            white-space: nowrap;
+        }
+
+        .tab {
+            flex: 0 0 auto;
+            padding: 11px 14px;
+            font-size: 12px;
+        }
+
+        .table-wrap {
+            -webkit-overflow-scrolling: touch;
+        }
     }
 </style>
 @endsection

@@ -38,6 +38,22 @@
             box-shadow: 2px 0 10px rgba(0,0,0,0.04);
         }
 
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 950;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .sidebar::-webkit-scrollbar {
             width: 5px;
         }
@@ -426,14 +442,23 @@
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
+                box-shadow: 12px 0 28px rgba(15, 23, 42, 0.14);
             }
 
             .sidebar.active {
                 transform: translateX(0);
             }
 
+            .sidebar-overlay {
+                display: block;
+            }
+
             .main-content {
                 margin-left: 0;
+            }
+
+            .topbar {
+                padding: 12px 14px;
             }
 
             .mobile-toggle {
@@ -441,7 +466,23 @@
             }
 
             .topbar h1 {
-                font-size: 18px;
+                font-size: 16px;
+                line-height: 1.25;
+            }
+
+            .topbar-right {
+                gap: 8px;
+            }
+
+            .profile-toggle {
+                padding: 6px 8px;
+                gap: 8px;
+            }
+
+            .profile-menu {
+                right: -4px;
+                min-width: 230px;
+                max-width: calc(100vw - 20px);
             }
 
             .content-wrapper {
@@ -540,6 +581,7 @@
                 @endif
             </nav>
         </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
         <!-- Main Content -->
         <main class="main-content">
@@ -629,7 +671,21 @@
 
     <script>
         function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('active');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const isOpen = sidebar.classList.toggle('active');
+            if (overlay) {
+                overlay.classList.toggle('active', isOpen);
+            }
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
         }
 
         function toggleAsesiProfile(e) {
@@ -650,8 +706,20 @@
             const toggle = document.querySelector('.mobile-toggle');
             if (window.innerWidth <= 768) {
                 if (!sidebar.contains(event.target) && toggle && !toggle.contains(event.target)) {
-                    sidebar.classList.remove('active');
+                    closeSidebar();
                 }
+            }
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                closeSidebar();
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeSidebar();
             }
         });
     </script>

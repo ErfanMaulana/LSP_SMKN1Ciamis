@@ -39,6 +39,22 @@
             border-right: 1px solid #e2e8f0;
         }
 
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            z-index: 950;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.25s ease;
+        }
+
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .sidebar::-webkit-scrollbar {
             width: 4px;
         }
@@ -372,10 +388,15 @@
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
+                box-shadow: 12px 0 28px rgba(15, 23, 42, 0.14);
             }
 
             .sidebar.active {
                 transform: translateX(0);
+            }
+
+            .sidebar-overlay {
+                display: block;
             }
 
             .main-content {
@@ -388,6 +409,30 @@
 
             .content-wrapper {
                 padding: 16px;
+            }
+
+            .topbar {
+                padding: 12px 14px;
+            }
+
+            .topbar h1 {
+                font-size: 16px;
+                line-height: 1.2;
+            }
+
+            .topbar-right {
+                gap: 8px;
+            }
+
+            .profile-toggle {
+                gap: 8px;
+                padding: 6px 8px;
+            }
+
+            .profile-menu {
+                right: -4px;
+                min-width: 230px;
+                max-width: calc(100vw - 20px);
             }
 
             .user-details {
@@ -452,13 +497,14 @@
                 </a>
             </nav>
         </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
         {{-- Main --}}
         <main class="main-content">
             <div class="topbar">
                 <div style="display:flex;align-items:center;gap:14px;">
                     <button class="mobile-toggle"
-                        onclick="document.getElementById('sidebar').classList.toggle('active')">
+                        onclick="toggleSidebar()">
                         <i class="bi bi-list"></i>
                     </button>
                     <h1>@yield('page-title', 'Dashboard')</h1>
@@ -532,6 +578,24 @@
     </div>
 
     <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const isOpen = sidebar.classList.toggle('active');
+            if (overlay) {
+                overlay.classList.toggle('active', isOpen);
+            }
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
         function toggleProfileMenu(event) {
             event.stopPropagation();
             const menu = document.getElementById('profileMenu');
@@ -545,6 +609,18 @@
 
             if (profileDropdown && !profileDropdown.contains(event.target)) {
                 if (profileMenu) profileMenu.classList.remove('show');
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 768) {
+                closeSidebar();
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeSidebar();
             }
         });
     </script>

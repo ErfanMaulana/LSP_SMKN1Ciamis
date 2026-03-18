@@ -245,6 +245,72 @@
             padding: 0 !important;
         }
     }
+
+    @media (max-width: 768px) {
+        .result-header {
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .result-header-top {
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .result-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            font-size: 22px;
+        }
+
+        .result-info h2 {
+            font-size: 16px;
+            line-height: 1.35;
+        }
+
+        .result-stats {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding-top: 14px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+        }
+
+        .completion-badge {
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .completion-badge i {
+            font-size: 18px;
+        }
+
+        .unit-result-header,
+        .elemen-result {
+            padding: 12px 14px;
+        }
+
+        .elemen-result {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .action-buttons .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 @endsection
 

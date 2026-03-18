@@ -318,33 +318,102 @@
 
     @media (max-width: 768px) {
         .jadwal-fullscreen {
-            padding: 20px;
+            min-height: auto;
+            padding: 16px;
+        }
+
+        .jadwal-content {
+            gap: 18px;
+        }
+
+        .countdown-section {
+            padding: 10px 0;
+        }
+
+        .countdown-label {
+            font-size: 13px;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .countdown-display {
+            gap: 8px;
         }
 
         .countdown-number {
-            font-size: 36px;
+            font-size: 24px;
         }
 
         .countdown-box {
-            min-width: 80px;
-            padding: 15px;
+            min-width: 0;
+            width: calc(25% - 6px);
+            padding: 10px 8px;
+            border-radius: 10px;
+        }
+
+        .countdown-unit {
+            font-size: 10px;
+            margin-top: 4px;
         }
 
         .jadwal-title-main {
-            font-size: 24px;
+            font-size: 20px;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .jadwal-badge {
+            font-size: 12px;
+            padding: 6px 12px;
         }
 
         .info-grid {
             grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .info-card,
+        .peserta-section {
+            padding: 14px;
         }
 
         .peserta-grid {
             grid-template-columns: 1fr;
-            max-height: 250px;
+            max-height: 220px;
+            padding-right: 4px;
+        }
+
+        .peserta-header {
+            gap: 10px;
+            align-items: flex-start;
+            flex-direction: column;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+        }
+
+        .peserta-title {
+            font-size: 16px;
         }
 
         .jadwal-nav {
             right: 15px;
+        }
+
+        .jadwal-nav-dot {
+            width: 10px;
+            height: 10px;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .countdown-display {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .countdown-box {
+            width: calc(50% - 6px);
         }
     }
 </style>

@@ -63,7 +63,7 @@
     }
 
     .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; min-width: 860px; }
     thead th {
         text-align: left;
         font-size: 11px;
@@ -137,6 +137,55 @@
         gap: 8px;
     }
     .btn-save:hover { background: #005e9b; }
+
+    @media (max-width: 768px) {
+        .top-info {
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .top-info h3 {
+            font-size: 16px;
+        }
+
+        .top-info .meta {
+            display: grid;
+            gap: 3px;
+        }
+
+        .btn-back {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .panel-head {
+            padding: 12px 14px;
+        }
+
+        .search-box {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .table-wrap {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .footer-bar {
+            padding: 12px 14px;
+        }
+
+        .summary-chip {
+            display: inline-flex;
+            margin-right: 0;
+            margin-bottom: 6px;
+        }
+
+        .btn-save {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 @endsection
 

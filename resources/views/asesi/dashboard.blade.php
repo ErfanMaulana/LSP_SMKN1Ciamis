@@ -258,6 +258,7 @@
         padding: 12px 16px;
         background: #f8fafc;
         border-radius: 8px;
+        min-width: 0;
     }
 
     .info-item label {
@@ -270,9 +271,133 @@
     }
 
     .info-item span {
+        display: block;
         font-size: 14px;
         color: #1e293b;
         font-weight: 500;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .asesor-assigned-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 10px;
+    }
+
+    .asesor-assigned-meta {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 2px;
+        line-height: 1.45;
+        word-break: break-word;
+    }
+
+    .asesor-assigned-badge {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: #dbeafe;
+        color: #1d4ed8;
+        white-space: nowrap;
+    }
+
+    .approved-banner {
+        margin-bottom: 12px;
+        padding: 8px 14px;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 8px;
+        font-size: 12.5px;
+        color: #0c4a6e;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        line-height: 1.45;
+    }
+
+    @media (max-width: 768px) {
+        .welcome-card,
+        .quick-actions,
+        .rekomendasi-card,
+        .info-card {
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .welcome-card {
+            margin-bottom: 16px;
+        }
+
+        .welcome-card h2 {
+            font-size: 18px;
+            line-height: 1.3;
+        }
+
+        .stats-grid,
+        .action-list,
+        .info-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 14px;
+            gap: 12px;
+        }
+
+        .stat-info .value {
+            font-size: 20px;
+        }
+
+        .action-item {
+            padding: 14px;
+            gap: 12px;
+        }
+
+        .action-item:hover {
+            transform: none;
+        }
+
+        .rek-item {
+            padding: 12px;
+            gap: 10px;
+        }
+
+        .rek-body .rek-skema {
+            font-size: 13px;
+        }
+
+        .asesor-assigned-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px;
+        }
+
+        .asesor-assigned-badge {
+            align-self: flex-start;
+        }
+
+        .approved-banner {
+            align-items: flex-start;
+            font-size: 12px;
+            padding: 10px 12px;
+        }
+
+        .info-item {
+            padding: 10px 12px;
+        }
+
+        .info-item span {
+            font-size: 13px;
+            line-height: 1.45;
+        }
     }
 </style>
 @endsection
@@ -338,13 +463,13 @@
 <div class="info-card" style="margin-top:24px;">
     <h3><i class="bi bi-person-badge-fill" style="color:#0073bd;"></i> Asesor Penguji</h3>
     @if($asesorTampil)
-    <div style="display:flex;align-items:center;gap:16px;padding:16px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;">
+    <div class="asesor-assigned-card">
         <div style="width:48px;height:48px;border-radius:50%;background:#0073bd;color:white;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0;">
             {{ strtoupper(substr($asesorTampil->nama, 0, 1)) }}
         </div>
         <div style="flex:1;">
             <div style="font-size:15px;font-weight:700;color:#1e293b;">{{ $asesorTampil->nama }}</div>
-            <div style="font-size:12px;color:#64748b;margin-top:2px;">
+            <div class="asesor-assigned-meta">
                 @if($asesorTampil->skemas->count())
                     <i class="bi bi-patch-check-fill" style="color:#0073bd;"></i>
                     {{ $asesorTampil->skemas->pluck('nama_skema')->join(', ') }}
@@ -354,7 +479,7 @@
                 @endif
             </div>
         </div>
-        <span style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;background:#dbeafe;color:#1d4ed8;"><i class="bi bi-diagram-3-fill"></i> Ditugaskan</span>
+        <span class="asesor-assigned-badge"><i class="bi bi-diagram-3-fill"></i> Ditugaskan</span>
     </div>
     @else
     <div style="padding:20px;text-align:center;background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;color:#94a3b8;font-size:13px;">
@@ -367,7 +492,7 @@
 {{-- ─── Data Pendaftaran ─── --}}
 <div class="info-card" style="margin-top:24px;">
     <h3><i class="bi bi-person-circle"></i> Data Pendaftaran</h3>
-    <div style="margin-bottom:12px;padding:8px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;font-size:12.5px;color:#0c4a6e;display:flex;align-items:center;gap:8px;">
+    <div class="approved-banner">
         <i class="bi bi-check-circle-fill"></i>
         Pendaftaran Anda telah disetujui oleh admin.
         @if($asesi->verified_at)

@@ -188,6 +188,110 @@
         border-radius: 999px;
     }
 
+    .form-table-wrap {
+        overflow-x: auto;
+    }
+
+    .rekom-table,
+    .sign-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .action-row {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    @media (max-width: 768px) {
+        .back-btn {
+            margin-bottom: 14px;
+        }
+
+        .header-card {
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .header-card h2 {
+            font-size: 16px;
+        }
+
+        .header-card .meta {
+            display: grid;
+            gap: 4px;
+        }
+
+        .header-card .meta span {
+            margin-right: 0;
+        }
+
+        .print-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .summary-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .summary-card {
+            padding: 12px;
+        }
+
+        .summary-card .num {
+            font-size: 22px;
+        }
+
+        .unit-header {
+            padding: 12px 14px;
+        }
+
+        .elemen-row {
+            padding: 12px 14px;
+        }
+
+        .elemen-top {
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .status-badge {
+            font-size: 12px;
+        }
+
+        .nilai-table {
+            min-width: 760px;
+        }
+
+        .form-table-wrap {
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .rekom-table,
+        .sign-table {
+            min-width: 660px;
+        }
+
+        #signatureCanvas {
+            height: 130px !important;
+        }
+
+        .action-row {
+            flex-direction: column-reverse;
+        }
+
+        .action-row a,
+        .action-row button {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
     @media print {
         .back-btn, .print-btn, aside, .topbar { display: none !important; }
         .main-content { margin-left: 0 !important; }
@@ -424,7 +528,8 @@
         @csrf
 
         {{-- Tabel Rekomendasi — format FR.APL.02 --}}
-        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px;">
+        <div class="form-table-wrap">
+        <table class="rekom-table" style="margin-bottom:20px;font-size:14px;">
             <tr>
                 <td style="width:42%;border:1px solid #d1d5db;padding:12px 16px;vertical-align:top;background:#f8fafc;">
                     <strong>Rekomendasi Untuk Asesi:</strong>
@@ -462,9 +567,11 @@
                 </td>
             </tr>
         </table>
+        </div>
 
         {{-- Tabel Tanda Tangan — format FR.APL.02 --}}
-        <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:22px;">
+        <div class="form-table-wrap">
+        <table class="sign-table" style="font-size:13px;margin-bottom:22px;">
             <tr>
                 {{-- KOLOM ASESI --}}
                 <td style="width:50%;border:1px solid #d1d5db;padding:0;vertical-align:top;">
@@ -591,8 +698,9 @@
                 </td>
             </tr>
         </table>
+        </div>
 
-        <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <div class="action-row">
             <a href="{{ route('asesor.asesi.index') }}"
                style="padding:10px 20px;border-radius:8px;border:1.5px solid #e2e8f0;background:white;color:#475569;font-size:14px;font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
                 <i class="bi bi-arrow-left"></i> Kembali

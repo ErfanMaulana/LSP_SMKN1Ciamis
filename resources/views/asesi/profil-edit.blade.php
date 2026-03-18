@@ -188,6 +188,44 @@
     }
 
     .btn-primary:hover { background: #0061a5; transform: translateY(-1px); }
+
+    @media (max-width: 768px) {
+        .card-header {
+            padding: 14px;
+            align-items: flex-start;
+        }
+
+        .card-header-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .card-header h3 {
+            font-size: 14px;
+        }
+
+        .card-body {
+            padding: 14px;
+        }
+
+        .info-badge {
+            font-size: 12px;
+            padding: 9px 12px;
+            margin-bottom: 14px;
+        }
+
+        .form-footer {
+            margin-top: 16px;
+            padding-top: 14px;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 @endsection
 

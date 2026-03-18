@@ -79,7 +79,11 @@
         overflow: hidden;
     }
 
-    .table-card table { width: 100%; border-collapse: collapse; }
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    .table-card table { width: 100%; border-collapse: collapse; min-width: 760px; }
     .table-card thead th {
         background: #f8fafc;
         padding: 12px 16px;
@@ -123,6 +127,51 @@
     }
     .empty-state i { font-size: 40px; margin-bottom: 10px; display: block; }
     .empty-state p { font-size: 14px; }
+
+    @media (max-width: 768px) {
+        .welcome-card {
+            padding: 18px 16px;
+            border-radius: 12px;
+            align-items: flex-start;
+        }
+
+        .welcome-card h2 {
+            font-size: 18px;
+            line-height: 1.3;
+        }
+
+        .welcome-icon {
+            display: none;
+        }
+
+        .skema-info {
+            width: 100%;
+            display: flex;
+            line-height: 1.4;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .stat-card h3 {
+            font-size: 22px;
+        }
+
+        .section-title {
+            font-size: 14px;
+        }
+
+        .table-wrap {
+            -webkit-overflow-scrolling: touch;
+        }
+    }
 </style>
 @endsection
 
@@ -196,40 +245,42 @@
 
 <div class="table-card">
     @if(count($recentCompleted))
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Nama Asesi</th>
-                <th>NIK</th>
-                <th>No. Reg</th>
-                <th>Selesai Pada</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($recentCompleted as $i => $row)
-            <tr>
-                <td>{{ $i + 1 }}</td>
-                <td>
-                    <div style="font-weight:600;color:#1e3a5f;">{{ $row->asesi?->nama ?? '-' }}</div>
-                </td>
-                <td><code style="font-size:12px;">{{ $row->asesi_nik }}</code></td>
-                <td>{{ $row->asesi?->no_reg ?? '-' }}</td>
-                <td>
-                    @if($row->tanggal_selesai)
-                        {{ \Carbon\Carbon::parse($row->tanggal_selesai)->locale('id')->isoFormat('D MMM YYYY, HH:mm') }}
-                    @else — @endif
-                </td>
-                <td>
-                    <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" class="btn-review">
-                        <i class="bi bi-eye"></i> Review
-                    </a>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nama Asesi</th>
+                    <th>NIK</th>
+                    <th>No. Reg</th>
+                    <th>Selesai Pada</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($recentCompleted as $i => $row)
+                <tr>
+                    <td>{{ $i + 1 }}</td>
+                    <td>
+                        <div style="font-weight:600;color:#1e3a5f;">{{ $row->asesi?->nama ?? '-' }}</div>
+                    </td>
+                    <td><code style="font-size:12px;">{{ $row->asesi_nik }}</code></td>
+                    <td>{{ $row->asesi?->no_reg ?? '-' }}</td>
+                    <td>
+                        @if($row->tanggal_selesai)
+                            {{ \Carbon\Carbon::parse($row->tanggal_selesai)->locale('id')->isoFormat('D MMM YYYY, HH:mm') }}
+                        @else — @endif
+                    </td>
+                    <td>
+                        <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" class="btn-review">
+                            <i class="bi bi-eye"></i> Review
+                        </a>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
     @else
     <div class="empty-state">
         <i class="bi bi-inbox"></i>

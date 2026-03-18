@@ -193,8 +193,45 @@
     }
 
     @media (max-width: 768px) {
+        .page-header {
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .page-header h2 {
+            font-size: 17px;
+            line-height: 1.35;
+        }
+
         .skema-grid {
             grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .skema-card {
+            padding: 16px;
+        }
+
+        .skema-card .skema-badge {
+            position: static;
+            margin-bottom: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .skema-icon {
+            width: 44px;
+            height: 44px;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .skema-meta {
+            gap: 10px;
+            padding-top: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
         }
     }
 </style>
