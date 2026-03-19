@@ -3,7 +3,8 @@ name: Otomatis Deploy ke Server
 on:
   push:
     branches:
-      - main   # Ganti sesuai branch utama kamu
+      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -21,19 +22,21 @@ jobs:
     - name: Deploy to server via SSH
       run: |
         ssh -p 21032 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            set -e
             eval \$(ssh-agent -s)
             ssh-add ~/.ssh/wisnu
+            ssh -T git@github.com
             cd web
-            git fetch --all
+            git fetch origin main
+            git checkout main
             git reset --hard origin/main
-            composer install
+            composer install --no-interaction --prefer-dist --optimize-autoloader
             composer dump-autoload
-            npm install
+            npm ci
             npm run build
             php artisan optimize:clear
             php artisan migrate --force
             php artisan db:seed --class='Database\\Seeders\\Admin\\RolePermissionSeeder' --force
-            php artisan db:seed --class='Database\\Seeders\\Reference\\PanduanSeeder' --force
-            php artisan route:list | grep admin/asesi/bulk-delete
             php artisan config:cache
+            echo DEPLOYED_COMMIT=\$(git rev-parse --short HEAD)
         " 
