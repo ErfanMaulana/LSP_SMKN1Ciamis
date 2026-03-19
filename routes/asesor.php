@@ -14,6 +14,10 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
     // Protected asesor routes (uses account guard, role = asesor)
     Route::middleware('auth:account')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('/profil', [DashboardController::class, 'profil'])->name('profil.index');
+        Route::put('/profil', [DashboardController::class, 'updateProfil'])->name('profil.update');
+        Route::get('/ubah-password', [DashboardController::class, 'passwordForm'])->name('password.edit');
+        Route::put('/ubah-password', [DashboardController::class, 'updatePassword'])->name('password.update');
         Route::get('/jadwal', [DashboardController::class, 'jadwalIndex'])->name('jadwal.index');
         Route::get('/kelompok', [DashboardController::class, 'kelompokIndex'])->name('kelompok.index');
         Route::get('/kelompok/{id}', [DashboardController::class, 'kelompokShow'])->name('kelompok.show');

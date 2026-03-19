@@ -176,6 +176,13 @@
             color: white;
             font-weight: 700;
             font-size: 15px;
+            overflow: hidden;
+        }
+
+        .user-avatar-sm img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .user-details {
@@ -258,6 +265,13 @@
             font-size: 18px;
             flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(0, 115, 189, 0.3);
+            overflow: hidden;
+        }
+
+        .profile-avatar-lg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .profile-header-info {
@@ -486,12 +500,12 @@
 
                 <div class="menu-section-title">AKUN</div>
 
-                <a href="#" class="menu-item disabled">
+                <a href="{{ route('asesor.profil.index') }}" class="menu-item {{ request()->routeIs('asesor.profil.*') ? 'active' : '' }}">
                     <i class="bi bi-person-circle"></i>
                     <span>Profil Saya</span>
                 </a>
 
-                <a href="#" class="menu-item disabled">
+                <a href="{{ route('asesor.password.edit') }}" class="menu-item {{ request()->routeIs('asesor.password.*') ? 'active' : '' }}">
                     <i class="bi bi-key"></i>
                     <span>Ubah Password</span>
                 </a>
@@ -511,10 +525,20 @@
                 </div>
 
                 <div class="topbar-right">
+                    @php
+                        $initialName = strtoupper(substr($asesor->nama ?? 'A', 0, 1));
+                        $photoProfileUrl = !empty($asesor?->foto_profil)
+                            ? asset('storage/' . $asesor->foto_profil)
+                            : null;
+                    @endphp
                     <div class="profile-dropdown" id="profileDropdown">
                         <button class="profile-toggle" onclick="toggleProfileMenu(event)">
                             <div class="user-avatar-sm">
-                                {{ strtoupper(substr($asesor->nama ?? 'A', 0, 1)) }}
+                                @if($photoProfileUrl)
+                                    <img src="{{ $photoProfileUrl }}" alt="Foto {{ $asesor->nama ?? 'Asesor' }}">
+                                @else
+                                    {{ $initialName }}
+                                @endif
                             </div>
                             <div class="user-details">
                                 <span class="user-name">{{ $asesor->nama ?? 'Asesor' }}</span>
@@ -526,7 +550,11 @@
                         <div class="profile-menu" id="profileMenu">
                             <div class="profile-header">
                                 <div class="profile-avatar-lg">
-                                    {{ strtoupper(substr($asesor->nama ?? 'A', 0, 1)) }}
+                                    @if($photoProfileUrl)
+                                        <img src="{{ $photoProfileUrl }}" alt="Foto {{ $asesor->nama ?? 'Asesor' }}">
+                                    @else
+                                        {{ $initialName }}
+                                    @endif
                                 </div>
                                 <div class="profile-header-info">
                                     <h4 class="profile-header-name">{{ $asesor->nama ?? 'Asesor' }}</h4>
@@ -535,13 +563,13 @@
                             </div>
 
                             <div class="profile-body">
-                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                <a href="{{ route('asesor.profil.index') }}" class="profile-menu-item">
                                     <i class="bi bi-person"></i>
                                     <span>Profil</span>
                                 </a>
-                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
-                                    <i class="bi bi-gear"></i>
-                                    <span>Pengaturan</span>
+                                <a href="{{ route('asesor.password.edit') }}" class="profile-menu-item">
+                                    <i class="bi bi-key"></i>
+                                    <span>Ubah Password</span>
                                 </a>
                                 <div class="profile-divider"></div>
                                 <form method="POST" action="{{ route('asesor.logout') }}"
