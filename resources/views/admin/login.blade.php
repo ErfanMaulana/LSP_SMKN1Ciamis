@@ -42,7 +42,7 @@
             justify-content: center;
             position: relative;
             overflow: hidden;
-            background: #0F172A url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=60') center/cover no-repeat;
+            background: #0F172A url('{{ asset('images/loginadmin.svg') }}') center/cover no-repeat;
         }
 
         .left-panel::before {

@@ -14,6 +14,10 @@
 
     </div>
 
+    {{-- Left overlay for text readability --}}
+    <div class="absolute inset-0 z-10 pointer-events-none"
+         style="background: linear-gradient(90deg, rgba(3, 10, 28, 0.76) 0%, rgba(3, 10, 28, 0.5) 34%, rgba(3, 10, 28, 0.2) 56%, rgba(3, 10, 28, 0) 78%);"></div>
+
 
     {{-- CONTENT --}}
     <div class="relative z-10 w-full">
