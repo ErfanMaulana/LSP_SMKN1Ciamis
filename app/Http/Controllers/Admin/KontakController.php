@@ -32,48 +32,24 @@ class KontakController extends Controller
     public function update(Request $request)
     {
         $validated = $request->validate([
-            'alamat'               => 'nullable|string',
-            'telepon'              => 'nullable|string|max:20',
-            'telepon_whatsapp'     => 'nullable|string|max:20',
-            'email_1'              => 'nullable|email',
-            'email_2'              => 'nullable|email',
-            'jam_senin_kamis_awal' => 'nullable|date_format:H:i',
-            'jam_senin_kamis_akhir'=> 'nullable|date_format:H:i',
-            'jam_jumat_awal'       => 'nullable|date_format:H:i',
-            'jam_jumat_akhir'      => 'nullable|date_format:H:i',
+            'alamat'  => 'nullable|string',
+            'telepon' => 'nullable|string|max:20',
+            'email_1' => 'nullable|email',
         ]);
 
         $kontak = Kontak::getKontak();
-        
-        // Build jam_pelayanan array
-        $jamPelayanan = [
-            'senin_kamis' => [
-                'awal'  => $validated['jam_senin_kamis_awal'] ?? '07:00',
-                'akhir' => $validated['jam_senin_kamis_akhir'] ?? '15:00',
-            ],
-            'jumat' => [
-                'awal'  => $validated['jam_jumat_awal'] ?? '07:00',
-                'akhir' => $validated['jam_jumat_akhir'] ?? '11:30',
-            ],
-        ];
 
         if ($kontak->id) {
             $kontak->update([
-                'alamat'               => $validated['alamat'],
-                'telepon'              => $validated['telepon'],
-                'telepon_whatsapp'     => $validated['telepon_whatsapp'],
-                'email_1'              => $validated['email_1'],
-                'email_2'              => $validated['email_2'],
-                'jam_pelayanan'        => $jamPelayanan,
+                'alamat'  => $validated['alamat'] ?? null,
+                'telepon' => $validated['telepon'] ?? null,
+                'email_1' => $validated['email_1'] ?? null,
             ]);
         } else {
             Kontak::create([
-                'alamat'               => $validated['alamat'],
-                'telepon'              => $validated['telepon'],
-                'telepon_whatsapp'     => $validated['telepon_whatsapp'],
-                'email_1'              => $validated['email_1'],
-                'email_2'              => $validated['email_2'],
-                'jam_pelayanan'        => $jamPelayanan,
+                'alamat'  => $validated['alamat'] ?? null,
+                'telepon' => $validated['telepon'] ?? null,
+                'email_1' => $validated['email_1'] ?? null,
             ]);
         }
 

@@ -16,6 +16,10 @@
         justify-content: space-between;
         gap: 20px;
     }
+    .welcome-card > div:first-child {
+        min-width: 0;
+        width: 100%;
+    }
     .welcome-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
     .welcome-card p  { font-size: 14px; opacity: 0.85; margin: 0; }
     .welcome-icon { font-size: 64px; opacity: 0.25; }
@@ -29,6 +33,13 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
+        max-width: 100%;
+    }
+    .skema-info i { flex-shrink: 0; }
+    .skema-info strong {
+        min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
 
     .stats-grid {
@@ -147,7 +158,14 @@
         .skema-info {
             width: 100%;
             display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            padding: 10px 12px;
             line-height: 1.4;
+        }
+
+        .skema-info strong {
+            width: 100%;
         }
 
         .stats-grid {
@@ -166,6 +184,10 @@
 
         .section-title {
             font-size: 14px;
+        }
+
+        .btn-review {
+            white-space: nowrap;
         }
 
         .table-wrap {

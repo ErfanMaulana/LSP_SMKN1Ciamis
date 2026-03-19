@@ -165,7 +165,7 @@
         <!-- Kontak Telepon -->
         <h3 class="section-title">Kontak Telepon</h3>
 
-        <div class="form-row">
+        <div class="form-row full">
             <div class="form-group">
                 <label class="form-label">Nomor Telepon</label>
                 <input type="tel" name="telepon" class="form-input @error('telepon') error @enderror" 
@@ -175,22 +175,12 @@
                     <div class="form-error">{{ $message }}</div>
                 @enderror
             </div>
-
-            <div class="form-group">
-                <label class="form-label">Nomor WhatsApp</label>
-                <input type="tel" name="telepon_whatsapp" class="form-input @error('telepon_whatsapp') error @enderror" 
-                       placeholder="+62 812-3456-7890" 
-                       value="{{ old('telepon_whatsapp', $kontak->telepon_whatsapp ?? '') }}">
-                @error('telepon_whatsapp')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-            </div>
         </div>
 
         <!-- Email -->
         <h3 class="section-title">Alamat Email</h3>
 
-        <div class="form-row">
+        <div class="form-row full">
             <div class="form-group">
                 <label class="form-label">Email Utama</label>
                 <input type="email" name="email_1" class="form-input @error('email_1') error @enderror" 
@@ -199,39 +189,6 @@
                 @error('email_1')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Email Tambahan</label>
-                <input type="email" name="email_2" class="form-input @error('email_2') error @enderror" 
-                       placeholder="email2@example.com" 
-                       value="{{ old('email_2', $kontak->email_2 ?? '') }}">
-                @error('email_2')
-                    <div class="form-error">{{ $message }}</div>
-                @enderror
-            </div>
-        </div>
-
-        <!-- Jam Pelayanan -->
-        <h3 class="section-title">Jam Pelayanan</h3>
-
-        <div class="form-group">
-            <label class="form-label">Senin - Kamis</label>
-            <div class="form-row">
-                <input type="time" name="jam_senin_kamis_awal" class="form-input @error('jam_senin_kamis_awal') error @enderror"
-                       value="{{ old('jam_senin_kamis_awal', $kontak->jam_pelayanan['senin_kamis']['awal'] ?? '07:00') }}">
-                <input type="time" name="jam_senin_kamis_akhir" class="form-input @error('jam_senin_kamis_akhir') error @enderror"
-                       value="{{ old('jam_senin_kamis_akhir', $kontak->jam_pelayanan['senin_kamis']['akhir'] ?? '15:00') }}">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Jumat</label>
-            <div class="form-row">
-                <input type="time" name="jam_jumat_awal" class="form-input @error('jam_jumat_awal') error @enderror"
-                       value="{{ old('jam_jumat_awal', $kontak->jam_pelayanan['jumat']['awal'] ?? '07:00') }}">
-                <input type="time" name="jam_jumat_akhir" class="form-input @error('jam_jumat_akhir') error @enderror"
-                       value="{{ old('jam_jumat_akhir', $kontak->jam_pelayanan['jumat']['akhir'] ?? '11:30') }}">
             </div>
         </div>
 
