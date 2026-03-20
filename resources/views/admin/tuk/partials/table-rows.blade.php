@@ -27,7 +27,7 @@
     </td>
     <td>
         <div class="action-menu">
-            <button class="action-btn" onclick="toggleMenu(event, this)">
+            <button type="button" class="action-btn" onclick="toggleMenu(event, this)">
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
             <div class="action-dropdown">

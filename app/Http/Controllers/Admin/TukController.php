@@ -35,9 +35,12 @@ class TukController extends Controller
             'nonaktif' => Tuk::where('status', 'nonaktif')->count(),
         ];
 
-        // If AJAX request, return only table rows
-        if ($request->ajax()) {
-            return view('admin.tuk.partials.table-rows', compact('tuks'))->render();
+        // If AJAX request, return table rows + pagination HTML
+        if ($request->ajax() || $request->expectsJson()) {
+            return response()->json([
+                'rows' => view('admin.tuk.partials.table-rows', compact('tuks'))->render(),
+                'pagination' => $tuks->hasPages() ? (string) $tuks->links() : '',
+            ]);
         }
 
         return view('admin.tuk.index', compact('tuks', 'stats', 'search', 'status'));
