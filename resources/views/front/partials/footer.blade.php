@@ -1,4 +1,7 @@
 <footer class="bg-gray-900 text-gray-300 mt-16">
+    @php
+        $kontak = \App\Models\Kontak::getKontak();
+    @endphp
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12 flex flex-col md:flex-row md:justify-between gap-8 md:gap-10">
 
         {{-- Tentang --}}
@@ -13,10 +16,27 @@
         {{-- Kontak --}}
         <div class="text-left">
             <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Kontak</h2>
-            <ul class="space-y-2 text-sm">
-                <li>📍 Jl. Jenderal Sudirman No.269, Sindangrasa</li>
-                <li>📞 (0265) 771204</li>
-                <li>✉️ lsp@smkn1ciamis.sch.id</li>
+            <ul class="space-y-3 text-sm">
+                <li class="grid grid-cols-[20px_1fr] gap-3 items-start">
+                    <i class="bi bi-geo-alt text-base text-blue-300 leading-none mt-0.5"></i>
+                    <span class="leading-relaxed">{{ $kontak->alamat ?: 'Belum diatur' }}</span>
+                </li>
+                <li class="grid grid-cols-[20px_1fr] gap-3 items-start">
+                    <i class="bi bi-telephone text-base text-blue-300 leading-none mt-0.5"></i>
+                    @if($kontak->telepon)
+                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $kontak->telepon) }}" class="hover:text-white transition leading-relaxed">{{ $kontak->telepon }}</a>
+                    @else
+                        <span class="leading-relaxed">Belum diatur</span>
+                    @endif
+                </li>
+                <li class="grid grid-cols-[20px_1fr] gap-3 items-start">
+                    <i class="bi bi-envelope text-base text-blue-300 leading-none mt-0.5"></i>
+                    @if($kontak->email_1)
+                        <a href="mailto:{{ $kontak->email_1 }}" class="hover:text-white transition leading-relaxed break-all">{{ $kontak->email_1 }}</a>
+                    @else
+                        <span class="leading-relaxed">Belum diatur</span>
+                    @endif
+                </li>
             </ul>
         </div>
 

@@ -13,6 +13,9 @@ use App\Models\AsesorNilaiElemen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class DashboardController extends Controller
 {
@@ -68,6 +71,137 @@ class DashboardController extends Controller
         }
 
         return view('asesor.dashboard', compact('account', 'asesor', 'stats', 'recentCompleted'));
+    }
+
+    /**
+     * Halaman profil asesor.
+     */
+    public function profil()
+    {
+        $account = Auth::guard('account')->user();
+        $asesor = $this->getAsesor();
+
+        if (!$asesor) {
+            return redirect()->route('asesor.dashboard')
+                ->with('error', 'Profil asesor tidak ditemukan. Hubungi admin.');
+        }
+
+        return view('asesor.profil.index', compact('account', 'asesor'));
+    }
+
+    /**
+     * Update foto profil asesor.
+     */
+    public function updateProfil(Request $request)
+    {
+        $asesor = $this->getAsesor();
+
+        if (!$asesor) {
+            return redirect()->route('asesor.dashboard')
+                ->with('error', 'Profil asesor tidak ditemukan. Hubungi admin.');
+        }
+
+        $validated = $request->validate([
+            'foto_profil' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'foto_profil_cropped' => 'nullable|string',
+            'hapus_foto' => 'nullable|boolean',
+        ]);
+
+        if (($validated['hapus_foto'] ?? false) && $asesor->foto_profil) {
+            Storage::disk('public')->delete($asesor->foto_profil);
+            $asesor->update(['foto_profil' => null]);
+
+            return redirect()->route('asesor.profil.index')
+                ->with('success', 'Foto profil berhasil dihapus.');
+        }
+
+        if (!empty($validated['foto_profil_cropped'])) {
+            if (!preg_match('/^data:image\/(jpeg|jpg|png|webp);base64,/', $validated['foto_profil_cropped'], $matches)) {
+                return redirect()->route('asesor.profil.index')
+                    ->withErrors(['foto_profil' => 'Format hasil crop tidak valid.'])->withInput();
+            }
+
+            $rawBase64 = substr($validated['foto_profil_cropped'], strpos($validated['foto_profil_cropped'], ',') + 1);
+            $binaryImage = base64_decode($rawBase64, true);
+
+            if ($binaryImage === false) {
+                return redirect()->route('asesor.profil.index')
+                    ->withErrors(['foto_profil' => 'Data gambar hasil crop tidak valid.'])->withInput();
+            }
+
+            $extension = strtolower($matches[1]);
+            if ($extension === 'jpeg') {
+                $extension = 'jpg';
+            }
+
+            if ($asesor->foto_profil) {
+                Storage::disk('public')->delete($asesor->foto_profil);
+            }
+
+            $path = 'asesor/profile/' . Str::uuid() . '.' . $extension;
+            Storage::disk('public')->put($path, $binaryImage);
+
+            $asesor->update(['foto_profil' => $path]);
+
+            return redirect()->route('asesor.profil.index')
+                ->with('success', 'Foto profil berhasil diperbarui.');
+        }
+
+        if ($request->hasFile('foto_profil')) {
+            if ($asesor->foto_profil) {
+                Storage::disk('public')->delete($asesor->foto_profil);
+            }
+
+            $path = $request->file('foto_profil')->store('asesor/profile', 'public');
+            $asesor->update(['foto_profil' => $path]);
+
+            return redirect()->route('asesor.profil.index')
+                ->with('success', 'Foto profil berhasil diperbarui.');
+        }
+
+        return redirect()->route('asesor.profil.index')
+            ->with('error', 'Pilih foto profil terlebih dahulu atau gunakan opsi hapus foto.');
+    }
+
+    /**
+     * Form ubah password asesor.
+     */
+    public function passwordForm()
+    {
+        $account = Auth::guard('account')->user();
+        $asesor = $this->getAsesor();
+
+        return view('asesor.profil.password', compact('account', 'asesor'));
+    }
+
+    /**
+     * Simpan password baru asesor.
+     */
+    public function updatePassword(Request $request)
+    {
+        $account = Auth::guard('account')->user();
+
+        $validated = $request->validate([
+            'password_lama' => 'required|string',
+            'password_baru' => 'required|string|min:8|confirmed|different:password_lama',
+        ], [
+            'password_baru.confirmed' => 'Konfirmasi password baru tidak cocok.',
+            'password_baru.different' => 'Password baru harus berbeda dari password lama.',
+        ]);
+
+        if (!Hash::check($validated['password_lama'], $account->password)) {
+            return back()->withErrors(['password_lama' => 'Password lama tidak sesuai.'])->withInput();
+        }
+
+        DB::table('accounts')
+            ->where('id', $account->id)
+            ->update([
+                'password' => Hash::make($validated['password_baru']),
+                'updated_at' => now(),
+            ]);
+
+        return redirect()->route('asesor.password.edit')
+            ->with('success', 'Password berhasil diperbarui.');
     }
 
     /**
@@ -279,7 +413,7 @@ class DashboardController extends Controller
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
             ->first();
 
-        abort_unless($pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+        abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
 
         $skema = Skema::with(['units.elemens'])->findOrFail($pivot->skema_id);
         $elemenIds = $skema->units->flatMap(fn($unit) => $unit->elemens->pluck('id'))->values()->all();
@@ -308,7 +442,7 @@ class DashboardController extends Controller
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
             ->first();
 
-        abort_unless($pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+        abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
 
         $skema = Skema::with(['units.elemens'])->findOrFail($pivot->skema_id);
         $elemens = $skema->units->flatMap(fn($unit) => $unit->elemens)->values();
@@ -363,7 +497,7 @@ class DashboardController extends Controller
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
             ->first();
 
-        abort_unless($pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+        abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
 
         $skemaId = $pivot->skema_id;
 
@@ -413,7 +547,7 @@ class DashboardController extends Controller
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
             ->first();
 
-        abort_unless($pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+        abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
 
         $updated = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)

@@ -143,17 +143,6 @@
         </div>
     </div>
 
-    <!-- WhatsApp -->
-    <div class="info-item">
-        <div class="info-icon">
-            <i class="bi bi-whatsapp" style="color: #25d366;"></i>
-        </div>
-        <div class="info-content">
-            <h3>Nomor WhatsApp</h3>
-            <p>{{ $kontak->telepon_whatsapp ?? 'Belum diatur' }}</p>
-        </div>
-    </div>
-
     <!-- Email 1 -->
     <div class="info-item">
         <div class="info-icon">
@@ -164,32 +153,5 @@
             <p>{{ $kontak->email_1 ?? 'Belum diatur' }}</p>
         </div>
     </div>
-
-    <!-- Email 2 -->
-    <div class="info-item">
-        <div class="info-icon">
-            <i class="bi bi-envelope-at"></i>
-        </div>
-        <div class="info-content">
-            <h3>Email Tambahan</h3>
-            <p>{{ $kontak->email_2 ?? 'Belum diatur' }}</p>
-        </div>
-    </div>
-
-    <!-- Jam Pelayanan -->
-    @if($kontak->jam_pelayanan)
-    <div class="info-item">
-        <div class="info-icon">
-            <i class="bi bi-calendar-event"></i>
-        </div>
-        <div class="info-content">
-            <h3>Jam Pelayanan</h3>
-            <div style="margin-top: 8px;">
-                <p><strong>Senin - Kamis:</strong> {{ $kontak->jam_pelayanan['senin_kamis']['awal'] ?? 'N/A' }} - {{ $kontak->jam_pelayanan['senin_kamis']['akhir'] ?? 'N/A' }}</p>
-                <p><strong>Jumat:</strong> {{ $kontak->jam_pelayanan['jumat']['awal'] ?? 'N/A' }} - {{ $kontak->jam_pelayanan['jumat']['akhir'] ?? 'N/A' }}</p>
-            </div>
-        </div>
-    </div>
-    @endif
 </div>
 @endsection

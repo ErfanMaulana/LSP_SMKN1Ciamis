@@ -107,6 +107,58 @@
     .nik-warning { color: #f59e0b; }
 
     @media(max-width:640px) { .reg-grid { grid-template-columns: 1fr; } }
+
+    @media (max-width: 768px) {
+        .reg-card {
+            padding: 16px;
+            border-radius: 10px;
+        }
+
+        .step-indicator {
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .step-label {
+            font-size: 11px;
+        }
+
+        .step-number {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+
+        .step-line {
+            width: 26px;
+        }
+
+        .section-header {
+            margin: 18px 0 12px;
+            padding-bottom: 8px;
+            gap: 8px;
+        }
+
+        .section-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 13px;
+        }
+
+        .radio-group {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .reg-actions {
+            margin-top: 18px;
+            padding-top: 14px;
+        }
+
+        .btn-reg-primary {
+            width: 100%;
+        }
+    }
 </style>
 @endsection
 

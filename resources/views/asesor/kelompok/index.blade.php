@@ -139,6 +139,38 @@
         margin-bottom: 12px;
         display: block;
     }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .page-header h2 {
+            font-size: 16px;
+            line-height: 1.35;
+        }
+
+        .group-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .group-head,
+        .group-body {
+            padding: 14px;
+        }
+
+        .asesi-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .asesi-item .asesi-info[style*='text-align:right'] {
+            text-align: left !important;
+        }
+    }
 </style>
 @endsection
 

@@ -264,6 +264,7 @@
         @media (max-width: 768px) {
             .login-wrapper {
                 flex-direction: column;
+                min-height: auto;
             }
 
             .left-panel {
@@ -281,6 +282,61 @@
 
             .right-panel {
                 padding: 40px 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .login-wrapper {
+                border-radius: 12px;
+            }
+
+            .left-panel {
+                padding: 28px 18px;
+                min-height: 160px;
+            }
+
+            .left-panel h1 {
+                font-size: 22px;
+                margin-bottom: 10px;
+            }
+
+            .left-panel p {
+                font-size: 13px;
+            }
+
+            .right-panel {
+                padding: 24px 18px;
+            }
+
+            .logo {
+                width: 50px;
+                height: 50px;
+                margin: 0 auto 14px;
+            }
+
+            .logo i {
+                font-size: 26px;
+            }
+
+            .login-header {
+                margin-bottom: 20px;
+            }
+
+            .login-header h2 {
+                font-size: 22px;
+            }
+
+            .remember-me {
+                margin-bottom: 16px;
+            }
+
+            .btn-login {
+                padding: 12px;
             }
         }
     </style>

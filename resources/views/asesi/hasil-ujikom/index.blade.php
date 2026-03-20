@@ -125,24 +125,40 @@
         .result-screen {
             min-height: calc(100vh - 210px);
             align-items: flex-start;
-            padding: 20px;
+            padding: 12px 0;
         }
 
         .result-content {
-            padding: 30px 20px;
+            padding: 20px 16px;
         }
 
         .result-message {
             font-size: 15px;
+            line-height: 1.65;
         }
 
         .result-meta {
             justify-content: flex-start;
             text-align: left;
+            gap: 10px;
+            margin-top: 18px;
         }
 
         .result-content {
             text-align: left;
+        }
+
+        .result-title {
+            line-height: 1.2;
+        }
+
+        .other-results {
+            margin-top: 20px;
+            padding-top: 12px;
+        }
+
+        .other-results ul {
+            padding-left: 16px;
         }
     }
 </style>

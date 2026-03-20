@@ -20,7 +20,7 @@
             <!-- Contact Form -->
             <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 lg:p-8">
                 <h2 class="text-xl sm:text-2xl font-bold text-gray-900 mb-5 sm:mb-6">
-                    <i class="bi bi-envelope text-blue-600"></i> Kirim Pesan
+                    Kirim Pesan
                 </h2>
                 <p class="text-gray-600 text-sm mb-6">Isi formulir di bawah ini dan kami akan segera merespons</p>
 
@@ -83,7 +83,7 @@
                         <!-- Alamat -->
                         @if($kontak->alamat)
                         <div class="flex gap-3">
-                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                 <i class="bi bi-geo-alt text-lg"></i>
                             </div>
                             <div>
@@ -96,7 +96,7 @@
                         <!-- Telepon -->
                         @if($kontak->telepon)
                         <div class="flex gap-3">
-                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                 <i class="bi bi-telephone text-lg"></i>
                             </div>
                             <div>
@@ -106,27 +106,10 @@
                         </div>
                         @endif
 
-                        <!-- WhatsApp -->
-                        @if($kontak->telepon_whatsapp)
-                        <div class="flex gap-3">
-                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <i class="bi bi-whatsapp text-lg"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs font-semibold text-blue-200 uppercase">WhatsApp</p>
-                                <a href="https://wa.me/{{ str_replace(['+', '-', ' ', '(', ')'], '', $kontak->telepon_whatsapp) }}" 
-                                   target="_blank"
-                                   class="text-sm text-blue-50 hover:text-white transition">
-                                    {{ $kontak->telepon_whatsapp }}
-                                </a>
-                            </div>
-                        </div>
-                        @endif
-
                         <!-- Email 1 -->
                         @if($kontak->email_1)
                         <div class="flex gap-3">
-                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                 <i class="bi bi-envelope text-lg"></i>
                             </div>
                             <div>
@@ -141,7 +124,7 @@
                         <!-- Email 2 -->
                         @if($kontak->email_2)
                         <div class="flex gap-3">
-                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                 <i class="bi bi-envelope-at text-lg"></i>
                             </div>
                             <div>
@@ -159,7 +142,7 @@
                 @if($kontak->jam_pelayanan)
                 <div class="bg-white rounded-xl shadow-md p-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4">
-                        <i class="bi bi-clock text-blue-600"></i> Jam Pelayanan
+                        Jam Pelayanan
                     </h3>
                     
                     <div class="space-y-3">

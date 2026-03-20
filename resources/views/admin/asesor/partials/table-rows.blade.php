@@ -3,7 +3,11 @@
     <td>
         <div class="user-info">
             <div class="user-avatar">
-                <img src="https://ui-avatars.com/api/?name={{ urlencode($item->nama) }}&background=3b82f6&color=fff" alt="{{ $item->nama }}">
+                @if($item->foto_profil)
+                    <img src="{{ asset('storage/' . $item->foto_profil) }}" alt="{{ $item->nama }}">
+                @else
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($item->nama) }}&background=3b82f6&color=fff" alt="{{ $item->nama }}">
+                @endif
             </div>
             <div class="user-details">
                 <div class="user-name">{{ $item->nama }}</div>

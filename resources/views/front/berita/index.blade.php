@@ -126,7 +126,7 @@
                 @if($latestBerita->count() > 0)
                 <div class="bg-white rounded-xl shadow-md p-4 sm:p-6 mb-6">
                     <h3 class="text-lg font-bold text-gray-900 mb-4 pb-3 border-b">
-                        <i class="bi bi-clock-history text-blue-600"></i> Berita Terbaru
+                        Berita Terbaru
                     </h3>
                     <div class="space-y-4">
                         @foreach($latestBerita as $item)

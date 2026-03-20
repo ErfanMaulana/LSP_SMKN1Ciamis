@@ -5,7 +5,7 @@
 @section('content')
 <section class="bg-blue-600 text-white py-16">
     <div class="max-w-6xl mx-auto px-6">
-        <p class="text-blue-100 uppercase tracking-[0.2em] text-xs font-semibold mb-3">Panduan Sistem</p>
+        
         <h1 class="text-4xl font-bold mb-3">{{ $content['heading'] }}</h1>
         <p class="text-blue-100 text-lg max-w-3xl">{{ $content['intro'] }}</p>
     </div>

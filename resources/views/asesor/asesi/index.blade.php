@@ -30,7 +30,8 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         border: 1px solid #e2e8f0; overflow: hidden;
     }
-    .table-card table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .table-wrap { overflow-x: auto; }
+    .table-card table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 760px; }
     .table-card thead th {
         background: #f8fafc; padding: 11px 10px;
         text-align: left; font-size: 11.5px; font-weight: 700;
@@ -86,6 +87,32 @@
     .table-card th:nth-child(5), .table-card td:nth-child(5) { width: 118px; }
     .table-card th:nth-child(6), .table-card td:nth-child(6) { width: 136px; }
     .table-card th:nth-child(7), .table-card td:nth-child(7) { width: 74px; text-align: center; }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .page-header h2 {
+            font-size: 16px;
+            line-height: 1.35;
+        }
+
+        .filter-bar {
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .filter-btn {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+
+        .table-wrap {
+            -webkit-overflow-scrolling: touch;
+        }
+    }
 </style>
 @endsection
 
@@ -110,70 +137,72 @@
 
 <div class="table-card">
     @if($data->count())
-    <table>
-        <thead>
-            <tr>
-                <th>Nama Asesi</th>
-                <th>NIK</th>
-                <th>Jurusan</th>
-                <th>Status Asesmen</th>
-                <th>Rekomendasi</th>
-                <th>Periode</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($data as $i => $row)
-            @php
-                $asesi = $row->asesi;
-                $statusClass = match($row->status) {
-                    'selesai'            => 'badge-selesai',
-                    'sedang_mengerjakan' => 'badge-sedang',
-                    default              => 'badge-belum',
-                };
-                $statusLabel = match($row->status) {
-                    'selesai'            => 'Selesai',
-                    'sedang_mengerjakan' => 'Sedang Dikerjakan',
-                    default              => 'Belum Mulai',
-                };
-            @endphp
-            <tr>
-                <td>
-                    <div style="font-weight:600;color:#1e3a5f;">{{ $asesi?->nama ?? '—' }}</div>
-                    <div style="font-size:10px;color:#94a3b8;line-height:1.3;">{{ $asesi?->email ?? '' }}</div>
-                </td>
-                <td><code style="font-size:11px;color:#475569;">{{ $row->asesi_nik }}</code></td>
-                <td><code style="font-size:11px;color:#475569;">{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</code></td>
-                <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
-                <td>
-                    @if($row->rekomendasi === 'lanjut')
-                        <span class="badge" style="background:#d1fae5;color:#059669;justify-content:center;white-space:nowrap;">✓ Dapat Lanjut</span>
-                    @elseif($row->rekomendasi === 'tidak_lanjut')
-                        <span class="badge" style="background:#fee2e2;color:#dc2626;justify-content:center;white-space:nowrap;">✗ Tidak Lanjut</span>
-                    @else
-                        <span style="font-size:12px;color:#94a3b8;">— Belum direview</span>
-                    @endif
-                </td>
-                <td class="period-col">
-                    <span>{{ $row->tanggal_mulai ? \Carbon\Carbon::parse($row->tanggal_mulai)->format('d/m/Y') : '—' }}</span>
-                    <span class="period-sep">s/d</span>
-                    <span>{{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('d/m/Y') : '—' }}</span>
-                </td>
-                <td>
-                    @if($row->status === 'selesai')
-                        <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" class="btn-review">
-                            <i class="bi bi-eye"></i> Review
-                        </a>
-                    @else
-                        <span class="btn-review disabled">
-                            <i class="bi bi-eye-slash"></i> Belum Selesai
-                        </span>
-                    @endif
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama Asesi</th>
+                    <th>NIK</th>
+                    <th>Jurusan</th>
+                    <th>Status Asesmen</th>
+                    <th>Rekomendasi</th>
+                    <th>Periode</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($data as $i => $row)
+                @php
+                    $asesi = $row->asesi;
+                    $statusClass = match($row->status) {
+                        'selesai'            => 'badge-selesai',
+                        'sedang_mengerjakan' => 'badge-sedang',
+                        default              => 'badge-belum',
+                    };
+                    $statusLabel = match($row->status) {
+                        'selesai'            => 'Selesai',
+                        'sedang_mengerjakan' => 'Sedang Dikerjakan',
+                        default              => 'Belum Mulai',
+                    };
+                @endphp
+                <tr>
+                    <td>
+                        <div style="font-weight:600;color:#1e3a5f;">{{ $asesi?->nama ?? '—' }}</div>
+                        <div style="font-size:10px;color:#94a3b8;line-height:1.3;">{{ $asesi?->email ?? '' }}</div>
+                    </td>
+                    <td><code style="font-size:11px;color:#475569;">{{ $row->asesi_nik }}</code></td>
+                    <td><code style="font-size:11px;color:#475569;">{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</code></td>
+                    <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
+                    <td>
+                        @if($row->rekomendasi === 'lanjut')
+                            <span class="badge" style="background:#d1fae5;color:#059669;justify-content:center;white-space:nowrap;">✓ Dapat Lanjut</span>
+                        @elseif($row->rekomendasi === 'tidak_lanjut')
+                            <span class="badge" style="background:#fee2e2;color:#dc2626;justify-content:center;white-space:nowrap;">✗ Tidak Lanjut</span>
+                        @else
+                            <span style="font-size:12px;color:#94a3b8;">— Belum direview</span>
+                        @endif
+                    </td>
+                    <td class="period-col">
+                        <span>{{ $row->tanggal_mulai ? \Carbon\Carbon::parse($row->tanggal_mulai)->format('d/m/Y') : '—' }}</span>
+                        <span class="period-sep">s/d</span>
+                        <span>{{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('d/m/Y') : '—' }}</span>
+                    </td>
+                    <td>
+                        @if($row->status === 'selesai')
+                            <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" class="btn-review">
+                                <i class="bi bi-eye"></i> Review
+                            </a>
+                        @else
+                            <span class="btn-review disabled">
+                                <i class="bi bi-eye-slash"></i> Belum Selesai
+                            </span>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
     @else
     <div class="empty-state">
         <i class="bi bi-people"></i>

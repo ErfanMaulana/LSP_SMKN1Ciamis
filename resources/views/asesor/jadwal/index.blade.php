@@ -134,6 +134,32 @@
         margin-bottom: 12px;
         display: block;
     }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .page-header h2 {
+            font-size: 16px;
+            line-height: 1.35;
+        }
+
+        .filter-bar {
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .filter-btn {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+
+        .table-wrap {
+            -webkit-overflow-scrolling: touch;
+        }
+    }
 </style>
 @endsection
 
