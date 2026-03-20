@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Front\RegisterController;
 use App\Http\Controllers\Front\KompetensiController;
-use App\Http\Controllers\Front\ProfilController;
 use App\Http\Controllers\Front\BeritaController;
 use App\Http\Controllers\Front\KontakController;
 use App\Http\Controllers\Front\PanduanController;
@@ -18,7 +17,7 @@ use App\Http\Controllers\Front\PanduanController;
 */
 
 Route::name('front.')->group(function () {
-    Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
+    Route::redirect('/profil', '/')->name('profil');
     Route::redirect('/daftar-lsp', '/berita')->name('daftar');
     Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
 

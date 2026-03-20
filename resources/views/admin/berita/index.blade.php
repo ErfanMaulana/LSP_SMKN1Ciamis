@@ -92,7 +92,12 @@
 
     .card {
         background: #fff; border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid #e5e7eb; overflow: show;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid #e5e7eb; overflow: visible;
+    }
+
+    /* Disable global table scroll wrapper for this page */
+    .card > .admin-table-scroll {
+        overflow: visible !important;
     }
 
     .data-table { width: 100%; border-collapse: collapse; }
@@ -415,6 +420,17 @@
 
 @section('scripts')
 <script>
+    // Remove global table scroll wrapper on this page
+    document.addEventListener('DOMContentLoaded', function () {
+        const table = document.querySelector('.card .data-table');
+        const wrapper = table ? table.closest('.admin-table-scroll') : null;
+
+        if (table && wrapper && wrapper.parentNode) {
+            wrapper.parentNode.insertBefore(table, wrapper);
+            wrapper.remove();
+        }
+    });
+
     // Search functionality
     let searchTimeout;
     document.getElementById('searchInput').addEventListener('input', function(e) {

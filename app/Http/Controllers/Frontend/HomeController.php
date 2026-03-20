@@ -9,6 +9,9 @@ use App\Models\Skema;
 use App\Models\Tuk;
 use App\Models\Asesi;
 use App\Models\Asesor;
+use App\Models\Jurusan;
+use App\Models\ProfileContent;
+use App\Models\ProfileVisionMission;
 
 class HomeController extends Controller
 {
@@ -34,12 +37,50 @@ class HomeController extends Controller
         $totalSkema  = Skema::count();
         $totalTuk    = Tuk::count();
 
+        // Dynamic profile content from admin-managed data
+        $sejarah = ProfileContent::byType('sejarah')->active()->get();
+        $milestones = ProfileContent::byType('milestone')->active()->get();
+        $visions = ProfileVisionMission::byType('visi')->active()->get();
+        $missions = ProfileVisionMission::byType('misi')->active()->get();
+
+        $jurusanList = Jurusan::withCount('skemas')
+            ->having('skemas_count', '>', 0)
+            ->orderBy('skemas_count', 'desc')
+            ->get()
+            ->map(function ($jurusan) {
+                $iconMap = [
+                    'PPLG' => ['icon' => 'bi-pc-display-horizontal', 'color' => 'ic-blue'],
+                    'AKL'  => ['icon' => 'bi-calculator-fill', 'color' => 'ic-blue'],
+                    'PM'   => ['icon' => 'bi-graph-up-arrow', 'color' => 'ic-blue'],
+                    'MPLB' => ['icon' => 'bi-briefcase-fill', 'color' => 'ic-blue'],
+                    'DKV'  => ['icon' => 'bi-palette-fill', 'color' => 'ic-blue'],
+                    'KLN'  => ['icon' => 'bi-egg-fried', 'color' => 'ic-blue'],
+                    'HTL'  => ['icon' => 'bi-building', 'color' => 'ic-blue'],
+                ];
+
+                $iconData = $iconMap[$jurusan->kode_jurusan] ?? ['icon' => 'bi-mortarboard-fill', 'color' => 'ic-blue'];
+
+                return [
+                    'nama' => $jurusan->nama_jurusan,
+                    'kode' => $jurusan->kode_jurusan,
+                    'icon' => $iconData['icon'],
+                    'color' => $iconData['color'],
+                    'skema_count' => $jurusan->skemas_count,
+                    'visi' => $jurusan->visi,
+                ];
+            });
+
         return view('front.home', compact(
             'carousels',
             'totalAsesi',
             'totalAsesor',
             'totalSkema',
-            'totalTuk'
+            'totalTuk',
+            'sejarah',
+            'milestones',
+            'visions',
+            'missions',
+            'jurusanList'
         ));
     }
     

@@ -12,7 +12,6 @@
             @php
                 $navLinks = [
                     ['route' => 'front.home', 'active_pattern' => 'front.home', 'label' => 'Beranda'],
-                    ['route' => 'front.profil', 'active_pattern' => 'front.profil', 'label' => 'Profil LSP'],
                     ['route' => 'front.kompetensi.index', 'active_pattern' => 'front.kompetensi.*', 'label' => 'Kompetensi & Data Skema'],
                     ['route' => 'front.berita.index', 'active_pattern' => 'front.berita.*', 'label' => 'Berita'],
                     ['route' => 'front.kontak', 'active_pattern' => 'front.kontak', 'label' => 'Kontak'],
@@ -54,7 +53,6 @@
         @php
             $navLinks = [
                 ['route' => 'front.home', 'label' => 'Beranda'],
-                ['route' => 'front.profil', 'label' => 'Profil LSP'],
                 ['route' => 'front.kompetensi.index', 'label' => 'Kompetensi & Data Skema'],
                 ['route' => 'front.berita.index', 'label' => 'Berita'],
                 ['route' => 'front.kontak', 'label' => 'Kontak'],

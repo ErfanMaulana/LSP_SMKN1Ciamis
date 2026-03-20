@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - LSP SMKN 1 Ciamis</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -16,66 +16,58 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f0f2f5;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px;
-            overflow: hidden;
+            padding: 20px;
         }
 
         .login-wrapper {
             display: flex;
             background: white;
-            border-radius: 14px;
-            box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             overflow: hidden;
             max-width: 860px;
             width: 100%;
-            height: auto;
-            max-height: calc(100vh - 32px);
+            min-height: 480px;
         }
 
         /* ── Left panel ─────────────────────────────────────── */
         .left-panel {
             flex: 1;
-            padding: 40px 36px;
+            padding: 60px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             position: relative;
             overflow: hidden;
-            background: var(--brand);
+            background: #005892 url('{{ asset('images/loginadmin.svg') }}') center/cover no-repeat;
         }
 
         .left-panel::before {
             content: '';
             position: absolute;
-            top: -50%; right: -50%;
-            width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
-            animation: pulse 15s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%,100% { transform: scale(1); }
-            50%      { transform: scale(1.1); }
+            inset: 0;
+            background: rgba(0, 83, 139, 0.72);
+            z-index: 0;
         }
 
         .left-panel h1 {
             color: white;
-            font-size: 32px;
+            font-size: 42px;
             font-weight: 700;
-            margin-bottom: 14px;
+            margin-bottom: 20px;
             position: relative;
             z-index: 1;
         }
 
         .left-panel p {
-            color: rgba(255,255,255,0.85);
-            font-size: 14px;
+            color: rgba(255,255,255,0.86);
+            font-size: 16px;
             line-height: 1.6;
             position: relative;
             z-index: 1;
@@ -84,7 +76,7 @@
         /* ── Right panel ────────────────────────────────────── */
         .right-panel {
             flex: 1;
-            padding: 28px 36px;
+            padding: 40px 42px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -111,19 +103,19 @@
             object-fit: cover;
         }
 
-        .login-header { text-align: center; margin-bottom: 16px; }
-        .login-header h2 { color: #1a2332; font-size: 22px; font-weight: 700; margin-bottom: 3px; }
-        .login-header p  { color: #6b7280; font-size: 12px; }
+        .login-header { text-align: center; margin-bottom: 24px; }
+        .login-header h2 { color: #1a2332; font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .login-header p  { color: #6b7280; font-size: 14px; }
 
         /* ── Form elements ──────────────────────────────────── */
-        .form-group { margin-bottom: 12px; }
+        .form-group { margin-bottom: 14px; }
 
         .form-group label {
             display: block;
             color: #6b7280;
             font-weight: 500;
-            margin-bottom: 5px;
-            font-size: 10px;
+            margin-bottom: 8px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -140,13 +132,39 @@
             pointer-events: none;
         }
 
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            transition: color 0.3s;
+        }
+
+        .toggle-password:hover:not(:disabled) {
+            color: var(--brand);
+        }
+
+        .toggle-password:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
         .form-group input,
         .form-group select {
             width: 100%;
-            padding: 9px 14px 9px 38px;
+            padding: 12px 14px 12px 40px;
             border: 1px solid #e5e7eb;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 14px;
             transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
             background: #f9fafb;
             font-family: inherit;
@@ -185,7 +203,7 @@
         .remember-me {
             display: flex;
             align-items: center;
-            margin-bottom: 14px;
+            margin-bottom: 24px;
         }
 
         .remember-me input[type="checkbox"] {
@@ -204,19 +222,19 @@
 
         .btn-login {
             width: 100%;
-            padding: 10px;
+            padding: 13px;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, filter 0.2s;
+            transition: all 0.3s;
             background: var(--brand);
             box-shadow: 0 4px 14px var(--brand-shadow);
         }
 
-        .btn-login:hover:not(:disabled)  { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-login:hover:not(:disabled)  { transform: translateY(-2px); filter: brightness(1.06); }
         .btn-login:active:not(:disabled) { transform: translateY(0); }
 
         .form-group input:disabled,
@@ -254,11 +272,73 @@
         .back-link a:hover { text-decoration:underline; }
 
         @media (max-width: 768px) {
-            body { overflow: auto; }
-            .login-wrapper { flex-direction: column; max-height: none; }
-            .left-panel    { padding: 28px 24px; }
-            .left-panel h1 { font-size: 24px; }
-            .right-panel   { padding: 24px 24px; }
+            .login-wrapper {
+                flex-direction: column;
+                border-radius: 12px;
+                min-height: auto;
+            }
+
+            .left-panel {
+                padding: 40px 30px;
+                min-height: 200px;
+            }
+
+            .left-panel h1 {
+                font-size: 28px;
+                margin-bottom: 12px;
+            }
+
+            .left-panel p {
+                font-size: 14px;
+            }
+
+            .right-panel {
+                padding: 34px 30px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .login-wrapper {
+                margin-top: 12px;
+            }
+
+            .left-panel {
+                padding: 26px 20px;
+                min-height: 160px;
+            }
+
+            .left-panel h1 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+
+            .left-panel p {
+                font-size: 12px;
+                line-height: 1.5;
+            }
+
+            .right-panel {
+                padding: 24px 20px;
+            }
+
+            .logo {
+                width: 54px;
+                height: 54px;
+                margin-bottom: 12px;
+            }
+
+            .login-header {
+                margin-bottom: 18px;
+            }
+
+            .login-header h2 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
@@ -345,9 +425,19 @@
                             id="password"
                             name="password"
                             required
-                            placeholder="Masukkan password"
+                            placeholder="Masukkan kata sandi"
                             {{ old('role') ? '' : 'disabled' }}
                         >
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            id="togglePassword"
+                            onclick="togglePasswordVisibility()"
+                            {{ old('role') ? '' : 'disabled' }}
+                            aria-label="Tampilkan atau sembunyikan password"
+                        >
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
                     </div>
                     @error('password')
                         <div class="error">{{ $message }}</div>
@@ -395,14 +485,30 @@
         const identifierIcon  = document.getElementById('identifierIcon');
         const identifierInput = document.getElementById('identifier');
         const passwordInput   = document.getElementById('password');
+        const togglePassword  = document.getElementById('togglePassword');
         const rememberInput   = document.getElementById('remember');
         const btnLogin        = document.getElementById('btnLogin');
 
         function setFieldsDisabled(disabled) {
             identifierInput.disabled = disabled;
             passwordInput.disabled   = disabled;
+            togglePassword.disabled  = disabled;
             rememberInput.disabled   = disabled;
             btnLogin.disabled        = disabled;
+        }
+
+        function togglePasswordVisibility() {
+            const icon = togglePassword.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('bi-eye-fill');
+                icon.classList.add('bi-eye-slash-fill');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('bi-eye-slash-fill');
+                icon.classList.add('bi-eye-fill');
+            }
         }
 
         function applyRole(role) {

@@ -139,7 +139,6 @@
                             <td>
                                 @if($skema->jurusan)
                                     <span class="text-xs font-medium">{{ $skema->jurusan->nama_jurusan }}</span>
-                                    <span class="text-xs text-muted d-block">{{ $skema->jurusan->kode_jurusan }}</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
@@ -150,7 +149,7 @@
                             <td>
                                 <div class="action-menu">
                                     <button class="action-btn" onclick="toggleMenu(this)">
-                                        <i class="bi bi-three-dots"></i>
+                                        <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-dropdown">
                                         <a href="{{ route('admin.skema.edit', $skema->id) }}">

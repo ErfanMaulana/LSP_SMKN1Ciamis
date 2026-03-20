@@ -355,8 +355,8 @@
 <body>
     <div class="login-wrapper">
         <div class="left-panel">
-            <h1>Welcome</h1>
-            <p>LSP SMKN 1 Ciamis provides competency assessment and certification aligned with national and industry standards.</p>
+            <h1>Selamat Datang</h1>
+            <p>LSP SMKN 1 Ciamis menyelenggarakan uji kompetensi dan sertifikasi sesuai standar nasional dan industri.</p>
         </div>
 
         <div class="right-panel">
@@ -366,7 +366,7 @@
 
             <div class="login-header">
                 <h2>Login</h2>
-                <p>Enter your username and password to continue.</p>
+                <p>Masukkan nama pengguna dan kata sandi Anda untuk melanjutkan.</p>
             </div>
 
             @if(session('success'))
@@ -397,7 +397,7 @@
                             value="{{ old('username') }}"
                             required 
                             autofocus
-                            placeholder="Enter your username"
+                            placeholder="Masukkan username"
                         >
                     </div>
                     @error('username')
@@ -408,7 +408,7 @@
                 <div class="form-group">
                     <div class="password-wrapper">
                         <label for="password">PASSWORD</label>
-                        <a href="#" class="forgot-password">Forgot password?</a>
+                        <a href="#" class="forgot-password">Lupa kata sandi?</a>
                     </div>
                     <div class="input-wrapper">
                         <i class="bi bi-lock-fill input-icon"></i>
@@ -417,7 +417,7 @@
                             id="password" 
                             name="password" 
                             required
-                            placeholder="Enter your password"
+                            placeholder="Masukkan kata sandi"
                         >
                         <button type="button" class="toggle-password" id="togglePassword" onclick="togglePasswordVisibility()">
                             <i class="bi bi-eye-fill"></i>
@@ -430,7 +430,7 @@
 
                 <div class="remember-me">
                     <input type="checkbox" id="remember" name="remember">
-                    <label for="remember">Remember me for 30 days</label>
+                    <label for="remember">Ingat saya selama 30 hari</label>
                 </div>
 
                 <button type="submit" class="btn-login">Login</button>
