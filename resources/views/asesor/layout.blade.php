@@ -399,6 +399,76 @@
             font-size: 19px;
         }
 
+        /* Bottom Navigation (Mobile) */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+            z-index: 999;
+            padding: 0;
+            margin: 0;
+        }
+
+        .bottom-nav-menu {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 70px;
+            gap: 0;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            height: 100%;
+            color: #64748b;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            gap: 4px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 8px 12px;
+            font-size: 12px;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .bottom-nav-item:hover {
+            color: #0073bd;
+            background: rgba(0,115,189,0.05);
+        }
+
+        .bottom-nav-item.active {
+            color: #0073bd;
+            font-weight: 600;
+        }
+
+        .bottom-nav-item i {
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .bottom-nav-item span {
+            font-size: 11px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -415,6 +485,11 @@
 
             .main-content {
                 margin-left: 0;
+                padding-bottom: 70px;
+            }
+
+            .bottom-nav {
+                display: block;
             }
 
             .mobile-toggle {
@@ -603,6 +678,31 @@
                 @yield('content')
             </div>
         </main>
+
+        <!-- Bottom Navigation (Mobile Only) -->
+        <nav class="bottom-nav" id="bottomNav">
+            <div class="bottom-nav-menu">
+                <a href="{{ route('asesor.dashboard') }}" class="bottom-nav-item {{ request()->routeIs('asesor.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="{{ route('asesor.asesi.index') }}" class="bottom-nav-item {{ request()->routeIs('asesor.asesi.*') ? 'active' : '' }}">
+                    <i class="bi bi-people"></i>
+                    <span>Asesi</span>
+                </a>
+
+                <a href="{{ route('asesor.entry-penilaian') }}" class="bottom-nav-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">
+                    <i class="bi bi-journal-check"></i>
+                    <span>Penilaian</span>
+                </a>
+
+                <a href="{{ route('asesor.profil.index') }}" class="bottom-nav-item {{ request()->routeIs('asesor.profil.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-circle"></i>
+                    <span>Profil</span>
+                </a>
+            </div>
+        </nav>
     </div>
 
     <script>
