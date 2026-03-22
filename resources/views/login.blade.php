@@ -461,7 +461,7 @@
     <script>
         const roleConfig = {
             asesi: {
-                panelTitle:            'Portal Asesi',
+                panelTitle:            'Login Asesi',
                 panelDesc:             'Akses portal uji kompetensi dan kelola berkas pendaftaran Anda.',
                 identifierLabel:       'NIK (NOMOR INDUK KEPENDUDUKAN)',
                 identifierIcon:        'bi-person-vcard',
@@ -469,7 +469,7 @@
                     maxlength:             16,
             },
             asesor: {
-                panelTitle:            'Portal Asesor',
+                panelTitle:            'Login Asesor',
                 panelDesc:             'Kelola penilaian dan hasil uji kompetensi peserta.',
                 identifierLabel:       'No MET',
                 identifierIcon:        'bi-card-text',

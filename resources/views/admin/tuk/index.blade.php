@@ -18,22 +18,22 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
         margin-bottom: 24px;
     }
-    .stat-card { background: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s; }
+    .stat-card { background: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; }
     .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
     .stat-icon {
-        width: 50px; height: 50px; border-radius: 12px;
+        width: 56px; height: 56px; border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
-        font-size: 22px; color: #fff; flex-shrink: 0;
+        font-size: 24px; color: #fff; flex-shrink: 0;
     }
-    .stat-icon.blue   { background: linear-gradient(135deg,#0073bd,#0061a5); }
+    .stat-icon.blue   { background: linear-gradient(135deg,#0073bd,#0073bd); }
     .stat-icon.green  { background: linear-gradient(135deg,#10b981,#059669); }
     .stat-icon.red    { background: linear-gradient(135deg,#ef4444,#dc2626); }
-    .stat-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing:.5px; }
-    .stat-value { font-size: 26px; font-weight: 700; color: #0F172A; line-height: 1.2; margin-top: 2px; }
+    .stat-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing:.5px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #0F172A; line-height: 1.2; margin-top: 2px; }
 
     .toolbar {
         margin-bottom: 16px;
@@ -135,12 +135,12 @@
         background: #fecaca;
     }
     .btn-add {
-        padding: 9px 18px; background: #0061a5; color: #fff;
-        border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+        padding: 9px 18px; background: #0073bd; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
         cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
         white-space: nowrap;
     }
-    .btn-add:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
+    .btn-add:hover { background: #005f99; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
 
     .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: visible; }
     .card > .admin-table-scroll {
@@ -222,7 +222,7 @@
         <p>Kelola data tempat uji kompetensi untuk pelaksanaan ujian sertifikasi</p>
     </div>
     <a href="{{ route('admin.tuk.create') }}" class="btn-add">
-        <i class="bi bi-plus-lg"></i> Tambah TUK
+        <i class="bi bi-plus-circle"></i> Tambah TUK
     </a>
 </div>
 
@@ -265,11 +265,7 @@
                 <option value="nonaktif" {{ $status === 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
             </select>
             <button type="submit" class="btn-filter-search"><i class="bi bi-search"></i></button>
-            @if($search || $status !== 'all')
-                <a href="{{ route('admin.tuk.index') }}" class="btn-filter-reset" title="Reset filter">
-                    <i class="bi bi-x-lg"></i>
-                </a>
-            @endif
+            
         </div>
     </div>
 </form>
@@ -349,11 +345,15 @@
             <tr>
                 <td colspan="8">
                     <div class="empty-state">
-                        <i class="bi bi-building-x"></i>
-                        <p>Belum ada data TUK{{ $search ? ' yang cocok dengan pencarian' : '' }}.</p>
-                        <a href="{{ route('admin.tuk.create') }}" class="btn-add" style="display:inline-flex;margin-top:12px;">
-                            <i class="bi bi-plus-lg"></i> Tambah TUK Sekarang
-                        </a>
+                        <i class="bi bi-inbox"></i>
+                        <p style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data TUK ditemukan</p>
+                        <p style="font-size: 13px; color: #9ca3af; margin: 0;">Coba kata kunci lain.</p>
+
+                        @if(!$search && $status === 'all')
+                            <a href="{{ route('admin.tuk.create') }}" class="btn-add" style="display:inline-flex;margin-top:12px;">
+                                <i class="bi bi-plus-lg"></i> Tambah TUK Sekarang
+                            </a>
+                        @endif
                     </div>
                 </td>
             </tr>

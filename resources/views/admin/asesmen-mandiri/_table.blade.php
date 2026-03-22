@@ -62,8 +62,9 @@
             <tr>
                 <td colspan="7">
                     <div class="empty-state">
-                        <i class="bi bi-journal-x"></i>
-                        <div>Belum ada data asesmen mandiri</div>
+                        <i class="bi bi-inbox"></i>
+                        <h4 style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data asesmen mandiri ditemukan</h4>
+                        <p style="font-size: 13px; color: #9ca3af; margin: 0;">Coba kata kunci lain.</p>
                     </div>
                 </td>
             </tr>

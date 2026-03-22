@@ -541,7 +541,6 @@
             <div class="peserta-section">
                 <div class="peserta-header">
                     <div class="peserta-title">
-                        <i class="bi bi-people-fill"></i>
                         Peserta Terdaftar
                     </div>
                     <div class="peserta-count">

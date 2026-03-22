@@ -11,7 +11,7 @@ class TukController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $status = $request->get('status');
+        $status = $request->get('status', 'all');
 
         $query = Tuk::withCount('jadwalUjikom');
 
@@ -38,7 +38,7 @@ class TukController extends Controller
         // If AJAX request, return table rows + pagination HTML
         if ($request->ajax() || $request->expectsJson()) {
             return response()->json([
-                'rows' => view('admin.tuk.partials.table-rows', compact('tuks'))->render(),
+                'rows' => view('admin.tuk.partials.table-rows', compact('tuks', 'search', 'status'))->render(),
                 'pagination' => $tuks->hasPages() ? (string) $tuks->links() : '',
             ]);
         }

@@ -165,7 +165,7 @@
 
 @section('content')
 <div class="page-header">
-    <h2><i class="bi bi-calendar3"></i> Jadwal Ujikom Saya</h2>
+    <h2>Jadwal Ujikom Saya</h2>
     <p>Daftar jadwal ujikom yang ditugaskan ke akun asesor Anda.</p>
 </div>
 

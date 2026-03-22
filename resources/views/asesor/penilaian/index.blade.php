@@ -186,7 +186,7 @@
 <div class="panel-card">
     <div class="panel-head">
         <div>
-            <h3><i class="bi bi-list-check"></i> Data Asesi Ujikom</h3>
+            <h3>Data Asesi Ujikom</h3>
             <p>Total asesi ujikom: {{ $asesiData->count() }} orang</p>
         </div>
     </div>

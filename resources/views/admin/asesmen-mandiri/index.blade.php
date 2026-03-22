@@ -80,19 +80,103 @@
     }
 
     .toolbar {
-        display: flex; align-items: center; justify-content: space-between;
-        gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+        margin-bottom: 16px;
     }
-    .filter-form { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
-    .filter-form input, .filter-form select {
-        padding: 9px 14px; border: 1px solid #d1d5db; border-radius: 8px;
-        font-size: 13px; outline: none; transition: border-color .2s;
+
+    .filter-section {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
     }
-    .filter-form input[type=text] { flex: 1; min-width: 200px; }
-    .filter-form input:focus, .filter-form select:focus { border-color: #0061a5; }
-    .btn-search {
-        padding: 9px 18px; background: #0061a5; color: #fff;
-        border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+
+    .search-box {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 42px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
+    .btn-filter-search {
+        padding: 9px 14px;
+        background: #0073bd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+    }
+
+    .btn-filter-search:hover {
+        background: #005f99;
+    }
+
+    .btn-filter-reset {
+        padding: 9px 12px;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .btn-filter-reset:hover {
+        background: #fecaca;
     }
 
     .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
@@ -209,21 +293,35 @@
 
 <!-- Toolbar -->
 <div class="toolbar">
-    <form class="filter-form" method="GET" action="{{ route('admin.asesmen-mandiri.index') }}">
-        <input type="text" name="search" placeholder="Cari nama / NIK / skema..." value="{{ request('search') }}">
-        <select name="status">
-            <option value="">Semua Status</option>
-            <option value="belum_mulai" {{ request('status') == 'belum_mulai' ? 'selected' : '' }}>Belum Mulai</option>
-            <option value="sedang_mengerjakan" {{ request('status') == 'sedang_mengerjakan' ? 'selected' : '' }}>Sedang Mengerjakan</option>
-            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-        </select>
-        <select name="skema_id">
-            <option value="">Semua Skema</option>
-            @foreach($skemas as $skema)
-                <option value="{{ $skema->id }}" {{ request('skema_id') == $skema->id ? 'selected' : '' }}>{{ $skema->nama_skema }}</option>
-            @endforeach
-        </select>
-        <button type="submit" class="btn-search"><i class="bi bi-search"></i> Cari</button>
+    <form method="GET" action="{{ route('admin.asesmen-mandiri.index') }}" id="filterForm">
+        <div class="filter-section">
+            <div class="search-box">
+                <i class="bi bi-search"></i>
+                <input type="text" name="search" placeholder="Cari nama / NIK / skema..." value="{{ request('search') }}" autocomplete="off">
+            </div>
+            <div class="filter-group">
+                <select class="filter-select" name="status">
+                    <option value="">Semua Status</option>
+                    <option value="belum_mulai" {{ request('status') == 'belum_mulai' ? 'selected' : '' }}>Belum Mulai</option>
+                    <option value="sedang_mengerjakan" {{ request('status') == 'sedang_mengerjakan' ? 'selected' : '' }}>Sedang Mengerjakan</option>
+                    <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                </select>
+                <select class="filter-select" name="skema_id">
+                    <option value="">Semua Skema</option>
+                    @foreach($skemas as $skema)
+                        <option value="{{ $skema->id }}" {{ request('skema_id') == $skema->id ? 'selected' : '' }}>{{ $skema->nama_skema }}</option>
+                    @endforeach
+                </select>
+                <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
+                    <i class="bi bi-search"></i>
+                </button>
+                @if(request('search') || request('status') || request('skema_id'))
+                <button type="button" class="btn-filter-reset" title="Reset filter" onclick="resetFilters()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+                @endif
+            </div>
+        </div>
     </form>
 </div>
 
@@ -231,4 +329,100 @@
 <div class="card" id="tableContainer">
     @include('admin.asesmen-mandiri._table')
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    const filterForm = document.getElementById('filterForm');
+    const tableContainer = document.getElementById('tableContainer');
+    const searchInput = filterForm ? filterForm.querySelector('input[name="search"]') : null;
+
+    function performAjaxSearch() {
+        if (!filterForm || !tableContainer) return;
+
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+
+        fetch('{{ route("admin.asesmen-mandiri.index") }}?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            tableContainer.innerHTML = html;
+            window.history.replaceState({}, '', '{{ route("admin.asesmen-mandiri.index") }}?' + params.toString());
+        })
+        .catch(error => console.error('Search error:', error));
+    }
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            performAjaxSearch();
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                performAjaxSearch();
+            }
+        });
+
+        searchInput.addEventListener('input', function() {
+            performAjaxSearch();
+        });
+    }
+
+    document.querySelectorAll('.filter-select').forEach(select => {
+        select.addEventListener('change', function() {
+            performAjaxSearch();
+        });
+    });
+
+    tableContainer?.addEventListener('click', function(event) {
+        const link = event.target.closest('.pagination a');
+        if (!link) return;
+
+        event.preventDefault();
+
+        const linkUrl = new URL(link.href);
+        const page = linkUrl.searchParams.get('page');
+
+        const params = new URLSearchParams(new FormData(filterForm));
+        if (page) {
+            params.set('page', page);
+        }
+
+        fetch('{{ route("admin.asesmen-mandiri.index") }}?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            tableContainer.innerHTML = html;
+            window.history.replaceState({}, '', '{{ route("admin.asesmen-mandiri.index") }}?' + params.toString());
+        })
+        .catch(error => console.error('Pagination error:', error));
+    });
+
+    function resetFilters() {
+        if (!filterForm) return;
+
+        const search = filterForm.querySelector('input[name="search"]');
+        const status = filterForm.querySelector('select[name="status"]');
+        const skema = filterForm.querySelector('select[name="skema_id"]');
+
+        if (search) search.value = '';
+        if (status) status.value = '';
+        if (skema) skema.value = '';
+
+        performAjaxSearch();
+    }
+</script>
 @endsection

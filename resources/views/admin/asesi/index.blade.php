@@ -255,7 +255,11 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center">Tidak ada data asesi</td>
+                            <td colspan="6" style="text-align: center; padding: 60px 20px;">
+                                <i class="bi bi-inbox" style="font-size: 48px; color: #d1d5db; display: block; margin-bottom: 12px;"></i>
+                                <h4 style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data asesi ditemukan</h4>
+                                <p style="font-size: 13px; color: #9ca3af; margin: 0;">Coba kata kunci lain.</p>
+                            </td>
                         </tr>
                         @endforelse
                     </tbody>

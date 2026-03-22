@@ -52,9 +52,12 @@ class JadwalUjikomController extends Controller
             })->count(),
         ];
 
-        // If AJAX request, return only table rows
-        if ($request->ajax()) {
-            return view('admin.jadwal-ujikom.partials.table-rows', compact('jadwals'))->render();
+        // If AJAX request, return table rows and pagination fragments
+        if ($request->ajax() || $request->expectsJson()) {
+            return response()->json([
+                'rows' => view('admin.jadwal-ujikom.partials.table-rows', compact('jadwals', 'search', 'status', 'bulan'))->render(),
+                'pagination' => $jadwals->hasPages() ? (string) $jadwals->links() : '',
+            ]);
         }
 
         return view('admin.jadwal-ujikom.index', compact('jadwals', 'stats', 'search', 'status', 'bulan'));

@@ -67,12 +67,14 @@
             <div class="filter-section">
                 <div class="search-box">
                     <i class="bi bi-search"></i>
-                    <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" style="display:flex;gap:8px;width:100%;">
+                    <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" id="verifikasiSearchForm" style="display:flex;gap:8px;width:100%;">
                         <input type="hidden" name="status" value="{{ $status }}">
                         <input type="hidden" name="reject_type" value="{{ $rejectType }}">
                         <input type="hidden" name="per_page" value="{{ $perPage }}">
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NIK, atau email..." style="flex:1;">
-                        <button type="submit" style="padding:10px 16px;background:#0073bd;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:500;">Cari</button>
+                        <button type="submit" style="width:48px;height:42px;background:#0073bd;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;justify-content:center;" aria-label="Cari" title="Cari">
+                            <i class="bi bi-search"></i>
+                        </button>
                     </form>
                 </div>
                 @if($status === 'rejected')
@@ -151,7 +153,7 @@
                                 <th style="text-align:center;">AKSI</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="verifikasiTableBody">
                             @foreach($asesi as $item)
                             <tr>
                                 <td class="bulk-col" style="display:none;text-align:center;">
@@ -423,6 +425,16 @@
         color: #94a3b8;
         font-size: 16px;
         z-index: 1;
+    }
+
+    .search-box button i {
+        position: static;
+        left: auto;
+        top: auto;
+        transform: none;
+        color: inherit;
+        font-size: 16px;
+        z-index: auto;
     }
 
     .search-box input {
@@ -1018,7 +1030,7 @@
         }
     });
 
-    (function () {
+    function initVerifikasiBulkActions() {
     var isBulkModeActive = false;
 
     function setBulkMode(active) {
@@ -1047,16 +1059,16 @@
     // Checkbox listeners
     function attachBulkListeners() {
         document.querySelectorAll('.bulk-checkbox').forEach(function(cb) {
-            cb.addEventListener('change', updateBulkBar);
+            cb.onchange = updateBulkBar;
         });
         var selectAll = document.getElementById('bulk-select-all');
         if (selectAll) {
-            selectAll.addEventListener('change', function() {
+            selectAll.onchange = function() {
                 document.querySelectorAll('.bulk-checkbox').forEach(function(cb) {
                     cb.checked = selectAll.checked;
                 });
                 updateBulkBar();
-            });
+            };
         }
     }
 
@@ -1154,23 +1166,86 @@
     };
 
     // Close modal on backdrop click
-    document.getElementById('bulk-reject-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeBulkRejectModal();
-    });
+    var rejectModal = document.getElementById('bulk-reject-modal');
+    if (rejectModal) {
+        rejectModal.onclick = function(e) {
+            if (e.target === rejectModal) closeBulkRejectModal();
+        };
+    }
 
-    document.getElementById('bulk-delete-modal').addEventListener('click', function(e) {
-        if (e.target === this) closeBulkDeleteModal();
-    });
+    var deleteModal = document.getElementById('bulk-delete-modal');
+    if (deleteModal) {
+        deleteModal.onclick = function(e) {
+            if (e.target === deleteModal) closeBulkDeleteModal();
+        };
+    }
 
     var toggleBulkModeBtn = document.getElementById('toggle-bulk-mode');
     if (toggleBulkModeBtn) {
-        toggleBulkModeBtn.addEventListener('click', function() {
+        toggleBulkModeBtn.onclick = function() {
             setBulkMode(!isBulkModeActive);
-        });
+        };
     }
 
     setBulkMode(false);
     attachBulkListeners();
-}());
+
+    window.refreshVerifikasiBulkActions = function() {
+        setBulkMode(false);
+        attachBulkListeners();
+        updateBulkBar();
+    };
+}
+
+function initVerifikasiAjaxSearch() {
+    var searchForm = document.getElementById('verifikasiSearchForm');
+    if (!searchForm) return;
+
+    var searchInput = searchForm.querySelector('input[name="search"]');
+    if (!searchInput) return;
+
+    function performAjaxSearch() {
+        var tableBody = document.getElementById('verifikasiTableBody');
+        if (!tableBody) return;
+
+        var formData = new FormData(searchForm);
+        var params = new URLSearchParams(formData);
+
+        fetch(searchForm.action + '?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            tableBody.innerHTML = html;
+            if (typeof window.refreshVerifikasiBulkActions === 'function') {
+                window.refreshVerifikasiBulkActions();
+            }
+            window.history.replaceState({}, '', searchForm.action + '?' + params.toString());
+        })
+        .catch(error => console.error('Search error:', error));
+    }
+
+    searchForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        performAjaxSearch();
+    });
+
+    searchInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            performAjaxSearch();
+        }
+    });
+
+    searchInput.addEventListener('input', function () {
+        performAjaxSearch();
+    });
+}
+
+initVerifikasiBulkActions();
+initVerifikasiAjaxSearch();
 </script>
 @endsection
