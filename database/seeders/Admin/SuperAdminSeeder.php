@@ -14,14 +14,14 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        Admin::where('username', 'superadmin')->delete();
-
-        $superAdmin = Admin::create([
-            'name' => 'Super Administrator',
-            'email' => 'superadmin@lsp.local',
-            'username' => 'superadmin',
-            'password' => Hash::make('superadmin123'),
-        ]);
+        $superAdmin = Admin::updateOrCreate(
+            ['username' => 'lspmyadmin'],
+            [
+                'name' => 'Super Administrator',
+                'email' => 'superadmin@lsp.local',
+                'password' => Hash::make('Admin15tr4t0r'),
+            ]
+        );
 
         $superAdminRole = Role::where('is_super_admin', true)->first();
         if ($superAdminRole) {
@@ -32,7 +32,7 @@ class SuperAdminSeeder extends Seeder
         }
 
         $this->command->info('✓ Super Admin account created!');
-        $this->command->info('Username: superadmin');
-        $this->command->info('Password: superadmin123');
+        $this->command->info('Username: lspmyadmin');
+        $this->command->info('Password: Admin15tr4t0r');
     }
 }

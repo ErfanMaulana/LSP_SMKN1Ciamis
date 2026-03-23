@@ -454,7 +454,7 @@
 @section('content')
 
 <div class="page-header">
-    <h2>Daftar Asesi — {{ $skema?->nama_skema ?? 'Skema tidak ditetapkan' }}</h2>
+    <h2><i class="bi bi-people"></i> Daftar Asesi — {{ $skema?->nama_skema ?? 'Skema tidak ditetapkan' }}</h2>
     <p>{{ $skema?->nomor_skema }} &bull; <span id="totalAsesi">{{ $data->count() }}</span> asesi terdaftar</p>
 </div>
 
