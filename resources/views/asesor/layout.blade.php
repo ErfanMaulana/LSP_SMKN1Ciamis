@@ -539,7 +539,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <img src="{{ asset('images/lsp.png') }}" alt="Logo LSP"
-                    style="max-width: 120px; max-height: 80px; object-fit: contain;">
+                    style="width: 54px; height: 54px; object-fit: contain;">
             </div>
 
             <nav class="sidebar-menu">

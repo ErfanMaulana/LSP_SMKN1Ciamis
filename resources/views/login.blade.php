@@ -47,16 +47,25 @@
             justify-content: center;
             position: relative;
             overflow: hidden;
-            background: var(--brand);
+            background: url('{{ asset('images/loginadmin.svg') }}') center/cover no-repeat;
         }
 
         .left-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 97, 165, 0.78);
+            z-index: 0;
+        }
+
+        .left-panel::after {
             content: '';
             position: absolute;
             top: -50%; right: -50%;
             width: 200%; height: 200%;
             background: radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%);
             animation: pulse 15s ease-in-out infinite;
+            z-index: 0;
         }
 
         @keyframes pulse {
