@@ -184,6 +184,11 @@ Route::prefix('admin')->group(function () {
                 ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
                 ->middleware('permission:panduan.delete');
 
+            Route::post('/panduan/{section}/bulk-delete', [PanduanController::class, 'bulkDestroy'])
+                ->name('admin.panduan.bulk-destroy')
+                ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
+                ->middleware('permission:panduan.delete');
+
             Route::patch('/panduan/{section}/{id}/toggle', [PanduanController::class, 'toggleStatus'])
                 ->name('admin.panduan.toggle')
                 ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')

@@ -31,6 +31,23 @@
     @endforeach
 </div>
 
+@if($canDelete && count($items) > 0)
+    <div class="bulk-toolbar">
+        <button type="button" class="btn btn-secondary" id="bulk-toggle-btn" onclick="toggleAllSelection()">
+            <i class="bi bi-check2-square"></i> Pilih Semua
+        </button>
+        <button type="button" class="btn btn-danger" id="bulk-delete-btn" disabled onclick="submitBulkDelete()">
+            <i class="bi bi-trash"></i> Hapus Terpilih
+        </button>
+        <span id="bulk-selection-text" class="bulk-selection-text">0 item dipilih</span>
+    </div>
+
+    <form id="bulk-delete-form" method="POST" action="{{ route('admin.panduan.bulk-destroy', $section) }}" style="display:none;">
+        @csrf
+        <div id="bulk-delete-ids"></div>
+    </form>
+@endif
+
 @if(count($items) === 0)
     <div class="empty-state">
         <i class="bi bi-journal-text"></i>
@@ -47,6 +64,11 @@
         <table class="table">
             <thead>
                 <tr>
+                    @if($canDelete)
+                        <th width="44" class="text-center">
+                            <input type="checkbox" id="select-all-items" title="Pilih semua">
+                        </th>
+                    @endif
                     <th width="72">Urutan</th>
                     <th>Judul</th>
                     <th>Deskripsi</th>
@@ -58,6 +80,11 @@
             <tbody>
                 @foreach($items as $item)
                     <tr>
+                        @if($canDelete)
+                            <td class="text-center">
+                                <input type="checkbox" class="bulk-item-checkbox" value="{{ $item->id }}" aria-label="Pilih {{ $item->title }}">
+                            </td>
+                        @endif
                         <td>
                             <span class="order-badge">{{ $item->sort_order }}</span>
                         </td>
@@ -137,6 +164,21 @@
     .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:8px; font-size:14px; text-decoration:none; border:none; cursor:pointer; }
     .btn-primary { background:#0073bd; color:#fff; }
     .btn-primary:hover { background:#003961; }
+    .btn-secondary { background:#e2e8f0; color:#334155; }
+    .btn-secondary:hover { background:#cbd5e1; }
+    .btn-secondary:disabled { background:#f1f5f9; color:#94a3b8; cursor:not-allowed; }
+    .btn-danger { background:#dc2626; color:#fff; }
+    .btn-danger:hover { background:#b91c1c; }
+    .btn-danger:disabled { background:#fca5a5; cursor:not-allowed; }
+
+    .bulk-toolbar {
+        display:flex;
+        align-items:center;
+        gap:12px;
+        margin-bottom:14px;
+        flex-wrap:wrap;
+    }
+    .bulk-selection-text { font-size:13px; color:#64748b; font-weight:600; }
 
     .card { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
     .table-wrap { overflow-x:auto; }
@@ -192,5 +234,98 @@
             });
         }
     });
+
+    function getSelectedItems() {
+        return Array.from(document.querySelectorAll('.bulk-item-checkbox:checked')).map(function (checkbox) {
+            return checkbox.value;
+        });
+    }
+
+    function updateBulkState() {
+        var checkboxes = Array.from(document.querySelectorAll('.bulk-item-checkbox'));
+        var selectedIds = getSelectedItems();
+        var selectAll = document.getElementById('select-all-items');
+        var deleteBtn = document.getElementById('bulk-delete-btn');
+        var toggleBtn = document.getElementById('bulk-toggle-btn');
+        var text = document.getElementById('bulk-selection-text');
+
+        if (!checkboxes.length || !selectAll || !deleteBtn || !toggleBtn || !text) {
+            return;
+        }
+
+        selectAll.checked = selectedIds.length === checkboxes.length;
+        deleteBtn.disabled = selectedIds.length === 0;
+        toggleBtn.disabled = checkboxes.length === 0;
+        toggleBtn.innerHTML = selectedIds.length === checkboxes.length
+            ? '<i class="bi bi-x-square"></i> Batal Pilih'
+            : '<i class="bi bi-check2-square"></i> Pilih Semua';
+        text.textContent = selectedIds.length + ' item dipilih';
+    }
+
+    function toggleAllSelection() {
+        var checkboxes = Array.from(document.querySelectorAll('.bulk-item-checkbox'));
+        if (!checkboxes.length) {
+            return;
+        }
+
+        var selectedCount = getSelectedItems().length;
+        var shouldSelectAll = selectedCount !== checkboxes.length;
+
+        checkboxes.forEach(function (checkbox) {
+            checkbox.checked = shouldSelectAll;
+        });
+
+        var selectAll = document.getElementById('select-all-items');
+        if (selectAll) {
+            selectAll.checked = shouldSelectAll;
+        }
+
+        updateBulkState();
+    }
+
+    function submitBulkDelete() {
+        var selectedIds = getSelectedItems();
+        if (!selectedIds.length) {
+            return;
+        }
+
+        if (!confirm('Hapus ' + selectedIds.length + ' poin terpilih?')) {
+            return;
+        }
+
+        var container = document.getElementById('bulk-delete-ids');
+        var form = document.getElementById('bulk-delete-form');
+        if (!container || !form) {
+            return;
+        }
+
+        container.innerHTML = '';
+        selectedIds.forEach(function (id) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids[]';
+            input.value = id;
+            container.appendChild(input);
+        });
+
+        form.submit();
+    }
+
+    var selectAllCheckbox = document.getElementById('select-all-items');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function (e) {
+            var checked = e.target.checked;
+            document.querySelectorAll('.bulk-item-checkbox').forEach(function (checkbox) {
+                checkbox.checked = checked;
+            });
+            updateBulkState();
+        });
+    }
+
+    document.querySelectorAll('.bulk-item-checkbox').forEach(function (checkbox) {
+        checkbox.addEventListener('change', updateBulkState);
+    });
+
+    updateBulkState();
 </script>
 @endsection
