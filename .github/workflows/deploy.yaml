@@ -35,7 +35,6 @@ jobs:
             php artisan optimize:clear
             php artisan migrate --force
             php artisan db:seed --class='Database\\Seeders\\Admin\\RolePermissionSeeder' --force
-            php artisan db:seed --class='Database\\Seeders\\Reference\\PanduanSeeder' --force
             php artisan route:list | grep admin/asesi/bulk-delete
             php artisan config:cache
         "
