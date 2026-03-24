@@ -56,6 +56,7 @@
                 ['route' => 'front.kompetensi.index', 'label' => 'Kompetensi & Data Skema'],
                 ['route' => 'front.berita.index', 'label' => 'Berita'],
                 ['route' => 'front.kontak', 'label' => 'Kontak'],
+                ['route' => 'front.panduan.overview', 'label' => 'Panduan'],
             ];
         @endphp
 

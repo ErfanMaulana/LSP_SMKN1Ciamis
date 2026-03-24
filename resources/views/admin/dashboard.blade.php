@@ -210,6 +210,7 @@
 .welcome-greeting { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
 .welcome-sub { font-size: 13px; opacity: 0.85; }
 .welcome-date { font-size: 13px; opacity: 0.9; text-align: right; line-height: 1.7; }
+.welcome-date .dash-time-line { display: block; }
 
 /* ── Stat Cards ───────────────────────────────────────────────────── */
 .stats-grid {
@@ -363,6 +364,15 @@
     .stats-grid { grid-template-columns: 1fr; }
     .quick-grid { grid-template-columns: 1fr; }
     .verif-grid { grid-template-columns: 1fr; }
+
+    .welcome-right {
+        width: 100%;
+    }
+
+    .welcome-date,
+    .welcome-date .dash-time-line {
+        text-align: left;
+    }
 }
 </style>
 
@@ -379,8 +389,8 @@
         const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
         const pad = n => String(n).padStart(2, '0');
         el.innerHTML =
-            '<strong>' + days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear() + '</strong><br>' +
-            pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) + ' WIB';
+            '<strong>' + days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear() + '</strong>' +
+            '<span class="dash-time-line">' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) + ' WIB</span>';
     }
     tick();
     setInterval(tick, 1000);

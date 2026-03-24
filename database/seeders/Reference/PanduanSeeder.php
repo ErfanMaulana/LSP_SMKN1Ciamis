@@ -61,29 +61,86 @@ class PanduanSeeder extends Seeder
                 ],
             ],
             'peran-asesi' => [
-                ['title' => 'Login ke Panel Asesi', 'description' => 'Pastikan akun Asesi sudah dibuat oleh Admin. Setelah itu, login melalui halaman utama dan sistem akan mengarahkan ke area Asesi.'],
-                ['title' => 'Isi Form Pendaftaran', 'description' => 'Lengkapi data pribadi dan data pendukung sesuai form pendaftaran pada panel Asesi.'],
-                ['title' => 'Upload Dokumen', 'description' => 'Unggah berkas seperti pas foto, identitas, bukti kompetensi, dan transkrip nilai.'],
-                ['title' => 'Menunggu Persetujuan Admin', 'description' => 'Sebelum disetujui Admin, akses fitur inti masih dibatasi. Jika ditolak, perbaiki data lalu kirim ulang.'],
-                ['title' => 'Kerjakan Asesmen Mandiri', 'description' => 'Setelah approved, Asesi dapat mengisi FR.APL.02 pada menu asesmen mandiri berdasarkan skema yang tersedia.'],
-                ['title' => 'Cek Jadwal dan Hasil', 'description' => 'Pantau jadwal ujikom, hasil asesmen, serta update profil dan password secara mandiri.'],
+                [
+                    'title' => 'Login ke Panel Asesi', 
+                    'description' => 'Pastikan akun Asesi sudah dibuat oleh Admin. Setelah itu, login melalui halaman utama dan sistem akan mengarahkan ke area Asesi.'
+                ],
+                [
+                    'title' => 'Isi Form Pendaftaran',
+                    'description' => 'Lengkapi data pribadi dan data pendukung sesuai form pendaftaran pada panel Asesi.'
+                ],
+                [
+                    'title' => 'Upload Dokumen',
+                    'description' => 'Unggah berkas seperti pas foto, identitas, bukti kompetensi, dan transkrip nilai.'
+                ],
+                [
+                    'title' => 'Menunggu Persetujuan Admin',
+                    'description' => 'Sebelum disetujui Admin, akses fitur inti masih dibatasi. Jika ditolak, perbaiki data lalu kirim ulang.'
+                ],
+                [
+                    'title' => 'Kerjakan Asesmen Mandiri',
+                    'description' => 'Setelah approved, Asesi dapat mengisi FR.APL.02 pada menu asesmen mandiri berdasarkan skema yang tersedia.'
+                ],
+                [
+                    'title' => 'Cek Jadwal dan Hasil',
+                    'description' => 'Pantau jadwal ujikom, hasil asesmen, serta update profil dan password secara mandiri.'
+                ],
             ],
             'peran-asesor' => [
-                ['title' => 'Login ke Panel Asesor', 'description' => 'Akun Asesor dibuat oleh Admin. Asesor login dari halaman umum lalu diarahkan ke area Asesor.'],
-                ['title' => 'Tinjau Jadwal dan Kelompok', 'description' => 'Asesor melihat jadwal ujikom serta kelompok Asesi yang menjadi tanggung jawabnya.'],
-                ['title' => 'Entry Penilaian', 'description' => 'Input nilai per Asesi melalui fitur entry penilaian sesuai instrumen yang berlaku.'],
-                ['title' => 'Review Berkas dan Hasil Asesi', 'description' => 'Lakukan peninjauan hasil asesmen mandiri maupun data pendukung untuk memastikan objektivitas.'],
-                ['title' => 'Beri Rekomendasi', 'description' => 'Asesor memberikan rekomendasi akhir kompetensi untuk setiap Asesi.'],
-                ['title' => 'Sinkron dengan Monitoring Admin', 'description' => 'Semua penilaian akan termonitor di panel Admin sebagai dasar pengambilan keputusan dan pelaporan.'],
+                [
+                    'title' => 'Login ke Panel Asesor',
+                    'description' => 'Akun Asesor dibuat oleh Admin. Asesor login dari halaman umum lalu diarahkan ke area Asesor.'
+                ],
+                [
+                    'title' => 'Tinjau Jadwal dan Kelompok',
+                    'description' => 'Asesor melihat jadwal ujikom serta kelompok Asesi yang menjadi tanggung jawabnya.'
+                ],
+                [
+                    'title' => 'Entry Penilaian',
+                    'description' => 'Input nilai per Asesi melalui fitur entry penilaian sesuai instrumen yang berlaku.'
+                ],
+                [
+                    'title' => 'Review Berkas dan Hasil Asesi',
+                    'description' => 'Lakukan peninjauan hasil asesmen mandiri maupun data pendukung untuk memastikan objektivitas.'
+                ],
+                [
+                    'title' => 'Beri Rekomendasi',
+                    'description' => 'Asesor memberikan rekomendasi akhir kompetensi untuk setiap Asesi.'
+                ],
+                [
+                    'title' => 'Sinkron dengan Monitoring Admin',
+                    'description' => 'Semua penilaian akan termonitor di panel Admin sebagai dasar pengambilan keputusan dan pelaporan.'
+                ],
             ],
             'peran-admin' => [
-                ['title' => 'Login dan Akses Dashboard', 'description' => 'Admin masuk melalui login admin untuk mengakses dashboard manajemen.'],
-                ['title' => 'Buat Akun Asesi dan Asesor', 'description' => 'Admin mendaftarkan akun pengguna agar Asesi dan Asesor bisa login dan menjalankan tugas masing-masing.'],
-                ['title' => 'Kelola Data Master', 'description' => 'Admin menyiapkan jurusan, skema, unit, elemen, kriteria, TUK, jadwal ujikom, mitra, dan konten pendukung front.'],
-                ['title' => 'Kelola Hak Akses', 'description' => 'Admin mengatur role dan permission sesuai kebutuhan operasional agar tiap menu hanya diakses pihak berwenang.'],
-                ['title' => 'Verifikasi Asesi', 'description' => 'Admin memeriksa kelengkapan data dan dokumen, kemudian melakukan approve/reject beserta catatan.'],
-                ['title' => 'Pantau Penilaian Asesor', 'description' => 'Admin memonitor input nilai, progres kelompok, dan hasil rekomendasi dari Asesor.'],
-                ['title' => 'Kontrol Kualitas Sistem', 'description' => 'Admin memastikan alur berjalan baik melalui pencarian data, evaluasi hasil, dan pemeliharaan konfigurasi sistem.'],
+                [
+                    'title' => 'Login dan Akses Dashboard',
+                    'description' => 'Admin masuk melalui login admin untuk mengakses dashboard manajemen.'
+                ],
+                [
+                    'title' => 'Buat Akun Asesi dan Asesor',
+                    'description' => 'Admin mendaftarkan akun pengguna agar Asesi dan Asesor bisa login dan menjalankan tugas masing-masing.'
+                ],
+                [
+                    'title' => 'Kelola Data Master',
+                    'description' => 'Admin menyiapkan jurusan, skema, unit, elemen, kriteria, TUK, jadwal ujikom, mitra, dan konten pendukung front.'
+                ],
+                [
+                    'title' => 'Kelola Hak Akses',
+                    'description' => 'Admin mengatur role dan permission sesuai kebutuhan operasional agar tiap menu hanya diakses pihak berwenang.'
+                ],
+                [
+                    'title' => 'Verifikasi Asesi',
+                    'description' => 'Admin memeriksa kelengkapan data dan dokumen, kemudian melakukan approve/reject beserta catatan.'
+                ],
+                [
+                    'title' => 'Pantau Penilaian Asesor',
+                    'description' => 'Admin memonitor input nilai, progres kelompok, dan hasil rekomendasi dari Asesor.'
+                ],
+                [
+                    'title' => 'Kontrol Kualitas Sistem',
+                    'description' => 'Admin memastikan alur berjalan baik melalui pencarian data, evaluasi hasil, dan pemeliharaan konfigurasi sistem.'
+                ],
             ],
         ];
 

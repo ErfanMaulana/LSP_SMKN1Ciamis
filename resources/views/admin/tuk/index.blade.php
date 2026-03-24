@@ -179,6 +179,52 @@
 
     .pagination-wrap { padding: 16px; }
 
+    @media (max-width: 768px) {
+        .page-header {
+            align-items: stretch;
+        }
+
+        .page-header .btn-add {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-select,
+        .btn-filter-search,
+        .btn-filter-reset {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .card {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card table {
+            min-width: 820px;
+        }
+
+        .card th,
+        .card td {
+            white-space: nowrap;
+        }
+    }
+
     @media (max-width: 640px) {
         .stats-grid {
             gap: 12px;

@@ -78,15 +78,7 @@
                             <option value="Okupasi" {{ request('jenis_skema') === 'Okupasi' ? 'selected' : '' }}>Okupasi</option>
                             <option value="Klaster" {{ request('jenis_skema') === 'Klaster' ? 'selected' : '' }}>Klaster</option>
                         </select>
-                        <select class="filter-select" name="sort" id="sortFilter">
-                            <option value="created_at" {{ request('sort', 'created_at') === 'created_at' ? 'selected' : '' }}>Tanggal Dibuat</option>
-                            <option value="nama_skema" {{ request('sort') === 'nama_skema' ? 'selected' : '' }}>Nama Skema</option>
-                            <option value="nomor_skema" {{ request('sort') === 'nomor_skema' ? 'selected' : '' }}>Nomor Skema</option>
-                        </select>
-                        <select class="filter-select" name="order" id="orderFilter">
-                            <option value="asc" {{ request('order', 'desc') === 'asc' ? 'selected' : '' }}>A → Z</option>
-                            <option value="desc" {{ request('order', 'desc') === 'desc' ? 'selected' : '' }}>Z → A</option>
-                        </select>
+                        
                         <button type="submit" class="btn-filter-search" title="Cari">
                             <i class="bi bi-search"></i>
                         </button>
@@ -699,6 +691,65 @@
         color: #94a3b8;
         font-size: 14px;
         font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            align-items: stretch;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .header-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-select,
+        .btn-filter-search,
+        .btn-filter-reset {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .data-table {
+            min-width: 900px;
+        }
+
+        .data-table th,
+        .data-table td {
+            white-space: nowrap;
+        }
+
+        .pagination-container {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 
     @media (max-width: 640px) {

@@ -791,22 +791,23 @@
             }
 
             .topbar {
-                flex-direction: column;
-                gap: 0;
+                flex-direction: row;
+                align-items: center;
+                gap: 8px;
                 padding: 0;
             }
 
             .global-search {
-                width: 100%;
-                max-width: 100%;
+                flex: 1;
+                min-width: 0;
                 padding: 12px 15px !important;
-                order: 1;
+                order: 0;
             }
 
             .topbar-right {
-                width: 100%;
-                padding: 12px 15px !important;
-                order: 2;
+                width: auto;
+                padding: 12px 15px 12px 0 !important;
+                order: 0;
             }
 
             .search-shortcut {
@@ -815,10 +816,20 @@
 
             .topbar-right {
                 justify-content: flex-end;
+                align-items: center;
+                flex-shrink: 0;
             }
 
             .profile-toggle {
                 padding: 6px;
+            }
+
+            .global-search>div {
+                gap: 10px !important;
+            }
+
+            .global-search-input-wrapper {
+                min-width: 0;
             }
 
             .profile-toggle .user-details,
