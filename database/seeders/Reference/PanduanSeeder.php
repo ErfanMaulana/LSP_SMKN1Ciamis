@@ -11,13 +11,54 @@ class PanduanSeeder extends Seeder
     {
         $data = [
             'alur-keseluruhan-sistem' => [
-                ['title' => 'Admin Membuat Akun Asesi dan Asesor', 'description' => 'Alur dimulai dari Admin dengan menyiapkan akun untuk Asesi dan Asesor agar setiap pengguna memiliki akses sesuai peran.'],
-                ['title' => 'Login dan Identifikasi Peran', 'description' => 'Setelah akun tersedia, pengguna login dari halaman yang sama. Sistem membaca role akun lalu mengarahkan ke dashboard Admin, Asesi, atau Asesor.'],
-                ['title' => 'Persiapan Data Master oleh Admin', 'description' => 'Admin menyiapkan jurusan, skema, unit, elemen, kriteria, jadwal, TUK, serta pembagian kelompok dan penugasan Asesor.'],
-                ['title' => 'Pendaftaran dan Kelengkapan Berkas Asesi', 'description' => 'Asesi mengisi formulir pendaftaran, melengkapi dokumen, lalu menunggu proses verifikasi dari Admin.'],
-                ['title' => 'Verifikasi Admin', 'description' => 'Admin melakukan approve atau reject data Asesi. Asesi yang approved bisa lanjut ke asesmen mandiri dan jadwal ujikom.'],
-                ['title' => 'Asesmen dan Penilaian', 'description' => 'Asesi mengerjakan asesmen mandiri (FR.APL.02), lalu Asesor melakukan entry nilai dan memberi rekomendasi kompetensi.'],
-                ['title' => 'Monitoring Hasil', 'description' => 'Admin memantau progres dan hasil, sementara Asesi melihat status akhir dan ringkasan hasil ujikom.'],
+                [
+                    'title' => 'Pembuatan Akun oleh Admin',
+                    'description' => 'Admin membuat dan mengelola akun untuk Asesi dan Asesor agar setiap pengguna memiliki akses sesuai dengan perannya masing-masing.'
+                ],
+                [
+                    'title' => 'Login dan Identifikasi Peran',
+                    'description' => 'Asesi dan Asesor melakukan login melalui halaman yang sama. Sistem secara otomatis mengidentifikasi peran pengguna dan mengarahkan ke dashboard sesuai hak akses.'
+                ],
+                [
+                    'title' => 'Persiapan Data Master',
+                    'description' => 'Admin menyiapkan data master seperti skema sertifikasi, unit kompetensi, elemen, kriteria unjuk kerja, TUK, serta jadwal uji kompetensi.'
+                ],
+                [
+                    'title' => 'Pendaftaran Asesi (APL 01)',
+                    'description' => 'Asesi melakukan pendaftaran dengan mengisi formulir APL 01 serta melengkapi dokumen persyaratan yang dibutuhkan.'
+                ],
+                [
+                    'title' => 'Verifikasi dan Persetujuan Admin',
+                    'description' => 'Admin melakukan verifikasi data pendaftaran Asesi. Jika data dinyatakan valid, maka Asesi akan disetujui (approved) untuk mengikuti tahap selanjutnya.'
+                ],
+                [
+                    'title' => 'Penjadwalan dan Pengelompokan',
+                    'description' => 'Admin menyusun kelompok Asesi serta menentukan jadwal dan lokasi uji kompetensi bagi Asesi yang telah disetujui.'
+                ],
+                [
+                    'title' => 'Asesmen Mandiri (APL 02)',
+                    'description' => 'Asesi mengisi asesmen mandiri (APL 02) sebagai bentuk evaluasi awal terhadap kompetensi yang dimiliki.'
+                ],
+                [
+                    'title' => 'Rekomendasi Asesor',
+                    'description' => 'Asesor meninjau hasil asesmen mandiri dan memberikan rekomendasi. Asesi yang direkomendasikan dapat melanjutkan ke tahap uji kompetensi.'
+                ],
+                [
+                    'title' => 'Pelaksanaan Uji Kompetensi',
+                    'description' => 'Asesi mengikuti uji kompetensi sesuai jadwal yang telah ditentukan oleh Admin.'
+                ],
+                [
+                    'title' => 'Penilaian dan Keputusan',
+                    'description' => 'Asesor melakukan penilaian hasil uji kompetensi dan menentukan apakah Asesi dinyatakan Kompeten (K) atau Belum Kompeten (BK).'
+                ],
+                [
+                    'title' => 'Penerbitan Sertifikat',
+                    'description' => 'Asesi yang dinyatakan Kompeten akan diproses untuk penerbitan sertifikat sebagai bukti kelulusan.'
+                ],
+                [
+                    'title' => 'Monitoring dan Laporan',
+                    'description' => 'Admin memantau seluruh proses dan hasil asesmen, sementara Asesi dapat melihat status akhir serta ringkasan hasil uji kompetensi.'
+                ],
             ],
             'peran-asesi' => [
                 ['title' => 'Login ke Panel Asesi', 'description' => 'Pastikan akun Asesi sudah dibuat oleh Admin. Setelah itu, login melalui halaman utama dan sistem akan mengarahkan ke area Asesi.'],
