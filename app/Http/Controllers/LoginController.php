@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -53,6 +54,15 @@ class LoginController extends Controller
         if ($account && Hash::check($request->password, $account->password)) {
             Auth::guard('account')->login($account, $request->filled('remember'));
 
+            ActivityLogger::logUser(
+                (string) ($account->NIK ?? $account->id),
+                $account->nama ?? (string) ($account->NIK ?? $account->id),
+                'Login User',
+                'User berhasil login ke sistem.',
+                $request,
+                ['role' => $account->role]
+            );
+
             if ($account->isAsesor()) {
                 return redirect()->intended(route('asesor.dashboard'))->with('success', 'Login berhasil!');
             }
@@ -72,6 +82,30 @@ class LoginController extends Controller
      */
     public function logout(Request $request)
     {
+        $admin = Auth::guard('admin')->user();
+        $account = Auth::guard('account')->user();
+
+        if ($admin) {
+            ActivityLogger::logAdmin(
+                (string) $admin->username,
+                $admin->name,
+                'Logout Admin',
+                'Admin logout dari sistem.',
+                $request
+            );
+        }
+
+        if ($account) {
+            ActivityLogger::logUser(
+                (string) ($account->NIK ?? $account->id),
+                $account->nama ?? (string) ($account->NIK ?? $account->id),
+                'Logout User',
+                'User logout dari sistem.',
+                $request,
+                ['role' => $account->role]
+            );
+        }
+
         Auth::guard('admin')->logout();
         Auth::guard('account')->logout();
 

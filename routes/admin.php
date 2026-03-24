@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\BeritaController;
 use App\Http\Controllers\Admin\KontakController;
 use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\PanduanController;
+use App\Http\Controllers\Admin\LogActivityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -302,6 +303,14 @@ Route::prefix('admin')->group(function () {
             Route::get('/nilai-asesor', [NilaiAsesorController::class, 'index'])->name('admin.nilai-asesor.index');
             Route::get('/nilai-asesor/{asesiNik}/{skemaId}', [NilaiAsesorController::class, 'show'])->name('admin.nilai-asesor.show');
             Route::post('/nilai-asesor/{skemaId}/update-kkm', [NilaiAsesorController::class, 'updateKkm'])->name('admin.nilai-asesor.update-kkm');
+        });
+
+        // Log Activity (Super Admin only, without permission middleware)
+        Route::middleware('super-admin')->group(function () {
+            Route::get('/log-activity/user', [LogActivityController::class, 'userIndex'])->name('admin.log-activity.user');
+            Route::get('/log-activity/admin', [LogActivityController::class, 'adminIndex'])->name('admin.log-activity.admin');
+            Route::get('/log-activity/user/export', [LogActivityController::class, 'userExport'])->name('admin.log-activity.user.export');
+            Route::get('/log-activity/admin/export', [LogActivityController::class, 'adminExport'])->name('admin.log-activity.admin.export');
         });
     });
 });

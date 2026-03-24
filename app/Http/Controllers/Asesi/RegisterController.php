@@ -7,6 +7,7 @@ use App\Models\Asesi;
 use App\Models\BuktiPendukung;
 use App\Models\Jurusan;
 use App\Models\Skema;
+use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -132,6 +133,15 @@ class RegisterController extends Controller
         // Store NIK in session for step 2
         session(['pendaftaran_nik' => $account->NIK]);
 
+        ActivityLogger::logUser(
+            (string) $account->NIK,
+            $request->input('nama') ?: ($account->nama ?? (string) $account->NIK),
+            'Mengisi APL 1',
+            'User menyimpan formulir APL 1 (data diri).',
+            $request,
+            ['skema_id' => (int) $request->skema_id]
+        );
+
         return redirect()->route('asesi.pendaftaran.dokumen');
     }
 
@@ -251,6 +261,14 @@ class RegisterController extends Controller
         // Set status to pending
         $asesi->status = 'pending';
         $asesi->save();
+
+        ActivityLogger::logUser(
+            (string) $account->NIK,
+            $asesi->nama ?? ($account->nama ?? (string) $account->NIK),
+            'Mengisi APL 1',
+            'User mengirim dokumen pendukung APL 1.',
+            $request
+        );
 
         // Clear session
         session()->forget('pendaftaran_nik');

@@ -22,7 +22,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="NIK">NIK <span class="required">*</span></label>
-                        <input type="text" id="NIK" name="NIK" class="form-control @error('NIK') is-invalid @enderror" value="{{ old('NIK') }}" required maxlength="16" minlength="16" pattern="\d{16}" inputmode="numeric" placeholder="16 digit NIK">
+                        <input type="text" id="NIK" name="NIK" class="form-control @error('NIK') is-invalid @enderror" value="{{ old('NIK', $prefillNIK ?? '') }}" required maxlength="16" minlength="16" pattern="\d{16}" inputmode="numeric" placeholder="16 digit NIK">
                         @error('NIK')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -30,7 +30,7 @@
 
                     <div class="form-group">
                         <label for="nama">Nama Lengkap <span class="required">*</span></label>
-                        <input type="text" id="nama" name="nama" class="form-control @error('nama') is-invalid @enderror" value="{{ old('nama') }}" required>
+                        <input type="text" id="nama" name="nama" class="form-control @error('nama') is-invalid @enderror" value="{{ old('nama', $prefillNama ?? '') }}" required>
                         @error('nama')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -77,15 +77,15 @@
                         <label>Jenis Kelamin <span class="required">*</span></label>
                         <div class="radio-group" id="jenis-kelamin-group">
                             <label class="radio-label">
-                                <input type="radio" name="jenis_kelamin_radio" value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'checked' : '' }} disabled>
+                                <input type="radio" name="jenis_kelamin_radio" value="Laki-laki" {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Laki-laki' ? 'checked' : '' }} disabled>
                                 <span>Laki-laki</span>
                             </label>
                             <label class="radio-label">
-                                <input type="radio" name="jenis_kelamin_radio" value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'checked' : '' }} disabled>
+                                <input type="radio" name="jenis_kelamin_radio" value="Perempuan" {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Perempuan' ? 'checked' : '' }} disabled>
                                 <span>Perempuan</span>
                             </label>
                         </div>
-                        <input type="hidden" id="jenis_kelamin" name="jenis_kelamin" value="{{ old('jenis_kelamin') }}" required>
+                        <input type="hidden" id="jenis_kelamin" name="jenis_kelamin" value="{{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') }}" required>
                         <small id="jenis-kelamin-feedback" style="font-size:11px;color:#64748b;margin-top:4px;display:block;">Diisi otomatis dari NIK</small>
                         @error('jenis_kelamin')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -159,7 +159,7 @@
 
                     <div class="form-group">
                         <label for="tanggal_lahir">Tanggal Lahir <span class="required">*</span></label>
-                        <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control @error('tanggal_lahir') is-invalid @enderror" value="{{ old('tanggal_lahir') }}" required readonly style="background:#f1f5f9;color:#475569;cursor:default;">
+                        <input type="date" id="tanggal_lahir" name="tanggal_lahir" class="form-control @error('tanggal_lahir') is-invalid @enderror" value="{{ old('tanggal_lahir', $nikData['tanggal_lahir'] ?? '') }}" required readonly style="background:#f1f5f9;color:#475569;cursor:default;">
                         <small id="tanggal-lahir-feedback" style="font-size:11px;color:#64748b;margin-top:4px;display:block;">Diisi otomatis dari NIK (6 digit kedua)</small>
                         @error('tanggal_lahir')
                             <div class="invalid-feedback">{{ $message }}</div>

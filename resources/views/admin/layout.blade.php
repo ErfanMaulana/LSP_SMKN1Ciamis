@@ -891,6 +891,20 @@
                                     <span>Role & Permission</span>
                                 </a>
                             @endif
+
+                            @if(Auth::guard('admin')->user()->isSuperAdmin())
+                                <a href="{{ route('admin.log-activity.user') }}"
+                                    class="menu-item {{ request()->routeIs('admin.log-activity.user') ? 'active' : '' }}">
+                                    <i class="bi bi-clock-history"></i>
+                                    <span>Log Activity User</span>
+                                </a>
+
+                                <a href="{{ route('admin.log-activity.admin') }}"
+                                    class="menu-item {{ request()->routeIs('admin.log-activity.admin') ? 'active' : '' }}">
+                                    <i class="bi bi-shield-check"></i>
+                                    <span>Log Activity Admin</span>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @endif
@@ -1098,6 +1112,7 @@
                         </div>
                     </div>
                 @endif
+
             </nav>
         </aside>
 
