@@ -3,7 +3,7 @@ name: Otomatis Deploy ke Server
 on:
   push:
     branches:
-      - main   # Ganti sesuai branch utama kamu
+      - main   # Trigger
 
 jobs:
   deploy:
