@@ -5,9 +5,18 @@
 
 @section('styles')
 <style>
+    :root {
+        --brand-500: #0061a5;
+        --brand-600: #00538d;
+        --brand-400: #0073bd;
+        --brand-soft: #eef6ff;
+    }
+
     .reg-card {
         background: white; border-radius: 12px; padding: 32px;
         box-shadow: 0 1px 3px rgba(0,0,0,.08); max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
     }
     .reg-card h3 {
         font-size: 16px; font-weight: 700; color: #0F172A;
@@ -21,16 +30,17 @@
     .step-indicator {
         display: flex; align-items: center; justify-content: center;
         gap: 16px; margin-bottom: 24px;
+        flex-wrap: wrap;
     }
     .step { display: flex; align-items: center; gap: 8px; }
     .step-number {
         width: 36px; height: 36px; border-radius: 50%;
-        background: #14532d; color: white;
+        background: var(--brand-500); color: white;
         display: flex; align-items: center; justify-content: center;
         font-weight: 700; font-size: 14px; flex-shrink: 0;
     }
     .step.inactive .step-number { background: #cbd5e1; color: #64748b; }
-    .step-label { font-size: 12px; font-weight: 600; color: #14532d; }
+    .step-label { font-size: 12px; font-weight: 600; color: var(--brand-500); }
     .step.inactive .step-label { color: #94a3b8; }
     .step-line { width: 50px; height: 2px; background: #cbd5e1; }
 
@@ -42,23 +52,24 @@
     }
     .section-icon {
         width: 36px; height: 36px; border-radius: 50%;
-        background: #14532d; color: white;
+        background: var(--brand-500); color: white;
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0; font-size: 16px;
     }
     .section-header h4 { font-size: 14px; font-weight: 700; color: #0F172A; margin: 0; }
 
     /* Form grid */
-    .reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .reg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
     .reg-full { grid-column: 1 / -1; }
-    .reg-group { display: flex; flex-direction: column; gap: 6px; }
+    .reg-group { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .reg-group label { font-size: 12px; font-weight: 600; color: #334155; }
     .reg-control {
         padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px;
+        width: 100%; min-width: 0; min-height: 42px;
         font-size: 13px; font-family: inherit; color: #334155;
         transition: border-color .2s; outline: none; background: white;
     }
-    .reg-control:focus { border-color: #14532d; box-shadow: 0 0 0 3px rgba(20,83,45,.1); }
+    .reg-control:focus { border-color: var(--brand-500); box-shadow: 0 0 0 3px rgba(0,97,165,.12); }
     .reg-control.is-invalid { border-color: #ef4444; background: #fef2f2; }
     textarea.reg-control { resize: vertical; min-height: 80px; }
     select.reg-control { cursor: pointer; }
@@ -72,16 +83,20 @@
         padding: 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px;
         cursor: pointer; transition: all .2s; font-size: 12px;
     }
-    .radio-label:hover { border-color: #14532d; background: #f0fdf4; }
-    .radio-label input[type="radio"] { accent-color: #14532d; cursor: pointer; }
+    .radio-label:hover { border-color: var(--brand-500); background: var(--brand-soft); }
+    .radio-label input[type="radio"] { accent-color: var(--brand-500); cursor: pointer; }
 
     /* Alerts */
     .alert-box {
         padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;
         display: flex; gap: 12px; font-size: 12px; line-height: 1.5;
     }
+    .alert-box p {
+        margin: 0;
+        min-width: 0;
+    }
     .alert-error { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
-    .alert-info { background: #f0fdf4; border-left: 4px solid #14532d; color: #14532d; }
+    .alert-info { background: var(--brand-soft); border-left: 4px solid var(--brand-500); color: var(--brand-600); }
     .alert-box i { flex-shrink: 0; margin-top: 2px; font-size: 15px; }
     .error-list { list-style: none; margin: 4px 0 0; padding-left: 16px; }
     .error-list li { font-size: 11px; margin-top: 2px; }
@@ -97,13 +112,13 @@
         cursor: pointer; border: none; display: inline-flex;
         align-items: center; gap: 8px; transition: all .2s;
     }
-    .btn-reg-primary { background: #14532d; color: white; flex: 1; justify-content: center; }
-    .btn-reg-primary:hover { background: #166534; }
+    .btn-reg-primary { background: var(--brand-500); color: white; flex: 1; justify-content: center; }
+    .btn-reg-primary:hover { background: var(--brand-600); }
 
     /* NIK validation */
     .nik-feedback { font-size: 12px; margin-top: 4px; display: none; align-items: center; gap: 6px; }
     .nik-error { color: #ef4444; }
-    .nik-success { color: #16a34a; }
+    .nik-success { color: var(--brand-400); }
     .nik-warning { color: #f59e0b; }
 
     @media(max-width:640px) { .reg-grid { grid-template-columns: 1fr; } }
@@ -114,9 +129,15 @@
             border-radius: 10px;
         }
 
+        .reg-card h3 {
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
         .step-indicator {
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 16px;
+            justify-content: flex-start;
         }
 
         .step-label {
@@ -130,7 +151,7 @@
         }
 
         .step-line {
-            width: 26px;
+            width: 20px;
         }
 
         .section-header {
@@ -153,6 +174,12 @@
         .reg-actions {
             margin-top: 18px;
             padding-top: 14px;
+        }
+
+        .alert-box {
+            padding: 10px 12px;
+            gap: 8px;
+            font-size: 11.5px;
         }
 
         .btn-reg-primary {
@@ -211,8 +238,8 @@
         Cek email secara berkala untuk mendapat notifikasi setelah proses verifikasi selesai.
     </p>
     <div style="
-        background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;
-        padding:14px 18px;color:#166534;font-size:13.5px;
+        background:#eef6ff;border:1px solid #bfdbfe;border-radius:10px;
+        padding:14px 18px;color:#00538d;font-size:13.5px;
         display:flex;align-items:center;gap:10px;text-align:left;
     ">
         <i class="bi bi-shield-check" style="font-size:20px;flex-shrink:0;"></i>
@@ -245,7 +272,7 @@
         </div>
     </div>
 
-    <h3><i class="bi bi-file-earmark-text" style="color:#14532d;"></i> FR.-APL-01. FORMULIR PERMOHONAN SERTIFIKASI</h3>
+    <h3><i class="bi bi-file-earmark-text" style="color:#0061a5;"></i> FR.-APL-01. FORMULIR PERMOHONAN SERTIFIKASI</h3>
     <p class="subtitle">Lengkapi formulir pendaftaran asesi berikut ini. NIK Anda sudah terisi otomatis dari akun.</p>
 
     @if ($errors->any())
@@ -301,10 +328,11 @@
 
             <div class="reg-group">
                 <label>Tanggal Lahir <span class="required">*</span></label>
-                <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $nikData['tanggal_lahir'] ?? '') }}" required readonly
-                       class="reg-control {{ $errors->has('tanggal_lahir') ? 'is-invalid' : '' }}" style="background:#f1f5f9;color:#475569;cursor:default;">
-                <small style="font-size:11px;color:#16a34a;margin-top:4px;display:flex;align-items:center;gap:4px;">
-                    <i class="bi bi-magic"></i> Diisi otomatis dari NIK
+                <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $nikData['tanggal_lahir'] ?? '') }}" required {{ !empty($nikAutofill) ? 'readonly' : '' }}
+                       class="reg-control {{ $errors->has('tanggal_lahir') ? 'is-invalid' : '' }}" style="{{ !empty($nikAutofill) ? 'background:#f1f5f9;color:#475569;cursor:default;' : '' }}">
+                <small style="font-size:11px;color:{{ !empty($nikAutofill) ? '#0073bd' : '#f59e0b' }};margin-top:4px;display:flex;align-items:center;gap:4px;">
+                    <i class="bi {{ !empty($nikAutofill) ? 'bi-magic' : 'bi-exclamation-triangle' }}"></i>
+                    {{ !empty($nikAutofill) ? 'Diisi otomatis dari NIK' : ($nikAutofillMessage ?? 'Isi manual karena NIK tidak dapat diparse') }}
                 </small>
                 @error('tanggal_lahir')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
@@ -312,21 +340,24 @@
             <div class="reg-group">
                 <label>Jenis Kelamin <span class="required">*</span></label>
                 <div class="radio-group">
-                    <label class="radio-label" style="background:#f1f5f9;cursor:default;opacity:0.85;">
+                    <label class="radio-label" style="{{ !empty($nikAutofill) ? 'background:#f1f5f9;cursor:default;opacity:0.85;' : '' }}">
                         <input type="radio" name="jenis_kelamin" value="Laki-laki"
-                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Laki-laki' ? 'checked' : '' }} required disabled>
+                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Laki-laki' ? 'checked' : '' }} required {{ !empty($nikAutofill) ? 'disabled' : '' }}>
                         <span>Laki-laki</span>
                     </label>
-                    <label class="radio-label" style="background:#f1f5f9;cursor:default;opacity:0.85;">
+                    <label class="radio-label" style="{{ !empty($nikAutofill) ? 'background:#f1f5f9;cursor:default;opacity:0.85;' : '' }}">
                         <input type="radio" name="jenis_kelamin" value="Perempuan"
-                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Perempuan' ? 'checked' : '' }} disabled>
+                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Perempuan' ? 'checked' : '' }} {{ !empty($nikAutofill) ? 'disabled' : '' }}>
                         <span>Perempuan</span>
                     </label>
                 </div>
-                {{-- Hidden input so value still submits when disabled --}}
-                <input type="hidden" name="jenis_kelamin" value="{{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') }}">
-                <small style="font-size:11px;color:#16a34a;margin-top:4px;display:flex;align-items:center;gap:4px;">
-                    <i class="bi bi-magic"></i> Diisi otomatis dari NIK
+                @if(!empty($nikAutofill))
+                    {{-- Hidden input so value still submits when disabled --}}
+                    <input type="hidden" name="jenis_kelamin" value="{{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') }}">
+                @endif
+                <small style="font-size:11px;color:{{ !empty($nikAutofill) ? '#0073bd' : '#f59e0b' }};margin-top:4px;display:flex;align-items:center;gap:4px;">
+                    <i class="bi {{ !empty($nikAutofill) ? 'bi-magic' : 'bi-exclamation-triangle' }}"></i>
+                    {{ !empty($nikAutofill) ? 'Diisi otomatis dari NIK' : ($nikAutofillMessage ?? 'Isi manual karena NIK tidak dapat diparse') }}
                 </small>
             </div>
 

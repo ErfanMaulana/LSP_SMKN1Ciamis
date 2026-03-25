@@ -33,6 +33,21 @@
     @enderror
 </div>
 
+<div class="form-group">
+    <label for="penjelasan">Penjelasan</label>
+    <textarea
+        id="penjelasan"
+        name="penjelasan"
+        rows="8"
+        class="form-control @error('penjelasan') is-invalid @enderror"
+        placeholder="Tambahkan penjelasan detail untuk poin ini"
+    >{{ old('penjelasan', $item?->penjelasan) }}</textarea>
+    <small class="help-text">Field ini mendukung format teks kaya melalui editor.</small>
+    @error('penjelasan')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
 <div class="form-grid">
     <div class="form-group">
         <label for="image">Foto (Opsional)</label>

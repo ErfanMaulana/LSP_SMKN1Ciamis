@@ -63,6 +63,7 @@ class PanduanController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'penjelasan' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
@@ -106,6 +107,7 @@ class PanduanController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'penjelasan' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',

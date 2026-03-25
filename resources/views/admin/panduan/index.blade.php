@@ -33,13 +33,18 @@
 
 @if($canDelete && count($items) > 0)
     <div class="bulk-toolbar">
-        <button type="button" class="btn btn-secondary" id="bulk-toggle-btn" onclick="toggleAllSelection()">
-            <i class="bi bi-check2-square"></i> Pilih Semua
+        <button type="button" class="btn btn-secondary" id="bulk-mode-btn" onclick="toggleBulkMode()">
+            <i class="bi bi-ui-checks-grid"></i> Aktifkan Bulk Action
         </button>
-        <button type="button" class="btn btn-danger" id="bulk-delete-btn" disabled onclick="submitBulkDelete()">
-            <i class="bi bi-trash"></i> Hapus Terpilih
-        </button>
-        <span id="bulk-selection-text" class="bulk-selection-text">0 item dipilih</span>
+        <div class="bulk-actions" id="bulk-actions">
+            <button type="button" class="btn btn-secondary" id="bulk-select-btn" onclick="toggleAllSelection()" disabled>
+                <i class="bi bi-check2-square"></i> Pilih Semua
+            </button>
+            <button type="button" class="btn btn-danger" id="bulk-delete-btn" disabled onclick="submitBulkDelete()">
+                <i class="bi bi-trash"></i> Hapus Terpilih
+            </button>
+            <span id="bulk-selection-text" class="bulk-selection-text">0 item dipilih</span>
+        </div>
     </div>
 
     <form id="bulk-delete-form" method="POST" action="{{ route('admin.panduan.bulk-destroy', $section) }}" style="display:none;">
@@ -65,13 +70,14 @@
             <thead>
                 <tr>
                     @if($canDelete)
-                        <th width="44" class="text-center">
+                        <th width="44" class="text-center bulk-column">
                             <input type="checkbox" id="select-all-items" title="Pilih semua">
                         </th>
                     @endif
                     <th width="72">Urutan</th>
                     <th>Judul</th>
                     <th>Deskripsi</th>
+                    <th>Penjelasan</th>
                     <th width="140">Foto</th>
                     <th width="90">Status</th>
                     <th width="140">Aksi</th>
@@ -81,7 +87,7 @@
                 @foreach($items as $item)
                     <tr>
                         @if($canDelete)
-                            <td class="text-center">
+                            <td class="text-center bulk-column">
                                 <input type="checkbox" class="bulk-item-checkbox" value="{{ $item->id }}" aria-label="Pilih {{ $item->title }}">
                             </td>
                         @endif
@@ -93,6 +99,9 @@
                         </td>
                         <td>
                             <span class="desc-preview">{{ \Illuminate\Support\Str::limit($item->description, 120) }}</span>
+                        </td>
+                        <td>
+                            <span class="desc-preview">{{ \Illuminate\Support\Str::limit(strip_tags($item->penjelasan ?? ''), 140) ?: '-' }}</span>
                         </td>
                         <td>
                             @if($item->image)
@@ -178,11 +187,44 @@
         margin-bottom:14px;
         flex-wrap:wrap;
     }
+
+    .bulk-actions {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    .bulk-actions.show {
+        display: flex;
+        animation: bulkToolbarReveal .22s ease-out forwards;
+    }
+
     .bulk-selection-text { font-size:13px; color:#64748b; font-weight:600; }
+    .bulk-selection-text.bump { animation: selectionBump .18s ease-out; }
 
     .card { background:#fff; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.08); }
     .table-wrap { overflow-x:auto; }
-    .table { width:100%; border-collapse:collapse; min-width: 860px; }
+    .table { width:100%; border-collapse:collapse; min-width: 980px; }
+    .bulk-column { display:none; }
+    .table.bulk-enabled .bulk-column { display:table-cell; }
+    .table.bulk-enabled .bulk-column input { animation: bulkCheckFade .2s ease-out; }
+
+    #bulk-mode-btn {
+        transition: transform .16s ease, box-shadow .2s ease, background-color .2s ease;
+    }
+
+    #bulk-mode-btn.bulk-on {
+        background: #dbeafe;
+        color: #1d4ed8;
+        box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+    }
+
+    #bulk-mode-btn:active {
+        transform: translateY(1px) scale(0.99);
+    }
     .table th { text-align:left; padding:12px 14px; border-bottom:2px solid #e2e8f0; font-size:12px; text-transform:uppercase; color:#64748b; }
     .table td { padding:12px 14px; border-bottom:1px solid #f1f5f9; font-size:14px; color:#334155; vertical-align:middle; }
 
@@ -211,9 +253,41 @@
     .empty-state h3 { color:#1e293b; margin-bottom:8px; }
     .empty-state p { color:#64748b; margin-bottom:16px; }
 
+    @keyframes bulkToolbarReveal {
+        from {
+            opacity: 0;
+            transform: translateY(-4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes bulkCheckFade {
+        from {
+            opacity: 0;
+            transform: scale(0.92);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    @keyframes selectionBump {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.06); }
+        100% { transform: scale(1); }
+    }
+
     @media (max-width: 768px) {
         .page-header h2 { font-size:18px; }
         .section-tab { font-size:12px; }
+        .bulk-toolbar { align-items: stretch; }
+        .bulk-toolbar .btn { width: 100%; justify-content: center; }
+        .bulk-actions { width: 100%; }
+        .bulk-selection-text { width: 100%; text-align: center; }
     }
 </style>
 @endsection
@@ -241,28 +315,122 @@
         });
     }
 
+    var bulkModeEnabled = false;
+    var displayedSelectedCount = 0;
+    var selectionAnimFrame = null;
+
+    function setSelectionText(textEl, count) {
+        textEl.textContent = count + ' item dipilih';
+    }
+
+    function animateSelectionCount(textEl, targetCount) {
+        if (selectionAnimFrame) {
+            cancelAnimationFrame(selectionAnimFrame);
+        }
+
+        var startCount = displayedSelectedCount;
+        var startTime = null;
+        var duration = 180;
+
+        function step(timestamp) {
+            if (!startTime) {
+                startTime = timestamp;
+            }
+
+            var progress = Math.min((timestamp - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - progress, 3);
+            var current = Math.round(startCount + (targetCount - startCount) * eased);
+
+            setSelectionText(textEl, current);
+
+            if (progress < 1) {
+                selectionAnimFrame = requestAnimationFrame(step);
+                return;
+            }
+
+            displayedSelectedCount = targetCount;
+            textEl.classList.remove('bump');
+            void textEl.offsetWidth;
+            textEl.classList.add('bump');
+        }
+
+        selectionAnimFrame = requestAnimationFrame(step);
+    }
+
+    function clearBulkSelection() {
+        document.querySelectorAll('.bulk-item-checkbox').forEach(function (checkbox) {
+            checkbox.checked = false;
+        });
+
+        var selectAll = document.getElementById('select-all-items');
+        if (selectAll) {
+            selectAll.checked = false;
+        }
+    }
+
+    function toggleBulkMode() {
+        setBulkMode(!bulkModeEnabled);
+    }
+
+    function setBulkMode(enabled) {
+        var table = document.querySelector('.table');
+        var modeBtn = document.getElementById('bulk-mode-btn');
+        var actions = document.getElementById('bulk-actions');
+
+        bulkModeEnabled = enabled;
+
+        if (table) {
+            table.classList.toggle('bulk-enabled', enabled);
+        }
+
+        if (actions) {
+            actions.classList.toggle('show', enabled);
+        }
+
+        if (modeBtn) {
+            modeBtn.innerHTML = enabled
+                ? '<i class="bi bi-x-circle"></i> Nonaktifkan Bulk Action'
+                : '<i class="bi bi-ui-checks-grid"></i> Aktifkan Bulk Action';
+            modeBtn.classList.toggle('bulk-on', enabled);
+        }
+
+        if (!enabled) {
+            clearBulkSelection();
+        }
+
+        updateBulkState();
+    }
+
     function updateBulkState() {
         var checkboxes = Array.from(document.querySelectorAll('.bulk-item-checkbox'));
         var selectedIds = getSelectedItems();
         var selectAll = document.getElementById('select-all-items');
         var deleteBtn = document.getElementById('bulk-delete-btn');
-        var toggleBtn = document.getElementById('bulk-toggle-btn');
+        var selectBtn = document.getElementById('bulk-select-btn');
         var text = document.getElementById('bulk-selection-text');
 
-        if (!checkboxes.length || !selectAll || !deleteBtn || !toggleBtn || !text) {
+        if (!checkboxes.length || !selectAll || !deleteBtn || !text) {
             return;
         }
 
         selectAll.checked = selectedIds.length === checkboxes.length;
-        deleteBtn.disabled = selectedIds.length === 0;
-        toggleBtn.disabled = checkboxes.length === 0;
-        toggleBtn.innerHTML = selectedIds.length === checkboxes.length
-            ? '<i class="bi bi-x-square"></i> Batal Pilih'
-            : '<i class="bi bi-check2-square"></i> Pilih Semua';
-        text.textContent = selectedIds.length + ' item dipilih';
+        deleteBtn.disabled = !bulkModeEnabled || selectedIds.length === 0;
+
+        if (selectBtn) {
+            selectBtn.disabled = !bulkModeEnabled || checkboxes.length === 0;
+            selectBtn.innerHTML = selectedIds.length === checkboxes.length
+                ? '<i class="bi bi-x-square"></i> Batal Pilih'
+                : '<i class="bi bi-check2-square"></i> Pilih Semua';
+        }
+
+        animateSelectionCount(text, selectedIds.length);
     }
 
     function toggleAllSelection() {
+        if (!bulkModeEnabled) {
+            return;
+        }
+
         var checkboxes = Array.from(document.querySelectorAll('.bulk-item-checkbox'));
         if (!checkboxes.length) {
             return;
@@ -284,6 +452,10 @@
     }
 
     function submitBulkDelete() {
+        if (!bulkModeEnabled) {
+            return;
+        }
+
         var selectedIds = getSelectedItems();
         if (!selectedIds.length) {
             return;
@@ -314,6 +486,11 @@
     var selectAllCheckbox = document.getElementById('select-all-items');
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', function (e) {
+            if (!bulkModeEnabled) {
+                e.target.checked = false;
+                return;
+            }
+
             var checked = e.target.checked;
             document.querySelectorAll('.bulk-item-checkbox').forEach(function (checkbox) {
                 checkbox.checked = checked;
@@ -326,6 +503,7 @@
         checkbox.addEventListener('change', updateBulkState);
     });
 
+    setBulkMode(false);
     updateBulkState();
 </script>
 @endsection

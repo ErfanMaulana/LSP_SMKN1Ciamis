@@ -178,6 +178,7 @@
             flex: 1;
             margin-left: 260px;
             transition: all 0.3s ease;
+            min-width: 0;
         }
 
         .topbar {
@@ -400,6 +401,10 @@
             padding: 30px;
         }
 
+        .content-wrapper > * {
+            max-width: 100%;
+        }
+
         .alert {
             padding: 14px 18px;
             border-radius: 8px;
@@ -536,6 +541,11 @@
                 padding: 12px 14px;
             }
 
+            .topbar > div:first-child {
+                min-width: 0;
+                flex: 1;
+            }
+
             .mobile-toggle {
                 display: block;
             }
@@ -543,10 +553,14 @@
             .topbar h1 {
                 font-size: 16px;
                 line-height: 1.25;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .topbar-right {
                 gap: 8px;
+                flex-shrink: 0;
             }
 
             .profile-toggle {
@@ -561,7 +575,7 @@
             }
 
             .content-wrapper {
-                padding: 20px 15px;
+                padding: 14px 12px;
             }
 
             .user-details {

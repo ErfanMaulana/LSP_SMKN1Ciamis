@@ -43,6 +43,11 @@
                     <article class="bg-white rounded-xl shadow-md border border-gray-100 p-4 sm:p-6">
                         <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-2">{{ $step['title'] }}</h3>
                         <p class="text-gray-600 leading-relaxed">{{ $step['description'] }}</p>
+                        @if(!empty($step['penjelasan']))
+                            <div class="prose prose-sm sm:prose max-w-none mt-4 text-gray-700">
+                                {!! $step['penjelasan'] !!}
+                            </div>
+                        @endif
                         @if(!empty($step['image']))
                             <figure class="mt-4 border border-gray-200 rounded-lg overflow-hidden bg-gray-100">
                                 <img

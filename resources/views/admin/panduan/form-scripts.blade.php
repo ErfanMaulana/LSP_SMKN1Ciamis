@@ -1,9 +1,27 @@
+<script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
 <script>
     (function () {
+        const penjelasanInput = document.getElementById('penjelasan');
         const imageInput = document.getElementById('image');
         const previewImage = document.getElementById('uploadPreviewImage');
         const previewPlaceholder = document.getElementById('uploadPreviewPlaceholder');
         const removeImageCheckbox = document.getElementById('remove_image');
+
+        if (penjelasanInput && window.ClassicEditor) {
+            ClassicEditor
+                .create(penjelasanInput, {
+                    toolbar: [
+                        'heading', '|',
+                        'bold', 'italic', 'underline', '|',
+                        'link', 'bulletedList', 'numberedList', '|',
+                        'blockQuote', 'insertTable', '|',
+                        'undo', 'redo'
+                    ]
+                })
+                .catch(function (error) {
+                    console.error(error);
+                });
+        }
 
         if (!imageInput || !previewImage || !previewPlaceholder) {
             return;
