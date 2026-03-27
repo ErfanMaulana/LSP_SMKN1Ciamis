@@ -54,6 +54,12 @@
 
         {{-- Sosial Media --}}
         <div class="text-left">
+            <h2 class="text-white text-lg font-semibold mb-2 whitespace-nowrap">Navigasi</h2>
+            <a href="{{ route('front.panduan.overview') }}" class="inline-flex items-center gap-2 text-sm hover:text-white transition mb-4">
+                <i class="bi bi-journal-text text-blue-300"></i>
+                Panduan
+            </a>
+
             <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Sosial Media</h2>
             @php
                 $socialMedias = \App\Models\SocialMedia::active()->get();
