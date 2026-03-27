@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\KontakController;
 use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\PanduanController;
 use App\Http\Controllers\Admin\LogActivityController;
+use App\Http\Controllers\Admin\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,11 @@ Route::prefix('admin')->group(function () {
     Route::middleware('auth:admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('permission:dashboard.view');
         Route::post('/logout', [AdminController::class, 'logout'])->name('admin.logout');
+
+        // Admin profile
+        Route::get('/profil', [ProfileController::class, 'edit'])->name('admin.profile.edit');
+        Route::put('/profil', [ProfileController::class, 'update'])->name('admin.profile.update');
+        Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('admin.profile.password');
 
         // Global Search
         Route::get('/search', [SearchController::class, 'search'])->name('admin.search');

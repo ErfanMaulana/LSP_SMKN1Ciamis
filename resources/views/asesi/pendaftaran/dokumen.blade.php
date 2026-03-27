@@ -28,6 +28,11 @@
         font-size: 12px; color: #64748b; margin-bottom: 20px;
     }
 
+    .reg-card,
+    .reg-card * {
+        max-width: 100%;
+    }
+
     /* Step indicator */
     .step-indicator {
         display: flex; align-items: center; justify-content: center;
@@ -53,6 +58,17 @@
     .alert-box p {
         margin: 0;
         min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .reg-card h3,
+    .subtitle,
+    .step-label,
+    .upload-card h4,
+    .upload-card p {
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
     .alert-error { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
     .alert-info { background: var(--brand-soft); border-left: 4px solid var(--brand-500); color: var(--brand-600); }
@@ -302,6 +318,25 @@
 
         .btn-reg-success {
             width: 100%;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .reg-card {
+            padding: 12px;
+        }
+
+        .upload-card {
+            padding: 12px;
+        }
+
+        .photo-box {
+            width: 108px;
+            height: 144px;
+        }
+
+        .reg-card h3 {
+            font-size: 14px;
         }
     }
 </style>

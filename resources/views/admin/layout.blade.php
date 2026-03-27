@@ -474,6 +474,14 @@
             font-weight: 700;
             font-size: 16px;
             box-shadow: 0 2px 8px rgba(0, 97, 165, 0.3);
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .user-details {
@@ -556,6 +564,14 @@
             font-size: 18px;
             flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(0, 97, 165, 0.3);
+            overflow: hidden;
+        }
+
+        .profile-avatar-lg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .profile-header-info {
@@ -1138,14 +1154,23 @@
                 </div>
 
                 <div class="topbar-right">
+                    @php
+                        $authAdmin = Auth::guard('admin')->user();
+                        $adminRolesLabel = $authAdmin->roles->pluck('display_name')->join(', ') ?: 'Administrator';
+                        $adminInitial = strtoupper(substr($authAdmin->name, 0, 1));
+                    @endphp
                     <div class="profile-dropdown" id="profileDropdown">
                         <button class="profile-toggle" onclick="toggleProfileMenu(event)" type="button">
                             <div class="user-avatar">
-                                {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
+                                @if($authAdmin->foto_profil)
+                                    <img src="{{ asset('storage/' . $authAdmin->foto_profil) }}" alt="Avatar admin">
+                                @else
+                                    {{ $adminInitial }}
+                                @endif
                             </div>
                             <div class="user-details">
-                                <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
-                                <span class="user-role">{{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Administrator' }}</span>
+                                <span class="user-name">{{ $authAdmin->name }}</span>
+                                <span class="user-role">{{ $adminRolesLabel }}</span>
                             </div>
                             <i class="bi bi-chevron-down" style="font-size: 14px; color: #64748b;"></i>
                         </button>
@@ -1153,24 +1178,22 @@
                         <div class="profile-menu" id="profileMenu">
                             <div class="profile-header">
                                 <div class="profile-avatar-lg">
-                                    {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
+                                    @if($authAdmin->foto_profil)
+                                        <img src="{{ asset('storage/' . $authAdmin->foto_profil) }}" alt="Avatar admin">
+                                    @else
+                                        {{ $adminInitial }}
+                                    @endif
                                 </div>
                                 <div class="profile-header-info">
-                                    <h4 class="profile-header-name">{{ Auth::guard('admin')->user()->name }}</h4>
-                                    <p class="profile-header-role">
-                                        {{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Administrator' }}
-                                    </p>
+                                    <h4 class="profile-header-name">{{ $authAdmin->name }}</h4>
+                                    <p class="profile-header-role">{{ $adminRolesLabel }}</p>
                                 </div>
                             </div>
 
                             <div class="profile-body">
-                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                <a href="{{ route('admin.profile.edit') }}" class="profile-menu-item">
                                     <i class="bi bi-person"></i>
                                     <span>Profil</span>
-                                </a>
-                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
-                                    <i class="bi bi-gear"></i>
-                                    <span>Pengaturan</span>
                                 </a>
                                 <div class="profile-divider"></div>
                                 <form method="POST" action="{{ route('admin.logout') }}"

@@ -17,11 +17,19 @@
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f7fa;
             overflow-x: hidden;
+            max-width: 100%;
+        }
+
+        html {
+            overflow-x: hidden;
+            max-width: 100%;
         }
 
         .asesi-wrapper {
             display: flex;
             min-height: 100vh;
+            max-width: 100%;
+            overflow-x: hidden;
         }
 
         /* Sidebar Styles */
@@ -399,6 +407,8 @@
 
         .content-wrapper {
             padding: 30px;
+            width: 100%;
+            max-width: 100%;
         }
 
         .content-wrapper > * {
@@ -539,6 +549,8 @@
 
             .topbar {
                 padding: 12px 14px;
+                gap: 8px;
+                min-width: 0;
             }
 
             .topbar > div:first-child {
@@ -568,6 +580,12 @@
                 gap: 8px;
             }
 
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 13px;
+            }
+
             .profile-menu {
                 right: -4px;
                 min-width: 230px;
@@ -580,6 +598,29 @@
 
             .user-details {
                 display: none;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .topbar {
+                padding: 10px 10px;
+            }
+
+            .mobile-toggle {
+                padding: 7px 10px;
+                font-size: 16px;
+            }
+
+            .topbar h1 {
+                font-size: 15px;
+            }
+
+            .content-wrapper {
+                padding: 12px 10px;
+            }
+
+            .profile-toggle {
+                padding: 4px;
             }
         }
     </style>

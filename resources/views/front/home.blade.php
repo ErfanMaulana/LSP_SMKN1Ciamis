@@ -7,7 +7,6 @@
 @section('content')
 
 @include('front.sections.hero')
-@include('front.sections.map')
 @include('front.sections.stats')
 @include('front.sections.profile-content')
 

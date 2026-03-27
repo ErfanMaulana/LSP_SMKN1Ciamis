@@ -26,6 +26,11 @@
         font-size: 12px; color: #64748b; margin-bottom: 20px;
     }
 
+    .reg-card,
+    .reg-card * {
+        max-width: 100%;
+    }
+
     /* Step indicator */
     .step-indicator {
         display: flex; align-items: center; justify-content: center;
@@ -94,6 +99,17 @@
     .alert-box p {
         margin: 0;
         min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .reg-card h3,
+    .subtitle,
+    .step-label,
+    .section-header h4,
+    .reg-group label {
+        overflow-wrap: anywhere;
+        word-break: break-word;
     }
     .alert-error { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
     .alert-info { background: var(--brand-soft); border-left: 4px solid var(--brand-500); color: var(--brand-600); }
@@ -184,6 +200,26 @@
 
         .btn-reg-primary {
             width: 100%;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .reg-card {
+            padding: 12px;
+        }
+
+        .reg-control {
+            padding: 8px 10px;
+            font-size: 12.5px;
+            min-height: 40px;
+        }
+
+        .section-header h4 {
+            font-size: 13px;
+        }
+
+        .reg-card h3 {
+            font-size: 14px;
         }
     }
 </style>
