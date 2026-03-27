@@ -2,10 +2,10 @@
     @php
         $kontak = \App\Models\Kontak::getKontak();
     @endphp
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12 flex flex-col md:flex-row md:justify-between gap-8 md:gap-10">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12 flex flex-col md:flex-row md:items-start md:justify-between gap-8 md:gap-10">
 
         {{-- Tentang --}}
-        <div class="text-left" style="max-width: 590px;">
+        <div class="text-left" style="max-width: 590px; flex-shrink: 0;">
             <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">LSP SMKN 1 Ciamis</h2>
             <p class="text-sm leading-relaxed">
                 Lembaga Sertifikasi Profesi P1 SMKN 1 Ciamis yang melaksanakan sertifikasi kompetensi
@@ -26,27 +26,27 @@
         </div>
 
         {{-- Kontak --}}
-        <div class="text-left">
+        <div class="text-left md:min-w-0 md:flex-1">
             <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Kontak</h2>
             <ul class="space-y-3 text-sm">
-                <li style="display: flex; align-items: center; gap: 12px; white-space: nowrap;">
-                    <i class="bi bi-geo-alt text-base text-blue-300 leading-none" style="width: 20px; text-align: center;"></i>
-                    <span class="leading-relaxed" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $kontak->alamat ?: 'Belum diatur' }}</span>
+                <li style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
+                    <i class="bi bi-geo-alt text-base text-blue-300 leading-none" style="width: 20px; text-align: center; flex: 0 0 20px; margin-top: 2px;"></i>
+                    <span class="leading-relaxed break-words md:overflow-hidden md:[display:-webkit-box] md:[-webkit-line-clamp:2] md:[-webkit-box-orient:vertical]">{{ $kontak->alamat ?: 'Belum diatur' }}</span>
                 </li>
-                <li style="display: flex; align-items: center; gap: 12px; white-space: nowrap;">
-                    <i class="bi bi-telephone text-base text-blue-300 leading-none" style="width: 20px; text-align: center;"></i>
+                <li style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
+                    <i class="bi bi-telephone text-base text-blue-300 leading-none" style="width: 20px; text-align: center; flex: 0 0 20px; margin-top: 2px;"></i>
                     @if($kontak->telepon)
-                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $kontak->telepon) }}" class="hover:text-white transition leading-relaxed" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $kontak->telepon }}</a>
+                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $kontak->telepon) }}" class="hover:text-white transition leading-relaxed break-words md:overflow-hidden md:[display:-webkit-box] md:[-webkit-line-clamp:2] md:[-webkit-box-orient:vertical]">{{ $kontak->telepon }}</a>
                     @else
-                        <span class="leading-relaxed" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Belum diatur</span>
+                        <span class="leading-relaxed break-words md:overflow-hidden md:[display:-webkit-box] md:[-webkit-line-clamp:2] md:[-webkit-box-orient:vertical]">Belum diatur</span>
                     @endif
                 </li>
-                <li style="display: flex; align-items: center; gap: 12px; white-space: nowrap;">
-                    <i class="bi bi-envelope text-base text-blue-300 leading-none" style="width: 20px; text-align: center;"></i>
+                <li style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
+                    <i class="bi bi-envelope text-base text-blue-300 leading-none" style="width: 20px; text-align: center; flex: 0 0 20px; margin-top: 2px;"></i>
                     @if($kontak->email_1)
-                        <a href="mailto:{{ $kontak->email_1 }}" class="hover:text-white transition leading-relaxed" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $kontak->email_1 }}</a>
+                        <a href="mailto:{{ $kontak->email_1 }}" class="hover:text-white transition leading-relaxed break-words md:overflow-hidden md:[display:-webkit-box] md:[-webkit-line-clamp:2] md:[-webkit-box-orient:vertical]">{{ $kontak->email_1 }}</a>
                     @else
-                        <span class="leading-relaxed" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Belum diatur</span>
+                        <span class="leading-relaxed break-words md:overflow-hidden md:[display:-webkit-box] md:[-webkit-line-clamp:2] md:[-webkit-box-orient:vertical]">Belum diatur</span>
                     @endif
                 </li>
             </ul>
