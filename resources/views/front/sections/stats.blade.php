@@ -36,7 +36,9 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-center">
 
             @foreach($items as $item)
-            <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 sm:p-6">
+            <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 sm:p-6"
+                 data-scroll-reveal="zoom"
+                 data-reveal-delay="{{ $loop->index * 90 }}">
 
                 <h3 class="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-600 counter"
                     data-target="{{ $item['value'] }}">

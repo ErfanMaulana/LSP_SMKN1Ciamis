@@ -5,7 +5,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-12 flex flex-col md:flex-row md:items-start md:justify-between gap-8 md:gap-10">
 
         {{-- Tentang --}}
-        <div class="text-left" style="max-width: 590px; flex-shrink: 0;">
+        <div class="text-left" style="max-width: 590px; flex-shrink: 0;" data-scroll-reveal="left" data-reveal-duration="780">
             <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">LSP SMKN 1 Ciamis</h2>
             <p class="text-sm leading-relaxed">
                 Lembaga Sertifikasi Profesi P1 SMKN 1 Ciamis yang melaksanakan sertifikasi kompetensi
@@ -26,7 +26,7 @@
         </div>
 
         {{-- Kontak --}}
-        <div class="text-left md:min-w-0 md:flex-1">
+        <div class="text-left md:min-w-0 md:flex-1" data-scroll-reveal data-reveal-delay="100">
             <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Kontak</h2>
             <ul class="space-y-3 text-sm">
                 <li style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
@@ -53,7 +53,7 @@
         </div>
 
         {{-- Sosial Media --}}
-        <div class="text-left">
+        <div class="text-left" data-scroll-reveal="right" data-reveal-delay="180">
             <h2 class="text-white text-lg font-semibold mb-2 whitespace-nowrap">Navigasi</h2>
             <a href="{{ route('front.panduan.overview') }}" class="inline-flex items-center gap-2 text-sm hover:text-white transition mb-4">
                 <i class="bi bi-journal-text text-blue-300"></i>
@@ -94,7 +94,7 @@
 
     </div>
 
-    <div class="border-t border-gray-800 text-center px-4 sm:px-6 py-4 text-xs sm:text-sm">
+    <div class="border-t border-gray-800 text-center px-4 sm:px-6 py-4 text-xs sm:text-sm" data-scroll-reveal data-reveal-delay="220">
         © {{ date('Y') }} LSP SMKN 1 Ciamis — All rights reserved
     </div>
 </footer>

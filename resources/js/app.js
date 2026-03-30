@@ -17,6 +17,86 @@ const initAlpineTree = () => {
 	}
 };
 
+let scrollRevealObserver = null;
+
+const resetScrollRevealObserver = () => {
+	if (scrollRevealObserver) {
+		scrollRevealObserver.disconnect();
+		scrollRevealObserver = null;
+	}
+};
+
+const initScrollReveal = () => {
+	if (!isTurboEnabledPage()) {
+		return;
+	}
+
+	const revealElements = Array.from(document.querySelectorAll('[data-scroll-reveal]'));
+	if (!revealElements.length) {
+		return;
+	}
+
+	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	resetScrollRevealObserver();
+
+	revealElements.forEach((element) => {
+		const revealDelay = Number(element.dataset.revealDelay);
+		if (Number.isFinite(revealDelay)) {
+			element.style.setProperty('--reveal-delay', `${Math.max(0, revealDelay)}ms`);
+		}
+
+		const revealDuration = Number(element.dataset.revealDuration);
+		if (Number.isFinite(revealDuration)) {
+			element.style.setProperty('--reveal-duration', `${Math.max(200, revealDuration)}ms`);
+		}
+
+		if (prefersReducedMotion) {
+			element.classList.add('is-revealed');
+		} else {
+			element.classList.remove('is-revealed');
+		}
+	});
+
+	if (prefersReducedMotion) {
+		return;
+	}
+
+	if (!('IntersectionObserver' in window)) {
+		revealElements.forEach((element) => {
+			element.classList.add('is-revealed');
+		});
+		return;
+	}
+
+	scrollRevealObserver = new IntersectionObserver(
+		(entries, observer) => {
+			entries.forEach((entry) => {
+				if (!entry.isIntersecting) {
+					return;
+				}
+
+				entry.target.classList.add('is-revealed');
+				observer.unobserve(entry.target);
+			});
+		},
+		{
+			threshold: 0.16,
+			rootMargin: '0px 0px -12% 0px',
+		}
+	);
+
+	revealElements.forEach((element) => {
+		scrollRevealObserver.observe(element);
+	});
+};
+
+const initFrontPageEnhancements = () => {
+	syncTurboDriveState();
+	initAlpineTree();
+	initNavPrefetch();
+	initScrollReveal();
+};
+
 syncTurboDriveState();
 
 const prefetchedUrls = new Set();
@@ -117,13 +197,11 @@ const initNavPrefetch = () => {
 };
 
 if (document.readyState === 'loading') {
-	document.addEventListener('DOMContentLoaded', initNavPrefetch);
+	document.addEventListener('DOMContentLoaded', initFrontPageEnhancements);
 } else {
-	initNavPrefetch();
+	initFrontPageEnhancements();
 }
 
 document.addEventListener('turbo:load', () => {
-	syncTurboDriveState();
-	initAlpineTree();
-	initNavPrefetch();
+	initFrontPageEnhancements();
 });
