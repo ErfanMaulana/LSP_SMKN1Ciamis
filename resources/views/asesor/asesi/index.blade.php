@@ -5,19 +5,26 @@
 
 @section('styles')
 <style>
-    * {
-        box-sizing: border-box;
-    }
-
     .page-header {
-        background: #0073bd;
-        border-radius: 12px;
-        padding: 22px 26px;
-        color: white;
-        margin-bottom: 22px;
+        margin-bottom: 20px;
     }
-    .page-header h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
-    .page-header p  { font-size: 14px; opacity: 0.85; margin: 0; }
+    .page-header h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .page-header h2 i {
+        color: #0073bd;
+    }
+    .page-header p {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+    }
 
     .search-bar {
         margin-bottom: 18px;
@@ -32,12 +39,13 @@
 
     .search-input {
         width: 100%;
-        padding: 11px 14px 11px 38px;
-        border: 1.5px solid #e2e8f0;
+        padding: 10px 14px 10px 40px;
+        border: 1px solid #e2e8f0;
         border-radius: 8px;
         font-size: 14px;
         transition: all 0.2s ease;
         font-family: 'Plus Jakarta Sans', sans-serif;
+        background: #fff;
     }
 
     .search-input:focus {
@@ -48,7 +56,7 @@
 
     .search-icon {
         position: absolute;
-        left: 12px;
+        left: 14px;
         top: 50%;
         transform: translateY(-50%);
         color: #94a3b8;
@@ -93,57 +101,140 @@
     }
 
     .filter-bar {
-        display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap;
+        display: flex;
+        gap: 10px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
     }
     .filter-btn {
-        padding: 8px 18px; border-radius: 20px; border: 1.5px solid #e2e8f0;
-        font-size: 14px; font-weight: 500; text-decoration: none;
-        color: #64748b; background: white; cursor: pointer; transition: all 0.2s;
+        padding: 8px 16px;
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        color: #64748b;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
     }
-    .filter-btn:hover, .filter-btn.active { background: #0073bd; color: white; border-color: #0073bd; }
+    .filter-btn:hover, .filter-btn.active {
+        background: #0073bd;
+        color: white;
+        border-color: #0073bd;
+    }
 
     .table-card {
-        background: white; border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0; overflow: hidden;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
     }
     .table-wrap { overflow-x: auto; }
-    .table-card table { width: 100%; border-collapse: collapse; table-layout: auto; }
+    .table-card table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+    }
     .table-card thead th {
-        background: #f8fafc; padding: 7px 6px;
-        text-align: left; font-size: 11px; font-weight: 700;
-        color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;
-        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+        padding: 11px 16px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid #e5e7eb;
         white-space: nowrap;
     }
     .table-card tbody td {
-        padding: 5px 6px; font-size: 13px; color: #374151;
-        border-bottom: 1px solid #f1f5f9;
+        padding: 13px 16px;
+        font-size: 13px;
+        color: #374151;
+        border-bottom: 1px solid #f3f4f6;
         vertical-align: middle;
     }
     .table-card tbody tr:last-child td { border-bottom: none; }
-    .table-card tbody tr:hover { background: #f8fafc; }
+    .table-card tbody tr:hover { background: #f9fafb; }
+
+    .asesi-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #0f172a;
+        line-height: 1.3;
+    }
+
+    .asesi-email {
+        font-size: 12px;
+        color: #94a3b8;
+        line-height: 1.3;
+        margin-top: 2px;
+        word-break: break-all;
+    }
+
+    .mono-chip {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        background: #f1f5f9;
+        color: #475569;
+        font-family: monospace;
+    }
 
     .badge {
-        display: inline-flex; align-items: center; gap: 4px;
-        padding: 3px 9px; border-radius: 16px;
-        font-size: 11px; font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
         white-space: nowrap;
     }
     .badge-selesai { background: #d1fae5; color: #059669; }
     .badge-sedang  { background: #fef3c7; color: #d97706; }
     .badge-belum   { background: #f1f5f9; color: #6b7280; }
 
+    .badge-rekomendasi-lanjut {
+        background: #d1fae5;
+        color: #059669;
+    }
+
+    .badge-rekomendasi-tidak {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .rekomendasi-empty {
+        font-size: 13px;
+        color: #94a3b8;
+    }
+
     .btn-review {
-        display: inline-flex; align-items: center; gap: 4px;
-        background: #0073bd; color: white;
-        padding: 4px 10px; border-radius: 5px;
-        font-size: 11px; font-weight: 600; text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background: #0073bd;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
         transition: background 0.2s;
         white-space: nowrap;
     }
     .btn-review:hover { background: #003961; color: white; }
-    .btn-review.disabled { background: #94a3b8; pointer-events: none; }
+    .btn-review.disabled {
+        background: #e2e8f0;
+        color: #64748b;
+        pointer-events: none;
+    }
 
     .period-col {
         font-size: 13px;
@@ -157,9 +248,30 @@
         font-size: 12px;
     }
 
-    .empty-state { text-align: center; padding: 40px 20px; color: #94a3b8; }
-    .empty-state i { font-size: 40px; margin-bottom: 10px; display: block; }
-    .empty-state p { font-size: 13px; }
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        color: #d1d5db;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .empty-state h4 {
+        font-size: 15px;
+        color: #6b7280;
+        font-weight: 500;
+        margin: 0 0 6px;
+    }
+
+    .empty-state p {
+        font-size: 13px;
+        color: #9ca3af;
+        margin: 0;
+    }
 
     .loading-spinner {
         display: inline-block;
@@ -192,10 +304,10 @@
     .asesi-card {
         background: white;
         border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        padding: 12px 14px;
+        border: 1px solid #e5e7eb;
+        padding: 14px 16px;
         margin-bottom: 12px;
-        box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
         transition: all 0.2s ease;
         overflow: hidden;
     }
@@ -209,8 +321,8 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: 8px;
-        margin-bottom: 10px;
+        gap: 10px;
+        margin-bottom: 12px;
         min-width: 0;
     }
 
@@ -220,9 +332,9 @@
     }
 
     .card-name {
-        font-weight: 700;
-        color: #1e293b;
-        font-size: 13px;
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 14px;
         line-height: 1.3;
         word-break: break-word;
         display: -webkit-box;
@@ -232,9 +344,9 @@
     }
 
     .card-email {
-        font-size: 10px;
+        font-size: 12px;
         color: #94a3b8;
-        margin-top: 2px;
+        margin-top: 3px;
         word-break: break-all;
         display: -webkit-box;
         -webkit-line-clamp: 1;
@@ -244,9 +356,9 @@
     }
 
     .card-status-badge {
-        padding: 3px 8px;
-        border-radius: 14px;
-        font-size: 9px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
         font-weight: 600;
         white-space: nowrap;
         flex-shrink: 0;
@@ -255,9 +367,9 @@
     .card-body {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px 8px;
-        margin-bottom: 10px;
-        font-size: 11px;
+        gap: 12px 10px;
+        margin-bottom: 12px;
+        font-size: 12px;
     }
 
     .card-field {
@@ -267,27 +379,28 @@
     }
 
     .card-label {
-        font-size: 8px;
+        font-size: 10px;
         color: #94a3b8;
         font-weight: 600;
         text-transform: uppercase;
-        margin-bottom: 2px;
-        letter-spacing: 0.2px;
+        margin-bottom: 4px;
+        letter-spacing: 0.35px;
     }
 
     .card-value {
         color: #374151;
         font-weight: 500;
+        font-size: 12px;
         word-break: break-word;
         overflow-wrap: break-word;
     }
 
     .card-value code {
         font-family: monospace;
-        font-size: 9px;
+        font-size: 11px;
         background: #f1f5f9;
-        padding: 2px 4px;
-        border-radius: 3px;
+        padding: 2px 8px;
+        border-radius: 6px;
         color: #475569;
         display: inline-block;
         max-width: 100%;
@@ -308,45 +421,45 @@
 
     .card-periode-dates {
         color: #475569;
-        font-size: 10px;
-        line-height: 1.3;
+        font-size: 12px;
+        line-height: 1.4;
         word-break: break-word;
     }
 
     .card-rekomendasi {
         grid-column: 1 / -1;
-        padding-top: 10px;
-        border-top: 1px solid #f1f5f9;
+        padding-top: 12px;
+        border-top: 1px solid #f3f4f6;
         overflow: hidden;
     }
 
     .card-rekomendasi .card-label {
-        margin-bottom: 3px;
+        margin-bottom: 6px;
     }
 
     .card-badge-rekomendasi {
         display: inline-flex;
         align-items: center;
-        gap: 3px;
-        padding: 3px 8px;
-        border-radius: 14px;
-        font-size: 9px;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 11px;
         font-weight: 600;
         white-space: nowrap;
     }
 
     .card-footer {
         display: flex;
-        gap: 6px;
-        padding-top: 10px;
-        border-top: 1px solid #f1f5f9;
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px solid #f3f4f6;
     }
 
     .card-btn {
         flex: 1;
-        padding: 6px 10px;
-        border-radius: 6px;
-        font-size: 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        font-size: 12px;
         font-weight: 600;
         text-decoration: none;
         text-align: center;
@@ -363,23 +476,26 @@
         color: white;
     }
 
+    .card-btn-primary:hover,
     .card-btn-primary:active {
         background: #003961;
     }
 
     .card-btn-disabled {
-        background: #f1f5f9;
-        color: #94a3b8;
+        background: #e2e8f0;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+        cursor: not-allowed;
     }
 
     @media (max-width: 768px) {
         .page-header {
-            padding: 16px;
+            padding: 0;
             margin-bottom: 16px;
         }
 
         .page-header h2 {
-            font-size: 16px;
+            font-size: 19px;
             line-height: 1.35;
         }
 
@@ -426,8 +542,8 @@
         }
 
         .filter-btn {
-            font-size: 13px;
-            padding: 7px 14px;
+            font-size: 12px;
+            padding: 7px 13px;
             flex-shrink: 0;
         }
 
@@ -521,19 +637,19 @@
                 @endphp
                 <tr>
                     <td>
-                        <div style="font-weight:600;color:#1e3a5f;font-size:13px;">{{ $asesi?->nama ?? '—' }}</div>
-                        <div style="font-size:11px;color:#94a3b8;line-height:1.3;">{{ $asesi?->email ?? '' }}</div>
+                        <div class="asesi-name">{{ $asesi?->nama ?? '—' }}</div>
+                        <div class="asesi-email">{{ $asesi?->email ?? '' }}</div>
                     </td>
-                    <td><code style="font-size:12px;color:#475569;">{{ $row->asesi_nik }}</code></td>
-                    <td><code style="font-size:12px;color:#475569;">{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</code></td>
+                    <td><span class="mono-chip">{{ $row->asesi_nik }}</span></td>
+                    <td><span class="mono-chip">{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</span></td>
                     <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
                     <td>
                         @if($row->rekomendasi === 'lanjut')
-                            <span class="badge" style="background:#d1fae5;color:#059669;justify-content:center;white-space:nowrap;">✓ Dapat Lanjut</span>
+                            <span class="badge badge-rekomendasi-lanjut"><i class="bi bi-check-circle-fill"></i> Dapat Lanjut</span>
                         @elseif($row->rekomendasi === 'tidak_lanjut')
-                            <span class="badge" style="background:#fee2e2;color:#dc2626;justify-content:center;white-space:nowrap;">✗ Tidak Lanjut</span>
+                            <span class="badge badge-rekomendasi-tidak"><i class="bi bi-x-circle-fill"></i> Tidak Lanjut</span>
                         @else
-                            <span style="font-size:13px;color:#94a3b8;">— Belum direview</span>
+                            <span class="rekomendasi-empty">— Belum direview</span>
                         @endif
                     </td>
                     <td class="period-col">
@@ -559,7 +675,8 @@
     </div>
     @else
     <div class="empty-state">
-        <i class="bi bi-people"></i>
+        <i class="bi bi-inbox"></i>
+        <h4>Tidak ada data asesi ditemukan</h4>
         <p>Belum ada asesi yang terdaftar pada skema ini.</p>
     </div>
     @endif
@@ -620,15 +737,15 @@
                 <div class="card-field card-rekomendasi">
                     <div class="card-label">Rekomendasi</div>
                     @if($row->rekomendasi === 'lanjut')
-                        <span class="card-badge-rekomendasi" style="background:#d1fae5;color:#059669;">
+                        <span class="card-badge-rekomendasi badge-rekomendasi-lanjut">
                             <i class="bi bi-check-circle-fill"></i> Dapat Lanjut
                         </span>
                     @elseif($row->rekomendasi === 'tidak_lanjut')
-                        <span class="card-badge-rekomendasi" style="background:#fee2e2;color:#dc2626;">
+                        <span class="card-badge-rekomendasi badge-rekomendasi-tidak">
                             <i class="bi bi-x-circle-fill"></i> Tidak Lanjut
                         </span>
                     @else
-                        <span style="font-size:11px;color:#94a3b8;">— Belum direview</span>
+                        <span class="rekomendasi-empty">— Belum direview</span>
                     @endif
                 </div>
             </div>
@@ -649,7 +766,8 @@
         @endforeach
     @else
         <div class="empty-state">
-            <i class="bi bi-people"></i>
+            <i class="bi bi-inbox"></i>
+            <h4>Tidak ada data asesi ditemukan</h4>
             <p>Belum ada asesi yang terdaftar pada skema ini.</p>
         </div>
     @endif

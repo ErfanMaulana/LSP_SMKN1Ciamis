@@ -39,6 +39,23 @@ const initScrollReveal = () => {
 		return;
 	}
 
+	const staggerGroups = Array.from(document.querySelectorAll('[data-reveal-stagger]'));
+	staggerGroups.forEach((group) => {
+		const rawStep = Number(group.dataset.revealStagger);
+		const rawStart = Number(group.dataset.revealStart);
+		const staggerStep = Number.isFinite(rawStep) ? Math.min(220, Math.max(20, rawStep)) : 90;
+		const staggerStart = Number.isFinite(rawStart) ? Math.max(0, rawStart) : 0;
+		const staggerItems = Array.from(group.querySelectorAll('[data-reveal-item]'));
+
+		staggerItems.forEach((item, index) => {
+			if (item.dataset.revealDelay) {
+				return;
+			}
+
+			item.dataset.revealDelay = String(staggerStart + index * staggerStep);
+		});
+	});
+
 	const revealElements = Array.from(document.querySelectorAll('[data-scroll-reveal]'));
 	if (!revealElements.length) {
 		return;

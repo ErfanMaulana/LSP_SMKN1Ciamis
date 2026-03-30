@@ -26,14 +26,14 @@
         </div>
 
         {{-- Kontak --}}
-        <div class="text-left md:min-w-0 md:flex-1" data-scroll-reveal data-reveal-delay="100">
-            <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Kontak</h2>
-            <ul class="space-y-3 text-sm">
-                <li style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
+        <div class="text-left md:min-w-0 md:flex-1">
+            <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap" data-scroll-reveal data-reveal-delay="100">Kontak</h2>
+            <ul class="space-y-3 text-sm" data-reveal-stagger="80" data-reveal-start="150">
+                <li data-scroll-reveal="left" data-reveal-item style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
                     <i class="bi bi-geo-alt text-base text-blue-300 leading-none" style="width: 20px; text-align: center; flex: 0 0 20px; margin-top: 2px;"></i>
                     <span class="leading-relaxed break-words md:overflow-hidden md:[display:-webkit-box] md:[-webkit-line-clamp:2] md:[-webkit-box-orient:vertical]">{{ $kontak->alamat ?: 'Belum diatur' }}</span>
                 </li>
-                <li style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
+                <li data-scroll-reveal="left" data-reveal-item style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
                     <i class="bi bi-telephone text-base text-blue-300 leading-none" style="width: 20px; text-align: center; flex: 0 0 20px; margin-top: 2px;"></i>
                     @if($kontak->telepon)
                         <a href="tel:{{ preg_replace('/[^0-9+]/', '', $kontak->telepon) }}" class="hover:text-white transition leading-relaxed break-words md:overflow-hidden md:[display:-webkit-box] md:[-webkit-line-clamp:2] md:[-webkit-box-orient:vertical]">{{ $kontak->telepon }}</a>
@@ -41,7 +41,7 @@
                         <span class="leading-relaxed break-words md:overflow-hidden md:[display:-webkit-box] md:[-webkit-line-clamp:2] md:[-webkit-box-orient:vertical]">Belum diatur</span>
                     @endif
                 </li>
-                <li style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
+                <li data-scroll-reveal="left" data-reveal-item style="display: flex; align-items: flex-start; gap: 12px; min-width: 0;">
                     <i class="bi bi-envelope text-base text-blue-300 leading-none" style="width: 20px; text-align: center; flex: 0 0 20px; margin-top: 2px;"></i>
                     @if($kontak->email_1)
                         <a href="mailto:{{ $kontak->email_1 }}" class="hover:text-white transition leading-relaxed break-words md:overflow-hidden md:[display:-webkit-box] md:[-webkit-line-clamp:2] md:[-webkit-box-orient:vertical]">{{ $kontak->email_1 }}</a>
@@ -53,14 +53,14 @@
         </div>
 
         {{-- Sosial Media --}}
-        <div class="text-left" data-scroll-reveal="right" data-reveal-delay="180">
-            <h2 class="text-white text-lg font-semibold mb-2 whitespace-nowrap">Navigasi</h2>
-            <a href="{{ route('front.panduan.overview') }}" class="inline-flex items-center gap-2 text-sm hover:text-white transition mb-4">
+        <div class="text-left">
+            <h2 class="text-white text-lg font-semibold mb-2 whitespace-nowrap" data-scroll-reveal="right" data-reveal-delay="180">Navigasi</h2>
+            <a href="{{ route('front.panduan.overview') }}" data-scroll-reveal="right" data-reveal-delay="220" class="inline-flex items-center gap-2 text-sm hover:text-white transition mb-4">
                 <i class="bi bi-journal-text text-blue-300"></i>
                 Panduan
             </a>
 
-            <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap">Sosial Media</h2>
+            <h2 class="text-white text-lg font-semibold mb-4 whitespace-nowrap" data-scroll-reveal="right" data-reveal-delay="260">Sosial Media</h2>
             @php
                 $socialMedias = \App\Models\SocialMedia::active()->get();
                 $smIcons = [
@@ -74,12 +74,12 @@
                 ];
             @endphp
             @if($socialMedias->count() > 0)
-            <ul class="space-y-3 text-sm">
+            <ul class="space-y-3 text-sm" data-reveal-stagger="70" data-reveal-start="300">
                 @foreach($socialMedias as $sm)
                 @php
                     $smData = $smIcons[$sm->platform] ?? ['icon' => 'bi-globe', 'color' => '#94a3b8'];
                 @endphp
-                <li>
+                <li data-scroll-reveal="right" data-reveal-item>
                     <a href="{{ $sm->url }}" target="_blank" rel="noopener" class="flex items-center gap-2 hover:text-white transition">
                         <i class="bi {{ $smData['icon'] }}" style="color: {{ $smData['color'] }}; font-size: 18px;"></i>
                         {{ $sm->name }}
