@@ -50,6 +50,21 @@
     }
 }
 
+@media (prefers-reduced-motion: no-preference) and (max-width: 640px) {
+    [data-scroll-reveal] {
+        --reveal-y: 20px;
+        --reveal-duration: 560ms;
+    }
+
+    [data-scroll-reveal='left'] {
+        --reveal-x: -18px;
+    }
+
+    [data-scroll-reveal='right'] {
+        --reveal-x: 18px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     [data-scroll-reveal] {
         opacity: 1;

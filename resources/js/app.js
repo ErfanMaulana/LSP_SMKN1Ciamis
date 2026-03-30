@@ -18,11 +18,19 @@ const initAlpineTree = () => {
 };
 
 let scrollRevealObserver = null;
+let counterObserver = null;
 
 const resetScrollRevealObserver = () => {
 	if (scrollRevealObserver) {
 		scrollRevealObserver.disconnect();
 		scrollRevealObserver = null;
+	}
+};
+
+const resetCounterObserver = () => {
+	if (counterObserver) {
+		counterObserver.disconnect();
+		counterObserver = null;
 	}
 };
 
@@ -42,12 +50,14 @@ const initScrollReveal = () => {
 	revealElements.forEach((element) => {
 		const revealDelay = Number(element.dataset.revealDelay);
 		if (Number.isFinite(revealDelay)) {
-			element.style.setProperty('--reveal-delay', `${Math.max(0, revealDelay)}ms`);
+			const normalizedDelay = Math.min(500, Math.max(0, revealDelay));
+			element.style.setProperty('--reveal-delay', `${normalizedDelay}ms`);
 		}
 
 		const revealDuration = Number(element.dataset.revealDuration);
 		if (Number.isFinite(revealDuration)) {
-			element.style.setProperty('--reveal-duration', `${Math.max(200, revealDuration)}ms`);
+			const normalizedDuration = Math.min(1100, Math.max(260, revealDuration));
+			element.style.setProperty('--reveal-duration', `${normalizedDuration}ms`);
 		}
 
 		if (prefersReducedMotion) {
@@ -90,11 +100,127 @@ const initScrollReveal = () => {
 	});
 };
 
+const formatCounterValue = (value) => {
+	const safeValue = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+	return new Intl.NumberFormat('id-ID').format(safeValue);
+};
+
+const animateCounter = (counter) => {
+	if (counter.dataset.counterDone === 'true' || counter.dataset.counterRunning === 'true') {
+		return;
+	}
+
+	const target = Number(counter.dataset.target);
+	const suffix = counter.dataset.suffix ?? '';
+	const rawDuration = Number(counter.dataset.counterDuration);
+	const duration = Number.isFinite(rawDuration) ? Math.min(2400, Math.max(700, rawDuration)) : 1300;
+
+	if (!Number.isFinite(target) || target <= 0) {
+		counter.textContent = `${formatCounterValue(target)}${suffix}`;
+		counter.dataset.counterDone = 'true';
+		counter.dataset.counterRunning = 'false';
+		return;
+	}
+
+	counter.dataset.counterRunning = 'true';
+	const startTime = performance.now();
+
+	const tick = (currentTime) => {
+		const progress = Math.min((currentTime - startTime) / duration, 1);
+		const easedProgress = 1 - Math.pow(1 - progress, 3);
+		const currentValue = Math.floor(target * easedProgress);
+
+		counter.textContent = `${formatCounterValue(currentValue)}${suffix}`;
+
+		if (progress < 1) {
+			requestAnimationFrame(tick);
+			return;
+		}
+
+		counter.textContent = `${formatCounterValue(target)}${suffix}`;
+		counter.dataset.counterDone = 'true';
+		counter.dataset.counterRunning = 'false';
+	};
+
+	requestAnimationFrame(tick);
+};
+
+const initCounters = () => {
+	if (!isTurboEnabledPage()) {
+		return;
+	}
+
+	const counters = Array.from(document.querySelectorAll('.counter[data-target]'));
+	if (!counters.length) {
+		return;
+	}
+
+	const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	resetCounterObserver();
+
+	counters.forEach((counter) => {
+		const suffix = counter.dataset.suffix ?? '';
+		counter.dataset.counterDone = 'false';
+		counter.dataset.counterRunning = 'false';
+		counter.textContent = `0${suffix}`;
+	});
+
+	if (prefersReducedMotion) {
+		counters.forEach((counter) => {
+			const target = Number(counter.dataset.target);
+			const suffix = counter.dataset.suffix ?? '';
+			counter.textContent = `${formatCounterValue(target)}${suffix}`;
+			counter.dataset.counterDone = 'true';
+			counter.dataset.counterRunning = 'false';
+		});
+		return;
+	}
+
+	if (!('IntersectionObserver' in window)) {
+		counters.forEach((counter) => {
+			animateCounter(counter);
+		});
+		return;
+	}
+
+	counterObserver = new IntersectionObserver(
+		(entries, observer) => {
+			entries.forEach((entry) => {
+				if (!entry.isIntersecting) {
+					return;
+				}
+
+				animateCounter(entry.target);
+				observer.unobserve(entry.target);
+			});
+		},
+		{
+			threshold: 0.45,
+			rootMargin: '0px 0px -10% 0px',
+		}
+	);
+
+	counters.forEach((counter) => {
+		counterObserver.observe(counter);
+	});
+};
+
 const initFrontPageEnhancements = () => {
+	if (!document.body) {
+		return;
+	}
+
+	const currentViewKey = `${window.location.pathname}${window.location.search}`;
+	if (document.body.dataset.frontEnhancementsInit === currentViewKey) {
+		return;
+	}
+
+	document.body.dataset.frontEnhancementsInit = currentViewKey;
 	syncTurboDriveState();
 	initAlpineTree();
 	initNavPrefetch();
 	initScrollReveal();
+	initCounters();
 };
 
 syncTurboDriveState();
