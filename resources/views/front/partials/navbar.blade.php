@@ -20,10 +20,9 @@
             @foreach($navLinks as $link)
                 @php $active = request()->routeIs($link['active_pattern']); @endphp
                 <a href="{{ route($link['route']) }}"
-                   class="px-4 py-2 rounded-lg transition-colors duration-150
-                          {{ $active
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-700 hover:bg-blue-700 hover:text-white' }}">
+                   data-nav-prefetch="true"
+                   class="px-4 py-2 transition-colors duration-200 {{ $active ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600' }}"
+                   style="text-decoration: none; border-bottom: 2px solid {{ $active ? '#2563eb' : 'transparent' }};">
                     {{ $link['label'] }}
                 </a>
             @endforeach
@@ -51,19 +50,21 @@
          class="md:hidden border-t border-gray-100 bg-white px-4 pb-4 pt-2">
         @php
             $navLinks = [
-                ['route' => 'front.home', 'label' => 'Beranda'],
-                ['route' => 'front.kompetensi.index', 'label' => 'Kompetensi & Data Skema'],
-                ['route' => 'front.berita.index', 'label' => 'Berita'],
-                ['route' => 'front.kontak', 'label' => 'Kontak'],
+                ['route' => 'front.home', 'active_pattern' => 'front.home', 'label' => 'Beranda'],
+                ['route' => 'front.kompetensi.index', 'active_pattern' => 'front.kompetensi.*', 'label' => 'Kompetensi & Data Skema'],
+                ['route' => 'front.berita.index', 'active_pattern' => 'front.berita.*', 'label' => 'Berita'],
+                ['route' => 'front.kontak', 'active_pattern' => 'front.kontak', 'label' => 'Kontak'],
             ];
         @endphp
 
         <nav class="flex flex-col gap-2 text-sm font-medium">
             @foreach($navLinks as $link)
-                @php $active = request()->routeIs($link['route']); @endphp
+                @php $active = request()->routeIs($link['active_pattern']); @endphp
                 <a href="{{ route($link['route']) }}"
+                   data-nav-prefetch="true"
                    @click="open = false"
-                   class="px-4 py-2.5 rounded-lg transition-colors duration-150 {{ $active ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700' }}">
+                   class="px-4 py-2.5 transition-colors duration-200 {{ $active ? 'text-blue-600' : 'text-gray-700 hover:text-blue-700' }}"
+                   style="text-decoration: none; border-bottom: 2px solid {{ $active ? '#2563eb' : 'transparent' }};">
                     {{ $link['label'] }}
                 </a>
             @endforeach
