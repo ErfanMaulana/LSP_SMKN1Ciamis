@@ -21,8 +21,8 @@
                 @php $active = request()->routeIs($link['active_pattern']); @endphp
                 <a href="{{ route($link['route']) }}"
                    data-nav-prefetch="true"
-                   class="px-4 py-2 transition-colors duration-200 {{ $active ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600' }}"
-                   style="text-decoration: none; border-bottom: 2px solid {{ $active ? '#2563eb' : 'transparent' }};">
+                   class="px-4 py-2 transition-colors duration-200 {{ $active ? 'text-[#0073bd] hover:text-[#0073bd]' : 'text-gray-700 hover:text-[#0073bd]' }}"
+                   style="text-decoration: none; border-bottom: 2px solid {{ $active ? '#0073bd' : 'transparent' }};">
                     {{ $link['label'] }}
                 </a>
             @endforeach
@@ -63,8 +63,8 @@
                 <a href="{{ route($link['route']) }}"
                    data-nav-prefetch="true"
                    @click="open = false"
-                   class="px-4 py-2.5 transition-colors duration-200 {{ $active ? 'text-blue-600' : 'text-gray-700 hover:text-blue-700' }}"
-                   style="text-decoration: none; border-bottom: 2px solid {{ $active ? '#2563eb' : 'transparent' }};">
+                   class="px-4 py-2.5 transition-colors duration-200 {{ $active ? 'text-[#0073bd] hover:text-[#0073bd]' : 'text-gray-700 hover:text-[#0073bd]' }}"
+                   style="text-decoration: none; border-bottom: 2px solid {{ $active ? '#0073bd' : 'transparent' }};">
                     {{ $link['label'] }}
                 </a>
             @endforeach
