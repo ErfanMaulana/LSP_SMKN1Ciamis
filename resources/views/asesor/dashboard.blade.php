@@ -202,7 +202,7 @@
 {{-- Welcome Banner --}}
 <div class="welcome-card">
     <div>
-        <h2>Selamat datang, {{ $asesor->nama ?? 'Asesor' }}! 👋</h2>
+        <h2>Selamat datang, {{ $asesor->nama ?? 'Asesor' }}!</h2>
         <p>Pantau progres asesmen mandiri para asesi pada skema yang Anda ampuh.</p>
         @if($asesor?->skemas?->count())
             <div class="skema-info">
