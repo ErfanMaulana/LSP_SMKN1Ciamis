@@ -132,12 +132,22 @@ class AsesmenMandiriController extends Controller
                 ->with('error', 'Skema ini tidak sesuai dengan jurusan Anda.');
         }
 
+        // Build dynamic rules so every elemen in this skema must be answered completely.
+        $elemenIds = $skema->units
+            ->flatMap(function ($unit) {
+                return $unit->elemens->pluck('id');
+            })
+            ->values();
+
         // Validate input
         $rules = [
             'jawaban' => 'required|array',
-            'jawaban.*.status' => 'required|in:K,BK',
-            'jawaban.*.bukti' => 'nullable|string|max:1000',
         ];
+
+        foreach ($elemenIds as $elemenId) {
+            $rules["jawaban.$elemenId.status"] = 'required|in:K,BK';
+            $rules["jawaban.$elemenId.bukti"] = ['required', 'string', 'max:1000', 'regex:/\\S/'];
+        }
 
         if ($request->has('submit_final')) {
             $rules['tanda_tangan'] = 'required|string';
@@ -145,6 +155,10 @@ class AsesmenMandiriController extends Controller
 
         $request->validate($rules, [
             'tanda_tangan.required' => 'Tanda tangan wajib diisi sebelum menyelesaikan asesmen.',
+            'jawaban.*.status.required' => 'Status K/BK pada setiap elemen wajib dipilih.',
+            'jawaban.*.status.in' => 'Status elemen harus K atau BK.',
+            'jawaban.*.bukti.required' => 'Bukti relevan pada setiap elemen wajib diisi.',
+            'jawaban.*.bukti.regex' => 'Bukti relevan tidak boleh hanya berisi spasi.',
         ]);
         
         // Save answers
@@ -156,7 +170,7 @@ class AsesmenMandiriController extends Controller
                 ],
                 [
                     'status' => $data['status'],
-                    'bukti' => $data['bukti'] ?? null,
+                    'bukti' => isset($data['bukti']) ? trim($data['bukti']) : null,
                 ]
             );
         }

@@ -11,6 +11,24 @@ use Illuminate\Support\Facades\DB;
 
 class JadwalUjikomController extends Controller
 {
+    private function findBentrokJadwalAsesor(?int $asesorId, string $tanggalMulai, string $tanggalSelesai, ?int $excludeJadwalId = null): ?JadwalUjikom
+    {
+        if (!$asesorId) {
+            return null;
+        }
+
+        return JadwalUjikom::query()
+            ->where('asesor_id', $asesorId)
+            ->where('status', '!=', 'dibatalkan')
+            ->whereDate('tanggal_mulai', '<=', $tanggalSelesai)
+            ->whereDate('tanggal_selesai', '>=', $tanggalMulai)
+            ->when($excludeJadwalId, function ($query, $excludeJadwalId) {
+                $query->where('id', '!=', $excludeJadwalId);
+            })
+            ->orderBy('tanggal_mulai')
+            ->first();
+    }
+
     public function index(Request $request)
     {
         $search = $request->get('search');
@@ -112,6 +130,20 @@ class JadwalUjikomController extends Controller
         $validated['skema_id']  = $kelompok->skema_id;
         $validated['asesor_id'] = $kelompok->asesors->first()?->ID_asesor;
 
+        $jadwalBentrok = $this->findBentrokJadwalAsesor(
+            $validated['asesor_id'],
+            $validated['tanggal_mulai'],
+            $validated['tanggal_selesai']
+        );
+
+        if ($jadwalBentrok) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'tanggal_mulai' => 'Jadwal asesor bentrok dengan jadwal (' . $jadwalBentrok->judul_jadwal . ').',
+                ]);
+        }
+
         $niks = $kelompok->asesis->pluck('NIK')->toArray();
         $validated['peserta_terdaftar'] = count($niks);
         $validated['kuota']             = max(1, count($niks));
@@ -206,6 +238,21 @@ class JadwalUjikomController extends Controller
         $kelompok = Kelompok::with(['skema', 'asesors', 'asesis'])->findOrFail($validated['kelompok_id']);
         $validated['skema_id']  = $kelompok->skema_id;
         $validated['asesor_id'] = $kelompok->asesors->first()?->ID_asesor;
+
+        $jadwalBentrok = $this->findBentrokJadwalAsesor(
+            $validated['asesor_id'],
+            $validated['tanggal_mulai'],
+            $validated['tanggal_selesai'],
+            $jadwal->id
+        );
+
+        if ($jadwalBentrok) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'tanggal_mulai' => 'Jadwal asesor bentrok dengan jadwal (' . $jadwalBentrok->judul_jadwal . ').',
+                ]);
+        }
 
         $niks = $kelompok->asesis->pluck('NIK')->toArray();
         $validated['kuota']             = max(1, count($niks));
