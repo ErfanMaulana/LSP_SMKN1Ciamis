@@ -1,12 +1,12 @@
 <header id="navbar" x-data="{ open: false }" class="bg-white shadow fixed top-0 left-0 right-0 z-50 w-full" style="background-color: #ffffff;">
     <div class="max-w-6xl mx-auto flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
 
-        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+        <a href="{{ route('front.home') }}" data-nav-prefetch="true" class="flex items-center gap-2 sm:gap-3 min-w-0" aria-label="Ke beranda">
             <div class="bg-white p-1 rounded">
                 <img src="{{ asset('images/lsp.png') }}" class="w-9 h-9 sm:w-10 sm:h-10 object-contain" alt="Logo LSP">
             </div>
             <span class="font-semibold text-sm sm:text-base truncate">LSP SMKN 1 CIAMIS</span>
-        </div>
+        </a>
 
         <nav class="hidden md:flex gap-1 text-sm font-medium">
             @php

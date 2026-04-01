@@ -926,7 +926,7 @@
                 @endif
 
                 <!-- DATA MASTER Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view', 'jadwal-ujikom.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>DATA MASTER</span>
@@ -978,6 +978,14 @@
                                     class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
                                     <i class="bi bi-patch-check"></i>
                                     <span>Skema</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view'))
+                                <a href="{{ route('admin.umpan-balik-komponen.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.umpan-balik-komponen.*') ? 'active' : '' }}">
+                                    <i class="bi bi-chat-square-text"></i>
+                                    <span>Komponen Umpan Balik</span>
                                 </a>
                             @endif
                         </div>
@@ -1034,6 +1042,12 @@
                                     class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
                                     <i class="bi bi-calendar-event"></i>
                                     <span>Jadwal Ujikom</span>
+                                </a>
+
+                                <a href="{{ route('admin.umpan-balik-hasil.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.umpan-balik-hasil.*') ? 'active' : '' }}">
+                                    <i class="bi bi-clipboard-data"></i>
+                                    <span>Hasil Umpan Balik Asesi</span>
                                 </a>
                             @endif
                         </div>

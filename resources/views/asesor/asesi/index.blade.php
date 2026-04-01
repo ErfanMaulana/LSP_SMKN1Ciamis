@@ -6,24 +6,25 @@
 @section('styles')
 <style>
     .page-header {
-        margin-bottom: 20px;
+        background: #0073bd;
+        border-radius: 12px;
+        padding: 22px 26px;
+        color: white;
+        margin-bottom: 22px;
     }
+
     .page-header h2 {
-        font-size: 22px;
+        font-size: 18px;
         font-weight: 700;
-        color: #0f172a;
-        margin: 0 0 4px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
+        margin-bottom: 4px;
+        color: white;
     }
-    .page-header h2 i {
-        color: #0073bd;
-    }
+
     .page-header p {
         font-size: 13px;
-        color: #64748b;
+        opacity: 0.9;
         margin: 0;
+        color: white;
     }
 
     .search-bar {
@@ -570,7 +571,7 @@
 @section('content')
 
 <div class="page-header">
-    <h2><i class="bi bi-people"></i> Daftar Asesi — {{ $skema?->nama_skema ?? 'Skema tidak ditetapkan' }}</h2>
+    <h2>Daftar Asesi — {{ $skema?->nama_skema ?? 'Skema tidak ditetapkan' }}</h2>
     <p>{{ $skema?->nomor_skema }} &bull; <span id="totalAsesi">{{ $data->count() }}</span> asesi terdaftar</p>
 </div>
 

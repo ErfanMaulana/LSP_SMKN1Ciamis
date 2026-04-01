@@ -1,4 +1,4 @@
-<footer class="bg-gray-900 text-gray-300 mt-16">
+<footer class="bg-gray-900 text-gray-300 mt-16 overflow-hidden">
     @php
         $kontak = \App\Models\Kontak::getKontak();
     @endphp

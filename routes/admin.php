@@ -25,6 +25,8 @@ use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\PanduanController;
 use App\Http\Controllers\Admin\LogActivityController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\UmpanBalikKomponenController;
+use App\Http\Controllers\Admin\UmpanBalikHasilController;
 
 /*
 |--------------------------------------------------------------------------
@@ -243,6 +245,24 @@ Route::prefix('admin')->group(function () {
             Route::put('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'update'])->name('admin.jadwal-ujikom.update')->middleware('permission:jadwal-ujikom.edit');
             Route::delete('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'destroy'])->name('admin.jadwal-ujikom.destroy')->middleware('permission:jadwal-ujikom.delete');
             Route::patch('/jadwal-ujikom/{id}/status', [JadwalUjikomController::class, 'updateStatus'])->name('admin.jadwal-ujikom.status')->middleware('permission:jadwal-ujikom.status');
+        });
+
+        // Umpan Balik Komponen CRUD
+        Route::middleware('permission:jadwal-ujikom.view')->group(function () {
+            Route::get('/umpan-balik-komponen', [UmpanBalikKomponenController::class, 'index'])->name('admin.umpan-balik-komponen.index');
+            Route::get('/umpan-balik-komponen/create', [UmpanBalikKomponenController::class, 'create'])->name('admin.umpan-balik-komponen.create')->middleware('permission:jadwal-ujikom.create');
+            Route::post('/umpan-balik-komponen', [UmpanBalikKomponenController::class, 'store'])->name('admin.umpan-balik-komponen.store')->middleware('permission:jadwal-ujikom.create');
+            Route::get('/umpan-balik-komponen/skema/{skemaId}', [UmpanBalikKomponenController::class, 'show'])->name('admin.umpan-balik-komponen.show');
+            Route::get('/umpan-balik-komponen/skema/{skemaId}/edit', [UmpanBalikKomponenController::class, 'editSkema'])->name('admin.umpan-balik-komponen.edit-skema')->middleware('permission:jadwal-ujikom.edit');
+            Route::delete('/umpan-balik-komponen/skema/{skemaId}', [UmpanBalikKomponenController::class, 'destroyBySkema'])->name('admin.umpan-balik-komponen.destroy-skema')->middleware('permission:jadwal-ujikom.delete');
+            Route::get('/umpan-balik-komponen/{id}/edit', [UmpanBalikKomponenController::class, 'edit'])->name('admin.umpan-balik-komponen.edit')->middleware('permission:jadwal-ujikom.edit');
+            Route::put('/umpan-balik-komponen/{id}', [UmpanBalikKomponenController::class, 'update'])->name('admin.umpan-balik-komponen.update')->middleware('permission:jadwal-ujikom.edit');
+            Route::delete('/umpan-balik-komponen/{id}', [UmpanBalikKomponenController::class, 'destroy'])->name('admin.umpan-balik-komponen.destroy')->middleware('permission:jadwal-ujikom.delete');
+        });
+
+        // Hasil Umpan Balik Asesi
+        Route::middleware('permission:jadwal-ujikom.view')->group(function () {
+            Route::get('/umpan-balik-hasil', [UmpanBalikHasilController::class, 'index'])->name('admin.umpan-balik-hasil.index');
         });
 
         // Penugasan Asesor ke Asesi

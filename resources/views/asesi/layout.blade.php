@@ -644,7 +644,7 @@
             {{-- Status banner for non-approved users --}}
             @if(!$isApproved)
                 <div style="margin: 12px 14px 4px; border-radius: 10px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5;
-                    {{ $isPending ? 'background:#fef9c3;border:1px solid #fde047;color:#854d0e;' : ($isRejected ? 'background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;' : ($isBanned ? 'background:#1e293b;border:1px solid #334155;color:#e2e8f0;' : 'background:#eff6ff;border:1px solid #93c5fd;color:#1e40af;')) }}">
+                    {{ $isPending ? 'background:#fef9c3;border:1px solid #fde047;color:#854d0e;' : ($isRejected ? 'background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;' : ($isBanned ? 'background:#1e293b;border:1px solid #334155;color:#e2e8f0;' : 'background:#eff6ff;border:1px solid #93c5fd;color:#0073bd;')) }}">
                     @if($isPending)
                         <i class="bi bi-hourglass-split" style="margin-right:5px;"></i>
                         <strong>Menunggu Verifikasi</strong><br>
