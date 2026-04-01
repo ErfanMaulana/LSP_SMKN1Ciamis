@@ -701,6 +701,11 @@
                         <span>Hasil Asesmen</span>
                     </a>
 
+                    <a href="{{ route('asesi.umpan-balik.index') }}" class="menu-item {{ request()->routeIs('asesi.umpan-balik.*') ? 'active' : '' }}">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                        <span>Umpan Balik Asesor</span>
+                    </a>
+
                     <!-- AKUN Section -->
                     <div class="menu-section-title">AKUN</div>
 
@@ -815,6 +820,11 @@
                     <a href="{{ route('asesi.jadwal.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event-fill"></i>
                         <span>Jadwal</span>
+                    </a>
+
+                    <a href="{{ route('asesi.umpan-balik.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.umpan-balik.*') ? 'active' : '' }}">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                        <span>Feedback</span>
                     </a>
 
                     <a href="{{ route('asesi.profil.edit') }}" class="bottom-nav-item {{ request()->routeIs('asesi.profil.*') ? 'active' : '' }}">
