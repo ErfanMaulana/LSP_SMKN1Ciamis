@@ -310,7 +310,6 @@
                 <option value="aktif" {{ $status === 'aktif' ? 'selected' : '' }}>Aktif</option>
                 <option value="nonaktif" {{ $status === 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
             </select>
-            <button type="submit" class="btn-filter-search"><i class="bi bi-search"></i></button>
             
         </div>
     </div>

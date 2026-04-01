@@ -71,14 +71,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
-                        <i class="bi bi-search"></i>
-                    </button>
-                    @if(request('search') || request('keahlian') || request('card_filter'))
-                    <button type="button" class="btn-filter-reset" title="Reset filter" onclick="resetFilters()">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                    @endif
+                   
                 </div>
             </div>
             </form>

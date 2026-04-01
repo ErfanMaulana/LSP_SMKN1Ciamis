@@ -79,14 +79,7 @@
                             <option value="Klaster" {{ request('jenis_skema') === 'Klaster' ? 'selected' : '' }}>Klaster</option>
                         </select>
                         
-                        <button type="submit" class="btn-filter-search" title="Cari">
-                            <i class="bi bi-search"></i>
-                        </button>
-                        @if(request('search') || request('jenis_skema', 'all') !== 'all' || request('sort', 'created_at') !== 'created_at' || request('order', 'desc') !== 'desc')
-                        <a href="{{ route('admin.skema.index') }}" class="btn-filter-reset" title="Reset filter">
-                            <i class="bi bi-x-lg"></i>
-                        </a>
-                        @endif
+                        
                     </div>
                 </div>
             </form>

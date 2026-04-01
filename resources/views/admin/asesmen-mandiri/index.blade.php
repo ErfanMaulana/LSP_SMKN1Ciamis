@@ -312,14 +312,7 @@
                         <option value="{{ $skema->id }}" {{ request('skema_id') == $skema->id ? 'selected' : '' }}>{{ $skema->nama_skema }}</option>
                     @endforeach
                 </select>
-                <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
-                    <i class="bi bi-search"></i>
-                </button>
-                @if(request('search') || request('status') || request('skema_id'))
-                <button type="button" class="btn-filter-reset" title="Reset filter" onclick="resetFilters()">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-                @endif
+                
             </div>
         </div>
     </form>

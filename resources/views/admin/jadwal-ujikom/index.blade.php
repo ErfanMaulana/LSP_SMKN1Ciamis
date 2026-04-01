@@ -148,6 +148,7 @@
     .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
     table { width: 100%; border-collapse: collapse; overflow: visible; }
     .card > table { overflow: visible; }
+    .card > .admin-table-scroll { overflow: visible; }
     th {
         padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700;
         color: #64748b; text-transform: uppercase; letter-spacing:.5px;
@@ -174,7 +175,8 @@
     .action-menu { position: relative; }
     .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
     .action-btn:hover { background: #f1f5f9; }
-    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 160px; z-index: 10; overflow: hidden; }
+    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 160px; z-index: 1200; overflow: hidden; }
+    .action-dropdown.open-up { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 4px; }
     .action-dropdown.show { display: block; }
     .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
     .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
@@ -215,6 +217,13 @@
     @media (max-width: 480px) {
         .stats-grid {
             grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .card > .admin-table-scroll {
+            overflow-x: auto;
+            overflow-y: visible;
         }
     }
 </style>
@@ -288,10 +297,7 @@
                 <option value="selesai"     {{ $status === 'selesai'     ? 'selected' : '' }}>Selesai</option>
                 <option value="dibatalkan"  {{ $status === 'dibatalkan'  ? 'selected' : '' }}>Dibatalkan</option>
             </select>
-            <button type="button" class="btn-filter-search" onclick="performAjaxSearch()"><i class="bi bi-search"></i></button>
-            @if($search || $status !== 'all' || $bulan !== now()->format('Y-m'))
-            <button type="button" class="btn-filter-reset" title="Reset filter" onclick="resetFilters()"><i class="bi bi-x-lg"></i></button>
-            @endif
+            
         </div>
     </div>
 </form>
@@ -407,14 +413,30 @@
 @section('scripts')
 <script>
 function toggleMenu(button) {
+    const dropdown = button.nextElementSibling;
+    if (!dropdown) return;
+
     document.querySelectorAll('.action-dropdown.show').forEach(d => {
-        if (d !== button.nextElementSibling) d.classList.remove('show');
+        if (d !== dropdown) {
+            d.classList.remove('show', 'open-up');
+        }
     });
-    button.nextElementSibling.classList.toggle('show');
+
+    const willOpen = !dropdown.classList.contains('show');
+    dropdown.classList.toggle('show');
+    dropdown.classList.remove('open-up');
+
+    if (willOpen) {
+        const rect = dropdown.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.top;
+        if (spaceBelow < rect.height + 12) {
+            dropdown.classList.add('open-up');
+        }
+    }
 }
 document.addEventListener('click', e => {
     if (!e.target.closest('.action-menu')) {
-        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show', 'open-up'));
     }
 });
 

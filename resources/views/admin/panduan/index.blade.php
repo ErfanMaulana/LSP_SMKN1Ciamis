@@ -167,7 +167,7 @@
     .subtitle { font-size:13px; color:#64748b; margin-top:4px; }
 
     .section-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; }
-    .section-tab { text-decoration:none; padding:8px 12px; border-radius:8px; border:1px solid #dbeafe; color:#1d4ed8; background:#eff6ff; font-size:13px; font-weight:600; }
+    .section-tab { text-decoration:none; padding:8px 12px; border-radius:8px; border:1px solid #dbeafe; color:#0073bd; background:#eff6ff; font-size:13px; font-weight:600; }
     .section-tab.active { background:#0073bd; border-color:#0073bd; color:#fff; }
 
     .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:8px; font-size:14px; text-decoration:none; border:none; cursor:pointer; }

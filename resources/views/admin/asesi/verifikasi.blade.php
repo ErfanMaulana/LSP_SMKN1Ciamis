@@ -72,9 +72,7 @@
                         <input type="hidden" name="reject_type" value="{{ $rejectType }}">
                         <input type="hidden" name="per_page" value="{{ $perPage }}">
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NIK, atau email..." style="flex:1;">
-                        <button type="submit" style="width:48px;height:42px;background:#0073bd;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;justify-content:center;" aria-label="Cari" title="Cari">
-                            <i class="bi bi-search"></i>
-                        </button>
+                        
                     </form>
                 </div>
                 @if($status === 'rejected')
