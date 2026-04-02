@@ -13,6 +13,15 @@ use Illuminate\Support\Facades\DB;
 
 class AsesmenMandiriController extends Controller
 {
+    private function isValidSignatureDataUri(?string $signature): bool
+    {
+        if (!$signature) {
+            return false;
+        }
+
+        return (bool) preg_match('/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/', $signature);
+    }
+
     /**
      * Get the current authenticated asesi
      */
@@ -125,11 +134,30 @@ class AsesmenMandiriController extends Controller
         
         $skema = Skema::with(['units.elemens'])->findOrFail($skemaId);
 
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesi->NIK)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        if (!$pivot) {
+            return redirect()->route('asesi.asesmen-mandiri.index')
+                ->with('error', 'Skema ini tidak terdaftar untuk akun Anda.');
+        }
+
         // Make sure this schema belongs to asesi's jurusan
         if ($skema->jurusan_id !== null && $skema->jurusan_id != $asesi->ID_jurusan) {
             return redirect()->route('asesi.asesmen-mandiri.index')
                 ->with('error', 'Skema ini tidak sesuai dengan jurusan Anda.');
         }
+
+        // Build dynamic rules so every elemen in this skema must be answered completely.
+        $elemenIds = $skema->units
+            ->flatMap(function ($unit) {
+                return $unit->elemens->pluck('id');
+            })
+            ->values();
+
+        $isFinalSubmission = $request->has('submit_final');
 
         // Validate input
         $rules = [
@@ -138,13 +166,47 @@ class AsesmenMandiriController extends Controller
             'jawaban.*.bukti' => 'nullable|string|max:1000',
         ];
 
-        if ($request->has('submit_final')) {
+        foreach ($elemenIds as $elemenId) {
+            $rules["jawaban.$elemenId.status"] = 'required|in:K,BK';
+
+            if ($isFinalSubmission) {
+                $rules["jawaban.$elemenId.bukti"] = ['required', 'string', 'max:1000', 'regex:/\\S/'];
+            } else {
+                $rules["jawaban.$elemenId.bukti"] = ['nullable', 'string', 'max:1000'];
+            }
+        }
+
+        if ($isFinalSubmission && empty($pivot->tanda_tangan)) {
             $rules['tanda_tangan'] = 'required|string';
         }
 
         $request->validate($rules, [
             'tanda_tangan.required' => 'Tanda tangan wajib diisi sebelum menyelesaikan asesmen.',
+            'jawaban.*.status.required' => 'Status K/BK pada setiap elemen wajib dipilih.',
+            'jawaban.*.status.in' => 'Status elemen harus K atau BK.',
+            'jawaban.*.bukti.required' => 'Bukti relevan pada setiap elemen wajib diisi.',
+            'jawaban.*.bukti.regex' => 'Bukti relevan tidak boleh hanya berisi spasi.',
         ]);
+
+        $providedTandaTangan = $request->input('tanda_tangan');
+
+        if ($providedTandaTangan && !$this->isValidSignatureDataUri($providedTandaTangan)) {
+            return redirect()->route('asesi.asesmen-mandiri.show', $skemaId)
+                ->with('error', 'Format tanda tangan tidak valid.');
+        }
+
+        if (!$isFinalSubmission && $providedTandaTangan && $providedTandaTangan !== ($pivot->tanda_tangan ?? null)) {
+            DB::table('asesi_skema')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skemaId)
+                ->update([
+                    'tanda_tangan' => $providedTandaTangan,
+                    'tanggal_tanda_tangan' => now(),
+                    'updated_at' => now(),
+                ]);
+
+            $pivot->tanda_tangan = $providedTandaTangan;
+        }
         
         // Save answers
         foreach ($request->jawaban as $elemenId => $data) {
@@ -155,7 +217,7 @@ class AsesmenMandiriController extends Controller
                 ],
                 [
                     'status' => $data['status'],
-                    'bukti' => $data['bukti'] ?? null,
+                    'bukti' => isset($data['bukti']) ? trim($data['bukti']) : null,
                 ]
             );
         }
@@ -173,10 +235,10 @@ class AsesmenMandiriController extends Controller
             ->count();
         
         // If this is final submission
-        if ($request->has('submit_final') && $totalElements === $answeredElements) {
-            // Validate signature format (must be base64 PNG data URI)
-            $tandaTangan = $request->input('tanda_tangan');
-            if (!preg_match('/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/', $tandaTangan)) {
+        if ($isFinalSubmission && $totalElements === $answeredElements) {
+            $tandaTangan = $providedTandaTangan ?: ($pivot->tanda_tangan ?? null);
+
+            if (!$this->isValidSignatureDataUri($tandaTangan)) {
                 return redirect()->route('asesi.asesmen-mandiri.show', $skemaId)
                     ->with('error', 'Format tanda tangan tidak valid.');
             }

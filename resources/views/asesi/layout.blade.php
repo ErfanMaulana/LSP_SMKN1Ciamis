@@ -511,16 +511,11 @@
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
-                transform: translateX(-100%);
-                box-shadow: 12px 0 28px rgba(15, 23, 42, 0.14);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
+                display: none;
             }
 
             .sidebar-overlay {
-                display: block;
+                display: none !important;
             }
 
             .main-content {
@@ -537,7 +532,7 @@
             }
 
             .mobile-toggle {
-                display: block;
+                display: none !important;
             }
 
             .topbar h1 {
@@ -645,14 +640,6 @@
                         <i class="bi bi-file-earmark-text"></i>
                         <span>Hasil Asesmen</span>
                     </a>
-
-                    <!-- AKUN Section -->
-                    <div class="menu-section-title">AKUN</div>
-
-                    <a href="{{ route('asesi.profil.edit') }}" class="menu-item {{ request()->routeIs('asesi.profil.*') && request('tab') !== 'password' ? 'active' : '' }}">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Profil Saya</span>
-                    </a>
                 @endif
             </nav>
         </aside>
@@ -697,10 +684,6 @@
                                     <a href="{{ route('asesi.profil.edit') }}" class="profile-menu-item">
                                         <i class="bi bi-person"></i>
                                         <span>Profil</span>
-                                    </a>
-                                    <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
-                                        <i class="bi bi-gear"></i>
-                                        <span>Pengaturan</span>
                                     </a>
                                     <div class="profile-menu-divider"></div>
                                 @endif
@@ -761,21 +744,11 @@
                         <i class="bi bi-calendar-event-fill"></i>
                         <span>Jadwal</span>
                     </a>
-
-                    <a href="{{ route('asesi.profil.edit') }}" class="bottom-nav-item {{ request()->routeIs('asesi.profil.*') ? 'active' : '' }}">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Profil</span>
-                    </a>
                 @else
                     <a href="{{ route('asesi.pendaftaran.formulir') }}" class="bottom-nav-item {{ request()->routeIs('asesi.pendaftaran.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-plus"></i>
                         <span>Daftar</span>
                     </a>
-
-                    <button class="bottom-nav-item" onclick="toggleAsesiProfile(event)">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Profil</span>
-                    </button>
                 @endif
             </div>
         </nav>

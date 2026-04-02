@@ -217,7 +217,7 @@ class DashboardController extends Controller
             return view('asesor.jadwal.index', compact('account', 'asesor', 'jadwals'));
         }
 
-        $jadwals = JadwalUjikom::with(['tuk', 'skema', 'kelompok'])
+        $jadwals = JadwalUjikom::with(['tuk', 'skema', 'kelompok', 'kelompoks'])
             ->where('asesor_id', $asesor->ID_asesor)
             ->when($request->filled('status') && $request->status !== 'all', function ($q) use ($request) {
                 $q->where('status', $request->status);

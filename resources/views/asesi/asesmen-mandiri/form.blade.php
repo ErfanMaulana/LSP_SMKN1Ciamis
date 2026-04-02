@@ -1101,7 +1101,7 @@
         <h3><i class="bi bi-pen"></i> Tanda Tangan Asesi</h3>
         <p class="signature-subtitle">Dengan menandatangani, saya menyatakan bahwa semua jawaban di atas adalah benar dan sesuai dengan kompetensi yang saya miliki.</p>
 
-        @if($pivot && $pivot->tanda_tangan)
+        @if($pivot && $pivot->tanda_tangan && ($pivot->status === 'selesai' || $pivot->rekomendasi))
         {{-- Signature sudah tersimpan --}}
         <div class="signature-saved-display">
             <img src="{{ $pivot->tanda_tangan }}" alt="Tanda Tangan Asesi">
@@ -1112,6 +1112,12 @@
         </div>
         @elseif(!($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)))
         {{-- Form tanda tangan --}}
+        @if($pivot && $pivot->tanda_tangan)
+        <div class="signature-saved-meta" style="justify-content:flex-start;margin-bottom:10px;">
+            <i class="bi bi-pencil-square"></i>
+            Tanda tangan sudah tersimpan. Gambar ulang untuk mengubah tanda tangan.
+        </div>
+        @endif
         <div class="signature-canvas-wrapper" id="signatureWrapper">
             <canvas class="signature-canvas" id="signatureCanvas"></canvas>
             <div class="signature-placeholder" id="signaturePlaceholder">
@@ -1119,6 +1125,7 @@
                 <span>Tanda tangan di sini</span>
             </div>
         </div>
+        <input type="hidden" id="savedTandaTangan" value="{{ $pivot->tanda_tangan ?? '' }}">
         <input type="hidden" name="tanda_tangan" id="tandaTanganInput">
         <div class="signature-error" id="signatureError">
             <i class="bi bi-exclamation-circle"></i>
@@ -1311,6 +1318,31 @@
     // Auto-save functionality
     let saveTimeout;
     const form = document.getElementById('asesmenForm');
+
+    function setBuktiRequired(required) {
+        if (!form) return;
+        form.querySelectorAll('.bukti-input').forEach(function(input) {
+            if (input.hasAttribute('readonly') || input.disabled) {
+                return;
+            }
+
+            if (required) {
+                input.setAttribute('required', 'required');
+            } else {
+                input.removeAttribute('required');
+            }
+        });
+    }
+
+    // Draft save should remain flexible; bukti is only mandatory on final submit.
+    setBuktiRequired(false);
+
+    const draftBtn = document.querySelector('[name="save_draft"]');
+    if (draftBtn) {
+        draftBtn.addEventListener('click', function() {
+            setBuktiRequired(false);
+        });
+    }
     
     form.addEventListener('change', function() {
         clearTimeout(saveTimeout);
@@ -1329,12 +1361,14 @@
         const ctx = canvas.getContext('2d');
         const wrapper = document.getElementById('signatureWrapper');
         const placeholder = document.getElementById('signaturePlaceholder');
+        const savedInput = document.getElementById('savedTandaTangan');
         const hiddenInput = document.getElementById('tandaTanganInput');
         const clearBtn = document.getElementById('clearSignature');
         const errorEl = document.getElementById('signatureError');
 
+        const savedSignature = savedInput ? savedInput.value : '';
         let isDrawing = false;
-        let hasSignature = false;
+        let hasSignature = Boolean(savedSignature);
         let lastX = 0;
         let lastY = 0;
 
@@ -1350,7 +1384,22 @@
             ctx.strokeStyle = '#1e293b';
         }
 
+        function drawSignatureImage(signatureData) {
+            const img = new Image();
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
+                wrapper.classList.add('has-signature');
+            };
+            img.src = signatureData;
+        }
+
         resizeCanvas();
+        if (savedSignature) {
+            hiddenInput.value = savedSignature;
+            drawSignatureImage(savedSignature);
+        }
+
         window.addEventListener('resize', function() {
             const imageData = canvas.toDataURL();
             resizeCanvas();
@@ -1429,6 +1478,7 @@
         const submitBtn = document.querySelector('[name="submit_final"]');
         if (submitBtn) {
             submitBtn.addEventListener('click', function(e) {
+                setBuktiRequired(true);
                 const confirmModal = document.getElementById('finalConfirmModal');
 
                 if (!hasSignature) {

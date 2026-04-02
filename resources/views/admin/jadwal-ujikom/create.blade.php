@@ -26,6 +26,7 @@
         padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px;
         font-size: 13px; font-family: inherit; transition: border-color .2s; outline: none;
     }
+    .form-control[multiple] { min-height: 156px; }
     .form-control:focus { border-color: #0061a5; box-shadow: 0 0 0 3px rgba(0,97,165,.1); }
     .form-control.is-invalid { border-color: #ef4444; }
     textarea.form-control { resize: vertical; min-height: 80px; }
@@ -94,22 +95,59 @@
             {{-- ─── Kelompok ─── --}}
             <div class="form-group form-full">
                 <label>Kelompok <span class="required">*</span></label>
-                <select name="kelompok_id" id="kelompok_select"
-                        class="form-control {{ $errors->has('kelompok_id') ? 'is-invalid' : '' }}"
-                        onchange="onKelompokChange(this.value)" required>
-                    <option value="">-- Pilih Kelompok --</option>
-                    @foreach($kelompoks as $k)
-                    <option value="{{ $k->id }}" {{ old('kelompok_id') == $k->id ? 'selected' : '' }}>
-                        {{ $k->nama_kelompok }}
-                        @if($k->skema) — {{ $k->skema->nama_skema }} @endif
-                        ({{ $k->asesis->count() }} asesi)
-                    </option>
-                    @endforeach
-                </select>
-                @error('kelompok_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                <span class="hint">Skema, asesor, dan peserta diisi otomatis dari kelompok yang dipilih.</span>
+                @php
+                    $oldKelompokIds = collect(old('kelompok_ids', []))->map(fn($id) => (int) $id)->all();
+                    $kelompokOptions = $kelompoks->map(function ($k) use ($kelompokScheduleMap) {
+                        return [
+                            'id' => (int) $k->id,
+                            'nama' => $k->nama_kelompok,
+                            'skema' => $k->skema?->nama_skema ?? '-',
+                            'asesi_count' => $k->asesis->count(),
+                            'locked_jadwal' => $kelompokScheduleMap[$k->id] ?? null,
+                        ];
+                    })->values();
+                @endphp
+                <div id="kelompok-hidden-inputs"></div>
+
+                <div style="position:relative;" id="kelompok-dropdown-wrap">
+                    <div id="kelompok-trigger" onclick="toggleKelompokDropdown()"
+                         style="display:flex;justify-content:space-between;align-items:center;
+                                padding:10px 14px;border:1px solid {{ ($errors->has('kelompok_ids') || $errors->has('kelompok_ids.*')) ? '#ef4444' : '#d1d5db' }};border-radius:8px;
+                                background:#f8fafc;cursor:pointer;font-size:13px;user-select:none;
+                                transition:border-color .2s,box-shadow .2s;">
+                        <span id="kelompok-trigger-text" style="color:#94a3b8;">Pilih kelompok...</span>
+                        <i class="bi bi-chevron-down" id="kelompok-chevron"
+                           style="font-size:12px;color:#64748b;transition:transform .2s;"></i>
+                    </div>
+
+                    <div id="kelompok-dropdown"
+                         style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:300;
+                                background:white;border:1px solid #e2e8f0;border-radius:8px;
+                                box-shadow:0 8px 24px rgba(0,0,0,.12);overflow:hidden;">
+                        <div style="padding:8px 10px;border-bottom:1px solid #f1f5f9;">
+                            <input type="text" id="kelompok-search" autocomplete="off"
+                                   placeholder="Cari nama kelompok atau skema..."
+                                   oninput="filterKelompok(this.value)"
+                                   style="width:100%;padding:7px 10px;border:1px solid #e2e8f0;
+                                          border-radius:6px;font-size:13px;outline:none;
+                                          font-family:inherit;background:#f8fafc;">
+                        </div>
+                        <div id="kelompok-list" style="max-height:240px;overflow-y:auto;"></div>
+                    </div>
+                </div>
+
+                <div id="kelompok-badges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+
+                @if($errors->has('kelompok_ids') || $errors->has('kelompok_ids.*'))
+                    <div class="invalid-feedback">{{ $errors->first('kelompok_ids') ?: $errors->first('kelompok_ids.*') }}</div>
+                @endif
+                <span class="hint">Bisa pilih lebih dari satu kelompok. Satu kelompok hanya boleh berada pada satu jadwal.</span>
 
                 <div class="kelompok-preview" id="kelompok_preview">
+                    <div class="kelompok-preview-row">
+                        <span class="kelompok-preview-label"><i class="bi bi-diagram-3"></i> Kelompok</span>
+                        <span id="prev_kelompok">—</span>
+                    </div>
                     <div class="kelompok-preview-row">
                         <span class="kelompok-preview-label"><i class="bi bi-award"></i> Skema</span>
                         <span id="prev_skema">—</span>
@@ -216,17 +254,203 @@
 @section('scripts')
 <script>
 const KELOMPOK_DATA = @json($kelompokData);
+const KELOMPOK_SOURCE = @json($kelompokOptions);
+const PRESELECTED_KELOMPOK_IDS = @json($oldKelompokIds);
 
-function onKelompokChange(id) {
+let selectedKelompoks = new Map();
+let kelompokOpen = false;
+
+PRESELECTED_KELOMPOK_IDS.forEach(function(id) {
+    const found = KELOMPOK_SOURCE.find(function(k) { return k.id === Number(id); });
+    if (found) {
+        selectedKelompoks.set(found.id, found);
+    }
+});
+
+function renderKelompokTriggerText() {
+    const el = document.getElementById('kelompok-trigger-text');
+    if (selectedKelompoks.size === 0) {
+        el.textContent = 'Pilih kelompok...';
+        el.style.color = '#94a3b8';
+    } else {
+        el.textContent = selectedKelompoks.size + ' kelompok dipilih';
+        el.style.color = '#1e293b';
+    }
+}
+
+function renderKelompokBadges() {
+    const badgeWrap = document.getElementById('kelompok-badges');
+    const hiddenWrap = document.getElementById('kelompok-hidden-inputs');
+
+    badgeWrap.innerHTML = '';
+    hiddenWrap.innerHTML = '';
+
+    selectedKelompoks.forEach(function(kelompok) {
+        const badge = document.createElement('span');
+        badge.style.cssText = 'display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 12px;background:#dbeafe;color:#1d4ed8;border-radius:20px;font-size:12px;font-weight:600;';
+        badge.innerHTML = kelompok.nama + ' <button type="button" onclick="removeKelompok(' + kelompok.id + ')" style="background:none;border:none;cursor:pointer;color:#1d4ed8;font-size:15px;line-height:1;padding:0;">&times;</button>';
+        badgeWrap.appendChild(badge);
+
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'kelompok_ids[]';
+        input.value = String(kelompok.id);
+        hiddenWrap.appendChild(input);
+    });
+
+    if (selectedKelompoks.size === 0) {
+        badgeWrap.innerHTML = '<span style="font-size:12px;color:#94a3b8;">Belum ada kelompok dipilih.</span>';
+    }
+
+    renderKelompokTriggerText();
+    onKelompokChange();
+}
+
+function removeKelompok(id) {
+    selectedKelompoks.delete(Number(id));
+    renderKelompokBadges();
+    if (kelompokOpen) {
+        buildKelompokItems(currentKelompokList());
+    }
+}
+
+function selectKelompok(id) {
+    const found = KELOMPOK_SOURCE.find(function(k) { return k.id === Number(id); });
+    if (!found) {
+        return;
+    }
+
+    if (found.locked_jadwal && !selectedKelompoks.has(found.id)) {
+        return;
+    }
+
+    selectedKelompoks.set(found.id, found);
+    renderKelompokBadges();
+    buildKelompokItems(currentKelompokList());
+}
+
+function currentKelompokList() {
+    const q = (document.getElementById('kelompok-search').value || '').toLowerCase().trim();
+    if (!q) {
+        return KELOMPOK_SOURCE;
+    }
+
+    return KELOMPOK_SOURCE.filter(function(k) {
+        return (k.nama || '').toLowerCase().includes(q)
+            || (k.skema || '').toLowerCase().includes(q);
+    });
+}
+
+function buildKelompokItems(list) {
+    const wrap = document.getElementById('kelompok-list');
+    wrap.innerHTML = '';
+
+    if (!list.length) {
+        wrap.innerHTML = '<div style="padding:10px 14px;color:#94a3b8;font-size:13px;">Tidak ada hasil.</div>';
+        return;
+    }
+
+    list.forEach(function(item) {
+        const selected = selectedKelompoks.has(item.id);
+        const locked = Boolean(item.locked_jadwal) && !selected;
+
+        const row = document.createElement('div');
+        row.style.cssText = 'padding:9px 14px;font-size:13px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #f8fafc;cursor:' + ((selected || locked) ? 'default' : 'pointer') + ';' + ((selected || locked) ? 'color:#94a3b8;' : 'color:#1e293b;');
+
+        let status = '';
+        if (selected) {
+            status = '<span style="font-size:11px;color:#16a34a;font-weight:600;white-space:nowrap;">✓ Dipilih</span>';
+        } else if (locked) {
+            status = '<span style="font-size:11px;color:#b45309;font-weight:600;white-space:nowrap;">Sudah dijadwal</span>';
+        }
+
+        row.innerHTML = '<div style="display:flex;flex-direction:column;gap:2px;">'
+            + '<span>' + item.nama + '</span>'
+            + '<span style="font-size:11px;color:#94a3b8;">' + item.skema + ' • ' + item.asesi_count + ' asesi' + (item.locked_jadwal ? ' • ' + item.locked_jadwal : '') + '</span>'
+            + '</div>'
+            + status;
+
+        if (!selected && !locked) {
+            row.onclick = function() { selectKelompok(item.id); };
+            row.onmouseover = function() { row.style.background = '#f0f9ff'; };
+            row.onmouseout = function() { row.style.background = ''; };
+        }
+
+        wrap.appendChild(row);
+    });
+}
+
+function filterKelompok() {
+    buildKelompokItems(currentKelompokList());
+}
+
+function openKelompokDropdown() {
+    kelompokOpen = true;
+    document.getElementById('kelompok-search').value = '';
+    buildKelompokItems(KELOMPOK_SOURCE);
+    document.getElementById('kelompok-dropdown').style.display = '';
+
+    const trigger = document.getElementById('kelompok-trigger');
+    trigger.style.borderColor = '#0061a5';
+    trigger.style.boxShadow = '0 0 0 3px rgba(0,97,165,.1)';
+    trigger.style.background = 'white';
+    document.getElementById('kelompok-chevron').style.transform = 'rotate(180deg)';
+}
+
+function closeKelompokDropdown() {
+    kelompokOpen = false;
+    document.getElementById('kelompok-dropdown').style.display = 'none';
+
+    const trigger = document.getElementById('kelompok-trigger');
+    trigger.style.borderColor = '{{ ($errors->has('kelompok_ids') || $errors->has('kelompok_ids.*')) ? '#ef4444' : '#d1d5db' }}';
+    trigger.style.boxShadow = '';
+    trigger.style.background = '#f8fafc';
+    document.getElementById('kelompok-chevron').style.transform = '';
+}
+
+function toggleKelompokDropdown() {
+    if (kelompokOpen) {
+        closeKelompokDropdown();
+    } else {
+        openKelompokDropdown();
+    }
+}
+
+document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('kelompok-dropdown-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+        closeKelompokDropdown();
+    }
+});
+
+function onKelompokChange() {
     const preview = document.getElementById('kelompok_preview');
-    if (!id || !KELOMPOK_DATA[id]) {
+    const selectedIds = Array.from(selectedKelompoks.keys());
+
+    if (!selectedIds.length) {
         preview.classList.remove('show');
         return;
     }
-    const d = KELOMPOK_DATA[id];
-    document.getElementById('prev_skema').textContent  = d.nama_skema  || '—';
-    document.getElementById('prev_asesor').textContent = d.asesor_nama || '(belum ada asesor)';
-    document.getElementById('prev_asesi').textContent  = d.asesi_count + ' peserta';
+
+    const selectedData = selectedIds.map(function(id) { return KELOMPOK_DATA[id]; }).filter(Boolean);
+    const skemaSet = new Set(selectedData.map(d => d.nama_skema || '—'));
+    const asesorSet = new Set(selectedData.map(d => d.asesor_nama || '(belum ada asesor)'));
+    const pesertaSet = new Set();
+
+    selectedData.forEach(function(d) {
+        (d.asesi_niks || []).forEach(function(nik) {
+            pesertaSet.add(String(nik));
+        });
+    });
+
+    document.getElementById('prev_kelompok').textContent = selectedData.map(d => d.nama_kelompok).join(', ');
+    document.getElementById('prev_skema').textContent = skemaSet.size === 1
+        ? Array.from(skemaSet)[0]
+        : 'Beragam (' + skemaSet.size + ' skema)';
+    document.getElementById('prev_asesor').textContent = asesorSet.size === 1
+        ? Array.from(asesorSet)[0]
+        : 'Beragam (' + asesorSet.size + ' asesor)';
+    document.getElementById('prev_asesi').textContent = pesertaSet.size + ' peserta dari ' + selectedIds.length + ' kelompok';
     preview.classList.add('show');
 }
 
@@ -262,8 +486,7 @@ function validateTanggal() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const sel = document.getElementById('kelompok_select');
-    if (sel?.value) onKelompokChange(sel.value);
+    renderKelompokBadges();
 
     const tukSel = document.getElementById('tuk_select');
     if (tukSel?.value) showTukPreview(tukSel);

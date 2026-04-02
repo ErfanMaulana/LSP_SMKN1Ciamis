@@ -230,7 +230,16 @@
                             </td>
                             <td>{{ $jadwal->tuk?->nama_tuk ?? '-' }}</td>
                             <td>{{ $jadwal->skema?->nama_skema ?? '-' }}</td>
-                            <td>{{ $jadwal->kelompok?->nama_kelompok ?? '-' }}</td>
+                            <td>
+                                @php
+                                    $namaKelompok = $jadwal->kelompoks->pluck('nama_kelompok')->filter()->values();
+                                @endphp
+                                @if($namaKelompok->count())
+                                    {{ $namaKelompok->join(', ') }}
+                                @else
+                                    {{ $jadwal->kelompok?->nama_kelompok ?? '-' }}
+                                @endif
+                            </td>
                             <td>{{ $jadwal->peserta_terdaftar }} / {{ $jadwal->kuota }}</td>
                             <td><span class="badge {{ $statusClass }}">{{ $jadwal->status_label }}</span></td>
                         </tr>
