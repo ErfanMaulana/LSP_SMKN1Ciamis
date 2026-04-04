@@ -517,7 +517,6 @@
 
             <nav class="navbar-nav">
                 <a href="{{ route('front.home') }}" class="{{ request()->routeIs('front.home') ? 'active' : '' }}">Beranda</a>
-                <a href="{{ route('front.profil') }}" class="{{ request()->routeIs('front.profil') ? 'active' : '' }}">Profil LSP</a>
                 <a href="{{ route('front.kompetensi.index') }}" class="{{ request()->routeIs('front.kompetensi.index') ? 'active' : '' }}">Kompetensi & Data Skema</a>
                 <a href="{{ route('front.berita.index') }}" class="{{ request()->routeIs('front.berita.index') ? 'active' : '' }}">Berita</a>
                 <a href="{{ route('front.kontak') }}" class="{{ request()->routeIs('front.kontak') ? 'active' : '' }}">Kontak</a>

@@ -78,99 +78,155 @@
             </div>
         </div>
 
-        <div class="card detail-card">
-            <h3>Informasi Asesor</h3>
+        <div class="profile-main-column">
+            <div class="card detail-card">
+                <h3>Informasi Asesor</h3>
 
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <label>Nama Lengkap</label>
-                    <div class="detail-value">{{ $asesor->nama }}</div>
-                </div>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <label>Nama Lengkap</label>
+                        <div class="detail-value">{{ $asesor->nama }}</div>
+                    </div>
 
-                <div class="detail-item">
-                    <label>No. Registrasi</label>
-                    <div class="detail-value">
-                        @if($asesor->no_met)
-                            <span class="badge badge-success">
-                                <i class="bi bi-check-circle-fill"></i> {{ $asesor->no_met }}
-                            </span>
-                        @else
-                            <span class="text-muted">Belum diatur</span>
-                        @endif
+                    <div class="detail-item">
+                        <label>No. Registrasi</label>
+                        <div class="detail-value">
+                            @if($asesor->no_met)
+                                <span class="badge badge-success">
+                                    <i class="bi bi-check-circle-fill"></i> {{ $asesor->no_met }}
+                                </span>
+                            @else
+                                <span class="text-muted">Belum diatur</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="detail-item detail-item-full">
+                        <label>Skema Sertifikasi</label>
+                        <div class="detail-value">
+                            @if($asesor->skemas->count())
+                                <div class="skema-list">
+                                    @foreach($asesor->skemas as $skema)
+                                        <div class="skema-item">
+                                            <div class="skema-name">{{ $skema->nama_skema }}</div>
+                                            @if($skema->nomor_skema)
+                                                <div class="skema-number">{{ $skema->nomor_skema }}</div>
+                                            @endif
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @else
+                                <span class="text-muted">Belum ditentukan</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Status Login</label>
+                        <div class="detail-value">
+                            @if($asesor->no_met)
+                                <span class="badge badge-active">
+                                    <i class="bi bi-person-check-fill"></i> Akun Aktif
+                                </span>
+                            @else
+                                <span class="badge badge-inactive">
+                                    <i class="bi bi-person-x-fill"></i> Tidak Ada Akun
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Status Asesor</label>
+                        <div class="detail-value">
+                            @if($asesor->skemas->count())
+                                <span class="badge badge-active">
+                                    <i class="bi bi-check-circle-fill"></i> Aktif
+                                </span>
+                            @else
+                                <span class="badge badge-inactive">
+                                    <i class="bi bi-x-circle-fill"></i> Tidak Aktif
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Dibuat pada</label>
+                        <div class="detail-value">
+                            @if($asesor->created_at)
+                                {{ \Carbon\Carbon::parse($asesor->created_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="detail-item">
+                        <label>Terakhir diupdate</label>
+                        <div class="detail-value">
+                            @if($asesor->updated_at)
+                                {{ \Carbon\Carbon::parse($asesor->updated_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="detail-item detail-item-full">
-                    <label>Skema Sertifikasi</label>
-                    <div class="detail-value">
-                        @if($asesor->skemas->count())
-                            <div class="skema-list">
-                                @foreach($asesor->skemas as $skema)
-                                    <div class="skema-item">
-                                        <div class="skema-name">{{ $skema->nama_skema }}</div>
-                                        @if($skema->nomor_skema)
-                                            <div class="skema-number">{{ $skema->nomor_skema }}</div>
-                                        @endif
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <span class="text-muted">Belum ditentukan</span>
-                        @endif
-                    </div>
-                </div>
+            <div class="card password-card" id="password-form">
+                <h3>Ubah Password</h3>
+                <p class="password-intro">Gunakan password yang kuat untuk menjaga keamanan akun asesor Anda.</p>
 
-                <div class="detail-item">
-                    <label>Status Login</label>
-                    <div class="detail-value">
-                        @if($asesor->no_met)
-                            <span class="badge badge-active">
-                                <i class="bi bi-person-check-fill"></i> Akun Aktif
-                            </span>
-                        @else
-                            <span class="badge badge-inactive">
-                                <i class="bi bi-person-x-fill"></i> Tidak Ada Akun
-                            </span>
-                        @endif
-                    </div>
-                </div>
+                <form action="{{ route('asesor.password.update') }}" method="POST" class="password-form">
+                    @csrf
+                    @method('PUT')
 
-                <div class="detail-item">
-                    <label>Status Asesor</label>
-                    <div class="detail-value">
-                        @if($asesor->skemas->count())
-                            <span class="badge badge-active">
-                                <i class="bi bi-check-circle-fill"></i> Aktif
-                            </span>
-                        @else
-                            <span class="badge badge-inactive">
-                                <i class="bi bi-x-circle-fill"></i> Tidak Aktif
-                            </span>
-                        @endif
+                    <div class="form-group">
+                        <label for="password_lama">Password Lama</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-lock"></i>
+                            <input id="password_lama" type="password" name="password_lama" class="form-input @error('password_lama') input-error @enderror" required>
+                            <button type="button" class="toggle-password" data-target="password_lama" aria-label="Tampilkan password lama">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        @error('password_lama')
+                            <p class="error-text">{{ $message }}</p>
+                        @enderror
                     </div>
-                </div>
 
-                <div class="detail-item">
-                    <label>Dibuat pada</label>
-                    <div class="detail-value">
-                        @if($asesor->created_at)
-                            {{ \Carbon\Carbon::parse($asesor->created_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
-                        @else
-                            <span class="text-muted">-</span>
-                        @endif
+                    <div class="form-group">
+                        <label for="password_baru">Password Baru</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-shield-lock"></i>
+                            <input id="password_baru" type="password" name="password_baru" class="form-input @error('password_baru') input-error @enderror" required>
+                            <button type="button" class="toggle-password" data-target="password_baru" aria-label="Tampilkan password baru">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <p class="password-hint">Minimal 8 karakter dan harus berbeda dari password lama.</p>
+                        @error('password_baru')
+                            <p class="error-text">{{ $message }}</p>
+                        @enderror
                     </div>
-                </div>
 
-                <div class="detail-item">
-                    <label>Terakhir diupdate</label>
-                    <div class="detail-value">
-                        @if($asesor->updated_at)
-                            {{ \Carbon\Carbon::parse($asesor->updated_at)->locale('id')->translatedFormat('d F Y, H:i') }} WIB
-                        @else
-                            <span class="text-muted">-</span>
-                        @endif
+                    <div class="form-group">
+                        <label for="password_baru_confirmation">Konfirmasi Password Baru</label>
+                        <div class="input-wrap">
+                            <i class="bi bi-shield-check"></i>
+                            <input id="password_baru_confirmation" type="password" name="password_baru_confirmation" class="form-input" required>
+                            <button type="button" class="toggle-password" data-target="password_baru_confirmation" aria-label="Tampilkan konfirmasi password baru">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
+
+                    <button type="submit" class="btn-primary">
+                        <i class="bi bi-check2-circle"></i> Simpan Password Baru
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -324,6 +380,24 @@
         });
     });
 </script>
+<script>
+    document.querySelectorAll('.toggle-password').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const targetId = button.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            if (!input) return;
+
+            const icon = button.querySelector('i');
+            const isHidden = input.type === 'password';
+
+            input.type = isHidden ? 'text' : 'password';
+            if (icon) {
+                icon.classList.toggle('bi-eye', !isHidden);
+                icon.classList.toggle('bi-eye-slash', isHidden);
+            }
+        });
+    });
+</script>
 @endsection
 
 @section('styles')
@@ -350,6 +424,21 @@
         display: grid;
         grid-template-columns: minmax(280px, 320px) 1fr;
         gap: 20px;
+        align-items: start;
+    }
+
+    .photo-card {
+        height: fit-content;
+    }
+
+    .profile-main-column {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    #password-form {
+        scroll-margin-top: 88px;
     }
 
     .card {
@@ -657,6 +746,90 @@
         margin-top: 4px;
     }
 
+    .password-card {
+        border: 1px solid #e2e8f0;
+    }
+
+    .password-intro {
+        color: #64748b;
+        font-size: 13px;
+        margin-top: -8px;
+        margin-bottom: 16px;
+    }
+
+    .password-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .input-wrap {
+        position: relative;
+    }
+
+    .input-wrap > i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 15px;
+    }
+
+    .form-input {
+        width: 100%;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 10px 42px 10px 38px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.12);
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: transparent;
+        color: #94a3b8;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+    }
+
+    .toggle-password:hover {
+        color: #475569;
+    }
+
+    .password-hint {
+        color: #64748b;
+        font-size: 12px;
+        margin-top: -3px;
+    }
+
     @media (max-width: 1024px) {
         .profile-grid {
             grid-template-columns: 1fr;
@@ -664,6 +837,10 @@
 
         .detail-grid {
             grid-template-columns: 1fr;
+        }
+
+        .profile-main-column {
+            gap: 14px;
         }
 
         .crop-modal-content {
@@ -699,6 +876,11 @@
         .card h3 {
             font-size: 16px;
             margin-bottom: 14px;
+        }
+
+        .password-intro {
+            margin-top: -4px;
+            margin-bottom: 12px;
         }
 
         .photo-preview,

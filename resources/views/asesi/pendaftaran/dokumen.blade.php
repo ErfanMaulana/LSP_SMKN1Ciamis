@@ -6,9 +6,19 @@
 @section('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 <style>
+    :root {
+        --brand-500: #0061a5;
+        --brand-600: #00538d;
+        --brand-400: #0073bd;
+        --brand-soft: #eef6ff;
+        --brand-soft-border: #bfdbfe;
+    }
+
     .reg-card {
         background: white; border-radius: 12px; padding: 32px;
         box-shadow: 0 1px 3px rgba(0,0,0,.08); max-width: 900px;
+        width: 100%;
+        margin: 0 auto;
     }
     .reg-card h3 {
         font-size: 16px; font-weight: 700; color: #0F172A;
@@ -18,29 +28,50 @@
         font-size: 12px; color: #64748b; margin-bottom: 20px;
     }
 
+    .reg-card,
+    .reg-card * {
+        max-width: 100%;
+    }
+
     /* Step indicator */
     .step-indicator {
         display: flex; align-items: center; justify-content: center;
         gap: 16px; margin-bottom: 24px;
+        flex-wrap: wrap;
     }
     .step { display: flex; align-items: center; gap: 8px; }
     .step-number {
         width: 36px; height: 36px; border-radius: 50%;
-        background: #14532d; color: white;
+        background: var(--brand-500); color: white;
         display: flex; align-items: center; justify-content: center;
         font-weight: 700; font-size: 14px; flex-shrink: 0;
     }
-    .step.completed .step-number { background: #16a34a; }
-    .step-label { font-size: 12px; font-weight: 600; color: #14532d; }
-    .step-line { width: 50px; height: 2px; background: #14532d; }
+    .step.completed .step-number { background: var(--brand-400); }
+    .step-label { font-size: 12px; font-weight: 600; color: var(--brand-500); }
+    .step-line { width: 50px; height: 2px; background: var(--brand-500); }
 
     /* Alerts */
     .alert-box {
         padding: 12px 16px; border-radius: 8px; margin-bottom: 20px;
         display: flex; gap: 12px; font-size: 12px; line-height: 1.5;
     }
+    .alert-box p {
+        margin: 0;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .reg-card h3,
+    .subtitle,
+    .step-label,
+    .upload-card h4,
+    .upload-card p {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
     .alert-error { background: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; }
-    .alert-info { background: #f0fdf4; border-left: 4px solid #14532d; color: #14532d; }
+    .alert-info { background: var(--brand-soft); border-left: 4px solid var(--brand-500); color: var(--brand-600); }
     .alert-box i { flex-shrink: 0; margin-top: 2px; font-size: 15px; }
     .error-list { list-style: none; margin: 4px 0 0; padding-left: 16px; }
     .error-list li { font-size: 11px; margin-top: 2px; }
@@ -55,7 +86,7 @@
         display: flex; align-items: center; justify-content: center;
         margin-bottom: 12px; cursor: pointer; transition: border-color .2s;
     }
-    .photo-box:hover { border-color: #14532d; }
+    .photo-box:hover { border-color: var(--brand-500); }
     .photo-box img {
         position: absolute; inset: 0;
         width: 100%; height: 100%; object-fit: cover; border-radius: 5px;
@@ -64,7 +95,7 @@
     .photo-badge {
         position: absolute; bottom: 6px; right: 6px;
         width: 28px; height: 28px; border-radius: 50%;
-        background: #14532d; color: white;
+        background: var(--brand-500); color: white;
         display: flex; align-items: center; justify-content: center;
         font-size: 13px;
     }
@@ -99,7 +130,7 @@
         padding: 5px 12px; font-size: 11px; font-weight: 600;
         border-radius: 20px; cursor: pointer; transition: all .2s; border: 1px solid;
     }
-    .photo-action-btn.edit { color: #0061a5; background: #eff6ff; border-color: #bfdbfe; }
+    .photo-action-btn.edit { color: var(--brand-500); background: #eff6ff; border-color: var(--brand-soft-border); }
     .photo-action-btn.edit:hover { background: #dbeafe; }
     .photo-action-btn.change { color: #64748b; background: #f8fafc; border-color: #e2e8f0; }
     .photo-action-btn.change:hover { background: #f1f5f9; }
@@ -107,10 +138,10 @@
     .photo-btn {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 6px 16px; font-size: 12px; font-weight: 600;
-        color: #14532d; background: #f0fdf4; border: 1px solid #bbf7d0;
+        color: var(--brand-500); background: var(--brand-soft); border: 1px solid var(--brand-soft-border);
         border-radius: 20px; cursor: pointer; transition: all .2s;
     }
-    .photo-btn:hover { background: #dcfce7; }
+    .photo-btn:hover { background: #dbeafe; }
     .photo-name { font-size: 11px; color: #94a3b8; margin-top: 6px; }
 
     /* Cropper Modal */
@@ -141,10 +172,10 @@
     }
     .btn-crop-apply {
         padding: 8px 24px; border-radius: 8px; font-size: 13px; font-weight: 600;
-        background: #14532d; color: white; border: none; cursor: pointer;
+        background: var(--brand-500); color: white; border: none; cursor: pointer;
         display: flex; align-items: center; gap: 8px;
     }
-    .btn-crop-apply:hover { background: #166534; }
+    .btn-crop-apply:hover { background: var(--brand-600); }
 
     /* Upload card */
     .upload-card {
@@ -152,16 +183,15 @@
         padding: 20px; background: white; margin-bottom: 16px;
         transition: all .2s;
     }
-    .upload-card:hover { border-color: #14532d; box-shadow: 0 2px 8px rgba(20,83,45,.08); }
+    .upload-card:hover { border-color: var(--brand-500); box-shadow: 0 2px 8px rgba(0,97,165,.12); }
     .upload-card-header { display: flex; align-items: flex-start; gap: 16px; }
     .upload-icon {
         width: 44px; height: 44px; border-radius: 10px;
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0; font-size: 20px;
+        background: var(--brand-soft);
+        color: var(--brand-500);
     }
-    .upload-icon.violet { background: #f3e8ff; color: #7c3aed; }
-    .upload-icon.amber { background: #fef3c7; color: #d97706; }
-    .upload-icon.emerald { background: #d1fae5; color: #059669; }
     .upload-card h4 {
         font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 4px;
     }
@@ -169,14 +199,15 @@
     .file-list { margin-bottom: 12px; }
     .file-row {
         display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+        min-width: 0;
     }
     .file-choose-btn {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 5px 14px; font-size: 11px; font-weight: 600;
-        color: #14532d; background: #f0fdf4; border: 1px solid #bbf7d0;
+        color: var(--brand-500); background: var(--brand-soft); border: 1px solid var(--brand-soft-border);
         border-radius: 20px; cursor: pointer; transition: all .2s; white-space: nowrap;
     }
-    .file-choose-btn:hover { background: #dcfce7; }
+    .file-choose-btn:hover { background: #dbeafe; }
     .file-name { font-size: 11px; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px; }
     .file-remove {
         padding: 4px; color: #ef4444; cursor: pointer; background: none; border: none;
@@ -186,10 +217,10 @@
     .add-file-btn {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 6px 16px; font-size: 12px; font-weight: 600;
-        color: #14532d; background: #f0fdf4; border: 1px solid #bbf7d0;
+        color: var(--brand-500); background: var(--brand-soft); border: 1px solid var(--brand-soft-border);
         border-radius: 20px; cursor: pointer; transition: all .2s;
     }
-    .add-file-btn:hover { background: #dcfce7; }
+    .add-file-btn:hover { background: #dbeafe; }
 
     /* Submit */
     .reg-actions {
@@ -201,8 +232,8 @@
         cursor: pointer; border: none; display: inline-flex;
         align-items: center; gap: 8px; transition: all .2s;
     }
-    .btn-reg-success { background: #14532d; color: white; flex: 1; justify-content: center; }
-    .btn-reg-success:hover { background: #166534; }
+    .btn-reg-success { background: var(--brand-500); color: white; flex: 1; justify-content: center; }
+    .btn-reg-success:hover { background: var(--brand-600); }
 
     @media (max-width: 768px) {
         .reg-card {
@@ -210,9 +241,15 @@
             border-radius: 10px;
         }
 
+        .reg-card h3 {
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
         .step-indicator {
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 16px;
+            justify-content: flex-start;
         }
 
         .step-number {
@@ -222,7 +259,7 @@
         }
 
         .step-line {
-            width: 26px;
+            width: 20px;
         }
 
         .step-label {
@@ -252,7 +289,7 @@
 
         .file-name {
             max-width: 100%;
-            width: calc(100% - 30px);
+            width: 100%;
         }
 
         .cropper-modal-box {
@@ -273,8 +310,33 @@
             padding-top: 14px;
         }
 
+        .alert-box {
+            padding: 10px 12px;
+            gap: 8px;
+            font-size: 11.5px;
+        }
+
         .btn-reg-success {
             width: 100%;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .reg-card {
+            padding: 12px;
+        }
+
+        .upload-card {
+            padding: 12px;
+        }
+
+        .photo-box {
+            width: 108px;
+            height: 144px;
+        }
+
+        .reg-card h3 {
+            font-size: 14px;
         }
     }
 </style>
@@ -295,7 +357,7 @@
         </div>
     </div>
 
-    <h3><i class="bi bi-cloud-upload" style="color:#14532d;"></i> Upload Bukti Pendukung</h3>
+    <h3><i class="bi bi-cloud-upload" style="color:#0061a5;"></i> Upload Bukti Pendukung</h3>
     <p class="subtitle">Ini adalah langkah terakhir! Upload dokumen yang diperlukan lalu kirim pendaftaran.</p>
 
     @if ($errors->any())
@@ -374,7 +436,7 @@
         <!-- Transkrip Nilai -->
         <div class="upload-card">
             <div class="upload-card-header">
-                <div class="upload-icon violet"><i class="bi bi-file-earmark-text"></i></div>
+                <div class="upload-icon"><i class="bi bi-file-earmark-text"></i></div>
                 <div style="flex:1;">
                     <h4>Transkrip Nilai <span style="color:#ef4444;">*</span></h4>
                     <p>Scan/foto transkrip nilai akademik. Format: JPG, PNG, WebP, PDF. Maks: 2MB per file</p>
@@ -389,7 +451,7 @@
         <!-- Identitas Pribadi -->
         <div class="upload-card">
             <div class="upload-card-header">
-                <div class="upload-icon amber"><i class="bi bi-person-vcard"></i></div>
+                <div class="upload-icon"><i class="bi bi-person-vcard"></i></div>
                 <div style="flex:1;">
                     <h4>Identitas Pribadi (KTP / Kartu Pelajar / KK) <span style="color:#ef4444;">*</span></h4>
                     <p>Format: JPG, PNG, WebP, PDF. Maks: 2MB per file</p>
@@ -404,7 +466,7 @@
         <!-- Bukti Kompetensi -->
         <div class="upload-card">
             <div class="upload-card-header">
-                <div class="upload-icon emerald"><i class="bi bi-award"></i></div>
+                <div class="upload-icon"><i class="bi bi-award"></i></div>
                 <div style="flex:1;">
                     <h4>Bukti Kompetensi (Sertifikat, Basic Skill Report) <span style="color:#ef4444;">*</span></h4>
                     <p>Format: JPG, PNG, WebP, PDF. Maks: 2MB per file</p>

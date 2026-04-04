@@ -115,18 +115,17 @@
     }
 
     .btn-primary:hover {
-        background: #003961;
+        background: #005a94;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
     }
 
     .btn-secondary {
-        background: #f3f4f6;
-        color: #374151;
+        background: #64748b;
+        color: #fff;
     }
 
     .btn-secondary:hover {
-        background: #e5e7eb;
+        background: #475569;
     }
 
     .form-actions {
@@ -145,6 +144,9 @@
         <h2>Edit Berita</h2>
         <p>Perbarui informasi berita</p>
     </div>
+    <a href="{{ route('admin.berita.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Kembali
+    </a>
 </div>
 
 <div class="form-card">
@@ -224,7 +226,7 @@
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">
-                <i class="bi bi-save"></i> Update Berita
+                <i class="bi bi-save"></i> Simpan
             </button>
             <a href="{{ route('admin.berita.index') }}" class="btn btn-secondary">
                 <i class="bi bi-x-lg"></i> Batal

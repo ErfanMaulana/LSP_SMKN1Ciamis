@@ -176,7 +176,7 @@
 
 @section('content')
 <div class="page-header">
-    <h2><i class="bi bi-people-fill"></i> Kelompok Yang Saya Ampu</h2>
+    <h2>Kelompok Yang Saya Ampu</h2>
     <p>Informasi kelompok dan daftar asesi yang ditugaskan ke asesor Anda.</p>
 </div>
 

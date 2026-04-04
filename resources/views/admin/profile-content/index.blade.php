@@ -99,7 +99,7 @@
                                     </button>
                                     <div class="action-dropdown">
                                         <a href="{{ route('admin.profile-content.edit', $item->id) }}" class="dropdown-item">
-                                            <i class="bi bi-pencil"></i> Ubah
+                                            <i class="bi bi-pencil"></i> Edit
                                         </a>
                                        
                                         <form action="{{ route('admin.profile-content.destroy', $item->id) }}" method="POST" 
@@ -173,7 +173,7 @@
                                     </button>
                                     <div class="action-dropdown">
                                         <a href="{{ route('admin.profile-content.vision-mission.edit', $vision->id) }}" class="dropdown-item">
-                                            <i class="bi bi-pencil"></i> Ubah
+                                            <i class="bi bi-pencil"></i> Edit
                                         </a>
                                        
                                         <form action="{{ route('admin.profile-content.vision-mission.destroy', $vision->id) }}" method="POST" 
@@ -247,7 +247,7 @@
                                     </button>
                                     <div class="action-dropdown">
                                         <a href="{{ route('admin.profile-content.vision-mission.edit', $mission->id) }}" class="dropdown-item">
-                                            <i class="bi bi-pencil"></i> Ubah
+                                            <i class="bi bi-pencil"></i> Edit
                                         </a>
                                        
                                         <form action="{{ route('admin.profile-content.vision-mission.destroy', $mission->id) }}" method="POST" 

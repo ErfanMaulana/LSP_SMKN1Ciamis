@@ -21,7 +21,7 @@
     </td>
     <td>
         @if($skema->jurusan)
-            <span class="text-xs font-medium">{{ strtoupper($skema->jurusan->kode_jurusan) }}</span>
+            <span class="text-xs font-medium">{{ $skema->jurusan->nama_jurusan }}</span>
         @else
             <span class="text-muted">-</span>
         @endif
@@ -31,15 +31,15 @@
     </td>
     <td>
         <div class="action-menu">
-            <button class="action-btn" onclick="toggleMenu(event, this)">
+            <button type="button" class="action-btn" onclick="toggleMenu(event, this)">
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
             <div class="action-dropdown">
-                <a href="{{ route('admin.skema.edit', $skema->id) }}">
-                    <i class="bi bi-pencil"></i> Ubah
+                <a href="{{ route('admin.skema.show', $skema->id) }}">
+                    <i class="bi bi-eye"></i> Lihat Detail
                 </a>
                 <a href="{{ route('admin.skema.edit', $skema->id) }}">
-                    <i class="bi bi-eye"></i> Lihat Detail
+                    <i class="bi bi-pencil"></i> Edit
                 </a>
                 <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;">
                     @csrf

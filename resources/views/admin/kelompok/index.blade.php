@@ -181,13 +181,16 @@
     }
 
     .filter-select {
-        padding: 10px 14px;
+        padding: 10px 36px 10px 14px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
         font-size: 14px;
         background: white;
-        color: #475569;
         cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
         transition: all 0.2s;
         min-width: 160px;
     }
@@ -203,7 +206,12 @@
     }
 
     /* Table */
-    
+    .table-container {
+        overflow-x: auto;
+        overflow-y: visible;
+        position: relative;
+        -webkit-overflow-scrolling: touch;
+    }
 
     .data-table {
         width: 100%;
@@ -264,7 +272,7 @@
     .action-menu { position: relative; }
     .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
     .action-btn:hover { background: #f1f5f9; }
-    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 160px; z-index: 10; overflow: hidden; }
+    .action-dropdown { display: none; position: fixed; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 170px; z-index: 9990; overflow: visible; }
     .action-dropdown.show { display: block; }
     .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
     .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
@@ -500,10 +508,38 @@
     // Dropdown toggle function
     function toggleMenu(event, button) {
         event.stopPropagation();
+        const dropdown = button.nextElementSibling;
+        const isOpen = dropdown.classList.contains('show');
+
         document.querySelectorAll('.action-dropdown.show').forEach(d => {
-            if (d !== button.nextElementSibling) d.classList.remove('show');
+            d.classList.remove('show');
+            d.style.top = '';
+            d.style.left = '';
         });
-        button.nextElementSibling.classList.toggle('show');
+
+        if (isOpen) {
+            return;
+        }
+
+        const rect = button.getBoundingClientRect();
+        dropdown.classList.add('show');
+
+        const dropdownWidth = dropdown.offsetWidth || 170;
+        const dropdownHeight = dropdown.offsetHeight || 140;
+
+        let left = rect.right - dropdownWidth;
+        if (left < 8) left = 8;
+        if (left + dropdownWidth > window.innerWidth - 8) {
+            left = window.innerWidth - dropdownWidth - 8;
+        }
+
+        let top = rect.bottom + 4;
+        if (top + dropdownHeight > window.innerHeight - 8) {
+            top = Math.max(8, rect.top - dropdownHeight - 4);
+        }
+
+        dropdown.style.top = `${top}px`;
+        dropdown.style.left = `${left}px`;
     }
 
     // Close dropdown when clicking outside
@@ -511,8 +547,18 @@
         if (!e.target.closest('.action-menu')) {
             document.querySelectorAll('.action-dropdown.show').forEach(menu => {
                 menu.classList.remove('show');
+                menu.style.top = '';
+                menu.style.left = '';
             });
         }
+    });
+
+    window.addEventListener('resize', function() {
+        document.querySelectorAll('.action-dropdown.show').forEach(menu => {
+            menu.classList.remove('show');
+            menu.style.top = '';
+            menu.style.left = '';
+        });
     });
 </script>
 

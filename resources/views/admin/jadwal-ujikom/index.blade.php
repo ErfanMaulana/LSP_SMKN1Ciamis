@@ -40,19 +40,103 @@
     .stat-value { font-size: 24px; font-weight: 700; color: #0F172A; margin-top: 2px; }
 
     .toolbar {
-        display: flex; align-items: center; justify-content: space-between;
-        gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+        margin-bottom: 16px;
     }
-    .filter-form { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
-    .filter-form input, .filter-form select {
-        padding: 9px 14px; border: 1px solid #d1d5db; border-radius: 8px;
-        font-size: 13px; outline: none; transition: border-color .2s;
+
+    .filter-section {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
     }
-    .filter-form input[type=text] { flex: 1; min-width: 200px; }
-    .filter-form input:focus, .filter-form select:focus { border-color: #0061a5; }
-    .btn-search {
-        padding: 9px 18px; background: #0061a5; color: #fff;
-        border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+
+    .search-box {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 42px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
+    .btn-filter-search {
+        padding: 9px 14px;
+        background: #0073bd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+    }
+
+    .btn-filter-search:hover {
+        background: #005f99;
+    }
+
+    .btn-filter-reset {
+        padding: 9px 12px;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .btn-filter-reset:hover {
+        background: #fecaca;
     }
     .btn-add {
         padding: 9px 18px; background: #0061a5; color: #fff; border: none;
@@ -64,6 +148,7 @@
     .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
     table { width: 100%; border-collapse: collapse; overflow: visible; }
     .card > table { overflow: visible; }
+    .card > .admin-table-scroll { overflow: visible; }
     th {
         padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700;
         color: #64748b; text-transform: uppercase; letter-spacing:.5px;
@@ -90,7 +175,8 @@
     .action-menu { position: relative; }
     .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
     .action-btn:hover { background: #f1f5f9; }
-    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 160px; z-index: 10; overflow: hidden; }
+    .action-dropdown { display: none; position: absolute; right: 0; top: 100%; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 160px; z-index: 1200; overflow: hidden; }
+    .action-dropdown.open-up { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 4px; }
     .action-dropdown.show { display: block; }
     .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
     .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
@@ -131,6 +217,13 @@
     @media (max-width: 480px) {
         .stats-grid {
             grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .card > .admin-table-scroll {
+            overflow-x: auto;
+            overflow-y: visible;
         }
     }
 </style>
@@ -189,21 +282,23 @@
 </div>
 
 <!-- Toolbar -->
-<form method="GET" class="toolbar">
-    <div class="filter-form">
-        <input type="text" name="search" value="{{ $search }}" placeholder="Cari judul, TUK, skema...">
-        <input type="month" name="bulan" value="{{ $bulan }}" title="Filter bulan">
-        <select name="status">
-            <option value="all"         {{ $status === 'all'         ? 'selected' : '' }}>Semua Status</option>
-            <option value="dijadwalkan" {{ $status === 'dijadwalkan' ? 'selected' : '' }}>Dijadwalkan</option>
-            <option value="berlangsung" {{ $status === 'berlangsung' ? 'selected' : '' }}>Berlangsung</option>
-            <option value="selesai"     {{ $status === 'selesai'     ? 'selected' : '' }}>Selesai</option>
-            <option value="dibatalkan"  {{ $status === 'dibatalkan'  ? 'selected' : '' }}>Dibatalkan</option>
-        </select>
-        <button type="submit" class="btn-search"><i class="bi bi-search"></i> Cari</button>
-        @if($search || $status !== 'all' || $bulan !== now()->format('Y-m'))
-        <a href="{{ route('admin.jadwal-ujikom.index') }}" style="padding:9px 14px;color:#64748b;text-decoration:none;font-size:13px;">Reset</a>
-        @endif
+<form method="GET" class="toolbar" id="filterForm" action="{{ route('admin.jadwal-ujikom.index') }}">
+    <div class="filter-section">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" name="search" value="{{ $search }}" placeholder="Cari judul, TUK, skema..." autocomplete="off">
+        </div>
+        <div class="filter-group">
+            <input type="month" name="bulan" value="{{ $bulan }}" title="Filter bulan" class="filter-select" style="padding-right:14px;background-image:none;">
+            <select name="status" class="filter-select">
+                <option value="all"         {{ $status === 'all'         ? 'selected' : '' }}>Semua Status</option>
+                <option value="dijadwalkan" {{ $status === 'dijadwalkan' ? 'selected' : '' }}>Dijadwalkan</option>
+                <option value="berlangsung" {{ $status === 'berlangsung' ? 'selected' : '' }}>Berlangsung</option>
+                <option value="selesai"     {{ $status === 'selesai'     ? 'selected' : '' }}>Selesai</option>
+                <option value="dibatalkan"  {{ $status === 'dibatalkan'  ? 'selected' : '' }}>Dibatalkan</option>
+            </select>
+            
+        </div>
     </div>
 </form>
 
@@ -221,7 +316,7 @@
                 <th>Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="jadwalTableBody">
             @forelse($jadwals as $i => $jadwal)
             <tr>
                 <td style="color:#94a3b8;font-weight:600;">{{ $jadwals->firstItem() + $i }}</td>
@@ -297,20 +392,20 @@
             <tr>
                 <td colspan="8">
                     <div class="empty-state">
-                        <i class="bi bi-calendar-x"></i>
-                        <p>Belum ada jadwal ujikom{{ $search ? ' yang cocok' : '' }}.</p>
-                        <a href="{{ route('admin.jadwal-ujikom.create') }}" class="btn-add" style="display:inline-flex;margin-top:12px;">
-                            <i class="bi bi-plus-lg"></i> Tambah Jadwal Sekarang
-                        </a>
+                        <i class="bi bi-inbox"></i>
+                        <h4 style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data jadwal ujikom ditemukan</h4>
+                        <p style="font-size: 13px; color: #9ca3af; margin: 0;">Coba kata kunci lain.</p>
                     </div>
                 </td>
             </tr>
             @endforelse
         </tbody>
     </table>
-    @if($jadwals->hasPages())
-    <div class="pagination-wrap">{{ $jadwals->links() }}</div>
-    @endif
+    <div class="pagination-wrap" id="jadwalPaginationWrap">
+        @if($jadwals->hasPages())
+            {{ $jadwals->links() }}
+        @endif
+    </div>
 </div>
 
 @endsection
@@ -318,15 +413,113 @@
 @section('scripts')
 <script>
 function toggleMenu(button) {
+    const dropdown = button.nextElementSibling;
+    if (!dropdown) return;
+
     document.querySelectorAll('.action-dropdown.show').forEach(d => {
-        if (d !== button.nextElementSibling) d.classList.remove('show');
+        if (d !== dropdown) {
+            d.classList.remove('show', 'open-up');
+        }
     });
-    button.nextElementSibling.classList.toggle('show');
+
+    const willOpen = !dropdown.classList.contains('show');
+    dropdown.classList.toggle('show');
+    dropdown.classList.remove('open-up');
+
+    if (willOpen) {
+        const rect = dropdown.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.top;
+        if (spaceBelow < rect.height + 12) {
+            dropdown.classList.add('open-up');
+        }
+    }
 }
 document.addEventListener('click', e => {
     if (!e.target.closest('.action-menu')) {
-        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
+        document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show', 'open-up'));
     }
 });
+
+const filterForm = document.getElementById('filterForm');
+const jadwalTableBody = document.getElementById('jadwalTableBody');
+const jadwalPaginationWrap = document.getElementById('jadwalPaginationWrap');
+
+function performAjaxSearch(page = null) {
+    if (!filterForm || !jadwalTableBody || !jadwalPaginationWrap) return;
+
+    const formData = new FormData(filterForm);
+    const params = new URLSearchParams(formData);
+    if (page) {
+        params.set('page', page);
+    }
+
+    fetch(filterForm.action + '?' + params.toString(), {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Gagal memuat data jadwal.');
+        return response.json();
+    })
+    .then(data => {
+        jadwalTableBody.innerHTML = data.rows || '';
+        jadwalPaginationWrap.innerHTML = data.pagination || '';
+        window.history.replaceState({}, '', filterForm.action + '?' + params.toString());
+    })
+    .catch(error => console.error('Search error:', error));
+}
+
+if (filterForm) {
+    filterForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        performAjaxSearch();
+    });
+}
+
+const searchInput = filterForm ? filterForm.querySelector('input[name="search"]') : null;
+if (searchInput) {
+    searchInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            performAjaxSearch();
+        }
+    });
+
+    searchInput.addEventListener('input', function() {
+        performAjaxSearch();
+    });
+}
+
+document.querySelectorAll('#filterForm select, #filterForm input[name="bulan"]').forEach(el => {
+    el.addEventListener('change', function() {
+        performAjaxSearch();
+    });
+});
+
+jadwalPaginationWrap?.addEventListener('click', function(event) {
+    const link = event.target.closest('a');
+    if (!link) return;
+
+    event.preventDefault();
+    const linkUrl = new URL(link.href);
+    const page = linkUrl.searchParams.get('page');
+    performAjaxSearch(page);
+});
+
+function resetFilters() {
+    if (!filterForm) return;
+
+    const searchField = filterForm.querySelector('input[name="search"]');
+    const monthField = filterForm.querySelector('input[name="bulan"]');
+    const statusField = filterForm.querySelector('select[name="status"]');
+
+    if (searchField) searchField.value = '';
+    if (monthField) monthField.value = '{{ now()->format('Y-m') }}';
+    if (statusField) statusField.value = 'all';
+
+    performAjaxSearch();
+}
 </script>
 @endsection

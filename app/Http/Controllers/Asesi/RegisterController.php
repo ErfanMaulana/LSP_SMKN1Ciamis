@@ -7,6 +7,7 @@ use App\Models\Asesi;
 use App\Models\BuktiPendukung;
 use App\Models\Jurusan;
 use App\Models\Skema;
+use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -37,8 +38,12 @@ class RegisterController extends Controller
         // Digit 9-10 : Bulan
         // Digit 11-12: Tahun (2 digit)
         $nikData = null;
+        $nikAutofill = false;
+        $nikAutofillMessage = null;
         $nik = $account->NIK ?? '';
-        if (strlen($nik) === 16 && ctype_digit($nik)) {
+        if (strlen($nik) !== 16 || !ctype_digit($nik)) {
+            $nikAutofillMessage = 'NIK akun tidak valid (harus 16 digit angka), isi tanggal lahir dan jenis kelamin secara manual.';
+        } else {
             $dd = (int) substr($nik, 6, 2);
             $mm = (int) substr($nik, 8, 2);
             $yy = (int) substr($nik, 10, 2);
@@ -55,10 +60,21 @@ class RegisterController extends Controller
                     'tanggal_lahir' => sprintf('%04d-%02d-%02d', $year, $mm, $day),
                     'jenis_kelamin' => $isFemale ? 'Perempuan' : 'Laki-laki',
                 ];
+                $nikAutofill = true;
+            } else {
+                $nikAutofillMessage = 'Tanggal/bulan pada NIK tidak valid, isi tanggal lahir dan jenis kelamin secara manual.';
             }
         }
 
-        return view('asesi.pendaftaran.formulir', compact('account', 'asesi', 'jurusanList', 'skemaList', 'nikData'));
+        return view('asesi.pendaftaran.formulir', compact(
+            'account',
+            'asesi',
+            'jurusanList',
+            'skemaList',
+            'nikData',
+            'nikAutofill',
+            'nikAutofillMessage'
+        ));
     }
 
     /**
@@ -131,6 +147,15 @@ class RegisterController extends Controller
 
         // Store NIK in session for step 2
         session(['pendaftaran_nik' => $account->NIK]);
+
+        ActivityLogger::logUser(
+            (string) $account->NIK,
+            $request->input('nama') ?: ($account->nama ?? (string) $account->NIK),
+            'Mengisi APL 1',
+            'User menyimpan formulir APL 1 (data diri).',
+            $request,
+            ['skema_id' => (int) $request->skema_id]
+        );
 
         return redirect()->route('asesi.pendaftaran.dokumen');
     }
@@ -251,6 +276,14 @@ class RegisterController extends Controller
         // Set status to pending
         $asesi->status = 'pending';
         $asesi->save();
+
+        ActivityLogger::logUser(
+            (string) $account->NIK,
+            $asesi->nama ?? ($account->nama ?? (string) $account->NIK),
+            'Mengisi APL 1',
+            'User mengirim dokumen pendukung APL 1.',
+            $request
+        );
 
         // Clear session
         session()->forget('pendaftaran_nik');

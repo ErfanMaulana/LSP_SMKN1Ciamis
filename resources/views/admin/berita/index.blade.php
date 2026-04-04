@@ -92,7 +92,12 @@
 
     .card {
         background: #fff; border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid #e5e7eb; overflow: show;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.07); border: 1px solid #e5e7eb; overflow: visible;
+    }
+
+    /* Disable global table scroll wrapper for this page */
+    .card > .admin-table-scroll {
+        overflow: visible !important;
     }
 
     .data-table { width: 100%; border-collapse: collapse; }
@@ -121,98 +126,15 @@
     .status-badge.draft { background: #fef3c7; color: #92400e; }
 
     /* Dropdown Action */
-    .dropdown-action {
-        position: relative;
-        display: inline-block;
-        text-align: center;
-    }
-
-    .btn-dropdown {
-        background: none;
-        border: none;
-        padding: 8px;
-        color: #64748b;
-        cursor: pointer;
-        border-radius: 6px;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .btn-dropdown:hover {
-        background: #f1f5f9;
-        color: #0F172A;
-    }
-
-    .btn-dropdown i {
-        font-size: 18px;
-    }
-
-    .dropdown-menu {
-        position: absolute;
-        right: 0;
-        top: 100%;
-        margin-top: 4px;
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        min-width: 160px;
-        z-index: 1000;
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(-10px);
-        transition: all 0.2s;
-    }
-
-    .dropdown-menu.show {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-    }
-
-    .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 16px;
-        font-size: 14px;
-        color: #475569;
-        text-decoration: none;
-        border: none;
-        background: none;
-        cursor: pointer;
-        transition: all 0.2s;
-        width: 100%;
-        text-align: left;
-    }
-
-    .dropdown-item:first-child {
-        border-radius: 8px 8px 0 0;
-    }
-
-    .dropdown-item:last-child {
-        border-radius: 0 0 8px 8px;
-    }
-
-    .dropdown-item:hover {
-        background: #f8fafc;
-        color: #0F172A;
-    }
-
-    .dropdown-item i {
-        font-size: 15px;
-    }
-
-    .dropdown-item.danger {
-        color: #dc2626;
-    }
-
-    .dropdown-item.danger:hover {
-        background: #fef2f2;
-        color: #dc2626;
-    }
+    .action-menu { position: relative; display: inline-block; }
+    .action-btn { width: 32px; height: 32px; border: none; background: transparent; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+    .action-btn:hover { background: #f1f5f9; }
+    .action-dropdown { display: none; position: fixed; background: white; border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,.15); min-width: 160px; z-index: 9990; overflow: hidden; }
+    .action-dropdown.show { display: block; }
+    .dropdown-item, .action-dropdown a, .action-dropdown button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: none; text-align: left; font-size: 14px; color: #475569; cursor: pointer; transition: all .2s; text-decoration: none; }
+    .dropdown-item:hover, .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
+    .dropdown-item.danger { color: #475569; }
+    .action-dropdown button[type="submit"]:hover { background: #fef2f2; color: #dc2626; }
 
     .empty-state { text-align: center; padding: 60px 20px; }
     .empty-state i { font-size: 48px; color: #d1d5db; display: block; margin-bottom: 12px; }
@@ -233,6 +155,54 @@
     }
     .alert-error {
         background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            align-items: stretch;
+        }
+
+        .page-header .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .filter-controls {
+            width: 100%;
+        }
+
+        .filter-select {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .card {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .data-table {
+            min-width: 760px;
+        }
+
+        .data-table tbody td {
+            white-space: nowrap;
+        }
+
+        .pagination-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
     }
 
     @media (max-width: 640px) {
@@ -365,17 +335,18 @@
                     </span>
                 </td>
                 <td style="text-align: center;">
-                    <div class="dropdown-action">
-                        <button class="btn-dropdown" onclick="toggleDropdown(this)">
+                    <div class="action-menu">
+                        <button type="button" class="action-btn" onclick="toggleMenu(this)">
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
-                        <div class="dropdown-menu">
+                        <div class="action-dropdown">
                             
-                            <a href="{{ route('admin.berita.edit', $item->id) }}" class="dropdown-item">
-                                <i class="bi bi-pencil"></i> Ubah
-                            </a>
+                            
                             <a href="{{ route('admin.berita.show', $item->id) }}" class="dropdown-item">
                                 <i class="bi bi-eye"></i> Lihat Detail
+                            </a>
+                            <a href="{{ route('admin.berita.edit', $item->id) }}" class="dropdown-item">
+                                <i class="bi bi-pencil"></i> Edit
                             </a>
                             <form action="{{ route('admin.berita.destroy', $item->id) }}" method="POST" style="margin: 0;">
                                 @csrf
@@ -415,6 +386,17 @@
 
 @section('scripts')
 <script>
+    // Remove global table scroll wrapper on this page
+    document.addEventListener('DOMContentLoaded', function () {
+        const table = document.querySelector('.card .data-table');
+        const wrapper = table ? table.closest('.admin-table-scroll') : null;
+
+        if (table && wrapper && wrapper.parentNode) {
+            wrapper.parentNode.insertBefore(table, wrapper);
+            wrapper.remove();
+        }
+    });
+
     // Search functionality
     let searchTimeout;
     document.getElementById('searchInput').addEventListener('input', function(e) {
@@ -442,27 +424,29 @@
     });
 
     // Dropdown functionality
-    function toggleDropdown(button) {
+    function toggleMenu(button) {
         const dropdown = button.nextElementSibling;
-        const allDropdowns = document.querySelectorAll('.dropdown-menu');
-        
+        const isVisible = dropdown.classList.contains('show');
+
         // Close all other dropdowns
-        allDropdowns.forEach(menu => {
-            if (menu !== dropdown) {
-                menu.classList.remove('show');
-            }
+        document.querySelectorAll('.action-dropdown.show').forEach(d => {
+            if (d !== dropdown) d.classList.remove('show');
         });
-        
-        // Toggle current dropdown
+
+        if (!isVisible) {
+            // Match carousel behavior: fixed dropdown that escapes table clipping
+            const rect = button.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + 4) + 'px';
+            dropdown.style.left = (rect.right - 160) + 'px';
+        }
+
         dropdown.classList.toggle('show');
     }
 
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
-        if (!event.target.closest('.dropdown-action')) {
-            document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                menu.classList.remove('show');
-            });
+        if (!event.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
         }
     });
 </script>

@@ -377,6 +377,7 @@ class JadwalUjikomController extends Controller
         }
 
         $niks = $this->collectPesertaNiks($kelompoks);
+        $niks = $kelompok->asesis->pluck('NIK')->toArray();
         $validated['peserta_terdaftar'] = count($niks);
         $validated['kuota']             = max(1, count($niks));
         unset($validated['kelompok_ids']);
@@ -538,6 +539,7 @@ class JadwalUjikomController extends Controller
         }
 
         $niks = $this->collectPesertaNiks($kelompoks);
+        $niks = $kelompok->asesis->pluck('NIK')->toArray();
         $validated['kuota']             = max(1, count($niks));
         $validated['peserta_terdaftar'] = count($niks);
         unset($validated['kelompok_ids']);

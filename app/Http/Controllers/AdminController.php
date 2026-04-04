@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use App\Support\ActivityLogger;
 use App\Models\Admin;
 use App\Models\Asesi;
 use App\Models\Asesor;
@@ -37,6 +38,14 @@ class AdminController extends Controller
 
         if ($admin && Hash::check($request->password, $admin->password)) {
             Auth::guard('admin')->login($admin, $request->filled('remember'));
+
+            ActivityLogger::logAdmin(
+                (string) $admin->username,
+                $admin->name,
+                'Login Admin',
+                'Admin berhasil login ke sistem.',
+                $request
+            );
             
             // Redirect ke halaman pertama yang admin punya akses berdasarkan sidebar menu
             return redirect($admin->getFirstAccessibleRoute())->with('success', 'Login berhasil!');
@@ -52,6 +61,18 @@ class AdminController extends Controller
      */
     public function logout(Request $request)
     {
+        $admin = Auth::guard('admin')->user();
+
+        if ($admin) {
+            ActivityLogger::logAdmin(
+                (string) $admin->username,
+                $admin->name,
+                'Logout Admin',
+                'Admin logout dari sistem.',
+                $request
+            );
+        }
+
         Auth::guard('admin')->logout();
         
         $request->session()->invalidate();

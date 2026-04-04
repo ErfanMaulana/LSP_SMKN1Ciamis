@@ -82,10 +82,19 @@
         border: 1px solid #dbe2ea;
         border-radius: 8px;
         padding: 10px 12px;
+        min-height: 44px;
         font-size: 14px;
         font-family: inherit;
         color: #0f172a;
         background: #f8fafc;
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+    }
+
+    .ck-editor__editable_inline {
+        min-height: 240px;
     }
 
     .form-control:focus {
@@ -246,6 +255,10 @@
     @media (max-width: 768px) {
         .card-body {
             padding: 16px;
+        }
+
+        .ck-editor__editable_inline {
+            min-height: 200px;
         }
 
         .form-grid {

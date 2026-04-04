@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Skema;
-use App\Models\Unit;
-use App\Models\Elemen;
-use App\Models\Kriteria;
 use App\Models\Jurusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,9 +46,18 @@ class SkemaController extends Controller
             'klaster' => Skema::where('jenis_skema', 'Klaster')->count(),
         ];
         
-        // If AJAX request, return only table rows
-        if ($request->ajax()) {
-            return view('admin.skema.partials.table-rows', compact('skemas'))->render();
+        // If AJAX request, return rows + pagination payload
+        if ($request->ajax() || $request->expectsJson()) {
+            return response()->json([
+                'rows' => view('admin.skema.partials.table-rows', compact('skemas'))->render(),
+                'pagination_info' => sprintf(
+                    'Menampilkan %d sampai %d dari %d data',
+                    $skemas->firstItem() ?? 0,
+                    $skemas->lastItem() ?? 0,
+                    $skemas->total()
+                ),
+                'pagination_links' => (string) $skemas->links(),
+            ]);
         }
         
         return view('admin.skema.index', compact('skemas', 'stats'));

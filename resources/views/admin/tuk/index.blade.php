@@ -18,47 +18,135 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
         margin-bottom: 24px;
     }
-    .stat-card { background: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: all 0.2s; }
+    .stat-card { background: white; padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: all 0.2s; }
     .stat-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
     .stat-icon {
-        width: 50px; height: 50px; border-radius: 12px;
+        width: 56px; height: 56px; border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
-        font-size: 22px; color: #fff; flex-shrink: 0;
+        font-size: 24px; color: #fff; flex-shrink: 0;
     }
-    .stat-icon.blue   { background: linear-gradient(135deg,#0073bd,#0061a5); }
+    .stat-icon.blue   { background: linear-gradient(135deg,#0073bd,#0073bd); }
     .stat-icon.green  { background: linear-gradient(135deg,#10b981,#059669); }
     .stat-icon.red    { background: linear-gradient(135deg,#ef4444,#dc2626); }
-    .stat-label { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing:.5px; }
-    .stat-value { font-size: 26px; font-weight: 700; color: #0F172A; line-height: 1.2; margin-top: 2px; }
+    .stat-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing:.5px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #0F172A; line-height: 1.2; margin-top: 2px; }
 
     .toolbar {
-        display: flex; align-items: center; justify-content: space-between;
-        gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+        margin-bottom: 16px;
     }
-    .filter-form { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
-    .filter-form input, .filter-form select {
-        padding: 9px 14px; border: 1px solid #d1d5db; border-radius: 8px;
-        font-size: 13px; outline: none; transition: border-color .2s;
+
+    .filter-section {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
     }
-    .filter-form input { flex: 1; min-width: 220px; }
-    .filter-form input:focus, .filter-form select:focus { border-color: #0061a5; }
-    .btn-search {
-        padding: 9px 18px; background: #0061a5; color: #fff;
-        border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+
+    .search-box {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 42px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
+    .btn-filter-search {
+        padding: 9px 14px;
+        background: #0073bd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+    }
+
+    .btn-filter-search:hover {
+        background: #005f99;
+    }
+
+    .btn-filter-reset {
+        padding: 9px 12px;
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+    .btn-filter-reset:hover {
+        background: #fecaca;
     }
     .btn-add {
-        padding: 9px 18px; background: #0061a5; color: #fff;
-        border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+        padding: 9px 18px; background: #0073bd; color: #fff;
+        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
         cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
         white-space: nowrap;
     }
-    .btn-add:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
+    .btn-add:hover { background: #005f99; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
 
-    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: hidden; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: visible; }
+    .card > .admin-table-scroll {
+        overflow: visible !important;
+        max-height: none !important;
+    }
     table { width: 100%; border-collapse: collapse; }
     th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: #64748b;
          text-transform: uppercase; letter-spacing: .5px; background: #f8fafc; border-bottom: 1px solid #e5e7eb; }
@@ -90,6 +178,52 @@
     .empty-state p  { font-size: 14px; }
 
     .pagination-wrap { padding: 16px; }
+
+    @media (max-width: 768px) {
+        .page-header {
+            align-items: stretch;
+        }
+
+        .page-header .btn-add {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-select,
+        .btn-filter-search,
+        .btn-filter-reset {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .card {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card table {
+            min-width: 820px;
+        }
+
+        .card th,
+        .card td {
+            white-space: nowrap;
+        }
+    }
 
     @media (max-width: 640px) {
         .stats-grid {
@@ -134,7 +268,7 @@
         <p>Kelola data tempat uji kompetensi untuk pelaksanaan ujian sertifikasi</p>
     </div>
     <a href="{{ route('admin.tuk.create') }}" class="btn-add">
-        <i class="bi bi-plus-lg"></i> Tambah TUK
+        <i class="bi bi-plus-circle"></i> Tambah TUK
     </a>
 </div>
 
@@ -164,18 +298,20 @@
 </div>
 
 <!-- Toolbar -->
-<form method="GET" class="toolbar">
-    <div class="filter-form">
-        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama TUK, kode, kota...">
-        <select name="status">
-            <option value="all"     {{ $status === 'all'     ? 'selected' : '' }}>Semua Status</option>
-            <option value="aktif"   {{ $status === 'aktif'   ? 'selected' : '' }}>Aktif</option>
-            <option value="nonaktif"{{ $status === 'nonaktif'? 'selected' : '' }}>Non-Aktif</option>
-        </select>
-        <button type="submit" class="btn-search"><i class="bi bi-search"></i> Cari</button>
-        @if($search || $status !== 'all')
-        <a href="{{ route('admin.tuk.index') }}" style="padding:9px 14px;color:#64748b;text-decoration:none;font-size:13px;">Reset</a>
-        @endif
+<form method="GET" action="{{ route('admin.tuk.index') }}" class="toolbar" id="filterForm">
+    <div class="filter-section">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama TUK, kode, kota..." autocomplete="off">
+        </div>
+        <div class="filter-group">
+            <select class="filter-select" name="status" id="statusFilter">
+                <option value="all" {{ $status === 'all' ? 'selected' : '' }}>Semua Status</option>
+                <option value="aktif" {{ $status === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                <option value="nonaktif" {{ $status === 'nonaktif' ? 'selected' : '' }}>Non-Aktif</option>
+            </select>
+            
+        </div>
     </div>
 </form>
 
@@ -184,7 +320,7 @@
     <table>
         <thead>
             <tr>
-                <th>#</th>
+                <th>No</th>
                 <th>Nama TUK</th>
                 <th>Tipe</th>
                 <th>Kota</th>
@@ -194,7 +330,7 @@
                 <th>Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="tukTableBody">
             @forelse($tuks as $i => $tuk)
             <tr>
                 <td style="color:#94a3b8;font-weight:600;">{{ $tuks->firstItem() + $i }}</td>
@@ -225,7 +361,7 @@
                 </td>
                 <td>
                     <div class="action-menu">
-                        <button class="action-btn" onclick="toggleMenu(this)">
+                        <button type="button" class="action-btn" onclick="toggleMenu(event, this)">
                             <i class="bi bi-three-dots-vertical"></i>
                         </button>
                         <div class="action-dropdown">
@@ -254,27 +390,105 @@
             <tr>
                 <td colspan="8">
                     <div class="empty-state">
-                        <i class="bi bi-building-x"></i>
-                        <p>Belum ada data TUK{{ $search ? ' yang cocok dengan pencarian' : '' }}.</p>
-                        <a href="{{ route('admin.tuk.create') }}" class="btn-add" style="display:inline-flex;margin-top:12px;">
-                            <i class="bi bi-plus-lg"></i> Tambah TUK Sekarang
-                        </a>
+                        <i class="bi bi-inbox"></i>
+                        <p style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data TUK ditemukan</p>
+                        <p style="font-size: 13px; color: #9ca3af; margin: 0;">Coba kata kunci lain.</p>
+
+                        @if(!$search && $status === 'all')
+                            <a href="{{ route('admin.tuk.create') }}" class="btn-add" style="display:inline-flex;margin-top:12px;">
+                                <i class="bi bi-plus-lg"></i> Tambah TUK Sekarang
+                            </a>
+                        @endif
                     </div>
                 </td>
             </tr>
             @endforelse
         </tbody>
     </table>
-    @if($tuks->hasPages())
-    <div class="pagination-wrap">{{ $tuks->links() }}</div>
-    @endif
+    <div class="pagination-wrap" id="tukPaginationWrap">
+        @if($tuks->hasPages())
+            {{ $tuks->links() }}
+        @endif
+    </div>
 </div>
 
 @endsection
 
 @section('scripts')
 <script>
-function toggleMenu(button) {
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.__tukAjaxInitialized) return;
+    window.__tukAjaxInitialized = true;
+
+    const table = document.querySelector('.card table');
+    const wrapper = table ? table.closest('.admin-table-scroll') : null;
+
+    if (table && wrapper && wrapper.parentNode) {
+        wrapper.parentNode.insertBefore(table, wrapper);
+        wrapper.remove();
+    }
+
+    const filterForm = document.getElementById('filterForm');
+    const statusFilter = document.getElementById('statusFilter');
+    const tableBody = document.getElementById('tukTableBody');
+    const paginationWrap = document.getElementById('tukPaginationWrap');
+
+    async function fetchTukData(page = null) {
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+
+        if (page) {
+            params.set('page', page);
+        }
+
+        const requestUrl = `${filterForm.action}?${params.toString()}`;
+
+        try {
+            const response = await fetch(requestUrl, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Gagal memuat data TUK.');
+            }
+
+            const data = await response.json();
+            tableBody.innerHTML = data.rows || '';
+            paginationWrap.innerHTML = data.pagination || '';
+
+            const url = new URL(window.location.href);
+            url.search = params.toString();
+            window.history.replaceState({}, '', url);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    filterForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        fetchTukData();
+    });
+
+    statusFilter.addEventListener('change', function () {
+        fetchTukData();
+    });
+
+    paginationWrap.addEventListener('click', function (event) {
+        const link = event.target.closest('a');
+        if (!link) return;
+
+        event.preventDefault();
+        const linkUrl = new URL(link.href);
+        const page = linkUrl.searchParams.get('page');
+        fetchTukData(page);
+    });
+});
+
+function toggleMenu(event, button) {
+    if (event) event.stopPropagation();
     document.querySelectorAll('.action-dropdown.show').forEach(d => {
         if (d !== button.nextElementSibling) d.classList.remove('show');
     });

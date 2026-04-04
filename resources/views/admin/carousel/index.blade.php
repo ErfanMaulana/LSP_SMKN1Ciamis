@@ -119,7 +119,7 @@
                                 <div class="action-dropdown">
                                     @if($canEditCarousel)
                                         <a href="{{ route('admin.carousel.edit', $carousel->id) }}" class="dropdown-item">
-                                            <i class="bi bi-pencil"></i> Ubah</a>
+                                            <i class="bi bi-pencil"></i> Edit</a>
                                     @endif
 
                                     @if($canDeleteCarousel)

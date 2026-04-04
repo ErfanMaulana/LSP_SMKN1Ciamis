@@ -303,7 +303,7 @@
         padding: 4px 12px;
         border-radius: 20px;
         background: #dbeafe;
-        color: #1d4ed8;
+        color: #0073bd;
         white-space: nowrap;
     }
 

@@ -431,6 +431,7 @@
     @foreach($jadwalWithPeserta as $index => $jadwal)
     @php
         $tglJadwal = \Carbon\Carbon::parse($jadwal->tanggal_mulai . ' ' . $jadwal->waktu_mulai);
+        $tglSelesaiJadwal = \Carbon\Carbon::parse($jadwal->tanggal_selesai . ' ' . $jadwal->waktu_selesai);
         $now = now();
         
         $tipeLabel = match($jadwal->tipe_tuk ?? '') {
@@ -446,7 +447,7 @@
         $isMultiDay = !$tglMulai->eq($tglSelesai);
     @endphp
 
-    <div class="jadwal-fullscreen status-{{ $jadwal->status }}" id="jadwal-{{ $index }}" data-jadwal-date="{{ $tglJadwal->toIso8601String() }}">
+    <div class="jadwal-fullscreen status-{{ $jadwal->status }}" id="jadwal-{{ $index }}" data-jadwal-date="{{ $tglJadwal->toIso8601String() }}" data-jadwal-end="{{ $tglSelesaiJadwal->toIso8601String() }}">
         <div class="jadwal-content">
             <!-- Title Section -->
             <div class="jadwal-title-section">
@@ -541,7 +542,6 @@
             <div class="peserta-section">
                 <div class="peserta-header">
                     <div class="peserta-title">
-                        <i class="bi bi-people-fill"></i>
                         Peserta Terdaftar
                     </div>
                     <div class="peserta-count">
@@ -599,9 +599,16 @@
 document.querySelectorAll('[id^="countdown-"]').forEach(countdownEl => {
     const jadwalEl = countdownEl.closest('.jadwal-fullscreen');
     const targetDate = new Date(jadwalEl.dataset.jadwalDate);
+    const endDate = new Date(jadwalEl.dataset.jadwalEnd);
 
     function updateCountdown() {
         const now = new Date();
+
+        if (!Number.isNaN(endDate.getTime()) && now >= endDate) {
+            countdownEl.innerHTML = '<div class="countdown-box started"><span class="countdown-number" style="font-size:24px;">Waktu Selesai!</span></div>';
+            return;
+        }
+
         const diff = targetDate - now;
 
         if (diff <= 0) {

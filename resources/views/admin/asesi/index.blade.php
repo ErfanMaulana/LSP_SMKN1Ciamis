@@ -255,7 +255,11 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="text-center">Tidak ada data asesi</td>
+                            <td colspan="6" style="text-align: center; padding: 60px 20px;">
+                                <i class="bi bi-inbox" style="font-size: 48px; color: #d1d5db; display: block; margin-bottom: 12px;"></i>
+                                <h4 style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data asesi ditemukan</h4>
+                                <p style="font-size: 13px; color: #9ca3af; margin: 0;">Coba kata kunci lain.</p>
+                            </td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -640,13 +644,13 @@
                        placeholder="Masukkan nama lengkap"
                        style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;">
             </div>
-            <div style="background:#eff6ff;border-left:3px solid #2563eb;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:12px;color:#1e40af;line-height:1.6;">
+            <div style="background:#eff6ff;border-left:3px solid #0073bd;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:12px;color:#1e40af;line-height:1.6;">
                 <i class="bi bi-info-circle"></i>
                 Password default = NIK. Asesi bisa login menggunakan NIK sebagai username dan password.
             </div>
             <div style="display:flex;gap:10px;">
                 <button type="button" onclick="closeAsesiCreateModal()" style="flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-size:14px;font-weight:600;cursor:pointer;color:#64748b;">Batal</button>
-                <button type="submit" style="flex:2;padding:10px;border-radius:8px;border:none;background:#2563eb;color:white;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <button type="submit" style="flex:2;padding:10px;border-radius:8px;border:none;background:#0073bd;color:white;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
                     <i class="bi bi-check-lg"></i> Simpan Akun
                 </button>
             </div>

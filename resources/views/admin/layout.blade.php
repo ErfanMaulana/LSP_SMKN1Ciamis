@@ -474,6 +474,14 @@
             font-weight: 700;
             font-size: 16px;
             box-shadow: 0 2px 8px rgba(0, 97, 165, 0.3);
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .user-details {
@@ -556,6 +564,14 @@
             font-size: 18px;
             flex-shrink: 0;
             box-shadow: 0 2px 8px rgba(0, 97, 165, 0.3);
+            overflow: hidden;
+        }
+
+        .profile-avatar-lg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .profile-header-info {
@@ -791,22 +807,23 @@
             }
 
             .topbar {
-                flex-direction: column;
-                gap: 0;
+                flex-direction: row;
+                align-items: center;
+                gap: 8px;
                 padding: 0;
             }
 
             .global-search {
-                width: 100%;
-                max-width: 100%;
+                flex: 1;
+                min-width: 0;
                 padding: 12px 15px !important;
-                order: 1;
+                order: 0;
             }
 
             .topbar-right {
-                width: 100%;
-                padding: 12px 15px !important;
-                order: 2;
+                width: auto;
+                padding: 12px 15px 12px 0 !important;
+                order: 0;
             }
 
             .search-shortcut {
@@ -815,10 +832,20 @@
 
             .topbar-right {
                 justify-content: flex-end;
+                align-items: center;
+                flex-shrink: 0;
             }
 
             .profile-toggle {
                 padding: 6px;
+            }
+
+            .global-search>div {
+                gap: 10px !important;
+            }
+
+            .global-search-input-wrapper {
+                min-width: 0;
             }
 
             .profile-toggle .user-details,
@@ -880,12 +907,26 @@
                                     <span>Role & Permission</span>
                                 </a>
                             @endif
+
+                            @if(Auth::guard('admin')->user()->isSuperAdmin())
+                                <a href="{{ route('admin.log-activity.user') }}"
+                                    class="menu-item {{ request()->routeIs('admin.log-activity.user') ? 'active' : '' }}">
+                                    <i class="bi bi-clock-history"></i>
+                                    <span>Log Activity User</span>
+                                </a>
+
+                                <a href="{{ route('admin.log-activity.admin') }}"
+                                    class="menu-item {{ request()->routeIs('admin.log-activity.admin') ? 'active' : '' }}">
+                                    <i class="bi bi-shield-check"></i>
+                                    <span>Log Activity Admin</span>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @endif
 
                 <!-- DATA MASTER Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view', 'jadwal-ujikom.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>DATA MASTER</span>
@@ -937,6 +978,14 @@
                                     class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
                                     <i class="bi bi-patch-check"></i>
                                     <span>Skema</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view'))
+                                <a href="{{ route('admin.umpan-balik-komponen.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.umpan-balik-komponen.*') ? 'active' : '' }}">
+                                    <i class="bi bi-chat-square-text"></i>
+                                    <span>Komponen Umpan Balik</span>
                                 </a>
                             @endif
                         </div>
@@ -993,6 +1042,12 @@
                                     class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
                                     <i class="bi bi-calendar-event"></i>
                                     <span>Jadwal Ujikom</span>
+                                </a>
+
+                                <a href="{{ route('admin.umpan-balik-hasil.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.umpan-balik-hasil.*') ? 'active' : '' }}">
+                                    <i class="bi bi-clipboard-data"></i>
+                                    <span>Hasil Umpan Balik Asesi</span>
                                 </a>
                             @endif
                         </div>
@@ -1087,6 +1142,7 @@
                         </div>
                     </div>
                 @endif
+
             </nav>
         </aside>
 
@@ -1112,14 +1168,23 @@
                 </div>
 
                 <div class="topbar-right">
+                    @php
+                        $authAdmin = Auth::guard('admin')->user();
+                        $adminRolesLabel = $authAdmin->roles->pluck('display_name')->join(', ') ?: 'Administrator';
+                        $adminInitial = strtoupper(substr($authAdmin->name, 0, 1));
+                    @endphp
                     <div class="profile-dropdown" id="profileDropdown">
                         <button class="profile-toggle" onclick="toggleProfileMenu(event)" type="button">
                             <div class="user-avatar">
-                                {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
+                                @if($authAdmin->foto_profil)
+                                    <img src="{{ asset('storage/' . $authAdmin->foto_profil) }}" alt="Avatar admin">
+                                @else
+                                    {{ $adminInitial }}
+                                @endif
                             </div>
                             <div class="user-details">
-                                <span class="user-name">{{ Auth::guard('admin')->user()->name }}</span>
-                                <span class="user-role">{{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Administrator' }}</span>
+                                <span class="user-name">{{ $authAdmin->name }}</span>
+                                <span class="user-role">{{ $adminRolesLabel }}</span>
                             </div>
                             <i class="bi bi-chevron-down" style="font-size: 14px; color: #64748b;"></i>
                         </button>
@@ -1127,24 +1192,22 @@
                         <div class="profile-menu" id="profileMenu">
                             <div class="profile-header">
                                 <div class="profile-avatar-lg">
-                                    {{ strtoupper(substr(Auth::guard('admin')->user()->name, 0, 1)) }}
+                                    @if($authAdmin->foto_profil)
+                                        <img src="{{ asset('storage/' . $authAdmin->foto_profil) }}" alt="Avatar admin">
+                                    @else
+                                        {{ $adminInitial }}
+                                    @endif
                                 </div>
                                 <div class="profile-header-info">
-                                    <h4 class="profile-header-name">{{ Auth::guard('admin')->user()->name }}</h4>
-                                    <p class="profile-header-role">
-                                        {{ Auth::guard('admin')->user()->roles->pluck('display_name')->join(', ') ?: 'Administrator' }}
-                                    </p>
+                                    <h4 class="profile-header-name">{{ $authAdmin->name }}</h4>
+                                    <p class="profile-header-role">{{ $adminRolesLabel }}</p>
                                 </div>
                             </div>
 
                             <div class="profile-body">
-                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
+                                <a href="{{ route('admin.profile.edit') }}" class="profile-menu-item">
                                     <i class="bi bi-person"></i>
                                     <span>Profil</span>
-                                </a>
-                                <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
-                                    <i class="bi bi-gear"></i>
-                                    <span>Pengaturan</span>
                                 </a>
                                 <div class="profile-divider"></div>
                                 <form method="POST" action="{{ route('admin.logout') }}"

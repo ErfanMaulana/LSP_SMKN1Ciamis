@@ -17,11 +17,19 @@
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f5f7fa;
             overflow-x: hidden;
+            max-width: 100%;
+        }
+
+        html {
+            overflow-x: hidden;
+            max-width: 100%;
         }
 
         .asesi-wrapper {
             display: flex;
             min-height: 100vh;
+            max-width: 100%;
+            overflow-x: hidden;
         }
 
         /* Sidebar Styles */
@@ -178,6 +186,7 @@
             flex: 1;
             margin-left: 260px;
             transition: all 0.3s ease;
+            min-width: 0;
         }
 
         .topbar {
@@ -398,6 +407,12 @@
 
         .content-wrapper {
             padding: 30px;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .content-wrapper > * {
+            max-width: 100%;
         }
 
         .alert {
@@ -529,6 +544,13 @@
 
             .topbar {
                 padding: 12px 14px;
+                gap: 8px;
+                min-width: 0;
+            }
+
+            .topbar > div:first-child {
+                min-width: 0;
+                flex: 1;
             }
 
             .mobile-toggle {
@@ -538,15 +560,25 @@
             .topbar h1 {
                 font-size: 16px;
                 line-height: 1.25;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .topbar-right {
                 gap: 8px;
+                flex-shrink: 0;
             }
 
             .profile-toggle {
                 padding: 6px 8px;
                 gap: 8px;
+            }
+
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 13px;
             }
 
             .profile-menu {
@@ -556,11 +588,34 @@
             }
 
             .content-wrapper {
-                padding: 20px 15px;
+                padding: 14px 12px;
             }
 
             .user-details {
                 display: none;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .topbar {
+                padding: 10px 10px;
+            }
+
+            .mobile-toggle {
+                padding: 7px 10px;
+                font-size: 16px;
+            }
+
+            .topbar h1 {
+                font-size: 15px;
+            }
+
+            .content-wrapper {
+                padding: 12px 10px;
+            }
+
+            .profile-toggle {
+                padding: 4px;
             }
         }
     </style>
@@ -584,7 +639,7 @@
             {{-- Status banner for non-approved users --}}
             @if(!$isApproved)
                 <div style="margin: 12px 14px 4px; border-radius: 10px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5;
-                    {{ $isPending ? 'background:#fef9c3;border:1px solid #fde047;color:#854d0e;' : ($isRejected ? 'background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;' : ($isBanned ? 'background:#1e293b;border:1px solid #334155;color:#e2e8f0;' : 'background:#eff6ff;border:1px solid #93c5fd;color:#1e40af;')) }}">
+                    {{ $isPending ? 'background:#fef9c3;border:1px solid #fde047;color:#854d0e;' : ($isRejected ? 'background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;' : ($isBanned ? 'background:#1e293b;border:1px solid #334155;color:#e2e8f0;' : 'background:#eff6ff;border:1px solid #93c5fd;color:#0073bd;')) }}">
                     @if($isPending)
                         <i class="bi bi-hourglass-split" style="margin-right:5px;"></i>
                         <strong>Menunggu Verifikasi</strong><br>
@@ -639,6 +694,19 @@
                     <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-text"></i>
                         <span>Hasil Asesmen</span>
+                    </a>
+
+                    <a href="{{ route('asesi.umpan-balik.index') }}" class="menu-item {{ request()->routeIs('asesi.umpan-balik.*') ? 'active' : '' }}">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                        <span>Umpan Balik Asesor</span>
+                    </a>
+
+                    <!-- AKUN Section -->
+                    <div class="menu-section-title">AKUN</div>
+
+                    <a href="{{ route('asesi.profil.edit') }}" class="menu-item {{ request()->routeIs('asesi.profil.*') && request('tab') !== 'password' ? 'active' : '' }}">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Profil Saya</span>
                     </a>
                 @endif
             </nav>
@@ -743,6 +811,16 @@
                     <a href="{{ route('asesi.jadwal.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event-fill"></i>
                         <span>Jadwal</span>
+                    </a>
+
+                    <a href="{{ route('asesi.umpan-balik.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.umpan-balik.*') ? 'active' : '' }}">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                        <span>Feedback</span>
+                    </a>
+
+                    <a href="{{ route('asesi.profil.edit') }}" class="bottom-nav-item {{ request()->routeIs('asesi.profil.*') ? 'active' : '' }}">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Profil</span>
                     </a>
                 @else
                     <a href="{{ route('asesi.pendaftaran.formulir') }}" class="bottom-nav-item {{ request()->routeIs('asesi.pendaftaran.*') ? 'active' : '' }}">

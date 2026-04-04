@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Asesi;
 
 use App\Http\Controllers\Controller;
 use App\Models\Account;
+use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -44,6 +45,15 @@ class AuthController extends Controller
         if ($account && Hash::check($request->password, $account->password)) {
             Auth::guard('account')->login($account, $request->filled('remember'));
 
+            ActivityLogger::logUser(
+                (string) ($account->NIK ?? $account->id),
+                $account->nama ?? (string) ($account->NIK ?? $account->id),
+                'Login User',
+                'User berhasil login ke sistem.',
+                $request,
+                ['role' => $account->role]
+            );
+
             if ($account->isAsesi()) {
                 return redirect()->intended(route('asesi.dashboard'))->with('success', 'Login berhasil!');
             }
@@ -65,6 +75,19 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        $account = Auth::guard('account')->user();
+
+        if ($account) {
+            ActivityLogger::logUser(
+                (string) ($account->NIK ?? $account->id),
+                $account->nama ?? (string) ($account->NIK ?? $account->id),
+                'Logout User',
+                'User logout dari sistem.',
+                $request,
+                ['role' => $account->role]
+            );
+        }
+
         Auth::guard('account')->logout();
 
         $request->session()->invalidate();

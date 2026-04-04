@@ -36,10 +36,14 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-center">
 
             @foreach($items as $item)
-            <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 sm:p-6">
+            <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition p-4 sm:p-6"
+                 data-scroll-reveal="zoom"
+                 data-reveal-delay="{{ $loop->index * 90 }}">
 
                 <h3 class="text-2xl sm:text-3xl md:text-4xl font-bold text-blue-600 counter"
-                    data-target="{{ $item['value'] }}">
+                    data-target="{{ $item['value'] }}"
+                    data-suffix="{{ $item['suffix'] }}"
+                    data-counter-duration="{{ 900 + ($loop->index * 120) }}">
                     0{{ $item['suffix'] }}
                 </h3>
 
@@ -54,31 +58,3 @@
 
     </div>
 </section>
-
-
-{{-- Counter Animation --}}
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    const counters = document.querySelectorAll('.counter');
-
-    counters.forEach(counter => {
-        const target = +counter.dataset.target;
-        let count = 0;
-        const speed = 40;
-
-        const update = () => {
-            const increment = Math.ceil(target / speed);
-
-            if (count < target) {
-                count += increment;
-                counter.innerText = count + (counter.innerText.includes('+') ? '+' : '');
-                requestAnimationFrame(update);
-            } else {
-                counter.innerText = target + (counter.innerText.includes('+') ? '+' : '');
-            }
-        };
-
-        update();
-    });
-});
-</script>

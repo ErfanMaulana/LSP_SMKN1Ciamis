@@ -63,6 +63,7 @@ class PanduanController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'penjelasan' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
@@ -106,6 +107,7 @@ class PanduanController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'penjelasan' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
             'sort_order' => 'nullable|integer|min:0',
             'is_active' => 'nullable|boolean',
@@ -151,6 +153,38 @@ class PanduanController extends Controller
         return redirect()
             ->route('admin.panduan.index', $section)
             ->with('success', 'Poin panduan berhasil dihapus.');
+    }
+
+    public function bulkDestroy(Request $request, string $section)
+    {
+        $this->sectionMeta($section);
+
+        $validated = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:panduan_items,id',
+        ]);
+
+        $items = PanduanItem::bySection($section)
+            ->whereIn('id', $validated['ids'])
+            ->get();
+
+        if ($items->isEmpty()) {
+            return redirect()
+                ->route('admin.panduan.index', $section)
+                ->with('error', 'Tidak ada poin yang valid untuk dihapus.');
+        }
+
+        foreach ($items as $item) {
+            if ($item->image && Storage::disk('public')->exists($item->image)) {
+                Storage::disk('public')->delete($item->image);
+            }
+        }
+
+        PanduanItem::whereIn('id', $items->pluck('id'))->delete();
+
+        return redirect()
+            ->route('admin.panduan.index', $section)
+            ->with('success', $items->count() . ' poin panduan berhasil dihapus.');
     }
 
     public function toggleStatus(string $section, int $id)

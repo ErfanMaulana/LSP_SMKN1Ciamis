@@ -27,7 +27,7 @@
     </td>
     <td>
         <div class="action-menu">
-            <button class="action-btn" onclick="toggleMenu(event, this)">
+            <button type="button" class="action-btn" onclick="toggleMenu(event, this)">
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
             <div class="action-dropdown">
@@ -55,6 +55,15 @@
 </tr>
 @empty
 <tr>
-    <td colspan="8" class="text-center">Tidak ada data TUK</td>
+    <td colspan="8" style="text-align: center; padding: 60px 20px;">
+        <i class="bi bi-inbox" style="font-size: 48px; color: #d1d5db; display: block; margin-bottom: 12px;"></i>
+        <h4 style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data TUK ditemukan</h4>
+        <p style="font-size: 13px; color: #9ca3af; margin: 0;">Coba kata kunci lain.</p>
+        @if(empty($search) && (($status ?? 'all') === 'all'))
+            <a href="{{ route('admin.tuk.create') }}" class="btn-add" style="display:inline-flex;margin-top:12px;">
+                <i class="bi bi-plus-lg"></i> Tambah TUK Sekarang
+            </a>
+        @endif
+    </td>
 </tr>
 @endforelse

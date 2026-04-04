@@ -6,6 +6,7 @@ use App\Http\Controllers\Asesi\AsesmenMandiriController;
 use App\Http\Controllers\Asesi\ProfileController;
 use App\Http\Controllers\Asesi\JadwalController;
 use App\Http\Controllers\Asesi\RegisterController;
+use App\Http\Controllers\Asesi\UmpanBalikController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +41,11 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::post('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'store'])->name('asesmen-mandiri.store');
             Route::get('/asesmen-mandiri/{skemaId}/result', [AsesmenMandiriController::class, 'result'])->name('asesmen-mandiri.result');
             Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
+
+            // Umpan Balik Kinerja Asesor
+            Route::get('/umpan-balik', [UmpanBalikController::class, 'index'])->name('umpan-balik.index');
+            Route::get('/umpan-balik/{skemaId}', [UmpanBalikController::class, 'show'])->name('umpan-balik.show');
+            Route::post('/umpan-balik/{skemaId}', [UmpanBalikController::class, 'store'])->name('umpan-balik.store');
 
             // Profil
             Route::get('/profil', [ProfileController::class, 'edit'])->name('profil.edit');

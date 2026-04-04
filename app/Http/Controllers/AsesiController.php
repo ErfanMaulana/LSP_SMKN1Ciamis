@@ -114,11 +114,48 @@ class AsesiController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
         $jurusan = Jurusan::with('kelasItems')->orderBy('nama_jurusan')->get();
         $skemaList = Skema::orderBy('jurusan_id')->orderBy('nama_skema')->get();
-        return view('admin.asesi.create', compact('jurusan', 'skemaList'));
+
+        $prefillNIK = preg_replace('/\D+/', '', (string) $request->query('nik', ''));
+        $prefillNIK = substr($prefillNIK, 0, 16);
+        $prefillNama = trim((string) $request->query('nama', ''));
+        $nikData = $this->parseNikData($prefillNIK);
+
+        return view('admin.asesi.create', compact('jurusan', 'skemaList', 'prefillNIK', 'prefillNama', 'nikData'));
+    }
+
+    /**
+     * Parse NIK to derive birth date and gender.
+     * Format: PPKKCCDDMMYYSSSS, female day = DD + 40.
+     */
+    private function parseNikData(?string $nik): ?array
+    {
+        if (!$nik || strlen($nik) !== 16 || !ctype_digit($nik)) {
+            return null;
+        }
+
+        $ddRaw = (int) substr($nik, 6, 2);
+        $mm = (int) substr($nik, 8, 2);
+        $yy = (int) substr($nik, 10, 2);
+
+        $isFemale = $ddRaw > 40;
+        $dd = $isFemale ? ($ddRaw - 40) : $ddRaw;
+
+        if ($dd < 1 || $dd > 31 || $mm < 1 || $mm > 12) {
+            return null;
+        }
+
+        $currentYY = (int) date('y');
+        $year = $yy <= $currentYY ? (2000 + $yy) : (1900 + $yy);
+
+        $tanggal = sprintf('%04d-%02d-%02d', $year, $mm, $dd);
+        return [
+            'tanggal_lahir' => $tanggal,
+            'jenis_kelamin' => $isFemale ? 'Perempuan' : 'Laki-laki',
+        ];
     }
 
     /**

@@ -23,6 +23,10 @@ use App\Http\Controllers\Admin\BeritaController;
 use App\Http\Controllers\Admin\KontakController;
 use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\PanduanController;
+use App\Http\Controllers\Admin\LogActivityController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\UmpanBalikKomponenController;
+use App\Http\Controllers\Admin\UmpanBalikHasilController;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,6 +46,11 @@ Route::prefix('admin')->group(function () {
     Route::middleware('auth:admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('permission:dashboard.view');
         Route::post('/logout', [AdminController::class, 'logout'])->name('admin.logout');
+
+        // Admin profile
+        Route::get('/profil', [ProfileController::class, 'edit'])->name('admin.profile.edit');
+        Route::put('/profil', [ProfileController::class, 'update'])->name('admin.profile.update');
+        Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('admin.profile.password');
 
         // Global Search
         Route::get('/search', [SearchController::class, 'search'])->name('admin.search');
@@ -107,6 +116,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/skema', [SkemaController::class, 'index'])->name('admin.skema.index');
             Route::get('/skema/create', [SkemaController::class, 'create'])->name('admin.skema.create')->middleware('permission:skema.create');
             Route::post('/skema', [SkemaController::class, 'store'])->name('admin.skema.store')->middleware('permission:skema.create');
+            Route::get('/skema/{id}', [SkemaController::class, 'show'])->name('admin.skema.show');
             Route::get('/skema/{id}/edit', [SkemaController::class, 'edit'])->name('admin.skema.edit')->middleware('permission:skema.edit');
             Route::put('/skema/{id}', [SkemaController::class, 'update'])->name('admin.skema.update')->middleware('permission:skema.edit');
             Route::delete('/skema/{id}', [SkemaController::class, 'destroy'])->name('admin.skema.destroy')->middleware('permission:skema.delete');
@@ -183,6 +193,11 @@ Route::prefix('admin')->group(function () {
                 ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
                 ->middleware('permission:panduan.delete');
 
+            Route::post('/panduan/{section}/bulk-delete', [PanduanController::class, 'bulkDestroy'])
+                ->name('admin.panduan.bulk-destroy')
+                ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
+                ->middleware('permission:panduan.delete');
+
             Route::patch('/panduan/{section}/{id}/toggle', [PanduanController::class, 'toggleStatus'])
                 ->name('admin.panduan.toggle')
                 ->where('section', 'alur-keseluruhan-sistem|peran-asesi|peran-asesor|peran-admin')
@@ -230,6 +245,24 @@ Route::prefix('admin')->group(function () {
             Route::put('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'update'])->name('admin.jadwal-ujikom.update')->middleware('permission:jadwal-ujikom.edit');
             Route::delete('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'destroy'])->name('admin.jadwal-ujikom.destroy')->middleware('permission:jadwal-ujikom.delete');
             Route::patch('/jadwal-ujikom/{id}/status', [JadwalUjikomController::class, 'updateStatus'])->name('admin.jadwal-ujikom.status')->middleware('permission:jadwal-ujikom.status');
+        });
+
+        // Umpan Balik Komponen CRUD
+        Route::middleware('permission:jadwal-ujikom.view')->group(function () {
+            Route::get('/umpan-balik-komponen', [UmpanBalikKomponenController::class, 'index'])->name('admin.umpan-balik-komponen.index');
+            Route::get('/umpan-balik-komponen/create', [UmpanBalikKomponenController::class, 'create'])->name('admin.umpan-balik-komponen.create')->middleware('permission:jadwal-ujikom.create');
+            Route::post('/umpan-balik-komponen', [UmpanBalikKomponenController::class, 'store'])->name('admin.umpan-balik-komponen.store')->middleware('permission:jadwal-ujikom.create');
+            Route::get('/umpan-balik-komponen/skema/{skemaId}', [UmpanBalikKomponenController::class, 'show'])->name('admin.umpan-balik-komponen.show');
+            Route::get('/umpan-balik-komponen/skema/{skemaId}/edit', [UmpanBalikKomponenController::class, 'editSkema'])->name('admin.umpan-balik-komponen.edit-skema')->middleware('permission:jadwal-ujikom.edit');
+            Route::delete('/umpan-balik-komponen/skema/{skemaId}', [UmpanBalikKomponenController::class, 'destroyBySkema'])->name('admin.umpan-balik-komponen.destroy-skema')->middleware('permission:jadwal-ujikom.delete');
+            Route::get('/umpan-balik-komponen/{id}/edit', [UmpanBalikKomponenController::class, 'edit'])->name('admin.umpan-balik-komponen.edit')->middleware('permission:jadwal-ujikom.edit');
+            Route::put('/umpan-balik-komponen/{id}', [UmpanBalikKomponenController::class, 'update'])->name('admin.umpan-balik-komponen.update')->middleware('permission:jadwal-ujikom.edit');
+            Route::delete('/umpan-balik-komponen/{id}', [UmpanBalikKomponenController::class, 'destroy'])->name('admin.umpan-balik-komponen.destroy')->middleware('permission:jadwal-ujikom.delete');
+        });
+
+        // Hasil Umpan Balik Asesi
+        Route::middleware('permission:jadwal-ujikom.view')->group(function () {
+            Route::get('/umpan-balik-hasil', [UmpanBalikHasilController::class, 'index'])->name('admin.umpan-balik-hasil.index');
         });
 
         // Penugasan Asesor ke Asesi
@@ -296,6 +329,14 @@ Route::prefix('admin')->group(function () {
             Route::get('/nilai-asesor', [NilaiAsesorController::class, 'index'])->name('admin.nilai-asesor.index');
             Route::get('/nilai-asesor/{asesiNik}/{skemaId}', [NilaiAsesorController::class, 'show'])->name('admin.nilai-asesor.show');
             Route::post('/nilai-asesor/{skemaId}/update-kkm', [NilaiAsesorController::class, 'updateKkm'])->name('admin.nilai-asesor.update-kkm');
+        });
+
+        // Log Activity (Super Admin only, without permission middleware)
+        Route::middleware('super-admin')->group(function () {
+            Route::get('/log-activity/user', [LogActivityController::class, 'userIndex'])->name('admin.log-activity.user');
+            Route::get('/log-activity/admin', [LogActivityController::class, 'adminIndex'])->name('admin.log-activity.admin');
+            Route::get('/log-activity/user/export', [LogActivityController::class, 'userExport'])->name('admin.log-activity.user.export');
+            Route::get('/log-activity/admin/export', [LogActivityController::class, 'adminExport'])->name('admin.log-activity.admin.export');
         });
     });
 });

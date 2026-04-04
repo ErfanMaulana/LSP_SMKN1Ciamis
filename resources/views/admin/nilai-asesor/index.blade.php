@@ -55,44 +55,77 @@
         color: #0f172a;
     }
 
-    .toolbar {
-        margin-bottom: 14px;
-    }
-
-    .filter-form {
+    .filter-section {
         display: flex;
-        gap: 8px;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 24px;
         flex-wrap: wrap;
     }
 
-    .filter-form input,
-    .filter-form select {
-        padding: 8px 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 12px;
-        outline: none;
-    }
-
-    .filter-form input[type=text] {
-        min-width: 200px;
+    .search-box {
         flex: 1;
+        min-width: 300px;
+        position: relative;
     }
 
-    .filter-form input:focus,
-    .filter-form select:focus {
-        border-color: #0061a5;
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
     }
 
-    .btn-search {
-        padding: 8px 14px;
-        background: #0061a5;
-        color: #fff;
-        border: none;
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 42px;
+        border: 1px solid #e2e8f0;
         border-radius: 8px;
-        font-size: 12px;
-        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .search-box input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .filter-controls {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
         cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+        min-width: 160px;
+    }
+
+    .filter-select.is-placeholder {
+        color: inherit;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
     .card {
@@ -189,6 +222,39 @@
         font-size: 42px;
         margin-bottom: 8px;
         display: block;
+    }
+
+    .spinner-border {
+        display: inline-block;
+        width: 3rem;
+        height: 3rem;
+        vertical-align: text-bottom;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+    }
+
+    .text-primary {
+        color: #0073bd;
+    }
+
+    .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border-width: 0;
+    }
+
+    @keyframes spinner-border {
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     .pagination-wrapper {
@@ -427,78 +493,25 @@
     </div>
 </div>
 
-<div class="toolbar">
-    <form id="nilaiAsesorFilterForm" class="filter-form" method="GET" action="{{ route('admin.nilai-asesor.index') }}">
-        <input type="text" id="nilaiAsesorSearchInput" name="search" placeholder="Cari nama / NIK / skema / asesor..." value="{{ request('search') }}">
-        <select id="nilaiAsesorSkemaFilter" name="skema_id">
-            <option value="">Semua Skema</option>
-            @foreach($skemas as $skema)
-                <option value="{{ $skema->id }}" {{ request('skema_id') == $skema->id ? 'selected' : '' }}>{{ $skema->nama_skema }}</option>
-            @endforeach
-        </select>
-        <!-- <button type="submit" id="nilaiAsesorSearchButton" class="btn-search"><i class="bi bi-search"></i> Cari</button> -->
-    </form>
+<div class="card" style="padding: 24px; margin-bottom: 14px;">
+    <div class="filter-section">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" id="nilaiAsesorSearchInput" name="search" placeholder="Cari nama / NIK / skema / asesor..." value="{{ request('search') }}" autocomplete="off">
+        </div>
+        <div class="filter-controls">
+            <select id="nilaiAsesorSkemaFilter" name="skema_id" class="filter-select">
+                <option value="">Semua Skema</option>
+                @foreach($skemas as $skema)
+                    <option value="{{ $skema->id }}" {{ request('skema_id') == $skema->id ? 'selected' : '' }}>{{ $skema->nama_skema }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
 </div>
 
 <div id="nilaiAsesorTableContainer" class="card">
-    <div class="table-wrap">
-        @if($data->count())
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:40px;">#</th>
-                        <th style="width:140px;">Asesi</th>
-                        <th style="width:100px;">NIK</th>
-                        <th style="width:150px;">Skema</th>
-                        <th style="width:100px;">Asesor</th>
-                        <!-- <th style="width:90px;">Elemen</th> -->
-                        <th style="width:80px;">Rata-rata</th>
-                        <th style="width:100px;">Hasil</th>
-                        <th style="width:140px;">Terakhir Dinilai</th>
-                        <th style="width:80px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($data as $i => $row)
-                        <tr>
-                            <td>{{ $data->firstItem() + $i }}</td>
-                            <td>
-                                <strong>{{ $row->nama_asesi }}</strong>
-                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;overflow:hidden;text-overflow:ellipsis;max-width:130px;">{{ $row->email_asesi }}</div>
-                            </td>
-                            <td style="font-family:monospace;">{{ $row->asesi_nik }}</td>
-                            <td>
-                                <strong style="font-size:12px;">{{ $row->nama_skema }}</strong>
-                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">{{ $row->nomor_skema }}</div>
-                            </td>
-                            <td>{{ $row->nama_asesor ?? '-' }}</td>
-                            <!-- <td>{{ $row->total_elemen }}</td> -->
-                            <td>{{ number_format((float) $row->rata_rata, 2) }}</td>
-                            <td>
-                                @if((float) $row->rata_rata >= (float) $row->kkm)
-                                    <span class="badge kompeten"><i class="bi bi-check-circle"></i> Kompeten</span>
-                                @else
-                                    <span class="badge belum"><i class="bi bi-x-circle"></i> Belum Kompeten</span>
-                                @endif
-                            </td>
-                            <td>{{ \Carbon\Carbon::parse($row->terakhir_dinilai)->format('d/m/Y H:i') }}</td>
-                            <td>
-                                <a href="{{ route('admin.nilai-asesor.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" class="btn-detail">
-                                    <i class="bi bi-eye"></i> Detail
-                                </a>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-            <div class="pagination-wrapper">{{ $data->links() }}</div>
-        @else
-            <div class="empty-state">
-                <i class="bi bi-inbox"></i>
-                <p>Belum ada data nilai asesor.</p>
-            </div>
-        @endif
-    </div>
+    @include('admin.nilai-asesor.partials.table-content')
 </div>
 
 <!-- KKM Setting Modal -->
@@ -539,6 +552,19 @@
 <script>
 let nilaiAsesorAjaxController = null;
 let nilaiAsesorSearchTimer = null;
+
+function syncNilaiAsesorSkemaPlaceholderColor() {
+    const skemaFilter = document.getElementById('nilaiAsesorSkemaFilter');
+    if (!skemaFilter) {
+        return;
+    }
+
+    if (String(skemaFilter.value).trim() === '') {
+        skemaFilter.classList.add('is-placeholder');
+    } else {
+        skemaFilter.classList.remove('is-placeholder');
+    }
+}
 
 function openKkmModal() {
     document.getElementById('kkmModal').classList.add('show');
@@ -606,31 +632,33 @@ function handleKkmSubmit(event, form) {
     });
 }
 
-function setSearchButtonLoading(isLoading) {
-    const btn = document.getElementById('nilaiAsesorSearchButton');
-    if (!btn) {
-        return;
-    }
-
-    if (isLoading) {
-        btn.disabled = true;
-        btn.dataset.originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Memuat...';
-    } else {
-        btn.disabled = false;
-        if (btn.dataset.originalText) {
-            btn.innerHTML = btn.dataset.originalText;
-        }
-    }
-}
-
 function ajaxLoadNilaiAsesor(url) {
+    const tableContainer = document.getElementById('nilaiAsesorTableContainer');
+
     if (nilaiAsesorAjaxController) {
         nilaiAsesorAjaxController.abort();
     }
 
     nilaiAsesorAjaxController = new AbortController();
-    setSearchButtonLoading(true);
+
+    if (tableContainer) {
+        tableContainer.innerHTML = `
+            <div class="table-wrap">
+                <table>
+                    <tbody>
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px 20px;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p style="color: #64748b; margin: 12px 0 0;">Mencari data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
 
     fetch(url, {
         method: 'GET',
@@ -646,13 +674,9 @@ function ajaxLoadNilaiAsesor(url) {
         return response.text();
     })
     .then(function(html) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const newTable = doc.getElementById('nilaiAsesorTableContainer');
         const currentTable = document.getElementById('nilaiAsesorTableContainer');
-
-        if (newTable && currentTable) {
-            currentTable.innerHTML = newTable.innerHTML;
+        if (currentTable) {
+            currentTable.innerHTML = html;
         }
 
         window.history.replaceState({}, '', url);
@@ -660,53 +684,60 @@ function ajaxLoadNilaiAsesor(url) {
     .catch(function(error) {
         if (error.name !== 'AbortError') {
             console.error(error);
-            alert('Gagal memuat data. Silakan coba lagi.');
+            if (tableContainer) {
+                tableContainer.innerHTML = `
+                    <div class="table-wrap">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td colspan="9" style="text-align: center; padding: 40px 20px;">
+                                        <i class="bi bi-exclamation-triangle" style="font-size: 40px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
+                                        <p style="color: #64748b; margin: 0;">Gagal memuat data. Silakan coba lagi.</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
         }
-    })
-    .finally(function() {
-        setSearchButtonLoading(false);
     });
 }
 
 function serializeFilterForm() {
-    const form = document.getElementById('nilaiAsesorFilterForm');
-    const url = new URL(form.action, window.location.origin);
-    const params = new URLSearchParams(new FormData(form));
+    const searchInput = document.getElementById('nilaiAsesorSearchInput');
+    const skemaFilter = document.getElementById('nilaiAsesorSkemaFilter');
+    const url = new URL('{{ route('admin.nilai-asesor.index') }}', window.location.origin);
 
-    params.forEach(function(value, key) {
-        if (value !== null && String(value).trim() !== '') {
-            url.searchParams.set(key, value);
-        }
-    });
+    if (searchInput && searchInput.value.trim() !== '') {
+        url.searchParams.set('search', searchInput.value.trim());
+    }
+
+    if (skemaFilter && skemaFilter.value.trim() !== '') {
+        url.searchParams.set('skema_id', skemaFilter.value.trim());
+    }
 
     return url.toString();
 }
 
 function bindNilaiAsesorAjaxSearch() {
-    const form = document.getElementById('nilaiAsesorFilterForm');
     const searchInput = document.getElementById('nilaiAsesorSearchInput');
     const skemaFilter = document.getElementById('nilaiAsesorSkemaFilter');
 
-    if (!form) {
-        return;
-    }
-
-    form.addEventListener('submit', function(event) {
-        event.preventDefault();
-        ajaxLoadNilaiAsesor(serializeFilterForm());
-    });
+    syncNilaiAsesorSkemaPlaceholderColor();
 
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             clearTimeout(nilaiAsesorSearchTimer);
             nilaiAsesorSearchTimer = setTimeout(function() {
                 ajaxLoadNilaiAsesor(serializeFilterForm());
-            }, 350);
+            }, 500);
         });
     }
 
     if (skemaFilter) {
         skemaFilter.addEventListener('change', function() {
+            syncNilaiAsesorSkemaPlaceholderColor();
             ajaxLoadNilaiAsesor(serializeFilterForm());
         });
     }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
 use App\Models\PanduanItem;
+use Illuminate\Support\Str;
 
 class PanduanController extends Controller
 {
@@ -59,17 +60,25 @@ class PanduanController extends Controller
         abort_unless(isset($sections[$activeSection]), 404);
 
         $dbSection = $sections[$activeSection]['db_section'];
-        $steps = PanduanItem::query()
+        $items = PanduanItem::query()
             ->bySection($dbSection)
             ->active()
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->get()
+            ->get();
+
+        $introFromPenjelasan = trim(strip_tags((string) optional($items->first())->penjelasan));
+        if ($introFromPenjelasan !== '') {
+            $sections[$activeSection]['intro'] = Str::limit($introFromPenjelasan, 220);
+        }
+
+        $steps = $items
             ->values()
             ->map(function (PanduanItem $item, int $index) {
                 return [
                     'title' => ($index + 1) . '. ' . $item->title,
                     'description' => $item->description,
+                    'penjelasan' => $item->penjelasan,
                     'image' => $item->image ? asset('storage/' . $item->image) : null,
                     'image_alt' => $item->title,
                     'image_caption' => $item->title,

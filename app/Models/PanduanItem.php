@@ -13,6 +13,7 @@ class PanduanItem extends Model
         'section',
         'title',
         'description',
+        'penjelasan',
         'image',
         'sort_order',
         'is_active',

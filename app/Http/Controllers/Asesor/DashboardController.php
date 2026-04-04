@@ -168,10 +168,7 @@ class DashboardController extends Controller
      */
     public function passwordForm()
     {
-        $account = Auth::guard('account')->user();
-        $asesor = $this->getAsesor();
-
-        return view('asesor.profil.password', compact('account', 'asesor'));
+        return redirect()->to(route('asesor.profil.index') . '#password-form');
     }
 
     /**
@@ -200,7 +197,7 @@ class DashboardController extends Controller
                 'updated_at' => now(),
             ]);
 
-        return redirect()->route('asesor.password.edit')
+        return redirect()->to(route('asesor.profil.index') . '#password-form')
             ->with('success', 'Password berhasil diperbarui.');
     }
 

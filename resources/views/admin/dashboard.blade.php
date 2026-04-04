@@ -31,7 +31,7 @@
         </div>
     </a>
 
-    <a href="{{ route('admin.asesor.index') }}" class="stat-card stat-indigo">
+    <a href="{{ route('admin.asesor.index') }}" class="stat-card stat-blue">
         <div class="stat-icon-wrap"><i class="bi bi-person-badge-fill"></i></div>
         <div class="stat-body">
             <div class="stat-label">TOTAL ASESOR</div>
@@ -39,7 +39,7 @@
         </div>
     </a>
 
-    <a href="{{ route('admin.jurusan.index') }}" class="stat-card stat-teal">
+    <a href="{{ route('admin.jurusan.index') }}" class="stat-card stat-blue">
         <div class="stat-icon-wrap"><i class="bi bi-mortarboard-fill"></i></div>
         <div class="stat-body">
             <div class="stat-label">TOTAL JURUSAN</div>
@@ -47,7 +47,7 @@
         </div>
     </a>
 
-    <a href="{{ route('admin.skema.index') }}" class="stat-card stat-purple">
+    <a href="{{ route('admin.skema.index') }}" class="stat-card stat-blue">
         <div class="stat-icon-wrap"><i class="bi bi-patch-check-fill"></i></div>
         <div class="stat-body">
             <div class="stat-label">TOTAL SKEMA</div>
@@ -55,7 +55,7 @@
         </div>
     </a>
 
-    <div class="stat-card stat-orange">
+    <div class="stat-card stat-blue">
         <div class="stat-icon-wrap"><i class="bi bi-building-fill"></i></div>
         <div class="stat-body">
             <div class="stat-label">TOTAL MITRA</div>
@@ -70,7 +70,7 @@
     {{-- Verifikasi Asesi --}}
     <div class="panel">
         <div class="panel-header">
-            <div class="panel-title"><i class="bi bi-shield-check"></i> Status Verifikasi Asesi</div>
+            <div class="panel-title">Status Verifikasi Asesi</div>
             <a href="{{ route('admin.asesi.verifikasi') }}" class="panel-link">Lihat semua <i class="bi bi-arrow-right"></i></a>
         </div>
         <div class="verif-grid">
@@ -95,7 +95,7 @@
     {{-- Asesmen Mandiri Progress --}}
     <div class="panel">
         <div class="panel-header">
-            <div class="panel-title"><i class="bi bi-clipboard2-check"></i> Progres Asesmen Mandiri</div>
+            <div class="panel-title">Progres Asesmen Mandiri</div>
         </div>
         <div class="progress-list">
             <div class="prog-item">
@@ -151,7 +151,7 @@
 {{-- ── Recent Asesi (full width) ────────────────────────────────────── --}}
 <div class="panel">
     <div class="panel-header">
-        <div class="panel-title"><i class="bi bi-person-lines-fill"></i> Asesi Terbaru</div>
+        <div class="panel-title">Asesi Terbaru</div>
         <a href="{{ route('admin.asesi.index') }}" class="panel-link">Lihat semua <i class="bi bi-arrow-right"></i></a>
     </div>
     <table class="dash-table">
@@ -195,7 +195,7 @@
 <style>
 /* ── Welcome ──────────────────────────────────────────────────────── */
 .welcome-card {
-    background: linear-gradient(135deg, #0073bd 0%, #004f90 100%);
+    background:#0073bd;
     padding: 28px 32px;
     border-radius: 14px;
     margin-bottom: 24px;
@@ -210,6 +210,7 @@
 .welcome-greeting { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
 .welcome-sub { font-size: 13px; opacity: 0.85; }
 .welcome-date { font-size: 13px; opacity: 0.9; text-align: right; line-height: 1.7; }
+.welcome-date .dash-time-line { display: block; }
 
 /* ── Stat Cards ───────────────────────────────────────────────────── */
 .stats-grid {
@@ -363,6 +364,15 @@
     .stats-grid { grid-template-columns: 1fr; }
     .quick-grid { grid-template-columns: 1fr; }
     .verif-grid { grid-template-columns: 1fr; }
+
+    .welcome-right {
+        width: 100%;
+    }
+
+    .welcome-date,
+    .welcome-date .dash-time-line {
+        text-align: left;
+    }
 }
 </style>
 
@@ -379,8 +389,8 @@
         const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
         const pad = n => String(n).padStart(2, '0');
         el.innerHTML =
-            '<strong>' + days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear() + '</strong><br>' +
-            pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) + ' WIB';
+            '<strong>' + days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear() + '</strong>' +
+            '<span class="dash-time-line">' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds()) + ' WIB</span>';
     }
     tick();
     setInterval(tick, 1000);

@@ -539,7 +539,7 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <img src="{{ asset('images/lsp.png') }}" alt="Logo LSP"
-                    style="max-width: 120px; max-height: 80px; object-fit: contain;">
+                    style="width: 54px; height: 54px; object-fit: contain;">
             </div>
 
             <nav class="sidebar-menu">
@@ -571,18 +571,6 @@
                     class="menu-item {{ request()->routeIs('asesor.kelompok.*') ? 'active' : '' }}">
                     <i class="bi bi-people-fill"></i>
                     <span>Kelompok</span>
-                </a>
-
-                <div class="menu-section-title">AKUN</div>
-
-                <a href="{{ route('asesor.profil.index') }}" class="menu-item {{ request()->routeIs('asesor.profil.*') ? 'active' : '' }}">
-                    <i class="bi bi-person-circle"></i>
-                    <span>Profil Saya</span>
-                </a>
-
-                <a href="{{ route('asesor.password.edit') }}" class="menu-item {{ request()->routeIs('asesor.password.*') ? 'active' : '' }}">
-                    <i class="bi bi-key"></i>
-                    <span>Ubah Password</span>
                 </a>
             </nav>
         </aside>
@@ -641,10 +629,6 @@
                                 <a href="{{ route('asesor.profil.index') }}" class="profile-menu-item">
                                     <i class="bi bi-person"></i>
                                     <span>Profil</span>
-                                </a>
-                                <a href="{{ route('asesor.password.edit') }}" class="profile-menu-item">
-                                    <i class="bi bi-key"></i>
-                                    <span>Ubah Password</span>
                                 </a>
                                 <div class="profile-divider"></div>
                                 <form method="POST" action="{{ route('asesor.logout') }}"

@@ -65,41 +65,24 @@
     <div class="card">
         <div class="card-body">
             <!-- Toolbar -->
-            <div class="toolbar">
-                <form method="GET" action="{{ route('admin.skema.index') }}" class="search-form">
-                    <input type="hidden" name="jenis_skema" value="{{ request('jenis_skema', 'all') }}">
-                    <input type="hidden" name="sort" value="{{ request('sort', 'created_at') }}">
-                    <input type="hidden" name="order" value="{{ request('order', 'desc') }}">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau nomor skema...">
-                    <button type="submit"><i class="bi bi-search"></i> Cari</button>
-                    @if(request('search'))
-                        <a href="{{ route('admin.skema.index') }}" class="btn-clear" title="Clear">
-                            <i class="bi bi-x"></i>
-                        </a>
-                    @endif
-                </form>
-
-                <div class="filters">
-                    <form method="GET" action="{{ route('admin.skema.index') }}" class="filter-form" id="filterForm">
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-                        <select name="jenis_skema" onchange="document.getElementById('filterForm').submit()">
+            <form method="GET" action="{{ route('admin.skema.index') }}" class="toolbar" id="filterForm">
+                <div class="filter-section">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama atau nomor skema..." autocomplete="off">
+                    </div>
+                    <div class="filter-group">
+                        <select class="filter-select" name="jenis_skema" id="jenisSkemaFilter">
                             <option value="all" {{ request('jenis_skema', 'all') === 'all' ? 'selected' : '' }}>Semua Jenis</option>
                             <option value="KKNI" {{ request('jenis_skema') === 'KKNI' ? 'selected' : '' }}>KKNI</option>
                             <option value="Okupasi" {{ request('jenis_skema') === 'Okupasi' ? 'selected' : '' }}>Okupasi</option>
                             <option value="Klaster" {{ request('jenis_skema') === 'Klaster' ? 'selected' : '' }}>Klaster</option>
                         </select>
-                        <select name="sort" onchange="document.getElementById('filterForm').submit()">
-                            <option value="created_at" {{ request('sort', 'created_at') === 'created_at' ? 'selected' : '' }}>Tanggal Dibuat</option>
-                            <option value="nama_skema" {{ request('sort') === 'nama_skema' ? 'selected' : '' }}>Nama Skema</option>
-                            <option value="nomor_skema" {{ request('sort') === 'nomor_skema' ? 'selected' : '' }}>Nomor Skema</option>
-                        </select>
-                        <select name="order" onchange="document.getElementById('filterForm').submit()">
-                            <option value="asc" {{ request('order', 'desc') === 'asc' ? 'selected' : '' }}>A → Z</option>
-                            <option value="desc" {{ request('order', 'desc') === 'desc' ? 'selected' : '' }}>Z → A</option>
-                        </select>
-                    </form>
+                        
+                        
+                    </div>
                 </div>
-            </div>
+            </form>
 
             <!-- Table -->
             <div class="table-container">
@@ -114,7 +97,7 @@
                             <th>AKSI</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="skemaTableBody">
                         @forelse($skemas as $skema)
                         <tr>
                             <td>
@@ -139,7 +122,6 @@
                             <td>
                                 @if($skema->jurusan)
                                     <span class="text-xs font-medium">{{ $skema->jurusan->nama_jurusan }}</span>
-                                    <span class="text-xs text-muted d-block">{{ $skema->jurusan->kode_jurusan }}</span>
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif
@@ -149,12 +131,15 @@
                             </td>
                             <td>
                                 <div class="action-menu">
-                                    <button class="action-btn" onclick="toggleMenu(this)">
-                                        <i class="bi bi-three-dots"></i>
+                                    <button type="button" class="action-btn" onclick="toggleMenu(event, this)">
+                                        <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-dropdown">
+                                        <a href="{{ route('admin.skema.show', $skema->id) }}">
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </a>
                                         <a href="{{ route('admin.skema.edit', $skema->id) }}">
-                                            <i class="bi bi-eye"></i> View
+                                            <i class="bi bi-pencil"></i> Edit
                                         </a>
                                         <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;">
                                             @csrf
@@ -177,35 +162,14 @@
             </div>
 
             <!-- Pagination -->
-            @if($skemas->hasPages())
-            <div class="pagination-container">
-                <div class="pagination-info">
+            <div class="pagination-container" id="skemaPaginationContainer">
+                <div class="pagination-info" id="skemaPaginationInfo">
                     Menampilkan {{ $skemas->firstItem() ?? 0 }} sampai {{ $skemas->lastItem() ?? 0 }} dari {{ $skemas->total() }} data
                 </div>
-                <div class="pagination">
-                    @if($skemas->currentPage() > 1)
-                        <a href="{{ $skemas->previousPageUrl() }}" class="page-link">
-                            <i class="bi bi-chevron-left"></i>
-                        </a>
-                    @endif
-                    
-                    @for($i = 1; $i <= min($skemas->lastPage(), 5); $i++)
-                        <a href="{{ $skemas->url($i) }}" class="page-link {{ $i == $skemas->currentPage() ? 'active' : '' }}">{{ $i }}</a>
-                    @endfor
-                    
-                    @if($skemas->lastPage() > 5)
-                        <span class="page-dots">...</span>
-                        <a href="{{ $skemas->url($skemas->lastPage()) }}" class="page-link">{{ $skemas->lastPage() }}</a>
-                    @endif
-                    
-                    @if($skemas->hasMorePages())
-                        <a href="{{ $skemas->nextPageUrl() }}" class="page-link">
-                            <i class="bi bi-chevron-right"></i>
-                        </a>
-                    @endif
+                <div class="pagination" id="skemaPaginationLinks">
+                    {{ $skemas->links() }}
                 </div>
             </div>
-            @endif
         </div>
     </div>
 </div>
@@ -364,110 +328,113 @@
 
     /* Toolbar */
     .toolbar {
+        margin-bottom: 20px;
+    }
+
+    .filter-section {
         display: flex;
         justify-content: space-between;
-        align-items: center;
         gap: 16px;
-        margin-bottom: 20px;
         flex-wrap: wrap;
     }
 
-    .search-form {
-        display: flex;
-        gap: 8px;
+    .search-box {
         flex: 1;
         min-width: 300px;
+        position: relative;
     }
 
-    .search-form input[type="text"] {
-        flex: 1;
-        padding: 9px 14px;
+    .search-box i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+    }
+
+    .search-box input {
+        width: 100%;
+        padding: 10px 14px 10px 42px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
-        font-size: 13px;
-        outline: none;
-        transition: border-color 0.2s;
+        font-size: 14px;
+        transition: all 0.2s;
     }
 
-    .search-form input[type="text"]:focus {
+    .search-box input:focus {
+        outline: none;
         border-color: #0073bd;
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
 
-    .search-form button {
-        padding: 9px 16px;
+    .filter-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
+    .btn-filter-search {
+        padding: 9px 14px;
         background: #0073bd;
         color: white;
         border: none;
         border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
+        font-size: 14px;
         cursor: pointer;
         display: flex;
         align-items: center;
-        gap: 6px;
         transition: background 0.2s;
     }
 
-    .search-form button:hover {
-        background: #0073bd;
+    .btn-filter-search:hover {
+        background: #005f99;
     }
 
-    .btn-clear {
-        padding: 9px;
-        background: #f3f4f6;
-        color: #6b7280;
+    .btn-filter-reset {
+        padding: 9px 12px;
+        background: #fee2e2;
+        color: #dc2626;
         border: none;
         border-radius: 8px;
-        font-size: 16px;
+        font-size: 13px;
         cursor: pointer;
         display: flex;
         align-items: center;
-        justify-content: center;
-        transition: all 0.2s;
         text-decoration: none;
-        width: 38px;
-        height: 38px;
+        transition: background 0.2s;
     }
 
-    .btn-clear:hover {
-        background: #e5e7eb;
-        color: #374151;
-    }
-
-    .filters {
-        display: flex;
-        gap: 8px;
-    }
-
-    .filter-form {
-        display: flex;
-        gap: 8px;
-    }
-
-    .filter-form select {
-        padding: 8px 32px 8px 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        font-size: 12px;
-        background: white;
-        cursor: pointer;
-        outline: none;
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-        transition: border-color 0.2s;
-    }
-
-    .filter-form select:focus {
-        border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    .btn-filter-reset:hover {
+        background: #fecaca;
     }
 
     /* Table */
     .table-container {
-        overflow-x: auto;
+        overflow: visible;
+    }
+
+    .table-container > .admin-table-scroll {
+        overflow: visible !important;
+        max-height: none !important;
     }
 
     .data-table {
@@ -719,6 +686,65 @@
         font-weight: 500;
     }
 
+    @media (max-width: 768px) {
+        .page-header {
+            align-items: stretch;
+        }
+
+        .header-actions {
+            width: 100%;
+        }
+
+        .header-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .card-body {
+            padding: 16px;
+        }
+
+        .filter-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .search-box {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .filter-group {
+            width: 100%;
+        }
+
+        .filter-select,
+        .btn-filter-search,
+        .btn-filter-reset {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .data-table {
+            min-width: 900px;
+        }
+
+        .data-table th,
+        .data-table td {
+            white-space: nowrap;
+        }
+
+        .pagination-container {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+
     @media (max-width: 640px) {
         .stats-grid {
             gap: 12px;
@@ -753,7 +779,18 @@
 </style>
 
 <script>
-    function toggleMenu(button) {
+    document.addEventListener('DOMContentLoaded', function () {
+        const table = document.querySelector('.table-container .data-table');
+        const wrapper = table ? table.closest('.admin-table-scroll') : null;
+
+        if (table && wrapper && wrapper.parentNode) {
+            wrapper.parentNode.insertBefore(table, wrapper);
+            wrapper.remove();
+        }
+    });
+
+    function toggleMenu(event, button) {
+        if (event) event.stopPropagation();
         // Close all other dropdowns
         document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
             if (dropdown !== button.nextElementSibling) {
@@ -773,5 +810,83 @@
             });
         }
     });
+
+    if (!window.__skemaAjaxInitialized) {
+        window.__skemaAjaxInitialized = true;
+
+        const filterForm = document.getElementById('filterForm');
+        const tableBody = document.getElementById('skemaTableBody');
+        const paginationInfo = document.getElementById('skemaPaginationInfo');
+        const paginationLinks = document.getElementById('skemaPaginationLinks');
+        const autoFilters = ['jenisSkemaFilter', 'sortFilter', 'orderFilter'];
+        const searchInput = filterForm ? filterForm.querySelector('input[name="search"]') : null;
+
+        async function fetchSkemaData(page = null) {
+            if (!filterForm || !tableBody || !paginationLinks || !paginationInfo) return;
+
+            const params = new URLSearchParams(new FormData(filterForm));
+            if (page) params.set('page', page);
+
+            const requestUrl = `${filterForm.action}?${params.toString()}`;
+
+            try {
+                const response = await fetch(requestUrl, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    }
+                });
+
+                if (!response.ok) throw new Error('Gagal memuat data skema');
+
+                const data = await response.json();
+                tableBody.innerHTML = data.rows || '';
+                paginationInfo.textContent = data.pagination_info || 'Menampilkan 0 sampai 0 dari 0 data';
+                paginationLinks.innerHTML = data.pagination_links || '';
+
+                const url = new URL(window.location.href);
+                url.search = params.toString();
+                window.history.replaceState({}, '', url.toString());
+            } catch (error) {
+                console.error('AJAX skema error:', error);
+            }
+        }
+
+        if (filterForm) {
+            filterForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                fetchSkemaData();
+            });
+        }
+
+        autoFilters.forEach(function (id) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener('change', function () {
+                    fetchSkemaData();
+                });
+            }
+        });
+
+        let searchDebounce;
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchDebounce);
+                searchDebounce = setTimeout(function () {
+                    fetchSkemaData();
+                }, 350);
+            });
+        }
+
+        paginationLinks.addEventListener('click', function (event) {
+            const link = event.target.closest('a');
+            if (!link) return;
+
+            event.preventDefault();
+            const linkUrl = new URL(link.href, window.location.origin);
+            fetchSkemaData(linkUrl.searchParams.get('page'));
+        });
+    }
 </script>
 @endsection

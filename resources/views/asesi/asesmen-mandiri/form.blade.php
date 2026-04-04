@@ -90,7 +90,7 @@
     }
 
     .instructions-box {
-        background: #f0fdf4;
+        background: #f0f5fd;
         border: 1px solid #bbd5f7;
         border-radius: 10px;
         padding: 20px;
@@ -1003,7 +1003,7 @@
         <div class="banner-meta">
             Ditinjau oleh: <strong>{{ $asesorReviewer->nama ?? ($pivot->reviewed_by ?? 'Asesor') }}</strong>
             @if($pivot->reviewed_at)
-                &nbsp;&bull;&nbsp; {{ \Carbon\Carbon::parse($pivot->reviewed_at)->translatedFormat('d F Y, H:i') }} WIB
+                &nbsp;&bull;&nbsp; {{ \Carbon\Carbon::parse($pivot->reviewed_at)->locale('id')->isoFormat('D MMMM YYYY, HH:mm') }} WIB
             @endif
         </div>
         @if($pivot->catatan_asesor)
@@ -1033,7 +1033,7 @@
 
         @if($unit->pertanyaan_unit)
         <div class="unit-question">
-            <i class="bi bi-question-circle"></i> {{ $unit->pertanyaan_unit }}
+            {{ $unit->pertanyaan_unit }}
         </div>
         @endif
 
@@ -1084,9 +1084,10 @@
                 @endif
 
                 <div class="bukti-section">
-                    <label class="bukti-label">Bukti yang Relevan</label>
+                    <label class="bukti-label">Bukti yang Relevan <span style="color:#dc2626;">*</span></label>
                     <textarea name="jawaban[{{ $elemen->id }}][bukti]" 
                               class="bukti-input" 
+                              {{ ($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)) ? '' : 'required' }}
                               {{ ($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)) ? 'readonly' : '' }}
                               placeholder="Tuliskan bukti yang menunjukkan bahwa Anda dapat melakukan kompetensi ini (contoh: sertifikat, pengalaman kerja, portofolio, dll)">{{ $existingAnswer->bukti ?? '' }}</textarea>
                 </div>
@@ -1107,7 +1108,7 @@
             <img src="{{ $pivot->tanda_tangan }}" alt="Tanda Tangan Asesi">
             <div class="signature-saved-meta">
                 <i class="bi bi-check-circle-fill"></i>
-                Ditandatangani pada: {{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan)->translatedFormat('d F Y, H:i') }} WIB
+                Ditandatangani pada: {{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan)->locale('id')->isoFormat('D MMMM YYYY, HH:mm') }} WIB
             </div>
         </div>
         @elseif(!($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)))
@@ -1134,7 +1135,7 @@
         <div class="signature-actions">
             <div class="signature-date">
                 <i class="bi bi-calendar3"></i>
-                Tanggal: <strong id="signatureDate">{{ now()->translatedFormat('d F Y') }}</strong>
+                Tanggal: <strong id="signatureDate">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
             </div>
             <button type="button" class="btn-clear-signature" id="clearSignature">
                 <i class="bi bi-eraser"></i> Hapus Tanda Tangan
