@@ -51,6 +51,16 @@ class JadwalUjikom extends Model
         return $this->belongsTo(\App\Models\Kelompok::class, 'kelompok_id');
     }
 
+    public function kelompoks()
+    {
+        return $this->belongsToMany(
+            \App\Models\Kelompok::class,
+            'jadwal_kelompok',
+            'jadwal_id',
+            'kelompok_id'
+        );
+    }
+
     public function peserta()
     {
         return $this->belongsToMany(

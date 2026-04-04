@@ -24,4 +24,14 @@ class Kelompok extends Model
     {
         return $this->hasMany(Asesi::class, 'kelompok_id');
     }
+
+    public function jadwals()
+    {
+        return $this->belongsToMany(
+            JadwalUjikom::class,
+            'jadwal_kelompok',
+            'kelompok_id',
+            'jadwal_id'
+        );
+    }
 }

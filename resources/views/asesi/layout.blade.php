@@ -526,16 +526,11 @@
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
-                transform: translateX(-100%);
-                box-shadow: 12px 0 28px rgba(15, 23, 42, 0.14);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
+                display: none;
             }
 
             .sidebar-overlay {
-                display: block;
+                display: none !important;
             }
 
             .main-content {
@@ -559,7 +554,7 @@
             }
 
             .mobile-toggle {
-                display: block;
+                display: none !important;
             }
 
             .topbar h1 {
@@ -758,10 +753,6 @@
                                         <i class="bi bi-person"></i>
                                         <span>Profil</span>
                                     </a>
-                                    <a href="#" class="profile-menu-item" onclick="event.preventDefault();">
-                                        <i class="bi bi-gear"></i>
-                                        <span>Pengaturan</span>
-                                    </a>
                                     <div class="profile-menu-divider"></div>
                                 @endif
                                 <form method="POST" action="{{ route('asesi.logout') }}" style="width: 100%; margin: 0;">
@@ -836,11 +827,6 @@
                         <i class="bi bi-file-earmark-plus"></i>
                         <span>Daftar</span>
                     </a>
-
-                    <button class="bottom-nav-item" onclick="toggleAsesiProfile(event)">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Profil</span>
-                    </button>
                 @endif
             </div>
         </nav>
