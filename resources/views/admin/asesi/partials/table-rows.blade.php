@@ -12,7 +12,11 @@
         </div>
     </td>
     <td>
-        <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? 'Belum Ditentukan' }}</span>
+        @if($item->skemas->isNotEmpty())
+            <span class="scheme-text">{{ $item->skemas->pluck('nama_skema')->implode(', ') }}</span>
+        @else
+            <span class="scheme-text">Belum Ditentukan</span>
+        @endif
     </td>
     <td>
         @if($item->account)
@@ -54,10 +58,10 @@
                 <a href="{{ route('admin.asesi.edit', $item->NIK) }}">
                     <i class="bi bi-pencil"></i> Edit
                 </a>
-                <form action="{{ route('admin.asesi.destroy', $item->NIK) }}" method="POST" style="margin:0;">
+                <form action="{{ route('admin.asesi.destroy', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openSingleDeleteModal(event, this, @js('Hapus asesi ' . $item->nama . '?'))">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" onclick="return confirm('Hapus asesi {{ addslashes($item->nama) }}?')">
+                    <button type="submit">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>

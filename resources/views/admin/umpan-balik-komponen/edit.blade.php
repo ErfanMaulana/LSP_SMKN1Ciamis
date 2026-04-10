@@ -56,9 +56,8 @@
 
             <div class="form-group">
                 <label for="urutan">Urutan <span class="required">*</span></label>
-                <input type="number" id="urutan" name="urutan" value="{{ old('urutan', $komponen->urutan) }}" min="1"
-                       class="form-control @error('urutan') is-invalid @enderror">
-                @error('urutan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                <input type="number" id="urutan" value="{{ $komponen->urutan }}" min="1" class="form-control" readonly disabled>
+                <div class="form-hint">Urutan dikelola otomatis oleh sistem dan tidak dapat diubah manual.</div>
             </div>
 
             <div class="form-group">

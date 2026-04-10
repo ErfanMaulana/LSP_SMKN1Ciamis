@@ -309,6 +309,97 @@
         to { transform: rotate(360deg); }
     }
 
+    .kelompok-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .kelompok-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .kelompok-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .kelompok-delete-confirm-overlay.show .kelompok-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .kelompok-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .kelompok-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .kelompok-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .kelompok-delete-btn-cancel,
+    .kelompok-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .kelompok-delete-btn-cancel {
+        background: #0073bd;
+    }
+    .kelompok-delete-btn-cancel:hover {
+        background: #005f99;
+    }
+
+    .kelompok-delete-btn-submit {
+        background: #0073bd;
+    }
+    .kelompok-delete-btn-submit:hover {
+        background: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .kelompok-delete-confirm-overlay,
+        .kelompok-delete-confirm-modal {
+            transition: none;
+        }
+    }
+
     @media (max-width: 640px) {
         .stats-grid {
             gap: 12px;
@@ -439,7 +530,72 @@
     </div>
 </div>
 
+<div id="kelompok-delete-confirm-overlay" class="kelompok-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="kelompokDeleteConfirmTitle" aria-hidden="true">
+    <div class="kelompok-delete-confirm-modal">
+        <h3 id="kelompokDeleteConfirmTitle" class="kelompok-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="kelompokDeleteConfirmText" class="kelompok-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="kelompok-delete-confirm-actions">
+            <button type="button" id="kelompokDeleteConfirmCancel" class="kelompok-delete-btn-cancel">Batal</button>
+            <button type="button" id="kelompokDeleteConfirmSubmit" class="kelompok-delete-btn-submit">Hapus</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    let pendingKelompokDeleteForm = null;
+
+    function openKelompokDeleteModal(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingKelompokDeleteForm = form;
+
+        const overlay = document.getElementById('kelompok-delete-confirm-overlay');
+        const text = document.getElementById('kelompokDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    }
+
+    function closeKelompokDeleteModal() {
+        const overlay = document.getElementById('kelompok-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingKelompokDeleteForm = null;
+    }
+
+    const kelompokDeleteOverlay = document.getElementById('kelompok-delete-confirm-overlay');
+    const kelompokDeleteCancelBtn = document.getElementById('kelompokDeleteConfirmCancel');
+    const kelompokDeleteSubmitBtn = document.getElementById('kelompokDeleteConfirmSubmit');
+
+    kelompokDeleteCancelBtn?.addEventListener('click', closeKelompokDeleteModal);
+
+    kelompokDeleteOverlay?.addEventListener('click', function(event) {
+        if (event.target === kelompokDeleteOverlay) {
+            closeKelompokDeleteModal();
+        }
+    });
+
+    kelompokDeleteSubmitBtn?.addEventListener('click', function() {
+        if (!pendingKelompokDeleteForm) return;
+        const formToSubmit = pendingKelompokDeleteForm;
+        closeKelompokDeleteModal();
+        formToSubmit.submit();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeKelompokDeleteModal();
+        }
+    });
+
     // AJAX Search dengan Debounce
     let searchTimeout;
     const searchInput = document.getElementById('searchInput');

@@ -136,6 +136,98 @@
     .dropdown-item.danger { color: #475569; }
     .action-dropdown button[type="submit"]:hover { background: #fef2f2; color: #dc2626; }
 
+    .berita-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .berita-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .berita-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .berita-delete-confirm-overlay.show .berita-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .berita-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .berita-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .berita-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .berita-delete-btn-cancel,
+    .berita-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .berita-delete-btn-cancel {
+        background: #0073bd;
+    }
+    .berita-delete-btn-cancel:hover {
+        background: #005fa3;
+    }
+
+    .berita-delete-btn-submit {
+        background: #0073bd;
+    }
+    .berita-delete-btn-submit:hover {
+        background: #005fa3;
+    }
+
+
+    @media (prefers-reduced-motion: reduce) {
+        .berita-delete-confirm-overlay,
+        .berita-delete-confirm-modal {
+            transition: none;
+        }
+    }
+
     .empty-state { text-align: center; padding: 60px 20px; }
     .empty-state i { font-size: 48px; color: #d1d5db; display: block; margin-bottom: 12px; }
     .empty-state h4 { font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px; }
@@ -351,7 +443,7 @@
                             <form action="{{ route('admin.berita.destroy', $item->id) }}" method="POST" style="margin: 0;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="dropdown-item danger" onclick="return confirm('Yakin ingin menghapus berita ini?')">
+                                <button type="submit" class="dropdown-item danger">
                                     <i class="bi bi-trash"></i> Hapus
                                 </button>
                             </form>
@@ -382,10 +474,74 @@
     </div>
     @endif
 </div>
+
+<div id="berita-delete-confirm-overlay" class="berita-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="beritaDeleteConfirmTitle" aria-hidden="true">
+    <div class="berita-delete-confirm-modal">
+        <h3 id="beritaDeleteConfirmTitle" class="berita-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="beritaDeleteConfirmText" class="berita-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="berita-delete-confirm-actions">
+            <button type="button" id="beritaDeleteConfirmCancel" class="berita-delete-btn-cancel">Batal</button>
+            <button type="button" id="beritaDeleteConfirmSubmit" class="berita-delete-btn-submit">Hapus</button>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
+    let pendingBeritaDeleteForm = null;
+
+    function openBeritaDeleteModal(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingBeritaDeleteForm = form;
+
+        const overlay = document.getElementById('berita-delete-confirm-overlay');
+        const text = document.getElementById('beritaDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+        return false;
+    }
+
+    function closeBeritaDeleteModal() {
+        const overlay = document.getElementById('berita-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingBeritaDeleteForm = null;
+    }
+
+    const beritaDeleteOverlay = document.getElementById('berita-delete-confirm-overlay');
+    const beritaDeleteCancelBtn = document.getElementById('beritaDeleteConfirmCancel');
+    const beritaDeleteSubmitBtn = document.getElementById('beritaDeleteConfirmSubmit');
+
+    beritaDeleteCancelBtn?.addEventListener('click', closeBeritaDeleteModal);
+
+    beritaDeleteOverlay?.addEventListener('click', function(event) {
+        if (event.target === beritaDeleteOverlay) {
+            closeBeritaDeleteModal();
+        }
+    });
+
+    beritaDeleteSubmitBtn?.addEventListener('click', function() {
+        if (!pendingBeritaDeleteForm) return;
+        const formToSubmit = pendingBeritaDeleteForm;
+        closeBeritaDeleteModal();
+        formToSubmit.submit();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeBeritaDeleteModal();
+        }
+    });
+
     // Remove global table scroll wrapper on this page
     document.addEventListener('DOMContentLoaded', function () {
         const table = document.querySelector('.card .data-table');
@@ -448,6 +604,20 @@
         if (!event.target.closest('.action-menu')) {
             document.querySelectorAll('.action-dropdown.show').forEach(d => d.classList.remove('show'));
         }
+    });
+
+    document.addEventListener('submit', function(event) {
+        const form = event.target.closest('form[action*="/admin/berita/"]');
+        if (!form) return;
+
+        const methodInput = form.querySelector('input[name="_method"]');
+        if (!methodInput || methodInput.value !== 'DELETE') return;
+
+        const row = form.closest('tr');
+        const titleEl = row ? row.querySelector('.berita-title') : null;
+        const title = titleEl ? titleEl.textContent.trim() : 'berita ini';
+        const message = 'Apakah Anda yakin menghapus berita "' + title + '" ini?';
+        openBeritaDeleteModal(event, form, message);
     });
 </script>
 @endsection

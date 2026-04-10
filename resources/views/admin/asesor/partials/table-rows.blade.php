@@ -41,10 +41,10 @@
                 <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}">
                     <i class="bi bi-pencil"></i> Edit
                 </a>
-                <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin:0;">
+                <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin:0;" onsubmit="return openAsesorDeleteModal(event, this, @js('Hapus asesor ' . $item->nama . '?'))">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" onclick="return confirm('Hapus asesor {{ addslashes($item->nama) }}?')">
+                    <button type="submit">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>

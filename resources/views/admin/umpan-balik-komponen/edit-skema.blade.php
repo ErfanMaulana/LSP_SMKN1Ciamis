@@ -54,7 +54,7 @@
         <p>{{ $skema->nama_skema }} ({{ $skema->nomor_skema }})</p>
     </div>
     <div class="actions">
-        <a href="{{ route('admin.umpan-balik-komponen.create') }}" class="btn btn-primary">
+        <a href="{{ route('admin.umpan-balik-komponen.create', ['skema_id' => $skema->id]) }}" class="btn btn-primary">
             <i class="bi bi-plus-circle"></i> Tambah Komponen
         </a>
         <a href="{{ route('admin.umpan-balik-komponen.index') }}" class="btn btn-secondary">

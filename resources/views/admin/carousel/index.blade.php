@@ -124,7 +124,7 @@
 
                                     @if($canDeleteCarousel)
                                         <form action="{{ route('admin.carousel.destroy', $carousel->id) }}" method="POST"
-                                              onsubmit="return confirm('Hapus banner ini?')" style="margin: 0;">
+                                              onsubmit="return openCarouselDeleteModal(event, this, @js('Apakah Anda yakin menghapus banner "' . $carousel->title . '" ini?'))" style="margin: 0;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="dropdown-item danger">
@@ -155,6 +155,17 @@
         @endif
     </div>
     @endif
+</div>
+
+<div id="carousel-delete-confirm-overlay" class="carousel-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="carouselDeleteConfirmTitle" aria-hidden="true">
+    <div class="carousel-delete-confirm-modal">
+        <h3 id="carouselDeleteConfirmTitle" class="carousel-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="carouselDeleteConfirmText" class="carousel-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="carousel-delete-confirm-actions">
+            <button type="button" id="carouselDeleteConfirmCancel" class="carousel-delete-btn-cancel">Batal</button>
+            <button type="button" id="carouselDeleteConfirmSubmit" class="carousel-delete-btn-submit">Hapus</button>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -271,6 +282,97 @@
     .dropdown-item.danger { color: #475569; }
     .action-dropdown button[type="submit"]:hover { background: #fef2f2; color: #dc2626; }
 
+    .carousel-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .carousel-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .carousel-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .carousel-delete-confirm-overlay.show .carousel-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .carousel-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .carousel-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .carousel-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .carousel-delete-btn-cancel,
+    .carousel-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .carousel-delete-btn-cancel {
+        background: #0073bd;
+    }
+    .carousel-delete-btn-cancel:hover {
+        background: #005f99;
+    }
+
+    .carousel-delete-btn-submit {
+        background: #0073bd;
+    }
+    .carousel-delete-btn-submit:hover {
+        background: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .carousel-delete-confirm-overlay,
+        .carousel-delete-confirm-modal {
+            transition: none;
+        }
+    }
+
     /* Empty state */
     .empty-state {
         background: white; border-radius: 12px; padding: 60px 20px; text-align: center;
@@ -321,6 +423,60 @@
 
 @section('scripts')
 <script>
+let pendingCarouselDeleteForm = null;
+
+function openCarouselDeleteModal(event, form, message) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    pendingCarouselDeleteForm = form;
+
+    const overlay = document.getElementById('carousel-delete-confirm-overlay');
+    const text = document.getElementById('carouselDeleteConfirmText');
+    if (!overlay || !text) return false;
+
+    text.textContent = message || 'Apakah Anda yakin?';
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    return false;
+}
+
+function closeCarouselDeleteModal() {
+    const overlay = document.getElementById('carousel-delete-confirm-overlay');
+    if (!overlay) return;
+
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+    pendingCarouselDeleteForm = null;
+}
+
+const carouselDeleteOverlay = document.getElementById('carousel-delete-confirm-overlay');
+const carouselDeleteCancelBtn = document.getElementById('carouselDeleteConfirmCancel');
+const carouselDeleteSubmitBtn = document.getElementById('carouselDeleteConfirmSubmit');
+
+carouselDeleteCancelBtn?.addEventListener('click', closeCarouselDeleteModal);
+
+carouselDeleteOverlay?.addEventListener('click', function(event) {
+    if (event.target === carouselDeleteOverlay) {
+        closeCarouselDeleteModal();
+    }
+});
+
+carouselDeleteSubmitBtn?.addEventListener('click', function() {
+    if (!pendingCarouselDeleteForm) return;
+    const formToSubmit = pendingCarouselDeleteForm;
+    closeCarouselDeleteModal();
+    formToSubmit.submit();
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeCarouselDeleteModal();
+    }
+});
+
 function toggleMenu(button) {
     const dropdown = button.nextElementSibling;
     const isVisible = dropdown.classList.contains('show');

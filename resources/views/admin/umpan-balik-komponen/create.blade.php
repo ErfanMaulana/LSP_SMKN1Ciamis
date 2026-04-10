@@ -118,7 +118,10 @@
             <div class="form-group">
                 <label for="skema_ids">Skema <span class="required">*</span></label>
                 @php
-                    $oldSkemaIds = collect(old('skema_ids', []))->map(fn($id) => (string) $id)->all();
+                    $defaultSkemaIds = isset($preselectedSkemaId) && $preselectedSkemaId !== null && $preselectedSkemaId !== ''
+                        ? [(string) $preselectedSkemaId]
+                        : [];
+                    $oldSkemaIds = collect(old('skema_ids', $defaultSkemaIds))->map(fn($id) => (string) $id)->all();
                 @endphp
                 <div id="skema-hidden-inputs"></div>
 

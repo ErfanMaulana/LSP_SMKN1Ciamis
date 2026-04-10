@@ -37,10 +37,10 @@
                     <a href="{{ route('admin.kelompok.edit', $kelompok->id) }}">
                         <i class="bi bi-pencil"></i> Ubah
                     </a>
-                    <form action="{{ route('admin.kelompok.destroy', $kelompok->id) }}" method="POST" style="margin: 0;">
+                    <form action="{{ route('admin.kelompok.destroy', $kelompok->id) }}" method="POST" style="margin: 0;" onsubmit="return openKelompokDeleteModal(event, this, @js('Apakah Anda yakin menghapus "' . $kelompok->nama_kelompok . '" ini?'))">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" onclick="return confirm('Apakah Anda yakin?')">
+                        <button type="submit">
                             <i class="bi bi-trash"></i> Hapus
                         </button>
                     </form>

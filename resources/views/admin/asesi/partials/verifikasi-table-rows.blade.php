@@ -45,15 +45,15 @@
                     <i class="bi bi-eye" style="font-size: 16px;"></i> Lihat Detail
                 </a>
                 @if($item->status === 'pending')
-                <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;">
+                <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Setujui pendaftaran ' . $item->nama . '?'))">
                     @csrf
-                    <button type="submit" title="Setujui" onclick="return confirm('Setujui pendaftaran {{ addslashes($item->nama) }}?')">
+                    <button type="submit" title="Setujui">
                         <i class="bi bi-check-lg" style="font-size: 16px;"></i> Setujui
                     </button>
                 </form>
-                <form action="{{ route('admin.asesi.reject', $item->NIK) }}" method="POST" style="margin:0;">
+                <form action="{{ route('admin.asesi.reject', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Tolak pendaftaran ' . $item->nama . '?'))">
                     @csrf
-                    <button type="submit" title="Tolak" onclick="return confirm('Tolak pendaftaran {{ addslashes($item->nama) }}?')">
+                    <button type="submit" title="Tolak">
                         <i class="bi bi-x-lg" style="font-size: 16px;"></i> Tolak
                     </button>
                 </form>

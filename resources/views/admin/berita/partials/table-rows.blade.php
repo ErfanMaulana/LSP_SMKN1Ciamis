@@ -37,7 +37,7 @@
                 <form action="{{ route('admin.berita.destroy', $item->id) }}" method="POST" style="margin: 0;">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="dropdown-item danger" onclick="return confirm('Yakin ingin menghapus berita ini?')">
+                    <button type="submit" class="dropdown-item danger">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>

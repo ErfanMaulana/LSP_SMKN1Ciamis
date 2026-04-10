@@ -42,10 +42,10 @@
                         {{ $tuk->status === 'aktif' ? 'Nonaktifkan' : 'Aktifkan' }}
                     </button>
                 </form>
-                <form action="{{ route('admin.tuk.destroy', $tuk->id) }}" method="POST" style="margin: 0;">
+                <form action="{{ route('admin.tuk.destroy', $tuk->id) }}" method="POST" style="margin: 0;" onsubmit="return openTukDeleteModal(event, this, @js('Hapus TUK "' . $tuk->nama_tuk . '" ini?'))">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus TUK {{ addslashes($tuk->nama_tuk) }}?')">
+                    <button type="submit">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>

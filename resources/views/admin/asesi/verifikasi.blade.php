@@ -201,15 +201,15 @@
                                                 <i class="bi bi-eye" style="font-size: 16px;"></i> Lihat Detail
                                             </a>
                                             @if($item->status === 'pending')
-                                            <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;">
+                                            <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Setujui pendaftaran ' . $item->nama . '?'))">
                                                 @csrf
-                                                <button type="submit" title="Setujui" onclick="return confirm('Setujui pendaftaran {{ addslashes($item->nama) }}?')">
+                                                <button type="submit" title="Setujui">
                                                     <i class="bi bi-check-lg" style="font-size: 16px;"></i> Setujui
                                                 </button>
                                             </form>
-                                            <form action="{{ route('admin.asesi.reject', $item->NIK) }}" method="POST" style="margin:0;">
+                                            <form action="{{ route('admin.asesi.reject', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Tolak pendaftaran ' . $item->nama . '?'))">
                                                 @csrf
-                                                <button type="submit" title="Tolak" onclick="return confirm('Tolak pendaftaran {{ addslashes($item->nama) }}?')">
+                                                <button type="submit" title="Tolak">
                                                     <i class="bi bi-x-lg" style="font-size: 16px;"></i> Tolak
                                                 </button>
                                             </form>
@@ -935,7 +935,109 @@
     .bulk-modal-field textarea:focus,
     .bulk-modal-field select:focus { border-color: #0073bd; box-shadow: 0 0 0 3px rgba(0,115,189,0.1); }
     .bulk-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    .verify-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10010;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .verify-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .verify-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .verify-confirm-overlay.show .verify-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .verify-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .verify-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .verify-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .verify-confirm-btn-cancel,
+    .verify-confirm-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .verify-confirm-btn-cancel {
+        background: #0073bd;
+    }
+    .verify-confirm-btn-cancel:hover {
+        background: #005fa3;
+    }
+
+    .verify-confirm-btn-submit {
+        background: #0073bd;
+    }
+    .verify-confirm-btn-submit:hover {
+        background: #005fa3;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .verify-confirm-overlay,
+        .verify-confirm-modal {
+            transition: none;
+        }
+    }
 </style>
+
+<div id="verify-confirm-overlay" class="verify-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="verifyConfirmTitle" aria-hidden="true">
+    <div class="verify-confirm-modal">
+        <h3 id="verifyConfirmTitle" class="verify-confirm-title">Konfirmasi</h3>
+        <p id="verifyConfirmText" class="verify-confirm-text">Apakah Anda yakin?</p>
+        <div class="verify-confirm-actions">
+            <button type="button" id="verifyConfirmCancel" class="verify-confirm-btn-cancel">Batal</button>
+            <button type="button" id="verifyConfirmSubmit" class="verify-confirm-btn-submit">Lanjutkan</button>
+        </div>
+    </div>
+</div>
 
 <!-- Bulk Reject Modal -->
 <div id="bulk-reject-modal" class="bulk-modal-overlay">
@@ -993,6 +1095,65 @@
     </div>
 </div>
 <script>
+    let pendingVerifikasiConfirmAction = null;
+
+    function openVerifikasiConfirmModal(message, onConfirm) {
+        const overlay = document.getElementById('verify-confirm-overlay');
+        const text = document.getElementById('verifyConfirmText');
+        if (!overlay || !text) return false;
+
+        pendingVerifikasiConfirmAction = typeof onConfirm === 'function' ? onConfirm : null;
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    }
+
+    function closeVerifikasiConfirmModal() {
+        const overlay = document.getElementById('verify-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingVerifikasiConfirmAction = null;
+    }
+
+    function openVerifikasiFormConfirm(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        return openVerifikasiConfirmModal(message, function () {
+            form.submit();
+        });
+    }
+
+    const verifyConfirmOverlay = document.getElementById('verify-confirm-overlay');
+    const verifyConfirmCancel = document.getElementById('verifyConfirmCancel');
+    const verifyConfirmSubmit = document.getElementById('verifyConfirmSubmit');
+
+    verifyConfirmCancel?.addEventListener('click', closeVerifikasiConfirmModal);
+
+    verifyConfirmOverlay?.addEventListener('click', function(event) {
+        if (event.target === verifyConfirmOverlay) {
+            closeVerifikasiConfirmModal();
+        }
+    });
+
+    verifyConfirmSubmit?.addEventListener('click', function() {
+        if (!pendingVerifikasiConfirmAction) return;
+        const action = pendingVerifikasiConfirmAction;
+        closeVerifikasiConfirmModal();
+        action();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeVerifikasiConfirmModal();
+        }
+    });
+
     // Action Menu Toggle with Fixed Positioning
     function toggleMenu(button) {
         const dropdown = button.nextElementSibling;
@@ -1102,7 +1263,6 @@
         if (!isBulkModeActive) return;
         var niks = getSelectedNiks();
         if (niks.length === 0) return;
-        if (!confirm('Setujui ' + niks.length + ' asesi terpilih?')) return;
         var container = document.getElementById('bulk-approve-niks');
         container.innerHTML = '';
         niks.forEach(function(nik) {
@@ -1110,7 +1270,9 @@
             inp.type = 'hidden'; inp.name = 'niks[]'; inp.value = nik;
             container.appendChild(inp);
         });
-        document.getElementById('bulk-approve-form').submit();
+        openVerifikasiConfirmModal('Setujui ' + niks.length + ' asesi terpilih?', function () {
+            document.getElementById('bulk-approve-form').submit();
+        });
     };
 
     window.openBulkRejectModal = function() {

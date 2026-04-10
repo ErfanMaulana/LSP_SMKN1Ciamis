@@ -179,6 +179,97 @@
 
     .pagination-wrap { padding: 16px; }
 
+    .tuk-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .tuk-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .tuk-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .tuk-delete-confirm-overlay.show .tuk-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .tuk-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .tuk-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .tuk-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .tuk-delete-btn-cancel,
+    .tuk-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .tuk-delete-btn-cancel {
+        background: #0073bd;
+    }
+    .tuk-delete-btn-cancel:hover {
+        background: #005f99;
+    }
+
+    .tuk-delete-btn-submit {
+        background: #0073bd;
+    }
+    .tuk-delete-btn-submit:hover {
+        background: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .tuk-delete-confirm-overlay,
+        .tuk-delete-confirm-modal {
+            transition: none;
+        }
+    }
+
     @media (max-width: 768px) {
         .page-header {
             align-items: stretch;
@@ -376,7 +467,7 @@
                                 </button>
                             </form>
                             <form method="POST" action="{{ route('admin.tuk.destroy', $tuk->id) }}" style="margin:0;"
-                                  onsubmit="return confirm('Hapus TUK {{ addslashes($tuk->nama_tuk) }}?')">
+                                  onsubmit="return openTukDeleteModal(event, this, @js('Hapus TUK "' . $tuk->nama_tuk . '" ?'))">
                                 @csrf @method('DELETE')
                                 <button type="submit">
                                     <i class="bi bi-trash"></i> Hapus
@@ -412,10 +503,75 @@
     </div>
 </div>
 
+<div id="tuk-delete-confirm-overlay" class="tuk-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="tukDeleteConfirmTitle" aria-hidden="true">
+    <div class="tuk-delete-confirm-modal">
+        <h3 id="tukDeleteConfirmTitle" class="tuk-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="tukDeleteConfirmText" class="tuk-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="tuk-delete-confirm-actions">
+            <button type="button" id="tukDeleteConfirmCancel" class="tuk-delete-btn-cancel">Batal</button>
+            <button type="button" id="tukDeleteConfirmSubmit" class="tuk-delete-btn-submit">Hapus</button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
 <script>
+let pendingTukDeleteForm = null;
+
+function openTukDeleteModal(event, form, message) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    pendingTukDeleteForm = form;
+
+    const overlay = document.getElementById('tuk-delete-confirm-overlay');
+    const text = document.getElementById('tukDeleteConfirmText');
+    if (!overlay || !text) return false;
+
+    text.textContent = message || 'Apakah Anda yakin?';
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    return false;
+}
+
+function closeTukDeleteModal() {
+    const overlay = document.getElementById('tuk-delete-confirm-overlay');
+    if (!overlay) return;
+
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+    pendingTukDeleteForm = null;
+}
+
+const tukDeleteOverlay = document.getElementById('tuk-delete-confirm-overlay');
+const tukDeleteCancelBtn = document.getElementById('tukDeleteConfirmCancel');
+const tukDeleteSubmitBtn = document.getElementById('tukDeleteConfirmSubmit');
+
+tukDeleteCancelBtn?.addEventListener('click', closeTukDeleteModal);
+
+tukDeleteOverlay?.addEventListener('click', function(event) {
+    if (event.target === tukDeleteOverlay) {
+        closeTukDeleteModal();
+    }
+});
+
+tukDeleteSubmitBtn?.addEventListener('click', function() {
+    if (!pendingTukDeleteForm) return;
+    const formToSubmit = pendingTukDeleteForm;
+    closeTukDeleteModal();
+    formToSubmit.submit();
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeTukDeleteModal();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function () {
     if (window.__tukAjaxInitialized) return;
     window.__tukAjaxInitialized = true;

@@ -141,10 +141,10 @@
                                         <a href="{{ route('admin.skema.edit', $skema->id) }}">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
-                                        <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;">
+                                        <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;" onsubmit="return openSkemaDeleteModal(event, this, @js('Apakah Anda yakin ingin menghapus skema ' . $skema->nama_skema . ' i?'))">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus skema ini?')">
+                                            <button type="submit">
                                                 <i class="bi bi-trash"></i> Hapus
                                             </button>
                                         </form>
@@ -170,6 +170,17 @@
                     {{ $skemas->links() }}
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div id="skema-delete-confirm-overlay" class="skema-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="skemaDeleteConfirmTitle" aria-hidden="true">
+    <div class="skema-delete-confirm-modal">
+        <h3 id="skemaDeleteConfirmTitle" class="skema-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="skemaDeleteConfirmText" class="skema-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="skema-delete-confirm-actions">
+            <button type="button" id="skemaDeleteConfirmCancel" class="skema-delete-btn-cancel">Batal</button>
+            <button type="button" id="skemaDeleteConfirmSubmit" class="skema-delete-btn-submit">Hapus</button>
         </div>
     </div>
 </div>
@@ -686,6 +697,97 @@
         font-weight: 500;
     }
 
+    .skema-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .skema-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .skema-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .skema-delete-confirm-overlay.show .skema-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .skema-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .skema-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .skema-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .skema-delete-btn-cancel,
+    .skema-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .skema-delete-btn-cancel {
+        background: #0073bd;
+    }
+    .skema-delete-btn-cancel:hover {
+        background: #005f99;
+    }
+
+    .skema-delete-btn-submit {
+        background: #0073bd;
+    }
+    .skema-delete-btn-submit:hover {
+        background: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .skema-delete-confirm-overlay,
+        .skema-delete-confirm-modal {
+            transition: none;
+        }
+    }
+
     @media (max-width: 768px) {
         .page-header {
             align-items: stretch;
@@ -779,6 +881,60 @@
 </style>
 
 <script>
+    let pendingSkemaDeleteForm = null;
+
+    function openSkemaDeleteModal(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingSkemaDeleteForm = form;
+
+        const overlay = document.getElementById('skema-delete-confirm-overlay');
+        const text = document.getElementById('skemaDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    }
+
+    function closeSkemaDeleteModal() {
+        const overlay = document.getElementById('skema-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingSkemaDeleteForm = null;
+    }
+
+    const skemaDeleteOverlay = document.getElementById('skema-delete-confirm-overlay');
+    const skemaDeleteCancelBtn = document.getElementById('skemaDeleteConfirmCancel');
+    const skemaDeleteSubmitBtn = document.getElementById('skemaDeleteConfirmSubmit');
+
+    skemaDeleteCancelBtn?.addEventListener('click', closeSkemaDeleteModal);
+
+    skemaDeleteOverlay?.addEventListener('click', function(event) {
+        if (event.target === skemaDeleteOverlay) {
+            closeSkemaDeleteModal();
+        }
+    });
+
+    skemaDeleteSubmitBtn?.addEventListener('click', function() {
+        if (!pendingSkemaDeleteForm) return;
+        const formToSubmit = pendingSkemaDeleteForm;
+        closeSkemaDeleteModal();
+        formToSubmit.submit();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeSkemaDeleteModal();
+        }
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
         const table = document.querySelector('.table-container .data-table');
         const wrapper = table ? table.closest('.admin-table-scroll') : null;

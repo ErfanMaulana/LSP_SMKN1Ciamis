@@ -102,8 +102,8 @@
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
                                        
-                                        <form action="{{ route('admin.profile-content.destroy', $item->id) }}" method="POST" 
-                                              onsubmit="return confirm('Hapus konten ini?')" style="margin: 0;">
+                                        <form action="{{ route('admin.profile-content.destroy', $item->id) }}" method="POST"
+                                            onsubmit="return openProfileDeleteModal(event, this, @js('Apakah Anda yakin menghapus konten "' . $item->title . '" ini?'))" style="margin: 0;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="dropdown-item danger">
@@ -176,8 +176,8 @@
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
                                        
-                                        <form action="{{ route('admin.profile-content.vision-mission.destroy', $vision->id) }}" method="POST" 
-                                              onsubmit="return confirm('Hapus visi ini?')" style="margin: 0;">
+                                        <form action="{{ route('admin.profile-content.vision-mission.destroy', $vision->id) }}" method="POST"
+                                            onsubmit="return openProfileDeleteModal(event, this, @js('Apakah Anda yakin menghapus visi ini?'))" style="margin: 0;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="dropdown-item danger">
@@ -250,8 +250,8 @@
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
                                        
-                                        <form action="{{ route('admin.profile-content.vision-mission.destroy', $mission->id) }}" method="POST" 
-                                              onsubmit="return confirm('Hapus misi ini?')" style="margin: 0;">
+                                        <form action="{{ route('admin.profile-content.vision-mission.destroy', $mission->id) }}" method="POST"
+                                            onsubmit="return openProfileDeleteModal(event, this, @js('Apakah Anda yakin menghapus misi ini?'))" style="margin: 0;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="dropdown-item danger">
@@ -278,6 +278,17 @@
         @endif
     </div>
 
+</div>
+
+<div id="profile-delete-confirm-overlay" class="profile-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="profileDeleteConfirmTitle" aria-hidden="true">
+    <div class="profile-delete-confirm-modal">
+        <h3 id="profileDeleteConfirmTitle" class="profile-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="profileDeleteConfirmText" class="profile-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="profile-delete-confirm-actions">
+            <button type="button" id="profileDeleteConfirmCancel" class="profile-delete-btn-cancel">Batal</button>
+            <button type="button" id="profileDeleteConfirmSubmit" class="profile-delete-btn-submit">Hapus</button>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -456,6 +467,97 @@
     .dropdown-item.danger { color: #475569; }
     .action-dropdown button[type="submit"]:hover { background: #fef2f2; color: #dc2626; }
 
+    .profile-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .profile-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .profile-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .profile-delete-confirm-overlay.show .profile-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .profile-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .profile-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .profile-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .profile-delete-btn-cancel,
+    .profile-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .profile-delete-btn-cancel {
+        background: #0073bd;
+    }
+    .profile-delete-btn-cancel:hover {
+        background: #005f99;
+    }
+
+    .profile-delete-btn-submit {
+        background: #0073bd;
+    }
+    .profile-delete-btn-submit:hover {
+        background: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .profile-delete-confirm-overlay,
+        .profile-delete-confirm-modal {
+            transition: none;
+        }
+    }
+
     /* Empty state */
     .empty-state {
         background: white; 
@@ -519,6 +621,59 @@
 @endsection
 @section('scripts')
 <script>
+let pendingProfileDeleteForm = null;
+
+function openProfileDeleteModal(event, form, message) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    pendingProfileDeleteForm = form;
+
+    const overlay = document.getElementById('profile-delete-confirm-overlay');
+    const text = document.getElementById('profileDeleteConfirmText');
+    if (!overlay || !text) return false;
+
+    text.textContent = message || 'Apakah Anda yakin?';
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+    return false;
+}
+
+function closeProfileDeleteModal() {
+    const overlay = document.getElementById('profile-delete-confirm-overlay');
+    if (!overlay) return;
+
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+    pendingProfileDeleteForm = null;
+}
+
+const profileDeleteOverlay = document.getElementById('profile-delete-confirm-overlay');
+const profileDeleteCancelBtn = document.getElementById('profileDeleteConfirmCancel');
+const profileDeleteSubmitBtn = document.getElementById('profileDeleteConfirmSubmit');
+
+profileDeleteCancelBtn?.addEventListener('click', closeProfileDeleteModal);
+
+profileDeleteOverlay?.addEventListener('click', function(event) {
+    if (event.target === profileDeleteOverlay) {
+        closeProfileDeleteModal();
+    }
+});
+
+profileDeleteSubmitBtn?.addEventListener('click', function() {
+    if (!pendingProfileDeleteForm) return;
+    const formToSubmit = pendingProfileDeleteForm;
+    closeProfileDeleteModal();
+    formToSubmit.submit();
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeProfileDeleteModal();
+    }
+});
+
 function toggleMenu(button) {
     const dropdown = button.nextElementSibling;
     const isVisible = dropdown.classList.contains('show');

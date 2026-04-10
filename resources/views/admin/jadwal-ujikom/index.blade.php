@@ -188,6 +188,97 @@
 
     .pagination-wrap { padding: 16px; }
 
+    .delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        padding: 16px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        border: 1px solid #e2e8f0;
+        padding: 20px;
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .delete-confirm-overlay.show .delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .btn-confirm-cancel,
+    .btn-confirm-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .btn-confirm-cancel {
+        background: #0073bd;
+    }
+    .btn-confirm-cancel:hover {
+        background: #005f99;
+    }
+
+    .btn-confirm-submit {
+        background: #0073bd;
+    }
+    .btn-confirm-submit:hover {
+        background: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .delete-confirm-overlay,
+        .delete-confirm-modal {
+            transition: none;
+        }
+    }
+
     @media (max-width: 640px) {
         .stats-grid {
             gap: 12px;
@@ -378,7 +469,8 @@
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
                             <form method="POST" action="{{ route('admin.jadwal-ujikom.destroy', $jadwal->id) }}" style="margin:0;"
-                                  onsubmit="return confirm('Hapus jadwal ini?')">
+                                  data-confirm-message="Hapus jadwal &quot;{{ $jadwal->judul_jadwal }}&quot; ?"
+                                  onsubmit="return openDeleteJadwalModal(event, this)">
                                 @csrf @method('DELETE')
                                 <button type="submit">
                                     <i class="bi bi-trash"></i> Hapus
@@ -408,10 +500,75 @@
     </div>
 </div>
 
+<div id="deleteConfirmOverlay" class="delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" aria-hidden="true">
+    <div class="delete-confirm-modal">
+        <h3 id="deleteConfirmTitle" class="delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="deleteConfirmText" class="delete-confirm-text">Hapus jadwal ini?</p>
+        <div class="delete-confirm-actions">
+            <button type="button" id="deleteConfirmCancel" class="btn-confirm-cancel">Batal</button>
+            <button type="button" id="deleteConfirmSubmit" class="btn-confirm-submit">Hapus</button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
 <script>
+let pendingDeleteForm = null;
+
+function openDeleteJadwalModal(event, form, message) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    pendingDeleteForm = form;
+
+    const overlay = document.getElementById('deleteConfirmOverlay');
+    const text = document.getElementById('deleteConfirmText');
+    if (!overlay || !text) return false;
+
+    text.textContent = message || form?.dataset?.confirmMessage || 'Hapus jadwal ini?';
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+
+    return false;
+}
+
+function closeDeleteJadwalModal() {
+    const overlay = document.getElementById('deleteConfirmOverlay');
+    if (!overlay) return;
+
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+    pendingDeleteForm = null;
+}
+
+const deleteOverlay = document.getElementById('deleteConfirmOverlay');
+const deleteCancelBtn = document.getElementById('deleteConfirmCancel');
+const deleteSubmitBtn = document.getElementById('deleteConfirmSubmit');
+
+deleteCancelBtn?.addEventListener('click', closeDeleteJadwalModal);
+
+deleteOverlay?.addEventListener('click', function(event) {
+    if (event.target === deleteOverlay) {
+        closeDeleteJadwalModal();
+    }
+});
+
+deleteSubmitBtn?.addEventListener('click', function() {
+    if (!pendingDeleteForm) return;
+    const formToSubmit = pendingDeleteForm;
+    closeDeleteJadwalModal();
+    formToSubmit.submit();
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeDeleteJadwalModal();
+    }
+});
+
 function toggleMenu(button) {
     const dropdown = button.nextElementSibling;
     if (!dropdown) return;

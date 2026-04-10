@@ -82,7 +82,7 @@
                     <thead>
                         <tr>
                             <th>NAMA ASESOR</th>
-                            <th>KEAHLIAN</th>
+                            <th>SKEMA</th>
                             <th>NO. MET / AKUN</th>
                             <th>STATUS</th>
                             <th>AKSI</th>
@@ -134,10 +134,10 @@
                                         <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
-                                        <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin:0;">
+                                        <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin:0;" onsubmit="return openAsesorDeleteModal(event, this, @js('Hapus asesor ' . $item->nama . '?'))">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" onclick="return confirm('Hapus asesor {{ addslashes($item->nama) }}?')">
+                                            <button type="submit">
                                                 <i class="bi bi-trash"></i> Hapus
                                             </button>
                                         </form>
@@ -186,6 +186,17 @@
                     @endif
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<div id="asesor-delete-confirm-overlay" class="asesor-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="asesorDeleteConfirmTitle" aria-hidden="true">
+    <div class="asesor-delete-confirm-modal">
+        <h3 id="asesorDeleteConfirmTitle" class="asesor-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="asesorDeleteConfirmText" class="asesor-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="asesor-delete-confirm-actions">
+            <button type="button" id="asesorDeleteConfirmCancel" class="asesor-delete-btn-cancel">Batal</button>
+            <button type="button" id="asesorDeleteConfirmSubmit" class="asesor-delete-btn-submit">Hapus</button>
         </div>
     </div>
 </div>
@@ -661,6 +672,97 @@
         color: #64748b;
     }
 
+    .asesor-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .asesor-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .asesor-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .asesor-delete-confirm-overlay.show .asesor-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .asesor-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .asesor-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .asesor-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .asesor-delete-btn-cancel,
+    .asesor-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .asesor-delete-btn-cancel {
+        background: #0073bd;
+    }
+    .asesor-delete-btn-cancel:hover {
+        background: #005f99;
+    }
+
+    .asesor-delete-btn-submit {
+        background: #0073bd;
+    }
+    .asesor-delete-btn-submit:hover {
+        background: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .asesor-delete-confirm-overlay,
+        .asesor-delete-confirm-modal {
+            transition: none;
+        }
+    }
+
     @media (max-width: 640px) {
         .stats-grid {
             gap: 12px;
@@ -695,6 +797,60 @@
 </style>
 
 <script>
+    let pendingAsesorDeleteForm = null;
+
+    function openAsesorDeleteModal(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingAsesorDeleteForm = form;
+
+        const overlay = document.getElementById('asesor-delete-confirm-overlay');
+        const text = document.getElementById('asesorDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    }
+
+    function closeAsesorDeleteModal() {
+        const overlay = document.getElementById('asesor-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingAsesorDeleteForm = null;
+    }
+
+    const asesorDeleteOverlay = document.getElementById('asesor-delete-confirm-overlay');
+    const asesorDeleteCancelBtn = document.getElementById('asesorDeleteConfirmCancel');
+    const asesorDeleteSubmitBtn = document.getElementById('asesorDeleteConfirmSubmit');
+
+    asesorDeleteCancelBtn?.addEventListener('click', closeAsesorDeleteModal);
+
+    asesorDeleteOverlay?.addEventListener('click', function(event) {
+        if (event.target === asesorDeleteOverlay) {
+            closeAsesorDeleteModal();
+        }
+    });
+
+    asesorDeleteSubmitBtn?.addEventListener('click', function() {
+        if (!pendingAsesorDeleteForm) return;
+        const formToSubmit = pendingAsesorDeleteForm;
+        closeAsesorDeleteModal();
+        formToSubmit.submit();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeAsesorDeleteModal();
+        }
+    });
+
     function toggleMenu(event, button) {
         event.stopPropagation();
         const dropdown = button.nextElementSibling;

@@ -121,7 +121,7 @@
                                     <i class="bi bi-pencil"></i> Edit
                                 </a>
                                 <form action="{{ route('admin.socialmedia.destroy', $sm->id) }}" method="POST"
-                                      onsubmit="return confirm('Hapus {{ $sm->name }}?')">
+                                                                            onsubmit="return openSocialDeleteModal(event, this, @js('Apakah Anda yakin menghapus "' . $sm->name . '" ini?'))">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit">
@@ -146,6 +146,17 @@
         </a>
     </div>
     @endif
+</div>
+
+<div id="social-delete-confirm-overlay" class="social-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="socialDeleteConfirmTitle" aria-hidden="true">
+    <div class="social-delete-confirm-modal">
+        <h3 id="socialDeleteConfirmTitle" class="social-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="socialDeleteConfirmText" class="social-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="social-delete-confirm-actions">
+            <button type="button" id="socialDeleteConfirmCancel" class="social-delete-btn-cancel">Batal</button>
+            <button type="button" id="socialDeleteConfirmSubmit" class="social-delete-btn-submit">Hapus</button>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -245,6 +256,97 @@
     .action-dropdown a:hover, .action-dropdown button:hover { background: #f8fafc; color: #0F172A; }
     .action-dropdown button[type="submit"]:hover { background: #fef2f2; color: #dc2626; }
 
+    .social-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .social-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .social-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .social-delete-confirm-overlay.show .social-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .social-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .social-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .social-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .social-delete-btn-cancel,
+    .social-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .social-delete-btn-cancel {
+        background: #0073bd;
+    }
+    .social-delete-btn-cancel:hover {
+        background: #005f99;
+    }
+
+    .social-delete-btn-submit {
+        background: #0073bd;
+    }
+    .social-delete-btn-submit:hover {
+        background: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .social-delete-confirm-overlay,
+        .social-delete-confirm-modal {
+            transition: none;
+        }
+    }
+
     .empty-state { background: white; border-radius: 12px; padding: 60px 20px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .empty-state i { font-size: 48px; color: #cbd5e1; }
     .empty-state h3 { font-size: 18px; color: #334155; margin-top: 16px; }
@@ -291,6 +393,59 @@
 
 @section('scripts')
 <script>
+let pendingSocialDeleteForm = null;
+
+function openSocialDeleteModal(event, form, message) {
+    if (event) {
+        event.preventDefault();
+    }
+
+    pendingSocialDeleteForm = form;
+
+    const overlay = document.getElementById('social-delete-confirm-overlay');
+    const text = document.getElementById('socialDeleteConfirmText');
+    if (!overlay || !text) return false;
+
+    text.textContent = message || 'Apakah Anda yakin?';
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+    return false;
+}
+
+function closeSocialDeleteModal() {
+    const overlay = document.getElementById('social-delete-confirm-overlay');
+    if (!overlay) return;
+
+    overlay.classList.remove('show');
+    overlay.setAttribute('aria-hidden', 'true');
+    pendingSocialDeleteForm = null;
+}
+
+const socialDeleteOverlay = document.getElementById('social-delete-confirm-overlay');
+const socialDeleteCancelBtn = document.getElementById('socialDeleteConfirmCancel');
+const socialDeleteSubmitBtn = document.getElementById('socialDeleteConfirmSubmit');
+
+socialDeleteCancelBtn?.addEventListener('click', closeSocialDeleteModal);
+
+socialDeleteOverlay?.addEventListener('click', function(event) {
+    if (event.target === socialDeleteOverlay) {
+        closeSocialDeleteModal();
+    }
+});
+
+socialDeleteSubmitBtn?.addEventListener('click', function() {
+    if (!pendingSocialDeleteForm) return;
+    const formToSubmit = pendingSocialDeleteForm;
+    closeSocialDeleteModal();
+    formToSubmit.submit();
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeSocialDeleteModal();
+    }
+});
+
 function toggleMenu(button) {
     document.querySelectorAll('.action-dropdown.show').forEach(d => {
         if (d !== button.nextElementSibling) d.classList.remove('show');

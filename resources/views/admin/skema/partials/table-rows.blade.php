@@ -41,10 +41,10 @@
                 <a href="{{ route('admin.skema.edit', $skema->id) }}">
                     <i class="bi bi-pencil"></i> Edit
                 </a>
-                <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;">
+                <form action="{{ route('admin.skema.destroy', $skema->id) }}" method="POST" style="margin: 0;" onsubmit="return openSkemaDeleteModal(event, this, @js('Apakah Anda yakin ingin menghapus skema ' . $skema->nama_skema . ' ini?'))">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus skema ini?')">
+                    <button type="submit">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>

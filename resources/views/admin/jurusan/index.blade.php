@@ -243,29 +243,73 @@
 
     /* Delete Modal */
     .modal-overlay {
-        display: none; position: fixed; inset: 0;
-        background: rgba(0,0,0,.5); z-index: 9999; align-items: center; justify-content: center;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
     }
-    .modal-overlay.show { display: flex; }
+    .modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
     .modal-box {
-        background: #fff; border-radius: 12px; padding: 28px;
-        width: 100%; max-width: 420px; margin: 20px;
-        box-shadow: 0 20px 60px rgba(0,0,0,.2);
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        width: 100%;
+        max-width: 420px;
+        margin: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
     }
-    .modal-box h3 { font-size: 17px; font-weight: 700; color: #1e293b; margin: 0 0 8px; }
-    .modal-box p  { font-size: 13px; color: #6b7280; margin: 0 0 20px; line-height: 1.6; }
+    .modal-overlay.show .modal-box {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    .modal-box h3 { font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 8px; }
+    .modal-box p  { font-size: 14px; color: #0f172a; margin: 0 0 20px; line-height: 1.6; }
     .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
     .btn-cancel {
-        padding: 9px 18px; background: #f3f4f6; color: #374151;
-        border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
+        padding: 8px 16px;
+        background: #0073bd;
+        color: #ffffff;
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
     }
-    .btn-cancel:hover { background: #e5e7eb; }
+    .btn-cancel:hover { background: #005f99; }
     .btn-confirm-delete {
-        padding: 9px 18px; background: #ef4444; color: #fff;
-        border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+        padding: 8px 16px;
+        background: #0073bd;
+        color: #ffffff;
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
         display: inline-flex; align-items: center; gap: 6px;
     }
-    .btn-confirm-delete:hover { background: #dc2626; }
+    .btn-confirm-delete:hover { background: #005f99; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .modal-overlay,
+        .modal-box {
+            transition: none;
+        }
+    }
 
     /* Spinner/Loading */
     .spinner-border {
@@ -488,14 +532,14 @@
 <!-- Delete Modal -->
 <div class="modal-overlay" id="deleteModal">
     <div class="modal-box">
-        <h3><i class="bi bi-exclamation-triangle" style="color:#ef4444;margin-right:8px;"></i>Hapus Jurusan</h3>
+        <h3>Konfirmasi Hapus</h3>
         <p id="deleteModalText"></p>
         <form id="deleteForm" method="POST">
             @csrf
             @method('DELETE')
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeModal()">Batal</button>
-                <button type="submit" class="btn-confirm-delete"><i class="bi bi-trash"></i> Ya, Hapus</button>
+                <button type="submit" class="btn-confirm-delete">Hapus</button>
             </div>
         </form>
     </div>

@@ -57,11 +57,12 @@ class UmpanBalikKomponenController extends Controller
         return view('admin.umpan-balik-komponen.index', compact('komponen', 'stats', 'search', 'status', 'skemaId', 'skemaList'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $skemaList = Skema::orderBy('nama_skema')->get(['id', 'nama_skema', 'nomor_skema']);
+        $preselectedSkemaId = $request->query('skema_id');
 
-        return view('admin.umpan-balik-komponen.create', compact('skemaList'));
+        return view('admin.umpan-balik-komponen.create', compact('skemaList', 'preselectedSkemaId'));
     }
 
     public function show($skemaId)
@@ -153,16 +154,14 @@ class UmpanBalikKomponenController extends Controller
         $validated = $request->validate([
             'skema_id' => 'required|exists:skemas,id',
             'pernyataan' => 'required|string',
-            'urutan' => 'required|integer|min:1',
             'is_active' => 'nullable|boolean',
         ], [
             'skema_id.required' => 'Skema wajib dipilih.',
             'skema_id.exists' => 'Skema tidak valid.',
             'pernyataan.required' => 'Pernyataan komponen wajib diisi.',
-            'urutan.required' => 'Urutan wajib diisi.',
-            'urutan.min' => 'Urutan minimal 1.',
         ]);
 
+        $validated['urutan'] = $komponen->urutan;
         $validated['is_active'] = $request->has('is_active');
 
         $komponen->update($validated);

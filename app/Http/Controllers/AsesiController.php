@@ -20,7 +20,7 @@ class AsesiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Asesi::with('jurusan');
+        $query = Asesi::with(['jurusan', 'skemas:id,nama_skema']);
         
         // Search filter
         if ($request->has('search') && $request->search != '') {

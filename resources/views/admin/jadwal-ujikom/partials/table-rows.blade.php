@@ -58,10 +58,10 @@
                 <a href="{{ route('admin.jadwal-ujikom.edit', $jadwal->id) }}">
                     <i class="bi bi-pencil"></i> Edit
                 </a>
-                <form action="{{ route('admin.jadwal-ujikom.destroy', $jadwal->id) }}" method="POST" style="margin: 0;">
+                <form action="{{ route('admin.jadwal-ujikom.destroy', $jadwal->id) }}" method="POST" style="margin: 0;" data-confirm-message="Hapus jadwal &quot;{{ $jadwal->judul_jadwal }}&quot; ini?" onsubmit="return openDeleteJadwalModal(event, this)">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" onclick="return confirm('Hapus jadwal ini?')">
+                    <button type="submit">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
                 </form>
