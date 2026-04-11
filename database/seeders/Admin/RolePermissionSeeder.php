@@ -85,6 +85,12 @@ class RolePermissionSeeder extends Seeder
                 'asesmen-mandiri.view' => 'Lihat Asesmen Mandiri',
                 'nilai-asesor.view'    => 'Lihat Nilai',
             ],
+            'Persetujuan Asesmen' => [
+                'persetujuan-asesmen.view'   => 'Lihat Persetujuan Asesmen',
+                'persetujuan-asesmen.create' => 'Tambah Persetujuan Asesmen',
+                'persetujuan-asesmen.edit'   => 'Edit Persetujuan Asesmen',
+                'persetujuan-asesmen.delete' => 'Hapus Persetujuan Asesmen',
+            ],
             'Carousel' => [
                 'carousel.view'   => 'Lihat Carousel',
                 'carousel.create' => 'Tambah Carousel',
@@ -193,7 +199,7 @@ class RolePermissionSeeder extends Seeder
         $adminLspPerms = Permission::whereIn('group', [
             'Asesor', 'Asesi', 'Verifikasi Asesi', 'Akun Asesi', 'Kelompok',
             'Mitra', 'Jurusan', 'Skema', 'TUK', 'Jadwal Ujikom', 
-            'Penugasan Asesor', 'Asesmen Mandiri', 'Manajemen Admin', 'Role & Permission',
+            'Penugasan Asesor', 'Asesmen Mandiri', 'Persetujuan Asesmen', 'Manajemen Admin', 'Role & Permission',
         ])->pluck('id');
         $adminLsp->permissions()->sync($adminLspPerms);
 

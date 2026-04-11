@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\LogActivityController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\UmpanBalikKomponenController;
 use App\Http\Controllers\Admin\UmpanBalikHasilController;
+use App\Http\Controllers\Admin\PersetujuanAsesmenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -263,6 +264,18 @@ Route::prefix('admin')->group(function () {
         // Hasil Umpan Balik Asesi
         Route::middleware('permission:jadwal-ujikom.view')->group(function () {
             Route::get('/umpan-balik-hasil', [UmpanBalikHasilController::class, 'index'])->name('admin.umpan-balik-hasil.index');
+        });
+
+        // Persetujuan Asesmen dan Kerahasiaan CRUD
+        Route::middleware('permission:persetujuan-asesmen.view')->group(function () {
+            Route::get('/persetujuan-asesmen', [PersetujuanAsesmenController::class, 'index'])->name('admin.persetujuan-asesmen.index');
+            Route::get('/persetujuan-asesmen/skema-participants', [PersetujuanAsesmenController::class, 'participantsBySkema'])->name('admin.persetujuan-asesmen.skema-participants');
+            Route::get('/persetujuan-asesmen/create', [PersetujuanAsesmenController::class, 'create'])->name('admin.persetujuan-asesmen.create')->middleware('permission:persetujuan-asesmen.create');
+            Route::post('/persetujuan-asesmen', [PersetujuanAsesmenController::class, 'store'])->name('admin.persetujuan-asesmen.store')->middleware('permission:persetujuan-asesmen.create');
+            Route::get('/persetujuan-asesmen/{id}', [PersetujuanAsesmenController::class, 'show'])->name('admin.persetujuan-asesmen.show');
+            Route::get('/persetujuan-asesmen/{id}/edit', [PersetujuanAsesmenController::class, 'edit'])->name('admin.persetujuan-asesmen.edit')->middleware('permission:persetujuan-asesmen.edit');
+            Route::put('/persetujuan-asesmen/{id}', [PersetujuanAsesmenController::class, 'update'])->name('admin.persetujuan-asesmen.update')->middleware('permission:persetujuan-asesmen.edit');
+            Route::delete('/persetujuan-asesmen/{id}', [PersetujuanAsesmenController::class, 'destroy'])->name('admin.persetujuan-asesmen.destroy')->middleware('permission:persetujuan-asesmen.delete');
         });
 
         // Penugasan Asesor ke Asesi

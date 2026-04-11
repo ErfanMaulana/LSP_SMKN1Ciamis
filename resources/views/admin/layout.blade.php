@@ -993,7 +993,7 @@
                 @endif
 
                 <!-- PROGRAM SERTIFIKASI Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view', 'nilai-asesor.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view', 'nilai-asesor.view', 'persetujuan-asesmen.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>PROGRAM SERTIFIKASI</span>
@@ -1048,6 +1048,14 @@
                                     class="menu-item {{ request()->routeIs('admin.umpan-balik-hasil.*') ? 'active' : '' }}">
                                     <i class="bi bi-clipboard-data"></i>
                                     <span>Hasil Umpan Balik Asesi</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.view'))
+                                <a href="{{ route('admin.persetujuan-asesmen.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.persetujuan-asesmen.*') ? 'active' : '' }}">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    <span>Persetujuan Asesmen</span>
                                 </a>
                             @endif
                         </div>

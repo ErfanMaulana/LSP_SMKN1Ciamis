@@ -159,7 +159,7 @@
             <tr>
                 <th>Nama</th>
                 <th>NIK</th>
-                <th>Jurusan</th>
+                <th>Skema</th>
                 <th>Status</th>
                 <th>Daftar</th>
             </tr>
@@ -173,7 +173,13 @@
                     </a>
                 </td>
                 <td class="mono">{{ $asesi->NIK }}</td>
-                <td>{{ $asesi->jurusan?->nama_jurusan ?? '—' }}</td>
+                <td>
+                    @if($asesi->skemas->isNotEmpty())
+                        {{ $asesi->skemas->pluck('nama_skema')->implode(', ') }}
+                    @else
+                        —
+                    @endif
+                </td>
                 <td>
                     @if($asesi->status === 'approved')
                         <span class="badge bg-green">Disetujui</span>

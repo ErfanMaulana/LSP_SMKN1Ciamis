@@ -33,9 +33,11 @@ class AsesiController extends Controller
             });
         }
         
-        // Jurusan filter
-        if ($request->has('jurusan') && $request->jurusan != '') {
-            $query->where('ID_jurusan', $request->jurusan);
+        // Skema filter
+        if ($request->has('skema') && $request->skema != '') {
+            $query->whereHas('skemas', function ($q) use ($request) {
+                $q->where('skemas.id', $request->skema);
+            });
         }
         
         // Status filter

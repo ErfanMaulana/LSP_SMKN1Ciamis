@@ -107,12 +107,12 @@
                            value="{{ request('search') }}" autocomplete="off">
                 </div>
                 <div class="filter-group">
-                    <select class="filter-select" name="jurusan" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">Semua Jurusan</option>
-                        @foreach($jurusanList as $jur)
-                            <option value="{{ $jur->ID_jurusan }}"
-                                {{ request('jurusan') == $jur->ID_jurusan ? 'selected' : '' }}>
-                                {{ $jur->nama_jurusan }}
+                    <select class="filter-select" name="skema" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">Semua Skema</option>
+                        @foreach($skemaList as $skema)
+                            <option value="{{ $skema->id }}"
+                                {{ request('skema') == $skema->id ? 'selected' : '' }}>
+                                {{ $skema->nama_skema }}
                             </option>
                         @endforeach
                     </select>
@@ -125,7 +125,7 @@
                     <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
                         <i class="bi bi-search"></i>
                     </button>
-                    @if(request('search') || request('jurusan') || request('status'))
+                    @if(request('search') || request('skema') || request('status'))
                     <button type="button" class="btn-filter-reset" title="Reset filter" onclick="resetFilters()">
                         <i class="bi bi-x-lg"></i>
                     </button>
@@ -1636,7 +1636,7 @@
         perPageInput.dataset.bound = '1';
     }
 
-    // Update filter on dropdown change (jurusan and status)
+    // Update filter on dropdown change (skema and status)
     const filterSelects = document.querySelectorAll('.filter-select');
     filterSelects.forEach(select => {
         select.addEventListener('change', function() {
@@ -1659,7 +1659,7 @@
     // Reset filters
     function resetFilters() {
         document.querySelector('input[name="search"]').value = '';
-        document.querySelector('select[name="jurusan"]').value = '';
+        document.querySelector('select[name="skema"]').value = '';
         document.querySelector('select[name="status"]').value = '';
         performAjaxSearch();
     }
