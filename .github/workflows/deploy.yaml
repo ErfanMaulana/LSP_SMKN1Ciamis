@@ -3,7 +3,7 @@ name: Otomatis Deploy ke Server
 on:
   push:
     branches:
-      - main   # Ganti sesuai branch utama 
+      - main 
 
 jobs:
   deploy:
@@ -20,6 +20,7 @@ jobs:
 
     - name: Deploy to server via SSH
       run: |
+        echo "CI/CD trigger commit: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
         ssh -p 21032 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             eval \$(ssh-agent -s)
             ssh-add ~/.ssh/wisnu
