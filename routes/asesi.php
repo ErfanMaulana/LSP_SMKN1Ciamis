@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Asesi\AuthController;
 use App\Http\Controllers\Asesi\AsesmenMandiriController;
+use App\Http\Controllers\Asesi\BandingAsesmenController;
 use App\Http\Controllers\Asesi\ProfileController;
 use App\Http\Controllers\Asesi\JadwalController;
 use App\Http\Controllers\Asesi\RegisterController;
@@ -41,6 +42,12 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::post('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'store'])->name('asesmen-mandiri.store');
             Route::get('/asesmen-mandiri/{skemaId}/result', [AsesmenMandiriController::class, 'result'])->name('asesmen-mandiri.result');
             Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
+
+            // Banding Asesmen (FR.AK.04)
+            Route::get('/banding-asesmen', [BandingAsesmenController::class, 'index'])->name('banding.index');
+            Route::get('/banding-asesmen/{skemaId}', [BandingAsesmenController::class, 'show'])->name('banding.show');
+            Route::post('/banding-asesmen/{skemaId}', [BandingAsesmenController::class, 'store'])->name('banding.store');
+            Route::post('/banding-asesmen/{skemaId}/decline', [BandingAsesmenController::class, 'decline'])->name('banding.decline');
 
             // Umpan Balik Kinerja Asesor
             Route::get('/umpan-balik', [UmpanBalikController::class, 'index'])->name('umpan-balik.index');

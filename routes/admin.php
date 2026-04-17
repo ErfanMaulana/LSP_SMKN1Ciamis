@@ -25,6 +25,8 @@ use App\Http\Controllers\Admin\MitraController;
 use App\Http\Controllers\Admin\PanduanController;
 use App\Http\Controllers\Admin\LogActivityController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\BandingAsesmenController;
+use App\Http\Controllers\Admin\BandingAsesmenKomponenController;
 use App\Http\Controllers\Admin\UmpanBalikKomponenController;
 use App\Http\Controllers\Admin\UmpanBalikHasilController;
 
@@ -263,6 +265,24 @@ Route::prefix('admin')->group(function () {
         // Hasil Umpan Balik Asesi
         Route::middleware('permission:jadwal-ujikom.view')->group(function () {
             Route::get('/umpan-balik-hasil', [UmpanBalikHasilController::class, 'index'])->name('admin.umpan-balik-hasil.index');
+        });
+
+        // Banding Asesmen
+        Route::middleware('permission:banding-asesmen.view')->group(function () {
+            Route::get('/banding-asesmen', [BandingAsesmenController::class, 'index'])->name('admin.banding-asesmen.index');
+            Route::get('/banding-asesmen/{id}/pdf', [BandingAsesmenController::class, 'downloadPdf'])->name('admin.banding-asesmen.pdf');
+            Route::get('/banding-asesmen/{id}', [BandingAsesmenController::class, 'show'])->name('admin.banding-asesmen.show');
+            Route::post('/banding-asesmen/{id}/review', [BandingAsesmenController::class, 'review'])->name('admin.banding-asesmen.review')->middleware('permission:banding-asesmen.check');
+        });
+
+        // Komponen Ceklis Banding Asesmen
+        Route::middleware('permission:banding-asesmen-komponen.view')->group(function () {
+            Route::get('/banding-asesmen-komponen', [BandingAsesmenKomponenController::class, 'index'])->name('admin.banding-asesmen-komponen.index');
+            Route::get('/banding-asesmen-komponen/create', [BandingAsesmenKomponenController::class, 'create'])->name('admin.banding-asesmen-komponen.create')->middleware('permission:banding-asesmen-komponen.create');
+            Route::post('/banding-asesmen-komponen', [BandingAsesmenKomponenController::class, 'store'])->name('admin.banding-asesmen-komponen.store')->middleware('permission:banding-asesmen-komponen.create');
+            Route::get('/banding-asesmen-komponen/{id}/edit', [BandingAsesmenKomponenController::class, 'edit'])->name('admin.banding-asesmen-komponen.edit')->middleware('permission:banding-asesmen-komponen.edit');
+            Route::put('/banding-asesmen-komponen/{id}', [BandingAsesmenKomponenController::class, 'update'])->name('admin.banding-asesmen-komponen.update')->middleware('permission:banding-asesmen-komponen.edit');
+            Route::delete('/banding-asesmen-komponen/{id}', [BandingAsesmenKomponenController::class, 'destroy'])->name('admin.banding-asesmen-komponen.destroy')->middleware('permission:banding-asesmen-komponen.delete');
         });
 
         // Penugasan Asesor ke Asesi

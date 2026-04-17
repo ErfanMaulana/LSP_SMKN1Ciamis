@@ -129,6 +129,8 @@ class Admin extends Authenticatable
             'admin.asesi.verifikasi' => 'verifikasi-asesi.view',
             'admin.asesmen-mandiri.index' => 'asesmen-mandiri.view',
             'admin.nilai-asesor.index' => 'asesmen-mandiri.view',
+            'admin.banding-asesmen.index' => 'banding-asesmen.view',
+            'admin.banding-asesmen-komponen.index' => 'banding-asesmen-komponen.view',
             'admin.kelompok.index' => 'kelompok.view',
             'admin.jadwal-ujikom.index' => 'jadwal-ujikom.view',
             'admin.carousel.index' => 'carousel.view',

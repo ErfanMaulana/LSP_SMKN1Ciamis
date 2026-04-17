@@ -988,12 +988,20 @@
                                     <span>Komponen Umpan Balik</span>
                                 </a>
                             @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('banding-asesmen-komponen.view'))
+                                <a href="{{ route('admin.banding-asesmen-komponen.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.banding-asesmen-komponen.*') ? 'active' : '' }}">
+                                    <i class="bi bi-card-checklist"></i>
+                                    <span>Ceklis Banding</span>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @endif
 
                 <!-- PROGRAM SERTIFIKASI Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view', 'nilai-asesor.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view', 'nilai-asesor.view', 'banding-asesmen.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>PROGRAM SERTIFIKASI</span>
@@ -1026,6 +1034,14 @@
                                     class="menu-item {{ request()->routeIs('admin.nilai-asesor.*') ? 'active' : '' }}">
                                     <i class="bi bi-clipboard-data"></i>
                                     <span>Nilai</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('banding-asesmen.view'))
+                                <a href="{{ route('admin.banding-asesmen.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.banding-asesmen.*') ? 'active' : '' }}">
+                                    <i class="bi bi-clipboard2-check"></i>
+                                    <span>Banding Asesmen</span>
                                 </a>
                             @endif
 

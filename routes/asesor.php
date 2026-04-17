@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Asesi\AuthController;
+use App\Http\Controllers\Asesor\BandingAsesmenController;
 use App\Http\Controllers\Asesor\DashboardController;
 
 /*
@@ -28,6 +29,8 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         Route::get('/asesi',     [DashboardController::class, 'asesiIndex'])->name('asesi.index');
         Route::get('/asesi/{asesiNik}/review',  [DashboardController::class, 'asesiReview'])->name('asesi.review');
         Route::post('/asesi/{asesiNik}/review', [DashboardController::class, 'recommend'])->name('asesi.recommend');
+        Route::get('/banding-asesmen', [BandingAsesmenController::class, 'index'])->name('banding.index');
+        Route::get('/banding-asesmen/{asesiNik}/{skemaId}', [BandingAsesmenController::class, 'form'])->name('banding.form');
         Route::post('/logout',   [AuthController::class, 'logout'])->name('logout');
     });
 });
