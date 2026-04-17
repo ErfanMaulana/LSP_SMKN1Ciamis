@@ -993,7 +993,7 @@
                 @endif
 
                 <!-- PROGRAM SERTIFIKASI Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view', 'nilai-asesor.view', 'persetujuan-asesmen.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view', 'nilai-asesor.view', 'persetujuan-asesmen.view', 'ceklis-observasi-aktivitas-praktik.view', 'rekaman-asesmen-kompetensi.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>PROGRAM SERTIFIKASI</span>
@@ -1056,6 +1056,22 @@
                                     class="menu-item {{ request()->routeIs('admin.persetujuan-asesmen.*') ? 'active' : '' }}">
                                     <i class="bi bi-file-earmark-text"></i>
                                     <span>Persetujuan Asesmen</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.view'))
+                                <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.ceklis-observasi-aktivitas-praktik.*') ? 'active' : '' }}">
+                                    <i class="bi bi-ui-checks-grid"></i>
+                                    <span>Ceklis Observasi Aktivitas Praktik</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('rekaman-asesmen-kompetensi.view'))
+                                <a href="{{ route('admin.rekaman-asesmen-kompetensi.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.rekaman-asesmen-kompetensi.*') ? 'active' : '' }}">
+                                    <i class="bi bi-journal-richtext"></i>
+                                    <span>Rekaman Asesmen Kompetensi</span>
                                 </a>
                             @endif
                         </div>

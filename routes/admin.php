@@ -28,6 +28,8 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\UmpanBalikKomponenController;
 use App\Http\Controllers\Admin\UmpanBalikHasilController;
 use App\Http\Controllers\Admin\PersetujuanAsesmenController;
+use App\Http\Controllers\Admin\CeklisObservasiAktivitasPraktikController;
+use App\Http\Controllers\Admin\RekamanAsesmenKompetensiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -276,6 +278,32 @@ Route::prefix('admin')->group(function () {
             Route::get('/persetujuan-asesmen/{id}/edit', [PersetujuanAsesmenController::class, 'edit'])->name('admin.persetujuan-asesmen.edit')->middleware('permission:persetujuan-asesmen.edit');
             Route::put('/persetujuan-asesmen/{id}', [PersetujuanAsesmenController::class, 'update'])->name('admin.persetujuan-asesmen.update')->middleware('permission:persetujuan-asesmen.edit');
             Route::delete('/persetujuan-asesmen/{id}', [PersetujuanAsesmenController::class, 'destroy'])->name('admin.persetujuan-asesmen.destroy')->middleware('permission:persetujuan-asesmen.delete');
+        });
+
+        // Ceklis Observasi Aktivitas Praktik CRUD
+        Route::middleware('permission:ceklis-observasi-aktivitas-praktik.view')->group(function () {
+            Route::get('/ceklis-observasi-aktivitas-praktik', [CeklisObservasiAktivitasPraktikController::class, 'index'])->name('admin.ceklis-observasi-aktivitas-praktik.index');
+            Route::get('/ceklis-observasi-aktivitas-praktik/skema-participants', [CeklisObservasiAktivitasPraktikController::class, 'participantsBySkema'])->name('admin.ceklis-observasi-aktivitas-praktik.skema-participants');
+            Route::get('/ceklis-observasi-aktivitas-praktik/skema-structure', [CeklisObservasiAktivitasPraktikController::class, 'skemaStructure'])->name('admin.ceklis-observasi-aktivitas-praktik.skema-structure');
+            Route::get('/ceklis-observasi-aktivitas-praktik/create', [CeklisObservasiAktivitasPraktikController::class, 'create'])->name('admin.ceklis-observasi-aktivitas-praktik.create')->middleware('permission:ceklis-observasi-aktivitas-praktik.create');
+            Route::post('/ceklis-observasi-aktivitas-praktik', [CeklisObservasiAktivitasPraktikController::class, 'store'])->name('admin.ceklis-observasi-aktivitas-praktik.store')->middleware('permission:ceklis-observasi-aktivitas-praktik.create');
+            Route::get('/ceklis-observasi-aktivitas-praktik/{id}', [CeklisObservasiAktivitasPraktikController::class, 'show'])->name('admin.ceklis-observasi-aktivitas-praktik.show');
+            Route::get('/ceklis-observasi-aktivitas-praktik/{id}/edit', [CeklisObservasiAktivitasPraktikController::class, 'edit'])->name('admin.ceklis-observasi-aktivitas-praktik.edit')->middleware('permission:ceklis-observasi-aktivitas-praktik.edit');
+            Route::put('/ceklis-observasi-aktivitas-praktik/{id}', [CeklisObservasiAktivitasPraktikController::class, 'update'])->name('admin.ceklis-observasi-aktivitas-praktik.update')->middleware('permission:ceklis-observasi-aktivitas-praktik.edit');
+            Route::delete('/ceklis-observasi-aktivitas-praktik/{id}', [CeklisObservasiAktivitasPraktikController::class, 'destroy'])->name('admin.ceklis-observasi-aktivitas-praktik.destroy')->middleware('permission:ceklis-observasi-aktivitas-praktik.delete');
+        });
+
+        // Rekaman Asesmen Kompetensi CRUD
+        Route::middleware('permission:rekaman-asesmen-kompetensi.view')->group(function () {
+            Route::get('/rekaman-asesmen-kompetensi', [RekamanAsesmenKompetensiController::class, 'index'])->name('admin.rekaman-asesmen-kompetensi.index');
+            Route::get('/rekaman-asesmen-kompetensi/skema-participants', [RekamanAsesmenKompetensiController::class, 'participantsBySkema'])->name('admin.rekaman-asesmen-kompetensi.skema-participants');
+            Route::get('/rekaman-asesmen-kompetensi/skema-units', [RekamanAsesmenKompetensiController::class, 'skemaUnits'])->name('admin.rekaman-asesmen-kompetensi.skema-units');
+            Route::get('/rekaman-asesmen-kompetensi/create', [RekamanAsesmenKompetensiController::class, 'create'])->name('admin.rekaman-asesmen-kompetensi.create')->middleware('permission:rekaman-asesmen-kompetensi.create');
+            Route::post('/rekaman-asesmen-kompetensi', [RekamanAsesmenKompetensiController::class, 'store'])->name('admin.rekaman-asesmen-kompetensi.store')->middleware('permission:rekaman-asesmen-kompetensi.create');
+            Route::get('/rekaman-asesmen-kompetensi/{id}', [RekamanAsesmenKompetensiController::class, 'show'])->name('admin.rekaman-asesmen-kompetensi.show');
+            Route::get('/rekaman-asesmen-kompetensi/{id}/edit', [RekamanAsesmenKompetensiController::class, 'edit'])->name('admin.rekaman-asesmen-kompetensi.edit')->middleware('permission:rekaman-asesmen-kompetensi.edit');
+            Route::put('/rekaman-asesmen-kompetensi/{id}', [RekamanAsesmenKompetensiController::class, 'update'])->name('admin.rekaman-asesmen-kompetensi.update')->middleware('permission:rekaman-asesmen-kompetensi.edit');
+            Route::delete('/rekaman-asesmen-kompetensi/{id}', [RekamanAsesmenKompetensiController::class, 'destroy'])->name('admin.rekaman-asesmen-kompetensi.destroy')->middleware('permission:rekaman-asesmen-kompetensi.delete');
         });
 
         // Penugasan Asesor ke Asesi

@@ -91,6 +91,18 @@ class RolePermissionSeeder extends Seeder
                 'persetujuan-asesmen.edit'   => 'Edit Persetujuan Asesmen',
                 'persetujuan-asesmen.delete' => 'Hapus Persetujuan Asesmen',
             ],
+            'Ceklis Observasi Aktivitas Praktik' => [
+                'ceklis-observasi-aktivitas-praktik.view'   => 'Lihat Ceklis Observasi Aktivitas Praktik',
+                'ceklis-observasi-aktivitas-praktik.create' => 'Tambah Ceklis Observasi Aktivitas Praktik',
+                'ceklis-observasi-aktivitas-praktik.edit'   => 'Edit Ceklis Observasi Aktivitas Praktik',
+                'ceklis-observasi-aktivitas-praktik.delete' => 'Hapus Ceklis Observasi Aktivitas Praktik',
+            ],
+            'Rekaman Asesmen Kompetensi' => [
+                'rekaman-asesmen-kompetensi.view'   => 'Lihat Rekaman Asesmen Kompetensi',
+                'rekaman-asesmen-kompetensi.create' => 'Tambah Rekaman Asesmen Kompetensi',
+                'rekaman-asesmen-kompetensi.edit'   => 'Edit Rekaman Asesmen Kompetensi',
+                'rekaman-asesmen-kompetensi.delete' => 'Hapus Rekaman Asesmen Kompetensi',
+            ],
             'Carousel' => [
                 'carousel.view'   => 'Lihat Carousel',
                 'carousel.create' => 'Tambah Carousel',
@@ -199,7 +211,7 @@ class RolePermissionSeeder extends Seeder
         $adminLspPerms = Permission::whereIn('group', [
             'Asesor', 'Asesi', 'Verifikasi Asesi', 'Akun Asesi', 'Kelompok',
             'Mitra', 'Jurusan', 'Skema', 'TUK', 'Jadwal Ujikom', 
-            'Penugasan Asesor', 'Asesmen Mandiri', 'Persetujuan Asesmen', 'Manajemen Admin', 'Role & Permission',
+            'Penugasan Asesor', 'Asesmen Mandiri', 'Persetujuan Asesmen', 'Ceklis Observasi Aktivitas Praktik', 'Rekaman Asesmen Kompetensi', 'Manajemen Admin', 'Role & Permission',
         ])->pluck('id');
         $adminLsp->permissions()->sync($adminLspPerms);
 

@@ -561,6 +561,11 @@
                     <i class="bi bi-journal-check"></i>
                     <span>Entry Penilaian</span>
                 </a>
+                <a href="{{ route('asesor.ceklis-observasi.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.ceklis-observasi.*') ? 'active' : '' }}">
+                    <i class="bi bi-ui-checks-grid"></i>
+                    <span>Ceklis Observasi</span>
+                </a>
                 <a href="{{ route('asesor.jadwal.index') }}"
                     class="menu-item {{ request()->routeIs('asesor.jadwal.*') ? 'active' : '' }}">
                     <i class="bi bi-calendar3"></i>
@@ -679,6 +684,11 @@
                 <a href="{{ route('asesor.entry-penilaian') }}" class="bottom-nav-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">
                     <i class="bi bi-journal-check"></i>
                     <span>Penilaian</span>
+                </a>
+
+                <a href="{{ route('asesor.ceklis-observasi.index') }}" class="bottom-nav-item {{ request()->routeIs('asesor.ceklis-observasi.*') ? 'active' : '' }}">
+                    <i class="bi bi-ui-checks-grid"></i>
+                    <span>Ceklis</span>
                 </a>
 
                 <a href="{{ route('asesor.profil.index') }}" class="bottom-nav-item {{ request()->routeIs('asesor.profil.*') ? 'active' : '' }}">
