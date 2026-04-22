@@ -1,251 +1,129 @@
 @extends('asesi.layout')
 
-@section('title', 'Hasil Ujikom')
-@section('page-title', 'Hasil Ujikom')
+@section('title', 'Status Asesmen')
+@section('page-title', 'Status Asesmen')
 
 @section('styles')
 <style>
-    .result-screen {
-        min-height: calc(100vh - 180px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .status-card {
+        border-left: 5px solid #0073bd;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s;
     }
 
-    .result-content {
-        width: 100%;
-        max-width: 980px;
-        background-color: #ffffff;
-        border-radius: 12px;
-        padding: 50px 40px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        text-align: center;
+    .status-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.15);
     }
 
-    .result-status-label {
-        font-size: 14px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 10px;
-    }
-
-    .result-title {
-        margin: 0;
-        font-size: clamp(34px, 5vw, 58px);
-        line-height: 1.12;
-        font-weight: 800;
-    }
-
-    .result-subtitle {
-        margin-top: 14px;
-        font-size: clamp(16px, 2vw, 22px);
-        color: #334155;
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 12px;
         font-weight: 600;
     }
 
-    .result-message {
-        margin: 20px auto 0;
-        max-width: 760px;
-        color: #475569;
-        font-size: 18px;
-        line-height: 1.8;
-    }
-
-    .result-meta {
-        margin-top: 28px;
-        padding-top: 18px;
-        border-top: 1px solid #cbd5e1;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 18px 26px;
-        justify-content: center;
-    }
-
-    .result-meta span {
-        font-size: 14px;
-        color: #334155;
-    }
-
-    .result-meta strong {
-        color: #0f172a;
-    }
-
-    .tone-competent .result-status-label,
-    .tone-competent .result-title {
-        color: #166534;
-    }
-
-    .tone-not-yet .result-status-label,
-    .tone-not-yet .result-title {
-        color: #991b1b;
-    }
-
-    .tone-pending .result-status-label,
-    .tone-pending .result-title {
+    .status-badge.pending {
+        background: #fef3c7;
         color: #92400e;
     }
 
-    .other-results {
-        margin-top: 26px;
-        text-align: left;
-        border-top: 1px dashed #cbd5e1;
-        padding-top: 14px;
+    .status-badge.dinilai {
+        background: #d1fae5;
+        color: #065f46;
     }
 
-    .other-results h4 {
-        margin: 0 0 8px;
-        color: #475569;
-        font-size: 14px;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-    }
-
-    .other-results ul {
-        margin: 0;
-        padding-left: 18px;
-        color: #475569;
-        font-size: 14px;
-        line-height: 1.7;
-    }
-
-    .empty {
+    .empty-state {
         text-align: center;
+        padding: 60px 20px;
         color: #94a3b8;
-        padding: 70px 20px;
     }
 
-    .empty i {
-        font-size: 54px;
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 16px;
         display: block;
-        margin-bottom: 10px;
-    }
-
-    @media (max-width: 768px) {
-        .result-screen {
-            min-height: calc(100vh - 210px);
-            align-items: flex-start;
-            padding: 12px 0;
-        }
-
-        .result-content {
-            padding: 20px 16px;
-        }
-
-        .result-message {
-            font-size: 15px;
-            line-height: 1.65;
-        }
-
-        .result-meta {
-            justify-content: flex-start;
-            text-align: left;
-            gap: 10px;
-            margin-top: 18px;
-        }
-
-        .result-content {
-            text-align: left;
-        }
-
-        .result-title {
-            line-height: 1.2;
-        }
-
-        .other-results {
-            margin-top: 20px;
-            padding-top: 12px;
-        }
-
-        .other-results ul {
-            padding-left: 16px;
-        }
+        opacity: 0.5;
     }
 </style>
 @endsection
 
 @section('content')
 @if($hasilUjikom->count())
-    @php $utama = $hasilUjikom->first(); @endphp
+    <div class="row">
+        @foreach($hasilUjikom as $row)
+            <div class="col-lg-6 col-md-12 mb-4">
+                <div class="card status-card shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <h6 class="mb-1">{{ $row->nama_skema }}</h6>
+                                <small class="text-muted">{{ $row->nomor_skema }}</small>
+                            </div>
+                            <span class="status-badge {{ $row->status_penilaian === 'sudah_dinilai' ? 'dinilai' : 'pending' }}">
+                                {{ $row->status_penilaian === 'sudah_dinilai' ? 'Sudah Dinilai' : 'Menunggu Penilaian' }}
+                            </span>
+                        </div>
 
-    @php
-        $toneClass = $utama->status_penilaian !== 'sudah_dinilai'
-            ? 'tone-pending'
-            : ($utama->hasil_ujikom === 'kompeten' ? 'tone-competent' : 'tone-not-yet');
-    @endphp
+                        @if($row->status_penilaian === 'sudah_dinilai')
+                            <div class="alert alert-info py-2 mb-3" role="alert">
+                                <small>
+                                    <strong>
+                                        @if($row->hasil_ujikom === 'kompeten')
+                                            <i class="bi bi-check-circle-fill text-success"></i> Anda Dinyatakan Kompeten
+                                        @else
+                                            <i class="bi bi-exclamation-circle-fill text-danger"></i> Anda Belum Kompeten
+                                        @endif
+                                    </strong>
+                                </small>
+                            </div>
 
-    <div class="result-screen {{ $toneClass }}">
-        <div class="result-content">
-            <div class="result-status-label">
-                @if($utama->status_penilaian !== 'sudah_dinilai')
-                    Menunggu Penilaian Asesor
-                @elseif($utama->hasil_ujikom === 'kompeten')
-                    Pengumuman Hasil Ujikom
-                @else
-                    Pengumuman Hasil Ujikom
-                @endif
-            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <small class="text-muted d-block mb-1">Asesor</small>
+                                    <small>{{ $row->asesor_nama ?? '-' }}</small>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block mb-1">Tanggal Penilaian</small>
+                                    <small>
+                                        @if($row->terakhir_dinilai)
+                                            {{ \Carbon\Carbon::parse($row->terakhir_dinilai)->format('d/m/Y H:i') }}
+                                        @else
+                                            -
+                                        @endif
+                                    </small>
+                                </div>
+                            </div>
 
-            <h1 class="result-title">
-                @if($utama->status_penilaian !== 'sudah_dinilai')
-                    Hasil Ujikom Anda Belum Tersedia
-                @elseif($utama->hasil_ujikom === 'kompeten')
-                    SELAMAT! ANDA DINYATAKAN KOMPETEN
-                @else
-                    MOHON MAAF, ANDA BELUM KOMPETEN
-                @endif
-            </h1>
-
-            <div class="result-subtitle">{{ $utama->nama_skema }}</div>
-
-            <p class="result-message">
-                @if($utama->status_penilaian !== 'sudah_dinilai')
-                    Penilaian dari asesor masih diproses. Silakan cek halaman ini secara berkala untuk melihat hasil akhir ujikom Anda.
-                @elseif($utama->hasil_ujikom === 'kompeten')
-                    Berdasarkan hasil penilaian asesor, Anda telah memenuhi kriteria kompetensi pada skema ini.
-                @else
-                    Berdasarkan hasil penilaian asesor, Anda belum memenuhi seluruh kriteria kompetensi pada skema ini.
-                @endif
-            </p>
-
-            <div class="result-meta">
-                <span><strong>Nomor Skema:</strong> {{ $utama->nomor_skema }}</span>
-                <span><strong>Asesor:</strong> {{ $utama->asesor_nama ?? '-' }}</span>
-                <span>
-                    <strong>Tanggal Penilaian:</strong>
-                    @if($utama->terakhir_dinilai)
-                        {{ \Carbon\Carbon::parse($utama->terakhir_dinilai)->format('d/m/Y H:i') }}
-                    @else
-                        -
-                    @endif
-                </span>
-            </div>
-
-            @if($hasilUjikom->count() > 1)
-                <div class="other-results">
-                    <h4>Skema Lainnya</h4>
-                    <ul>
-                        @foreach($hasilUjikom->skip(1) as $row)
-                            <li>
-                                <strong>{{ $row->nama_skema }}</strong>:
-                                @if($row->status_penilaian !== 'sudah_dinilai')
-                                    Menunggu penilaian asesor.
-                                @elseif($row->hasil_ujikom === 'kompeten')
-                                    Dinyatakan Kompeten.
-                                @else
-                                    Dinyatakan Belum Kompeten.
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
+                            @if($row->hasil_ujikom !== 'kompeten')
+                                <div class="d-flex gap-2">
+                                    <a href="{{ route('asesi.banding.index') }}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil-square"></i> Ajukan Banding
+                                    </a>
+                                </div>
+                            @endif
+                        @else
+                            <p class="text-muted small mb-0 py-3">
+                                <i class="bi bi-hourglass-split"></i> Asesmen Anda sedang diproses oleh asesor. Silakan periksa kembali halaman ini untuk melihat hasil.
+                            </p>
+                        @endif
+                    </div>
                 </div>
-            @endif
-        </div>
+            </div>
+        @endforeach
     </div>
 @else
-    <div class="empty">
-        <i class="bi bi-inbox"></i>
-        <p>Belum ada data ujikom selesai untuk ditampilkan.</p>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p>
+                    <strong>Belum Ada Data Asesmen</strong><br>
+                    <small>Anda belum menyelesaikan asesmen. Kerjakan asesmen mandiri terlebih dahulu.</small>
+                </p>
+            </div>
+        </div>
     </div>
 @endif
 @endsection

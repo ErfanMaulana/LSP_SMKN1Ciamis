@@ -112,7 +112,7 @@ class AdminController extends Controller
         ];
 
         // ── 6 asesi terbaru ────────────────────────────────────────────
-        $recentAsesi = Asesi::with('skemas:id,nama_skema')
+        $recentAsesi = Asesi::with('jurusan')
             ->orderByDesc('created_at')
             ->limit(6)
             ->get();

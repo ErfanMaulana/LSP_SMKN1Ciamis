@@ -17,6 +17,15 @@ class ActivityLogger
         self::write('admin', $id, $name, $activity, $description, $request, $meta);
     }
 
+        public static function logAsesi(?string $id, ?string $name, string $activity, ?string $description = null, ?Request $request = null, array $meta = []): void
+        {
+            self::write('asesi', $id, $name, $activity, $description, $request, $meta);
+        }
+
+        public static function logAsesor(?string $id, ?string $name, string $activity, ?string $description = null, ?Request $request = null, array $meta = []): void
+        {
+            self::write('asesor', $id, $name, $activity, $description, $request, $meta);
+        }
     private static function write(string $actorType, ?string $actorId, ?string $actorName, string $activity, ?string $description, ?Request $request, array $meta): void
     {
         ActivityLog::create([
