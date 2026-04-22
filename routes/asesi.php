@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Asesi\AuthController;
 use App\Http\Controllers\Asesi\AsesmenMandiriController;
+use App\Http\Controllers\Asesi\BandingAsesmenController;
 use App\Http\Controllers\Asesi\ProfileController;
 use App\Http\Controllers\Asesi\JadwalController;
 use App\Http\Controllers\Asesi\RegisterController;

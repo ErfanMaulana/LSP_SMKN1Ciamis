@@ -639,7 +639,7 @@
             {{-- Status banner for non-approved users --}}
             @if(!$isApproved)
                 <div style="margin: 12px 14px 4px; border-radius: 10px; padding: 12px 14px; font-size: 12.5px; line-height: 1.5;
-                    {{ $isPending ? 'background:#fef9c3;border:1px solid #fde047;color:#854d0e;' : ($isRejected ? 'background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;' : ($isBanned ? 'background:#1e293b;border:1px solid #334155;color:#e2e8f0;' : 'background:#eff6ff;border:1px solid #93c5fd;color:#0073bd;')) }}">
+                    {{ $isPending ? 'background:#fef9c3;border:1px solid #fde047;color:#854d0e;' : ($isRejected ? 'background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;' : ($isBanned ? 'background:#1e293b;border:1px solid #334155;color:#e2e8f0;' : 'background:#eff6ff;border:1px solid #93c5fd;color:#1e40af;')) }}">
                     @if($isPending)
                         <i class="bi bi-hourglass-split" style="margin-right:5px;"></i>
                         <strong>Menunggu Verifikasi</strong><br>
@@ -693,7 +693,12 @@
 
                     <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-text"></i>
-                        <span>Hasil Asesmen</span>
+                            <span>Status Asesmen</span>
+                    </a>
+
+                    <a href="{{ route('asesi.banding.index') }}" class="menu-item {{ request()->routeIs('asesi.banding.*') ? 'active' : '' }}">
+                        <i class="bi bi-clipboard2-check"></i>
+                        <span>Banding Asesmen</span>
                     </a>
 
                     <a href="{{ route('asesi.umpan-balik.index') }}" class="menu-item {{ request()->routeIs('asesi.umpan-balik.*') ? 'active' : '' }}">
@@ -812,6 +817,13 @@
                         <i class="bi bi-calendar-event-fill"></i>
                         <span>Jadwal</span>
                     </a>
+
+                    @if(Route::has('asesi.banding.index'))
+                    <a href="{{ route('asesi.banding.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.banding.*') ? 'active' : '' }}">
+                        <i class="bi bi-clipboard2-check"></i>
+                        <span>Banding</span>
+                    </a>
+                    @endif
 
                     <a href="{{ route('asesi.umpan-balik.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.umpan-balik.*') ? 'active' : '' }}">
                         <i class="bi bi-chat-left-text-fill"></i>
