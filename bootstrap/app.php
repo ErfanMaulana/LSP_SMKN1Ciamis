@@ -27,8 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'asesi.approved' => \App\Http\Middleware\EnsureAsesiApproved::class,
+            'ujikom.completed' => \App\Http\Middleware\EnsureUjikomCompleted::class,
             'permission' => \App\Http\Middleware\CheckAdminPermission::class,
             'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'admin.activity' => \App\Http\Middleware\LogAdminActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

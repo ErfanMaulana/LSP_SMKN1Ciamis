@@ -41,12 +41,14 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::get('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'show'])->name('asesmen-mandiri.show');
             Route::post('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'store'])->name('asesmen-mandiri.store');
             Route::get('/asesmen-mandiri/{skemaId}/result', [AsesmenMandiriController::class, 'result'])->name('asesmen-mandiri.result');
-            Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
+            Route::middleware('ujikom.completed')->group(function () {
+                Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
 
-            // Umpan Balik Kinerja Asesor
-            Route::get('/umpan-balik', [UmpanBalikController::class, 'index'])->name('umpan-balik.index');
-            Route::get('/umpan-balik/{skemaId}', [UmpanBalikController::class, 'show'])->name('umpan-balik.show');
-            Route::post('/umpan-balik/{skemaId}', [UmpanBalikController::class, 'store'])->name('umpan-balik.store');
+                // Umpan Balik Kinerja Asesor
+                Route::get('/umpan-balik', [UmpanBalikController::class, 'index'])->name('umpan-balik.index');
+                Route::get('/umpan-balik/{skemaId}', [UmpanBalikController::class, 'show'])->name('umpan-balik.show');
+                Route::post('/umpan-balik/{skemaId}', [UmpanBalikController::class, 'store'])->name('umpan-balik.store');
+            });
 
             // Profil
             Route::get('/profil', [ProfileController::class, 'edit'])->name('profil.edit');

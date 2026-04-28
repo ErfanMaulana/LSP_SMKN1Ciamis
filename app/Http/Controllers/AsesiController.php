@@ -11,6 +11,8 @@ use App\Models\Asesor;
 use App\Models\Kelompok;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AsesiController extends Controller
@@ -20,7 +22,7 @@ class AsesiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Asesi::with(['jurusan', 'skemas:id,nama_skema']);
+        $query = Asesi::with('jurusan');
         
         // Search filter
         if ($request->has('search') && $request->search != '') {
@@ -33,11 +35,9 @@ class AsesiController extends Controller
             });
         }
         
-        // Skema filter
-        if ($request->has('skema') && $request->skema != '') {
-            $query->whereHas('skemas', function ($q) use ($request) {
-                $q->where('skemas.id', $request->skema);
-            });
+        // Jurusan filter
+        if ($request->has('jurusan') && $request->jurusan != '') {
+            $query->where('ID_jurusan', $request->jurusan);
         }
         
         // Status filter
@@ -997,6 +997,56 @@ class AsesiController extends Controller
         
         return redirect()->route('admin.asesi.verifikasi')
             ->with('success', $message);
+    }
+
+    /**
+     * Delete registration data so asesi can refill from scratch.
+     * Account login is intentionally kept.
+     */
+    public function deleteRegistration(Request $request, $nik)
+    {
+        $asesi = Asesi::with('buktiPendukung')->findOrFail($nik);
+
+        if ($asesi->status === 'approved') {
+            return redirect()->route('admin.asesi.verifikasi')
+                ->with('error', 'Data asesi yang sudah disetujui tidak dapat dihapus dari menu verifikasi.');
+        }
+
+        DB::beginTransaction();
+        try {
+            $paths = [];
+
+            if (!empty($asesi->pas_foto)) {
+                $paths[] = $asesi->pas_foto;
+            }
+
+            foreach ($asesi->buktiPendukung as $dokumen) {
+                if (!empty($dokumen->file_path)) {
+                    $paths[] = $dokumen->file_path;
+                }
+            }
+
+            $paths = array_values(array_unique($paths));
+            foreach ($paths as $path) {
+                Storage::disk('public')->delete($path);
+            }
+
+            // Remove pivot mappings first so the re-registration starts cleanly.
+            $asesi->skemas()->detach();
+            $asesi->buktiPendukung()->delete();
+            $asesi->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.asesi.verifikasi')
+                ->with('success', 'Data pendaftaran asesi berhasil dihapus. Asesi dapat mengisi ulang formulir pendaftaran.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Delete registration error: ' . $e->getMessage());
+
+            return redirect()->route('admin.asesi.verifikasi')
+                ->with('error', 'Gagal menghapus data pendaftaran: ' . $e->getMessage());
+        }
     }
 
     /**

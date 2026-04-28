@@ -150,6 +150,7 @@
             <div class="form-group form-full">
                 <label>Kelompok <span class="required">*</span></label>
                 @php
+                    $kelompokScheduleMap = $kelompokScheduleMap ?? [];
                     $kelompokOptions = $kelompoks->map(function ($k) use ($kelompokScheduleMap) {
                         return [
                             'id' => (int) $k->id,
@@ -241,11 +242,22 @@
 
             <div class="form-section-title"><i class="bi bi-clock"></i> Tanggal & Waktu</div>
 
+            @php
+                $todayDate = now()->toDateString();
+                $initialTanggalMulai = old('tanggal_mulai', $jadwal->tanggal_mulai ? $jadwal->tanggal_mulai->format('Y-m-d') : '');
+                $initialTanggalSelesai = old('tanggal_selesai', $jadwal->tanggal_selesai ? $jadwal->tanggal_selesai->format('Y-m-d') : '');
+                $minTanggalMulai = ($initialTanggalMulai && $initialTanggalMulai < $todayDate) ? $initialTanggalMulai : $todayDate;
+                $minTanggalSelesai = ($initialTanggalSelesai && $initialTanggalSelesai < $todayDate) ? $initialTanggalSelesai : $todayDate;
+            @endphp
+
             {{-- ─── Tanggal Mulai ─── --}}
             <div class="form-group">
                 <label>Tanggal Mulai <span class="required">*</span></label>
                 <input type="date" name="tanggal_mulai" id="tanggal_mulai"
-                       value="{{ old('tanggal_mulai', $jadwal->tanggal_mulai ? $jadwal->tanggal_mulai->format('Y-m-d') : '') }}"
+                       value="{{ $initialTanggalMulai }}"
+                       min="{{ $minTanggalMulai }}"
+                       data-original="{{ $initialTanggalMulai }}"
+                       data-today="{{ $todayDate }}"
                        class="form-control {{ $errors->has('tanggal_mulai') ? 'is-invalid' : '' }}">
                 @error('tanggal_mulai')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
@@ -254,7 +266,8 @@
             <div class="form-group" id="tanggal_selesai_group">
                 <label>Tanggal Selesai <span class="required">*</span></label>
                 <input type="date" name="tanggal_selesai" id="tanggal_selesai"
-                       value="{{ old('tanggal_selesai', $jadwal->tanggal_selesai ? $jadwal->tanggal_selesai->format('Y-m-d') : '') }}"
+                       value="{{ $initialTanggalSelesai }}"
+                       min="{{ $minTanggalSelesai }}"
                        class="form-control {{ $errors->has('tanggal_selesai') ? 'is-invalid' : '' }}">
                 <span class="hint">Bisa sama dengan tanggal mulai jika ujikom hanya 1 hari.</span>
                 <div class="validation-error" id="tanggal_error">
@@ -528,22 +541,58 @@ function showTukPreview(sel) {
     }
 }
 
-function validateTanggal() {
-    const tMulai   = document.getElementById('tanggal_mulai').value;
-    const tSelesai = document.getElementById('tanggal_selesai').value;
-    const errDiv   = document.getElementById('tanggal_error');
-    const errMsg   = document.getElementById('tanggal_error_message');
+async function validateTanggal() {
+    const tMulaiEl = document.getElementById('tanggal_mulai');
+    const tMulai   = tMulaiEl?.value;
+    const tSelesaiEl = document.getElementById('tanggal_selesai');
+    const tSelesai = tSelesaiEl?.value;
+    const today    = tMulaiEl?.dataset.today || '';
+    const original = tMulaiEl?.dataset.original || '';
     const grp      = document.getElementById('tanggal_selesai_group');
     const btn      = document.querySelector('button[type="submit"]');
-    if (tMulai && tSelesai && new Date(tSelesai) < new Date(tMulai)) {
-        errMsg.textContent = 'Tanggal selesai harus sama atau lebih besar dari tanggal mulai';
-        errDiv.classList.add('show');
-        grp.classList.add('has-error');
+
+    if (tMulaiEl && tSelesaiEl) {
+        // enforce two-way constraints: selesai.min = mulai (or original/today), mulai.max = selesai
+        const minForSelesai = tMulai || original || today || '{{ now()->toDateString() }}';
+        tSelesaiEl.min = minForSelesai;
+        tMulaiEl.max = tSelesai || '';
+
+        if (tMulai && tSelesai && tSelesai < tMulai) {
+            tSelesaiEl.value = '';
+        }
+        if (tMulai && tSelesai && tMulai > tSelesai) {
+            tMulaiEl.value = '';
+        }
+    }
+
+    if (!tMulai || !tSelesai) {
         if (btn) btn.disabled = true;
-    } else {
-        errDiv.classList.remove('show');
         grp.classList.remove('has-error');
+        return;
+    }
+
+    // if tanggal_mulai equals original, allow past date (skip today check)
+    const skipToday = (original && tMulai === original) ? true : false;
+
+    const token = document.querySelector('input[name="_token"]')?.value || '';
+
+    try {
+        const res = await fetch("{{ route('admin.jadwal-ujikom.validate-dates') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+            },
+            body: JSON.stringify({ tanggal_mulai: tMulai, tanggal_selesai: tSelesai, skip_today: skipToday })
+        });
+
+        const json = await res.json();
+        const valid = json.valid === true;
+        if (btn) btn.disabled = !valid;
+        grp.classList.toggle('has-error', !valid);
+    } catch (e) {
         if (btn) btn.disabled = false;
+        grp.classList.remove('has-error');
     }
 }
 
@@ -553,8 +602,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const tukSel = document.getElementById('tuk_select');
     if (tukSel?.value) showTukPreview(tukSel);
 
-    document.getElementById('tanggal_mulai')?.addEventListener('change', validateTanggal);
-    document.getElementById('tanggal_selesai')?.addEventListener('change', validateTanggal);
+    const tanggalMulai = document.getElementById('tanggal_mulai');
+    const tanggalSelesai = document.getElementById('tanggal_selesai');
+    if (tanggalMulai && tanggalSelesai) {
+        const originalTanggal = tanggalMulai.dataset.original || '';
+        const todayTanggal = tanggalMulai.dataset.today || '';
+        tanggalSelesai.min = tanggalMulai.value || originalTanggal || todayTanggal || '{{ now()->toDateString() }}';
+        tanggalMulai.max = tanggalSelesai.value || '';
+
+        tanggalMulai.addEventListener('change', validateTanggal);
+        tanggalSelesai.addEventListener('change', validateTanggal);
+
+        tanggalMulai.addEventListener('change', function() {
+            tanggalSelesai.min = this.value || originalTanggal || todayTanggal || '{{ now()->toDateString() }}';
+            if (tanggalSelesai.value && tanggalSelesai.value < this.value) {
+                tanggalSelesai.value = '';
+            }
+            tanggalMulai.max = tanggalSelesai.value || '';
+        });
+
+        tanggalSelesai.addEventListener('change', function() {
+            tanggalMulai.max = this.value || '';
+            if (tanggalMulai.value && tanggalMulai.value > this.value) {
+                tanggalMulai.value = '';
+            }
+            tanggalSelesai.min = tanggalMulai.value || originalTanggal || todayTanggal || '{{ now()->toDateString() }}';
+        });
+    }
     validateTanggal();
 });
 </script>

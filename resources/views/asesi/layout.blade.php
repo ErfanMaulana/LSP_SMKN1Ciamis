@@ -189,6 +189,19 @@
             min-width: 0;
         }
 
+        body.hide-asesi-sidebar .sidebar,
+        body.hide-asesi-sidebar .sidebar-overlay {
+            display: none;
+        }
+
+        body.hide-asesi-sidebar .main-content {
+            margin-left: 0;
+        }
+
+        body.hide-asesi-sidebar .mobile-toggle {
+            display: none;
+        }
+
         .topbar {
             background: white;
             padding: 15px 30px;
@@ -621,7 +634,10 @@
     </style>
     @yield('styles')
 </head>
-<body>
+@php
+    $hideAsesiSidebar = request()->routeIs('asesi.pendaftaran.*');
+@endphp
+<body class="{{ $hideAsesiSidebar ? 'hide-asesi-sidebar' : '' }}">
     <div class="asesi-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -634,6 +650,7 @@
                 $isPending  = $asesi && $asesi->status === 'pending';
                 $isRejected = $asesi && $asesi->status === 'rejected';
                 $isBanned   = $asesi && $asesi->status === 'banned';
+                $hasCompletedUjikom = $asesi && method_exists($asesi, 'hasCompletedUjikom') ? $asesi->hasCompletedUjikom() : false;
             @endphp
 
             {{-- Status banner for non-approved users --}}
@@ -691,20 +708,26 @@
                         <span>Jadwal Ujikom</span>
                     </a>
 
+                    @if($hasCompletedUjikom && Route::has('asesi.hasil-ujikom.index'))
                     <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-text"></i>
-                            <span>Status Asesmen</span>
+                        <span>Status Asesmen</span>
                     </a>
+                    @endif
 
+                    @if($hasCompletedUjikom && Route::has('asesi.banding.index'))
                     <a href="{{ route('asesi.banding.index') }}" class="menu-item {{ request()->routeIs('asesi.banding.*') ? 'active' : '' }}">
                         <i class="bi bi-clipboard2-check"></i>
                         <span>Banding Asesmen</span>
                     </a>
+                    @endif
 
+                    @if($hasCompletedUjikom)
                     <a href="{{ route('asesi.umpan-balik.index') }}" class="menu-item {{ request()->routeIs('asesi.umpan-balik.*') ? 'active' : '' }}">
                         <i class="bi bi-chat-left-text-fill"></i>
                         <span>Umpan Balik Asesor</span>
                     </a>
+                    @endif
 
                     <!-- AKUN Section -->
                     <div class="menu-section-title">AKUN</div>
@@ -818,17 +841,19 @@
                         <span>Jadwal</span>
                     </a>
 
-                    @if(Route::has('asesi.banding.index'))
+                    @if($hasCompletedUjikom && Route::has('asesi.banding.index'))
                     <a href="{{ route('asesi.banding.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.banding.*') ? 'active' : '' }}">
                         <i class="bi bi-clipboard2-check"></i>
                         <span>Banding</span>
                     </a>
                     @endif
 
+                    @if($hasCompletedUjikom)
                     <a href="{{ route('asesi.umpan-balik.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.umpan-balik.*') ? 'active' : '' }}">
                         <i class="bi bi-chat-left-text-fill"></i>
                         <span>Feedback</span>
                     </a>
+                    @endif
 
                     <a href="{{ route('asesi.profil.edit') }}" class="bottom-nav-item {{ request()->routeIs('asesi.profil.*') ? 'active' : '' }}">
                         <i class="bi bi-person-circle"></i>

@@ -96,15 +96,9 @@
         </div>
         <h1>Menunggu Verifikasi Admin</h1>
         <p>
-            Akun Anda sedang dalam proses peninjauan oleh admin.
-            Silakan menunggu sampai verifikasi selesai sebelum menggunakan fitur lainnya.
+            Formulir pendaftaran Anda sedang ditinjau oleh admin.
+            Silakan menunggu sampai verifikasi selesai.
         </p>
-        <div class="waiting-note mt-4">
-            <i class="bi bi-shield-check"></i>
-            <div>
-                Akses ke dashboard penuh akan terbuka otomatis setelah admin menyetujui pendaftaran Anda.
-            </div>
-        </div>
     </main>
 </body>
 </html>

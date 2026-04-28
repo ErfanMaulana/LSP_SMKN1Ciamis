@@ -46,7 +46,7 @@ Route::prefix('admin')->group(function () {
     Route::post('/login', [AdminController::class, 'login'])->name('admin.login.submit');
 
     // Protected admin routes
-    Route::middleware('auth:admin')->group(function () {
+    Route::middleware(['auth:admin', 'admin.activity'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard')->middleware('permission:dashboard.view');
         Route::post('/logout', [AdminController::class, 'logout'])->name('admin.logout');
 
@@ -80,6 +80,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/asesi-verifikasi/{nik}', [AsesiController::class, 'showVerifikasi'])->name('admin.asesi.verifikasi.show');
             Route::post('/asesi-verifikasi/{nik}/approve', [AsesiController::class, 'approve'])->name('admin.asesi.approve')->middleware('permission:verifikasi-asesi.approve');
             Route::post('/asesi-verifikasi/{nik}/reject', [AsesiController::class, 'reject'])->name('admin.asesi.reject')->middleware('permission:verifikasi-asesi.reject');
+            Route::post('/asesi-verifikasi/{nik}/delete-registration', [AsesiController::class, 'deleteRegistration'])->name('admin.asesi.delete-registration')->middleware('permission:verifikasi-asesi.reject');
         });
         
         // Asesor CRUD
@@ -119,6 +120,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/skema', [SkemaController::class, 'index'])->name('admin.skema.index');
             Route::get('/skema/create', [SkemaController::class, 'create'])->name('admin.skema.create')->middleware('permission:skema.create');
             Route::post('/skema', [SkemaController::class, 'store'])->name('admin.skema.store')->middleware('permission:skema.create');
+            Route::post('/skema/validate-unit-codes', [SkemaController::class, 'validateUnitCodes'])->name('admin.skema.validate-unit-codes')->middleware('permission:skema.create|skema.edit');
             Route::get('/skema/{id}', [SkemaController::class, 'show'])->name('admin.skema.show');
             Route::get('/skema/{id}/edit', [SkemaController::class, 'edit'])->name('admin.skema.edit')->middleware('permission:skema.edit');
             Route::put('/skema/{id}', [SkemaController::class, 'update'])->name('admin.skema.update')->middleware('permission:skema.edit');
@@ -242,6 +244,7 @@ Route::prefix('admin')->group(function () {
         Route::middleware('permission:jadwal-ujikom.view')->group(function () {
             Route::get('/jadwal-ujikom', [JadwalUjikomController::class, 'index'])->name('admin.jadwal-ujikom.index');
             Route::get('/jadwal-ujikom/create', [JadwalUjikomController::class, 'create'])->name('admin.jadwal-ujikom.create')->middleware('permission:jadwal-ujikom.create');
+            Route::post('/jadwal-ujikom/validate-dates', [JadwalUjikomController::class, 'validateDates'])->name('admin.jadwal-ujikom.validate-dates')->middleware('permission:jadwal-ujikom.create|jadwal-ujikom.edit');
             Route::get('/jadwal-ujikom/asesi-rekomendasi', [JadwalUjikomController::class, 'getAsesiBySkema'])->name('admin.jadwal-ujikom.asesi-rekomendasi');
             Route::post('/jadwal-ujikom', [JadwalUjikomController::class, 'store'])->name('admin.jadwal-ujikom.store')->middleware('permission:jadwal-ujikom.create');
             Route::get('/jadwal-ujikom/{id}/edit', [JadwalUjikomController::class, 'edit'])->name('admin.jadwal-ujikom.edit')->middleware('permission:jadwal-ujikom.edit');

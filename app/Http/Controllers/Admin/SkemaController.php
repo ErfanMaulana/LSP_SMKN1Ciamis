@@ -7,6 +7,7 @@ use App\Models\Skema;
 use App\Models\Jurusan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class SkemaController extends Controller
 {
@@ -73,17 +74,57 @@ class SkemaController extends Controller
     }
 
     /**
+     * Validate duplicate unit codes in create form (AJAX).
+     */
+    public function validateUnitCodes(Request $request)
+    {
+        $request->validate([
+            'codes' => 'required|array|min:1',
+            'codes.*' => 'nullable|string|max:255',
+        ]);
+
+        $normalized = [];
+        $duplicateIndices = [];
+
+        foreach ($request->input('codes', []) as $index => $code) {
+            $key = strtoupper(trim((string) $code));
+
+            if ($key === '') {
+                continue;
+            }
+
+            if (isset($normalized[$key])) {
+                $duplicateIndices[] = $normalized[$key];
+                $duplicateIndices[] = $index;
+                continue;
+            }
+
+            $normalized[$key] = $index;
+        }
+
+        $duplicateIndices = array_values(array_unique($duplicateIndices));
+
+        return response()->json([
+            'is_valid' => empty($duplicateIndices),
+            'duplicate_indices' => $duplicateIndices,
+            'message' => empty($duplicateIndices)
+                ? null
+                : 'Kode unit tidak boleh sama antar unit kompetensi.',
+        ]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_skema' => 'required|string|max:255',
             'nomor_skema' => 'required|string|max:255|unique:skemas,nomor_skema',
             'jenis_skema' => 'required|in:KKNI,Okupasi,Klaster',
             'jurusan_id' => 'nullable|exists:jurusan,ID_jurusan',
             'units' => 'required|array|min:1',
-            'units.*.kode_unit' => 'required|string|max:255',
+            'units.*.kode_unit' => 'required|string|max:255|distinct',
             'units.*.judul_unit' => 'required|string|max:255',
             'units.*.pertanyaan_unit' => 'nullable|string',
             'units.*.elemens' => 'required|array|min:1',
@@ -98,12 +139,19 @@ class SkemaController extends Controller
             'jenis_skema.in' => 'Jenis skema tidak valid.',
             'units.required' => 'Minimal satu unit kompetensi harus ditambahkan.',
             'units.*.kode_unit.required' => 'Kode unit wajib diisi.',
+            'units.*.kode_unit.distinct' => 'Kode unit tidak boleh duplikat antar unit.',
             'units.*.judul_unit.required' => 'Judul unit wajib diisi.',
             'units.*.elemens.required' => 'Minimal satu elemen harus ditambahkan per unit.',
             'units.*.elemens.*.nama_elemen.required' => 'Nama elemen wajib diisi.',
             'units.*.elemens.*.kriteria.required' => 'Minimal satu kriteria unjuk kerja harus ditambahkan per elemen.',
             'units.*.elemens.*.kriteria.*.deskripsi_kriteria.required' => 'Deskripsi kriteria wajib diisi.',
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            $this->addDuplicateUnitCodeErrors($validator, $request->input('units', []));
+        });
+
+        $validated = $validator->validate();
 
         DB::beginTransaction();
         try {
@@ -183,13 +231,13 @@ class SkemaController extends Controller
     {
         $skema = Skema::findOrFail($id);
 
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'nama_skema' => 'required|string|max:255',
             'nomor_skema' => 'required|string|max:255|unique:skemas,nomor_skema,' . $id,
             'jenis_skema' => 'required|in:KKNI,Okupasi,Klaster',
             'jurusan_id' => 'nullable|exists:jurusan,ID_jurusan',
             'units' => 'required|array|min:1',
-            'units.*.kode_unit' => 'required|string|max:255',
+            'units.*.kode_unit' => 'required|string|max:255|distinct',
             'units.*.judul_unit' => 'required|string|max:255',
             'units.*.pertanyaan_unit' => 'nullable|string',
             'units.*.elemens' => 'required|array|min:1',
@@ -203,7 +251,14 @@ class SkemaController extends Controller
             'jenis_skema.required' => 'Jenis skema wajib dipilih.',
             'jenis_skema.in' => 'Jenis skema tidak valid.',
             'units.required' => 'Minimal satu unit kompetensi harus ditambahkan.',
+            'units.*.kode_unit.distinct' => 'Kode unit tidak boleh duplikat antar unit.',
         ]);
+
+        $validator->after(function ($validator) use ($request) {
+            $this->addDuplicateUnitCodeErrors($validator, $request->input('units', []));
+        });
+
+        $validated = $validator->validate();
 
         DB::beginTransaction();
         try {
@@ -258,5 +313,29 @@ class SkemaController extends Controller
         $skema->delete();
 
         return redirect()->route('admin.skema.index')->with('success', 'Skema sertifikasi berhasil dihapus!');
+    }
+
+    private function addDuplicateUnitCodeErrors($validator, array $units): void
+    {
+        $seen = [];
+
+        foreach ($units as $index => $unit) {
+            $rawCode = $unit['kode_unit'] ?? '';
+            $normalizedCode = strtoupper(trim((string) $rawCode));
+
+            if ($normalizedCode === '') {
+                continue;
+            }
+
+            if (isset($seen[$normalizedCode])) {
+                $validator->errors()->add(
+                    "units.{$index}.kode_unit",
+                    'Kode unit tidak boleh sama dengan unit lain.'
+                );
+                continue;
+            }
+
+            $seen[$normalizedCode] = $index;
+        }
     }
 }
