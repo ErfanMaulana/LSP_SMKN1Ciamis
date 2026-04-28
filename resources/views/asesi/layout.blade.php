@@ -701,15 +701,6 @@
                             <i class="bi bi-clipboard2-check"></i>
                             <span>Banding Asesmen</span>
                         </a>
-                    @else
-                        <div class="menu-item" style="opacity:0.6; cursor:default;">
-                            <i class="bi bi-file-earmark-text"></i>
-                            <span>Hasil Asesmen (tersedia setelah ujikom)</span>
-                        </div>
-                        <div class="menu-item" style="opacity:0.6; cursor:default;">
-                            <i class="bi bi-clipboard2-check"></i>
-                            <span>Banding Asesmen (tersedia setelah ujikom)</span>
-                        </div>
                     @endif
                 @endif
             </nav>
