@@ -691,15 +691,26 @@
                         <span>Jadwal Ujikom</span>
                     </a>
 
-                    <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>Hasil Asesmen</span>
-                    </a>
+                    @if(method_exists($asesi, 'hasCompletedUjikom') && $asesi->hasCompletedUjikom())
+                        <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>Hasil Asesmen</span>
+                        </a>
 
-                    <a href="{{ route('asesi.banding.index') }}" class="menu-item {{ request()->routeIs('asesi.banding.*') ? 'active' : '' }}">
-                        <i class="bi bi-clipboard2-check"></i>
-                        <span>Banding Asesmen</span>
-                    </a>
+                        <a href="{{ route('asesi.banding.index') }}" class="menu-item {{ request()->routeIs('asesi.banding.*') ? 'active' : '' }}">
+                            <i class="bi bi-clipboard2-check"></i>
+                            <span>Banding Asesmen</span>
+                        </a>
+                    @else
+                        <div class="menu-item" style="opacity:0.6; cursor:default;">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>Hasil Asesmen (tersedia setelah ujikom)</span>
+                        </div>
+                        <div class="menu-item" style="opacity:0.6; cursor:default;">
+                            <i class="bi bi-clipboard2-check"></i>
+                            <span>Banding Asesmen (tersedia setelah ujikom)</span>
+                        </div>
+                    @endif
                 @endif
             </nav>
         </aside>
@@ -805,10 +816,12 @@
                         <span>Jadwal</span>
                     </a>
 
-                    <a href="{{ route('asesi.banding.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.banding.*') ? 'active' : '' }}">
-                        <i class="bi bi-clipboard2-check"></i>
-                        <span>Banding</span>
-                    </a>
+                    @if(method_exists($asesi, 'hasCompletedUjikom') && $asesi->hasCompletedUjikom())
+                        <a href="{{ route('asesi.banding.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.banding.*') ? 'active' : '' }}">
+                            <i class="bi bi-clipboard2-check"></i>
+                            <span>Banding</span>
+                        </a>
+                    @endif
                 @else
                     <a href="{{ route('asesi.pendaftaran.formulir') }}" class="bottom-nav-item {{ request()->routeIs('asesi.pendaftaran.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-plus"></i>

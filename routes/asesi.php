@@ -41,13 +41,15 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::get('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'show'])->name('asesmen-mandiri.show');
             Route::post('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'store'])->name('asesmen-mandiri.store');
             Route::get('/asesmen-mandiri/{skemaId}/result', [AsesmenMandiriController::class, 'result'])->name('asesmen-mandiri.result');
-            Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
+            Route::middleware('ujikom.completed')->group(function () {
+                Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
 
-            // Banding Asesmen (FR.AK.04)
-            Route::get('/banding-asesmen', [BandingAsesmenController::class, 'index'])->name('banding.index');
-            Route::get('/banding-asesmen/{skemaId}', [BandingAsesmenController::class, 'show'])->name('banding.show');
-            Route::post('/banding-asesmen/{skemaId}', [BandingAsesmenController::class, 'store'])->name('banding.store');
-            Route::post('/banding-asesmen/{skemaId}/decline', [BandingAsesmenController::class, 'decline'])->name('banding.decline');
+                // Banding Asesmen (FR.AK.04)
+                Route::get('/banding-asesmen', [BandingAsesmenController::class, 'index'])->name('banding.index');
+                Route::get('/banding-asesmen/{skemaId}', [BandingAsesmenController::class, 'show'])->name('banding.show');
+                Route::post('/banding-asesmen/{skemaId}', [BandingAsesmenController::class, 'store'])->name('banding.store');
+                Route::post('/banding-asesmen/{skemaId}/decline', [BandingAsesmenController::class, 'decline'])->name('banding.decline');
+            });
 
             // Umpan Balik Kinerja Asesor
             Route::get('/umpan-balik', [UmpanBalikController::class, 'index'])->name('umpan-balik.index');
