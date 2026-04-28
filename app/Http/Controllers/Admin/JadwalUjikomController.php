@@ -9,6 +9,7 @@ use App\Models\Tuk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Validator;
 
 class JadwalUjikomController extends Controller
 {
@@ -283,7 +284,7 @@ class JadwalUjikomController extends Controller
             'kelompok_ids'    => 'required|array|min:1',
             'kelompok_ids.*'  => 'required|distinct|exists:kelompok,id',
             'tuk_id'          => 'required|exists:tuk,id',
-            'tanggal_mulai'   => 'required|date',
+            'tanggal_mulai'   => 'required|date|after_or_equal:today',
             'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
             'waktu_mulai'     => 'required',
             'waktu_selesai'   => 'required|after:waktu_mulai',
@@ -299,6 +300,7 @@ class JadwalUjikomController extends Controller
             'tuk_id.required'                => 'TUK wajib dipilih.',
             'tuk_id.exists'                  => 'TUK tidak ditemukan.',
             'tanggal_mulai.required'         => 'Tanggal mulai wajib diisi.',
+            'tanggal_mulai.after_or_equal'   => 'Tanggal mulai tidak boleh sebelum hari ini.',
             'tanggal_selesai.required'       => 'Tanggal selesai wajib diisi.',
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai harus sama atau setelah tanggal mulai.',
             'waktu_mulai.required'           => 'Waktu mulai wajib diisi.',
@@ -377,7 +379,6 @@ class JadwalUjikomController extends Controller
         }
 
         $niks = $this->collectPesertaNiks($kelompoks);
-        $niks = $kelompok->asesis->pluck('NIK')->toArray();
         $validated['peserta_terdaftar'] = count($niks);
         $validated['kuota']             = max(1, count($niks));
         unset($validated['kelompok_ids']);
@@ -436,6 +437,33 @@ class JadwalUjikomController extends Controller
         return view('admin.jadwal-ujikom.edit', compact('jadwal', 'tuks', 'kelompoks', 'kelompokData', 'selectedKelompokIds', 'kelompokScheduleMap'));
     }
 
+    public function validateDates(Request $request)
+    {
+        $data = $request->only(['tanggal_mulai', 'tanggal_selesai', 'skip_today']);
+
+        $skipToday = filter_var($data['skip_today'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        $rules = [
+            'tanggal_mulai'   => 'required|date',
+            'tanggal_selesai' => 'required|date|after_or_equal:tanggal_mulai',
+        ];
+
+        if (!$skipToday) {
+            $rules['tanggal_mulai'] .= '|after_or_equal:today';
+        }
+
+        $v = Validator::make($data, $rules);
+
+        if ($v->fails()) {
+            return response()->json([
+                'valid' => false,
+                'errors' => $v->errors()->all(),
+            ]);
+        }
+
+        return response()->json(['valid' => true]);
+    }
+
     public function update(Request $request, $id)
     {
         $jadwal = JadwalUjikom::findOrFail($id);
@@ -466,6 +494,20 @@ class JadwalUjikomController extends Controller
             'waktu_selesai.required'         => 'Waktu selesai wajib diisi.',
             'waktu_selesai.after'            => 'Waktu selesai harus setelah waktu mulai.',
         ]);
+
+        $today = now()->toDateString();
+        $newTanggalMulai = date('Y-m-d', strtotime($validated['tanggal_mulai']));
+        $currentTanggalMulai = $jadwal->tanggal_mulai
+            ? date('Y-m-d', strtotime((string) $jadwal->tanggal_mulai))
+            : null;
+
+        if ($newTanggalMulai !== $currentTanggalMulai && $newTanggalMulai < $today) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'tanggal_mulai' => 'Tanggal mulai tidak boleh sebelum hari ini.',
+                ]);
+        }
 
         $kelompokIds = $this->normalizeKelompokIds($validated['kelompok_ids']);
 
@@ -539,7 +581,6 @@ class JadwalUjikomController extends Controller
         }
 
         $niks = $this->collectPesertaNiks($kelompoks);
-        $niks = $kelompok->asesis->pluck('NIK')->toArray();
         $validated['kuota']             = max(1, count($niks));
         $validated['peserta_terdaftar'] = count($niks);
         unset($validated['kelompok_ids']);

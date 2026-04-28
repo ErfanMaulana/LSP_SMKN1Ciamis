@@ -214,6 +214,14 @@
                                                 </button>
                                             </form>
                                             @endif
+                                            @if($item->status !== 'approved')
+                                            <form action="{{ route('admin.asesi.delete-registration', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Hapus data pendaftaran ' . $item->nama . '? Asesi akan diminta mengisi ulang formulir dari awal.'))">
+                                                @csrf
+                                                <button type="submit" title="Hapus Data Pendaftaran" style="color:#dc2626;">
+                                                    <i class="bi bi-trash" style="font-size: 16px;"></i> Hapus
+                                                </button>
+                                            </form>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

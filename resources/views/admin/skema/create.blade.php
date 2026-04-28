@@ -84,6 +84,7 @@
 
     .form-control.is-invalid { border-color: #ef4444; }
     .invalid-feedback { font-size: 12px; color: #ef4444; }
+    .invalid-feedback.kode-unit-feedback { display: block; margin-top: 5px; }
     .form-text { font-size: 12px; color: #64748b; margin-top: 5px; }
 
     .form-grid {
@@ -518,6 +519,8 @@
 @section('scripts')
 <script>
     let unitIndex = 1;
+    let kodeUnitValidationTimer = null;
+    let isSubmittingFromValidation = false;
 
     // ===== ADD UNIT =====
     document.getElementById('addUnitBtn').addEventListener('click', function() {
@@ -562,6 +565,7 @@
             reindexAll();
             updateNumbers();
             updateRemoveButtons();
+            scheduleKodeUnitValidation();
         }
 
         // Remove Elemen
@@ -585,6 +589,18 @@
             updateRemoveButtons();
         }
     });
+
+    document.addEventListener('input', function(e) {
+        if (e.target.matches('#units-container input[name*="[kode_unit]"]')) {
+            scheduleKodeUnitValidation();
+        }
+    });
+
+    document.addEventListener('blur', function(e) {
+        if (e.target.matches('#units-container input[name*="[kode_unit]"]')) {
+            validateKodeUnitByAjax();
+        }
+    }, true);
 
     // ===== HTML GENERATORS =====
     function createUnitHtml(uIdx) {
@@ -767,7 +783,103 @@
         });
     }
 
+    function scheduleKodeUnitValidation() {
+        clearTimeout(kodeUnitValidationTimer);
+        kodeUnitValidationTimer = setTimeout(validateKodeUnitByAjax, 250);
+    }
+
+    function ensureKodeUnitFeedback(input) {
+        let feedback = input.parentElement.querySelector('.kode-unit-feedback');
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback kode-unit-feedback';
+            input.parentElement.appendChild(feedback);
+        }
+        return feedback;
+    }
+
+    function applyKodeUnitValidation(inputElements, duplicateIndices, message) {
+        const duplicateSet = new Set(duplicateIndices);
+        let allValid = true;
+
+        inputElements.forEach((input, idx) => {
+            const feedback = ensureKodeUnitFeedback(input);
+            const hasValue = input.value.trim() !== '';
+            const isDuplicate = hasValue && duplicateSet.has(idx);
+
+            if (isDuplicate) {
+                input.classList.add('is-invalid');
+                input.setCustomValidity(message || 'Kode unit tidak boleh sama dengan unit lain.');
+                feedback.textContent = message || 'Kode unit ini duplikat dengan unit lain.';
+                allValid = false;
+                return;
+            }
+
+            input.classList.remove('is-invalid');
+            input.setCustomValidity('');
+            feedback.textContent = '';
+        });
+
+        return allValid;
+    }
+
+    async function validateKodeUnitByAjax() {
+        const inputElements = Array.from(document.querySelectorAll('#units-container input[name*="[kode_unit]"]'));
+        const codes = inputElements.map((input) => input.value.trim());
+
+        if (inputElements.length === 0) {
+            return true;
+        }
+
+        try {
+            const token = document.querySelector('#skemaForm input[name="_token"]')?.value;
+            const response = await fetch('{{ route('admin.skema.validate-unit-codes') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token || '',
+                },
+                body: JSON.stringify({ codes }),
+            });
+
+            if (!response.ok) {
+                return applyKodeUnitValidation(inputElements, [], '');
+            }
+
+            const result = await response.json();
+            return applyKodeUnitValidation(
+                inputElements,
+                result.duplicate_indices || [],
+                result.message || 'Kode unit tidak boleh sama dengan unit lain.'
+            );
+        } catch (error) {
+            return applyKodeUnitValidation(inputElements, [], '');
+        }
+    }
+
+    document.getElementById('skemaForm').addEventListener('submit', async function(e) {
+        if (isSubmittingFromValidation) {
+            return;
+        }
+
+        e.preventDefault();
+        const isValid = await validateKodeUnitByAjax();
+
+        if (!isValid) {
+            const firstInvalid = this.querySelector('#units-container input[name*="[kode_unit]"].is-invalid');
+            if (firstInvalid) {
+                firstInvalid.focus();
+            }
+            return;
+        }
+
+        isSubmittingFromValidation = true;
+        this.submit();
+    });
+
     // Init
     updateRemoveButtons();
+    validateKodeUnitByAjax();
 </script>
 @endsection

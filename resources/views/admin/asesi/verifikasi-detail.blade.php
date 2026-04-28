@@ -317,6 +317,27 @@
         background: #dc2626;
     }
 
+    .btn-delete-registration {
+        flex: 1;
+        padding: 12px 24px;
+        background: #991b1b;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+
+    .btn-delete-registration:hover {
+        background: #7f1d1d;
+    }
+
     textarea.catatan {
         width: 100%;
         padding: 12px 14px;
@@ -736,6 +757,9 @@
                     <button type="button" class="btn-reject" onclick="showRejectModal()">
                         <i class="bi bi-x-circle"></i> Tolak Pendaftaran
                     </button>
+                    <button type="button" class="btn-delete-registration" onclick="showDeleteRegistrationModal()">
+                        <i class="bi bi-trash"></i> Hapus Data Pendaftaran
+                    </button>
                 </div>
             </div>
         </div>
@@ -769,6 +793,14 @@
                         @endif
                     </div>
                 </div>
+
+                @if($asesi->status !== 'approved')
+                    <div class="action-buttons" style="margin-top:16px;">
+                        <button type="button" class="btn-delete-registration" onclick="showDeleteRegistrationModal()">
+                            <i class="bi bi-trash"></i> Hapus Data Pendaftaran
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
     @endif
@@ -824,6 +856,24 @@
         </form>
     </div>
 </div>
+
+<!-- Delete Registration Modal -->
+<div class="modal-overlay" id="deleteRegistrationModal">
+    <div class="modal-box">
+        <h3><i class="bi bi-trash" style="color:#dc2626;"></i> Konfirmasi Hapus Data Pendaftaran</h3>
+        <p style="margin-bottom:10px;">Anda akan menghapus data pendaftaran <strong>{{ $asesi->nama }}</strong>.</p>
+        <p style="font-size:13px;color:#991b1b;background:#fee2e2;border:1px solid #fecaca;padding:10px 12px;border-radius:8px;">
+            Data formulir dan dokumen pendukung akan dihapus. Akun login tetap ada agar asesi bisa isi ulang formulir dari awal.
+        </p>
+        <form method="POST" action="{{ route('admin.asesi.delete-registration', $asesi->NIK) }}">
+            @csrf
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeModal('deleteRegistrationModal')">Batal</button>
+                <button type="submit" class="btn-confirm-reject"><i class="bi bi-trash"></i> Ya, Hapus Data</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -856,6 +906,10 @@
         setTimeout(() => {
             document.getElementById('reject_catatan').focus();
         }, 100);
+    }
+
+    function showDeleteRegistrationModal() {
+        document.getElementById('deleteRegistrationModal').classList.add('show');
     }
 
     function validateReject() {

@@ -12,9 +12,29 @@
 
 <form method="GET" class="toolbar" style="margin-bottom:16px; display:flex; gap:10px; align-items:center;">
     <input type="text" name="q" value="{{ $search }}" placeholder="Cari nama, ID, atau aktivitas..." class="input-search">
+
+    <select name="module" style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; background:#fff;">
+        <option value="">Semua Modul</option>
+        @if(!empty($modules))
+            @foreach($modules as $m)
+                <option value="{{ $m }}" @if(isset($module) && $module === $m) selected @endif>{{ ucwords(str_replace('-', ' ', $m)) }}</option>
+            @endforeach
+        @endif
+    </select>
+
+    <select name="action" style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; background:#fff;">
+        <option value="">Semua Aksi</option>
+        <option value="create" @if(isset($action) && $action === 'create') selected @endif>Menambah</option>
+        <option value="update" @if(isset($action) && $action === 'update') selected @endif>Memperbarui</option>
+        <option value="delete" @if(isset($action) && $action === 'delete') selected @endif>Menghapus</option>
+        <option value="verify" @if(isset($action) && $action === 'verify') selected @endif>Verifikasi</option>
+        <option value="login" @if(isset($action) && $action === 'login') selected @endif>Login</option>
+        <option value="logout" @if(isset($action) && $action === 'logout') selected @endif>Logout</option>
+    </select>
+
     <button type="submit" class="btn btn-primary">Cari</button>
-    <a href="{{ route('admin.log-activity.user.export', ['q' => $search]) }}" class="btn btn-export">Export CSV</a>
-    @if($search !== '')
+    <a href="{{ route('admin.log-activity.user.export', ['q' => $search, 'module' => $module ?? '', 'action' => $action ?? '']) }}" class="btn btn-export">Export CSV</a>
+    @if($search !== '' || (isset($module) && $module) || (isset($action) && $action))
         <a href="{{ route('admin.log-activity.user') }}" class="btn btn-secondary">Reset</a>
     @endif
 </form>
@@ -27,23 +47,28 @@
                 <th>Nama User</th>
                 <th>ID User</th>
                 <th>Aktivitas</th>
+                <th>Route</th>
+                <th>Method</th>
                 <th>Deskripsi</th>
                 <th>IP</th>
             </tr>
         </thead>
         <tbody>
             @forelse($logs as $log)
+                @php($meta = is_array($log->meta) ? $log->meta : [])
                 <tr>
                     <td>{{ $log->created_at?->format('d/m/Y H:i:s') ?? '-' }}</td>
                     <td>{{ $log->actor_name ?? '-' }}</td>
                     <td>{{ $log->actor_id ?? '-' }}</td>
                     <td>{{ $log->activity }}</td>
+                    <td>{{ $meta['route'] ?? '-' }}</td>
+                    <td>{{ $meta['method'] ?? '-' }}</td>
                     <td>{{ $log->description ?? '-' }}</td>
                     <td>{{ $log->ip_address ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="6" class="empty-row">Belum ada data log user.</td>
+                    <td colspan="8" class="empty-row">Belum ada data log user.</td>
                 </tr>
             @endforelse
         </tbody>

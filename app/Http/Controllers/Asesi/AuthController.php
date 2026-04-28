@@ -116,6 +116,10 @@ class AuthController extends Controller
             return redirect()->route('asesi.pendaftaran.formulir');
         }
 
+        if ($asesi->status !== 'approved') {
+            return view('asesi.dashboard-pending', compact('account', 'asesi'));
+        }
+
         return view('asesi.dashboard', compact('account', 'asesi'));
     }
 }

@@ -52,11 +52,11 @@
                                 </span>
                                 <span class="flex items-center gap-2">
                                     <i class="bi bi-calendar3 text-blue-600"></i>
-                                    <span>{{ $berita->tanggal_publikasi->format('d F Y') }}</span>
+                                    <span>{{ mb_strtolower($berita->tanggal_publikasi->locale('id')->translatedFormat('d F Y'), 'UTF-8') }}</span>
                                 </span>
                                 <span class="flex items-center gap-2">
                                     <i class="bi bi-clock text-blue-600"></i>
-                                    <span>{{ $berita->created_at->diffForHumans() }}</span>
+                                    <span>{{ $berita->created_at->locale('id')->diffForHumans() }}</span>
                                 </span>
                             </div>
                         </div>

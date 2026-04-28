@@ -64,7 +64,7 @@
                 </div>
                 <div class="filter-group">
                     <select class="filter-select" name="keahlian" onchange="performAjaxSearch()">
-                        <option value="">Keahlian: Semua</option>
+                        <option value="">Skema: Semua</option>
                         @foreach($skemaList as $skema)
                             <option value="{{ $skema->id }}" {{ request('keahlian') == $skema->id ? 'selected' : '' }}>
                                 {{ $skema->nama_skema }}

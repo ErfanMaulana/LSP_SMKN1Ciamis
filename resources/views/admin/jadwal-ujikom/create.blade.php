@@ -96,6 +96,7 @@
             <div class="form-group form-full">
                 <label>Kelompok <span class="required">*</span></label>
                 @php
+                    $kelompokScheduleMap = $kelompokScheduleMap ?? [];
                     $oldKelompokIds = collect(old('kelompok_ids', []))->map(fn($id) => (int) $id)->all();
                     $kelompokOptions = $kelompoks->map(function ($k) use ($kelompokScheduleMap) {
                         return [
@@ -193,6 +194,7 @@
                 <label>Tanggal Mulai <span class="required">*</span></label>
                 <input type="date" name="tanggal_mulai" id="tanggal_mulai"
                        value="{{ old('tanggal_mulai') }}"
+                       min="{{ now()->toDateString() }}"
                        class="form-control {{ $errors->has('tanggal_mulai') ? 'is-invalid' : '' }}">
                 @error('tanggal_mulai')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
@@ -202,6 +204,7 @@
                 <label>Tanggal Selesai <span class="required">*</span></label>
                 <input type="date" name="tanggal_selesai" id="tanggal_selesai"
                        value="{{ old('tanggal_selesai') }}"
+                      min="{{ now()->toDateString() }}"
                        class="form-control {{ $errors->has('tanggal_selesai') ? 'is-invalid' : '' }}">
                 <span class="hint">Bisa sama dengan tanggal mulai jika ujikom hanya 1 hari.</span>
                 <div class="validation-error" id="tanggal_error">
@@ -466,22 +469,53 @@ function showTukPreview(sel) {
     }
 }
 
-function validateTanggal() {
-    const tMulai   = document.getElementById('tanggal_mulai').value;
-    const tSelesai = document.getElementById('tanggal_selesai').value;
-    const errDiv   = document.getElementById('tanggal_error');
-    const errMsg   = document.getElementById('tanggal_error_message');
+async function validateTanggal() {
+    const tMulaiEl = document.getElementById('tanggal_mulai');
+    const tMulai   = tMulaiEl?.value;
+    const tSelesaiEl = document.getElementById('tanggal_selesai');
+    const tSelesai = tSelesaiEl?.value;
     const grp      = document.getElementById('tanggal_selesai_group');
     const btn      = document.querySelector('button[type="submit"]');
-    if (tMulai && tSelesai && new Date(tSelesai) < new Date(tMulai)) {
-        errMsg.textContent = 'Tanggal selesai harus sama atau lebih besar dari tanggal mulai';
-        errDiv.classList.add('show');
-        grp.classList.add('has-error');
+
+    if (tMulaiEl && tSelesaiEl) {
+        // enforce two-way constraints: selesai.min = mulai, mulai.max = selesai
+        tSelesaiEl.min = tMulai || '{{ now()->toDateString() }}';
+        tMulaiEl.max = tSelesai || '';
+
+        // clear values that violate the constraint so the picker disables them
+        if (tMulai && tSelesai && tSelesai < tMulai) {
+            tSelesaiEl.value = '';
+        }
+        if (tMulai && tSelesai && tMulai > tSelesai) {
+            tMulaiEl.value = '';
+        }
+    }
+
+    if (!tMulai || !tSelesai) {
         if (btn) btn.disabled = true;
-    } else {
-        errDiv.classList.remove('show');
         grp.classList.remove('has-error');
+        return;
+    }
+
+    const token = document.querySelector('input[name="_token"]')?.value || '';
+
+    try {
+        const res = await fetch("{{ route('admin.jadwal-ujikom.validate-dates') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token,
+            },
+            body: JSON.stringify({ tanggal_mulai: tMulai, tanggal_selesai: tSelesai })
+        });
+
+        const json = await res.json();
+        const valid = json.valid === true;
+        if (btn) btn.disabled = !valid;
+        grp.classList.toggle('has-error', !valid);
+    } catch (e) {
         if (btn) btn.disabled = false;
+        grp.classList.remove('has-error');
     }
 }
 
@@ -491,8 +525,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const tukSel = document.getElementById('tuk_select');
     if (tukSel?.value) showTukPreview(tukSel);
 
-    document.getElementById('tanggal_mulai')?.addEventListener('change', validateTanggal);
-    document.getElementById('tanggal_selesai')?.addEventListener('change', validateTanggal);
+    const tanggalMulai = document.getElementById('tanggal_mulai');
+    const tanggalSelesai = document.getElementById('tanggal_selesai');
+    if (tanggalMulai && tanggalSelesai) {
+        tanggalSelesai.min = tanggalMulai.value || '{{ now()->toDateString() }}';
+        tanggalMulai.max = tanggalSelesai.value || '';
+
+        tanggalMulai.addEventListener('change', validateTanggal);
+        tanggalSelesai.addEventListener('change', validateTanggal);
+
+        // also update counterpart limits on change to keep pickers in sync
+        tanggalMulai.addEventListener('change', function() {
+            tanggalSelesai.min = this.value || '{{ now()->toDateString() }}';
+            if (tanggalSelesai.value && tanggalSelesai.value < this.value) {
+                tanggalSelesai.value = '';
+            }
+            tanggalMulai.max = tanggalSelesai.value || '';
+        });
+
+        tanggalSelesai.addEventListener('change', function() {
+            tanggalMulai.max = this.value || '';
+            if (tanggalMulai.value && tanggalMulai.value > this.value) {
+                tanggalMulai.value = '';
+            }
+            tanggalSelesai.min = tanggalMulai.value || '{{ now()->toDateString() }}';
+        });
+    }
     validateTanggal();
 });
 </script>

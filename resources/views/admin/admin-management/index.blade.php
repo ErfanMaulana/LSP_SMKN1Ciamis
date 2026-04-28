@@ -170,19 +170,96 @@
     .alert-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
     .alert-danger  { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
 
-    .modal-overlay {
-        display: none; position: fixed; inset: 0; background: rgba(15,23,42,.45);
-        z-index: 9999; align-items: center; justify-content: center;
+    .delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        padding: 16px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
     }
-    .modal-overlay.active { display: flex; }
-    .modal-box {
-        background: white; border-radius: 16px; padding: 32px;
-        max-width: 420px; width: 90%; text-align: center;
-        box-shadow: 0 25px 50px rgba(0,0,0,.25);
+
+    .delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
     }
-    .modal-box h3 { font-size: 18px; color: #0F172A; margin: 16px 0 8px; }
-    .modal-box p { font-size: 14px; color: #64748b; margin-bottom: 24px; }
-    .modal-actions { display: flex; gap: 12px; justify-content: center; }
+
+    .delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        border: 1px solid #e2e8f0;
+        padding: 20px;
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .delete-confirm-overlay.show .delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .btn-confirm-cancel,
+    .btn-confirm-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+    }
+
+    .btn-confirm-cancel {
+        background: #0073bd;
+    }
+    .btn-confirm-cancel:hover {
+        background: #005f99;
+    }
+
+    .btn-confirm-submit {
+        background: #0073bd;
+    }
+    .btn-confirm-submit:hover {
+        background: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .delete-confirm-overlay,
+        .delete-confirm-modal {
+            transition: none;
+        }
+    }
 
     @media (max-width: 768px) {
         .search-box { min-width: 100%; }
@@ -307,18 +384,15 @@
 </div>
 
 <!-- Delete Modal -->
-<div class="modal-overlay" id="deleteModal">
-    <div class="modal-box">
-        <div style="width:56px;height:56px;background:#fee2e2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;">
-            <i class="bi bi-exclamation-triangle" style="font-size:24px;color:#ef4444;"></i>
-        </div>
-        <h3>Hapus Admin?</h3>
-        <p>Admin <strong id="deleteAdminName"></strong> akan dihapus permanen.</p>
-        <div class="modal-actions">
-            <button class="btn btn-sm" style="background:#e2e8f0;color:#475569;" onclick="closeDeleteModal()">Batal</button>
+<div id="deleteConfirmOverlay" class="delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle" aria-hidden="true">
+    <div class="delete-confirm-modal">
+        <h3 id="deleteConfirmTitle" class="delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="deleteConfirmText" class="delete-confirm-text">Hapus admin ini?</p>
+        <div class="delete-confirm-actions">
+            <button type="button" id="deleteConfirmCancel" class="btn-confirm-cancel">Batal</button>
             <form id="deleteForm" method="POST" style="margin:0;">
                 @csrf @method('DELETE')
-                <button type="submit" class="btn btn-sm" style="background:#ef4444;color:white;">Hapus</button>
+                <button type="submit" class="btn-confirm-submit">Hapus</button>
             </form>
         </div>
     </div>
@@ -374,9 +448,14 @@
 
     function confirmDelete(id, name) {
         closeMenus();
-        document.getElementById('deleteAdminName').textContent = name;
+        const text = document.getElementById('deleteConfirmText');
+        if (text) {
+            text.textContent = 'Hapus admin ' + name + '?';
+        }
         document.getElementById('deleteForm').action = '/admin/admin-management/' + id;
-        document.getElementById('deleteModal').classList.add('active');
+        const modal = document.getElementById('deleteConfirmOverlay');
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
     }
 
     function closeMenus() {
@@ -384,10 +463,18 @@
     }
 
     function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.remove('active');
+        const modal = document.getElementById('deleteConfirmOverlay');
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
     }
-    document.getElementById('deleteModal').addEventListener('click', function(e) {
-        if (e.target === this) closeDeleteModal();
+
+    const deleteOverlay = document.getElementById('deleteConfirmOverlay');
+    const deleteCancelBtn = document.getElementById('deleteConfirmCancel');
+
+    deleteCancelBtn?.addEventListener('click', closeDeleteModal);
+
+    deleteOverlay?.addEventListener('click', function(e) {
+        if (e.target === deleteOverlay) closeDeleteModal();
     });
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {

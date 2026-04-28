@@ -24,6 +24,11 @@ class EnsureAsesiApproved
 
         $asesi = Asesi::find($account->NIK);
 
+        // Pending users may still open the dashboard to see the waiting message.
+        if ($asesi && $asesi->status === 'pending' && $request->routeIs('asesi.dashboard')) {
+            return $next($request);
+        }
+
         // Belum mendaftar atau belum diverifikasi
         if (!$asesi || $asesi->status !== 'approved') {
             return redirect()->route('asesi.pendaftaran.formulir');

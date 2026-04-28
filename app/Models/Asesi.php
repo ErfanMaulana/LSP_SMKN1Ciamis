@@ -109,6 +109,19 @@ class Asesi extends Model
                     ->withTimestamps();
     }
 
+    public function hasCompletedUjikom(): bool
+    {
+        return $this->skemas()->wherePivot('status', 'selesai')->exists();
+    }
+
+    public function hasCompletedUjikomForSkema(int|string $skemaId): bool
+    {
+        return $this->skemas()
+            ->where('skemas.id', $skemaId)
+            ->wherePivot('status', 'selesai')
+            ->exists();
+    }
+
     public function jawabanElemen()
     {
         return $this->hasMany(JawabanElemen::class, 'asesi_nik', 'NIK');

@@ -176,10 +176,6 @@ class AsesmenMandiriController extends Controller
         }
 
         if ($isFinalSubmission && empty($pivot->tanda_tangan)) {
-            $rules["jawaban.$elemenId.bukti"] = ['required', 'string', 'max:1000', 'regex:/\\S/'];
-        }
-
-        if ($request->has('submit_final')) {
             $rules['tanda_tangan'] = 'required|string';
         }
 

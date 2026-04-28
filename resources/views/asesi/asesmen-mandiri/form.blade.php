@@ -1087,7 +1087,6 @@
                     <label class="bukti-label">Bukti yang Relevan <span style="color:#dc2626;">*</span></label>
                     <textarea name="jawaban[{{ $elemen->id }}][bukti]" 
                               class="bukti-input" 
-                              {{ ($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)) ? '' : 'required' }}
                               {{ ($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)) ? 'readonly' : '' }}
                               placeholder="Tuliskan bukti yang menunjukkan bahwa Anda dapat melakukan kompetensi ini (contoh: sertifikat, pengalaman kerja, portofolio, dll)">{{ $existingAnswer->bukti ?? '' }}</textarea>
                 </div>
