@@ -328,7 +328,6 @@ Route::prefix('admin')->group(function () {
             Route::put('/rekaman-asesmen-kompetensi/{id}', [RekamanAsesmenKompetensiController::class, 'update'])->name('admin.rekaman-asesmen-kompetensi.update')->middleware('permission:rekaman-asesmen-kompetensi.edit');
             Route::delete('/rekaman-asesmen-kompetensi/{id}', [RekamanAsesmenKompetensiController::class, 'destroy'])->name('admin.rekaman-asesmen-kompetensi.destroy')->middleware('permission:rekaman-asesmen-kompetensi.delete');
         });
-        });
 
         // Penugasan Asesor ke Asesi
         Route::middleware('permission:penugasan-asesor.view')->group(function () {
