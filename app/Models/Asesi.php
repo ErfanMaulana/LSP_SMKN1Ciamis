@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\RekamanAsesmenKompetensi;
 
 class Asesi extends Model
 {
@@ -111,14 +112,18 @@ class Asesi extends Model
 
     public function hasCompletedUjikom(): bool
     {
-        return $this->skemas()->wherePivot('status', 'selesai')->exists();
+        return RekamanAsesmenKompetensi::where('asesi_nik', $this->NIK)
+            ->whereNotNull('tanggal_selesai')
+            ->where('tanggal_selesai', '<=', now())
+            ->exists();
     }
 
     public function hasCompletedUjikomForSkema(int|string $skemaId): bool
     {
-        return $this->skemas()
-            ->where('skemas.id', $skemaId)
-            ->wherePivot('status', 'selesai')
+        return RekamanAsesmenKompetensi::where('asesi_nik', $this->NIK)
+            ->where('skema_id', $skemaId)
+            ->whereNotNull('tanggal_selesai')
+            ->where('tanggal_selesai', '<=', now())
             ->exists();
     }
 
