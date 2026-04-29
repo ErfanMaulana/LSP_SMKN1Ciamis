@@ -127,6 +127,21 @@ class Asesi extends Model
             ->exists();
     }
 
+    public function hasRekomendasiLanjut(): bool
+    {
+        return $this->skemas()
+            ->wherePivot('rekomendasi', 'lanjut')
+            ->exists();
+    }
+
+    public function hasRekomendasiLanjutForSkema(int|string $skemaId): bool
+    {
+        return $this->skemas()
+            ->where('skemas.id', $skemaId)
+            ->wherePivot('rekomendasi', 'lanjut')
+            ->exists();
+    }
+
     public function jawabanElemen()
     {
         return $this->hasMany(JawabanElemen::class, 'asesi_nik', 'NIK');
