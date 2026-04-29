@@ -85,23 +85,13 @@ class RolePermissionSeeder extends Seeder
                 'asesmen-mandiri.view' => 'Lihat Asesmen Mandiri',
                 'nilai-asesor.view'    => 'Lihat Nilai',
             ],
-            'Persetujuan Asesmen' => [
-                'persetujuan-asesmen.view'   => 'Lihat Persetujuan Asesmen',
-                'persetujuan-asesmen.create' => 'Tambah Persetujuan Asesmen',
-                'persetujuan-asesmen.edit'   => 'Edit Persetujuan Asesmen',
-                'persetujuan-asesmen.delete' => 'Hapus Persetujuan Asesmen',
-            ],
-            'Ceklis Observasi Aktivitas Praktik' => [
-                'ceklis-observasi-aktivitas-praktik.view'   => 'Lihat Ceklis Observasi Aktivitas Praktik',
-                'ceklis-observasi-aktivitas-praktik.create' => 'Tambah Ceklis Observasi Aktivitas Praktik',
-                'ceklis-observasi-aktivitas-praktik.edit'   => 'Edit Ceklis Observasi Aktivitas Praktik',
-                'ceklis-observasi-aktivitas-praktik.delete' => 'Hapus Ceklis Observasi Aktivitas Praktik',
-            ],
-            'Rekaman Asesmen Kompetensi' => [
-                'rekaman-asesmen-kompetensi.view'   => 'Lihat Rekaman Asesmen Kompetensi',
-                'rekaman-asesmen-kompetensi.create' => 'Tambah Rekaman Asesmen Kompetensi',
-                'rekaman-asesmen-kompetensi.edit'   => 'Edit Rekaman Asesmen Kompetensi',
-                'rekaman-asesmen-kompetensi.delete' => 'Hapus Rekaman Asesmen Kompetensi',
+            'Banding Asesmen' => [
+                'banding-asesmen.view' => 'Lihat Banding Asesmen',
+                'banding-asesmen.check' => 'Cek Banding Asesmen',
+                'banding-asesmen-komponen.view' => 'Lihat Komponen Ceklis Banding',
+                'banding-asesmen-komponen.create' => 'Tambah Komponen Ceklis Banding',
+                'banding-asesmen-komponen.edit' => 'Edit Komponen Ceklis Banding',
+                'banding-asesmen-komponen.delete' => 'Hapus Komponen Ceklis Banding',
             ],
             'Carousel' => [
                 'carousel.view'   => 'Lihat Carousel',
@@ -211,7 +201,7 @@ class RolePermissionSeeder extends Seeder
         $adminLspPerms = Permission::whereIn('group', [
             'Asesor', 'Asesi', 'Verifikasi Asesi', 'Akun Asesi', 'Kelompok',
             'Mitra', 'Jurusan', 'Skema', 'TUK', 'Jadwal Ujikom', 
-            'Penugasan Asesor', 'Asesmen Mandiri', 'Persetujuan Asesmen', 'Ceklis Observasi Aktivitas Praktik', 'Rekaman Asesmen Kompetensi', 'Manajemen Admin', 'Role & Permission',
+            'Penugasan Asesor', 'Asesmen Mandiri', 'Banding Asesmen', 'Manajemen Admin', 'Role & Permission',
         ])->pluck('id');
         $adminLsp->permissions()->sync($adminLspPerms);
 

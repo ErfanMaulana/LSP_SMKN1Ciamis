@@ -20,7 +20,7 @@
         min-width: 0;
         width: 100%;
     }
-    .welcome-card h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+    .welcome-card h2 { font-size: 22px; font-weight: 700; margi n-bottom: 6px; }
     .welcome-card p  { font-size: 14px; opacity: 0.85; margin: 0; }
     .welcome-icon { font-size: 64px; opacity: 0.25; }
 

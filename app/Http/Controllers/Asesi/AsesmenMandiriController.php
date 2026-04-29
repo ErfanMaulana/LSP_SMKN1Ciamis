@@ -7,7 +7,6 @@ use App\Models\Asesi;
 use App\Models\Asesor;
 use App\Models\Skema;
 use App\Models\JawabanElemen;
-use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -163,6 +162,8 @@ class AsesmenMandiriController extends Controller
         // Validate input
         $rules = [
             'jawaban' => 'required|array',
+            'jawaban.*.status' => 'required|in:K,BK',
+            'jawaban.*.bukti' => 'nullable|string|max:1000',
         ];
 
         foreach ($elemenIds as $elemenId) {
@@ -252,28 +253,10 @@ class AsesmenMandiriController extends Controller
                     'tanggal_tanda_tangan' => now(),
                     'updated_at' => now(),
                 ]);
-
-            ActivityLogger::logUser(
-                (string) $asesi->NIK,
-                $asesi->nama ?? (string) $asesi->NIK,
-                'Mengisi APL 2',
-                'User menyelesaikan dan submit final APL 2 untuk skema "' . $skema->nama_skema . '".',
-                $request,
-                ['skema_id' => (int) $skemaId, 'submit_type' => 'final']
-            );
             
             return redirect()->route('asesi.asesmen-mandiri.index')
                 ->with('success', 'Asesmen Mandiri untuk skema "' . $skema->nama_skema . '" berhasil diselesaikan!');
         }
-
-        ActivityLogger::logUser(
-            (string) $asesi->NIK,
-            $asesi->nama ?? (string) $asesi->NIK,
-            'Mengisi APL 2',
-            'User menyimpan jawaban APL 2 untuk skema "' . $skema->nama_skema . '".',
-            $request,
-            ['skema_id' => (int) $skemaId, 'submit_type' => 'draft']
-        );
         
         return redirect()->route('asesi.asesmen-mandiri.show', $skemaId)
             ->with('success', 'Jawaban berhasil disimpan!');

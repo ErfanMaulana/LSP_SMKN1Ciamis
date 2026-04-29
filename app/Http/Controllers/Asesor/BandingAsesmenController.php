@@ -5,166 +5,266 @@ namespace App\Http\Controllers\Asesor;
 use App\Http\Controllers\Controller;
 use App\Models\Asesi;
 use App\Models\Asesor;
-use App\Models\Banding;
+use App\Models\BandingAsesmen;
+use App\Models\BandingAsesmenJawaban;
+use App\Models\BandingAsesmenKomponen;
 use App\Models\Skema;
-use App\Support\ActivityLogger;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class BandingAsesmenController extends Controller
 {
-    /**
-     * Get authenticated asesor
-     */
     private function getAsesor(): ?Asesor
     {
         $account = Auth::guard('account')->user();
-        return Asesor::where('no_reg', $account->no_reg)->first();
+
+        return Asesor::with('skemas')->where('no_met', $account->id)->first();
     }
 
-    /**
-     * Display list of pending bandings for this asesor
-     */
-    public function index()
+    public function index(Request $request)
     {
+        $account = Auth::guard('account')->user();
         $asesor = $this->getAsesor();
 
         if (!$asesor) {
-            return redirect()->route('asesor.dashboard')
-                ->with('error', 'Data asesor tidak ditemukan.');
+            return view('asesor.banding.index', [
+                'account' => $account,
+                'asesor' => null,
+                'rows' => collect(),
+                'stats' => [
+                    'total' => 0,
+                    'diajukan' => 0,
+                    'ditinjau' => 0,
+                    'diterima' => 0,
+                    'ditolak' => 0,
+                    'tidak_banding' => 0,
+                ],
+            ]);
         }
 
-        // Get bandings assigned to this asesor, grouped by status
-        $bandings = Banding::with(['asesi', 'skema'])
+        $skemaIds = $asesor->skemas->pluck('id')->all();
+
+        $query = DB::table('asesi_skema as aks')
+            ->join('asesi as a', 'a.NIK', '=', 'aks.asesi_nik')
+            ->join('skemas as s', 's.id', '=', 'aks.skema_id')
+            ->leftJoin('banding_asesmen as b', function ($join) {
+                $join->on('b.asesi_nik', '=', 'aks.asesi_nik')
+                    ->on('b.skema_id', '=', 'aks.skema_id');
+            })
+            ->whereIn('aks.skema_id', $skemaIds)
+            ->whereNotNull('aks.rekomendasi')
+            ->select([
+                'aks.asesi_nik',
+                'aks.skema_id',
+                'aks.rekomendasi',
+                'aks.tanggal_selesai',
+                'a.nama as asesi_nama',
+                's.nama_skema',
+                's.nomor_skema',
+                'b.id as banding_id',
+                'b.status as banding_status',
+                'b.tanggal_pengajuan',
+                'b.checked_at',
+            ]);
+
+        $search = trim((string) $request->get('search', ''));
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('a.nama', 'like', "%{$search}%")
+                    ->orWhere('a.NIK', 'like', "%{$search}%")
+                    ->orWhere('s.nama_skema', 'like', "%{$search}%")
+                    ->orWhere('s.nomor_skema', 'like', "%{$search}%");
+            });
+        }
+
+        $status = $request->get('status', 'all');
+        if ($status !== 'all') {
+            if ($status === 'belum') {
+                $query->whereNull('b.id');
+            } else {
+                $query->where('b.status', $status);
+            }
+        }
+
+        $rows = $query->orderByDesc('aks.updated_at')->paginate(12)->withQueryString();
+
+        $statsBase = DB::table('asesi_skema as aks')
+            ->leftJoin('banding_asesmen as b', function ($join) {
+                $join->on('b.asesi_nik', '=', 'aks.asesi_nik')
+                    ->on('b.skema_id', '=', 'aks.skema_id');
+            })
+            ->whereIn('aks.skema_id', $skemaIds)
+            ->whereNotNull('aks.rekomendasi');
+
+        $stats = [
+            'total' => (clone $statsBase)->count(),
+            'diajukan' => (clone $statsBase)->where('b.status', 'diajukan')->count(),
+            'ditinjau' => (clone $statsBase)->where('b.status', 'ditinjau')->count(),
+            'diterima' => (clone $statsBase)->where('b.status', 'diterima')->count(),
+            'ditolak' => (clone $statsBase)->where('b.status', 'ditolak')->count(),
+            'tidak_banding' => (clone $statsBase)->where('b.status', 'tidak_banding')->count(),
+        ];
+
+        return view('asesor.banding.index', compact('account', 'asesor', 'rows', 'stats', 'search', 'status'));
+    }
+
+    public function form(string $asesiNik, int $skemaId)
+    {
+        $account = Auth::guard('account')->user();
+        $asesor = $this->getAsesor();
+
+        abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        $isAssigned = DB::table('asesor_skema')
             ->where('asesor_id', $asesor->ID_asesor)
-            ->orderByRaw("FIELD(status, 'pending', 'approved', 'rejected', 'revised')")
-            ->orderByDesc('diajukan_at')
-            ->get()
-            ->groupBy('status');
+            ->where('skema_id', $skemaId)
+            ->exists();
 
-        return view('asesor.banding.index', compact('asesor', 'bandings'));
-    }
+        abort_unless($isAssigned, 403, 'Skema ini tidak berada dalam penugasan Anda.');
 
-    /**
-     * Show banding form for asesor to review and process
-     */
-    public function form($asesiNik, $skemaId)
-    {
-        $asesor = $this->getAsesor();
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
 
-        if (!$asesor) {
-            return redirect()->route('asesor.dashboard')
-                ->with('error', 'Data asesor tidak ditemukan.');
-        }
+        abort_unless($pivot && !empty($pivot->rekomendasi), 404, 'Data asesi atau keputusan asesmen tidak ditemukan.');
 
         $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
         $skema = Skema::findOrFail($skemaId);
 
-        // Get banding record
-        $banding = Banding::where('asesi_nik', $asesiNik)
-            ->where('skema_id', $skemaId)
-            ->firstOrFail();
-
-        // Verify this banding is assigned to this asesor
-        if ($banding->asesor_id !== $asesor->ID_asesor && $banding->status !== 'pending') {
-            abort(403, 'Anda tidak berhak mengakses banding ini.');
-        }
-
-        // Get nilai details untuk konteks diskusi
-        $nilaiDetails = DB::table('asesor_nilai_elemens')
-            ->join('elemens as e', 'asesor_nilai_elemens.elemen_id', '=', 'e.id')
-            ->join('units as u', 'e.unit_id', '=', 'u.id')
-            ->where('asesor_nilai_elemens.asesi_nik', $asesiNik)
-            ->where('u.skema_id', $skemaId)
-            ->select([
-                'e.id as elemen_id',
-                'e.kode_elemen',
-                'u.nama_unit',
-                'e.nama_elemen',
-                'asesor_nilai_elemens.status'
-            ])
-            ->orderBy('u.urutan')
-            ->orderBy('e.id')
+        $komponen = BandingAsesmenKomponen::where('is_active', true)
+            ->orderBy('urutan')
+            ->orderBy('id')
             ->get();
 
-        return view('asesor.banding.form', compact('asesor', 'asesi', 'skema', 'banding', 'nilaiDetails'));
+        if ($komponen->isEmpty()) {
+            return redirect()->route('asesor.banding.index')
+                ->with('error', 'Komponen ceklis banding belum tersedia. Hubungi admin.');
+        }
+
+        $banding = BandingAsesmen::with('jawaban')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        if (!$banding) {
+            return redirect()->route('asesor.banding.index')
+                ->with('error', 'Banding belum diajukan oleh asesi.');
+        }
+
+        $existingJawaban = $banding
+            ? $banding->jawaban->keyBy('komponen_id')
+            : collect();
+
+        return view('asesor.banding.form', compact(
+            'account',
+            'asesor',
+            'asesi',
+            'skema',
+            'pivot',
+            'komponen',
+            'banding',
+            'existingJawaban'
+        ));
     }
 
-    /**
-     * Process banding (approve/reject/revise)
-     */
-    public function store(Request $request, $asesiNik, $skemaId)
+    public function store(Request $request, string $asesiNik, int $skemaId)
     {
+        return redirect()->route('asesor.banding.index')
+            ->with('error', 'Pengajuan banding hanya dapat dilakukan oleh asesi.');
+
         $asesor = $this->getAsesor();
 
-        if (!$asesor) {
-            return redirect()->route('asesor.dashboard')
-                ->with('error', 'Data asesor tidak ditemukan.');
-        }
+        abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
 
-        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
-        $skema = Skema::findOrFail($skemaId);
-
-        // Get banding
-        $banding = Banding::where('asesi_nik', $asesiNik)
+        $isAssigned = DB::table('asesor_skema')
+            ->where('asesor_id', $asesor->ID_asesor)
             ->where('skema_id', $skemaId)
-            ->firstOrFail();
+            ->exists();
 
-        // Verify authorization
-        if ($banding->asesor_id !== $asesor->ID_asesor) {
-            abort(403, 'Anda tidak berhak memproses banding ini.');
+        abort_unless($isAssigned, 403, 'Skema ini tidak berada dalam penugasan Anda.');
+
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        abort_unless($pivot && !empty($pivot->rekomendasi), 404, 'Data asesi atau keputusan asesmen tidak ditemukan.');
+
+        $komponenIds = BandingAsesmenKomponen::where('is_active', true)
+            ->orderBy('urutan')
+            ->orderBy('id')
+            ->pluck('id');
+
+        if ($komponenIds->isEmpty()) {
+            return redirect()->route('asesor.banding.index')
+                ->with('error', 'Komponen ceklis banding belum tersedia. Hubungi admin.');
         }
 
-        // Validate
-        $request->validate([
-            'action' => 'required|in:approve,reject,revise',
-            'catatan_asesor' => 'required|string|min:5|max:1000',
-            'total_k_sesudah' => 'nullable|integer|min:0',
-            'total_bk_sesudah' => 'nullable|integer|min:0',
-        ]);
+        $rules = [
+            'alasan_banding' => ['required', 'string', 'max:3000', 'regex:/\\S/'],
+        ];
 
-        $action = $request->action;
-        $totalK = $request->total_k_sesudah;
-        $totalBK = $request->total_bk_sesudah;
-
-        // Process berdasarkan action
-        $newStatus = match($action) {
-            'approve' => 'approved',
-            'reject' => 'rejected',
-            'revise' => 'revised',
-        };
-
-        $banding->update([
-            'status' => $newStatus,
-            'catatan_asesor' => $request->catatan_asesor,
-            'total_k_sesudah' => $totalK,
-            'total_bk_sesudah' => $totalBK,
-            'direview_at' => now(),
-            'direview_oleh' => $asesor->no_reg,
-        ]);
-
-        // Jika approve/revise, update nilai asesi di database
-        if ($action === 'approve' || $action === 'revise') {
-            // Bisa tambah logic untuk update asesor_nilai_elemens jika diperlukan
-            // Atau tandai bahwa nilai sudah di-review
+        foreach ($komponenIds as $komponenId) {
+            $rules["jawaban.$komponenId"] = 'required|in:ya,tidak';
         }
 
-        ActivityLogger::logAsesor(
-            $asesor->no_reg,
-            $asesor->nama,
-            'Proses Banding Asesmen',
-            "Asesor {$action} banding untuk asesi {$asesi->nama} ({$asesiNik}) pada skema {$skema->nama_skema}",
-            $request
-        );
+        $validated = $request->validate($rules, [
+            'alasan_banding.required' => 'Alasan banding wajib diisi.',
+            'alasan_banding.regex' => 'Alasan banding tidak boleh hanya berisi spasi.',
+            'jawaban.*.required' => 'Semua ceklis wajib diisi.',
+            'jawaban.*.in' => 'Nilai ceklis harus Ya atau Tidak.',
+        ]);
 
-        $message = match($action) {
-            'approve' => 'Banding disetujui. Nilai asesi telah diperbarui.',
-            'reject' => 'Banding ditolak. Nilai asesi tetap sesuai penilaian awal.',
-            'revise' => 'Nilai diperbaharui berdasarkan review banding.',
-        };
+        $existing = BandingAsesmen::where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        if ($existing && in_array($existing->status, ['diterima', 'ditolak'], true)) {
+            return back()->with('error', 'Banding sudah diperiksa admin dan tidak dapat diubah lagi.');
+        }
+
+        DB::transaction(function () use ($asesiNik, $skemaId, $asesor, $pivot, $validated, $komponenIds, $existing) {
+            $banding = BandingAsesmen::updateOrCreate(
+                [
+                    'asesi_nik' => $asesiNik,
+                    'skema_id' => $skemaId,
+                ],
+                [
+                    'asesor_id' => $asesor->ID_asesor,
+                    'tanggal_asesmen' => $pivot->tanggal_selesai ? Carbon::parse($pivot->tanggal_selesai)->toDateString() : now()->toDateString(),
+                    'tanggal_pengajuan' => now()->toDateString(),
+                    'alasan_banding' => trim((string) $validated['alasan_banding']),
+                    'status' => 'diajukan',
+                    'catatan_admin' => null,
+                    'checked_by' => null,
+                    'checked_at' => null,
+                ]
+            );
+
+            foreach ($komponenIds as $komponenId) {
+                BandingAsesmenJawaban::updateOrCreate(
+                    [
+                        'banding_id' => $banding->id,
+                        'komponen_id' => $komponenId,
+                    ],
+                    [
+                        'jawaban' => $validated['jawaban'][$komponenId],
+                    ]
+                );
+            }
+
+            // Hapus jawaban dari komponen yang sudah tidak aktif/terhapus.
+            if ($existing) {
+                BandingAsesmenJawaban::where('banding_id', $banding->id)
+                    ->whereNotIn('komponen_id', $komponenIds)
+                    ->delete();
+            }
+        });
 
         return redirect()->route('asesor.banding.index')
-            ->with('success', $message);
+            ->with('success', 'Banding asesmen berhasil diajukan dan menunggu pengecekan admin.');
     }
 }

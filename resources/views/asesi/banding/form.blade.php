@@ -1,4 +1,4 @@
-@extends('asesor.layout')
+@extends('asesi.layout')
 
 @section('title', 'Form Banding Asesmen')
 @section('page-title', 'Form Banding Asesmen FR.AK.04')
@@ -31,6 +31,7 @@
     .actions { padding:12px 10px; border-top:1px solid #111827; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
     .btn { border:none; border-radius:8px; padding:10px 14px; font-size:14px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
     .btn-primary { background:#0073bd; color:#fff; }
+    .btn-warning { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
     .btn-secondary { background:#e2e8f0; color:#334155; text-decoration:none; }
 
     .error-text { margin-top:6px; color:#dc2626; font-size:12px; }
@@ -44,7 +45,7 @@
 
 @section('content')
 <div class="top-actions">
-    <a href="{{ route('asesor.banding.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Monitoring Banding</a>
+    <a href="{{ route('asesi.banding.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Daftar Banding</a>
 </div>
 
 @php
@@ -58,17 +59,16 @@
         'tidak_banding' => 'Tidak Banding',
     ][$bandingStatus] ?? ucfirst($bandingStatus);
 
-    $isLocked = true;
+    $isLocked = in_array($bandingStatus, ['diterima', 'ditolak'], true);
 @endphp
 
 <div class="status-box">
     <div><strong>Status Banding:</strong> {{ $statusLabel }}</div>
     @if($bandingStatus === 'tidak_banding')
-        <div style="margin-top:4px;color:#475569;">Asesi memilih Tidak Banding pada skema ini.</div>
+        <div style="margin-top:4px;color:#475569;">Anda sudah memilih Tidak Banding. Anda masih bisa mengubah keputusan menjadi Ajukan Banding selama belum ada keputusan final admin.</div>
     @endif
-    <div style="margin-top:4px;color:#475569;">Banding diajukan oleh asesi. Asesor hanya melakukan monitoring pada halaman ini.</div>
     @if($banding && $banding->checked_at)
-        <div style="margin-top:4px;color:#475569;">Dicek admin pada {{ $banding->checked_at->format('d-m-Y H:i') }} WIB</div>
+        <div style="margin-top:4px;color:#475569;">Diproses pada {{ $banding->checked_at->format('d-m-Y H:i') }} WIB</div>
     @endif
     @if($banding && $banding->catatan_admin)
         <div style="margin-top:8px;"><strong>Catatan Admin:</strong> {{ $banding->catatan_admin }}</div>
@@ -84,8 +84,8 @@
             <td>{{ $asesi->nama }}</td>
         </tr>
         <tr>
-            <td>Nama Asesor</td>
-            <td>{{ $asesor->nama }}</td>
+            <td>Skema Sertifikasi</td>
+            <td>{{ $skema->nama_skema }}</td>
         </tr>
         <tr>
             <td>Tanggal Asesmen</td>
@@ -93,7 +93,8 @@
         </tr>
     </table>
 
-    <div>
+    <form method="POST" action="{{ route('asesi.banding.store', $skema->id) }}">
+        @csrf
 
         <table class="check-table">
             <thead>
@@ -143,12 +144,24 @@
         </div>
 
         <div class="section">
-            <p>Anda mempunyai hak mengajukan banding jika menilai Proses Asesmen tidak sesuai SOP dan tidak memenuhi Prinsip Asesmen.</p>
+            <p>Anda mempunyai hak untuk mengajukan banding jika menilai proses asesmen tidak sesuai SOP dan tidak memenuhi prinsip asesmen.</p>
         </div>
 
         <div class="actions">
-            <a href="{{ route('asesor.banding.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Batal</a>
+            <a href="{{ route('asesi.banding.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Kembali</a>
+            @if(!$isLocked)
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button
+                        type="submit"
+                        formaction="{{ route('asesi.banding.decline', $skema->id) }}"
+                        class="btn btn-warning"
+                        onclick="return confirm('Simpan keputusan Tidak Banding untuk skema ini?');">
+                        <i class="bi bi-x-octagon"></i> Pilih Tidak Banding
+                    </button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> {{ $bandingStatus === 'tidak_banding' ? 'Ubah Menjadi Ajukan Banding' : 'Kirim Pengajuan Banding' }}</button>
+                </div>
+            @endif
         </div>
-    </div>
+    </form>
 </div>
 @endsection
