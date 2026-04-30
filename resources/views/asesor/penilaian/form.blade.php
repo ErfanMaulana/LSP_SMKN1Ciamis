@@ -6,7 +6,7 @@
 @section('styles')
 <style>
     .top-info {
-        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+        background: #0073bd;
         color: white;
         border-radius: 12px;
         padding: 18px 20px;

@@ -13,7 +13,7 @@
     .back-btn:hover { color: #1d4ed8; }
 
     .header-card {
-        background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+        background: #0073bd;
         border-radius: 14px; padding: 24px 28px; color: white; margin-bottom: 24px;
         display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
         flex-wrap: wrap;
@@ -23,7 +23,7 @@
     .header-card .meta span { margin-right: 16px; }
 
     .summary-row {
-        display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr));
+        display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 14px; margin-bottom: 24px;
     }
     .summary-card {
@@ -57,7 +57,7 @@
     }
     .unit-number {
         width: 32px; height: 32px;
-        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        background: #0073bd;
         color: white; border-radius: 8px;
         display: flex; align-items: center; justify-content: center;
         font-size: 13px; font-weight: 700; flex-shrink: 0;
@@ -204,6 +204,12 @@
         gap: 10px;
     }
 
+    @media (max-width: 1200px) {
+        .summary-row {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
     @media (max-width: 768px) {
         .back-btn {
             margin-bottom: 14px;
@@ -233,7 +239,7 @@
         }
 
         .summary-row {
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
             margin-bottom: 16px;
         }
@@ -292,6 +298,12 @@
         }
     }
 
+    @media (max-width: 480px) {
+        .summary-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
     @media print {
         .back-btn, .print-btn, aside, .topbar { display: none !important; }
         .main-content { margin-left: 0 !important; }
@@ -303,7 +315,7 @@
 @section('content')
 
 <a href="{{ route('asesor.asesi.index') }}" class="back-btn">
-    <i class="bi bi-arrow-left"></i> Kembali ke Daftar Asesi
+    <i class="bi bi-arrow-left"></i> Kembali ke Asesmen Mandiri
 </a>
 
 {{-- Header Info --}}
@@ -350,96 +362,6 @@
         @php $pct = $answers->count() > 0 ? round($kCount / $answers->count() * 100) : 0; @endphp
         <div class="num" style="color:{{ $pct >= 70 ? '#059669' : '#d97706' }};">{{ $pct }}%</div>
         <div class="lbl">Tingkat Kompeten</div>
-    </div>
-</div>
-
-{{-- Format Penilaian Per Elemen --}}
-@php
-    $totalElemenSkema = $skema->units->sum(fn($u) => $u->elemens->count());
-    $totalPoinMandiri = 0;
-    $totalPoinPenilaian = 0;
-@endphp
-<div class="nilai-card">
-    <div class="nilai-header">
-        <h3><i class="bi bi-table"></i> Perbandingan Asesmen Mandiri vs Penilaian Asesor</h3>
-        <p>Poin per elemen sama: <strong>K = 1 poin</strong>, <strong>BK / belum dijawab = 0 poin</strong>.</p>
-    </div>
-    <div class="nilai-table-wrap">
-        <table class="nilai-table">
-            <thead>
-                <tr>
-                    <th style="width:50px;">No</th>
-                    <th style="width:220px;">Unit</th>
-                    <th>Elemen</th>
-                    <th style="width:140px;">Asesmen Mandiri</th>
-                    <th style="width:90px;text-align:center;">Poin AM</th>
-                    <th style="width:140px;">Penilaian Asesor</th>
-                    <th style="width:90px;text-align:center;">Poin PA</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $rowNo = 1; @endphp
-                @foreach($skema->units as $unit)
-                    @foreach($unit->elemens as $elemen)
-                        @php
-                            $jwb = $answers->get($elemen->id);
-                            $statusMandiri = $jwb?->status;
-                            // Sementara penilaian asesor mengikuti poin elemen yang sama dari asesmen mandiri.
-                            $statusPenilaian = $statusMandiri;
-                            $poinMandiri = $statusMandiri === 'K' ? 1 : 0;
-                            $poinPenilaian = $statusPenilaian === 'K' ? 1 : 0;
-                            $totalPoinMandiri += $poinMandiri;
-                            $totalPoinPenilaian += $poinPenilaian;
-                        @endphp
-                        <tr>
-                            <td>{{ $rowNo++ }}</td>
-                            <td>
-                                <div style="font-weight:600;color:#1e293b;">{{ $unit->judul_unit }}</div>
-                                <div style="font-size:11px;color:#64748b;">{{ $unit->kode_unit }}</div>
-                            </td>
-                            <td>{{ $elemen->nama_elemen }}</td>
-                            <td>
-                                @if($statusMandiri === 'K')
-                                    <span class="status-badge status-K">K</span>
-                                @elseif($statusMandiri === 'BK')
-                                    <span class="status-badge status-BK">BK</span>
-                                @else
-                                    <span class="status-badge status-na">NA</span>
-                                @endif
-                            </td>
-                            <td class="nilai-point {{ $poinMandiri ? 'ok' : 'no' }}">{{ $poinMandiri }}</td>
-                            <td>
-                                @if($statusPenilaian === 'K')
-                                    <span class="status-badge status-K">K</span>
-                                @elseif($statusPenilaian === 'BK')
-                                    <span class="status-badge status-BK">BK</span>
-                                @else
-                                    <span class="status-badge status-na">NA</span>
-                                @endif
-                            </td>
-                            <td class="nilai-point {{ $poinPenilaian ? 'ok' : 'no' }}">{{ $poinPenilaian }}</td>
-                        </tr>
-                    @endforeach
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="4" style="text-align:right;">Total Poin</td>
-                    <td style="text-align:center;">{{ $totalPoinMandiri }} / {{ $totalElemenSkema }}</td>
-                    <td style="text-align:center;">Total Poin</td>
-                    <td style="text-align:center;">{{ $totalPoinPenilaian }} / {{ $totalElemenSkema }}</td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-    @php
-        $nilaiMandiriPersen = $totalElemenSkema > 0 ? round(($totalPoinMandiri / $totalElemenSkema) * 100, 2) : 0;
-        $nilaiPenilaianPersen = $totalElemenSkema > 0 ? round(($totalPoinPenilaian / $totalElemenSkema) * 100, 2) : 0;
-    @endphp
-    <div class="nilai-meta">
-        <span class="nilai-chip">Total elemen: {{ $totalElemenSkema }}</span>
-        <span class="nilai-chip">Asesmen Mandiri: {{ $totalPoinMandiri }} poin ({{ $nilaiMandiriPersen }}%)</span>
-        <span class="nilai-chip">Penilaian Asesor: {{ $totalPoinPenilaian }} poin ({{ $nilaiPenilaianPersen }}%)</span>
     </div>
 </div>
 
@@ -498,7 +420,7 @@
      FR.APL.02 — Rekomendasi Asesor
 ════════════════════════════════════════════════════════ --}}
 <div class="unit-card" style="margin-top:28px;" id="rekomendasi-section">
-    <div class="unit-header" style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:white;">
+    <div class="unit-header" style="background:#0073bd;color:white;">
         <div class="unit-number" style="background:rgba(255,255,255,0.2);">
             <i class="bi bi-patch-check-fill" style="font-size:16px;"></i>
         </div>
@@ -706,7 +628,8 @@
                 <i class="bi bi-arrow-left"></i> Kembali
             </a>
             <button type="submit"
-                    style="padding:10px 26px;border-radius:8px;border:none;background:linear-gradient(135deg,#1e3a5f,#2563eb);color:white;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+                    style="padding:10px 26px;border-radius:8px;border:none;background:#0073bd;color:white;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+
                 <i class="bi bi-send-check-fill"></i>
                 {{ $pivot->rekomendasi ? 'Perbarui Rekomendasi' : 'Simpan Rekomendasi' }}
             </button>

@@ -6,7 +6,7 @@
 @section('styles')
 <style>
     .guide-hero {
-        background: linear-gradient(135deg, #1e3a5f 0%, #0073bd 100%);
+        background: #0073bd;
         color: white;
         border-radius: 14px;
         padding: 24px;
@@ -251,7 +251,7 @@
 <div class="guide-hero">
     <h2><i class="bi bi-journal-check"></i> Panduan Penggunaan Panel Asesor</h2>
     <p>
-        Halaman ini membantu Anda menjalankan alur kerja asesmen mulai dari melihat daftar asesi,
+        Halaman ini membantu Anda menjalankan alur kerja asesmen mulai dari melihat asesmen mandiri,
         mengisi nilai elemen, hingga memberikan rekomendasi hasil asesmen.
     </p>
 </div>
@@ -311,7 +311,7 @@
 </div>
 
 <div class="quick-links">
-    <a href="{{ route('asesor.asesi.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Daftar Asesi</a>
+    <a href="{{ route('asesor.asesi.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Asesmen Mandiri</a>
     <a href="{{ route('asesor.entry-penilaian') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Entry Penilaian</a>
     <a href="{{ route('asesor.jadwal.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Jadwal</a>
     <a href="{{ route('asesor.kelompok.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Kelompok</a>

@@ -1,30 +1,29 @@
 @extends('asesor.layout')
 
-@section('title', 'Daftar Asesi')
-@section('page-title', 'Daftar Asesi')
+@section('title', 'Asesmen Mandiri')
+@section('page-title', 'Asesmen Mandiri')
 
 @section('styles')
 <style>
     .page-header {
-        background: #0073bd;
-        border-radius: 12px;
-        padding: 22px 26px;
-        color: white;
-        margin-bottom: 22px;
+        margin-bottom: 20px;
     }
-
     .page-header h2 {
-        font-size: 18px;
+        font-size: 22px;
         font-weight: 700;
-        margin-bottom: 4px;
-        color: white;
+        color: #0f172a;
+        margin: 0 0 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
-
+    .page-header h2 i {
+        color: #0073bd;
+    }
     .page-header p {
         font-size: 13px;
-        opacity: 0.9;
+        color: #64748b;
         margin: 0;
-        color: white;
     }
 
     .search-bar {
@@ -325,11 +324,16 @@
         gap: 10px;
         margin-bottom: 12px;
         min-width: 0;
+        background-color: #007ac3;
+        color: #fff;
+        border-radius: 8px 8px 0 0;
+        padding: 18px 24px;
     }
 
     .card-header > div:first-child {
         min-width: 0;
         flex: 1;
+        color: #fff;
     }
 
     .card-name {
@@ -571,7 +575,7 @@
 @section('content')
 
 <div class="page-header">
-    <h2>Daftar Asesi — {{ $skema?->nama_skema ?? 'Skema tidak ditetapkan' }}</h2>
+    <h2><i class="bi bi-people"></i> Asesmen Mandiri — {{ $skema?->nama_skema ?? 'Skema tidak ditetapkan' }}</h2>
     <p>{{ $skema?->nomor_skema }} &bull; <span id="totalAsesi">{{ $data->count() }}</span> asesi terdaftar</p>
 </div>
 

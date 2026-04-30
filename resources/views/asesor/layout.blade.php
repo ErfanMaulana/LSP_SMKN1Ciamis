@@ -552,12 +552,12 @@
                 <div class="menu-section-title">PENILAIAN</div>
 
                 <a href="{{ route('asesor.asesi.index') }}"
-                    class="menu-item {{ request()->routeIs('asesor.asesi.index') ? 'active' : '' }}">
+                    class="menu-item {{ request()->routeIs('asesor.asesi.*') ? 'active' : '' }}">
                     <i class="bi bi-people"></i>
-                    <span>Daftar Asesi</span>
+                    <span>Asesmen Mandiri</span>
                 </a>
                 <a href="{{ route('asesor.entry-penilaian') }}"
-                    class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') || request()->routeIs('asesor.asesi.review') ? 'active' : '' }}">
+                    class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">
                     <i class="bi bi-journal-check"></i>
                     <span>Entry Penilaian</span>
                 </a>
@@ -678,7 +678,7 @@
 
                 <a href="{{ route('asesor.asesi.index') }}" class="bottom-nav-item {{ request()->routeIs('asesor.asesi.*') ? 'active' : '' }}">
                     <i class="bi bi-people"></i>
-                    <span>Asesi</span>
+                    <span>Asesmen Mandiri</span>
                 </a>
 
                 <a href="{{ route('asesor.entry-penilaian') }}" class="bottom-nav-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">

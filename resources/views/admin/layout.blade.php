@@ -1066,6 +1066,30 @@
                                     <span>Hasil Umpan Balik Asesi</span>
                                 </a>
                             @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.view'))
+                                <a href="{{ route('admin.persetujuan-asesmen.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.persetujuan-asesmen.*') ? 'active' : '' }}">
+                                    <i class="bi bi-file-earmark-check"></i>
+                                    <span>Persetujuan Asesmen</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.view'))
+                                <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.ceklis-observasi-aktivitas-praktik.*') ? 'active' : '' }}">
+                                    <i class="bi bi-card-checklist"></i>
+                                    <span>Ceklis Observasi Aktivitas Praktik</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('rekaman-asesmen-kompetensi.view'))
+                                <a href="{{ route('admin.rekaman-asesmen-kompetensi.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.rekaman-asesmen-kompetensi.*') ? 'active' : '' }}">
+                                    <i class="bi bi-record-circle"></i>
+                                    <span>Rekaman Asesmen Kompetensi</span>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @endif
