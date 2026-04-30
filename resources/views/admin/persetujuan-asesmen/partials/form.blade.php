@@ -268,7 +268,14 @@
 
         <div class="field">
             <label>Skema Sertifikasi (Kategori)</label>
-            <input type="text" name="kategori_skema" value="{{ $value('kategori_skema') }}">
+            @php $selectedKategoriSkema = $value('kategori_skema'); @endphp
+            <select name="kategori_skema">
+                <option value="">-- Pilih Kategori Skema --</option>
+                <option value="KKNI" {{ $selectedKategoriSkema === 'KKNI' ? 'selected' : '' }}>KKNI</option>
+                <option value="Okupasi" {{ $selectedKategoriSkema === 'Okupasi' ? 'selected' : '' }}>Okupasi</option>
+                <option value="Klaster" {{ $selectedKategoriSkema === 'Klaster' ? 'selected' : '' }}>Klaster</option>
+               
+            </select>
             @error('kategori_skema')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -293,7 +300,14 @@
 
         <div class="field">
             <label>TUK</label>
-            <input type="text" name="tuk" value="{{ $value('tuk') }}">
+            @php $selectedTuk = $value('tuk'); @endphp
+            <select name="tuk">
+                <option value="">-- Pilih TUK --</option>
+                <option value="Sewaktu" {{ $selectedTuk === 'Sewaktu' ? 'selected' : '' }}>Sewaktu</option>
+                <option value="Tempat Kerja" {{ $selectedTuk === 'Tempat Kerja' ? 'selected' : '' }}>Tempat Kerja</option>
+                <option value="Mandiri" {{ $selectedTuk === 'Mandiri' ? 'selected' : '' }}>Mandiri</option>
+                
+            </select>
             @error('tuk')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 

@@ -430,7 +430,14 @@
 
         <div class="field">
             <label>TUK</label>
-            <input type="text" name="tuk" value="{{ $value('tuk', '') }}" placeholder="Sewaktu/Tempat Kerja/Mandiri">
+            @php $selectedTuk = $value('tuk', ''); @endphp
+            <select name="tuk">
+                <option value="">-- Pilih TUK --</option>
+                <option value="Sewaktu" {{ $selectedTuk === 'Sewaktu' ? 'selected' : '' }}>Sewaktu</option>
+                <option value="Tempat Kerja" {{ $selectedTuk === 'Tempat Kerja' ? 'selected' : '' }}>Tempat Kerja</option>
+                <option value="Mandiri" {{ $selectedTuk === 'Mandiri' ? 'selected' : '' }}>Mandiri</option>
+                
+            </select>
             @error('tuk')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
