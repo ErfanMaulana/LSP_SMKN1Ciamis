@@ -27,6 +27,15 @@
     @media (max-width:768px) { .meta-grid { grid-template-columns:1fr; } }
 </style>
 
+@php
+    $tukLabel = match ($item->tuk) {
+        'sewaktu' => 'TUK Sewaktu',
+        'tempat_kerja' => 'TUK Tempat Kerja',
+        'mandiri' => 'TUK Mandiri',
+        default => $item->tuk ?? '-',
+    };
+@endphp
+
 <div class="top-actions">
     <h2>Detail Rekaman Asesmen Kompetensi</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -42,7 +51,7 @@
         <div class="meta-item"><div class="label">Kode Form</div><div class="value">{{ $item->kode_form }}</div></div>
         <div class="meta-item"><div class="label">Judul Form</div><div class="value">{{ $item->judul_form }}</div></div>
         <div class="meta-item"><div class="label">Skema</div><div class="value">{{ $item->skema?->nama_skema }} ({{ $item->skema?->nomor_skema }})</div></div>
-        <div class="meta-item"><div class="label">TUK</div><div class="value">{{ $item->tuk ?? '-' }}</div></div>
+        <div class="meta-item"><div class="label">TUK</div><div class="value">{{ $tukLabel }}</div></div>
         <div class="meta-item"><div class="label">Nama Asesor</div><div class="value">{{ $item->asesor?->nama ?? '-' }}</div></div>
         <div class="meta-item"><div class="label">Nama Asesi</div><div class="value">{{ $item->asesi?->nama ?? $item->asesi_nik }}</div></div>
         <div class="meta-item"><div class="label">Tanggal Asesmen</div><div class="value">Mulai: {{ $item->tanggal_mulai?->translatedFormat('d M Y') ?? '-' }} | Selesai: {{ $item->tanggal_selesai?->translatedFormat('d M Y') ?? '-' }}</div></div>

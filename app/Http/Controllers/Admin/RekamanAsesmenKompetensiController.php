@@ -58,7 +58,7 @@ class RekamanAsesmenKompetensiController extends Controller
             'kode_form' => 'FR.AK.02.',
             'judul_form' => 'REKAMAN ASESMEN KOMPETENSI',
             'kategori_skema' => 'KKNI/Okupasi/Klaster',
-            'tuk' => 'Sewaktu/Tempat Kerja/Mandiri*',
+            'tuk' => 'sewaktu',
             'catatan_footer' => '* Coret yang tidak perlu',
         ];
 

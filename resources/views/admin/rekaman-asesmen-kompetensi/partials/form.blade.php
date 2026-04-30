@@ -18,6 +18,24 @@
     $selectedSkemaId = (string) $value('skema_id', '');
     $selectedAsesiNik = (string) $value('asesi_nik', '');
     $selectedAsesorId = (string) $value('asesor_id', '');
+    $selectedTuk = (string) $value('tuk', 'sewaktu');
+
+    $tukOptions = [
+        'sewaktu' => 'TUK Sewaktu',
+        'tempat_kerja' => 'TUK Tempat Kerja',
+        'mandiri' => 'TUK Mandiri',
+    ];
+
+    if (!array_key_exists($selectedTuk, $tukOptions)) {
+        $legacyTukMap = [
+            'Sewaktu/Tempat Kerja/Mandiri*' => 'sewaktu',
+            'TUK Sewaktu' => 'sewaktu',
+            'TUK Tempat Kerja' => 'tempat_kerja',
+            'TUK Mandiri' => 'mandiri',
+        ];
+
+        $selectedTuk = $legacyTukMap[$selectedTuk] ?? 'sewaktu';
+    }
 
     $initialDetailMap = old('detail');
     if (!$initialDetailMap && $record) {
@@ -115,7 +133,12 @@
 
         <div class="field">
             <label>TUK</label>
-            <input type="text" name="tuk" value="{{ $value('tuk', '') }}">
+            <select name="tuk">
+                <option value="">-- Pilih TUK --</option>
+                @foreach($tukOptions as $tukValue => $tukLabel)
+                    <option value="{{ $tukValue }}" {{ $selectedTuk === $tukValue ? 'selected' : '' }}>{{ $tukLabel }}</option>
+                @endforeach
+            </select>
             @error('tuk')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
