@@ -1,12 +1,17 @@
 @extends('asesor.layout')
 
-@section('title', 'Asesmen Mandiri')
-@section('page-title', 'Asesmen Mandiri')
+@section('title', 'Asesi')
+@section('page-title', 'Asesi')
 
 @section('styles')
 <style>
     .page-header {
         margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
     }
     .page-header h2 {
         font-size: 22px;
@@ -26,32 +31,96 @@
         margin: 0;
     }
 
-    .search-bar {
+    .summary-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
         margin-bottom: 18px;
+    }
+
+    .summary-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .summary-value {
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .summary-label {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .summary-total .summary-value { color: #0073bd; }
+    .summary-selesai .summary-value { color: #059669; }
+    .summary-sedang .summary-value { color: #d97706; }
+    .summary-belum .summary-value { color: #6b7280; }
+
+    .page-header-actions {
+        display: inline-flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #0073bd;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .btn-action:hover {
+        background: #003961;
+        color: #ffffff;
+    }
+
+    .search-bar {
+        margin: 0 0 16px;
         display: flex;
         gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
     .search-input-wrapper {
-        flex: 1;
+        flex: 1 1 360px;
         position: relative;
     }
 
     .search-input {
         width: 100%;
-        padding: 10px 14px 10px 40px;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
+        padding: 12px 44px 12px 42px;
+        border: 1px solid #dbe4ef;
+        border-radius: 14px;
         font-size: 14px;
         transition: all 0.2s ease;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        background: #fff;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
 
     .search-input:focus {
         outline: none;
         border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+        box-shadow: 0 0 0 4px rgba(0, 115, 189, 0.1);
     }
 
     .search-icon {
@@ -66,15 +135,16 @@
 
     .clear-search {
         position: absolute;
-        right: 12px;
+        right: 10px;
         top: 50%;
         transform: translateY(-50%);
-        background: none;
+        background: #fff;
         border: none;
         color: #94a3b8;
         cursor: pointer;
         font-size: 16px;
         padding: 4px;
+        border-radius: 999px;
         display: none;
     }
 
@@ -91,8 +161,8 @@
         color: #64748b;
         padding: 8px 14px;
         background: #f8fafc;
-        border-radius: 6px;
-        margin-bottom: 12px;
+        border-radius: 10px;
+        margin: -4px 0 12px;
         display: none;
     }
 
@@ -130,6 +200,7 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
         border: 1px solid #e5e7eb;
         overflow: hidden;
+           z-index: 1;
     }
     .table-wrap { overflow-x: auto; }
     .table-card table {
@@ -185,6 +256,19 @@
         font-family: monospace;
     }
 
+    .skema-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
     .badge {
         display: inline-flex;
         align-items: center;
@@ -234,6 +318,144 @@
         background: #e2e8f0;
         color: #64748b;
         pointer-events: none;
+    }
+
+    /* Kebab Menu Styles */
+    .action-menu-wrapper {
+        position: relative;
+        display: inline-block;
+           z-index: 999;
+    }
+
+    .btn-kebab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        padding: 6px 8px;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 32px;
+        height: 32px;
+    }
+
+    .btn-kebab:hover {
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+
+    .btn-kebab.active {
+        background: #0073bd;
+        border-color: #0073bd;
+        color: white;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        min-width: 200px;
+        z-index: 10000;
+        display: none;
+        margin-top: 4px;
+        overflow: visible;
+        pointer-events: auto;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .dropdown-menu.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .dropdown-menu.show-up {
+        transform: translateY(0);
+    }
+
+    .dropdown-menu.dropdown-floating {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: auto;
+        margin: 0;
+        width: 220px;
+        min-width: 220px;
+        max-width: 240px;
+        max-height: calc(100vh - 24px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        z-index: 20000;
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    .dropdown-menu.dropdown-floating.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    body.dropdown-open {
+        overflow: hidden;
+    }
+
+    .dropdown-menu a,
+    .dropdown-menu button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        border: none;
+        background: none;
+        color: #374151;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .dropdown-menu a:last-child,
+    .dropdown-menu button:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-menu a:hover,
+    .dropdown-menu button:hover {
+        background: #f8fafc;
+        color: #0073bd;
+    }
+
+    .dropdown-menu a i,
+    .dropdown-menu button i {
+        font-size: 14px;
+        width: 18px;
+        text-align: center;
+    }
+
+    .dropdown-menu .menu-danger:hover {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .dropdown-menu .menu-danger i {
+        color: #dc2626;
+    }
+
+    .dropdown-menu .menu-danger:hover i {
+        color: #dc2626;
     }
 
     .period-col {
@@ -288,13 +510,14 @@
     }
 
     /* Table Column Widths */
-    .table-card th:nth-child(1), .table-card td:nth-child(1) { width: 22%; }
+    .table-card th:nth-child(1), .table-card td:nth-child(1) { width: 20%; }
     .table-card th:nth-child(2), .table-card td:nth-child(2) { width: 12%; }
-    .table-card th:nth-child(3), .table-card td:nth-child(3) { width: 10%; }
-    .table-card th:nth-child(4), .table-card td:nth-child(4) { width: 11%; }
-    .table-card th:nth-child(5), .table-card td:nth-child(5) { width: 12%; }
-    .table-card th:nth-child(6), .table-card td:nth-child(6) { width: 18%; }
-    .table-card th:nth-child(7), .table-card td:nth-child(7) { width: 15%; text-align: center; }
+    .table-card th:nth-child(3), .table-card td:nth-child(3) { width: 12%; }
+    .table-card th:nth-child(4), .table-card td:nth-child(4) { width: 12%; }
+    .table-card th:nth-child(5), .table-card td:nth-child(5) { width: 11%; }
+    .table-card th:nth-child(6), .table-card td:nth-child(6) { width: 11%; }
+    .table-card th:nth-child(7), .table-card td:nth-child(7) { width: 17%; }
+    .table-card th:nth-child(8), .table-card td:nth-child(8) { width: 15%; text-align: center; }
 
     /* Card View (Mobile) */
     .card-view {
@@ -309,7 +532,7 @@
         margin-bottom: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
         transition: all 0.2s ease;
-        overflow: hidden;
+        overflow: visible;
     }
 
     .asesi-card:active {
@@ -505,16 +728,30 @@
         }
 
         .search-bar {
+            margin-bottom: 12px;
+        }
+
+        .summary-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
             margin-bottom: 14px;
         }
 
+        .summary-card {
+            padding: 12px 14px;
+        }
+
+        .summary-value {
+            font-size: 20px;
+        }
+
         .search-input {
-            padding: 9px 12px 9px 34px;
+            padding: 11px 40px 11px 38px;
             font-size: 13px;
         }
 
         .search-icon {
-            left: 10px;
+            left: 12px;
             font-size: 15px;
         }
 
@@ -575,8 +812,38 @@
 @section('content')
 
 <div class="page-header">
-    <h2><i class="bi bi-people"></i> Asesmen Mandiri — {{ $skema?->nama_skema ?? 'Skema tidak ditetapkan' }}</h2>
-    <p>{{ $skema?->nomor_skema }} &bull; <span id="totalAsesi">{{ $data->count() }}</span> asesi terdaftar</p>
+    <div>
+        <h2><i class="bi bi-people"></i> Asesi</h2>
+        <p>
+            {{ $skema?->nama_skema ?? ($skemaNames->count() ? $skemaNames->join(', ') : 'Semua skema yang diampu') }}
+            &bull; <span id="totalAsesi">{{ $summary['total'] ?? $data->count() }}</span> asesi
+        </p>
+    </div>
+    <div class="page-header-actions">
+        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create') }}" class="btn-action">
+            <i class="bi bi-plus-circle"></i>
+            <span>Buat Rekaman</span>
+        </a>
+    </div>
+</div>
+
+<div class="summary-row">
+    <div class="summary-card summary-total">
+        <div class="summary-value">{{ $summary['total'] ?? 0 }}</div>
+        <div class="summary-label">Total Asesi</div>
+    </div>
+    <div class="summary-card summary-selesai">
+        <div class="summary-value">{{ $summary['selesai'] ?? 0 }}</div>
+        <div class="summary-label">Selesai</div>
+    </div>
+    <div class="summary-card summary-sedang">
+        <div class="summary-value">{{ $summary['sedang'] ?? 0 }}</div>
+        <div class="summary-label">Sedang Dikerjakan</div>
+    </div>
+    <div class="summary-card summary-belum">
+        <div class="summary-value">{{ $summary['belum'] ?? 0 }}</div>
+        <div class="summary-label">Belum Mulai</div>
+    </div>
 </div>
 
 {{-- Search Bar --}}
@@ -587,7 +854,7 @@
             type="text" 
             class="search-input" 
             id="asesiSearch" 
-            placeholder="Cari nama asesi, NIK, atau email..."
+            placeholder="Cari nama asesi, NIK, email, atau skema..."
             autocomplete="off"
         >
         <button class="clear-search" id="clearSearch">
@@ -619,6 +886,7 @@
                     <th>Nama Asesi</th>
                     <th>NIK</th>
                     <th>Jurusan</th>
+                    <th>Skema</th>
                     <th>Status Asesmen</th>
                     <th>Rekomendasi</th>
                     <th>Periode</th>
@@ -647,6 +915,7 @@
                     </td>
                     <td><span class="mono-chip">{{ $row->asesi_nik }}</span></td>
                     <td><span class="mono-chip">{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</span></td>
+                    <td><span class="skema-chip">{{ $row->skema?->nama_skema ?? '—' }}</span></td>
                     <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
                     <td>
                         @if($row->rekomendasi === 'lanjut')
@@ -663,15 +932,29 @@
                         <span>{{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('d/m/Y') : '—' }}</span>
                     </td>
                     <td>
-                        @if($row->status === 'selesai')
-                            <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" class="btn-review">
-                                <i class="bi bi-eye"></i> Review
-                            </a>
-                        @else
-                            <span class="btn-review disabled">
-                                <i class="bi bi-eye-slash"></i> Belum Selesai
-                            </span>
-                        @endif
+                        <div class="action-menu-wrapper">
+                            <button class="btn-kebab" type="button" data-nik="{{ $row->asesi_nik }}">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" title="Lihat detail dan review asesmen asesi">
+                                    <i class="bi bi-eye"></i>
+                                    <span>Lihat Detail</span>
+                                </a>
+                                <a href="#" title="Akses asesmen mandiri" onclick="alert('Fitur Asesmen Mandiri')">
+                                    <i class="bi bi-pencil-square"></i>
+                                    <span>Asesmen Mandiri</span>
+                                </a>
+                                <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Lakukan penilaian">
+                                    <i class="bi bi-clipboard-check"></i>
+                                    <span>Penilaian</span>
+                                </a>
+                                <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}" title="Lihat rekaman asesmen">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    <span>Rekaman Asesi</span>
+                                </a>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 @endforeach
@@ -728,6 +1011,11 @@
                     <div class="card-value"><code>{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</code></div>
                 </div>
 
+                <div class="card-field">
+                    <div class="card-label">Skema</div>
+                    <div class="card-value"><span class="skema-chip">{{ $row->skema?->nama_skema ?? '—' }}</span></div>
+                </div>
+
                 <!-- Periode -->
                 <div class="card-field card-periode">
                     <div class="card-label">Periode Asesmen</div>
@@ -757,23 +1045,38 @@
 
             <!-- Card Footer -->
             <div class="card-footer">
-                @if($row->status === 'selesai')
-                    <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" class="card-btn card-btn-primary">
-                        <i class="bi bi-eye"></i> Review
-                    </a>
-                @else
-                    <button class="card-btn card-btn-disabled" disabled>
-                        <i class="bi bi-eye-slash"></i> Belum Selesai
+                <div class="action-menu-wrapper">
+                    <button class="btn-kebab" type="button" data-nik="{{ $row->asesi_nik }}" style="width: 100%; border-radius: 8px; gap: 6px; padding: 8px 12px;">
+                        <i class="bi bi-three-dots-vertical"></i>
+                        <span>Menu Aksi</span>
                     </button>
-                @endif
+                    <div class="dropdown-menu" style="right: auto; left: 0; min-width: 180px;">
+                        <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" title="Lihat detail dan review asesmen asesi">
+                            <i class="bi bi-eye"></i>
+                            <span>Lihat Detail</span>
+                        </a>
+                        <a href="#" title="Akses asesmen mandiri" onclick="alert('Fitur Asesmen Mandiri')">
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Asesmen Mandiri</span>
+                        </a>
+                        <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Lakukan penilaian">
+                            <i class="bi bi-clipboard-check"></i>
+                            <span>Penilaian</span>
+                        </a>
+                        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}" title="Lihat rekaman asesmen">
+                            <i class="bi bi-file-earmark-text"></i>
+                            <span>Rekaman Asesi</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
         @endforeach
     @else
         <div class="empty-state">
             <i class="bi bi-inbox"></i>
-            <h4>Tidak ada data asesi ditemukan</h4>
-            <p>Belum ada asesi yang terdaftar pada skema ini.</p>
+        <h4>Belum ada asesi</h4>
+        <p>Belum ada data asesi yang terhubung dengan skema asesor ini.</p>
         </div>
     @endif
 </div>
@@ -872,6 +1175,119 @@ document.addEventListener('DOMContentLoaded', function() {
         searchResultsInfo.classList.remove('show');
         totalAsesiEl.textContent = '{{ $data->count() }}';
     }
+
+    // Dropdown Menu Functionality
+    const kebabBtns = document.querySelectorAll('.btn-kebab');
+    let activeDropdown = null;
+
+    function restoreDropdown(menu, wrapper) {
+        const originalStyle = menu.dataset.originalStyle || '';
+
+        menu.classList.remove('show', 'show-up', 'dropdown-floating');
+        menu.setAttribute('style', originalStyle);
+
+        if (wrapper && !wrapper.contains(menu)) {
+            wrapper.appendChild(menu);
+        }
+
+        delete menu.dataset.originalStyle;
+    }
+
+    function closeActiveDropdown() {
+        if (!activeDropdown) {
+            return;
+        }
+
+        const { menu, button, wrapper } = activeDropdown;
+        restoreDropdown(menu, wrapper);
+        button.classList.remove('active');
+        activeDropdown = null;
+        document.body.classList.remove('dropdown-open');
+    }
+
+    function openDropdown(button) {
+        const wrapper = button.closest('.action-menu-wrapper');
+        const menu = wrapper ? wrapper.querySelector('.dropdown-menu') : null;
+
+        if (!menu) {
+            return;
+        }
+
+        if (activeDropdown && activeDropdown.menu === menu) {
+            closeActiveDropdown();
+            return;
+        }
+
+        closeActiveDropdown();
+
+        menu.dataset.originalStyle = menu.getAttribute('style') || '';
+        document.body.appendChild(menu);
+        document.body.classList.add('dropdown-open');
+
+        menu.classList.add('dropdown-floating', 'show');
+        button.classList.add('active');
+
+        const buttonRect = button.getBoundingClientRect();
+        const menuWidth = Math.max(menu.offsetWidth, 220);
+        const menuHeight = menu.offsetHeight;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const margin = 12;
+        const gap = 8;
+
+        let left = buttonRect.right - menuWidth;
+        left = Math.max(margin, Math.min(left, viewportWidth - menuWidth - margin));
+
+        let top = buttonRect.bottom + gap;
+        let positionUp = false;
+
+        if (top + menuHeight > viewportHeight - margin) {
+            const aboveTop = buttonRect.top - menuHeight - gap;
+            if (aboveTop >= margin) {
+                top = aboveTop;
+                positionUp = true;
+            } else {
+                top = Math.max(margin, viewportHeight - menuHeight - margin);
+            }
+        }
+
+        menu.style.left = `${left}px`;
+        menu.style.top = `${top}px`;
+        menu.style.right = 'auto';
+        menu.style.width = '220px';
+        menu.style.minWidth = '220px';
+        menu.style.maxWidth = '240px';
+        menu.style.maxHeight = `calc(100vh - ${margin * 2}px)`;
+
+        if (positionUp) {
+            menu.classList.add('show-up');
+        } else {
+            menu.classList.remove('show-up');
+        }
+
+        activeDropdown = { menu, button, wrapper };
+    }
+
+    kebabBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            openDropdown(this);
+        });
+    });
+
+    document.addEventListener('scroll', function() {
+        closeActiveDropdown();
+    }, true);
+
+    window.addEventListener('resize', function() {
+        closeActiveDropdown();
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown-menu') && !e.target.closest('.btn-kebab')) {
+            closeActiveDropdown();
+        }
+    });
 });
 </script>
 @endsection

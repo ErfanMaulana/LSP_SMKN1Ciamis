@@ -249,6 +249,7 @@ Route::prefix('admin')->group(function () {
             Route::post('/jadwal-ujikom/validate-dates', [JadwalUjikomController::class, 'validateDates'])->name('admin.jadwal-ujikom.validate-dates')->middleware('permission:jadwal-ujikom.create|jadwal-ujikom.edit');
             Route::get('/jadwal-ujikom/asesi-rekomendasi', [JadwalUjikomController::class, 'getAsesiBySkema'])->name('admin.jadwal-ujikom.asesi-rekomendasi');
             Route::post('/jadwal-ujikom', [JadwalUjikomController::class, 'store'])->name('admin.jadwal-ujikom.store')->middleware('permission:jadwal-ujikom.create');
+            Route::get('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'show'])->name('admin.jadwal-ujikom.show');
             Route::get('/jadwal-ujikom/{id}/edit', [JadwalUjikomController::class, 'edit'])->name('admin.jadwal-ujikom.edit')->middleware('permission:jadwal-ujikom.edit');
             Route::put('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'update'])->name('admin.jadwal-ujikom.update')->middleware('permission:jadwal-ujikom.edit');
             Route::delete('/jadwal-ujikom/{id}', [JadwalUjikomController::class, 'destroy'])->name('admin.jadwal-ujikom.destroy')->middleware('permission:jadwal-ujikom.delete');

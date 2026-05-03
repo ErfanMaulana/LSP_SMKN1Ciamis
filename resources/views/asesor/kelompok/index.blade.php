@@ -45,6 +45,19 @@
         background: #f8fafc;
     }
 
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 8px;
+    }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-green { background: #d1fae5; color: #065f46; }
+    .badge-amber { background: #fff7ed; color: #c2410c; }
+    .badge-gray { background: #f1f5f9; color: #94a3b8; }
+
     .group-name {
         font-size: 16px;
         font-weight: 700;
@@ -55,6 +68,13 @@
     .group-meta {
         font-size: 12px;
         color: #64748b;
+    }
+
+    .group-status-detail {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.45;
     }
 
     .group-body {
@@ -140,6 +160,28 @@
         display: block;
     }
 
+    .filters {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 16px;
+    }
+
+    .status-filter {
+        min-width: 220px;
+        padding: 10px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #0f172a;
+        font-size: 13px;
+        outline: none;
+    }
+
+    .status-filter:focus {
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
     @media (max-width: 768px) {
         .page-header {
             padding: 16px;
@@ -180,13 +222,24 @@
     <p>Informasi kelompok dan daftar asesi yang ditugaskan ke asesor Anda.</p>
 </div>
 
+<form method="GET" action="{{ route('asesor.kelompok.index') }}" class="filters">
+    <select name="status" class="status-filter" onchange="this.form.submit()">
+        <option value="all" @selected(request('status', 'all') === 'all')>Semua Status</option>
+        <option value="belum terjadwal" @selected(request('status') === 'belum terjadwal')>Belum Terjadwal</option>
+        <option value="terjadwal" @selected(request('status') === 'terjadwal')>Terjadwal</option>
+        <option value="sedang asesmen" @selected(request('status') === 'sedang asesmen')>Sedang Asesmen</option>
+        <option value="selesai" @selected(request('status') === 'selesai')>Selesai</option>
+    </select>
+</form>
+
 @if($kelompoks->count())
     <div class="group-grid">
         @foreach($kelompoks as $kelompok)
             <div class="group-card">
                 <div class="group-head">
-                    <h3 class="group-name">{{ $kelompok->nama_kelompok }}</h3>
+                    <h3 class="group-name">{{ $kelompok->nama_kelompok }} <span class="badge {{ $kelompok->status_badge_class ?? 'badge-gray' }}" title="{{ $kelompok->status_tooltip }}">{{ $kelompok->status_label }}</span></h3>
                     <div class="group-meta">Skema: {{ $kelompok->skema?->nama_skema ?? '-' }}</div>
+                    <div class="group-status-detail" title="{{ $kelompok->status_detail }}">{{ $kelompok->status_detail }}</div>
                 </div>
                 <div class="group-body">
                     <div class="meta-row"><strong>Total Asesi:</strong> {{ $kelompok->asesis->count() }} peserta</div>

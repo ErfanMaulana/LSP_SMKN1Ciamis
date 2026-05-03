@@ -26,6 +26,15 @@
             </div>
         </td>
         <td>
+            @php $statusClass = $kelompok->status_badge_class ?? 'badge-gray'; @endphp
+            <div style="display:flex;flex-direction:column;gap:4px;max-width:240px;">
+                <span class="badge {{ $statusClass }}" title="{{ $kelompok->status_tooltip }}">{{ $kelompok->status_label }}</span>
+                <small style="color:#64748b;font-size:11px;line-height:1.35;" title="{{ $kelompok->status_detail }}">
+                    {{ $kelompok->status_detail }}
+                </small>
+            </div>
+        </td>
+        <td>
             <div class="action-menu">
                 <button class="action-btn" onclick="toggleMenu(event, this)">
                     <i class="bi bi-three-dots-vertical"></i>
@@ -50,7 +59,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="6" class="text-center">
+        <td colspan="7" class="text-center">
             <div style="padding: 40px 20px;">
                 <i class="bi bi-inbox" style="font-size: 48px; color: #d1d5db; display: block; margin-bottom: 12px;"></i>
                 <h4 style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data kelompok ditemukan</h4>

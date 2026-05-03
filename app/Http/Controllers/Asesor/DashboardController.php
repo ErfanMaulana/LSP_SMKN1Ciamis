@@ -229,7 +229,7 @@ class DashboardController extends Controller
     /**
      * Kelompok yang diampu asesor login.
      */
-    public function kelompokIndex()
+    public function kelompokIndex(Request $request)
     {
         $account = Auth::guard('account')->user();
         $asesor = $this->getAsesor();
@@ -239,9 +239,12 @@ class DashboardController extends Controller
             return view('asesor.kelompok.index', compact('account', 'asesor', 'kelompoks'));
         }
 
-        $kelompoks = Kelompok::with(['skema', 'asesis.jurusan'])
+        $kelompoks = Kelompok::with(['skema', 'asesis.jurusan', 'jadwals'])
             ->whereHas('asesors', function ($q) use ($asesor) {
                 $q->where('asesor.ID_asesor', $asesor->ID_asesor);
+            })
+            ->when($request->filled('status') && $request->status !== 'all', function ($query) use ($request) {
+                $query->filterStatus($request->status);
             })
             ->orderBy('nama_kelompok')
             ->get();
@@ -261,7 +264,7 @@ class DashboardController extends Controller
             abort(403, 'Profil asesor tidak ditemukan.');
         }
 
-        $kelompok = Kelompok::with(['skema', 'asesis.jurusan', 'asesors'])
+        $kelompok = Kelompok::with(['skema', 'asesis.jurusan', 'asesors', 'jadwals'])
             ->where('id', $id)
             ->whereHas('asesors', function ($q) use ($asesor) {
                 $q->where('asesor.ID_asesor', $asesor->ID_asesor);
@@ -279,6 +282,7 @@ class DashboardController extends Controller
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+        $skemaNames = $asesor ? $asesor->skemas->pluck('nama_skema')->filter()->values() : collect();
 
         $query = DB::table('asesi_skema')
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds));
@@ -286,7 +290,14 @@ class DashboardController extends Controller
         if (!count($skemaIds)) {
             $data  = collect();
             $skema = null;
-            return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema'));
+            $summary = [
+                'total'   => 0,
+                'selesai' => 0,
+                'sedang'  => 0,
+                'belum'   => 0,
+            ];
+
+            return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema', 'summary', 'skemaNames'));
         }
 
         // Filter status
@@ -299,12 +310,19 @@ class DashboardController extends Controller
         // Attach asesi data
         $data = $rows->map(function ($row) {
             $row->asesi = Asesi::where('NIK', $row->asesi_nik)->first();
+            $row->skema = Skema::find($row->skema_id);
             return $row;
         });
 
         $skema = count($skemaIds) === 1 ? Skema::find($skemaIds[0]) : null;
+        $summary = [
+            'total'   => $data->count(),
+            'selesai' => $data->where('status', 'selesai')->count(),
+            'sedang'  => $data->where('status', 'sedang_mengerjakan')->count(),
+            'belum'   => $data->where('status', 'belum_mulai')->count(),
+        ];
 
-        return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema'));
+        return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema', 'summary', 'skemaNames'));
     }
 
     /**
@@ -486,7 +504,7 @@ class DashboardController extends Controller
         $asesor  = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
 
-        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+        $asesi = Asesi::with(['jurusan'])->where('NIK', $asesiNik)->firstOrFail();
 
         // Cari pivot di semua skema asesor
         $pivot = DB::table('asesi_skema')
@@ -508,10 +526,17 @@ class DashboardController extends Controller
         $kCount  = $answers->where('status', 'K')->count();
         $bkCount = $answers->where('status', 'BK')->count();
 
+        // Ambil bukti pendukung (transkrip nilai, identitas pribadi, bukti kompetensi)
+        $buktiPendukung = $asesi->buktiPendukung()->get();
+        $transkripNilai = $asesi->transkripNilai()->get();
+        $identitasPribadi = $asesi->identitasPribadi()->get();
+        $buktiKompetensi = $asesi->buktiKompetensi()->get();
+
         $savedSignature = $asesor ? $asesor->saved_tanda_tangan : null;
 
         return view('asesor.asesi.review', compact(
-            'account', 'asesor', 'asesi', 'skema', 'answers', 'pivot', 'kCount', 'bkCount', 'savedSignature'
+            'account', 'asesor', 'asesi', 'skema', 'answers', 'pivot', 'kCount', 'bkCount', 'savedSignature',
+            'buktiPendukung', 'transkripNilai', 'identitasPribadi', 'buktiKompetensi'
         ));
     }
 

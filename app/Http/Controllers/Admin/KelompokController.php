@@ -16,7 +16,7 @@ class KelompokController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Kelompok::with(['skema', 'asesors', 'asesis.jurusan']);
+        $query = Kelompok::with(['skema', 'asesors', 'asesis.jurusan', 'jadwals']);
 
         // Search filter
         if ($request->filled('search')) {
@@ -31,6 +31,10 @@ class KelompokController extends Controller
         // Skema filter
         if ($request->has('skema') && $request->skema != '') {
             $query->where('skema_id', $request->skema);
+        }
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->filterStatus($request->status);
         }
 
         $kelompoks = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
@@ -122,7 +126,7 @@ class KelompokController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $kelompok = Kelompok::with(['skema', 'asesors', 'asesis.jurusan'])->findOrFail($id);
+        $kelompok = Kelompok::with(['skema', 'asesors', 'asesis.jurusan', 'jadwals'])->findOrFail($id);
 
         $asesiDitugaskan = $kelompok->asesis()->with('jurusan')->get();
 
@@ -139,7 +143,7 @@ class KelompokController extends Controller
      */
     public function edit($id)
     {
-        $kelompok = Kelompok::with(['asesors', 'asesis'])->findOrFail($id);
+        $kelompok = Kelompok::with(['asesors', 'asesis', 'jadwals'])->findOrFail($id);
         $skemas   = Skema::orderBy('nama_skema')->get();
         $asesors  = Asesor::with('skemas')->orderBy('nama')->get();
 

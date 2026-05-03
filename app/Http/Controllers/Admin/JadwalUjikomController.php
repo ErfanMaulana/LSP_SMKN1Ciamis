@@ -220,7 +220,7 @@ class JadwalUjikomController extends Controller
         $status = $request->get('status', 'all');
         $bulan  = $request->get('bulan');
 
-        $query = JadwalUjikom::with(['tuk', 'skema', 'kelompoks']);
+        $query = JadwalUjikom::with(['tuk', 'skema', 'kelompoks'])->withCount('kelompoks');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -264,6 +264,20 @@ class JadwalUjikomController extends Controller
         }
 
         return view('admin.jadwal-ujikom.index', compact('jadwals', 'stats', 'search', 'status', 'bulan'));
+    }
+
+    public function show($id)
+    {
+        $jadwal = JadwalUjikom::with([
+            'tuk',
+            'skema',
+            'asesor',
+            'kelompoks.asesis.jurusan',
+            'kelompoks.asesors',
+            'peserta.jurusan',
+        ])->findOrFail($id);
+
+        return view('admin.jadwal-ujikom.show', compact('jadwal'));
     }
 
     public function create()

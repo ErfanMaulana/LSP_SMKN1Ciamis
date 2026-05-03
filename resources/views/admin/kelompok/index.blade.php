@@ -263,6 +263,11 @@
         color: #065f46;
     }
 
+    .badge-amber {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
     .badge-gray {
         background: #f1f5f9;
         color: #94a3b8;
@@ -411,8 +416,15 @@
                     <select class="filter-select" id="skemaFilter">
                         <option value="">Semua Skema</option>
                         @foreach($skemaList as $skema)
-                            <option value="{{ $skema->id }}">{{ $skema->nama_skema }}</option>
+                            <option value="{{ $skema->id }}" @selected(request('skema') == $skema->id)>{{ $skema->nama_skema }}</option>
                         @endforeach
+                    </select>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="all" @selected(request('status', 'all') === 'all')>Semua Status</option>
+                        <option value="belum terjadwal" @selected(request('status') === 'belum terjadwal')>Belum Terjadwal</option>
+                        <option value="terjadwal" @selected(request('status') === 'terjadwal')>Terjadwal</option>
+                        <option value="sedang asesmen" @selected(request('status') === 'sedang asesmen')>Sedang Asesmen</option>
+                        <option value="selesai" @selected(request('status') === 'selesai')>Selesai</option>
                     </select>
                 </div>
             </div>
@@ -427,6 +439,7 @@
                             <th>SKEMA</th>
                             <th>ASESOR</th>
                             <th>JUMLAH ASESI</th>
+                            <th>STATUS</th>
                             <th>AKSI</th>
                         </tr>
                     </thead>
@@ -444,21 +457,24 @@
     let searchTimeout;
     const searchInput = document.getElementById('searchInput');
     const skemaFilter = document.getElementById('skemaFilter');
+    const statusFilter = document.getElementById('statusFilter');
     const tableBody = document.getElementById('kelompokTableBody');
 
     function performSearch() {
         const searchValue = searchInput.value;
         const skemaValue = skemaFilter.value;
+        const statusValue = statusFilter.value;
 
         // Build query parameters
         const params = new URLSearchParams();
         if (searchValue) params.append('search', searchValue);
         if (skemaValue) params.append('skema', skemaValue);
+        if (statusValue && statusValue !== 'all') params.append('status', statusValue);
 
         // Show loading indicator
         tableBody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center">
+                <td colspan="7" class="text-center">
                     <div style="padding: 40px 20px;">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Loading...</span>
@@ -485,7 +501,7 @@
             console.error('Error:', error);
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="text-center">
+                    <td colspan="7" class="text-center">
                         <div style="padding: 40px 20px;">
                             <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #ef4444; display: block; margin-bottom: 12px;"></i>
                             <p style="color: #64748b; margin: 0;">Terjadi kesalahan saat memuat data</p>
@@ -504,6 +520,7 @@
 
     // Filter changes trigger immediate search
     skemaFilter.addEventListener('change', performSearch);
+    statusFilter.addEventListener('change', performSearch);
 
     // Dropdown toggle function
     function toggleMenu(event, button) {

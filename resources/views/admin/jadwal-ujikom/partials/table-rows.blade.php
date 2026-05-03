@@ -33,6 +33,10 @@
         @endif
     </td>
     <td>
+        @php($kelompokCount = $jadwal->kelompoks_count ?? $jadwal->kelompoks->count())
+        <span class="badge kelompok-count" title="{{ $jadwal->kelompoks->pluck('nama_kelompok')->filter()->join(', ') ?: 'Tidak ada kelompok' }}">{{ $kelompokCount }} Kelompok</span>
+    </td>
+    <td>
         @if($jadwal->tanggal_mulai && $jadwal->tanggal_selesai)
             @if($jadwal->tanggal_mulai->eq($jadwal->tanggal_selesai))
                 <div style="font-size:13px;font-weight:500;"><i class="bi bi-calendar3" style="color:#0061a5;"></i> {{ $jadwal->tanggal_mulai->translatedFormat('d M Y') }}</div>
@@ -71,7 +75,10 @@
 </tr>
 @empty
 <tr>
-    <td colspan="8">
+                        <a href="{{ route('admin.jadwal-ujikom.show', $jadwal->id) }}">
+                            <i class="bi bi-eye"></i> Detail
+                        </a>
+    <td colspan="9">
         <div class="empty-state">
             <i class="bi bi-inbox"></i>
             <h4 style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data jadwal ujikom ditemukan</h4>
