@@ -430,36 +430,6 @@
         </div>
 
         <div class="field full">
-            <div class="signature-section">
-                <h3><i class="bi bi-pen"></i> Tanda Tangan Asesi</h3>
-                <p class="signature-subtitle">Dengan menandatangani, saya menyatakan bahwa semua jawaban di atas adalah benar dan sesuai dengan kompetensi yang saya miliki.</p>
-
-                <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
-                    <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
-                    <div class="signature-placeholder">
-                        <i class="bi bi-pen"></i>
-                        <span>Tanda tangan di sini</span>
-                    </div>
-                </div>
-
-                <input type="hidden" name="ttd_asesi_nama" id="ttdAsesiNamaInput" value="{{ $value('ttd_asesi_nama') }}">
-                <input type="hidden" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ $ttdAsesiTanggal }}">
-                @error('ttd_asesi_nama')<div class="error-text">{{ $message }}</div>@enderror
-                @error('ttd_asesi_tanggal')<div class="error-text">{{ $message }}</div>@enderror
-
-                <div class="signature-actions">
-                    <div class="signature-date">
-                        <i class="bi bi-calendar3"></i>
-                        Tanggal: <strong id="signatureDateAsesi">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
-                    </div>
-                    <button type="button" class="btn-clear-signature" id="clearSignatureAsesi">
-                        <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="field full">
             <label>Catatan Footer</label>
             <input type="text" name="catatan_footer" value="{{ $value('catatan_footer') }}">
             @error('catatan_footer')<div class="error-text">{{ $message }}</div>@enderror
@@ -483,11 +453,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const clearSignatureAsesor = document.getElementById('clearSignatureAsesor');
     const ttdAsesorNamaInput = document.getElementById('ttdAsesorNamaInput');
     const ttdAsesorTanggalInput = document.getElementById('ttdAsesorTanggalInput');
-    const signatureCanvasAsesi = document.getElementById('signatureCanvasAsesi');
-    const signatureWrapperAsesi = document.getElementById('signatureWrapperAsesi');
-    const clearSignatureAsesi = document.getElementById('clearSignatureAsesi');
-    const ttdAsesiNamaInput = document.getElementById('ttdAsesiNamaInput');
-    const ttdAsesiTanggalInput = document.getElementById('ttdAsesiTanggalInput');
     const endpointUrl = '{{ route('admin.persetujuan-asesmen.skema-participants') }}';
     const selectedAsesorName = @json($selectedAsesor);
     const selectedAsesiName = @json($selectedAsesi);
@@ -702,15 +667,6 @@ document.addEventListener('DOMContentLoaded', function () {
         nameInput: ttdAsesorNamaInput,
         dateInput: ttdAsesorTanggalInput,
         getSignerName: () => (namaAsesorSelect && namaAsesorSelect.value) ? namaAsesorSelect.value : '',
-    });
-
-    initSignaturePad({
-        canvas: signatureCanvasAsesi,
-        wrapper: signatureWrapperAsesi,
-        clearButton: clearSignatureAsesi,
-        nameInput: ttdAsesiNamaInput,
-        dateInput: ttdAsesiTanggalInput,
-        getSignerName: () => (namaAsesiSelect && namaAsesiSelect.value) ? namaAsesiSelect.value : '',
     });
 });
 </script>

@@ -5,15 +5,41 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Asesi;
 use App\Models\Asesor;
-use App\Models\Account;
 use App\Models\Skema;
 use App\Models\Tuk;
 use App\Models\PersetujuanAsesmen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 
 class PersetujuanAsesmenFrontController extends Controller
 {
+    private function resolveAsesiFromUser($user): ?Asesi
+    {
+        if (!$user) {
+            return null;
+        }
+
+        $asesiQuery = Asesi::query();
+        $hasCondition = false;
+
+        if (!empty($user->NIK)) {
+            $asesiQuery->where('NIK', $user->NIK);
+            $hasCondition = true;
+        }
+
+        if (Schema::hasColumn('asesi', 'no_reg') && !empty($user->id)) {
+            if ($hasCondition) {
+                $asesiQuery->orWhere('no_reg', $user->id);
+            } else {
+                $asesiQuery->where('no_reg', $user->id);
+                $hasCondition = true;
+            }
+        }
+
+        return $hasCondition ? $asesiQuery->first() : null;
+    }
+
     private function hasAsesiNikColumn(): bool
     {
         static $hasColumn = null;
@@ -52,14 +78,15 @@ class PersetujuanAsesmenFrontController extends Controller
         $account = $request->user();
         $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
         $useNik = $this->hasAsesiNikColumn();
+        $search = $request->get('search');
 
         $items = collect();
 
         if ($asesor) {
             $asesiList = $asesor->asesis()->with('skemas')->orderBy('nama')->get();
 
-            $items = $asesiList->flatMap(function ($asesi) {
-                return $asesi->skemas->map(function ($skema) use ($asesi) {
+            $items = $asesiList->flatMap(function ($asesi) use ($useNik) {
+                return $asesi->skemas->map(function ($skema) use ($asesi, $useNik) {
                     $record = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
                         ->where(function ($q) use ($asesi, $useNik) {
                             $q->where('nama_asesi', $asesi->nama);
@@ -80,18 +107,28 @@ class PersetujuanAsesmenFrontController extends Controller
                     ];
                 });
             })->values();
+
+            // Apply search filter if provided
+            if ($search) {
+                $search = strtolower($search);
+                $items = $items->filter(function ($item) use ($search) {
+                    return stripos($item['skema_nama'], $search) !== false
+                        || stripos($item['skema_nomor'], $search) !== false
+                        || stripos($item['asesi_nama'], $search) !== false;
+                });
+            }
         }
 
         return view('persetujuan-asesmen.asesor-index', [
             'items' => $items,
             'asesor' => $asesor,
+            'search' => $search,
         ]);
     }
 
     public function asesiIndex(Request $request)
     {
-        $account = $request->user();
-        $asesi = $account ? Asesi::where('NIK', $account->NIK)->first() : null;
+        $asesi = $this->resolveAsesiFromUser($request->user());
         $useNik = $this->hasAsesiNikColumn();
 
         $items = collect();
@@ -105,16 +142,24 @@ class PersetujuanAsesmenFrontController extends Controller
                             $q->orWhere('asesi_nik', $asesi->NIK);
                         }
                     })
+                    ->whereNotNull('ttd_asesor_nama')
+                    ->whereNotNull('ttd_asesor_tanggal')
                     ->latest()
                     ->first();
 
+                if (!$record) {
+                    return null;
+                }
+
                 return [
+                    'persetujuan_id' => $record->id,
                     'skema_id' => $skema->id,
                     'skema_nama' => $skema->nama_skema,
                     'skema_nomor' => $skema->nomor_skema,
-                    'status' => $record ? ($record->ttd_asesi_nama ? 'Sudah Ditandatangani' : 'Draft') : 'Belum Ada',
+                    'status' => $record->ttd_asesi_nama ? 'Sudah Ditandatangani Asesi' : 'Menunggu Tanda Tangan Asesi',
+                    'can_sign' => empty($record->ttd_asesi_nama),
                 ];
-            })->values();
+            })->filter()->values();
         }
 
         return view('persetujuan-asesmen.asesi-index', [
@@ -175,7 +220,34 @@ class PersetujuanAsesmenFrontController extends Controller
         $data = $request->validate([
             'ttd_asesor_nama' => 'required|string|max:255',
             'ttd_asesor_tanggal' => 'required|date',
+            'ttd_asesor_file' => 'required|string',
         ]);
+
+        // Handle signature file from the canvas (base64 data URL)
+        try {
+            $signatureData = $request->ttd_asesor_file;
+
+            if (strpos($signatureData, 'data:image') === 0) {
+                list($type, $signatureData) = explode(';', $signatureData);
+                list(, $signatureData) = explode(',', $signatureData);
+                $signatureData = base64_decode($signatureData);
+            } else {
+                $signatureData = base64_decode($signatureData);
+            }
+
+            $filename = 'signature_asesor_' . $item->id . '_' . time() . '.png';
+            $path = 'persetujuan-asesmen/signatures';
+
+            Storage::disk('public')->put($path . '/' . $filename, $signatureData);
+            $data['ttd_asesor_file'] = $path . '/' . $filename;
+
+            \Log::info('Asesor signature image saved', ['file' => $data['ttd_asesor_file']]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to save asesor signature image', ['error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Tanda tangan asesor tidak tersimpan. Pastikan tanda tangan digambar di canvas sebelum menyimpan.');
+        }
+
+        \Log::info('Updating asesor signature', ['id' => $item->id, 'data' => $data]);
 
         $item->update($data);
 
@@ -184,27 +256,11 @@ class PersetujuanAsesmenFrontController extends Controller
 
     public function asesiShow(Request $request, $skemaId)
     {
-        $user = auth()->user();
-        if (!$user) abort(403);
-
-        $asesiQuery = Asesi::query();
-        $hasCondition = false;
-
-        if (!empty($user->NIK)) {
-            $asesiQuery->where('NIK', $user->NIK);
-            $hasCondition = true;
+        $asesi = $this->resolveAsesiFromUser($request->user());
+        if (!$asesi) {
+            abort(403);
         }
 
-        if (Schema::hasColumn('asesi', 'no_reg') && !empty($user->id)) {
-            if ($hasCondition) {
-                $asesiQuery->orWhere('no_reg', $user->id);
-            } else {
-                $asesiQuery->where('no_reg', $user->id);
-                $hasCondition = true;
-            }
-        }
-
-        $asesi = $hasCondition ? $asesiQuery->first() : null;
         $skema = Skema::find($skemaId);
         if (!$skema) abort(404);
         $useNik = $this->hasAsesiNikColumn();
@@ -217,15 +273,15 @@ class PersetujuanAsesmenFrontController extends Controller
                         $q->orWhere('asesi_nik', $asesi->NIK);
                     }
                 }
-            })->latest()->first();
+            })
+            ->whereNotNull('ttd_asesor_nama')
+            ->whereNotNull('ttd_asesor_tanggal')
+            ->latest()
+            ->first();
 
         if (!$item) {
-            $item = PersetujuanAsesmen::create($this->buildDefaultPayload([
-                'judul_skema' => $skema->nama_skema ?? '',
-                'nomor_skema' => $skema->nomor_skema ?? '',
-                'nama_asesi' => $asesi->nama ?? '',
-                'asesi_nik' => $asesi->NIK ?? null,
-            ]));
+            return redirect()->route('asesi.persetujuan-asesmen.index')
+                ->with('error', 'Form belum tersedia. Asesor belum menandatangani persetujuan asesmen untuk skema ini.');
         }
 
         $tukList = Tuk::orderBy('nama_tuk')->get(['id','nama_tuk','tipe_tuk','kota']);
@@ -240,15 +296,114 @@ class PersetujuanAsesmenFrontController extends Controller
 
     public function asesiSign(Request $request, $id)
     {
+        $asesi = $this->resolveAsesiFromUser($request->user());
+        if (!$asesi) {
+            abort(403);
+        }
+
         $item = PersetujuanAsesmen::findOrFail($id);
+        $useNik = $this->hasAsesiNikColumn();
+
+        $sameAsesi = $item->nama_asesi === $asesi->nama;
+        if ($useNik && !empty($item->asesi_nik) && !empty($asesi->NIK)) {
+            $sameAsesi = $sameAsesi || $item->asesi_nik === $asesi->NIK;
+        }
+
+        if (!$sameAsesi) {
+            \Log::error('Asesi mismatch', [
+                'item_nama' => $item->nama_asesi,
+                'asesi_nama' => $asesi->nama,
+                'item_nik' => $item->asesi_nik,
+                'asesi_nik' => $asesi->NIK ?? null,
+            ]);
+            abort(403);
+        }
+
+        if (empty($item->ttd_asesor_nama) || empty($item->ttd_asesor_tanggal)) {
+            \Log::error('Asesor not signed yet', [
+                'item_id' => $item->id,
+                'ttd_asesor_nama' => $item->ttd_asesor_nama,
+                'ttd_asesor_tanggal' => $item->ttd_asesor_tanggal,
+            ]);
+            return redirect()->back()->with('error', 'Tanda tangan asesi belum bisa dilakukan sebelum asesor menandatangani.');
+        }
+
+        \Log::info('Asesi sign request received', [
+            'id' => $id,
+            'request_data' => $request->all(),
+        ]);
 
         $data = $request->validate([
-            'ttd_asesi_nama' => 'required|string|max:255',
-            'ttd_asesi_tanggal' => 'required|date',
+            'ttd_asesi_tanggal' => 'required|date_format:Y-m-d',
+        ], [
+            'ttd_asesi_tanggal.required' => 'Tanggal harus diisi',
+            'ttd_asesi_tanggal.date_format' => 'Format tanggal tidak valid',
+        ]);
+
+        $data['ttd_asesi_nama'] = $asesi->nama;
+
+        // Handle signature image file
+        if ($request->has('ttd_asesi_file') && !empty($request->ttd_asesi_file)) {
+            try {
+                $signatureData = $request->ttd_asesi_file;
+                
+                // Extract base64 data
+                if (strpos($signatureData, 'data:image') === 0) {
+                    list($type, $signatureData) = explode(';', $signatureData);
+                    list(, $signatureData) = explode(',', $signatureData);
+                    $signatureData = base64_decode($signatureData);
+                } else {
+                    $signatureData = base64_decode($signatureData);
+                }
+                
+                // Create filename
+                $filename = 'signature_asesi_' . $item->id . '_' . time() . '.png';
+                $path = 'persetujuan-asesmen/signatures';
+                
+                // Store file
+                Storage::disk('public')->put($path . '/' . $filename, $signatureData);
+                
+                $data['ttd_asesi_file'] = $path . '/' . $filename;
+                
+                \Log::info('Signature image saved', ['file' => $data['ttd_asesi_file']]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to save signature image', ['error' => $e->getMessage()]);
+                // Continue without image, don't fail validation
+            }
+        }
+
+        // Fallback: if no signature image was uploaded, generate a simple SVG with the name
+        if (empty($data['ttd_asesi_file']) && !empty($data['ttd_asesi_nama'])) {
+            try {
+                $name = htmlspecialchars($data['ttd_asesi_nama'], ENT_QUOTES, 'UTF-8');
+                $svg = "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"600\" height=\"140\">";
+                $svg .= "<rect width=\"100%\" height=\"100%\" fill=\"#ffffff\"/>";
+                $svg .= "<text x=\"50%\" y=\"60%\" dominant-baseline=\"middle\" text-anchor=\"middle\" font-family=\"Segoe UI, Arial, sans-serif\" font-size=36 fill=\"#111827\">" . $name . "</text>";
+                $svg .= "</svg>";
+
+                $filename = 'signature_asesi_name_' . $item->id . '_' . time() . '.svg';
+                $path = 'persetujuan-asesmen/signatures';
+                Storage::disk('public')->put($path . '/' . $filename, $svg);
+                $data['ttd_asesi_file'] = $path . '/' . $filename;
+                \Log::info('Generated fallback signature SVG for asesi', ['file' => $data['ttd_asesi_file']]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to generate fallback signature SVG', ['error' => $e->getMessage()]);
+            }
+        }
+
+        \Log::info('Updating asesi signature', [
+            'id' => $item->id,
+            'data' => $data,
         ]);
 
         $item->update($data);
 
-        return redirect()->back()->with('success', 'Tanda tangan asesi tersimpan');
+        \Log::info('Asesi signature saved', [
+            'id' => $item->id,
+            'ttd_asesi_tanggal' => $item->ttd_asesi_tanggal,
+            'ttd_asesi_nama' => $item->ttd_asesi_nama,
+        ]);
+
+        return redirect()->route('asesi.persetujuan-asesmen.index')->with('success', 'Tanda tangan asesi tersimpan');
     }
 }
