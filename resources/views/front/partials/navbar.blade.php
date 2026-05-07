@@ -20,7 +20,6 @@
             @foreach($navLinks as $link)
                 @php $active = request()->routeIs($link['active_pattern']); @endphp
                 <a href="{{ route($link['route']) }}"
-                   data-nav-prefetch="true"
                    class="px-4 py-2 transition-colors duration-200 {{ $active ? 'text-[#0073bd] hover:text-[#0073bd]' : 'text-gray-700 hover:text-[#0073bd]' }}"
                    style="text-decoration: none; border-bottom: 2px solid {{ $active ? '#0073bd' : 'transparent' }};">
                     {{ $link['label'] }}
@@ -30,6 +29,7 @@
 
         <div class="hidden md:block">
         <a href="{{ route('login') }}"
+           data-turbo="false"
            class="bg-blue-600 text-white px-5 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors duration-150 whitespace-nowrap">
            Login
         </a>
@@ -61,7 +61,6 @@
             @foreach($navLinks as $link)
                 @php $active = request()->routeIs($link['active_pattern']); @endphp
                 <a href="{{ route($link['route']) }}"
-                   data-nav-prefetch="true"
                    @click="open = false"
                    class="px-4 py-2.5 transition-colors duration-200 {{ $active ? 'text-[#0073bd] hover:text-[#0073bd]' : 'text-gray-700 hover:text-[#0073bd]' }}"
                    style="text-decoration: none; border-bottom: 2px solid {{ $active ? '#0073bd' : 'transparent' }};">
@@ -70,6 +69,7 @@
             @endforeach
 
             <a href="{{ route('login') }}"
+               data-turbo="false"
                class="mt-1 bg-blue-600 text-white px-4 py-2.5 rounded-lg text-center font-semibold hover:bg-blue-700 transition-colors duration-150">
                 Login
             </a>
