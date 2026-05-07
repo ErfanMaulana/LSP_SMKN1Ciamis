@@ -29,6 +29,12 @@ class RegisterController extends Controller
                 ->with('info', 'Pendaftaran Anda sudah disetujui.');
         }
 
+        // If pending verification, redirect to dashboard to avoid confusion
+        if ($asesi && $asesi->status === 'pending') {
+            return redirect()->route('asesi.dashboard')
+                ->with('info', 'Formulir Anda sedang menunggu verifikasi admin.');
+        }
+
         $jurusanList = Jurusan::with('kelasItems')->get();
         $skemaList   = Skema::orderBy('jurusan_id')->orderBy('nama_skema')->get();
 
@@ -180,11 +186,10 @@ class RegisterController extends Controller
                 ->with('info', 'Pendaftaran Anda sudah disetujui.');
         }
 
-        // If pending (submitted step 1 but not yet approved), show step 2 still
-        // or redirect back to formulir with info
-        if ($asesi->status === 'pending' && $asesi->pas_foto) {
-            return redirect()->route('asesi.pendaftaran.formulir')
-                ->with('info', 'Dokumen sudah dikirim. Menunggu verifikasi admin.');
+        // If pending (submitted), redirect to dashboard
+        if ($asesi->status === 'pending') {
+            return redirect()->route('asesi.dashboard')
+                ->with('info', 'Formulir Anda sedang menunggu verifikasi admin.');
         }
 
         return view('asesi.pendaftaran.dokumen', compact('account', 'asesi'));
