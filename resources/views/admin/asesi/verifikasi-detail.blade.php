@@ -50,12 +50,105 @@
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
     }
 
+    .signature-section {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .signature-section h4 {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0 0 8px;
+    }
+
+    .signature-box {
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        background: #f8fafc;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .signature-box canvas {
+        width: 100%;
+        height: 180px;
+        display: block;
+        touch-action: none;
+        cursor: crosshair;
+        background: #fff;
+    }
+
+    .signature-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        color: #94a3b8;
+        font-size: 13px;
+        gap: 8px;
+        text-align: center;
+        padding: 0 16px;
+    }
+
+    .signature-box.has-signature .signature-placeholder {
+        display: none;
+    }
+
+    .signature-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+    }
+
+    .signature-note {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .btn-clear-signature {
+        padding: 8px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #fff;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-clear-signature:hover {
+        background: #f8fafc;
+    }
+
+    .signature-error {
+        display: none;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #dc2626;
+    }
+
     .back-link {
         display: none;
     }
 
     .profile-header {
         background: #fff;
+                        @if($asesi->tanda_tangan_admin)
+                            <div style="margin-top:12px;padding-top:12px;border-top:1px dashed #e5e7eb;">
+                                <p style="font-size:12px;color:#64748b;margin:0 0 8px;">Tanda tangan admin</p>
+                                <img src="{{ $asesi->tanda_tangan_admin }}" alt="Tanda tangan admin" style="max-width:260px;width:100%;height:auto;border:1px solid #e5e7eb;border-radius:8px;background:#fff;padding:8px;">
+                                @if($asesi->tanggal_tanda_tangan_admin)
+                                    <p style="font-size:11px;color:#94a3b8;margin-top:6px;">{{ \\Carbon\\Carbon::parse($asesi->tanggal_tanda_tangan_admin)->locale('id')->translatedFormat('d M Y H:i') }}</p>
+                                @endif
+                            </div>
+                        @endif
         border-radius: 12px;
         padding: 28px;
         display: flex;
@@ -761,6 +854,24 @@
                         <i class="bi bi-trash"></i> Hapus Data Pendaftaran
                     </button>
                 </div>
+
+                <div class="signature-section">
+                    <h4><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda Tangan Admin</h4>
+                    <div class="signature-box" id="signatureBoxAdmin">
+                        <canvas id="signatureCanvasAdmin"></canvas>
+                        <div class="signature-placeholder" id="signaturePlaceholderAdmin">
+                            <i class="bi bi-pen"></i>
+                            <span>Silakan tanda tangan admin sebelum menyetujui atau menolak pendaftaran.</span>
+                        </div>
+                    </div>
+                    <div class="signature-actions">
+                        <div class="signature-note">Tanda tangan ini akan tersimpan pada data verifikasi asesi.</div>
+                        <button type="button" class="btn-clear-signature" id="clearSignatureAdmin">
+                            <i class="bi bi-arrow-counterclockwise"></i> Hapus Tanda Tangan
+                        </button>
+                    </div>
+                    <div class="signature-error" id="signatureErrorAdmin">Tanda tangan admin wajib diisi.</div>
+                </div>
             </div>
         </div>
     @else
@@ -813,6 +924,7 @@
         <p>Apakah Anda yakin ingin <strong>menyetujui</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>? Email notifikasi akan dikirim ke <strong>{{ $asesi->email }}</strong>.</p>
         <form method="POST" action="{{ route('admin.asesi.approve', $asesi->NIK) }}">
             @csrf
+            <input type="hidden" name="tanda_tangan_admin" class="signature-admin-input">
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeModal('approveModal')">Batal</button>
                 <button type="submit" class="btn-confirm-approve"><i class="bi bi-check-lg"></i> Ya, Setujui</button>
@@ -828,6 +940,7 @@
         <p>Apakah Anda yakin ingin <strong>menolak</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>? Email notifikasi akan dikirim ke <strong>{{ $asesi->email }}</strong>.</p>
         <form method="POST" action="{{ route('admin.asesi.reject', $asesi->NIK) }}" id="rejectForm" onsubmit="return validateReject()">
             @csrf
+            <input type="hidden" name="tanda_tangan_admin" class="signature-admin-input">
             {{-- Reject type --}}
             <label class="catatan-label" style="margin-bottom:8px;">Jenis Penolakan <span style="color:#ef4444;">*</span></label>
             <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
@@ -920,6 +1033,12 @@
             document.getElementById('reject_catatan').focus();
             return false;
         }
+
+        if (!window.adminSignatureInput || !window.adminSignatureInput.value) {
+            document.getElementById('signatureErrorAdmin').style.display = 'block';
+            document.getElementById('signatureCanvasAdmin').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
         return true;
     }
 
@@ -949,6 +1068,136 @@
                 closeModal(modal.id);
             });
         }
+    });
+
+    function initSignaturePadAdmin() {
+        const canvas = document.getElementById('signatureCanvasAdmin');
+        const box = document.getElementById('signatureBoxAdmin');
+        const inputEls = document.querySelectorAll('.signature-admin-input');
+        const clearButton = document.getElementById('clearSignatureAdmin');
+        const errorBox = document.getElementById('signatureErrorAdmin');
+        const placeholder = document.getElementById('signaturePlaceholderAdmin');
+        const ctx = canvas.getContext('2d');
+
+        window.adminSignatureInput = inputEls[0] || null;
+
+        let drawing = false;
+        let hasSignature = false;
+        let points = [];
+
+        const resizeCanvas = () => {
+            const data = inputEls[0] ? inputEls[0].value : '';
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * ratio;
+            canvas.height = rect.height * ratio;
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = '#111827';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (data) {
+                const img = new Image();
+                img.onload = () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0, rect.width, rect.height);
+                    hasSignature = true;
+                    box.classList.add('has-signature');
+                    placeholder.style.display = 'none';
+                };
+                img.src = data;
+            } else {
+                hasSignature = false;
+                box.classList.remove('has-signature');
+                placeholder.style.display = 'flex';
+            }
+        };
+
+        const getPoint = (event) => {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: event.clientX - rect.left,
+                y: event.clientY - rect.top,
+            };
+        };
+
+        const syncInputs = () => {
+            const data = canvas.toDataURL('image/png');
+            inputEls.forEach(function(el) {
+                el.value = hasSignature ? data : '';
+            });
+            window.adminSignatureInput = inputEls[0] || null;
+        };
+
+        const start = (event) => {
+            drawing = true;
+            points = [getPoint(event)];
+            errorBox.style.display = 'none';
+            canvas.setPointerCapture?.(event.pointerId);
+        };
+
+        const draw = (event) => {
+            if (!drawing) return;
+            const point = getPoint(event);
+            points.push(point);
+            if (points.length < 2) return;
+            const prev = points[points.length - 2];
+            ctx.beginPath();
+            ctx.moveTo(prev.x, prev.y);
+            ctx.lineTo(point.x, point.y);
+            ctx.stroke();
+            if (!hasSignature) {
+                hasSignature = true;
+                box.classList.add('has-signature');
+                placeholder.style.display = 'none';
+            }
+            syncInputs();
+        };
+
+        const stop = () => {
+            drawing = false;
+            if (points.length > 1) {
+                syncInputs();
+            }
+            points = [];
+        };
+
+        clearButton.addEventListener('click', function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false;
+            box.classList.remove('has-signature');
+            placeholder.style.display = 'flex';
+            errorBox.style.display = 'none';
+            inputEls.forEach(function(el) { el.value = ''; });
+            window.adminSignatureInput = inputEls[0] || null;
+        });
+
+        canvas.addEventListener('pointerdown', start);
+        canvas.addEventListener('pointermove', draw);
+        canvas.addEventListener('pointerup', stop);
+        canvas.addEventListener('pointerleave', stop);
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        initSignaturePadAdmin();
+
+        document.querySelectorAll('form').forEach(function(form) {
+            if (form.action.includes('/approve') || form.id === 'rejectForm') {
+                form.addEventListener('submit', function(event) {
+                    const adminInput = form.querySelector('.signature-admin-input');
+                    if (!adminInput || !adminInput.value) {
+                        event.preventDefault();
+                        document.getElementById('signatureErrorAdmin').style.display = 'block';
+                        document.getElementById('signatureCanvasAdmin').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            }
+        });
     });
 </script>
 @endsection

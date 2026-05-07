@@ -53,11 +53,17 @@ class Asesi extends Model
         'catatan_admin',
         'verified_at',
         'verified_by',
+        'tanda_tangan_pendaftar',
+        'tanggal_tanda_tangan_pendaftar',
+        'tanda_tangan_admin',
+        'tanggal_tanda_tangan_admin',
     ];
 
     protected $casts = [
         'tanggal_lahir' => 'datetime',
         'verified_at'   => 'datetime',
+        'tanggal_tanda_tangan_pendaftar' => 'datetime',
+        'tanggal_tanda_tangan_admin'     => 'datetime',
     ];
 
     public function jurusan()

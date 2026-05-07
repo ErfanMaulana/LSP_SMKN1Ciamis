@@ -192,6 +192,7 @@ class AsesiController extends Controller
             'kode_provinsi' => 'nullable|string|max:50',
             'kode_kementrian' => 'nullable|string|max:50',
             'kode_anggaran' => 'nullable|string|max:50',
+            'tanda_tangan_pendaftar' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
         ]);
 
         $skemaId = $validated['skema_id'];
@@ -203,6 +204,8 @@ class AsesiController extends Controller
         } elseif (($validated['jenis_kelamin'] ?? null) === 'P') {
             $validated['jenis_kelamin'] = 'Perempuan';
         }
+
+        $validated['tanggal_tanda_tangan_pendaftar'] = now();
 
         $asesi = Asesi::create($validated);
 
@@ -876,6 +879,13 @@ class AsesiController extends Controller
      */
     public function approve(Request $request, $nik)
     {
+        $validated = $request->validate([
+            'tanda_tangan_admin' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
+        ], [
+            'tanda_tangan_admin.required' => 'Tanda tangan admin wajib diisi.',
+            'tanda_tangan_admin.regex' => 'Format tanda tangan admin tidak valid.',
+        ]);
+
         $asesi = Asesi::findOrFail($nik);
         
         // Generate unique no_reg based on birth date and index
@@ -891,6 +901,8 @@ class AsesiController extends Controller
             'catatan_admin' => $request->input('catatan_admin'),
             'verified_at' => now(),
             'verified_by' => auth('admin')->id(),
+            'tanda_tangan_admin' => $validated['tanda_tangan_admin'],
+            'tanggal_tanda_tangan_admin' => now(),
         ]);
         
         // Check if account already exists (NIK-based flow)
@@ -966,10 +978,13 @@ class AsesiController extends Controller
         $request->validate([
             'catatan_admin' => 'required|string',
             'reject_type'   => 'required|in:rejected,banned',
+            'tanda_tangan_admin' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
         ], [
             'catatan_admin.required' => 'Catatan penolakan wajib diisi.',
             'reject_type.required'   => 'Jenis penolakan wajib dipilih.',
             'reject_type.in'         => 'Jenis penolakan tidak valid.',
+            'tanda_tangan_admin.required' => 'Tanda tangan admin wajib diisi.',
+            'tanda_tangan_admin.regex' => 'Format tanda tangan admin tidak valid.',
         ]);
         
         $asesi = Asesi::findOrFail($nik);
@@ -980,6 +995,8 @@ class AsesiController extends Controller
             'catatan_admin' => $request->input('catatan_admin'),
             'verified_at'   => now(),
             'verified_by'   => auth('admin')->id(),
+            'tanda_tangan_admin' => $request->input('tanda_tangan_admin'),
+            'tanggal_tanda_tangan_admin' => now(),
         ]);
         
         // Send rejection email if asesi has email

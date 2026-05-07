@@ -434,6 +434,83 @@
             background: #cbd5e1;
         }
 
+        .signature-section {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .signature-box {
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .signature-box canvas {
+            width: 100%;
+            height: 180px;
+            display: block;
+            touch-action: none;
+            cursor: crosshair;
+            background: #fff;
+        }
+
+        .signature-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            color: #94a3b8;
+            font-size: 13px;
+            gap: 8px;
+            text-align: center;
+            padding: 0 16px;
+        }
+
+        .signature-box.has-signature .signature-placeholder {
+            display: none;
+        }
+
+        .signature-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .signature-note {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .btn-clear-signature {
+            padding: 8px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #fff;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-clear-signature:hover {
+            background: #f8fafc;
+        }
+
+        .signature-error {
+            display: none;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #dc2626;
+        }
+
         .error-list {
             list-style: none;
             margin: 6px 0 0 0;
@@ -755,6 +832,33 @@
                         </div>
                     </div>
 
+                    <!-- Tanda Tangan Pendaftar -->
+                    <div class="signature-section">
+                        <div class="form-section-title" style="margin-bottom:14px;">
+                            <div class="section-icon">
+                                <i class="bi bi-pen"></i>
+                            </div>
+                            <h3>Tanda Tangan Pendaftar</h3>
+                        </div>
+                        <div class="signature-box" id="signatureBoxPendaftar">
+                            <canvas id="signatureCanvasPendaftar"></canvas>
+                            <div class="signature-placeholder" id="signaturePlaceholderPendaftar">
+                                <i class="bi bi-pen"></i>
+                                <span>Silakan tanda tangan di area ini menggunakan mouse atau sentuhan.</span>
+                            </div>
+                        </div>
+                        <input type="hidden" name="tanda_tangan_pendaftar" id="tandaTanganPendaftarInput" value="{{ old('tanda_tangan_pendaftar') }}">
+                        <div class="signature-actions">
+                            <div class="signature-note">Tanda tangan ini akan disimpan sebagai bukti persetujuan pendaftaran.</div>
+                            <button type="button" class="btn-clear-signature" id="clearSignaturePendaftar">
+                                <i class="bi bi-arrow-counterclockwise"></i> Hapus Tanda Tangan
+                            </button>
+                        </div>
+                        <div class="signature-error" id="signatureErrorPendaftar">
+                            Tanda tangan pendaftar wajib diisi.
+                        </div>
+                    </div>
+
                     <!-- Form Actions -->
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary">
@@ -1032,6 +1136,108 @@
                     radio.addEventListener('change', validateNIK);
                 });
                 
+
+            function initSignaturePad(config) {
+                const canvas = config.canvas;
+                const box = config.box;
+                const input = config.input;
+                const clearButton = config.clearButton;
+                const errorBox = config.errorBox;
+                const placeholder = config.placeholder;
+                const ctx = canvas.getContext('2d');
+
+                let drawing = false;
+                let hasSignature = false;
+                let points = [];
+
+                const getPoint = (event) => {
+                    const rect = canvas.getBoundingClientRect();
+                    return {
+                        x: event.clientX - rect.left,
+                        y: event.clientY - rect.top,
+                    };
+                };
+
+                const resizeCanvas = () => {
+                    const data = input.value;
+                    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                    const rect = canvas.getBoundingClientRect();
+                    canvas.width = rect.width * ratio;
+                    canvas.height = rect.height * ratio;
+                    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.lineWidth = 2.5;
+                    ctx.strokeStyle = '#111827';
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    if (data) {
+                        const img = new Image();
+                        img.onload = () => {
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            ctx.drawImage(img, 0, 0, rect.width, rect.height);
+                            hasSignature = true;
+                            box.classList.add('has-signature');
+                            placeholder.style.display = 'none';
+                        };
+                        img.src = data;
+                    } else {
+                        hasSignature = false;
+                        box.classList.remove('has-signature');
+                        placeholder.style.display = 'flex';
+                    }
+                };
+
+                const draw = (event) => {
+                    if (!drawing) return;
+                    const point = getPoint(event);
+                    points.push(point);
+                    if (points.length < 2) return;
+                    const prev = points[points.length - 2];
+                    ctx.beginPath();
+                    ctx.moveTo(prev.x, prev.y);
+                    ctx.lineTo(point.x, point.y);
+                    ctx.stroke();
+                    if (!hasSignature) {
+                        hasSignature = true;
+                        box.classList.add('has-signature');
+                        placeholder.style.display = 'none';
+                    }
+                    input.value = canvas.toDataURL('image/png');
+                };
+
+                const start = (event) => {
+                    drawing = true;
+                    points = [getPoint(event)];
+                    errorBox.style.display = 'none';
+                    canvas.setPointerCapture?.(event.pointerId);
+                };
+
+                const stop = () => {
+                    drawing = false;
+                    if (points.length > 1) {
+                        input.value = canvas.toDataURL('image/png');
+                    }
+                    points = [];
+                };
+
+                clearButton.addEventListener('click', () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    input.value = '';
+                    hasSignature = false;
+                    box.classList.remove('has-signature');
+                    placeholder.style.display = 'flex';
+                    errorBox.style.display = 'none';
+                });
+
+                canvas.addEventListener('pointerdown', start);
+                canvas.addEventListener('pointermove', draw);
+                canvas.addEventListener('pointerup', stop);
+                canvas.addEventListener('pointerleave', stop);
+
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas();
+            }
                 // Validasi awal saat loading
                 validateNIK();
             }
@@ -1050,6 +1256,36 @@
                 emailLembagaInput.addEventListener('input', function() { validateEmail('email_lembaga'); });
                 emailLembagaInput.addEventListener('change', function() { validateEmail('email_lembaga'); });
                 validateEmail('email_lembaga');
+            }
+
+            const signatureCanvas = document.getElementById('signatureCanvasPendaftar');
+            const signatureBox = document.getElementById('signatureBoxPendaftar');
+            const signatureInput = document.getElementById('tandaTanganPendaftarInput');
+            const clearSignature = document.getElementById('clearSignaturePendaftar');
+            const signatureError = document.getElementById('signatureErrorPendaftar');
+            const signaturePlaceholder = document.getElementById('signaturePlaceholderPendaftar');
+
+            if (signatureCanvas && signatureBox && signatureInput && clearSignature && signatureError && signaturePlaceholder) {
+                initSignaturePad({
+                    canvas: signatureCanvas,
+                    box: signatureBox,
+                    input: signatureInput,
+                    clearButton: clearSignature,
+                    errorBox: signatureError,
+                    placeholder: signaturePlaceholder,
+                });
+
+                const form = signatureCanvas.closest('form');
+                if (form) {
+                    form.addEventListener('submit', function(event) {
+                        if (!signatureInput.value) {
+                            event.preventDefault();
+                            signatureError.style.display = 'block';
+                            signatureCanvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            return;
+                        }
+                    });
+                }
             }
         });
     </script>
