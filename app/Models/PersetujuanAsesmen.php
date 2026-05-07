@@ -9,6 +9,7 @@ class PersetujuanAsesmen extends Model
     protected $table = 'persetujuan_asesmen';
 
     protected $fillable = [
+        'asesi_nik',
         'kode_form',
         'judul_form',
         'pengantar',

@@ -27,13 +27,18 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         Route::get('/entry-penilaian/create', [DashboardController::class, 'entryPenilaianCreate'])->name('entry-penilaian.create');
         Route::get('/entry-penilaian/{asesiNik}/input', [DashboardController::class, 'entryPenilaianForm'])->name('entry-penilaian.form');
         Route::post('/entry-penilaian/{asesiNik}/input', [DashboardController::class, 'entryPenilaianStore'])->name('entry-penilaian.store');
-        Route::get('/asesi-terkait', [DashboardController::class, 'asesiIndex'])->name('asesi.terkait');
+        Route::get('/asesmen-mandiri', [DashboardController::class, 'asesmenMandiriIndex'])->name('asesmen-mandiri.index');
+        Route::get('/asesmen-mandiri/{asesiNik}/{skemaId}', [DashboardController::class, 'asesmenMandiriShow'])->name('asesmen-mandiri.show');
+        Route::post('/asesmen-mandiri/{asesiNik}/{skemaId}/recommend', [DashboardController::class, 'recommend'])->name('asesmen-mandiri.recommend');
+        Route::get('/data-asesi', [DashboardController::class, 'asesiIndex'])->name('asesi.terkait');
         Route::get('/asesi',     [DashboardController::class, 'asesiIndex'])->name('asesi.index');
         Route::get('/asesi/{asesiNik}/review',  [DashboardController::class, 'asesiReview'])->name('asesi.review');
         Route::post('/asesi/{asesiNik}/review', [DashboardController::class, 'recommend'])->name('asesi.recommend');
+        Route::get('/persetujuan-asesmen', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorIndex'])->name('persetujuan-asesmen.index');
         Route::prefix('rekaman-asesmen-kompetensi')->name('rekaman-asesmen-kompetensi.')->group(function () {
             Route::get('/', [RekamanAsesmenKompetensiController::class, 'index'])->name('index');
             Route::get('/skema-participants', [RekamanAsesmenKompetensiController::class, 'participantsBySkema'])->name('skema-participants');
+            Route::get('/get-asesi-data', [RekamanAsesmenKompetensiController::class, 'getAsesiData'])->name('get-asesi-data');
             Route::get('/skema-units', [RekamanAsesmenKompetensiController::class, 'skemaUnits'])->name('skema-units');
             Route::get('/create', [RekamanAsesmenKompetensiController::class, 'create'])->name('create');
             Route::post('/', [RekamanAsesmenKompetensiController::class, 'store'])->name('store');
@@ -43,6 +48,22 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
             Route::delete('/{id}', [RekamanAsesmenKompetensiController::class, 'destroy'])->name('destroy');
         });
         Route::get('/banding-asesmen', [BandingAsesmenController::class, 'index'])->name('banding.index');
+        // Ceklis Observasi Aktivitas Praktik (oleh Asesor)
+        Route::prefix('ceklis-observasi')->name('ceklis-observasi.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'update'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'destroy'])->name('destroy');
+            Route::get('/skema-participants', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'participantsBySkema'])->name('skema-participants');
+            Route::get('/skema-structure', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'skemaStructure'])->name('skema-structure');
+            Route::get('/get-asesi-data', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'getAsesiData'])->name('get-asesi-data');
+            Route::get('/{id}', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'show'])->name('show');
+        });
+        // Persetujuan Asesmen (front) - allow asesor to sign
+        Route::get('/persetujuan-asesmen/{asesiNik}/{skemaId}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorShow'])->name('persetujuan.front.asesor.show');
+        Route::post('/persetujuan-asesmen/{id}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorSign'])->name('persetujuan.front.asesor.sign');
         Route::get('/banding-asesmen/{asesiNik}/{skemaId}', [BandingAsesmenController::class, 'form'])->name('banding.form');
         Route::post('/logout',   [AuthController::class, 'logout'])->name('logout');
     });

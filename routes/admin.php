@@ -386,6 +386,7 @@ Route::prefix('admin')->group(function () {
         // ─── Asesmen Mandiri (Admin monitoring) ───
         Route::middleware('permission:asesmen-mandiri.view')->group(function () {
             Route::get('/asesmen-mandiri', [AsesmenMandiriController::class, 'index'])->name('admin.asesmen-mandiri.index');
+            Route::post('/asesmen-mandiri/{nik}/{skemaId}/reset', [AsesmenMandiriController::class, 'reset'])->name('admin.asesmen-mandiri.reset')->middleware('permission:asesmen-mandiri.delete');
             Route::get('/asesmen-mandiri/{asesiNik}/{skemaId}', [AsesmenMandiriController::class, 'show'])->name('admin.asesmen-mandiri.show');
         });
 

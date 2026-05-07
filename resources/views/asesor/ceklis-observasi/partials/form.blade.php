@@ -118,13 +118,13 @@
 
         <div class="field">
             <label>TUK</label>
-            <input type="text" name="tuk" value="{{ $value('tuk', '') }}">
+            <input type="text" id="tukInput" name="tuk" value="{{ $value('tuk', '') }}">
             @error('tuk')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field">
             <label>Tanggal</label>
-            <input type="date" name="tanggal" value="{{ $selectedTanggal }}">
+            <input type="date" id="tanggalInput" name="tanggal" value="{{ $selectedTanggal }}">
             @error('tanggal')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -165,7 +165,7 @@
     </div>
 
     <div class="grid-2" style="margin-top:14px;">
-        <div class="field"><label>Nama Asesi</label><input type="text" name="ttd_asesi_nama" value="{{ $value('ttd_asesi_nama', '') }}"></div>
+        <div class="field"><label>Nama Asesi</label><input type="text" id="ttdAsesiNamaInput" name="ttd_asesi_nama" value="{{ $value('ttd_asesi_nama', '') }}"></div>
         <div class="field"><label>Tanggal TTD Asesi</label><input type="date" name="ttd_asesi_tanggal" value="{{ $ttdAsesiTanggal }}"></div>
         <div class="field"><label>Nama Asesor</label><input type="text" name="ttd_asesor_nama" value="{{ $value('ttd_asesor_nama', '') }}"></div>
         <div class="field"><label>No Reg Asesor</label><input type="text" name="ttd_asesor_no_reg" value="{{ $value('ttd_asesor_no_reg', '') }}"></div>
@@ -192,9 +192,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const participantsUrl = '{{ route('asesor.ceklis-observasi.skema-participants') }}';
     const structureUrl = '{{ route('asesor.ceklis-observasi.skema-structure') }}';
+    const asesiDataUrl = '{{ route('asesor.ceklis-observasi.get-asesi-data') }}';
     const selectedAsesiNik = @json($selectedAsesiNik);
     const initialDetailMap = @json($initialDetailMap ?? []);
     let firstHydration = true;
+
+    const tukInput = document.getElementById('tukInput');
+    const tanggalInput = document.getElementById('tanggalInput');
+    const ttdAsesiNamaInput = document.getElementById('ttdAsesiNamaInput');
 
     const setNomorSkema = () => {
         nomorSkemaDisplay.value = skemaIdInput ? (skemaIdInput.getAttribute('data-nomor') || '') : '';
@@ -348,6 +353,48 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    const applyAsesiData = (payload) => {
+        if (!payload) {
+            return;
+        }
+
+        if (tukInput) {
+            tukInput.value = payload.tuk || '';
+        }
+
+        if (tanggalInput) {
+            tanggalInput.value = payload.tanggal || '';
+        }
+
+        if (ttdAsesiNamaInput && (!ttdAsesiNamaInput.value)) {
+            ttdAsesiNamaInput.value = payload.asesi?.nama || '';
+        }
+    };
+
+    const fetchAsesiData = async (asesiNik) => {
+        const skemaId = skemaIdInput ? skemaIdInput.value : '';
+        if (!asesiNik || !skemaId) {
+            applyAsesiData({ tuk: '', tanggal: '', asesi: null });
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `${asesiDataUrl}?asesi_nik=${encodeURIComponent(asesiNik)}&skema_id=${encodeURIComponent(skemaId)}`
+            );
+
+            if (!response.ok) {
+                applyAsesiData({ tuk: '', tanggal: '', asesi: null });
+                return;
+            }
+
+            const payload = await response.json();
+            applyAsesiData(payload);
+        } catch (error) {
+            applyAsesiData({ tuk: '', tanggal: '', asesi: null });
+        }
+    };
+
     const loadData = async () => {
         const skemaId = skemaIdInput ? skemaIdInput.value : '';
 
@@ -368,6 +415,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             fillAsesi(participants.asesi || [], firstHydration ? selectedAsesiNik : '');
             renderChecklist(structure.units || []);
+            if (firstHydration && selectedAsesiNik) {
+                await fetchAsesiData(selectedAsesiNik);
+            }
             firstHydration = false;
         } catch (error) {
             resetAsesi('-- Gagal memuat asesi --');
@@ -404,6 +454,7 @@ document.addEventListener('DOMContentLoaded', function () {
     clearBtn.addEventListener('click', clearBulk);
 
     rekomendasiInputs.forEach((input) => input.addEventListener('change', toggleBelumKompeten));
+    asesiSelect.addEventListener('change', () => fetchAsesiData(asesiSelect.value));
 
     setNomorSkema();
     loadData();

@@ -49,13 +49,18 @@
                     {{ $item->updated_at ? \Carbon\Carbon::parse($item->updated_at)->locale('id')->translatedFormat('d M Y H:i') : '-' }}
                 </td>
                 <td>
-                    @if($item->status !== 'belum_mulai')
-                        <a href="{{ route('admin.asesmen-mandiri.show', [$item->NIK, $item->skema_id]) }}" class="btn-detail">
-                            <i class="bi bi-eye"></i> Detail
-                        </a>
-                    @else
-                        <span style="color:#cbd5e1;font-size:12px">-</span>
-                    @endif
+                    <div class="action-dropdown" style="position:relative;display:inline-block;">
+                        <button class="action-toggle" type="button" aria-label="Aksi" onclick="toggleActionMenu(this); return false;" style="border:0;background:transparent;padding:0;cursor:pointer;color:#0f172a;line-height:1;box-shadow:none;outline:none;">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                        <div class="action-menu" style="display:none;position:absolute;right:0;top:28px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(2,6,23,0.08);z-index:50;min-width:160px;overflow:hidden;">
+                            <a href="{{ route('admin.asesmen-mandiri.show', [$item->NIK, $item->skema_id]) }}" class="action-item" style="display:block;padding:10px 12px;color:#0f172a;text-decoration:none;">Lihat Detail</a>
+                            <form method="POST" action="{{ route('admin.asesmen-mandiri.reset', [$item->NIK, $item->skema_id]) }}" onsubmit="return confirm('Yakin reset asesmen mandiri untuk asesi ini? Semua jawaban akan dihapus.');" style="margin:0;">
+                                @csrf
+                                <button type="submit" class="action-item" style="display:block;padding:10px 12px;width:100%;border:none;background:transparent;text-align:left;color:#dc2626;">Hapus / Reset</button>
+                            </form>
+                        </div>
+                    </div>
                 </td>
             </tr>
         @empty
@@ -77,3 +82,26 @@
         {{ $data->links() }}
     </div>
 @endif
+
+<script>
+    function toggleActionMenu(button) {
+        var menu = button.nextElementSibling;
+        if (!menu) return;
+
+        var isOpen = menu.style.display === 'block';
+        document.querySelectorAll('.action-menu').forEach(function (item) {
+            item.style.display = 'none';
+        });
+
+        menu.style.display = isOpen ? 'none' : 'block';
+    }
+
+    document.addEventListener('click', function (e) {
+        document.querySelectorAll('.action-menu').forEach(function (menu) {
+            if (menu.style.display !== 'block') return;
+            if (!menu.contains(e.target) && !menu.previousElementSibling.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+    });
+</script>

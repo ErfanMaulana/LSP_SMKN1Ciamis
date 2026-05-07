@@ -57,6 +57,10 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
 
             // Jadwal Ujikom
             Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+            Route::get('/persetujuan-asesmen', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesiIndex'])->name('persetujuan-asesmen.index');
+            // Persetujuan Asesmen (front) - allow asesi to sign
+            Route::get('/persetujuan-asesmen/{skemaId}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesiShow'])->name('persetujuan.front.asesi.show');
+            Route::post('/persetujuan-asesmen/{id}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesiSign'])->name('persetujuan.front.asesi.sign');
         });
     });
 });

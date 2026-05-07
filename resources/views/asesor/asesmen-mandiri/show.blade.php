@@ -5,207 +5,206 @@
 
 @section('styles')
 <style>
-    .back-btn {
-        display: inline-flex; align-items: center; gap: 6px;
-        color: #2563eb; text-decoration: none; font-size: 14px;
-        font-weight: 500; margin-bottom: 18px;
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 16px;
     }
-    .back-btn:hover { color: #1d4ed8; }
 
-    .header-card {
-        background: #0073bd;
-        border-radius: 14px; padding: 24px 28px; color: white; margin-bottom: 24px;
-        display: flex; justify-content: space-between; align-items: flex-start; gap: 16px;
+    .hero-card {
+        background: linear-gradient(135deg, #0b4b83, #1574c1);
+        border-radius: 16px;
+        padding: 22px 24px;
+        color: #ffffff;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
         flex-wrap: wrap;
-    }
-    .header-card h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-    .header-card .meta { font-size: 13px; opacity: 0.85; }
-    .header-card .meta span { margin-right: 16px; }
-
-    .info-card {
-        background: white; border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0; margin-bottom: 24px; overflow: hidden;
-    }
-    .info-header {
-        background: #f8fafc; padding: 16px 20px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    .info-header h3 { font-size: 15px; font-weight: 700; color: #1e293b; margin: 0; }
-
-    .info-row {
-        display: grid; grid-template-columns: 200px 1fr;
-        padding: 14px 20px; border-bottom: 1px solid #f1f5f9;
-        align-items: start; gap: 16px;
-    }
-    .info-row:last-child { border-bottom: none; }
-    .info-label { font-size: 13px; font-weight: 600; color: #64748b; }
-    .info-value { font-size: 13px; color: #334155; font-weight: 500; }
-
-    .status-badge {
-        display: inline-flex; align-items: center; gap: 6px;
-        padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
-    }
-    .status-selesai { background: #d1fae5; color: #059669; }
-    .status-sedang { background: #fef3c7; color: #b45309; }
-    .status-belum { background: #fee2e2; color: #dc2626; }
-
-    .rekom-box {
-        background: white; border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        border: 1px solid #e2e8f0; margin-bottom: 24px;
-        padding: 20px;
-    }
-    .rekom-title {
-        font-size: 14px; font-weight: 700; color: #1e293b;
-        margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
-    }
-    .rekom-content {
-        padding: 14px; border-radius: 8px; font-size: 13px;
-    }
-    .rekom-lanjut {
-        background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;
-    }
-    .rekom-tidak {
-        background: #fee2e2; color: #991b1b; border: 1px solid #fecaca;
-    }
-    .rekom-empty {
-        background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; font-style: italic;
+        margin-bottom: 20px;
     }
 
-    .action-row {
-        display: flex; justify-content: flex-end;
+    .hero-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .hero-sub {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    .hero-meta {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .meta-item {
+        background: rgba(255,255,255,0.12);
+        border-radius: 10px;
+        padding: 10px 12px;
+    }
+
+    .meta-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.8;
+        margin-bottom: 4px;
+    }
+
+    .meta-value {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .hero-badges {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        background: rgba(255,255,255,0.18);
+        color: #ffffff;
+    }
+
+    .badge.status-selesai { background: rgba(34,197,94,0.18); }
+    .badge.status-sedang { background: rgba(251,191,36,0.25); }
+    .badge.status-belum { background: rgba(148,163,184,0.25); }
+
+    .badge.rekom-lanjut { background: rgba(34,197,94,0.25); }
+    .badge.rekom-tidak { background: rgba(239,68,68,0.25); }
+    .badge.rekom-pending { background: rgba(148,163,184,0.25); }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 12px;
+        margin-bottom: 20px;
     }
 
-    @media (max-width: 768px) {
-        .header-card {
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-        .header-card h2 { font-size: 16px; }
-        .header-card .meta {
-            display: grid; gap: 4px;
-        }
-        .header-card .meta span { margin-right: 0; }
-
-        .info-row {
-            grid-template-columns: 1fr;
-            gap: 4px;
-        }
-        .info-label { font-size: 12px; }
-    }
-
-    @media print {
-        .back-btn, aside, .topbar { display: none !important; }
-        .main-content { margin-left: 0 !important; }
-    }
-        background: #dbeafe; color: #2563eb;
-        width: 18px; height: 18px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 1px;
-    }
-    .kriteria-list { counter-reset: krit; }
-
-    .bukti-box {
-        background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
-        padding: 10px 14px; font-size: 13px; color: #475569;
-        display: flex; gap: 8px; align-items: flex-start;
-    }
-    .bukti-box i { color: #3b82f6; margin-top: 2px; flex-shrink: 0; }
-    .bukti-empty { color: #94a3b8; font-style: italic; }
-
-    .nilai-card {
-        background: white;
+    .summary-card {
+        background: #ffffff;
         border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         border: 1px solid #e2e8f0;
-        margin-bottom: 24px;
-        overflow: hidden;
+        padding: 14px 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     }
-    .nilai-header {
-        background: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
-        padding: 14px 18px;
+
+    .summary-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
     }
-    .nilai-header h3 {
-        margin: 0;
+
+    .summary-label {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .section-title {
         font-size: 15px;
         font-weight: 700;
-        color: #1e293b;
+        color: #0f172a;
+        margin: 0 0 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
-    .nilai-header p {
-        margin: 4px 0 0;
+
+    .unit-card {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        margin-bottom: 16px;
+        overflow: hidden;
+    }
+
+    .unit-header {
+        background: #f8fafc;
+        padding: 14px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .unit-header h3 {
+        font-size: 14px;
+        font-weight: 700;
+        margin: 0;
+        color: #0f172a;
+    }
+
+    .unit-code {
         font-size: 12px;
         color: #64748b;
     }
-    .nilai-table-wrap {
-        overflow-x: auto;
-    }
-    .nilai-table {
+
+    table {
         width: 100%;
         border-collapse: collapse;
         font-size: 13px;
     }
-    .nilai-table thead th {
+
+    thead th {
+        background: #f9fafb;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 11px;
         text-align: left;
-        background: #eff6ff;
-        color: #1e3a8a;
-        border-bottom: 1px solid #bfdbfe;
-        padding: 10px 12px;
-        font-weight: 700;
+        padding: 10px 14px;
     }
-    .nilai-table tbody td {
-        border-bottom: 1px solid #f1f5f9;
-        padding: 10px 12px;
-        color: #334155;
+
+    tbody td {
+        padding: 10px 14px;
+        border-top: 1px solid #f1f5f9;
         vertical-align: top;
+        color: #374151;
     }
-    .nilai-table tfoot td {
-        padding: 10px 12px;
-        border-top: 2px solid #cbd5e1;
-        background: #f8fafc;
-        font-weight: 700;
-        color: #0f172a;
-    }
-    .nilai-point {
-        font-weight: 700;
-        text-align: center;
-        width: 90px;
-    }
-    .nilai-point.ok { color: #059669; }
-    .nilai-point.no { color: #dc2626; }
-    .nilai-meta {
-        display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        margin: 12px 18px 16px;
-    }
-    .nilai-chip {
-        background: #eef2ff;
-        color: #3730a3;
-        font-size: 12px;
-        font-weight: 600;
-        padding: 6px 10px;
+
+    .status-chip {
+        padding: 4px 10px;
         border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
     }
 
-    .form-table-wrap {
-        overflow-x: auto;
-    }
-
-    .rekom-table,
-    .sign-table {
-        width: 100%;
-    }
+    .status-chip.k { background: #d1fae5; color: #059669; }
+    .status-chip.bk { background: #fee2e2; color: #dc2626; }
+    .status-chip.empty { background: #f1f5f9; color: #94a3b8; }
 
     .recommend-card {
         background: #ffffff;
         border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         padding: 20px;
-        margin-bottom: 24px;
+        margin-top: 20px;
     }
 
     .recommend-title {
@@ -251,7 +250,7 @@
 
     .radio-group {
         display: flex;
-        gap: 12px;
+        gap: 10px;
         flex-wrap: wrap;
     }
 
@@ -263,13 +262,37 @@
         border-radius: 8px;
         border: 1px solid #e2e8f0;
         background: #f8fafc;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         cursor: pointer;
     }
 
+    .rekom-content {
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .rekom-lanjut {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .rekom-tidak {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .recommend-note {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 6px;
+    }
+
     .signature-section {
-        margin-top: 16px;
+        margin-top: 14px;
     }
 
     .signature-canvas-wrapper {
@@ -311,7 +334,6 @@
         text-align: center;
         pointer-events: none;
         color: #9ca3af;
-        transition: opacity 0.2s;
     }
 
     .signature-placeholder i {
@@ -357,11 +379,12 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-top: 10px;
         flex-wrap: wrap;
+        margin-bottom: 10px;
     }
 
-    .saved-signature img {
+    .saved-signature img,
+    .signature-preview img {
         max-width: 200px;
         max-height: 80px;
         border: 1px solid #e2e8f0;
@@ -392,187 +415,151 @@
         background: #003961;
     }
 
-    .recommend-note {
-        font-size: 12px;
-        color: #64748b;
-        margin-top: 6px;
+    @media (max-width: 900px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 640px) {
+        .hero-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
         .recommend-grid {
             grid-template-columns: 1fr;
         }
     }
-
 </style>
 @endsection
 
 @section('content')
+@php
+    $statusLabel = match($pivot->status) {
+        'selesai' => 'Selesai',
+        'sedang_mengerjakan' => 'Sedang Dikerjakan',
+        default => 'Belum Mulai',
+    };
+    $statusClass = match($pivot->status) {
+        'selesai' => 'status-selesai',
+        'sedang_mengerjakan' => 'status-sedang',
+        default => 'status-belum',
+    };
+@endphp
 
-<a href="{{ route('asesor.asesi.terkait') }}" class="back-btn">
-    <i class="bi bi-arrow-left"></i> Kembali ke Asesi
+<a href="{{ route('asesor.asesmen-mandiri.index') }}" class="back-link">
+    <i class="bi bi-arrow-left"></i> Kembali ke daftar
 </a>
 
-{{-- Header Info Asesi --}}
-<div class="header-card">
-    <div style="display:flex;gap:16px;align-items:center;">
-        <div style="width:96px;height:96px;border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,0.06);background:white;flex-shrink:0;">
-            @if(!empty($asesi->foto) || !empty($asesi->avatar))
-                <img src="{{ $asesi->foto ?? $asesi->avatar }}" alt="Foto {{ $asesi->nama }}" style="width:100%;height:100%;object-fit:cover;display:block;">
-            @else
-                <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#f1f5f9;color:#94a3b8;font-weight:700;font-size:20px;">{{ strtoupper(substr($asesi->nama,0,1) ?? 'A') }}</div>
-            @endif
-        </div>
-
-        <div>
-            <h2><i class="bi bi-person-lines-fill"></i> {{ $asesi->nama }}</h2>
-            <div class="meta">
-                <span><i class="bi bi-credit-card"></i> NIK: {{ $asesi->NIK }}</span>
-                <span><i class="bi bi-envelope"></i> Email: {{ $asesi->asesi_email ?? '—' }}</span>
+<div class="hero-card">
+    <div>
+        <div class="hero-title">Asesmen Mandiri</div>
+        <div class="hero-sub">Skema: {{ $skema->nama_skema ?? '-' }} ({{ $skema->nomor_skema ?? '-' }})</div>
+        <div class="hero-meta">
+            <div class="meta-item">
+                <div class="meta-label">Nama Asesi</div>
+                <div class="meta-value">{{ $asesi->nama }}</div>
             </div>
-            <div class="meta" style="margin-top:8px;">
-                <span><i class="bi bi-mortarboard"></i> {{ $asesi->jurusan?->nama_jurusan ?? '—' }}</span>
-                <span><i class="bi bi-award"></i> {{ $skema->nama_skema ?? '—' }}</span>
+            <div class="meta-item">
+                <div class="meta-label">NIK</div>
+                <div class="meta-value">{{ $asesi->NIK }}</div>
             </div>
-        </div>
-    </div>
-</div>
-
-{{-- Data Asesi Card --}}
-<div class="info-card">
-    <div class="info-header">
-        <h3><i class="bi bi-info-circle"></i> Informasi Asesi</h3>
-    </div>
-    
-    <div class="info-row">
-        <div class="info-label">Nama Lengkap</div>
-        <div class="info-value">{{ $asesi->nama }}</div>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">NIK</div>
-        <div class="info-value">{{ $asesi->NIK }}</div>
-    </div>
-
-    @if($asesi->no_reg)
-    <div class="info-row">
-        <div class="info-label">No. Registrasi</div>
-        <div class="info-value">{{ $asesi->no_reg }}</div>
-    </div>
-    @endif
-
-    @if($asesi->asesi_email)
-    <div class="info-row">
-        <div class="info-label">Email</div>
-        <div class="info-value">{{ $asesi->asesi_email }}</div>
-    </div>
-    @endif
-
-    <div class="info-row">
-        <div class="info-label">Jurusan</div>
-        <div class="info-value">{{ $asesi->jurusan?->nama_jurusan ?? '—' }}</div>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">Program Keahlian</div>
-        <div class="info-value">{{ $asesi->jurusan?->kode_jurusan ?? '—' }}</div>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">Skema Kompetensi</div>
-        <div class="info-value">{{ $skema->nama_skema ?? '—' }}</div>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">Status Asesmen</div>
-        <div class="info-value">
-            @php
-                $statusText = [
-                    'selesai' => 'Selesai',
-                    'sedang_mengerjakan' => 'Sedang Dikerjakan',
-                    'belum_mulai' => 'Belum Mulai'
-                ];
-                $statusClass = 'status-' . str_replace('_', '-', $pivot->status);
-                $displayStatus = $statusText[$pivot->status] ?? $pivot->status;
-            @endphp
-            <span class="status-badge {{ $statusClass }}">{{ $displayStatus }}</span>
-        </div>
-    </div>
-
-    <div class="info-row">
-        <div class="info-label">Periode Asesmen</div>
-        <div class="info-value">
-            @if($pivot->tanggal_mulai)
-                {{ \Carbon\Carbon::parse($pivot->tanggal_mulai)->format('d/m/Y H:i') }}
-            @endif
-            @if($pivot->tanggal_selesai)
-                s/d {{ \Carbon\Carbon::parse($pivot->tanggal_selesai)->format('d/m/Y H:i') }}
-            @else
-                @if($pivot->tanggal_mulai)
-                    <span style="color:#94a3b8;">(Belum selesai)</span>
-                @else
-                    —
-                @endif
-            @endif
-        </div>
-    </div>
-</div>
-
-{{-- Transkrip Nilai: tampilkan ringkasan per unit/elemen jika data jawaban tersedia --}}
-<div class="info-card">
-    <div class="info-header">
-        <h3><i class="bi bi-journal-text"></i> Transkrip Nilai</h3>
-    </div>
-
-    @if(isset($skema) && $skema->units->count())
-        @foreach($skema->units as $unitIdx => $unit)
-            <div style="padding:12px 20px;border-bottom:1px solid #f1f5f9;">
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-                    <div>
-                        <div style="font-weight:700;color:#0f172a;">{{ ($unitIdx+1) }}. {{ $unit->judul_unit }}</div>
-                        <div style="font-size:12px;color:#64748b;">{{ $unit->kode_unit }}</div>
-                    </div>
-                    <div style="font-size:13px;color:#64748b;">Unit skor: {{-- optional aggregate if available --}}</div>
+            <div class="meta-item">
+                <div class="meta-label">Periode</div>
+                <div class="meta-value">
+                    @if($pivot->tanggal_mulai)
+                        {{ \Carbon\Carbon::parse($pivot->tanggal_mulai)->format('d/m/Y H:i') }}
+                    @else
+                        -
+                    @endif
+                    @if($pivot->tanggal_selesai)
+                        s/d {{ \Carbon\Carbon::parse($pivot->tanggal_selesai)->format('d/m/Y H:i') }}
+                    @endif
                 </div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">Jurusan</div>
+                <div class="meta-value">{{ $asesi->jurusan?->nama_jurusan ?? '-' }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-badges">
+        <span class="badge {{ $statusClass }}">Status: {{ $statusLabel }}</span>
+        @if($pivot->rekomendasi === 'lanjut')
+            <span class="badge rekom-lanjut">Rekomendasi: Lanjut</span>
+        @elseif($pivot->rekomendasi === 'tidak_lanjut')
+            <span class="badge rekom-tidak">Rekomendasi: Tidak Lanjut</span>
+        @else
+            <span class="badge rekom-pending">Rekomendasi: Belum</span>
+        @endif
+    </div>
+</div>
 
-                @if($unit->elemens->count())
-                <div style="margin-top:10px;overflow:auto;">
-                    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="summary-value">{{ $totalElemen }}</div>
+        <div class="summary-label">Total Elemen</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-value">{{ $kCount }}</div>
+        <div class="summary-label">Kompeten</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-value">{{ $bkCount }}</div>
+        <div class="summary-label">Belum Kompeten</div>
+    </div>
+    <div class="summary-card">
+        <div class="summary-value">{{ $totalBelum }}</div>
+        <div class="summary-label">Belum Dijawab</div>
+    </div>
+</div>
+
+<div>
+    <div class="section-title"><i class="bi bi-journal-text"></i> Ringkasan Jawaban Asesmen Mandiri</div>
+    @if($skema->units->count())
+        @foreach($skema->units as $unit)
+            <div class="unit-card">
+                <div class="unit-header">
+                    <div>
+                        <h3>{{ $unit->judul_unit ?? '-' }}</h3>
+                        <div class="unit-code">{{ $unit->kode_unit ?? '-' }}</div>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
                         <thead>
-                            <tr style="background:#f8fafc;color:#0f172a;font-weight:700;">
-                                <th style="text-align:left;padding:8px;border:1px solid #eef2ff;">Elemen</th>
-                                <th style="text-align:left;padding:8px;border:1px solid #eef2ff;">Status</th>
-                                <th style="text-align:left;padding:8px;border:1px solid #eef2ff;">Nilai / Catatan</th>
+                            <tr>
+                                <th>Elemen</th>
+                                <th>Status</th>
+                                <th>Nilai / Catatan</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($unit->elemens as $elIdx => $elemen)
-                                @php $jawaban = $answers->get($elemen->id) ?? null; @endphp
+                            @foreach($unit->elemens as $elemen)
+                                @php $jawaban = $answers->get($elemen->id); @endphp
                                 <tr>
-                                    <td style="padding:8px;border:1px solid #f1f5f9;vertical-align:top;">{{ $elIdx+1 }}. {{ $elemen->nama_elemen }}</td>
-                                    <td style="padding:8px;border:1px solid #f1f5f9;vertical-align:top;">
-                                        @if($jawaban)
-                                            @if(isset($jawaban->status) && $jawaban->status === 'K')
-                                                <span class="status-badge status-selesai">Kompeten</span>
-                                            @elseif(isset($jawaban->status) && $jawaban->status === 'BK')
-                                                <span class="status-badge status-belum">Belum Kompeten</span>
-                                            @else
-                                                <span class="status-badge status-sedang">{{ $jawaban->status }}</span>
-                                            @endif
+                                    <td>{{ $elemen->nama_elemen ?? '-' }}</td>
+                                    <td>
+                                        @if($jawaban && $jawaban->status === 'K')
+                                            <span class="status-chip k">Kompeten</span>
+                                        @elseif($jawaban && $jawaban->status === 'BK')
+                                            <span class="status-chip bk">Belum Kompeten</span>
                                         @else
-                                            <span class="status-badge status-belum">Belum Dijawab</span>
+                                            <span class="status-chip empty">Belum Dijawab</span>
                                         @endif
                                     </td>
-                                    <td style="padding:8px;border:1px solid #f1f5f9;vertical-align:top;">
-                                        @if($jawaban)
-                                            @if(isset($jawaban->nilai))
-                                                <strong>{{ $jawaban->nilai }}</strong>
-                                            @endif
-                                            @if(isset($jawaban->catatan) && $jawaban->catatan)
-                                                <div style="color:#64748b;margin-top:6px;white-space:pre-wrap;">{{ $jawaban->catatan }}</div>
-                                            @endif
+                                    <td>
+                                        @if($jawaban && $jawaban->nilai)
+                                            <strong>{{ $jawaban->nilai }}</strong>
                                         @else
-                                            —
+                                            -
+                                        @endif
+                                        @if($jawaban && $jawaban->catatan)
+                                            <div class="recommend-note">{{ $jawaban->catatan }}</div>
                                         @endif
                                     </td>
                                 </tr>
@@ -580,11 +567,10 @@
                         </tbody>
                     </table>
                 </div>
-                @endif
             </div>
         @endforeach
     @else
-        <div style="padding:14px 20px;color:#64748b;">Belum ada skema/unit terkait untuk menampilkan transkrip nilai.</div>
+        <div class="recommend-note">Belum ada unit kompetensi pada skema ini.</div>
     @endif
 </div>
 
@@ -597,19 +583,19 @@
         @if($pivot->catatan_asesor)
             <div class="recommend-note">Catatan Asesor: {{ $pivot->catatan_asesor }}</div>
         @endif
-        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;">
+        <div class="signature-preview" style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;">
             <div>
-                <div class="info-label">Tanda Tangan Asesi</div>
+                <div class="recommend-note">Tanda Tangan Asesi</div>
                 @if($pivot->tanda_tangan)
-                    <img src="{{ $pivot->tanda_tangan }}" alt="Tanda Tangan Asesi" class="signature-img">
+                    <img src="{{ $pivot->tanda_tangan }}" alt="Tanda Tangan Asesi">
                 @else
                     <div class="recommend-note">Belum ada tanda tangan asesi.</div>
                 @endif
             </div>
             <div>
-                <div class="info-label">Tanda Tangan Asesor</div>
+                <div class="recommend-note">Tanda Tangan Asesor</div>
                 @if($pivot->tanda_tangan_asesor)
-                    <img src="{{ $pivot->tanda_tangan_asesor }}" alt="Tanda Tangan Asesor" class="signature-img">
+                    <img src="{{ $pivot->tanda_tangan_asesor }}" alt="Tanda Tangan Asesor">
                 @else
                     <div class="recommend-note">Belum ada tanda tangan asesor.</div>
                 @endif
@@ -617,7 +603,7 @@
         </div>
     </div>
 @elseif($pivot->status === 'selesai')
-    <form method="POST" action="{{ route('asesor.asesi.recommend', $asesi->NIK) }}" id="recommendForm">
+    <form method="POST" action="{{ route('asesor.asesmen-mandiri.recommend', ['asesiNik' => $asesi->NIK, 'skemaId' => $skema->id]) }}" id="recommendForm">
         @csrf
         <div class="recommend-card">
             <div class="recommend-title"><i class="bi bi-clipboard-check"></i> Rekomendasi Asesor</div>
@@ -694,15 +680,6 @@
         <div class="recommend-note">Asesmen mandiri belum selesai. Rekomendasi dapat diberikan setelah status selesai.</div>
     </div>
 @endif
-
-{{-- Action Buttons --}}
-<div class="action-row">
-    <a href="{{ route('asesor.asesi.terkait') }}"
-       style="padding: 10px 20px; border-radius: 8px; border: 1.5px solid #e2e8f0; background: white; color: #475569; font-size: 14px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-        <i class="bi bi-arrow-left"></i> Kembali
-    </a>
-</div>
-
 @endsection
 
 @section('scripts')
@@ -717,7 +694,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const useSavedCheckbox = document.getElementById('useSavedSignature');
     const canvas = document.getElementById('signatureCanvas');
     const wrapper = document.getElementById('signatureWrapper');
-    const placeholder = document.getElementById('signaturePlaceholder');
     const hiddenInput = document.getElementById('tandaTanganInput');
     const clearBtn = document.getElementById('clearSignature');
     const errorEl = document.getElementById('signatureError');
@@ -891,4 +867,3 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 @endsection
-

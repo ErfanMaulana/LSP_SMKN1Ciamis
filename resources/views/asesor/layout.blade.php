@@ -556,15 +556,35 @@
                     <i class="bi bi-people"></i>
                     <span>Asesi</span>
                 </a>
+                <a href="{{ route('asesor.asesmen-mandiri.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.asesmen-mandiri.*') ? 'active' : '' }}">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span>Asesmen Mandiri</span>
+                </a>
+                <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.rekaman-asesmen-kompetensi.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Rekaman Asesmen</span>
+                </a>
                 <a href="{{ route('asesor.entry-penilaian') }}"
                     class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">
                     <i class="bi bi-journal-check"></i>
                     <span>Entry Penilaian</span>
                 </a>
+                <a href="{{ route('asesor.persetujuan-asesmen.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.persetujuan-asesmen.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <span>Persetujuan Asesmen</span>
+                </a>
                 <a href="{{ route('asesor.banding.index') }}"
                     class="menu-item {{ request()->routeIs('asesor.banding.*') ? 'active' : '' }}">
                     <i class="bi bi-clipboard2-check"></i>
                     <span>Banding Asesmen</span>
+                </a>
+                <a href="{{ route('asesor.ceklis-observasi.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.ceklis-observasi.*') ? 'active' : '' }}">
+                    <i class="bi bi-check2-square"></i>
+                    <span>Ceklis Observasi</span>
                 </a>
                 <a href="{{ route('asesor.jadwal.index') }}"
                     class="menu-item {{ request()->routeIs('asesor.jadwal.*') ? 'active' : '' }}">
@@ -684,6 +704,11 @@
                 <a href="{{ route('asesor.entry-penilaian') }}" class="bottom-nav-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">
                     <i class="bi bi-journal-check"></i>
                     <span>Penilaian</span>
+                </a>
+
+                <a href="{{ route('asesor.persetujuan-asesmen.index') }}" class="bottom-nav-item {{ request()->routeIs('asesor.persetujuan-asesmen.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <span>Persetujuan</span>
                 </a>
 
                 <a href="{{ route('asesor.banding.index') }}" class="bottom-nav-item {{ request()->routeIs('asesor.banding.*') ? 'active' : '' }}">

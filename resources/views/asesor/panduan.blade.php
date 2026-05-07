@@ -311,7 +311,7 @@
 </div>
 
 <div class="quick-links">
-    <a href="{{ route('asesor.asesi.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Asesmen Mandiri</a>
+    <a href="{{ route('asesor.asesmen-mandiri.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Asesmen Mandiri</a>
     <a href="{{ route('asesor.entry-penilaian') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Entry Penilaian</a>
     <a href="{{ route('asesor.jadwal.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Jadwal</a>
     <a href="{{ route('asesor.kelompok.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Kelompok</a>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Asesi;
 use App\Models\Asesor;
 use App\Models\RekamanAsesmenKompetensi;
+use App\Models\PersetujuanAsesmen;
 use App\Models\Skema;
 use App\Models\Unit;
 use Illuminate\Http\Request;
@@ -64,7 +65,7 @@ class RekamanAsesmenKompetensiController extends Controller
         return view('asesor.rekaman-asesmen-kompetensi.index', compact('account', 'asesor', 'items', 'search'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $account = Auth::guard('account')->user();
         $asesor = $this->getAsesor();
@@ -83,10 +84,35 @@ class RekamanAsesmenKompetensiController extends Controller
             'kategori_skema' => '',
             'tuk' => '',
             'catatan_footer' => '* Coret yang tidak perlu',
+            'asesi_nik' => null,
+            'skema_id' => null,
         ];
 
-        if ($skemaList->count() === 1) {
+        // Pre-fill with skema_id if provided
+        if ($request->has('skema_id')) {
+            $skemaId = (int) $request->get('skema_id');
+            if ($skemaList->contains('id', $skemaId)) {
+                $defaults['skema_id'] = $skemaId;
+            }
+        }
+
+        // If skema not provided but only one skema available
+        if (!$defaults['skema_id'] && $skemaList->count() === 1) {
             $defaults['skema_id'] = $skemaList->first()->id;
+        }
+
+        // Pre-fill with asesi_nik if provided. Accept if NIK exists in DB
+        // (fallback API will provide full data even if not assigned to this asesor)
+        if ($request->has('asesi_nik')) {
+            $asesiNik = (string) trim($request->get('asesi_nik'));
+
+            $existsAny = Asesi::query()
+                ->where('NIK', $asesiNik)
+                ->exists();
+
+            if ($existsAny) {
+                $defaults['asesi_nik'] = $asesiNik;
+            }
         }
 
         return view('asesor.rekaman-asesmen-kompetensi.create', compact('account', 'asesor', 'skemaList', 'defaults'));
@@ -96,6 +122,20 @@ class RekamanAsesmenKompetensiController extends Controller
     {
         $asesor = $this->getAsesor();
         abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        // If request provides asesi_nik and skema_id, ensure pivot exists so validation passes
+        $reqAsesiNik = $request->get('asesi_nik');
+        $reqSkemaId = $request->get('skema_id');
+        if ($reqAsesiNik && $reqSkemaId) {
+            $asesiModel = Asesi::query()->where('NIK', (string) $reqAsesiNik)->first();
+            if ($asesiModel) {
+                $attached = $asesiModel->skemas()->where('skemas.id', (int) $reqSkemaId)->exists();
+                if (!$attached) {
+                    // Attach with minimal pivot data; do not overwrite existing relations
+                    $asesiModel->skemas()->syncWithoutDetaching([(int) $reqSkemaId => ['status' => 'terdaftar']]);
+                }
+            }
+        }
 
         [$data, $details] = $this->validatedData($request, $asesor);
 
@@ -226,6 +266,77 @@ class RekamanAsesmenKompetensiController extends Controller
         ]);
     }
 
+    public function getAsesiData(Request $request)
+    {
+        $asesor = $this->getAsesor();
+        abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        $asesiNik = $request->get('asesi_nik');
+        abort_unless($asesiNik, 400, 'asesi_nik is required');
+        $selectedSkemaId = (int) $request->get('skema_id');
+
+        $asesi = Asesi::query()
+            ->where('NIK', $asesiNik)
+            ->where('ID_asesor', $asesor->ID_asesor)
+            ->with(['jurusan:ID_jurusan,kode_jurusan,nama_jurusan', 'kelompok.jadwals'])
+            ->first(['NIK', 'nama', 'email', 'telepon_hp', 'ID_jurusan', 'kelompok_id']);
+
+        if (!$asesi) {
+            $asesi = Asesi::query()
+                ->where('NIK', $asesiNik)
+                ->with(['jurusan:ID_jurusan,kode_jurusan,nama_jurusan', 'kelompok.jadwals'])
+                ->first(['NIK', 'nama', 'email', 'telepon_hp', 'ID_jurusan', 'kelompok_id']);
+        }
+
+        if (!$asesi) {
+            return response()->json(['asesi' => null], 404);
+        }
+
+        $skemaIds = [];
+        try {
+            $skemaIds = method_exists($asesi, 'skemas') ? $asesi->skemas()->pluck('id')->map(fn ($i) => (int) $i)->values()->all() : [];
+        } catch (\Throwable $e) {
+            $skemaIds = [];
+        }
+
+        $jadwal = null;
+        if ($asesi->relationLoaded('kelompok') && $asesi->kelompok) {
+            $jadwals = $asesi->kelompok->jadwals ?? null;
+            if ($jadwals && $jadwals->isNotEmpty()) {
+                $first = $jadwals->sortBy('tanggal_mulai')->first();
+                $jadwal = [
+                    'tanggal_mulai' => $first->tanggal_mulai?->format('Y-m-d') ?? null,
+                    'tanggal_selesai' => $first->tanggal_selesai?->format('Y-m-d') ?? null,
+                ];
+            }
+        }
+
+        $tuk = null;
+        $skema = $selectedSkemaId > 0 ? Skema::find($selectedSkemaId) : null;
+        if ($skema) {
+            $persetujuan = PersetujuanAsesmen::query()
+                ->where('nomor_skema', $skema->nomor_skema)
+                ->where('nama_asesi', $asesi->nama)
+                ->latest('id')
+                ->first(['tuk']);
+
+            $tuk = $persetujuan?->tuk;
+        }
+
+        return response()->json([
+            'asesi' => [
+                'id' => (string) $asesi->NIK,
+                'nama' => $asesi->nama,
+                'email' => $asesi->email,
+                'telepon_hp' => $asesi->telepon_hp,
+                'jurusan' => $asesi->jurusan?->kode_jurusan ? trim($asesi->jurusan->kode_jurusan . ' - ' . $asesi->jurusan->nama_jurusan) : ($asesi->jurusan?->nama_jurusan ?? '-'),
+                'skema_ids' => $skemaIds,
+                'jadwal' => $jadwal,
+                'tuk' => $tuk,
+            ],
+        ]);
+    }
+
     public function skemaUnits(Request $request)
     {
         $asesor = $this->getAsesor();
@@ -258,8 +369,8 @@ class RekamanAsesmenKompetensiController extends Controller
     private function validatedData(Request $request, Asesor $asesor): array
     {
         $data = $request->validate([
-            'kode_form' => 'required|string|max:20',
-            'judul_form' => 'required|string|max:255',
+            'kode_form' => 'nullable|string|max:20',
+            'judul_form' => 'nullable|string|max:255',
             'kategori_skema' => 'nullable|string|max:100',
             'skema_id' => 'required|exists:skemas,id',
             'tuk' => 'nullable|string|max:255',
@@ -339,6 +450,8 @@ class RekamanAsesmenKompetensiController extends Controller
         }
 
         $data['asesor_id'] = $asesor->ID_asesor;
+        $data['kode_form'] = $data['kode_form'] ?: 'FR.AK.02.';
+        $data['judul_form'] = $data['judul_form'] ?: 'REKAMAN ASESMEN KOMPETENSI';
         $data['kategori_skema'] = $data['kategori_skema'] ?: Skema::find($data['skema_id'])?->jenis_skema;
         $data['tuk'] = $data['tuk'] ?: null;
 

@@ -67,6 +67,12 @@
         border:1px solid #d1d5db; border-radius:8px; padding:10px 12px; font-size:13px; font-family:inherit;
     }
 
+    .field input[readonly] {
+        color: #111827;
+        opacity: 1;
+        background: #fff;
+    }
+
     .field textarea { min-height:80px; resize:vertical; }
     .error-text { font-size:12px; color:#ef4444; }
 
@@ -108,6 +114,18 @@
         word-break: break-word;
     }
 
+    /* locked select: hide native dropdown arrow and pointer */
+    select.locked {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: none;
+        color: #111827;
+        opacity: 1;
+        background: #fff;
+        pointer-events: none;
+    }
+
     .table-wrap { overflow-x:auto; border:1px solid #e2e8f0; border-radius:8px; margin-top:12px; }
     .rekaman-table { width:100%; min-width:1100px; border-collapse:collapse; }
     .rekaman-table th, .rekaman-table td { border:1px solid #e2e8f0; padding:8px 10px; font-size:13px; text-align:center; }
@@ -129,18 +147,6 @@
 
 <div class="card-form">
     <div class="grid-2">
-        <div class="field">
-            <label>Kode Form <span class="req">*</span></label>
-            <input type="text" name="kode_form" value="{{ $value('kode_form', '') }}">
-            @error('kode_form')<div class="error-text">{{ $message }}</div>@enderror
-        </div>
-
-        <div class="field">
-            <label>Judul Form <span class="req">*</span></label>
-            <input type="text" name="judul_form" value="{{ $value('judul_form', '') }}">
-            @error('judul_form')<div class="error-text">{{ $message }}</div>@enderror
-        </div>
-
         <div class="field">
             <label>Skema Sertifikasi</label>
             <input id="kategoriSkemaInput" type="text" name="kategori_skema" value="{{ $value('kategori_skema', '') }}" readonly>
@@ -282,9 +288,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const unitRowsContainer = document.getElementById('unitRowsContainer');
     const kategoriSkemaInput = document.getElementById('kategoriSkemaInput');
     const asesiInfoGrid = document.getElementById('asesiInfoGrid');
+    const tukSelect = document.querySelector('select[name="tuk"]');
 
     const participantsUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.skema-participants') }}';
     const unitsUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.skema-units') }}';
+        const getAsesiDataUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.get-asesi-data') }}';
     const selectedAsesiNik = @json($selectedAsesiNik);
     const initialDetailMap = @json($initialDetailMap ?? []);
     const selectedAsesiInfo = @json($selectedAsesiInfo);
@@ -315,6 +323,17 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     const syncAsesiInfo = (selectedValue) => {
+        if (!selectedValue) {
+            renderAsesiInfo(selectedAsesiInfo);
+            return;
+        }
+
+        // If an object is passed, render it directly
+        if (typeof selectedValue === 'object') {
+            renderAsesiInfo(selectedValue);
+            return;
+        }
+
         const selectedItem = asesiOptions.find((item) => String(item.id) === String(selectedValue));
 
         if (selectedItem) {
@@ -354,6 +373,60 @@ document.addEventListener('DOMContentLoaded', function () {
             asesiInfoGrid.querySelector('[data-info="jurusan"]').textContent = fields.jurusan;
             asesiInfoGrid.querySelector('[data-info="telepon"]').textContent = fields.telepon;
         }
+    };
+
+    const normalizeTukValue = (value) => {
+        const text = String(value || '').toLowerCase();
+
+        if (text.includes('sewaktu')) {
+            return 'Sewaktu';
+        }
+
+        if (text.includes('tempat kerja')) {
+            return 'Tempat Kerja';
+        }
+
+        if (text.includes('mandiri')) {
+            return 'Mandiri';
+        }
+
+        return '';
+    };
+
+    const lockAsesiAndSkema = () => {
+        asesiSelect.classList.add('locked');
+        skemaSelect.classList.add('locked');
+    };
+
+    const applyAsesiDetail = (data) => {
+        if (!data || !data.asesi) {
+            return;
+        }
+
+        renderAsesiInfo(data.asesi);
+
+        if (tukSelect) {
+            const normalizedTuk = normalizeTukValue(data.asesi.tuk || data.asesi.tuk_pelaksanaan);
+            if (normalizedTuk) {
+                tukSelect.value = normalizedTuk;
+            }
+            tukSelect.classList.add('locked');
+        }
+
+        if (data.asesi.jadwal) {
+            const mulaiInput = document.querySelector('input[name="tanggal_mulai"]');
+            const selesaiInput = document.querySelector('input[name="tanggal_selesai"]');
+
+            if (mulaiInput && data.asesi.jadwal.tanggal_mulai) {
+                mulaiInput.value = data.asesi.jadwal.tanggal_mulai;
+            }
+
+            if (selesaiInput && data.asesi.jadwal.tanggal_selesai) {
+                selesaiInput.value = data.asesi.jadwal.tanggal_selesai;
+            }
+        }
+
+        lockAsesiAndSkema();
     };
 
     const checkboxCell = (name, checked) => {
@@ -414,20 +487,55 @@ document.addEventListener('DOMContentLoaded', function () {
                 (item) => `${item.nama} (${item.id})`
             );
 
+            // Handle pre-selection of asesi
+            if (applyInitialSelection && selectedAsesiNik) {
+                const detailResponse = await fetch(`${getAsesiDataUrl}?asesi_nik=${encodeURIComponent(selectedAsesiNik)}&skema_id=${encodeURIComponent(skemaId)}`);
+                const detailData = await detailResponse.json();
+
+                // Find the asesi in the options
+                const selectedAsesiOption = asesiOptions.find(a => String(a.id).trim() === String(selectedAsesiNik).trim());
+                
+                if (selectedAsesiOption) {
+                    // Asesi exists in list, select it
+                    asesiSelect.value = String(selectedAsesiOption.id);
+                    syncAsesiInfo(selectedAsesiOption);
+                } else {
+                    // Asesi not in list - fetch it separately as fallback
+                    if (detailData.asesi) {
+                        const option = document.createElement('option');
+                        option.value = String(detailData.asesi.id);
+                        option.textContent = `${detailData.asesi.nama} (${detailData.asesi.id})`;
+                        asesiSelect.appendChild(option);
+                        asesiSelect.value = String(detailData.asesi.id);
+                        syncAsesiInfo(detailData.asesi);
+                    } else {
+                        asesiSelect.value = '';
+                        syncAsesiInfo(null);
+                    }
+                }
+
+                if (detailData.asesi) {
+                    applyAsesiDetail(detailData);
+                    if (detailData.asesi.skema_ids && detailData.asesi.skema_ids.length > 0) {
+                        skemaSelect.value = String(detailData.asesi.skema_ids[0]);
+                        syncNomorSkema();
+                    }
+                } else {
+                    console.error('Asesi detail not found for selected URL param');
+                }
+            } else {
+                syncAsesiInfo(asesiSelect.value);
+            }
+
             if (kategoriSkemaInput) {
                 const selectedOption = skemaSelect.options[skemaSelect.selectedIndex];
                 kategoriSkemaInput.value = (selectedOption && selectedOption.getAttribute('data-jenis')) || selectedKategoriSkema || '';
             }
 
-            if (applyInitialSelection) {
-                syncAsesiInfo(selectedAsesiNik);
-            } else {
-                syncAsesiInfo(asesiSelect.value);
-            }
-
             renderUnits(unitPayload.units || []);
             applyInitialSelection = false;
         } catch (error) {
+                        console.error('Error loading skema data:', error);
             resetSelect(asesiSelect, '-- Gagal memuat asesi --');
             renderAsesiInfo(null);
             unitRowsContainer.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#b91c1c;">Gagal memuat unit kompetensi.</td></tr>';

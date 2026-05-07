@@ -427,6 +427,31 @@
         border-bottom: 1px solid #f3f4f6;
     }
 
+    .dropdown-menu .menu-disabled {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #94a3b8;
+        background: #f8fafc;
+        border-bottom: 1px solid #f3f4f6;
+        cursor: not-allowed;
+    }
+
+    .dropdown-menu .menu-disabled:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-menu .menu-disabled i {
+        font-size: 14px;
+        width: 18px;
+        text-align: center;
+        color: #94a3b8;
+    }
+
     .dropdown-menu a:last-child,
     .dropdown-menu button:last-child {
         border-bottom: none;
@@ -819,12 +844,6 @@
             &bull; <span id="totalAsesi">{{ $summary['total'] ?? $data->count() }}</span> asesi
         </p>
     </div>
-    <div class="page-header-actions">
-        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create') }}" class="btn-action">
-            <i class="bi bi-plus-circle"></i>
-            <span>Buat Rekaman</span>
-        </a>
-    </div>
 </div>
 
 <div class="summary-row">
@@ -907,6 +926,7 @@
                         'sedang_mengerjakan' => 'Sedang Dikerjakan',
                         default              => 'Belum Mulai',
                     };
+                    $canProceed = $row->status !== 'belum_mulai';
                 @endphp
                 <tr>
                     <td>
@@ -937,22 +957,69 @@
                                 <i class="bi bi-three-dots-vertical"></i>
                             </button>
                             <div class="dropdown-menu">
-                                <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" title="Lihat detail dan review asesmen asesi">
+                                <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Lihat detail asesmen mandiri">
                                     <i class="bi bi-eye"></i>
                                     <span>Lihat Detail</span>
                                 </a>
-                                <a href="#" title="Akses asesmen mandiri" onclick="alert('Fitur Asesmen Mandiri')">
-                                    <i class="bi bi-pencil-square"></i>
-                                    <span>Asesmen Mandiri</span>
-                                </a>
-                                <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Lakukan penilaian">
-                                    <i class="bi bi-clipboard-check"></i>
-                                    <span>Penilaian</span>
-                                </a>
-                                <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}" title="Lihat rekaman asesmen">
-                                    <i class="bi bi-file-earmark-text"></i>
-                                    <span>Rekaman Asesi</span>
-                                </a>
+                                @if($canProceed && $row->has_asesmen_mandiri)
+                                    <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Review asesmen mandiri">
+                                        <i class="bi bi-pencil-square"></i>
+                                        <span>Asesmen Mandiri</span>
+                                    </a>
+                                @else
+                                    <span class="menu-disabled">
+                                        <i class="bi bi-pencil-square"></i>
+                                        <span>Asesmen Mandiri</span>
+                                    </span>
+                                @endif
+                                @if(!$canProceed)
+                                    <span class="menu-disabled">
+                                        <i class="bi bi-clipboard-check"></i>
+                                        <span>Penilaian</span>
+                                    </span>
+                                    <span class="menu-disabled">
+                                        <i class="bi bi-check2-square"></i>
+                                        <span>Ceklis Observasi</span>
+                                    </span>
+                                    <span class="menu-disabled">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                        <span>Rekaman Asesi</span>
+                                    </span>
+                                @else
+                                    @if($row->has_penilaian)
+                                        <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Edit penilaian">
+                                            <i class="bi bi-clipboard-check"></i>
+                                            <span>Penilaian</span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Mulai penilaian">
+                                            <i class="bi bi-clipboard-check"></i>
+                                            <span>Penilaian</span>
+                                        </a>
+                                    @endif
+                                    @if($row->has_ceklis_observasi)
+                                        <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
+                                            <i class="bi bi-check2-square"></i>
+                                            <span>Ceklis Observasi</span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('asesor.ceklis-observasi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Isi ceklis observasi">
+                                            <i class="bi bi-check2-square"></i>
+                                            <span>Ceklis Observasi</span>
+                                        </a>
+                                    @endif
+                                    @if($row->has_rekaman)
+                                        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index', ['asesi_nik' => $row->asesi_nik]) }}" title="Lihat rekaman asesmen">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                            <span>Rekaman Asesi</span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Buat rekaman asesmen">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                            <span>Rekaman Asesi</span>
+                                        </a>
+                                    @endif
+                                @endif
                             </div>
                         </div>
                     </td>
@@ -986,6 +1053,7 @@
                 'sedang_mengerjakan' => 'Sedang Dikerjakan',
                 default              => 'Belum Mulai',
             };
+            $canProceed = $row->status !== 'belum_mulai';
         @endphp
         <div class="asesi-card">
             <!-- Card Header -->
@@ -1051,22 +1119,69 @@
                         <span>Menu Aksi</span>
                     </button>
                     <div class="dropdown-menu" style="right: auto; left: 0; min-width: 180px;">
-                        <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" title="Lihat detail dan review asesmen asesi">
+                        <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Lihat detail asesmen mandiri">
                             <i class="bi bi-eye"></i>
                             <span>Lihat Detail</span>
                         </a>
-                        <a href="#" title="Akses asesmen mandiri" onclick="alert('Fitur Asesmen Mandiri')">
-                            <i class="bi bi-pencil-square"></i>
-                            <span>Asesmen Mandiri</span>
-                        </a>
-                        <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Lakukan penilaian">
-                            <i class="bi bi-clipboard-check"></i>
-                            <span>Penilaian</span>
-                        </a>
-                        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}" title="Lihat rekaman asesmen">
-                            <i class="bi bi-file-earmark-text"></i>
-                            <span>Rekaman Asesi</span>
-                        </a>
+                        @if($canProceed && $row->has_asesmen_mandiri)
+                            <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Review asesmen mandiri">
+                                <i class="bi bi-pencil-square"></i>
+                                <span>Asesmen Mandiri</span>
+                            </a>
+                        @else
+                            <span class="menu-disabled">
+                                <i class="bi bi-pencil-square"></i>
+                                <span>Asesmen Mandiri</span>
+                            </span>
+                        @endif
+                        @if(!$canProceed)
+                            <span class="menu-disabled">
+                                <i class="bi bi-clipboard-check"></i>
+                                <span>Penilaian</span>
+                            </span>
+                            <span class="menu-disabled">
+                                <i class="bi bi-check2-square"></i>
+                                <span>Ceklis Observasi</span>
+                            </span>
+                            <span class="menu-disabled">
+                                <i class="bi bi-file-earmark-text"></i>
+                                <span>Rekaman Asesi</span>
+                            </span>
+                        @else
+                            @if($row->has_penilaian)
+                                <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Edit penilaian">
+                                    <i class="bi bi-clipboard-check"></i>
+                                    <span>Penilaian</span>
+                                </a>
+                            @else
+                                <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Mulai penilaian">
+                                    <i class="bi bi-clipboard-check"></i>
+                                    <span>Penilaian</span>
+                                </a>
+                            @endif
+                            @if($row->has_ceklis_observasi)
+                                <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
+                                    <i class="bi bi-check2-square"></i>
+                                    <span>Ceklis Observasi</span>
+                                </a>
+                            @else
+                                <a href="{{ route('asesor.ceklis-observasi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Isi ceklis observasi">
+                                    <i class="bi bi-check2-square"></i>
+                                    <span>Ceklis Observasi</span>
+                                </a>
+                            @endif
+                            @if($row->has_rekaman)
+                                <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index', ['asesi_nik' => $row->asesi_nik]) }}" title="Lihat rekaman asesmen">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    <span>Rekaman Asesi</span>
+                                </a>
+                            @else
+                                <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Buat rekaman asesmen">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    <span>Rekaman Asesi</span>
+                                </a>
+                            @endif
+                        @endif
                     </div>
                 </div>
             </div>

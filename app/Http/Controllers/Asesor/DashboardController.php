@@ -307,10 +307,53 @@ class DashboardController extends Controller
 
         $rows = $query->orderByDesc('updated_at')->get();
 
+        // Get rekaman, asesmen mandiri, and penilaian counts
+        $rekamanByAsesiSkema = DB::table('rekaman_asesmen_kompetensi')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->select(DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`"), 'id')
+            ->get()
+            ->pluck('id', 'asset_key');
+        
+        $asesmenByAsesiSkema = DB::table('jawaban_elemens as je')
+            ->join('elemens as e', 'je.elemen_id', '=', 'e.id')
+            ->join('units as u', 'e.unit_id', '=', 'u.id')
+            ->whereIn('je.asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
+            ->whereIn('u.skema_id', $skemaIds)
+            ->select(DB::raw("CONCAT(je.asesi_nik, '|', u.skema_id) as `asset_key`"), 'je.id')
+            ->get()
+            ->pluck('id', 'asset_key');
+        
+        $penilaianByAsesiSkema = DB::table('asesor_nilai_elemens')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->whereIn('asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
+            ->select(DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`"), 'id')
+            ->get()
+            ->pluck('id', 'asset_key');
+
+        $ceklisByAsesiSkema = DB::table('ceklis_observasi_aktivitas_praktiks')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->whereIn('asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
+            ->whereIn('skema_id', $skemaIds)
+            ->select(
+                DB::raw("MAX(id) as id"),
+                DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`")
+            )
+            ->groupBy('asesi_nik', 'skema_id')
+            ->get()
+            ->pluck('id', 'asset_key');
+
         // Attach asesi data
-        $data = $rows->map(function ($row) {
+        $data = $rows->map(function ($row) use ($rekamanByAsesiSkema, $asesmenByAsesiSkema, $penilaianByAsesiSkema) {
             $row->asesi = Asesi::where('NIK', $row->asesi_nik)->first();
             $row->skema = Skema::find($row->skema_id);
+            
+            $key = "{$row->asesi_nik}|{$row->skema_id}";
+            $row->has_rekaman = isset($rekamanByAsesiSkema[$key]);
+            $row->has_asesmen_mandiri = isset($asesmenByAsesiSkema[$key]);
+            $row->has_penilaian = isset($penilaianByAsesiSkema[$key]);
+            $row->has_ceklis_observasi = isset($ceklisByAsesiSkema[$key]);
+            $row->ceklis_observasi_id = $ceklisByAsesiSkema[$key] ?? null;
+            
             return $row;
         });
 
@@ -504,7 +547,7 @@ class DashboardController extends Controller
         $asesor  = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
 
-        $asesi = Asesi::with(['jurusan'])->where('NIK', $asesiNik)->firstOrFail();
+        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
 
         // Cari pivot di semua skema asesor
         $pivot = DB::table('asesi_skema')
@@ -514,7 +557,122 @@ class DashboardController extends Controller
 
         abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
 
-        $skemaId = $pivot->skema_id;
+        return redirect()->route('asesor.asesmen-mandiri.show', [
+            'asesiNik' => $asesiNik,
+            'skemaId' => $pivot->skema_id,
+        ]);
+    }
+
+    /**
+     * Daftar asesmen mandiri untuk asesor
+     */
+    public function asesmenMandiriIndex(Request $request)
+    {
+        $account = Auth::guard('account')->user();
+        $asesor  = $this->getAsesor();
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+        $search = trim((string) $request->get('search'));
+        $status = (string) $request->get('status');
+
+        if (!$asesor || !count($skemaIds)) {
+            $data = collect();
+            $summary = [
+                'total' => 0,
+                'selesai' => 0,
+                'sedang' => 0,
+                'belum' => 0,
+                'reviewed' => 0,
+                'pending_review' => 0,
+            ];
+
+            return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status'));
+        }
+
+        $query = DB::table('asesi_skema')->whereIn('skema_id', $skemaIds);
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        if ($search !== '') {
+            $query
+                ->join('asesi as a', 'asesi_skema.asesi_nik', '=', 'a.NIK')
+                ->join('skemas as s', 'asesi_skema.skema_id', '=', 's.id')
+                ->where(function ($q) use ($search) {
+                    $q->where('a.nama', 'like', "%{$search}%")
+                        ->orWhere('a.NIK', 'like', "%{$search}%")
+                        ->orWhere('s.nama_skema', 'like', "%{$search}%")
+                        ->orWhere('s.nomor_skema', 'like', "%{$search}%");
+                })
+                ->select('asesi_skema.*');
+        }
+
+        $rows = $query->orderByDesc('updated_at')->get();
+
+        $asesiMap = Asesi::query()
+            ->whereIn('NIK', $rows->pluck('asesi_nik')->unique()->values())
+            ->get()
+            ->keyBy('NIK');
+
+        $skemaMap = Skema::query()
+            ->whereIn('id', $rows->pluck('skema_id')->unique()->values())
+            ->get()
+            ->keyBy('id');
+
+        $asesmenByAsesiSkema = DB::table('jawaban_elemens as je')
+            ->join('elemens as e', 'je.elemen_id', '=', 'e.id')
+            ->join('units as u', 'e.unit_id', '=', 'u.id')
+            ->whereIn('je.asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
+            ->whereIn('u.skema_id', $skemaIds)
+            ->select(
+                DB::raw("COUNT(je.id) as total"),
+                DB::raw("CONCAT(je.asesi_nik, '|', u.skema_id) as `asset_key`")
+            )
+            ->groupBy('je.asesi_nik', 'u.skema_id')
+            ->get()
+            ->pluck('total', 'asset_key');
+
+        $data = $rows->map(function ($row) use ($asesiMap, $skemaMap, $asesmenByAsesiSkema) {
+            $row->asesi = $asesiMap[$row->asesi_nik] ?? null;
+            $row->skema = $skemaMap[$row->skema_id] ?? null;
+
+            $key = "{$row->asesi_nik}|{$row->skema_id}";
+            $row->has_asesmen_mandiri = isset($asesmenByAsesiSkema[$key]);
+            $row->jawaban_count = (int) ($asesmenByAsesiSkema[$key] ?? 0);
+
+            return $row;
+        });
+
+        $summary = [
+            'total' => $data->count(),
+            'selesai' => $data->where('status', 'selesai')->count(),
+            'sedang' => $data->where('status', 'sedang_mengerjakan')->count(),
+            'belum' => $data->where('status', 'belum_mulai')->count(),
+            'reviewed' => $data->whereNotNull('rekomendasi')->count(),
+            'pending_review' => $data->where('status', 'selesai')->whereNull('rekomendasi')->count(),
+        ];
+
+        return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status'));
+    }
+
+    /**
+     * Detail asesmen mandiri untuk asesor
+     */
+    public function asesmenMandiriShow($asesiNik, $skemaId)
+    {
+        $account = Auth::guard('account')->user();
+        $asesor  = $this->getAsesor();
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+
+        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->first();
+
+        abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
 
         $skema = Skema::with(['units.elemens.kriteria'])->findOrFail($skemaId);
 
@@ -525,25 +683,22 @@ class DashboardController extends Controller
 
         $kCount  = $answers->where('status', 'K')->count();
         $bkCount = $answers->where('status', 'BK')->count();
-
-        // Ambil bukti pendukung (transkrip nilai, identitas pribadi, bukti kompetensi)
-        $buktiPendukung = $asesi->buktiPendukung()->get();
-        $transkripNilai = $asesi->transkripNilai()->get();
-        $identitasPribadi = $asesi->identitasPribadi()->get();
-        $buktiKompetensi = $asesi->buktiKompetensi()->get();
+        $totalElemen = $skema->units->reduce(function ($carry, $unit) {
+            return $carry + $unit->elemens->count();
+        }, 0);
+        $totalBelum = max(0, $totalElemen - $kCount - $bkCount);
 
         $savedSignature = $asesor ? $asesor->saved_tanda_tangan : null;
 
-        return view('asesor.asesi.review', compact(
-            'account', 'asesor', 'asesi', 'skema', 'answers', 'pivot', 'kCount', 'bkCount', 'savedSignature',
-            'buktiPendukung', 'transkripNilai', 'identitasPribadi', 'buktiKompetensi'
+        return view('asesor.asesmen-mandiri.show', compact(
+            'account', 'asesor', 'asesi', 'skema', 'answers', 'pivot', 'kCount', 'bkCount', 'totalElemen', 'totalBelum', 'savedSignature'
         ));
     }
 
     /**
      * Simpan rekomendasi asesor untuk asesmen mandiri asesi
      */
-    public function recommend(Request $request, $asesiNik)
+    public function recommend(Request $request, $asesiNik, $skemaId = null)
     {
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
@@ -564,16 +719,23 @@ class DashboardController extends Controller
         }
 
         // Pastikan asesi ini memang di skema asesor
-        $pivot = DB::table('asesi_skema')
+        $pivotQuery = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
-            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
-            ->first();
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds));
+
+        if ($skemaId) {
+            $pivotQuery->where('skema_id', $skemaId);
+        }
+
+        $pivot = $pivotQuery->first();
 
         abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
 
+        $targetSkemaId = $skemaId ?: $pivot->skema_id;
+
         $updated = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
-            ->where('skema_id', $pivot->skema_id)
+            ->where('skema_id', $targetSkemaId)
             ->update([
                 'rekomendasi'                => $request->rekomendasi,
                 'catatan_asesor'             => $request->catatan_asesor,
@@ -594,6 +756,13 @@ class DashboardController extends Controller
         $label = $request->rekomendasi === 'lanjut'
             ? 'Asesmen dapat dilanjutkan'
             : 'Asesmen tidak dapat dilanjutkan';
+
+        if ($skemaId) {
+            return redirect()->route('asesor.asesmen-mandiri.show', [
+                'asesiNik' => $asesiNik,
+                'skemaId' => $targetSkemaId,
+            ])->with('success', 'Rekomendasi berhasil disimpan: ' . $label . '.');
+        }
 
         return redirect()->route('asesor.asesi.review', $asesiNik)
             ->with('success', 'Rekomendasi berhasil disimpan: ' . $label . '.');

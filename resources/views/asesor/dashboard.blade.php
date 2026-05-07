@@ -294,7 +294,7 @@
                         @else — @endif
                     </td>
                     <td>
-                        <a href="{{ route('asesor.asesi.review', $row->asesi_nik) }}" class="btn-review">
+                        <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" class="btn-review">
                             <i class="bi bi-eye"></i> Review
                         </a>
                     </td>

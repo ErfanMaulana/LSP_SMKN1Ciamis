@@ -8,6 +8,7 @@ use App\Models\Skema;
 use App\Models\JawabanElemen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AsesmenMandiriController extends Controller
 {
@@ -97,5 +98,47 @@ class AsesmenMandiriController extends Controller
         }
 
         return view('admin.asesmen-mandiri.show', compact('asesi', 'skema', 'pivot', 'jawaban', 'reviewer'));
+    }
+
+    public function reset(Request $request, $asesiNik, $skemaId)
+    {
+        // authorize via middleware route permission
+
+        DB::beginTransaction();
+        try {
+            // Reset pivot row in asesI_skema
+            DB::table('asesi_skema')
+                ->where('asesi_nik', $asesiNik)
+                ->where('skema_id', $skemaId)
+                ->update([
+                    'status' => 'belum_mulai',
+                    'tanggal_mulai' => null,
+                    'tanggal_selesai' => null,
+                    'rekomendasi' => null,
+                    'catatan_asesor' => null,
+                    'reviewed_by' => null,
+                    'reviewed_at' => null,
+                    'tanda_tangan' => null,
+                    'tanggal_tanda_tangan' => null,
+                    'updated_at' => now(),
+                ]);
+
+            // Delete jawaban elemen for this asesi and skema elements
+            $skema = Skema::with('units.elemens')->find($skemaId);
+            if ($skema) {
+                $elemenIds = $skema->units->pluck('elemens')->flatten()->pluck('id')->all();
+                if (!empty($elemenIds)) {
+                    JawabanElemen::where('asesi_nik', $asesiNik)
+                        ->whereIn('elemen_id', $elemenIds)
+                        ->delete();
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('admin.asesmen-mandiri.index')->with('success', 'Asesmen mandiri direset. Asesi akan mengulang pengisian.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('admin.asesmen-mandiri.index')->with('error', 'Gagal mereset asesmen: ' . $e->getMessage());
+        }
     }
 }

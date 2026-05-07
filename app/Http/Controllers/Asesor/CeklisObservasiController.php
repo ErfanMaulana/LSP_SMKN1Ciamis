@@ -7,6 +7,7 @@ use App\Models\Asesi;
 use App\Models\Asesor;
 use App\Models\CeklisObservasiAktivitasPraktik;
 use App\Models\Kriteria;
+use App\Models\PersetujuanAsesmen;
 use App\Models\Skema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -66,7 +67,7 @@ class CeklisObservasiController extends Controller
         return view('asesor.ceklis-observasi.index', compact('account', 'asesor', 'items', 'search'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $account = Auth::guard('account')->user();
         $asesor = $this->getAsesor();
@@ -85,6 +86,38 @@ class CeklisObservasiController extends Controller
             'ttd_asesor_no_reg' => $asesor->no_met,
         ];
 
+        $requestedSkemaId = (int) $request->get('skema_id');
+        if ($requestedSkemaId && $asesor->skemas->contains('id', $requestedSkemaId)) {
+            $activeSkema = $asesor->skemas->firstWhere('id', $requestedSkemaId) ?? $activeSkema;
+            $defaults['skema_id'] = $activeSkema->id;
+        }
+
+        $requestedAsesiNik = trim((string) $request->get('asesi_nik'));
+        if ($requestedAsesiNik !== '') {
+            $asesi = Asesi::query()
+                ->where('NIK', $requestedAsesiNik)
+                ->whereHas('skemas', function ($query) use ($activeSkema) {
+                    $query->where('skemas.id', $activeSkema->id);
+                })
+                ->first(['NIK', 'nama']);
+
+            if ($asesi) {
+                $existing = CeklisObservasiAktivitasPraktik::query()
+                    ->where('asesor_id', $asesor->ID_asesor)
+                    ->where('asesi_nik', $asesi->NIK)
+                    ->where('skema_id', $activeSkema->id)
+                    ->latest('id')
+                    ->first(['id']);
+
+                if ($existing) {
+                    return redirect()->route('asesor.ceklis-observasi.show', $existing->id);
+                }
+
+                $defaults['asesi_nik'] = $asesi->NIK;
+                $defaults['ttd_asesi_nama'] = $asesi->nama;
+            }
+        }
+
         return view('asesor.ceklis-observasi.create', compact('account', 'asesor', 'activeSkema', 'defaults'));
     }
 
@@ -102,6 +135,35 @@ class CeklisObservasiController extends Controller
 
         return redirect()->route('asesor.ceklis-observasi.index')
             ->with('success', 'Ceklis observasi berhasil disimpan.');
+    }
+
+    public function show($id)
+    {
+        $account = Auth::guard('account')->user();
+        $asesor = $this->getAsesor();
+        abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        $item = CeklisObservasiAktivitasPraktik::query()
+            ->with([
+                'skema:id,nama_skema,nomor_skema',
+                'asesi:NIK,nama',
+                'details.unit:id,kode_unit,judul_unit',
+                'details.elemen:id,unit_id,nama_elemen',
+                'details.kriteria:id,elemen_id,deskripsi_kriteria,urutan',
+            ])
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->findOrFail($id);
+
+        $detailsByUnit = $item->details
+            ->sortBy([
+                ['unit_id', 'asc'],
+                ['elemen_id', 'asc'],
+                ['kriteria.urutan', 'asc'],
+                ['kriteria_id', 'asc'],
+            ])
+            ->groupBy('unit_id');
+
+        return view('asesor.ceklis-observasi.show', compact('account', 'asesor', 'item', 'detailsByUnit'));
     }
 
     public function edit($id)
@@ -172,7 +234,6 @@ class CeklisObservasiController extends Controller
         abort_unless($isOwnedSkema, 403, 'Skema tidak termasuk penugasan asesor Anda.');
 
         $asesi = Asesi::query()
-            ->where('ID_asesor', $asesor->ID_asesor)
             ->whereHas('skemas', function ($query) use ($skemaId) {
                 $query->where('skemas.id', $skemaId);
             })
@@ -191,6 +252,74 @@ class CeklisObservasiController extends Controller
                 'nama' => $asesor->nama,
                 'no_reg' => $asesor->no_met,
             ]],
+        ]);
+    }
+
+    public function getAsesiData(Request $request)
+    {
+        $asesor = $this->getAsesor();
+        abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        $validated = $request->validate([
+            'asesi_nik' => 'required|exists:asesi,NIK',
+            'skema_id' => 'required|exists:skemas,id',
+        ]);
+
+        $skemaId = (int) $validated['skema_id'];
+        $isOwnedSkema = $asesor->skemas->contains('id', $skemaId);
+        abort_unless($isOwnedSkema, 403, 'Skema tidak termasuk penugasan asesor Anda.');
+
+        $asesi = Asesi::query()
+            ->where('NIK', $validated['asesi_nik'])
+            ->whereHas('skemas', function ($query) use ($skemaId) {
+                $query->where('skemas.id', $skemaId);
+            })
+            ->with(['kelompok.jadwals.tuk'])
+            ->first(['NIK', 'nama', 'kelompok_id']);
+
+        if (!$asesi) {
+            return response()->json(['asesi' => null], 404);
+        }
+
+        $tukName = null;
+        $tanggal = null;
+
+        if ($asesi->relationLoaded('kelompok') && $asesi->kelompok) {
+            $jadwals = $asesi->kelompok->jadwals ?? collect();
+            if ($jadwals->isNotEmpty()) {
+                $filtered = $jadwals->where('skema_id', $skemaId);
+                $jadwalPick = ($filtered->isNotEmpty() ? $filtered : $jadwals)
+                    ->sortBy('tanggal_mulai')
+                    ->first();
+
+                if ($jadwalPick) {
+                    $tukName = $jadwalPick->tuk?->nama_tuk;
+                    $tanggal = $jadwalPick->tanggal_mulai?->format('Y-m-d')
+                        ?? $jadwalPick->tanggal_selesai?->format('Y-m-d');
+                }
+            }
+        }
+
+        if (!$tukName) {
+            $skema = Skema::find($skemaId);
+            if ($skema) {
+                $persetujuan = PersetujuanAsesmen::query()
+                    ->where('nomor_skema', $skema->nomor_skema)
+                    ->where('nama_asesi', $asesi->nama)
+                    ->latest('id')
+                    ->first(['tuk']);
+
+                $tukName = $persetujuan?->tuk;
+            }
+        }
+
+        return response()->json([
+            'asesi' => [
+                'id' => (string) $asesi->NIK,
+                'nama' => $asesi->nama,
+            ],
+            'tuk' => $tukName,
+            'tanggal' => $tanggal,
         ]);
     }
 
@@ -282,7 +411,6 @@ class CeklisObservasiController extends Controller
 
         $validAsesi = Asesi::query()
             ->where('NIK', $data['asesi_nik'])
-            ->where('ID_asesor', $asesor->ID_asesor)
             ->whereHas('skemas', function ($query) use ($data) {
                 $query->where('skemas.id', $data['skema_id']);
             })
