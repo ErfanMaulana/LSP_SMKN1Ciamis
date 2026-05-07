@@ -140,15 +140,6 @@
 
     .profile-header {
         background: #fff;
-                        @if($asesi->tanda_tangan_admin)
-                            <div style="margin-top:12px;padding-top:12px;border-top:1px dashed #e5e7eb;">
-                                <p style="font-size:12px;color:#64748b;margin:0 0 8px;">Tanda tangan admin</p>
-                                <img src="{{ $asesi->tanda_tangan_admin }}" alt="Tanda tangan admin" style="max-width:260px;width:100%;height:auto;border:1px solid #e5e7eb;border-radius:8px;background:#fff;padding:8px;">
-                                @if($asesi->tanggal_tanda_tangan_admin)
-                                    <p style="font-size:11px;color:#94a3b8;margin-top:6px;">{{ \\Carbon\\Carbon::parse($asesi->tanggal_tanda_tangan_admin)->locale('id')->translatedFormat('d M Y H:i') }}</p>
-                                @endif
-                            </div>
-                        @endif
         border-radius: 12px;
         padding: 28px;
         display: flex;
@@ -901,6 +892,15 @@
                         </p>
                         @if($asesi->catatan_admin)
                             <p style="margin-top:8px;"><strong>Catatan:</strong> {{ $asesi->catatan_admin }}</p>
+                        @endif
+                        @if($asesi->tanda_tangan_admin)
+                            <div style="margin-top:12px;padding-top:12px;border-top:1px dashed #e5e7eb;">
+                                <p style="font-size:12px;color:#64748b;margin:0 0 8px;">Tanda tangan admin</p>
+                                <img src="{{ $asesi->tanda_tangan_admin }}" alt="Tanda tangan admin" style="max-width:260px;width:100%;height:auto;border:1px solid #e5e7eb;border-radius:8px;background:#fff;padding:8px;">
+                                @if($asesi->tanggal_tanda_tangan_admin)
+                                    <p style="font-size:11px;color:#94a3b8;margin-top:6px;">{{ \Carbon\Carbon::parse($asesi->tanggal_tanda_tangan_admin)->locale('id')->translatedFormat('d M Y H:i') }}</p>
+                                @endif
+                            </div>
                         @endif
                     </div>
                 </div>

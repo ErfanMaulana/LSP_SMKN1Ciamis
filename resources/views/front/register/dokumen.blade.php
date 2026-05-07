@@ -49,6 +49,69 @@
             object-fit: cover;
             border-radius: 50%;
         }
+
+        /* Signature Styles */
+        .signature-section {
+            border border-gray-200 rounded-lg p-5 bg-white;
+        }
+
+        .signature-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 6px;
+            background: #f8fafc;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        .signature-canvas {
+            display: block;
+            width: 100%;
+            height: 200px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .signature-placeholder {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #cbd5e1;
+            font-size: 14px;
+            pointer-events: none;
+            text-align: center;
+        }
+
+        .signature-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .signature-error {
+            display: none;
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 12px 16px;
+            border-radius: 4px;
+            color: #991b1b;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .signature-success {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 12px 16px;
+            border-radius: 4px;
+            color: #15803d;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
     </style>
 </head>
 
@@ -266,6 +329,38 @@
                             </div>
                         </div>
 
+                        <!-- Signature Section -->
+                        <div class="signature-section">
+                            <div class="flex items-start space-x-4">
+                                <div class="bg-indigo-100 rounded-lg p-3 flex-shrink-0">
+                                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-semibold text-gray-800 mb-1">Tanda Tangan Pendaftar <span class="text-red-500">*</span></h4>
+                                    <p class="text-xs text-gray-400 mb-4">Silakan buat tanda tangan Anda di area dibawah ini</p>
+                                    <div id="signatureErrorDokumen" class="signature-error">Tanda tangan harus diisi sebelum submit</div>
+                                    <div class="signature-box">
+                                        <canvas id="signatureCanvasDokumen" class="signature-canvas"></canvas>
+                                        <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
+                                    </div>
+                                    <div class="signature-actions">
+                                        <button type="button" onclick="clearSignatureDokumen()"
+                                            class="inline-flex items-center px-4 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">
+                                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                            Hapus
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-3">Tanggal & waktu akan dicatat secara otomatis</p>
+                                    <input type="hidden" name="tanda_tangan_pendaftar" id="signatureInputDokumen" value="">
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Submit Button -->
                         <div class="flex justify-center pt-4">
                             <button type="submit"
@@ -374,6 +469,103 @@
                 span.classList.add('text-gray-400');
             }
         }
+
+        // Signature Pad Initialization
+        const initSignaturePadDokumen = () => {
+            const canvas = document.getElementById('signatureCanvasDokumen');
+            const signatureInput = document.getElementById('signatureInputDokumen');
+            const signatureBox = canvas.parentElement;
+            const clearButton = document.querySelector('[onclick="clearSignatureDokumen()"]');
+            const errorBox = document.getElementById('signatureErrorDokumen');
+            const placeholder = signatureBox.querySelector('.signature-placeholder');
+
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            let hasSignature = false;
+            let points = [];
+
+            // Resize canvas to match display size
+            const resizeCanvas = () => {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * window.devicePixelRatio;
+                canvas.height = rect.height * window.devicePixelRatio;
+                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#1f2937';
+            };
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Pointer events for drawing
+            const startDrawing = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                drawing = true;
+                points = [{x, y}];
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                placeholder.style.display = 'none';
+            };
+
+            const draw = (e) => {
+                if (!drawing) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                points.push({x, y});
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            };
+
+            const stopDrawing = () => {
+                if (drawing && points.length > 0) {
+                    hasSignature = true;
+                    signatureInput.value = canvas.toDataURL('image/png');
+                }
+                drawing = false;
+            };
+
+            canvas.addEventListener('pointerdown', startDrawing);
+            canvas.addEventListener('pointermove', draw);
+            canvas.addEventListener('pointerup', stopDrawing);
+            canvas.addEventListener('pointerleave', stopDrawing);
+        };
+
+        const clearSignatureDokumen = () => {
+            const canvas = document.getElementById('signatureCanvasDokumen');
+            const signatureInput = document.getElementById('signatureInputDokumen');
+            const placeholder = canvas.parentElement.querySelector('.signature-placeholder');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            signatureInput.value = '';
+            placeholder.style.display = 'block';
+        };
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addFileInput('transkrip_nilai');
+            addFileInput('identitas_pribadi');
+            addFileInput('bukti_kompetensi');
+            initSignaturePadDokumen();
+
+            // Form validation
+            const form = document.querySelector('form');
+            const signatureInput = document.getElementById('signatureInputDokumen');
+            const signatureError = document.getElementById('signatureErrorDokumen');
+            const canvas = document.getElementById('signatureCanvasDokumen');
+
+            form.addEventListener('submit', (event) => {
+                if (!signatureInput.value) {
+                    event.preventDefault();
+                    signatureError.style.display = 'block';
+                    canvas.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
     </script>
 
 </body>
