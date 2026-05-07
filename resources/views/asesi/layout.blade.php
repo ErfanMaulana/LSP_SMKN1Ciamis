@@ -637,6 +637,14 @@
     @yield('styles')
 </head>
 <body class="{{ request()->routeIs('asesi.pendaftaran.*') ? 'no-sidebar' : '' }}">
+    @php
+        $account = $account ?? auth()->guard('account')->user();
+        if (!isset($asesi)) {
+            $asesi = ($account && !empty($account->NIK))
+                ? \App\Models\Asesi::where('NIK', $account->NIK)->first()
+                : null;
+        }
+    @endphp
     <div class="asesi-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">

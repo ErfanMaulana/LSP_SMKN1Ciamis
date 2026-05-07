@@ -10,13 +10,48 @@ use App\Models\Skema;
 use App\Models\Tuk;
 use App\Models\PersetujuanAsesmen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class PersetujuanAsesmenFrontController extends Controller
 {
+    private function hasAsesiNikColumn(): bool
+    {
+        static $hasColumn = null;
+
+        if ($hasColumn === null) {
+            $hasColumn = Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
+        }
+
+        return $hasColumn;
+    }
+
+    private function buildDefaultPayload(array $overrides = []): array
+    {
+        $payload = array_merge([
+            'kode_form' => 'FR.AK.01.',
+            'judul_form' => 'PERSETUJUAN ASESMEN DAN KERAHASIAAN',
+            'pengantar' => 'Persetujuan Asesmen ini untuk menjamin bahwa Asesi telah diberi arahan secara rinci tentang perencanaan dan proses asesmen',
+            'kategori_skema' => 'KKNI/Okupasi/Klaster',
+            'tuk' => 'Sewaktu/Tempat Kerja/Mandiri*',
+            'nama_asesor' => '-',
+            'pernyataan_asesi_1' => 'Bahwa saya telah mendapatkan penjelasan terkait hak dan prosedur banding asesmen dari asesor.',
+            'pernyataan_asesor' => 'Menyatakan tidak akan membuka hasil pekerjaan yang saya peroleh karena penugasan saya sebagai Asesor dalam pekerjaan Asesmen kepada siapapun atau organisasi apapun selain kepada pihak yang berwenang sehubungan dengan kewajiban saya sebagai Asesor yang ditugaskan oleh LSP.',
+            'pernyataan_asesi_2' => 'Saya setuju mengikuti asesmen dengan pemahaman bahwa informasi yang dikumpulkan hanya digunakan untuk pengembangan profesional dan hanya dapat diakses oleh orang tertentu saja.',
+            'catatan_footer' => '* Coret yang tidak perlu',
+        ], $overrides);
+
+        if (!$this->hasAsesiNikColumn()) {
+            unset($payload['asesi_nik']);
+        }
+
+        return $payload;
+    }
+
     public function asesorIndex(Request $request)
     {
         $account = $request->user();
         $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
+        $useNik = $this->hasAsesiNikColumn();
 
         $items = collect();
 
@@ -26,9 +61,11 @@ class PersetujuanAsesmenFrontController extends Controller
             $items = $asesiList->flatMap(function ($asesi) {
                 return $asesi->skemas->map(function ($skema) use ($asesi) {
                     $record = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
-                        ->where(function ($q) use ($asesi) {
-                            $q->where('nama_asesi', $asesi->nama)
-                              ->orWhere('asesi_nik', $asesi->NIK);
+                        ->where(function ($q) use ($asesi, $useNik) {
+                            $q->where('nama_asesi', $asesi->nama);
+                            if ($useNik) {
+                                $q->orWhere('asesi_nik', $asesi->NIK);
+                            }
                         })
                         ->latest()
                         ->first();
@@ -55,15 +92,18 @@ class PersetujuanAsesmenFrontController extends Controller
     {
         $account = $request->user();
         $asesi = $account ? Asesi::where('NIK', $account->NIK)->first() : null;
+        $useNik = $this->hasAsesiNikColumn();
 
         $items = collect();
 
         if ($asesi) {
-            $items = $asesi->skemas()->withPivot('status', 'tanggal_mulai', 'tanggal_selesai')->get()->map(function ($skema) use ($asesi) {
+            $items = $asesi->skemas()->withPivot('status', 'tanggal_mulai', 'tanggal_selesai')->get()->map(function ($skema) use ($asesi, $useNik) {
                 $record = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
-                    ->where(function ($q) use ($asesi) {
-                        $q->where('nama_asesi', $asesi->nama)
-                          ->orWhere('asesi_nik', $asesi->NIK);
+                    ->where(function ($q) use ($asesi, $useNik) {
+                        $q->where('nama_asesi', $asesi->nama);
+                        if ($useNik) {
+                            $q->orWhere('asesi_nik', $asesi->NIK);
+                        }
                     })
                     ->latest()
                     ->first();
@@ -85,6 +125,8 @@ class PersetujuanAsesmenFrontController extends Controller
 
     public function asesorShow(Request $request, $asesiNik, $skemaId)
     {
+        $account = $request->user();
+        $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
         $asesi = Asesi::where('NIK', $asesiNik)->first();
         $skema = Skema::find($skemaId);
 
@@ -93,25 +135,27 @@ class PersetujuanAsesmenFrontController extends Controller
         }
 
         $namaAsesi = $asesi ? $asesi->nama : null;
+        $useNik = $this->hasAsesiNikColumn();
 
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
-            ->where(function ($q) use ($namaAsesi, $asesiNik) {
+            ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
                 if ($namaAsesi) {
                     $q->where('nama_asesi', $namaAsesi);
                 }
-                $q->orWhere('asesi_nik', $asesiNik);
+                if ($useNik) {
+                    $q->orWhere('asesi_nik', $asesiNik);
+                }
             })->latest()->first();
 
         if (!$item) {
             // create placeholder record so form can be signed
-            $item = PersetujuanAsesmen::create([
-                'kode_form' => 'FR.AK.01.',
-                'judul_form' => 'PERSETUJUAN ASESMEN DAN KERAHASIAAN',
+            $item = PersetujuanAsesmen::create($this->buildDefaultPayload([
                 'judul_skema' => $skema->nama_skema ?? '',
                 'nomor_skema' => $skema->nomor_skema ?? '',
                 'nama_asesi' => $namaAsesi ?? '',
                 'asesi_nik' => $asesiNik,
-            ]);
+                'nama_asesor' => $asesor?->nama ?? '-',
+            ]));
         }
 
         $tukList = Tuk::orderBy('nama_tuk')->get(['id','nama_tuk','tipe_tuk','kota']);
@@ -143,26 +187,45 @@ class PersetujuanAsesmenFrontController extends Controller
         $user = auth()->user();
         if (!$user) abort(403);
 
-        $asesi = Asesi::where('ID_asesi', $user->id)->orWhere('NIK', $user->NIK ?? '')->first();
+        $asesiQuery = Asesi::query();
+        $hasCondition = false;
+
+        if (!empty($user->NIK)) {
+            $asesiQuery->where('NIK', $user->NIK);
+            $hasCondition = true;
+        }
+
+        if (Schema::hasColumn('asesi', 'no_reg') && !empty($user->id)) {
+            if ($hasCondition) {
+                $asesiQuery->orWhere('no_reg', $user->id);
+            } else {
+                $asesiQuery->where('no_reg', $user->id);
+                $hasCondition = true;
+            }
+        }
+
+        $asesi = $hasCondition ? $asesiQuery->first() : null;
         $skema = Skema::find($skemaId);
         if (!$skema) abort(404);
+        $useNik = $this->hasAsesiNikColumn();
 
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
-            ->where(function ($q) use ($asesi) {
+            ->where(function ($q) use ($asesi, $useNik) {
                 if ($asesi) {
-                    $q->where('nama_asesi', $asesi->nama)->orWhere('asesi_nik', $asesi->NIK);
+                    $q->where('nama_asesi', $asesi->nama);
+                    if ($useNik) {
+                        $q->orWhere('asesi_nik', $asesi->NIK);
+                    }
                 }
             })->latest()->first();
 
         if (!$item) {
-            $item = PersetujuanAsesmen::create([
-                'kode_form' => 'FR.AK.01.',
-                'judul_form' => 'PERSETUJUAN ASESMEN DAN KERAHASIAAN',
+            $item = PersetujuanAsesmen::create($this->buildDefaultPayload([
                 'judul_skema' => $skema->nama_skema ?? '',
                 'nomor_skema' => $skema->nomor_skema ?? '',
                 'nama_asesi' => $asesi->nama ?? '',
                 'asesi_nik' => $asesi->NIK ?? null,
-            ]);
+            ]));
         }
 
         $tukList = Tuk::orderBy('nama_tuk')->get(['id','nama_tuk','tipe_tuk','kota']);

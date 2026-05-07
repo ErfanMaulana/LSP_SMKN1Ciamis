@@ -3,9 +3,10 @@
     $role = $role ?? 'asesi';
     $skema = $skema ?? null;
     $tukList = $tukList ?? collect();
+    $layout = $role === 'asesor' ? 'asesor.layout' : 'asesi.layout';
 @endphp
 
-@extends('layouts.app')
+@extends($layout)
 
 @section('content')
 <div class="container">
@@ -29,7 +30,7 @@
     @endif
 
     @if($role === 'asesor')
-        <form method="POST" action="{{ route('persetujuan.front.asesor.sign', $item->id) }}">
+        <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}">
             @csrf
             <div class="mb-3">
                 <label class="form-label">Nama Asesor</label>
@@ -44,7 +45,7 @@
             <button class="btn btn-primary">Simpan Tanda Tangan Asesor</button>
         </form>
     @else
-        <form method="POST" action="{{ route('persetujuan.front.asesi.sign', $item->id) }}">
+        <form method="POST" action="{{ route('asesi.persetujuan.front.asesi.sign', $item->id) }}">
             @csrf
             <div class="mb-3">
                 <label class="form-label">Nama Asesi</label>
