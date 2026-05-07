@@ -40,6 +40,11 @@
                     <i class="bi bi-three-dots-vertical"></i>
                 </button>
                 <div class="action-dropdown">
+                    @if(($kelompok->status ?? '') === 'belum terjadwal')
+                        <a href="{{ route('admin.jadwal-ujikom.create', ['kelompok_id' => $kelompok->id]) }}">
+                            <i class="bi bi-calendar-plus"></i> Buat Jadwal
+                        </a>
+                    @endif
                     <a href="{{ route('admin.kelompok.show', $kelompok->id) }}">
                         <i class="bi bi-people-fill"></i> Kelola Asesi
                     </a>

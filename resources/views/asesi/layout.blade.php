@@ -20,6 +20,21 @@
             max-width: 100%;
         }
 
+        body.no-sidebar .sidebar,
+        body.no-sidebar .sidebar-overlay {
+            display: none !important;
+        }
+
+        body.no-sidebar .main-content {
+            margin-left: 0;
+        }
+
+        body.no-sidebar .content-wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
         html {
             overflow-x: hidden;
             max-width: 100%;
@@ -621,7 +636,7 @@
     </style>
     @yield('styles')
 </head>
-<body>
+<body class="{{ request()->routeIs('asesi.pendaftaran.*') ? 'no-sidebar' : '' }}">
     <div class="asesi-wrapper">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">

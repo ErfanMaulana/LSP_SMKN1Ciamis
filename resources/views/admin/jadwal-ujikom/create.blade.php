@@ -84,7 +84,7 @@
             {{-- ─── Judul ─── --}}
             <div class="form-group form-full">
                 <label>Judul Jadwal <span class="required">*</span></label>
-                <input type="text" name="judul_jadwal" value="{{ old('judul_jadwal') }}"
+                  <input type="text" name="judul_jadwal" value="{{ old('judul_jadwal', $prefillJudulJadwal ?? '') }}"
                        class="form-control {{ $errors->has('judul_jadwal') ? 'is-invalid' : '' }}"
                        placeholder="Contoh: Ujikom RPL Gelombang I - 2026">
                 @error('judul_jadwal')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -97,7 +97,10 @@
                 <label>Kelompok <span class="required">*</span></label>
                 @php
                     $kelompokScheduleMap = $kelompokScheduleMap ?? [];
-                    $oldKelompokIds = collect(old('kelompok_ids', []))->map(fn($id) => (int) $id)->all();
+                    $prefillKelompokIds = $prefillKelompokIds ?? [];
+                    $oldKelompokIds = collect(old('kelompok_ids', $prefillKelompokIds))
+                        ->map(fn($id) => (int) $id)
+                        ->all();
                     $kelompokOptions = $kelompoks->map(function ($k) use ($kelompokScheduleMap) {
                         return [
                             'id' => (int) $k->id,

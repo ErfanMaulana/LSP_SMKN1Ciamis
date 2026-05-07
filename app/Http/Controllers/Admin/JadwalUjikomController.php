@@ -280,7 +280,7 @@ class JadwalUjikomController extends Controller
         return view('admin.jadwal-ujikom.show', compact('jadwal'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $tuks      = Tuk::where('status', 'aktif')->orderBy('nama_tuk')->get();
         $kelompoks = Kelompok::with(['skema', 'asesors', 'asesis'])->orderBy('nama_kelompok')->get();
@@ -288,7 +288,28 @@ class JadwalUjikomController extends Controller
         $kelompokData = $this->buildKelompokData($kelompoks);
         $kelompokScheduleMap = $this->getKelompokScheduleMap();
 
-        return view('admin.jadwal-ujikom.create', compact('tuks', 'kelompoks', 'kelompokData', 'kelompokScheduleMap'));
+        $prefillKelompokId = (int) $request->get('kelompok_id');
+        $prefillKelompokIds = [];
+        $prefillJudulJadwal = null;
+
+        if ($prefillKelompokId > 0) {
+            $prefillKelompok = $kelompoks->firstWhere('id', $prefillKelompokId);
+            $isScheduled = isset($kelompokScheduleMap[$prefillKelompokId]);
+
+            if ($prefillKelompok && !$isScheduled) {
+                $prefillKelompokIds = [$prefillKelompokId];
+                $prefillJudulJadwal = 'Ujikom ' . $prefillKelompok->nama_kelompok;
+            }
+        }
+
+        return view('admin.jadwal-ujikom.create', compact(
+            'tuks',
+            'kelompoks',
+            'kelompokData',
+            'kelompokScheduleMap',
+            'prefillKelompokIds',
+            'prefillJudulJadwal'
+        ));
     }
 
     public function store(Request $request)
