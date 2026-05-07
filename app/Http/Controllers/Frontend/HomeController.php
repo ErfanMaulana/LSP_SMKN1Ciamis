@@ -24,7 +24,7 @@ class HomeController extends Controller
                     'title' => 'Sertifikasi Kompetensi Siswa Kejuruan',
                     'subtitle' => 'Lembaga Sertifikasi Profesi (LSP P1)',
                     'description' => 'Pengujian kompetensi berbasis standar industri dan BNSP untuk memastikan lulusan siap kerja dan profesional.',
-                    'image' => 'images/jellyfish.jpg',
+                    'image' => 'images/lsp.png',
                     'button_text' => 'Lihat Skema',
                     'button_link' => '#skema'
                 ]

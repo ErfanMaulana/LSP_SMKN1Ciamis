@@ -1,13 +1,13 @@
 <section class="relative aspect-video min-h-0 md:min-h-[90vh] md:aspect-auto flex items-center overflow-hidden">
 
     {{-- Slides --}}
-    <div id="carousel" class="absolute inset-0 z-0">
+    <div id="carousel" class="absolute inset-0 z-0" style="background: linear-gradient(135deg, #0061a5 0%, #00a8e8 100%);">
 
         @foreach($carousels as $index => $slide)
         <div class="carousel-item absolute inset-0 transition-opacity duration-1000 {{ $index==0?'opacity-100':'opacity-0' }}">
 
             <img src="{{ Str::startsWith($slide->image, 'carousels/') ? asset('storage/' . $slide->image) : asset($slide->image) }}"
-                 class="w-full h-full object-cover">
+                 class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'">
 
         </div>
         @endforeach
