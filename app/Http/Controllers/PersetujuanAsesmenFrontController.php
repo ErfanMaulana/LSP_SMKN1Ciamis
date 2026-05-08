@@ -11,6 +11,7 @@ use App\Models\PersetujuanAsesmen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 class PersetujuanAsesmenFrontController extends Controller
 {
@@ -73,6 +74,168 @@ class PersetujuanAsesmenFrontController extends Controller
         return $payload;
     }
 
+    private function defaultContent(): array
+    {
+        return [
+            'kode_form' => 'FR.AK.01.',
+            'judul_form' => 'PERSETUJUAN ASESMEN DAN KERAHASIAAN',
+            'pengantar' => 'Persetujuan Asesmen ini untuk menjamin bahwa Asesi telah diberi arahan secara rinci tentang perencanaan dan proses asesmen',
+            'kategori_skema' => 'KKNI/Okupasi/Klaster',
+            'tuk' => 'Sewaktu/Tempat Kerja/Mandiri*',
+            'pernyataan_asesi_1' => 'Bahwa saya telah mendapatkan penjelasan terkait hak dan prosedur banding asesmen dari asesor.',
+            'pernyataan_asesor' => 'Menyatakan tidak akan membuka hasil pekerjaan yang saya peroleh karena penugasan saya sebagai Asesor dalam pekerjaan Asesmen kepada siapapun atau organisasi apapun selain kepada pihak yang berwenang sehubungan dengan kewajiban saya sebagai Asesor yang ditugaskan oleh LSP.',
+            'pernyataan_asesi_2' => 'Saya setuju mengikuti asesmen dengan pemahaman bahwa informasi yang dikumpulkan hanya digunakan untuk pengembangan profesional dan hanya dapat diakses oleh orang tertentu saja.',
+            'catatan_footer' => '* Coret yang tidak perlu',
+        ];
+    }
+
+    private function validatedData(Request $request): array
+    {
+        $data = $request->validate([
+            'kode_form' => 'required|string|max:20',
+            'judul_form' => 'required|string|max:255',
+            'pengantar' => 'required|string',
+            'kategori_skema' => 'nullable|string|max:100',
+            'judul_skema' => 'required|string|max:255',
+            'nomor_skema' => 'required|string|max:255',
+            'tuk' => 'nullable|string|max:255',
+            'nama_asesor' => 'required|string|max:255',
+            'nama_asesi' => 'required|string|max:255',
+            'bukti_verifikasi_portofolio' => 'nullable|boolean',
+            'bukti_reviu_produk' => 'nullable|boolean',
+            'bukti_observasi_langsung' => 'nullable|boolean',
+            'bukti_kegiatan_terstruktur' => 'nullable|boolean',
+            'bukti_pertanyaan_lisan' => 'nullable|boolean',
+            'bukti_pertanyaan_tertulis' => 'nullable|boolean',
+            'bukti_pertanyaan_wawancara' => 'nullable|boolean',
+            'bukti_lainnya' => 'nullable|boolean',
+            'bukti_lainnya_keterangan' => 'nullable|string|max:255',
+            'hari_tanggal' => 'nullable|string|max:120',
+            'waktu' => 'nullable|string|max:120',
+            'tuk_pelaksanaan' => 'nullable|string|max:255',
+            'pernyataan_asesi_1' => 'required|string',
+            'pernyataan_asesor' => 'required|string',
+            'pernyataan_asesi_2' => 'required|string',
+            'ttd_asesor_nama' => 'nullable|string|max:255',
+            'ttd_asesor_tanggal' => 'nullable|date',
+            'ttd_asesi_nama' => 'nullable|string|max:255',
+            'ttd_asesi_tanggal' => 'nullable|date',
+            'catatan_footer' => 'nullable|string|max:255',
+        ]);
+
+        foreach ([
+            'bukti_verifikasi_portofolio',
+            'bukti_reviu_produk',
+            'bukti_observasi_langsung',
+            'bukti_kegiatan_terstruktur',
+            'bukti_pertanyaan_lisan',
+            'bukti_pertanyaan_tertulis',
+            'bukti_pertanyaan_wawancara',
+            'bukti_lainnya',
+        ] as $field) {
+            $data[$field] = $request->boolean($field);
+        }
+
+        return $data;
+    }
+
+    public function participantsBySkema(Request $request)
+    {
+        $validated = $request->validate([
+            'skema_id' => 'required|exists:skemas,id',
+        ]);
+
+        $skemaId = (int) $validated['skema_id'];
+
+        $asesiList = Asesi::query()
+            ->whereHas('skemas', function ($query) use ($skemaId) {
+                $query->where('skemas.id', $skemaId);
+            })
+            ->orderBy('nama')
+            ->get(['NIK', 'nama'])
+            ->map(function ($asesi) {
+                return [
+                    'id' => (string) $asesi->NIK,
+                    'nama' => $asesi->nama,
+                ];
+            })
+            ->values();
+
+        $isAsesorRoute = $request->routeIs('asesor.*');
+        $account = $request->user();
+        $loggedAsesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
+
+        if ($isAsesorRoute && $loggedAsesor) {
+            $asesorList = collect([[
+                'id' => (string) $loggedAsesor->ID_asesor,
+                'nama' => $loggedAsesor->nama,
+            ]]);
+        } else {
+            $asesorList = Asesor::query()
+                ->whereHas('skemas', function ($query) use ($skemaId) {
+                    $query->where('skemas.id', $skemaId);
+                })
+                ->orderBy('nama')
+                ->get(['ID_asesor', 'nama'])
+                ->map(function ($asesor) {
+                    return [
+                        'id' => (string) $asesor->ID_asesor,
+                        'nama' => $asesor->nama,
+                    ];
+                })
+                ->values();
+        }
+
+        return response()->json([
+            'asesi' => $asesiList,
+            'asesor' => $asesorList,
+        ]);
+    }
+
+    public function asesorCreate(Request $request)
+    {
+        $account = $request->user();
+        $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
+
+        $defaults = array_merge($this->defaultContent(), [
+            'nama_asesor' => $asesor?->nama ?? '-',
+        ]);
+
+        $skemaList = Skema::query()
+            ->orderBy('nama_skema')
+            ->get(['id', 'nama_skema', 'nomor_skema']);
+
+        $tukList = Tuk::query()
+            ->orderBy('nama_tuk')
+            ->get(['id', 'nama_tuk', 'tipe_tuk', 'kota', 'status']);
+
+        return view('persetujuan-asesmen.create', [
+            'defaults' => $defaults,
+            'skemaList' => $skemaList,
+            'tukList' => $tukList,
+            'submitLabel' => 'Simpan Data',
+            'backUrl' => route('asesor.persetujuan-asesmen.index'),
+            'participantsEndpoint' => route('asesor.persetujuan-asesmen.skema-participants'),
+        ]);
+    }
+
+    public function asesorStore(Request $request)
+    {
+        $data = $this->validatedData($request);
+        $account = $request->user();
+        $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
+
+        if ($asesor) {
+            // Keep persisted asesor name aligned with the logged-in asesor account.
+            $data['nama_asesor'] = $asesor->nama;
+        }
+
+        PersetujuanAsesmen::create($data);
+
+        return redirect()->route('asesor.persetujuan-asesmen.index')
+            ->with('success', 'Data persetujuan asesmen berhasil ditambahkan.');
+    }
+
     public function asesorIndex(Request $request)
     {
         $account = $request->user();
@@ -83,40 +246,56 @@ class PersetujuanAsesmenFrontController extends Controller
         $items = collect();
 
         if ($asesor) {
-            $asesiList = $asesor->asesis()->with('skemas')->orderBy('nama')->get();
+            $records = PersetujuanAsesmen::query()
+                ->where('nama_asesor', $asesor->nama)
+                ->when($search, function ($query) use ($search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('judul_skema', 'like', "%{$search}%")
+                            ->orWhere('nomor_skema', 'like', "%{$search}%")
+                            ->orWhere('nama_asesi', 'like', "%{$search}%");
+                    });
+                })
+                ->latest()
+                ->get();
 
-            $items = $asesiList->flatMap(function ($asesi) use ($useNik) {
-                return $asesi->skemas->map(function ($skema) use ($asesi, $useNik) {
-                    $record = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
-                        ->where(function ($q) use ($asesi, $useNik) {
-                            $q->where('nama_asesi', $asesi->nama);
-                            if ($useNik) {
-                                $q->orWhere('asesi_nik', $asesi->NIK);
-                            }
-                        })
-                        ->latest()
-                        ->first();
+            $skemaByNomor = Skema::query()
+                ->get(['id', 'nama_skema', 'nomor_skema'])
+                ->keyBy('nomor_skema');
 
-                    return [
-                        'asesi_nik' => $asesi->NIK,
-                        'asesi_nama' => $asesi->nama,
-                        'skema_id' => $skema->id,
-                        'skema_nama' => $skema->nama_skema,
-                        'skema_nomor' => $skema->nomor_skema,
-                        'status' => $record ? ($record->ttd_asesor_nama ? 'Sudah Ditandatangani' : 'Draft') : 'Belum Ada',
-                    ];
-                });
+            $asesiByNik = Asesi::query()
+                ->get(['NIK', 'nama'])
+                ->keyBy('NIK');
+
+            $items = $records->map(function ($record) use ($skemaByNomor, $asesiByNik, $useNik) {
+                $skema = $skemaByNomor->get($record->nomor_skema);
+
+                $asesiNik = null;
+                if ($useNik && !empty($record->asesi_nik)) {
+                    $asesiNik = $record->asesi_nik;
+                }
+
+                if (!$asesiNik) {
+                    $matchingAsesi = Asesi::query()
+                        ->where('nama', $record->nama_asesi)
+                        ->orderBy('NIK')
+                        ->first(['NIK']);
+                    $asesiNik = $matchingAsesi?->NIK;
+                }
+
+                $asesiNama = $record->nama_asesi;
+                if ($asesiNik && $asesiByNik->has($asesiNik)) {
+                    $asesiNama = $asesiByNik->get($asesiNik)->nama;
+                }
+
+                return [
+                    'asesi_nik' => $asesiNik,
+                    'asesi_nama' => $asesiNama,
+                    'skema_id' => $skema?->id,
+                    'skema_nama' => $record->judul_skema ?: ($skema?->nama_skema ?? '-'),
+                    'skema_nomor' => $record->nomor_skema,
+                    'status' => $record->ttd_asesor_nama ? 'Sudah Ditandatangani' : 'Draft',
+                ];
             })->values();
-
-            // Apply search filter if provided
-            if ($search) {
-                $search = strtolower($search);
-                $items = $items->filter(function ($item) use ($search) {
-                    return stripos($item['skema_nama'], $search) !== false
-                        || stripos($item['skema_nomor'], $search) !== false
-                        || stripos($item['asesi_nama'], $search) !== false;
-                });
-            }
         }
 
         return view('persetujuan-asesmen.asesor-index', [
@@ -241,13 +420,13 @@ class PersetujuanAsesmenFrontController extends Controller
             Storage::disk('public')->put($path . '/' . $filename, $signatureData);
             $data['ttd_asesor_file'] = $path . '/' . $filename;
 
-            \Log::info('Asesor signature image saved', ['file' => $data['ttd_asesor_file']]);
+            Log::info('Asesor signature image saved', ['file' => $data['ttd_asesor_file']]);
         } catch (\Exception $e) {
-            \Log::error('Failed to save asesor signature image', ['error' => $e->getMessage()]);
+            Log::error('Failed to save asesor signature image', ['error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Tanda tangan asesor tidak tersimpan. Pastikan tanda tangan digambar di canvas sebelum menyimpan.');
         }
 
-        \Log::info('Updating asesor signature', ['id' => $item->id, 'data' => $data]);
+        Log::info('Updating asesor signature', ['id' => $item->id, 'data' => $data]);
 
         $item->update($data);
 
@@ -310,7 +489,7 @@ class PersetujuanAsesmenFrontController extends Controller
         }
 
         if (!$sameAsesi) {
-            \Log::error('Asesi mismatch', [
+            Log::error('Asesi mismatch', [
                 'item_nama' => $item->nama_asesi,
                 'asesi_nama' => $asesi->nama,
                 'item_nik' => $item->asesi_nik,
@@ -320,7 +499,7 @@ class PersetujuanAsesmenFrontController extends Controller
         }
 
         if (empty($item->ttd_asesor_nama) || empty($item->ttd_asesor_tanggal)) {
-            \Log::error('Asesor not signed yet', [
+            Log::error('Asesor not signed yet', [
                 'item_id' => $item->id,
                 'ttd_asesor_nama' => $item->ttd_asesor_nama,
                 'ttd_asesor_tanggal' => $item->ttd_asesor_tanggal,
@@ -328,7 +507,7 @@ class PersetujuanAsesmenFrontController extends Controller
             return redirect()->back()->with('error', 'Tanda tangan asesi belum bisa dilakukan sebelum asesor menandatangani.');
         }
 
-        \Log::info('Asesi sign request received', [
+        Log::info('Asesi sign request received', [
             'id' => $id,
             'request_data' => $request->all(),
         ]);
@@ -365,9 +544,9 @@ class PersetujuanAsesmenFrontController extends Controller
                 
                 $data['ttd_asesi_file'] = $path . '/' . $filename;
                 
-                \Log::info('Signature image saved', ['file' => $data['ttd_asesi_file']]);
+                Log::info('Signature image saved', ['file' => $data['ttd_asesi_file']]);
             } catch (\Exception $e) {
-                \Log::error('Failed to save signature image', ['error' => $e->getMessage()]);
+                Log::error('Failed to save signature image', ['error' => $e->getMessage()]);
                 // Continue without image, don't fail validation
             }
         }
@@ -385,20 +564,20 @@ class PersetujuanAsesmenFrontController extends Controller
                 $path = 'persetujuan-asesmen/signatures';
                 Storage::disk('public')->put($path . '/' . $filename, $svg);
                 $data['ttd_asesi_file'] = $path . '/' . $filename;
-                \Log::info('Generated fallback signature SVG for asesi', ['file' => $data['ttd_asesi_file']]);
+                Log::info('Generated fallback signature SVG for asesi', ['file' => $data['ttd_asesi_file']]);
             } catch (\Exception $e) {
-                \Log::error('Failed to generate fallback signature SVG', ['error' => $e->getMessage()]);
+                Log::error('Failed to generate fallback signature SVG', ['error' => $e->getMessage()]);
             }
         }
 
-        \Log::info('Updating asesi signature', [
+        Log::info('Updating asesi signature', [
             'id' => $item->id,
             'data' => $data,
         ]);
 
         $item->update($data);
 
-        \Log::info('Asesi signature saved', [
+        Log::info('Asesi signature saved', [
             'id' => $item->id,
             'ttd_asesi_tanggal' => $item->ttd_asesi_tanggal,
             'ttd_asesi_nama' => $item->ttd_asesi_nama,
@@ -407,3 +586,4 @@ class PersetujuanAsesmenFrontController extends Controller
         return redirect()->route('asesi.persetujuan-asesmen.index')->with('success', 'Tanda tangan asesi tersimpan');
     }
 }
+

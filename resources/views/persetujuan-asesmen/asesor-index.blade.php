@@ -116,6 +116,9 @@
 
 <div class="page-header">
     <h2>Persetujuan Asesmen dan Kerahasiaan</h2>
+    <a href="{{ route('asesor.persetujuan-asesmen.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Tambah Data
+    </a>
 </div>
 
 <div class="toolbar">
@@ -152,9 +155,13 @@
                         <td>{{ $item['status'] }}</td>
                         <td>
                             <div class="action-wrap">
-                                <a href="{{ route('asesor.persetujuan.front.asesor.show', [$item['asesi_nik'], $item['skema_id']]) }}" class="btn btn-secondary">
-                                    <i class="bi bi-eye"></i> Lihat
-                                </a>
+                                @if(!empty($item['asesi_nik']) && !empty($item['skema_id']))
+                                    <a href="{{ route('asesor.persetujuan.front.asesor.show', [$item['asesi_nik'], $item['skema_id']]) }}" class="btn btn-secondary">
+                                        <i class="bi bi-eye"></i> Lihat
+                                    </a>
+                                @else
+                                    <span style="font-size:12px;color:#94a3b8;">Data belum lengkap</span>
+                                @endif
                             </div>
                         </td>
                     </tr>

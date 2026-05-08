@@ -1,12 +1,14 @@
-@php
+﻿@php
     $record = $item ?? null;
     $defaults = $defaults ?? [];
     $skemaList = $skemaList ?? collect();
     $tukList = $tukList ?? collect();
+    $backUrl = $backUrl ?? route('admin.persetujuan-asesmen.index');
+    $participantsEndpoint = $participantsEndpoint ?? route('admin.persetujuan-asesmen.skema-participants');
     $ttdAsesorTanggal = old('ttd_asesor_tanggal', ($record && $record->ttd_asesor_tanggal) ? $record->ttd_asesor_tanggal->format('Y-m-d') : '');
     $ttdAsesiTanggal = old('ttd_asesi_tanggal', ($record && $record->ttd_asesi_tanggal) ? $record->ttd_asesi_tanggal->format('Y-m-d') : '');
 
-    $value = function (string $field, $fallback = '') use ($record, $defaults) {
+    $getValue = function (string $field, $fallback = '') use ($record, $defaults) {
         if (old($field) !== null) {
             return old($field);
         }
@@ -26,8 +28,8 @@
         return (bool) ($record->{$field} ?? false);
     };
 
-    $selectedAsesor = $value('nama_asesor');
-    $selectedAsesi = $value('nama_asesi');
+    $selectedAsesor = $getValue('nama_asesor');
+    $selectedAsesi = $getValue('nama_asesi');
 @endphp
 
 <style>
@@ -250,25 +252,25 @@
     <div class="grid-2">
         <div class="field">
             <label>Kode Form <span class="req">*</span></label>
-            <input type="text" name="kode_form" value="{{ $value('kode_form') }}" class="{{ $errors->has('kode_form') ? 'invalid' : '' }}">
+            <input type="text" name="kode_form" value="{{ $getValue('kode_form') }}" class="{{ $errors->has('kode_form') ? 'invalid' : '' }}">
             @error('kode_form')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field">
             <label>Judul Form <span class="req">*</span></label>
-            <input type="text" name="judul_form" value="{{ $value('judul_form') }}" class="{{ $errors->has('judul_form') ? 'invalid' : '' }}">
+            <input type="text" name="judul_form" value="{{ $getValue('judul_form') }}" class="{{ $errors->has('judul_form') ? 'invalid' : '' }}">
             @error('judul_form')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field full">
             <label>Pengantar <span class="req">*</span></label>
-            <textarea name="pengantar" class="{{ $errors->has('pengantar') ? 'invalid' : '' }}">{{ $value('pengantar') }}</textarea>
+            <textarea name="pengantar" class="{{ $errors->has('pengantar') ? 'invalid' : '' }}">{{ $getValue('pengantar') }}</textarea>
             @error('pengantar')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field">
             <label>Skema Sertifikasi (Kategori)</label>
-            @php $selectedKategoriSkema = $value('kategori_skema'); @endphp
+            @php $selectedKategoriSkema = $getValue('kategori_skema'); @endphp
             <select name="kategori_skema">
                 <option value="">-- Pilih Kategori Skema --</option>
                 <option value="KKNI" {{ $selectedKategoriSkema === 'KKNI' ? 'selected' : '' }}>KKNI</option>
@@ -284,7 +286,7 @@
             <select id="judulSkemaSelect" name="judul_skema" class="{{ $errors->has('judul_skema') ? 'invalid' : '' }}">
                 <option value="">-- Pilih Judul Skema --</option>
                 @foreach($skemaList as $skema)
-                    <option value="{{ $skema->nama_skema }}" data-id="{{ $skema->id }}" data-nomor="{{ $skema->nomor_skema }}" {{ $value('judul_skema') === $skema->nama_skema ? 'selected' : '' }}>
+                    <option value="{{ $skema->nama_skema }}" data-id="{{ $skema->id }}" data-nomor="{{ $skema->nomor_skema }}" {{ $getValue('judul_skema') === $skema->nama_skema ? 'selected' : '' }}>
                         {{ $skema->nama_skema }}
                     </option>
                 @endforeach
@@ -294,13 +296,13 @@
 
         <div class="field">
             <label>Nomor Skema <span class="req">*</span></label>
-            <input id="nomorSkemaInput" type="text" name="nomor_skema" value="{{ $value('nomor_skema') }}" class="{{ $errors->has('nomor_skema') ? 'invalid' : '' }}" readonly>
+            <input id="nomorSkemaInput" type="text" name="nomor_skema" value="{{ $getValue('nomor_skema') }}" class="{{ $errors->has('nomor_skema') ? 'invalid' : '' }}" readonly>
             @error('nomor_skema')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field">
             <label>TUK</label>
-            @php $selectedTuk = $value('tuk'); @endphp
+            @php $selectedTuk = $getValue('tuk'); @endphp
             <select name="tuk">
                 <option value="">-- Pilih TUK --</option>
                 <option value="Sewaktu" {{ $selectedTuk === 'Sewaktu' ? 'selected' : '' }}>Sewaktu</option>
@@ -339,19 +341,19 @@
                 <label class="checkbox-item"><input type="checkbox" name="bukti_pertanyaan_wawancara" value="1" {{ $checked('bukti_pertanyaan_wawancara') ? 'checked' : '' }}> Hasil Pertanyaan Wawancara</label>
                 <label class="checkbox-item"><input type="checkbox" name="bukti_lainnya" value="1" {{ $checked('bukti_lainnya') ? 'checked' : '' }}> Lainnya</label>
             </div>
-            <input style="margin-top:8px;" type="text" name="bukti_lainnya_keterangan" value="{{ $value('bukti_lainnya_keterangan') }}" placeholder="Keterangan bukti lainnya (opsional)">
+            <input style="margin-top:8px;" type="text" name="bukti_lainnya_keterangan" value="{{ $getValue('bukti_lainnya_keterangan') }}" placeholder="Keterangan bukti lainnya (opsional)">
             @error('bukti_lainnya_keterangan')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field">
             <label>Hari / Tanggal</label>
-            <input type="text" name="hari_tanggal" value="{{ $value('hari_tanggal') }}" placeholder="Contoh: Senin, 11 April 2026">
+            <input type="text" name="hari_tanggal" value="{{ $getValue('hari_tanggal') }}" placeholder="Contoh: Senin, 11 April 2026">
             @error('hari_tanggal')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field">
             <label>Waktu</label>
-            <input type="text" name="waktu" value="{{ $value('waktu') }}" placeholder="Contoh: 08.00 - 10.00 WIB">
+            <input type="text" name="waktu" value="{{ $getValue('waktu') }}" placeholder="Contoh: 08.00 - 10.00 WIB">
             @error('waktu')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -368,14 +370,14 @@
                             default => $tuk->tipe_tuk,
                         };
                         $displayLabelPelaksanaan = $tuk->nama_tuk . ' (' . $tipeLabelPelaksanaan . ($tuk->kota ? ' - ' . $tuk->kota : '') . ')';
-                        $selectedTukPelaksanaan = $value('tuk_pelaksanaan');
+                        $selectedTukPelaksanaan = $getValue('tuk_pelaksanaan');
                     @endphp
                     <option value="{{ $tuk->nama_tuk }}" {{ $selectedTukPelaksanaan === $tuk->nama_tuk ? 'selected' : '' }}>
                         {{ $displayLabelPelaksanaan }}
                     </option>
                 @endforeach
-                @if($value('tuk_pelaksanaan') && $tukList->where('nama_tuk', $value('tuk_pelaksanaan'))->isEmpty())
-                    <option value="{{ $value('tuk_pelaksanaan') }}" selected>{{ $value('tuk_pelaksanaan') }}</option>
+                @if($getValue('tuk_pelaksanaan') && $tukList->where('nama_tuk', $getValue('tuk_pelaksanaan'))->isEmpty())
+                    <option value="{{ $getValue('tuk_pelaksanaan') }}" selected>{{ $getValue('tuk_pelaksanaan') }}</option>
                 @endif
             </select>
             @error('tuk_pelaksanaan')<div class="error-text">{{ $message }}</div>@enderror
@@ -383,19 +385,19 @@
 
         <div class="field full">
             <label>Pernyataan Asesi (Bagian 1) <span class="req">*</span></label>
-            <textarea name="pernyataan_asesi_1" class="{{ $errors->has('pernyataan_asesi_1') ? 'invalid' : '' }}">{{ $value('pernyataan_asesi_1') }}</textarea>
+            <textarea name="pernyataan_asesi_1" class="{{ $errors->has('pernyataan_asesi_1') ? 'invalid' : '' }}">{{ $getValue('pernyataan_asesi_1') }}</textarea>
             @error('pernyataan_asesi_1')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field full">
             <label>Pernyataan Asesor <span class="req">*</span></label>
-            <textarea name="pernyataan_asesor" class="{{ $errors->has('pernyataan_asesor') ? 'invalid' : '' }}">{{ $value('pernyataan_asesor') }}</textarea>
+            <textarea name="pernyataan_asesor" class="{{ $errors->has('pernyataan_asesor') ? 'invalid' : '' }}">{{ $getValue('pernyataan_asesor') }}</textarea>
             @error('pernyataan_asesor')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field full">
             <label>Pernyataan Asesi (Bagian 2) <span class="req">*</span></label>
-            <textarea name="pernyataan_asesi_2" class="{{ $errors->has('pernyataan_asesi_2') ? 'invalid' : '' }}">{{ $value('pernyataan_asesi_2') }}</textarea>
+            <textarea name="pernyataan_asesi_2" class="{{ $errors->has('pernyataan_asesi_2') ? 'invalid' : '' }}">{{ $getValue('pernyataan_asesi_2') }}</textarea>
             @error('pernyataan_asesi_2')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -412,7 +414,7 @@
                     </div>
                 </div>
 
-                <input type="hidden" name="ttd_asesor_nama" id="ttdAsesorNamaInput" value="{{ $value('ttd_asesor_nama') }}">
+                <input type="hidden" name="ttd_asesor_nama" id="ttdAsesorNamaInput" value="{{ $getValue('ttd_asesor_nama') }}">
                 <input type="hidden" name="ttd_asesor_tanggal" id="ttdAsesorTanggalInput" value="{{ $ttdAsesorTanggal }}">
                 @error('ttd_asesor_nama')<div class="error-text">{{ $message }}</div>@enderror
                 @error('ttd_asesor_tanggal')<div class="error-text">{{ $message }}</div>@enderror
@@ -431,14 +433,14 @@
 
         <div class="field full">
             <label>Catatan Footer</label>
-            <input type="text" name="catatan_footer" value="{{ $value('catatan_footer') }}">
+            <input type="text" name="catatan_footer" value="{{ $getValue('catatan_footer') }}">
             @error('catatan_footer')<div class="error-text">{{ $message }}</div>@enderror
         </div>
     </div>
 
     <div class="form-actions">
         <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> {{ $submitLabel }}</button>
-        <a href="{{ route('admin.persetujuan-asesmen.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Batal</a>
+        <a href="{{ $backUrl }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Batal</a>
     </div>
 </div>
 
@@ -453,7 +455,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const clearSignatureAsesor = document.getElementById('clearSignatureAsesor');
     const ttdAsesorNamaInput = document.getElementById('ttdAsesorNamaInput');
     const ttdAsesorTanggalInput = document.getElementById('ttdAsesorTanggalInput');
-    const endpointUrl = '{{ route('admin.persetujuan-asesmen.skema-participants') }}';
+    const endpointUrl = @json($participantsEndpoint);
     const selectedAsesorName = @json($selectedAsesor);
     const selectedAsesiName = @json($selectedAsesi);
     let applyInitialSelection = true;
@@ -670,3 +672,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+

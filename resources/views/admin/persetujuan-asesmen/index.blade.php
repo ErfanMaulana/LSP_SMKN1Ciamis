@@ -72,6 +72,11 @@
         border: 1px solid #fecaca;
     }
 
+    .btn-danger:hover {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
     .card {
         background: #ffffff;
         border-radius: 12px;
@@ -99,7 +104,80 @@
     }
     tr:last-child td { border-bottom: none; }
 
-    .action-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+    .action-wrap { display: flex; align-items: center; justify-content: center; }
+
+    .action-cell {
+        width: 96px;
+        text-align: center;
+    }
+
+    .action-menu { position: relative; display: inline-block; }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .2s;
+        color: #475569;
+    }
+
+    .action-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .action-dropdown {
+        display: none;
+        position: fixed;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(0,0,0,.15);
+        min-width: 160px;
+        z-index: 9990;
+        overflow: hidden;
+    }
+
+    .action-dropdown.show {
+        display: block;
+    }
+
+    .action-dropdown a,
+    .action-dropdown button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 16px;
+        border: none;
+        background: none;
+        text-align: left;
+        font-size: 14px;
+        color: #475569;
+        cursor: pointer;
+        transition: all .2s;
+        text-decoration: none;
+    }
+
+    .action-dropdown a:hover,
+    .action-dropdown button:hover {
+        background: #f8fafc;
+        color: #0F172A;
+    }
+
+    .action-dropdown button[type="submit"]:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .action-dropdown .danger {
+        color: #475569;
+    }
 
     .pagination-wrap { padding: 14px; }
 
@@ -147,7 +225,7 @@
                     <th>Asesor</th>
                     <th>Asesi</th>
                     <th>Dibuat</th>
-                    <th style="width: 240px;">Aksi</th>
+                    <th class="action-cell">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -159,27 +237,34 @@
                         <td>{{ $item->nama_asesor }}</td>
                         <td>{{ $item->nama_asesi }}</td>
                         <td>{{ $item->created_at?->locale('id')->translatedFormat('d M Y H:i') }}</td>
-                        <td>
+                        <td class="action-cell">
                             <div class="action-wrap">
-                                <a href="{{ route('admin.persetujuan-asesmen.show', $item->id) }}" class="btn btn-secondary">
-                                    <i class="bi bi-eye"></i> Lihat
-                                </a>
+                                <div class="action-menu">
+                                    <button type="button" class="action-btn" onclick="toggleMenu(this)" aria-label="Aksi data">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="action-dropdown">
+                                        <a href="{{ route('admin.persetujuan-asesmen.show', $item->id) }}">
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </a>
 
-                                @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.edit'))
-                                    <a href="{{ route('admin.persetujuan-asesmen.edit', $item->id) }}" class="btn btn-primary">
-                                        <i class="bi bi-pencil-square"></i> Edit
-                                    </a>
-                                @endif
+                                        @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.edit'))
+                                            <a href="{{ route('admin.persetujuan-asesmen.edit', $item->id) }}">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </a>
+                                        @endif
 
-                                @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.delete'))
-                                    <form method="POST" action="{{ route('admin.persetujuan-asesmen.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="bi bi-trash"></i> Hapus
-                                        </button>
-                                    </form>
-                                @endif
+                                        @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.delete'))
+                                            <form method="POST" action="{{ route('admin.persetujuan-asesmen.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');" style="margin:0;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="danger">
+                                                    <i class="bi bi-trash"></i> Hapus
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -201,4 +286,35 @@
         <div class="pagination-wrap">{{ $items->links() }}</div>
     @endif
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    function toggleMenu(button) {
+        const menu = button.nextElementSibling;
+        if (!menu) return;
+
+        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+            if (dropdown !== menu) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        const isVisible = menu.classList.contains('show');
+        if (!isVisible) {
+            const rect = button.getBoundingClientRect();
+            menu.style.top = `${rect.bottom + window.scrollY + 6}px`;
+            menu.style.left = `${rect.left + window.scrollX - 120}px`;
+            menu.classList.add('show');
+        } else {
+            menu.classList.remove('show');
+        }
+    }
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => dropdown.classList.remove('show'));
+        }
+    });
+</script>
 @endsection
