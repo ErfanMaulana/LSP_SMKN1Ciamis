@@ -3,34 +3,53 @@ name: Otomatis Deploy ke Server
 on:
   push:
     branches:
-      - main 
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Setup SSH connection
-      uses: webfactory/ssh-agent@v0.9.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Setup SSH connection
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Deploy to server via SSH
-      run: |
-        echo "CI/CD trigger commit: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-        ssh -p 21032 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-            eval \$(ssh-agent -s)
+      - name: Deploy to server via SSH
+        run: |
+          echo "CI/CD trigger commit: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          ssh -p 21032 -o StrictHostKeyChecking=no \
+          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+
+            set -e
+
+            eval $(ssh-agent -s)
             ssh-add ~/.ssh/wisnu
-            ssh -T git@github.com
+
+            echo "Testing GitHub SSH..."
+            ssh -T git@github.com || true
+
             cd web
-            git fetch --all
+
+            echo "Fetching latest code..."
+            git fetch origin main
+
+            echo "Reset to latest main..."
             git reset --hard origin/main
+
+            echo "Laravel optimize clear..."
             php artisan optimize:clear
+
+            echo "Running migration..."
             php artisan migrate --force
-            php artisan route:list | grep admin/asesi/bulk-delete
+
+            echo "Caching config..."
             php artisan config:cache
-        "
-# trigger: manual
+
+            echo "Deploy selesai"
+
+          EOF
