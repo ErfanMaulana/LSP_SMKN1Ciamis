@@ -978,26 +978,30 @@ class AsesiController extends Controller
         $request->validate([
             'catatan_admin' => 'required|string',
             'reject_type'   => 'required|in:rejected,banned',
-            'tanda_tangan_admin' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
+            'tanda_tangan_admin' => ['nullable', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
         ], [
             'catatan_admin.required' => 'Catatan penolakan wajib diisi.',
             'reject_type.required'   => 'Jenis penolakan wajib dipilih.',
             'reject_type.in'         => 'Jenis penolakan tidak valid.',
-            'tanda_tangan_admin.required' => 'Tanda tangan admin wajib diisi.',
             'tanda_tangan_admin.regex' => 'Format tanda tangan admin tidak valid.',
         ]);
         
         $asesi = Asesi::findOrFail($nik);
         $rejectType = $request->input('reject_type', 'rejected'); // 'rejected' or 'banned'
         
-        $asesi->update([
+        $updateData = [
             'status'        => $rejectType,
             'catatan_admin' => $request->input('catatan_admin'),
             'verified_at'   => now(),
             'verified_by'   => auth('admin')->id(),
-            'tanda_tangan_admin' => $request->input('tanda_tangan_admin'),
-            'tanggal_tanda_tangan_admin' => now(),
-        ]);
+        ];
+
+        if ($request->filled('tanda_tangan_admin')) {
+            $updateData['tanda_tangan_admin'] = $request->input('tanda_tangan_admin');
+            $updateData['tanggal_tanda_tangan_admin'] = now();
+        }
+
+        $asesi->update($updateData);
         
         // Send rejection email if asesi has email
         if ($asesi->email) {
