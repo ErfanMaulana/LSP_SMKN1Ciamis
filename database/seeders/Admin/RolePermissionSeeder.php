@@ -64,6 +64,12 @@ class RolePermissionSeeder extends Seeder
                 'skema.edit'   => 'Edit Skema',
                 'skema.delete' => 'Hapus Skema',
             ],
+            'Bukti Persyaratan Dasar Pemohon' => [
+                'bukti-persyaratan-dasar-pemohon.view'   => 'Lihat Bukti Persyaratan Dasar Pemohon',
+                'bukti-persyaratan-dasar-pemohon.create' => 'Tambah Bukti Persyaratan Dasar Pemohon',
+                'bukti-persyaratan-dasar-pemohon.edit'   => 'Edit Bukti Persyaratan Dasar Pemohon',
+                'bukti-persyaratan-dasar-pemohon.delete' => 'Hapus Bukti Persyaratan Dasar Pemohon',
+            ],
             'TUK' => [
                 'tuk.view'   => 'Lihat TUK',
                 'tuk.create' => 'Tambah TUK',

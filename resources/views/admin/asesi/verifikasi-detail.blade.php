@@ -327,6 +327,124 @@
         text-decoration: underline;
     }
 
+    .checklist-card {
+        background: #fff;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+
+    .checklist-card .section-title {
+        padding: 16px 24px;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8fafc;
+    }
+
+    .checklist-card .section-body {
+        padding: 24px;
+    }
+
+    .checklist-note {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0 0 16px;
+    }
+
+    .checklist-table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+    }
+
+    .checklist-table th,
+    .checklist-table td {
+        border: 1px solid #1f2937;
+        padding: 10px 8px;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .checklist-table th {
+        background: #f8fafc;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .checklist-table .row-label {
+        text-align: left;
+        font-weight: 500;
+    }
+
+    .checklist-radio-group {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .checklist-radio {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #1e293b;
+        white-space: nowrap;
+    }
+
+    .checklist-radio input {
+        accent-color: #0073bd;
+        width: 14px;
+        height: 14px;
+    }
+
+    .checklist-error {
+        display: none;
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+        font-size: 13px;
+    }
+
+    .checklist-summary {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .checklist-summary-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 16px;
+        background: #f8fafc;
+    }
+
+    .checklist-summary-card h5 {
+        margin: 0 0 10px;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .checklist-summary-list {
+        margin: 0;
+        padding-left: 18px;
+        font-size: 13px;
+        color: #334155;
+    }
+
     /* Action Section */
     .action-card {
         background: #fff;
@@ -628,6 +746,19 @@
     </a>
 </div>
 
+@php
+    $selectedSkema = $asesi->skemas->first();
+    $dynamicChecklistItems = data_get($selectedSkema, 'buktiPersyaratanDasarPemohon.items', []);
+    $staticAdministrativeItems = [
+        'Fotocopy Kartu Pelajar',
+        'Fotocopy Kartu Keluarga/KTP',
+        'Pas foto 3 x 4 berwarna sebanyak 2 lembar',
+    ];
+
+    $savedDynamicChecklist = is_array($asesi->verifikasi_bukti_persyaratan_dasar ?? null) ? $asesi->verifikasi_bukti_persyaratan_dasar : [];
+    $savedAdministrativeChecklist = is_array($asesi->verifikasi_bukti_administratif ?? null) ? $asesi->verifikasi_bukti_administratif : [];
+@endphp
+
 <div class="review-page">
     <!-- Profile Header -->
     <div class="profile-header">
@@ -819,6 +950,126 @@
         </div>
     </div>
 
+    @if($asesi->status === 'pending')
+        <div class="checklist-card">
+            <div class="section-title">
+                <i class="bi bi-check2-square" style="color:#0073bd;"></i> Ceklis Verifikasi Persyaratan
+            </div>
+            <div class="section-body">
+                <p class="checklist-note">
+                    Pilih status untuk setiap bukti persyaratan dasar pemohon dan bukti administratif sebelum menyetujui atau menolak pendaftaran.
+                </p>
+
+                @if(!$selectedSkema)
+                    <div class="checklist-error" style="display:block;">
+                        Asesi ini belum terhubung ke skema. Checklist dinamis tidak dapat ditampilkan.
+                    </div>
+                @endif
+
+                @if($selectedSkema)
+                    <h4 style="font-size:14px;font-weight:600;color:#374151;margin:0 0 12px;">3.1 Bukti Persyaratan Dasar Pemohon</h4>
+                    <table class="checklist-table" style="margin-bottom:20px;">
+                        <thead>
+                            <tr>
+                                <th rowspan="2" style="width:58px;">No.</th>
+                                <th rowspan="2">Bukti Persyaratan Dasar</th>
+                                <th colspan="2">Ada</th>
+                                <th rowspan="2" style="width:120px;">Tidak Ada</th>
+                            </tr>
+                            <tr>
+                                <th style="width:150px;">Memenuhi Syarat</th>
+                                <th style="width:170px;">Tidak Memenuhi Syarat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse(($dynamicChecklistItems ?? []) as $index => $itemLabel)
+                                @php
+                                    $rowName = 'dynamic_check_' . $index;
+                                    $savedValue = $savedDynamicChecklist[$index]['status'] ?? null;
+                                    $label = is_array($itemLabel) ? ($itemLabel['label'] ?? $itemLabel['nama'] ?? '') : $itemLabel;
+                                @endphp
+                                <tr data-checklist-row="dynamic">
+                                    <td style="text-align:center;">{{ $index + 1 }}.</td>
+                                    <td class="row-label" data-checklist-label="{{ $label }}">{{ $label }}</td>
+                                    <td>
+                                        <label class="checklist-radio">
+                                            <input type="radio" name="{{ $rowName }}" value="memenuhi" {{ $savedValue === 'memenuhi' ? 'checked' : '' }}>
+                                            <span>Memenuhi</span>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <label class="checklist-radio">
+                                            <input type="radio" name="{{ $rowName }}" value="tidak_memenuhi" {{ $savedValue === 'tidak_memenuhi' ? 'checked' : '' }}>
+                                            <span>Tidak Memenuhi</span>
+                                        </label>
+                                    </td>
+                                    <td style="text-align:center;">
+                                        <label class="checklist-radio">
+                                            <input type="radio" name="{{ $rowName }}" value="tidak_ada" {{ $savedValue === 'tidak_ada' ? 'checked' : '' }}>
+                                            <span>Tidak Ada</span>
+                                        </label>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" style="text-align:center;color:#64748b;">Belum ada master persyaratan dasar untuk skema ini.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                @endif
+
+                <h4 style="font-size:14px;font-weight:600;color:#374151;margin:0 0 12px;">3.2 Bukti Administratif</h4>
+                <table class="checklist-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width:58px;">No.</th>
+                            <th rowspan="2">Bukti Administratif</th>
+                            <th colspan="2">Ada</th>
+                            <th rowspan="2" style="width:120px;">Tidak Ada</th>
+                        </tr>
+                        <tr>
+                            <th style="width:150px;">Memenuhi Syarat</th>
+                            <th style="width:170px;">Tidak Memenuhi Syarat</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($staticAdministrativeItems as $index => $itemLabel)
+                            @php
+                                $rowName = 'administrative_check_' . $index;
+                                $savedValue = $savedAdministrativeChecklist[$index]['status'] ?? null;
+                            @endphp
+                            <tr data-checklist-row="administrative">
+                                <td style="text-align:center;">{{ $index + 1 }}.</td>
+                                <td class="row-label" data-checklist-label="{{ $itemLabel }}">{{ $itemLabel }}</td>
+                                <td>
+                                    <label class="checklist-radio">
+                                        <input type="radio" name="{{ $rowName }}" value="memenuhi" {{ $savedValue === 'memenuhi' ? 'checked' : '' }}>
+                                        <span>Memenuhi</span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <label class="checklist-radio">
+                                        <input type="radio" name="{{ $rowName }}" value="tidak_memenuhi" {{ $savedValue === 'tidak_memenuhi' ? 'checked' : '' }}>
+                                        <span>Tidak Memenuhi</span>
+                                    </label>
+                                </td>
+                                <td style="text-align:center;">
+                                    <label class="checklist-radio">
+                                        <input type="radio" name="{{ $rowName }}" value="tidak_ada" {{ $savedValue === 'tidak_ada' ? 'checked' : '' }}>
+                                        <span>Tidak Ada</span>
+                                    </label>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+
+                <div class="checklist-error" id="checklistErrorBox">Semua item checklist harus dipilih sebelum menyimpan verifikasi.</div>
+            </div>
+        </div>
+    @endif
+
     <!-- Action / Verification -->
     @if($asesi->status === 'pending')
         <div class="action-card">
@@ -922,9 +1173,11 @@
     <div class="modal-box">
         <h3><i class="bi bi-check-circle" style="color:#10b981;"></i> Konfirmasi Persetujuan</h3>
         <p>Apakah Anda yakin ingin <strong>menyetujui</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>? Email notifikasi akan dikirim ke <strong>{{ $asesi->email }}</strong>.</p>
-        <form method="POST" action="{{ route('admin.asesi.approve', $asesi->NIK) }}">
+        <form method="POST" action="{{ route('admin.asesi.approve', $asesi->NIK) }}" onsubmit="return prepareChecklistPayload('approve')">
             @csrf
             <input type="hidden" name="tanda_tangan_admin" class="signature-admin-input">
+            <input type="hidden" name="verifikasi_bukti_persyaratan_dasar" id="approveChecklistPersyaratan">
+            <input type="hidden" name="verifikasi_bukti_administratif" id="approveChecklistAdministratif">
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeModal('approveModal')">Batal</button>
                 <button type="submit" class="btn-confirm-approve"><i class="bi bi-check-lg"></i> Ya, Setujui</button>
@@ -938,9 +1191,11 @@
     <div class="modal-box">
         <h3><i class="bi bi-x-circle" style="color:#ef4444;"></i> Konfirmasi Penolakan</h3>
         <p>Apakah Anda yakin ingin <strong>menolak</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>? Email notifikasi akan dikirim ke <strong>{{ $asesi->email }}</strong>.</p>
-        <form method="POST" action="{{ route('admin.asesi.reject', $asesi->NIK) }}" id="rejectForm" onsubmit="return validateReject()">
+        <form method="POST" action="{{ route('admin.asesi.reject', $asesi->NIK) }}" id="rejectForm" onsubmit="return validateReject() && prepareChecklistPayload('reject')">
             @csrf
             <input type="hidden" name="tanda_tangan_admin" class="signature-admin-input">
+            <input type="hidden" name="verifikasi_bukti_persyaratan_dasar" id="rejectChecklistPersyaratan">
+            <input type="hidden" name="verifikasi_bukti_administratif" id="rejectChecklistAdministratif">
             {{-- Reject type --}}
             <label class="catatan-label" style="margin-bottom:8px;">Jenis Penolakan <span style="color:#ef4444;">*</span></label>
             <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
@@ -992,6 +1247,7 @@
 @section('scripts')
 <script>
     function showApproveModal() {
+        document.getElementById('checklistErrorBox').style.display = 'none';
         document.getElementById('approveModal').classList.add('show');
     }
 
@@ -1010,6 +1266,7 @@
     function showRejectModal() {
         // Reset error state
         document.getElementById('reject-error').style.display = 'none';
+        document.getElementById('checklistErrorBox').style.display = 'none';
         document.getElementById('rt_rejected').checked = true;
         updateRejectBtn();
         document.getElementById('reject_catatan').style.borderColor = '#d1d5db';
@@ -1039,6 +1296,48 @@
             document.getElementById('signatureCanvasAdmin').scrollIntoView({ behavior: 'smooth', block: 'center' });
             return false;
         }
+        return true;
+    }
+
+    function collectChecklistItems() {
+        const rows = Array.from(document.querySelectorAll('[data-checklist-row]'));
+
+        return rows.map((row) => {
+            const labelEl = row.querySelector('[data-checklist-label]');
+            const checked = row.querySelector('input[type="radio"]:checked');
+
+            return {
+                label: labelEl ? labelEl.textContent.trim() : '',
+                status: checked ? checked.value : null,
+            };
+        });
+    }
+
+    function prepareChecklistPayload(prefix) {
+        const items = collectChecklistItems();
+        const dynamicCount = {{ count($dynamicChecklistItems ?? []) }};
+        const hasMissing = items.some((item) => !item.status);
+
+        if (hasMissing) {
+            const errorBox = document.getElementById('checklistErrorBox');
+            if (errorBox) {
+                errorBox.style.display = 'block';
+                errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return false;
+        }
+
+        const targetPersyaratan = document.getElementById(`${prefix}ChecklistPersyaratan`);
+        const targetAdministratif = document.getElementById(`${prefix}ChecklistAdministratif`);
+
+        if (targetPersyaratan) {
+            targetPersyaratan.value = JSON.stringify(items.filter((item, index) => index < dynamicCount));
+        }
+
+        if (targetAdministratif) {
+            targetAdministratif.value = JSON.stringify(items.filter((item, index) => index >= dynamicCount));
+        }
+
         return true;
     }
 

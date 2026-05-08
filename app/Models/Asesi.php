@@ -57,6 +57,8 @@ class Asesi extends Model
         'tanggal_tanda_tangan_pendaftar',
         'tanda_tangan_admin',
         'tanggal_tanda_tangan_admin',
+        'verifikasi_bukti_persyaratan_dasar',
+        'verifikasi_bukti_administratif',
     ];
 
     protected $casts = [
@@ -64,6 +66,8 @@ class Asesi extends Model
         'verified_at'   => 'datetime',
         'tanggal_tanda_tangan_pendaftar' => 'datetime',
         'tanggal_tanda_tangan_admin'     => 'datetime',
+        'verifikasi_bukti_persyaratan_dasar' => 'array',
+        'verifikasi_bukti_administratif' => 'array',
     ];
 
     public function jurusan()

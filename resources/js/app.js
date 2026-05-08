@@ -35,10 +35,6 @@ const resetCounterObserver = () => {
 };
 
 const initScrollReveal = () => {
-	if (!isTurboEnabledPage()) {
-		return;
-	}
-
 	const staggerGroups = Array.from(document.querySelectorAll('[data-reveal-stagger]'));
 	staggerGroups.forEach((group) => {
 		const rawStep = Number(group.dataset.revealStagger);
@@ -163,10 +159,6 @@ const animateCounter = (counter) => {
 };
 
 const initCounters = () => {
-	if (!isTurboEnabledPage()) {
-		return;
-	}
-
 	const counters = Array.from(document.querySelectorAll('.counter[data-target]'));
 	if (!counters.length) {
 		return;

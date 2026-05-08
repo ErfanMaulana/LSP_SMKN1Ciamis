@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AsesiController extends Controller
@@ -868,7 +869,7 @@ class AsesiController extends Controller
      */
     public function showVerifikasi($nik)
     {
-        $asesi = Asesi::with(['jurusan', 'buktiPendukung', 'verifiedBy'])
+        $asesi = Asesi::with(['jurusan', 'buktiPendukung', 'verifiedBy', 'skemas.buktiPersyaratanDasarPemohon'])
             ->findOrFail($nik);
         
         return view('admin.asesi.verifikasi-detail', compact('asesi'));
@@ -881,12 +882,16 @@ class AsesiController extends Controller
     {
         $validated = $request->validate([
             'tanda_tangan_admin' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
+            'verifikasi_bukti_persyaratan_dasar' => 'nullable|string',
+            'verifikasi_bukti_administratif' => 'nullable|string',
         ], [
             'tanda_tangan_admin.required' => 'Tanda tangan admin wajib diisi.',
             'tanda_tangan_admin.regex' => 'Format tanda tangan admin tidak valid.',
         ]);
 
         $asesi = Asesi::findOrFail($nik);
+        $verifikasiBuktiPersyaratanDasar = $this->decodeChecklistPayload($request->input('verifikasi_bukti_persyaratan_dasar'));
+        $verifikasiBuktiAdministratif = $this->decodeChecklistPayload($request->input('verifikasi_bukti_administratif'));
         
         // Generate unique no_reg based on birth date and index
         $noReg = $this->generateNoReg($asesi);
@@ -895,7 +900,7 @@ class AsesiController extends Controller
         $plainPassword = $noReg;
         
         // Update asesi status and no_reg
-        $asesi->update([
+        $updatePayload = [
             'no_reg' => $noReg,
             'status' => 'approved',
             'catatan_admin' => $request->input('catatan_admin'),
@@ -903,7 +908,14 @@ class AsesiController extends Controller
             'verified_by' => auth('admin')->id(),
             'tanda_tangan_admin' => $validated['tanda_tangan_admin'],
             'tanggal_tanda_tangan_admin' => now(),
-        ]);
+        ];
+
+        if (Schema::hasColumn('asesi', 'verifikasi_bukti_persyaratan_dasar') && Schema::hasColumn('asesi', 'verifikasi_bukti_administratif')) {
+            $updatePayload['verifikasi_bukti_persyaratan_dasar'] = $verifikasiBuktiPersyaratanDasar;
+            $updatePayload['verifikasi_bukti_administratif'] = $verifikasiBuktiAdministratif;
+        }
+
+        $asesi->update($updatePayload);
         
         // Check if account already exists (NIK-based flow)
         $existingAccount = \App\Models\Account::where('NIK', $asesi->NIK)->first();
@@ -971,6 +983,24 @@ class AsesiController extends Controller
     }
 
     /**
+     * Decode checklist payload from a hidden JSON field.
+     */
+    private function decodeChecklistPayload(?string $payload): ?array
+    {
+        if (empty($payload)) {
+            return null;
+        }
+
+        $decoded = json_decode($payload, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+            return null;
+        }
+
+        return $decoded;
+    }
+
+    /**
      * Reject an asesi registration.
      */
     public function reject(Request $request, $nik)
@@ -979,6 +1009,8 @@ class AsesiController extends Controller
             'catatan_admin' => 'required|string',
             'reject_type'   => 'required|in:rejected,banned',
             'tanda_tangan_admin' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
+            'verifikasi_bukti_persyaratan_dasar' => 'nullable|string',
+            'verifikasi_bukti_administratif' => 'nullable|string',
         ], [
             'catatan_admin.required' => 'Catatan penolakan wajib diisi.',
             'reject_type.required'   => 'Jenis penolakan wajib dipilih.',
@@ -989,6 +1021,8 @@ class AsesiController extends Controller
         
         $asesi = Asesi::findOrFail($nik);
         $rejectType = $request->input('reject_type', 'rejected'); // 'rejected' or 'banned'
+        $verifikasiBuktiPersyaratanDasar = $this->decodeChecklistPayload($request->input('verifikasi_bukti_persyaratan_dasar'));
+        $verifikasiBuktiAdministratif = $this->decodeChecklistPayload($request->input('verifikasi_bukti_administratif'));
         
         $asesi->update([
             'status'        => $rejectType,
@@ -997,6 +1031,8 @@ class AsesiController extends Controller
             'verified_by'   => auth('admin')->id(),
             'tanda_tangan_admin' => $request->input('tanda_tangan_admin'),
             'tanggal_tanda_tangan_admin' => now(),
+            'verifikasi_bukti_persyaratan_dasar' => $verifikasiBuktiPersyaratanDasar,
+            'verifikasi_bukti_administratif' => $verifikasiBuktiAdministratif,
         ]);
         
         // Send rejection email if asesi has email

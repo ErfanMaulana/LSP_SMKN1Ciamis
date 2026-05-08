@@ -19,6 +19,7 @@ class SetupAdminWithPermissionsSeeder extends Seeder
             'asesor.view', 'asesor.create', 'asesor.edit', 'asesor.delete',
             'jurusan.view', 'jurusan.create', 'jurusan.edit', 'jurusan.delete',
             'skema.view', 'skema.create', 'skema.edit', 'skema.delete',
+            'bukti-persyaratan-dasar-pemohon.view', 'bukti-persyaratan-dasar-pemohon.create', 'bukti-persyaratan-dasar-pemohon.edit', 'bukti-persyaratan-dasar-pemohon.delete',
             'tuk.view', 'tuk.create', 'tuk.edit', 'tuk.delete',
             'carousel.view', 'carousel.create', 'carousel.edit', 'carousel.delete',
             'admin-management.view', 'admin-management.create', 'admin-management.edit', 'admin-management.delete',

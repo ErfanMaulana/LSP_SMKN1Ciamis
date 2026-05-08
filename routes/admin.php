@@ -7,6 +7,7 @@ use App\Http\Controllers\AsesorController;
 use App\Http\Controllers\Admin\JurusanController;
 use App\Http\Controllers\Admin\CarouselController;
 use App\Http\Controllers\Admin\SkemaController;
+use App\Http\Controllers\Admin\BuktiPersyaratanDasarPemohonController;
 use App\Http\Controllers\Admin\SocialMediaController;
 use App\Http\Controllers\Admin\ProfileContentController;
 use App\Http\Controllers\Admin\TukController;
@@ -127,6 +128,16 @@ Route::prefix('admin')->group(function () {
             Route::get('/skema/{id}/edit', [SkemaController::class, 'edit'])->name('admin.skema.edit')->middleware('permission:skema.edit');
             Route::put('/skema/{id}', [SkemaController::class, 'update'])->name('admin.skema.update')->middleware('permission:skema.edit');
             Route::delete('/skema/{id}', [SkemaController::class, 'destroy'])->name('admin.skema.destroy')->middleware('permission:skema.delete');
+        });
+
+        // Bukti Persyaratan Dasar Pemohon CRUD
+        Route::middleware('permission:bukti-persyaratan-dasar-pemohon.view')->group(function () {
+            Route::get('/bukti-persyaratan-dasar-pemohon', [BuktiPersyaratanDasarPemohonController::class, 'index'])->name('admin.bukti-persyaratan-dasar-pemohon.index');
+            Route::get('/bukti-persyaratan-dasar-pemohon/create', [BuktiPersyaratanDasarPemohonController::class, 'create'])->name('admin.bukti-persyaratan-dasar-pemohon.create')->middleware('permission:bukti-persyaratan-dasar-pemohon.create');
+            Route::post('/bukti-persyaratan-dasar-pemohon', [BuktiPersyaratanDasarPemohonController::class, 'store'])->name('admin.bukti-persyaratan-dasar-pemohon.store')->middleware('permission:bukti-persyaratan-dasar-pemohon.create');
+            Route::get('/bukti-persyaratan-dasar-pemohon/{id}/edit', [BuktiPersyaratanDasarPemohonController::class, 'edit'])->name('admin.bukti-persyaratan-dasar-pemohon.edit')->middleware('permission:bukti-persyaratan-dasar-pemohon.edit');
+            Route::put('/bukti-persyaratan-dasar-pemohon/{id}', [BuktiPersyaratanDasarPemohonController::class, 'update'])->name('admin.bukti-persyaratan-dasar-pemohon.update')->middleware('permission:bukti-persyaratan-dasar-pemohon.edit');
+            Route::delete('/bukti-persyaratan-dasar-pemohon/{id}', [BuktiPersyaratanDasarPemohonController::class, 'destroy'])->name('admin.bukti-persyaratan-dasar-pemohon.destroy')->middleware('permission:bukti-persyaratan-dasar-pemohon.delete');
         });
 
         // Carousel CRUD

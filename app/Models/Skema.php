@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\BuktiPersyaratanDasarPemohon;
 
 class Skema extends Model
 {
@@ -27,6 +28,11 @@ class Skema extends Model
     public function units()
     {
         return $this->hasMany(Unit::class);
+    }
+
+    public function buktiPersyaratanDasarPemohon()
+    {
+        return $this->hasOne(BuktiPersyaratanDasarPemohon::class, 'skema_id');
     }
 
     public function asesis()

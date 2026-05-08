@@ -926,7 +926,7 @@
                 @endif
 
                 <!-- DATA MASTER Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view', 'jadwal-ujikom.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view', 'bukti-persyaratan-dasar-pemohon.view', 'jadwal-ujikom.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>DATA MASTER</span>
@@ -978,6 +978,14 @@
                                     class="menu-item {{ request()->routeIs('admin.skema.*') ? 'active' : '' }}">
                                     <i class="bi bi-patch-check"></i>
                                     <span>Skema</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('bukti-persyaratan-dasar-pemohon.view'))
+                                <a href="{{ route('admin.bukti-persyaratan-dasar-pemohon.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.bukti-persyaratan-dasar-pemohon.*') ? 'active' : '' }}">
+                                    <i class="bi bi-check2-square"></i>
+                                    <span>Bukti Persyaratan Dasar</span>
                                 </a>
                             @endif
 
