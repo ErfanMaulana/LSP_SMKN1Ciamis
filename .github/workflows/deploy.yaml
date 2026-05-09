@@ -3,55 +3,34 @@ name: Otomatis Deploy ke Server
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
+      - main 
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Setup SSH connection
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Setup SSH connection
+      uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to server via SSH
-        run: |
-          echo "=========================================="
-          echo "Starting deployment to server..."
-          echo "Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-          echo "Branch: main"
-          echo "=========================================="
-
-          ssh -p 21032 -o StrictHostKeyChecking=no \
-          ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-
-            set -e
-
-            echo "[1/5] Testing GitHub SSH access..."
-            ssh -T git@github.com 2>&1 | head -1 || true
-
-            echo "[2/5] Entering web directory..."
-            cd web || { echo "ERROR: web directory not found"; exit 1; }
-
-            echo "[3/5] Fetching latest code from main branch..."
-            git fetch origin main
+    - name: Deploy to server via SSH
+      run: |
+        echo "CI/CD trigger commit: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+        ssh -p 21032 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            eval \$(ssh-agent -s)
+            ssh-add ~/.ssh/wisnu
+            ssh -T git@github.com
+            cd web
+            git fetch --all
             git reset --hard origin/main
-
-            echo "[4/5] Clearing Laravel cache and running migrations..."
             php artisan optimize:clear
-            php artisan migrate --force --step
+            php artisan migrate --force
+            php artisan route:list | grep admin/asesi/bulk-delete
             php artisan config:cache
-
-            echo "[5/5] Verifying deployment..."
-            php artisan route:list --path=/admin/asesi-verifikasi > /dev/null && echo "✓ Routes verified"
-
-            echo "=========================================="
-            echo "✓ Deployment completed successfully!"
-            echo "=========================================="
-
-          EOF
+        "
+# trigger: manual
