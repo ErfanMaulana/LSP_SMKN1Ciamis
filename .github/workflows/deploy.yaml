@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -20,36 +21,37 @@ jobs:
 
       - name: Deploy to server via SSH
         run: |
-          echo "CI/CD trigger commit: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "=========================================="
+          echo "Starting deployment to server..."
+          echo "Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          echo "Branch: main"
+          echo "=========================================="
 
           ssh -p 21032 -o StrictHostKeyChecking=no \
           ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
 
             set -e
 
-            eval $(ssh-agent -s)
-            ssh-add ~/.ssh/wisnu
+            echo "[1/5] Testing GitHub SSH access..."
+            ssh -T git@github.com 2>&1 | head -1 || true
 
-            echo "Testing GitHub SSH..."
-            ssh -T git@github.com || true
+            echo "[2/5] Entering web directory..."
+            cd web || { echo "ERROR: web directory not found"; exit 1; }
 
-            cd web
-
-            echo "Fetching latest code..."
+            echo "[3/5] Fetching latest code from main branch..."
             git fetch origin main
-
-            echo "Reset to latest main..."
             git reset --hard origin/main
 
-            echo "Laravel optimize clear..."
+            echo "[4/5] Clearing Laravel cache and running migrations..."
             php artisan optimize:clear
-
-            echo "Running migration..."
-            php artisan migrate --force
-
-            echo "Caching config..."
+            php artisan migrate --force --step
             php artisan config:cache
 
-            echo "Deploy selesai"
+            echo "[5/5] Verifying deployment..."
+            php artisan route:list --path=/admin/asesi-verifikasi > /dev/null && echo "✓ Routes verified"
+
+            echo "=========================================="
+            echo "✓ Deployment completed successfully!"
+            echo "=========================================="
 
           EOF
