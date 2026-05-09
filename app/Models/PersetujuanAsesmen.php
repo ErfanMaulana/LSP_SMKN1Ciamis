@@ -36,8 +36,10 @@ class PersetujuanAsesmen extends Model
         'pernyataan_asesi_2',
         'ttd_asesor_nama',
         'ttd_asesor_tanggal',
+        'ttd_asesor_file',
         'ttd_asesi_nama',
         'ttd_asesi_tanggal',
+        'ttd_asesi_file',
         'catatan_footer',
     ];
 

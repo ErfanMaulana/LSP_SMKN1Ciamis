@@ -1008,14 +1008,13 @@ class AsesiController extends Controller
         $request->validate([
             'catatan_admin' => 'required|string',
             'reject_type'   => 'required|in:rejected,banned',
-            'tanda_tangan_admin' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
+            'tanda_tangan_admin' => ['nullable', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
             'verifikasi_bukti_persyaratan_dasar' => 'nullable|string',
             'verifikasi_bukti_administratif' => 'nullable|string',
         ], [
             'catatan_admin.required' => 'Catatan penolakan wajib diisi.',
             'reject_type.required'   => 'Jenis penolakan wajib dipilih.',
             'reject_type.in'         => 'Jenis penolakan tidak valid.',
-            'tanda_tangan_admin.required' => 'Tanda tangan admin wajib diisi.',
             'tanda_tangan_admin.regex' => 'Format tanda tangan admin tidak valid.',
         ]);
         
@@ -1024,16 +1023,21 @@ class AsesiController extends Controller
         $verifikasiBuktiPersyaratanDasar = $this->decodeChecklistPayload($request->input('verifikasi_bukti_persyaratan_dasar'));
         $verifikasiBuktiAdministratif = $this->decodeChecklistPayload($request->input('verifikasi_bukti_administratif'));
         
-        $asesi->update([
+        $updateData = [
             'status'        => $rejectType,
             'catatan_admin' => $request->input('catatan_admin'),
             'verified_at'   => now(),
             'verified_by'   => auth('admin')->id(),
-            'tanda_tangan_admin' => $request->input('tanda_tangan_admin'),
-            'tanggal_tanda_tangan_admin' => now(),
             'verifikasi_bukti_persyaratan_dasar' => $verifikasiBuktiPersyaratanDasar,
             'verifikasi_bukti_administratif' => $verifikasiBuktiAdministratif,
-        ]);
+        ];
+
+        if ($request->filled('tanda_tangan_admin')) {
+            $updateData['tanda_tangan_admin'] = $request->input('tanda_tangan_admin');
+            $updateData['tanggal_tanda_tangan_admin'] = now();
+        }
+
+        $asesi->update($updateData);
         
         // Send rejection email if asesi has email
         if ($asesi->email) {

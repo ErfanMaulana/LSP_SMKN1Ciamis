@@ -175,6 +175,43 @@
             <td colspan="2">Tanda tangan Asesi : {{ $item->ttd_asesi_nama ?: '............................' }}</td>
             <td colspan="2">Tanggal : {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: '............................' }}</td>
         </tr>
+        <tr>
+            <td colspan="4" style="padding: 16px; text-align: center; background: #f8fafc;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <!-- Asesor Signature -->
+                    <div style="text-align: center;">
+                        <h4 style="margin: 0 0 12px; color: #0f172a; font-size: 14px;">Tanda Tangan Asesor</h4>
+                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; min-height: 120px; display: flex; align-items: center; justify-content: center; background: white;">
+                            @if($item->ttd_asesor_file)
+                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" style="max-width: 100%; max-height: 120px;">
+                            @else
+                                <span style="color: #94a3b8; font-size: 13px;">Belum ditandatangani</span>
+                            @endif
+                        </div>
+                        <p style="margin: 8px 0 0; font-size: 13px; color: #64748b;">
+                            <strong>{{ $item->ttd_asesor_nama ?: 'Nama Asesor' }}</strong><br>
+                            {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: 'Tanggal Pendatangan' }}
+                        </p>
+                    </div>
+
+                    <!-- Asesi Signature -->
+                    <div style="text-align: center;">
+                        <h4 style="margin: 0 0 12px; color: #0f172a; font-size: 14px;">Tanda Tangan Asesi</h4>
+                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; min-height: 120px; display: flex; align-items: center; justify-content: center; background: white;">
+                            @if($item->ttd_asesi_file)
+                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" style="max-width: 100%; max-height: 120px;">
+                            @else
+                                <span style="color: #94a3b8; font-size: 13px;">Belum ditandatangani</span>
+                            @endif
+                        </div>
+                        <p style="margin: 8px 0 0; font-size: 13px; color: #64748b;">
+                            <strong>{{ $item->ttd_asesi_nama ?: 'Nama Asesi' }}</strong><br>
+                            {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: 'Tanggal Pendatangan' }}
+                        </p>
+                    </div>
+                </div>
+            </td>
+        </tr>
     </table>
 
     @if($item->catatan_footer)

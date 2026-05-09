@@ -1290,12 +1290,6 @@
             document.getElementById('reject_catatan').focus();
             return false;
         }
-
-        if (!window.adminSignatureInput || !window.adminSignatureInput.value) {
-            document.getElementById('signatureErrorAdmin').style.display = 'block';
-            document.getElementById('signatureCanvasAdmin').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            return false;
-        }
         return true;
     }
 
@@ -1486,7 +1480,8 @@
         initSignaturePadAdmin();
 
         document.querySelectorAll('form').forEach(function(form) {
-            if (form.action.includes('/approve') || form.id === 'rejectForm') {
+            // Only enforce signature for approval form(s)
+            if (form.action.includes('/approve')) {
                 form.addEventListener('submit', function(event) {
                     const adminInput = form.querySelector('.signature-admin-input');
                     if (!adminInput || !adminInput.value) {
