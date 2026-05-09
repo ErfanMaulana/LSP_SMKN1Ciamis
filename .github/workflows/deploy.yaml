@@ -28,6 +28,8 @@ jobs:
             cd web
             git fetch --all
             git reset --hard origin/main
+            npm install
+            npm run build
             php artisan optimize:clear
             php artisan migrate --force
             php artisan route:list | grep admin/asesi/bulk-delete
