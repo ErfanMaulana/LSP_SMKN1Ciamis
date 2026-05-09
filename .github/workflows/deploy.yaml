@@ -1,6 +1,6 @@
 # Workflow untuk auto-deploy ke production server
 # Triggered setiap push ke branch main
-# Last triggered: 2026-05-09 Manual deployment test
+# Last triggered: 2026-05-09 22:30 Fix landing page styling - rebuild assets
 name: Otomatis Deploy ke Server
 
 on:
