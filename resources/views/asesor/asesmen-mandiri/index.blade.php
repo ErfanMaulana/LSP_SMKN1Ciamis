@@ -202,6 +202,80 @@
         pointer-events: none;
     }
 
+    .action-cell {
+        width: 96px;
+        text-align: center;
+        padding: 12px 16px;
+    }
+
+    .action-wrap { display: flex; align-items: center; justify-content: center; }
+
+    .action-menu { position: relative; display: inline-block; }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .2s;
+        color: #475569;
+    }
+
+    .action-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .action-dropdown {
+        display: none;
+        position: fixed;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(0,0,0,.15);
+        min-width: 160px;
+        z-index: 9990;
+        overflow: hidden;
+    }
+
+    .action-dropdown.show {
+        display: block;
+    }
+
+    .action-dropdown a,
+    .action-dropdown button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 16px;
+        border: none;
+        background: none;
+        text-align: left;
+        font-size: 14px;
+        color: #475569;
+        cursor: pointer;
+        transition: all .2s;
+        text-decoration: none;
+    }
+
+    .action-dropdown a:hover,
+    .action-dropdown button:hover {
+        background: #f8fafc;
+        color: #0F172A;
+    }
+
+    .action-dropdown.disabled a,
+    .action-dropdown.disabled button {
+        pointer-events: none;
+        opacity: 0.5;
+        color: #94a3b8;
+    }
+
     .empty-state {
         text-align: center;
         padding: 60px 20px;
@@ -276,7 +350,7 @@
                         <th>Status</th>
                         <th>Jawaban</th>
                         <th>Rekomendasi</th>
-                        <th>Aksi</th>
+                        <th class="action-cell">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -308,16 +382,25 @@
                                     <span class="badge badge-rekom-pending">Belum Direview</span>
                                 @endif
                             </td>
-                            <td>
-                                @if($row->has_asesmen_mandiri)
-                                    <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" class="btn-review">
-                                        <i class="bi bi-eye"></i> Review
-                                    </a>
-                                @else
-                                    <span class="btn-review disabled">
-                                        <i class="bi bi-eye"></i> Review
-                                    </span>
-                                @endif
+                            <td class="action-cell">
+                                <div class="action-wrap">
+                                    <div class="action-menu">
+                                        <button type="button" class="action-btn" onclick="toggleMenu(this)" aria-label="Aksi data">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <div class="action-dropdown">
+                                            @if($row->has_asesmen_mandiri)
+                                                <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}">
+                                                    <i class="bi bi-eye"></i> Review
+                                                </a>
+                                            @else
+                                                <span style="display: flex; align-items: center; gap: 10px; padding: 10px 16px; color: #94a3b8;">
+                                                    <i class="bi bi-eye" style="width: 18px; text-align: center;"></i> Review
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -331,4 +414,43 @@
         </div>
     @endif
 </div>
+
+<script>
+function toggleMenu(button) {
+    const menu = button.nextElementSibling;
+    if (!menu) return;
+
+    document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+        if (dropdown !== menu) {
+            dropdown.classList.remove('show');
+        }
+    });
+
+    menu.classList.toggle('show');
+
+    if (menu.classList.contains('show')) {
+        const buttonRect = button.getBoundingClientRect();
+        const menuHeight = menu.offsetHeight;
+        const viewportHeight = window.innerHeight;
+
+        let top = buttonRect.bottom + 8;
+        if (top + menuHeight > viewportHeight) {
+            top = buttonRect.top - menuHeight - 8;
+        }
+
+        menu.style.top = top + 'px';
+        menu.style.left = (buttonRect.left - menu.offsetWidth + button.offsetWidth) + 'px';
+    }
+
+    event.stopPropagation();
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.action-menu')) {
+        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+            dropdown.classList.remove('show');
+        });
+    }
+});
+</script>
 @endsection

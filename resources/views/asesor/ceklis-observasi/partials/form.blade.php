@@ -77,6 +77,14 @@
 
     .hidden { display:none; }
 
+    /* Signature canvas styles to match persetujuan-asesmen */
+    .signature-canvas-wrapper { border: 2px dashed #e6eef5; border-radius: 8px; padding: 12px; min-height: 120px; background: #ffffff; position: relative; }
+    .signature-canvas { width: 100%; height: 120px; display: block; border-radius:6px; background: transparent; }
+    .signature-placeholder { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#94a3b8; font-size:13px; pointer-events:none; }
+    .signature-placeholder i { font-size:20px; margin-bottom:6px; }
+    .signature-actions { margin-top:8px; display:flex; gap:8px; align-items:center; }
+    .btn-clear-signature { background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:7px 10px; cursor:pointer; color:#0f172a; }
+
     @media (max-width:768px) {
         .grid-2 { grid-template-columns:1fr; }
     }
@@ -170,6 +178,59 @@
         <div class="field"><label>Nama Asesor</label><input type="text" name="ttd_asesor_nama" value="{{ $value('ttd_asesor_nama', '') }}"></div>
         <div class="field"><label>No Reg Asesor</label><input type="text" name="ttd_asesor_no_reg" value="{{ $value('ttd_asesor_no_reg', '') }}"></div>
         <div class="field"><label>Tanggal TTD Asesor</label><input type="date" name="ttd_asesor_tanggal" value="{{ $ttdAsesorTanggal }}"></div>
+    </div>
+
+    <div style="margin-top:14px;">
+        <h4 style="margin:0 0 8px;font-size:14px;color:#0f172a;">Tanda Tangan</h4>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:260px;">
+                <label style="font-weight:700;display:block;margin-bottom:6px;">Tanda Tangan Asesor</label>
+                <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;min-height:120px;background:#fff;">
+                        @if(!empty($record) && $record->ttd_asesor_file)
+                            <img src="{{ asset('storage/' . ltrim($record->ttd_asesor_file, '/')) }}" alt="Signature Asesor" style="max-width:100%;max-height:120px;">
+                        @else
+                            <div class="signature-canvas-wrapper" id="ceklisSignatureWrapperAsesor" style="margin-top:0;">
+                                <canvas class="signature-canvas" id="ceklisSignatureCanvasAsesor"></canvas>
+                                <div class="signature-placeholder">
+                                    <i class="bi bi-pen"></i>
+                                    <span>Tanda tangan di sini</span>
+                                </div>
+                            </div>
+                        @endif
+                </div>
+                <div class="signature-actions">
+                    <button type="button" id="ceklisClearAsesor" class="btn-clear-signature">Hapus Tanda Tangan</button>
+                    <div style="font-size:13px;color:#64748b;">Tanggal: <strong id="ceklisSignatureDateAsesor">{{ now()->format('d M Y') }}</strong></div>
+                </div>
+                <input type="hidden" name="ttd_asesor_file" id="ceklisTtdAsesorFileInput">
+            </div>
+
+            <div style="flex:1;min-width:260px;">
+                <label style="font-weight:700;display:block;margin-bottom:6px;">Tanda Tangan Asesi</label>
+                <div style="border:1px solid #e5e7eb;border-radius:8px;padding:12px;min-height:120px;background:#fff;">
+                    @if(!empty($record) && $record->ttd_asesi_file)
+                        <img src="{{ asset('storage/' . ltrim($record->ttd_asesi_file, '/')) }}" alt="Signature Asesi" style="max-width:100%;max-height:120px;">
+                    @else
+                        @if(empty($record) || empty($record->ttd_asesor_file))
+                            <div style="color:#94a3b8;font-size:13px;">Asesor belum menandatangani. Tanda tangan asesi belum tersedia.</div>
+                        @else
+                            <div class="signature-canvas-wrapper" id="ceklisSignatureWrapperAsesi" style="margin-top:0;">
+                                <canvas class="signature-canvas" id="ceklisSignatureCanvasAsesi"></canvas>
+                                <div class="signature-placeholder">
+                                    <i class="bi bi-pen"></i>
+                                    <span>Tanda tangan di sini</span>
+                                </div>
+                            </div>
+                        @endif
+                    @endif
+                </div>
+                <div class="signature-actions">
+                    <button type="button" id="ceklisClearAsesi" class="btn-clear-signature">Hapus Tanda Tangan</button>
+                    <div style="font-size:13px;color:#64748b;">Tanggal: <strong id="ceklisSignatureDateAsesi">{{ now()->format('d M Y') }}</strong></div>
+                </div>
+                <input type="hidden" name="ttd_asesi_file" id="ceklisTtdAsesiFileInput">
+            </div>
+        </div>
     </div>
 
     <div class="form-actions">
@@ -459,5 +520,83 @@ document.addEventListener('DOMContentLoaded', function () {
     setNomorSkema();
     loadData();
     toggleBelumKompeten();
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Helper to initialize a canvas for drawing signature
+    // Initialize canvas behavior similar to persetujuan-asesmen
+    const setupCanvas = (canvasId, clearBtnId, hiddenInputId, dateElementId) => {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return null;
+        const ctx = canvas.getContext('2d');
+        const clearBtn = document.getElementById(clearBtnId);
+        const hidden = document.getElementById(hiddenInputId);
+        const dateEl = document.getElementById(dateElementId);
+
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        const resize = () => {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * ratio;
+            canvas.height = rect.height * ratio;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+        };
+
+        const pos = (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const point = event.touches && event.touches[0] ? event.touches[0] : event;
+            return { x: point.clientX - rect.left, y: point.clientY - rect.top };
+        };
+
+        const start = (e) => { e.preventDefault(); isDrawing = true; const p = pos(e); lastX = p.x; lastY = p.y; };
+        const move = (e) => { e.preventDefault(); if (!isDrawing) return; const p = pos(e); ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y); ctx.stroke(); lastX = p.x; lastY = p.y; };
+        const stop = () => { isDrawing = false; };
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                if (hidden) hidden.value = '';
+                if (dateEl && !dateEl.value) dateEl.value = '';
+            });
+        }
+
+        window.addEventListener('resize', resize);
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', move);
+        canvas.addEventListener('mouseup', stop);
+        canvas.addEventListener('mouseleave', stop);
+        canvas.addEventListener('touchstart', start, { passive: false });
+        canvas.addEventListener('touchmove', move, { passive: false });
+        canvas.addEventListener('touchend', stop);
+        resize();
+
+        return {
+            captureToHidden() {
+                if (hidden) hidden.value = canvas.toDataURL('image/png');
+            }
+        };
+    };
+
+    const asesorSig = setupCanvas('ceklisSignatureCanvasAsesor', 'ceklisClearAsesor', 'ceklisTtdAsesorFileInput', null);
+    const asesiSig = setupCanvas('ceklisSignatureCanvasAsesi', 'ceklisClearAsesi', 'ceklisTtdAsesiFileInput', '');
+
+    const signatureHiddenAsesor = document.getElementById('ceklisTtdAsesorFileInput');
+    const outerForm = signatureHiddenAsesor ? signatureHiddenAsesor.closest('form') : null;
+    if (outerForm) {
+        outerForm.addEventListener('submit', function () {
+            if (asesorSig) asesorSig.captureToHidden();
+            if (asesiSig) asesiSig.captureToHidden();
+        });
+    }
 });
 </script>

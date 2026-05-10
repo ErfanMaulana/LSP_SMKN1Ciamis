@@ -99,7 +99,81 @@
     }
     tr:last-child td { border-bottom: none; }
 
-    .action-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+    .action-wrap { display: flex; align-items: center; justify-content: center; }
+
+    .action-cell {
+        width: 96px;
+        text-align: center;
+        padding: 12px 14px;
+    }
+
+    .action-menu { position: relative; display: inline-block; }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .2s;
+        color: #475569;
+    }
+
+    .action-btn:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .action-dropdown {
+        display: none;
+        position: fixed;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(0,0,0,.15);
+        min-width: 160px;
+        z-index: 9990;
+        overflow: hidden;
+    }
+
+    .action-dropdown.show {
+        display: block;
+    }
+
+    .action-dropdown a,
+    .action-dropdown button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 16px;
+        border: none;
+        background: none;
+        text-align: left;
+        font-size: 14px;
+        color: #475569;
+        cursor: pointer;
+        transition: all .2s;
+        text-decoration: none;
+    }
+
+    .action-dropdown a:hover,
+    .action-dropdown button:hover {
+        background: #f8fafc;
+        color: #0F172A;
+    }
+
+    .action-dropdown button[type="submit"]:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .action-dropdown .danger {
+        color: #475569;
+    }
 
     .pagination-wrap { padding: 14px; }
 
@@ -107,6 +181,169 @@
         padding: 36px 16px;
         text-align: center;
         color: #64748b;
+    }
+
+    /* Kebab Menu Styles */
+    .action-menu-wrapper {
+        position: relative;
+        display: inline-block;
+        z-index: 999;
+    }
+
+    .btn-kebab {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        padding: 6px 8px;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        width: 32px;
+        height: 32px;
+    }
+
+    .btn-kebab:hover {
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+
+    .btn-kebab.active {
+        background: #0073bd;
+        border-color: #0073bd;
+        color: white;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+        min-width: 200px;
+        z-index: 10000;
+        display: none;
+        margin-top: 4px;
+        overflow: visible;
+        pointer-events: auto;
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+
+    .dropdown-menu.show {
+        display: block;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .dropdown-menu.show-up {
+        transform: translateY(0);
+    }
+
+    .dropdown-menu.dropdown-floating {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: auto;
+        margin: 0;
+        width: 220px;
+        min-width: 220px;
+        max-width: 240px;
+        max-height: calc(100vh - 24px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        z-index: 20000;
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    .dropdown-menu.dropdown-floating.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    body.dropdown-open {
+        overflow: hidden;
+    }
+
+    .dropdown-menu a,
+    .dropdown-menu button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        border: none;
+        background: none;
+        color: #374151;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .dropdown-menu a:last-child,
+    .dropdown-menu button:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-menu a:hover,
+    .dropdown-menu button:hover {
+        background: #f8fafc;
+        color: #0073bd;
+    }
+
+    .dropdown-menu a i,
+    .dropdown-menu button i {
+        font-size: 14px;
+        width: 18px;
+        text-align: center;
+    }
+
+    .dropdown-menu .menu-disabled {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #94a3b8;
+        background: #f8fafc;
+        border-bottom: 1px solid #f3f4f6;
+        cursor: not-allowed;
+    }
+
+    .dropdown-menu .menu-disabled:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-menu .menu-disabled i {
+        font-size: 14px;
+        width: 18px;
+        text-align: center;
+        color: #94a3b8;
+    }
+
+    .dropdown-menu .menu-danger:hover {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+
+    .dropdown-menu .menu-danger i {
+        color: #dc2626;
+    }
+
+    .dropdown-menu .menu-danger:hover i {
+        color: #dc2626;
     }
 </style>
 @endsection
@@ -142,7 +379,7 @@
                     <th>Nomor Skema</th>
                     <th>Asesi</th>
                     <th>Status</th>
-                    <th style="width: 120px;">Aksi</th>
+                    <th class="action-cell">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -153,15 +390,22 @@
                         <td>{{ $item['skema_nomor'] }}</td>
                         <td>{{ $item['asesi_nama'] }}</td>
                         <td>{{ $item['status'] }}</td>
-                        <td>
+                        <td class="action-cell">
                             <div class="action-wrap">
-                                @if(!empty($item['asesi_nik']) && !empty($item['skema_id']))
-                                    <a href="{{ route('asesor.persetujuan.front.asesor.show', [$item['asesi_nik'], $item['skema_id']]) }}" class="btn btn-secondary">
-                                        <i class="bi bi-eye"></i> Lihat
-                                    </a>
-                                @else
-                                    <span style="font-size:12px;color:#94a3b8;">Data belum lengkap</span>
-                                @endif
+                                <div class="action-menu">
+                                    @if(!empty($item['asesi_nik']) && !empty($item['skema_id']))
+                                        <button type="button" class="action-btn" onclick="toggleMenu(this)" aria-label="Aksi data">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <div class="action-dropdown">
+                                            <a href="{{ route('asesor.persetujuan.front.asesor.show', [$item['asesi_nik'], $item['skema_id']]) }}">
+                                                <i class="bi bi-eye"></i> Lihat Detail
+                                            </a>
+                                        </div>
+                                    @else
+                                        <span style="font-size:12px;color:#94a3b8;">Data belum lengkap</span>
+                                    @endif
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -179,4 +423,43 @@
         </table>
     </div>
 </div>
+
+<script>
+function toggleMenu(button) {
+    const menu = button.nextElementSibling;
+    if (!menu) return;
+
+    document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+        if (dropdown !== menu) {
+            dropdown.classList.remove('show');
+        }
+    });
+
+    menu.classList.toggle('show');
+
+    if (menu.classList.contains('show')) {
+        const buttonRect = button.getBoundingClientRect();
+        const menuHeight = menu.offsetHeight;
+        const viewportHeight = window.innerHeight;
+
+        let top = buttonRect.bottom + 8;
+        if (top + menuHeight > viewportHeight) {
+            top = buttonRect.top - menuHeight - 8;
+        }
+
+        menu.style.top = top + 'px';
+        menu.style.left = (buttonRect.left - menu.offsetWidth + button.offsetWidth) + 'px';
+    }
+
+    event.stopPropagation();
+}
+
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.action-menu')) {
+        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
+            dropdown.classList.remove('show');
+        });
+    }
+});
+</script>
 @endsection

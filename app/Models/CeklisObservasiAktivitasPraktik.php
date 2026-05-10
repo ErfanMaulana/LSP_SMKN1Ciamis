@@ -24,9 +24,11 @@ class CeklisObservasiAktivitasPraktik extends Model
         'belum_kompeten_kuk',
         'ttd_asesi_nama',
         'ttd_asesi_tanggal',
+        'ttd_asesi_file',
         'ttd_asesor_nama',
         'ttd_asesor_no_reg',
         'ttd_asesor_tanggal',
+        'ttd_asesor_file',
         'catatan_footer',
     ];
 

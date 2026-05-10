@@ -12,6 +12,8 @@ use App\Models\Skema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class CeklisObservasiController extends Controller
@@ -128,6 +130,9 @@ class CeklisObservasiController extends Controller
 
         [$data, $details] = $this->validatedData($request, $asesor, false);
 
+        // Persist any base64 signature images and replace with storage path.
+        $this->persistSignatures($data);
+
         DB::transaction(function () use ($data, $details) {
             $item = CeklisObservasiAktivitasPraktik::create($data);
             $item->details()->createMany($details);
@@ -193,6 +198,9 @@ class CeklisObservasiController extends Controller
             ->findOrFail($id);
 
         [$data, $details] = $this->validatedData($request, $asesor, true);
+
+        // Persist any base64 signature images and replace with storage path.
+        $this->persistSignatures($data, $item->id);
 
         DB::transaction(function () use ($item, $data, $details) {
             $item->update($data);
@@ -394,6 +402,8 @@ class CeklisObservasiController extends Controller
             'ttd_asesor_nama' => 'nullable|string|max:255',
             'ttd_asesor_no_reg' => 'nullable|string|max:255',
             'ttd_asesor_tanggal' => 'nullable|date',
+            'ttd_asesor_file' => 'nullable|string',
+            'ttd_asesi_file' => 'nullable|string',
             'catatan_footer' => 'nullable|string|max:255',
             'detail' => 'required|array|min:1',
             'detail.*.unit_id' => 'required|exists:units,id',
@@ -470,5 +480,59 @@ class CeklisObservasiController extends Controller
         }
 
         return [$data, $details];
+    }
+
+    /**
+     * Store base64 signature strings to storage and replace with path in data array.
+     */
+    private function persistSignatures(array &$data, ?int $id = null)
+    {
+        // asesor signature
+        if (!empty($data['ttd_asesor_file']) && is_string($data['ttd_asesor_file'])) {
+            try {
+                $signatureData = $data['ttd_asesor_file'];
+                if (strpos($signatureData, 'data:image') === 0) {
+                    list($type, $signatureData) = explode(';', $signatureData);
+                    list(, $signatureData) = explode(',', $signatureData);
+                    $signatureData = base64_decode($signatureData);
+                } else {
+                    $signatureData = base64_decode($signatureData);
+                }
+
+                $filename = 'signature_asesor_' . ($id ?? 'new') . '_' . time() . '.png';
+                $path = 'ceklis-observasi/signatures';
+
+                Storage::disk('public')->put($path . '/' . $filename, $signatureData);
+                $data['ttd_asesor_file'] = $path . '/' . $filename;
+                Log::info('Saved asesor signature for ceklis', ['file' => $data['ttd_asesor_file']]);
+            } catch (\Exception $e) {
+                Log::error('Failed to save asesor signature', ['error' => $e->getMessage()]);
+                unset($data['ttd_asesor_file']);
+            }
+        }
+
+        // asesi signature
+        if (!empty($data['ttd_asesi_file']) && is_string($data['ttd_asesi_file'])) {
+            try {
+                $signatureData = $data['ttd_asesi_file'];
+                if (strpos($signatureData, 'data:image') === 0) {
+                    list($type, $signatureData) = explode(';', $signatureData);
+                    list(, $signatureData) = explode(',', $signatureData);
+                    $signatureData = base64_decode($signatureData);
+                } else {
+                    $signatureData = base64_decode($signatureData);
+                }
+
+                $filename = 'signature_asesi_' . ($id ?? 'new') . '_' . time() . '.png';
+                $path = 'ceklis-observasi/signatures';
+
+                Storage::disk('public')->put($path . '/' . $filename, $signatureData);
+                $data['ttd_asesi_file'] = $path . '/' . $filename;
+                Log::info('Saved asesi signature for ceklis', ['file' => $data['ttd_asesi_file']]);
+            } catch (\Exception $e) {
+                Log::error('Failed to save asesi signature', ['error' => $e->getMessage()]);
+                unset($data['ttd_asesi_file']);
+            }
+        }
     }
 }

@@ -331,28 +331,24 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        color: #475569;
-        padding: 6px 8px;
-        border-radius: 6px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: all 0.2s ease;
         width: 32px;
         height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all .2s;
+        color: #475569;
     }
 
     .btn-kebab:hover {
-        background: #e2e8f0;
-        border-color: #cbd5e1;
+        background: #f1f5f9;
         color: #0f172a;
     }
 
     .btn-kebab.active {
-        background: #0073bd;
-        border-color: #0073bd;
-        color: white;
+        background: #f1f5f9;
+        color: #0f172a;
     }
 
     .dropdown-menu {
