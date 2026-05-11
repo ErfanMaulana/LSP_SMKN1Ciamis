@@ -379,7 +379,7 @@
         <p>Setelah submit, pendaftaran Anda akan dikirim ke admin untuk diverifikasi. Pastikan semua dokumen sudah benar.</p>
     </div>
 
-    <form action="{{ route('asesi.pendaftaran.dokumen.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('asesi.pendaftaran.dokumen.store') }}" method="POST" enctype="multipart/form-data" id="dokumenForm">
         @csrf
 
         <!-- Pas Foto -->
@@ -480,12 +480,49 @@
 
         <!-- Submit -->
         <div class="reg-actions">
-            <button type="submit" class="btn-reg btn-reg-success">
+            <button type="button" class="btn-reg btn-reg-success" id="openSignatureDokumenBtn">
                 <i class="bi bi-check-circle"></i>
                 <span>Selesaikan Pendaftaran & Kirim ke Admin</span>
             </button>
         </div>
+
+        <input type="hidden" name="tanda_tangan_pendaftar" id="signatureInputDokumen" value="">
     </form>
+
+    <div class="signature-modal-overlay" id="signatureModalDokumen">
+        <div class="signature-modal">
+            <div class="signature-modal-header">
+                <h4><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda Tangan Pendaftar</h4>
+                <p>Silakan tanda tangan sebelum pendaftaran dikirim ke admin.</p>
+            </div>
+            <div class="signature-modal-body">
+                <div id="signatureErrorDokumen" class="signature-error" style="display:none;">Tanda tangan harus diisi sebelum submit</div>
+                <div class="signature-box" id="signatureBoxDokumen">
+                    <canvas id="signatureCanvasDokumen" class="signature-canvas"></canvas>
+                    <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
+                </div>
+                <div class="signature-modal-actions">
+                    <p class="text-xs text-gray-500 m-0">Tanggal & waktu akan dicatat secara otomatis</p>
+                    <button type="button" onclick="clearSignatureDokumen()"
+                        class="inline-flex items-center px-4 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">
+                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Hapus
+                    </button>
+                </div>
+            </div>
+            <div class="signature-modal-footer">
+                <button type="button" onclick="closeSignatureModal()" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">Batal</button>
+                <button type="submit" form="dokumenForm" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-emerald-500 border border-emerald-500 rounded-full cursor-pointer hover:bg-emerald-600 transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Ya, Kirim ke Admin
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -620,5 +657,142 @@ function onFileSelected(input, id) {
         span.style.color = '#94a3b8';
     }
 }
+
+function openSignatureModal() {
+    const modal = document.getElementById('signatureModalDokumen');
+    const errorBox = document.getElementById('signatureErrorDokumen');
+    errorBox.style.display = 'none';
+    modal.classList.add('show');
+
+    window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+            if (typeof window.dokumenSignatureResize === 'function') {
+                window.dokumenSignatureResize();
+            }
+        });
+    });
+}
+
+function closeSignatureModal() {
+    document.getElementById('signatureModalDokumen').classList.remove('show');
+}
+
+const initSignaturePadDokumen = () => {
+    const canvas = document.getElementById('signatureCanvasDokumen');
+    const signatureInput = document.getElementById('signatureInputDokumen');
+    const signatureBox = document.getElementById('signatureBoxDokumen');
+    const errorBox = document.getElementById('signatureErrorDokumen');
+    const placeholder = signatureBox.querySelector('.signature-placeholder');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    const resizeCanvas = () => {
+        const rect = canvas.getBoundingClientRect();
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = rect.width * ratio;
+        canvas.height = rect.height * ratio;
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#1f2937';
+        ctx.clearRect(0, 0, rect.width, rect.height);
+    };
+
+    window.dokumenSignatureResize = resizeCanvas;
+    window.addEventListener('resize', resizeCanvas);
+
+    const getPoint = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+        };
+    };
+
+    const startDrawing = (e) => {
+        if (!canvas.width || !canvas.height) {
+            resizeCanvas();
+        }
+        const { x, y } = getPoint(e);
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        placeholder.style.display = 'none';
+        errorBox.style.display = 'none';
+    };
+
+    const draw = (e) => {
+        if (!drawing) return;
+        const { x, y } = getPoint(e);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    };
+
+    const stopDrawing = () => {
+        if (drawing) {
+            signatureInput.value = canvas.toDataURL('image/png');
+        }
+        drawing = false;
+    };
+
+    canvas.addEventListener('pointerdown', startDrawing);
+    canvas.addEventListener('pointermove', draw);
+    canvas.addEventListener('pointerup', stopDrawing);
+    canvas.addEventListener('pointerleave', stopDrawing);
+};
+
+function clearSignatureDokumen() {
+    const canvas = document.getElementById('signatureCanvasDokumen');
+    const signatureInput = document.getElementById('signatureInputDokumen');
+    const placeholder = document.getElementById('signatureBoxDokumen').querySelector('.signature-placeholder');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    signatureInput.value = '';
+    placeholder.style.display = 'block';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const openButton = document.getElementById('openSignatureDokumenBtn');
+    const form = document.getElementById('dokumenForm');
+    const modal = document.getElementById('signatureModalDokumen');
+    const canvas = document.getElementById('signatureCanvasDokumen');
+
+    initSignaturePadDokumen();
+
+    if (openButton) {
+        openButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            openSignatureModal();
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            const signatureInput = document.getElementById('signatureInputDokumen');
+            const signatureError = document.getElementById('signatureErrorDokumen');
+            if (!signatureInput.value) {
+                event.preventDefault();
+                signatureError.style.display = 'block';
+                openSignatureModal();
+                canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    }
+
+    if (modal) {
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeSignatureModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeSignatureModal();
+        }
+    });
+});
 </script>
 @endsection
