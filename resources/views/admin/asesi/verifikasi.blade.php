@@ -469,15 +469,14 @@
     /* Table */
     .table-container {
         overflow-x: auto;
+        overflow-y: visible;
+        padding-bottom: 200px;
+        margin-bottom: -200px;
     }
 
     .data-table {
         width: 100%;
         border-collapse: collapse;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #fff;
     }
 
     .data-table thead th {
@@ -488,15 +487,14 @@
         color: #64748b;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e2e8f0;
         background: #f8fafc;
     }
 
     .data-table tbody td {
         padding: 16px;
-        border: 1px solid #e5e7eb;
-        font-size: 14px;
-        color: #475569;
+        border-bottom: 1px solid #f1f5f9;
+        overflow: visible;
     }
 
     .data-table tbody tr {
