@@ -876,6 +876,11 @@ class AsesiController extends Controller
         // Get the filter status from query parameter
         $status = $request->query('status', '');
         
+            // If no status provided and no search/filter, redirect to pending view
+            if (empty($status) && !$request->has('search') && !$request->has('jurusan') && !$request->has('reject_type')) {
+                return redirect()->route('admin.asesi.verifikasi', ['status' => 'pending']);
+            }
+        
         // Get reject type filter (sementara/permanen)
         $rejectType = $request->query('reject_type', '');
         

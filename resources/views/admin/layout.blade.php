@@ -1017,7 +1017,7 @@
                         </div>
                         <div class="menu-section-items">
                             @if(Auth::guard('admin')->user()->hasPermission('verifikasi-asesi.view'))
-                                <a href="{{ route('admin.asesi.verifikasi') }}"
+                                  <a href="{{ route('admin.asesi.verifikasi', ['status' => 'pending']) }}"
                                     class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
                                     <i class="bi bi-clipboard-check"></i>
                                     <span>permohonan sertifkasi</span>
