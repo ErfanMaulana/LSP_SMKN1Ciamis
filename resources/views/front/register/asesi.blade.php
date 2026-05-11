@@ -442,19 +442,25 @@
 
         .signature-box {
             border: 1px solid #cbd5e1;
-            border-radius: 10px;
-            background: #f8fafc;
+            border-radius: 8px;
+            background: #ffffff;
             overflow: hidden;
             position: relative;
+            width: 220px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
         }
 
         .signature-box canvas {
             width: 100%;
-            height: 180px;
+            height: 100%;
             display: block;
             touch-action: none;
             cursor: crosshair;
-            background: #fff;
+            background: transparent;
         }
 
         .signature-placeholder {
@@ -622,7 +628,7 @@
 
                 <!-- Form Title -->
                 <div class="form-title">
-                    <h2>FR.-APL-01. FORMULIR PERMOHONAN SERTIFIKASI</h2>
+                    <h2>FR.-APL-01. FORMULIR permohonan sertifkasi</h2>
                     <p>Bidang Sertifikasi yang akan diuji skema-industri-terkait</p>
                 </div>
 

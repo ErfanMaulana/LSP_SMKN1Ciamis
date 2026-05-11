@@ -308,7 +308,7 @@
         </div>
     </div>
 
-    <h3><i class="bi bi-file-earmark-text" style="color:#0061a5;"></i> FR.-APL-01. FORMULIR PERMOHONAN SERTIFIKASI</h3>
+    <h3><i class="bi bi-file-earmark-text" style="color:#0061a5;"></i> FR.-APL-01. FORMULIR permohonan sertifkasi</h3>
     <p class="subtitle">Lengkapi formulir pendaftaran asesi berikut ini. NIK Anda sudah terisi otomatis dari akun.</p>
 
     @if ($errors->any())

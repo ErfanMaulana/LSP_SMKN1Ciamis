@@ -156,7 +156,7 @@
 <div class="page-header">
     <div>
         <h2>Bukti Persyaratan Dasar Pemohon</h2>
-        <p>Kelola daftar persyaratan dasar per skema untuk form verifikasi asesi.</p>
+        <p>Kelola daftar persyaratan dasar per skema untuk form permohonan sertifkasi.</p>
     </div>
     <a href="{{ route('admin.bukti-persyaratan-dasar-pemohon.create') }}" class="btn-primary"><i class="bi bi-plus-circle"></i> Tambah Master</a>
 </div>

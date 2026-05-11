@@ -7,6 +7,7 @@ use App\Models\Asesi;
 use App\Models\Asesor;
 use App\Models\Skema;
 use App\Models\JawabanElemen;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -345,4 +346,54 @@ class AsesmenMandiriController extends Controller
         
         return view('asesi.asesmen-mandiri.result', compact('account', 'asesi', 'skema', 'answers', 'pivot'));
     }
+
+            /**
+             * Generate PDF for completed asesmen mandiri result.
+             */
+            public function pdf($skemaId)
+            {
+                $account = Auth::guard('account')->user();
+                $asesi = $this->getAsesi();
+
+                if (!$asesi) {
+                    return redirect()->route('asesi.asesmen-mandiri.index')
+                        ->with('error', 'Data asesi tidak ditemukan.');
+                }
+
+                $skema = Skema::with(['units.elemens.kriteria'])->findOrFail($skemaId);
+
+                $pivot = DB::table('asesi_skema')
+                    ->where('asesi_nik', $asesi->NIK)
+                    ->where('skema_id', $skemaId)
+                    ->first();
+
+                if (!$pivot || $pivot->status !== 'selesai') {
+                    return redirect()->route('asesi.asesmen-mandiri.result', $skemaId)
+                        ->with('error', 'PDF hanya dapat dibuat setelah asesmen mandiri selesai.');
+                }
+
+                $answers = JawabanElemen::where('asesi_nik', $asesi->NIK)
+                    ->whereHas('elemen.unit', function ($q) use ($skemaId) {
+                        $q->where('skema_id', $skemaId);
+                    })
+                    ->with('elemen.unit')
+                    ->get()
+                    ->keyBy('elemen_id');
+
+                $logoPath = public_path('images/lsp.png');
+                $logoUrl = file_exists($logoPath) ? 'file://' . $logoPath : null;
+
+                $pdf = Pdf::loadView('asesi.asesmen-mandiri.pdf-result', compact(
+                    'account',
+                    'asesi',
+                    'skema',
+                    'answers',
+                    'pivot',
+                    'logoUrl'
+                ))->setPaper('a4', 'portrait');
+
+                $fileName = 'FR_APL_03_' . ($asesi->NIK ?? 'asesi') . '_' . ($skema->nama_skema ?? 'hasil') . '.pdf';
+
+                return $pdf->stream($fileName);
+            }
 }

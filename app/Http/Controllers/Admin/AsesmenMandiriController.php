@@ -21,6 +21,7 @@ class AsesmenMandiriController extends Controller
             ->select(
                 'asesi_skema.*',
                 'asesi.NIK',
+                'asesi.status as asesi_status',
                 'asesi.nama as asesi_nama',
                 'asesi.kelas',
                 'skemas.id as skema_id',

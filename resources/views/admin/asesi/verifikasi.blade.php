@@ -1,14 +1,14 @@
 @extends('admin.layout')
 
-@section('title', 'Verifikasi Asesi')
-@section('page-title', 'Verifikasi Pendaftaran Asesi')
+@section('title', 'permohonan sertifkasi')
+@section('page-title', 'permohonan sertifkasi')
 
 @section('content')
 <div class="asesi-verifikasi">
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>Verifikasi Pendaftaran Asesi</h2>
+            <h2>permohonan sertifkasi</h2>
             <p class="subtitle">Kelola dan verifikasi pendaftaran calon asesi baru.</p>
         </div>
     </div>
@@ -154,6 +154,9 @@
                         <tbody id="verifikasiTableBody">
                             @foreach($asesi as $item)
                             <tr>
+                                @php
+                                    $isApproved = strtolower(trim((string) $item->status)) === 'approved';
+                                @endphp
                                 <td class="bulk-col" style="display:none;text-align:center;">
                                     <input type="checkbox" class="bulk-checkbox" value="{{ $item->NIK }}"
                                         style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
@@ -183,7 +186,7 @@
                                 <td>
                                     @if($item->status === 'pending')
                                         <span class="badge badge-pending">Menunggu</span>
-                                    @elseif($item->status === 'approved')
+                                    @elseif($isApproved)
                                         <span class="badge badge-approved">Disetujui</span>
                                     @elseif($item->status === 'banned')
                                         <span class="badge badge-rejected">Ditolak Permanen</span>
@@ -200,6 +203,11 @@
                                             <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" title="Review Detail">
                                                 <i class="bi bi-eye" style="font-size: 16px;"></i> Lihat Detail
                                             </a>
+                                            @if($isApproved)
+                                            <a href="{{ route('admin.asesi.verifikasi.apl1', $item->NIK) }}" target="_blank" title="Generate APL 1">
+                                                <i class="bi bi-file-earmark-pdf" style="font-size: 16px;color:#d32f2f;"></i> Generate APL 1
+                                            </a>
+                                            @endif
                                             @if($item->status === 'pending')
                                             <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Setujui pendaftaran ' . $item->nama . '?'))">
                                                 @csrf
@@ -214,7 +222,7 @@
                                                 </button>
                                             </form>
                                             @endif
-                                            @if($item->status !== 'approved')
+                                            @if(!$isApproved)
                                             <form action="{{ route('admin.asesi.delete-registration', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Hapus data pendaftaran ' . $item->nama . '? Asesi akan diminta mengisi ulang formulir dari awal.'))">
                                                 @csrf
                                                 <button type="submit" title="Hapus Data Pendaftaran" style="color:#dc2626;">
@@ -466,6 +474,10 @@
     .data-table {
         width: 100%;
         border-collapse: collapse;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
     }
 
     .data-table thead th {
@@ -476,13 +488,13 @@
         color: #64748b;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        border-bottom: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
         background: #f8fafc;
     }
 
     .data-table tbody td {
         padding: 16px;
-        border-bottom: 1px solid #f1f5f9;
+        border: 1px solid #e5e7eb;
         font-size: 14px;
         color: #475569;
     }
