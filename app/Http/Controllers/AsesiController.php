@@ -1101,6 +1101,50 @@ class AsesiController extends Controller
     }
 
     /**
+     * Build a rejection note from checklist items that are not compliant.
+     */
+    private function buildRejectionChecklistNote(?array $persyaratanDasar, ?array $administratif): string
+    {
+        $issues = [];
+
+        foreach ([
+            'Bukti Persyaratan Dasar Pemohon' => $persyaratanDasar,
+            'Bukti Administratif' => $administratif,
+        ] as $sectionLabel => $items) {
+            if (empty($items) || !is_array($items)) {
+                continue;
+            }
+
+            $sectionIssues = [];
+
+            foreach ($items as $item) {
+                if (!is_array($item)) {
+                    continue;
+                }
+
+                $status = (string) ($item['status'] ?? '');
+                if (!in_array($status, ['tidak_memenuhi', 'tidak_ada'], true)) {
+                    continue;
+                }
+
+                $label = trim((string) ($item['label'] ?? $item['name'] ?? $item['nama'] ?? 'Item tidak dikenal'));
+                $statusLabel = $status === 'tidak_ada' ? 'tidak ada' : 'tidak memenuhi syarat';
+                $sectionIssues[] = $label . ' (' . $statusLabel . ')';
+            }
+
+            if ($sectionIssues) {
+                $issues[] = $sectionLabel . ': ' . implode(', ', $sectionIssues);
+            }
+        }
+
+        if (empty($issues)) {
+            return '';
+        }
+
+        return "Berdasarkan hasil verifikasi, terdapat dokumen yang belum memenuhi ketentuan.\n" . implode("\n", $issues);
+    }
+
+    /**
      * Reject an asesi registration.
      */
     public function reject(Request $request, $nik)
@@ -1123,9 +1167,15 @@ class AsesiController extends Controller
         $verifikasiBuktiPersyaratanDasar = $this->decodeChecklistPayload($request->input('verifikasi_bukti_persyaratan_dasar'));
         $verifikasiBuktiAdministratif = $this->decodeChecklistPayload($request->input('verifikasi_bukti_administratif'));
         
+        $existingCatatan = trim((string) $request->input('catatan_admin'));
+        $autoCatatan = $rejectType === 'rejected'
+            ? $this->buildRejectionChecklistNote($verifikasiBuktiPersyaratanDasar, $verifikasiBuktiAdministratif)
+            : '';
+        $combinedCatatan = trim(collect([$existingCatatan, $autoCatatan])->filter()->implode("\n\n"));
+
         $updateData = [
             'status'        => $rejectType,
-            'catatan_admin' => $request->input('catatan_admin'),
+            'catatan_admin' => $combinedCatatan !== '' ? $combinedCatatan : $existingCatatan,
             'verified_at'   => now(),
             'verified_by'   => auth('admin')->id(),
             'verifikasi_bukti_persyaratan_dasar' => $verifikasiBuktiPersyaratanDasar,

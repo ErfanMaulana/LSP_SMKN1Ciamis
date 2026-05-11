@@ -672,6 +672,11 @@
                         <i class="bi bi-x-circle" style="margin-right:5px;"></i>
                         <strong>Pendaftaran Ditolak</strong><br>
                         Silakan perbaiki dan kirim ulang formulir.
+                        @if($asesi->catatan_admin)
+                            <div style="margin-top:8px;padding:8px 10px;background:rgba(255,255,255,.45);border-radius:8px;color:inherit;white-space:pre-line;">
+                                {{ $asesi->catatan_admin }}
+                            </div>
+                        @endif
                     @elseif($isBanned)
                         <i class="bi bi-slash-circle" style="margin-right:5px;"></i>
                         <strong>Ditolak Permanen</strong><br>
