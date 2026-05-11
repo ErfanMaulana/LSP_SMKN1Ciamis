@@ -1020,7 +1020,7 @@
                                 <a href="{{ route('admin.asesi.verifikasi') }}"
                                     class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
                                     <i class="bi bi-clipboard-check"></i>
-                                    <span>Verifikasi Asesi</span>
+                                    <span>permohonan sertifkasi</span>
                                     @php $pendingCount = \App\Models\Asesi::where('status', 'pending')->count(); @endphp
                                     @if($pendingCount > 0)
                                         <span
@@ -1545,7 +1545,7 @@
                     'Mitra': 16,
 
                     // Program Sertifikasi
-                    'Verifikasi Asesi': 20,
+                    'permohonan sertifkasi': 20,
                     'Asesmen Mandiri': 21,
                     'Nilai Asesor': 22,
                     'Kelompok': 23,

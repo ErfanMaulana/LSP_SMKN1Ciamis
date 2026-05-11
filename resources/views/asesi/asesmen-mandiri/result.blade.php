@@ -401,6 +401,11 @@
 @endforeach
 
 <div class="action-buttons">
+    @if($pivot && $pivot->status === 'selesai')
+    <a href="{{ route('asesi.asesmen-mandiri.pdf', $skema->id) }}" target="_blank" class="btn btn-print">
+        <i class="bi bi-file-earmark-pdf"></i> Unduh PDF
+    </a>
+    @endif
     <button onclick="window.print()" class="btn btn-print">
         <i class="bi bi-printer"></i> Cetak Hasil
     </button>

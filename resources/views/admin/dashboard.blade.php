@@ -70,7 +70,7 @@
     {{-- Verifikasi Asesi --}}
     <div class="panel">
         <div class="panel-header">
-            <div class="panel-title">Status Verifikasi Asesi</div>
+            <div class="panel-title">permohonan sertifkasi</div>
             <a href="{{ route('admin.asesi.verifikasi') }}" class="panel-link">Lihat semua <i class="bi bi-arrow-right"></i></a>
         </div>
         <div class="verif-grid">

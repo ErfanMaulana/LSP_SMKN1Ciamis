@@ -42,6 +42,7 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::get('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'show'])->name('asesmen-mandiri.show');
             Route::post('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'store'])->name('asesmen-mandiri.store');
             Route::get('/asesmen-mandiri/{skemaId}/result', [AsesmenMandiriController::class, 'result'])->name('asesmen-mandiri.result');
+            Route::get('/asesmen-mandiri/{skemaId}/pdf', [AsesmenMandiriController::class, 'pdf'])->name('asesmen-mandiri.pdf');
             Route::middleware('ujikom.completed')->group(function () {
                 Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
 

@@ -171,7 +171,7 @@
 <div class="page-header">
     <div>
         <h2>Tambah Bukti Persyaratan Dasar Pemohon</h2>
-        <p>Isi master persyaratan yang akan muncul sebagai checklist dinamis pada halaman verifikasi asesi.</p>
+        <p>Isi master persyaratan yang akan muncul sebagai checklist dinamis pada halaman permohonan sertifkasi.</p>
     </div>
     <a href="{{ route('admin.bukti-persyaratan-dasar-pemohon.index') }}" class="btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
 </div>

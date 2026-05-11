@@ -279,6 +279,8 @@
         position: relative;
         overflow: hidden;
         transition: border-color 0.2s;
+        width: 320px;
+        aspect-ratio: 1 / 1;
     }
 
     .signature-canvas-wrapper.active {
@@ -298,7 +300,7 @@
 
     .signature-canvas {
         width: 100%;
-        height: 180px;
+        height: 100%;
         cursor: crosshair;
         display: block;
     }

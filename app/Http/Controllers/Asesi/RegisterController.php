@@ -151,8 +151,11 @@ class RegisterController extends Controller
         // Sync selected skema to pivot table
         $asesiRecord->skemas()->sync([$request->skema_id => ['status' => 'belum_mulai']]);
 
-        // Store NIK in session for step 2
-        session(['pendaftaran_nik' => $account->NIK]);
+        // Store flow markers for step 2.
+        session([
+            'pendaftaran_nik' => $account->NIK,
+            'pendaftaran_step1_completed' => true,
+        ]);
 
         ActivityLogger::logUser(
             (string) $account->NIK,
@@ -178,6 +181,11 @@ class RegisterController extends Controller
         if (!$asesi) {
             return redirect()->route('asesi.pendaftaran.formulir')
                 ->with('error', 'Silakan isi formulir data diri terlebih dahulu.');
+        }
+
+        // If the step-1 flow was just completed, always continue to the document step.
+        if (session('pendaftaran_step1_completed')) {
+            return view('asesi.pendaftaran.dokumen', compact('account', 'asesi'));
         }
 
         // If already has documents and is approved, go to dashboard
@@ -278,7 +286,6 @@ class RegisterController extends Controller
             }
         }
 
-        // Set status to pending
         $asesi->status = 'pending';
         $asesi->save();
 
@@ -290,8 +297,8 @@ class RegisterController extends Controller
             $request
         );
 
-        // Clear session
-        session()->forget('pendaftaran_nik');
+        // Clear flow markers
+        session()->forget(['pendaftaran_nik', 'pendaftaran_step1_completed']);
 
         return redirect()->route('asesi.dashboard')
             ->with('success', 'Pendaftaran berhasil! Silakan tunggu konfirmasi dari admin.');

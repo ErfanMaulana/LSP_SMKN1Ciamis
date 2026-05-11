@@ -38,7 +38,7 @@
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
                 <div>
                     <h4 style="margin:0;font-size:16px;color:#0f172a;">Item Persyaratan</h4>
-                    <p style="margin:6px 0 0;color:#64748b;font-size:13px;">Tambahkan daftar bukti yang harus diperiksa pada verifikasi asesi.</p>
+                    <p style="margin:6px 0 0;color:#64748b;font-size:13px;">Tambahkan daftar bukti yang harus diperiksa pada permohonan sertifkasi.</p>
                 </div>
             </div>
 

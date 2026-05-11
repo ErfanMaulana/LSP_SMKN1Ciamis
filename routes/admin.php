@@ -81,6 +81,7 @@ Route::prefix('admin')->group(function () {
             Route::post('/asesi-verifikasi/bulk-approve', [AsesiController::class, 'bulkApprove'])->name('admin.asesi.bulk-approve')->middleware('permission:verifikasi-asesi.approve');
             Route::post('/asesi-verifikasi/bulk-reject', [AsesiController::class, 'bulkReject'])->name('admin.asesi.bulk-reject')->middleware('permission:verifikasi-asesi.reject');
             Route::get('/asesi-verifikasi/{nik}', [AsesiController::class, 'showVerifikasi'])->name('admin.asesi.verifikasi.show');
+            Route::get('/asesi-verifikasi/{nik}/apl1', [AsesiController::class, 'generatePdf'])->name('admin.asesi.verifikasi.apl1')->middleware('permission:verifikasi-asesi.view');
             Route::post('/asesi-verifikasi/{nik}/approve', [AsesiController::class, 'approve'])->name('admin.asesi.approve')->middleware('permission:verifikasi-asesi.approve');
             Route::post('/asesi-verifikasi/{nik}/reject', [AsesiController::class, 'reject'])->name('admin.asesi.reject')->middleware('permission:verifikasi-asesi.reject');
             Route::post('/asesi-verifikasi/{nik}/delete-registration', [AsesiController::class, 'deleteRegistration'])->name('admin.asesi.delete-registration')->middleware('permission:verifikasi-asesi.reject');
@@ -397,6 +398,7 @@ Route::prefix('admin')->group(function () {
         // ─── Asesmen Mandiri (Admin monitoring) ───
         Route::middleware('permission:asesmen-mandiri.view')->group(function () {
             Route::get('/asesmen-mandiri', [AsesmenMandiriController::class, 'index'])->name('admin.asesmen-mandiri.index');
+            Route::get('/asesmen-mandiri/{nik}/apl1', [AsesiController::class, 'generatePdf'])->name('admin.asesmen-mandiri.apl1');
             Route::post('/asesmen-mandiri/{nik}/{skemaId}/reset', [AsesmenMandiriController::class, 'reset'])->name('admin.asesmen-mandiri.reset')->middleware('permission:asesmen-mandiri.delete');
             Route::get('/asesmen-mandiri/{asesiNik}/{skemaId}', [AsesmenMandiriController::class, 'show'])->name('admin.asesmen-mandiri.show');
         });

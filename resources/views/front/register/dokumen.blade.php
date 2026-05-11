@@ -57,18 +57,23 @@
 
         .signature-box {
             border: 2px dashed #cbd5e1;
-            border-radius: 6px;
-            background: #f8fafc;
-            padding: 16px;
+            border-radius: 8px;
+            background: #ffffff;
+            padding: 8px;
             margin-bottom: 12px;
             position: relative;
+            width: 220px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .signature-canvas {
             display: block;
             width: 100%;
-            height: 200px;
-            background: white;
+            height: 100%;
+            background: transparent;
             border: 1px solid #e2e8f0;
             border-radius: 4px;
             cursor: crosshair;
@@ -111,6 +116,72 @@
             color: #15803d;
             font-size: 13px;
             margin-bottom: 16px;
+        }
+
+        .signature-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.58);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+
+        .signature-modal-overlay.show {
+            display: flex;
+        }
+
+        .signature-modal {
+            width: 100%;
+            max-width: 640px;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+            overflow: hidden;
+        }
+
+        .signature-modal-header {
+            padding: 20px 24px 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .signature-modal-header h4 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .signature-modal-header p {
+            margin: 8px 0 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .signature-modal-body {
+            padding: 18px 24px 24px;
+        }
+
+        .signature-modal-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .signature-modal-footer {
+            padding: 16px 24px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #e5e7eb;
         }
     </style>
 </head>
@@ -223,7 +294,7 @@
                         </div>
                     </div>
 
-                    <form action="{{ route('front.register.asesi.dokumen.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <form action="{{ route('front.register.asesi.dokumen.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="dokumenForm">
                         @csrf
 
                         <!-- Pas Foto Upload - Circular -->
@@ -329,41 +400,9 @@
                             </div>
                         </div>
 
-                        <!-- Signature Section -->
-                        <div class="signature-section">
-                            <div class="flex items-start space-x-4">
-                                <div class="bg-indigo-100 rounded-lg p-3 flex-shrink-0">
-                                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
-                                    </svg>
-                                </div>
-                                <div class="flex-1">
-                                    <h4 class="text-sm font-semibold text-gray-800 mb-1">Tanda Tangan Pendaftar <span class="text-red-500">*</span></h4>
-                                    <p class="text-xs text-gray-400 mb-4">Silakan buat tanda tangan Anda di area dibawah ini</p>
-                                    <div id="signatureErrorDokumen" class="signature-error">Tanda tangan harus diisi sebelum submit</div>
-                                    <div class="signature-box">
-                                        <canvas id="signatureCanvasDokumen" class="signature-canvas"></canvas>
-                                        <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
-                                    </div>
-                                    <div class="signature-actions">
-                                        <button type="button" onclick="clearSignatureDokumen()"
-                                            class="inline-flex items-center px-4 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">
-                                            <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                            </svg>
-                                            Hapus
-                                        </button>
-                                    </div>
-                                    <p class="text-xs text-gray-500 mt-3">Tanggal & waktu akan dicatat secara otomatis</p>
-                                    <input type="hidden" name="tanda_tangan_pendaftar" id="signatureInputDokumen" value="">
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Submit Button -->
                         <div class="flex justify-center pt-4">
-                            <button type="submit"
+                            <button type="button" id="openSignatureDokumenBtn"
                                 class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-medium text-sm px-8 py-3 rounded-full shadow-sm transition duration-200 flex items-center justify-center space-x-2">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -372,6 +411,42 @@
                             </button>
                         </div>
                     </form>
+                </div>
+
+                <div class="signature-modal-overlay" id="signatureModalDokumen">
+                    <div class="signature-modal">
+                        <div class="signature-modal-header">
+                            <h4><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda Tangan Pendaftar</h4>
+                            <p>Silakan tanda tangan sebelum pendaftaran dikirim ke admin.</p>
+                        </div>
+                        <div class="signature-modal-body">
+                            <div id="signatureErrorDokumen" class="signature-error" style="display:none;">Tanda tangan harus diisi sebelum submit</div>
+                            <div class="signature-box" id="signatureBoxDokumen">
+                                <canvas id="signatureCanvasDokumen" class="signature-canvas"></canvas>
+                                <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
+                            </div>
+                            <div class="signature-modal-actions">
+                                <p class="text-xs text-gray-500 m-0">Tanggal & waktu akan dicatat secara otomatis</p>
+                                <button type="button" onclick="clearSignatureDokumen()"
+                                    class="inline-flex items-center px-4 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">
+                                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                    Hapus
+                                </button>
+                            </div>
+                            <input type="hidden" name="tanda_tangan_pendaftar" id="signatureInputDokumen" value="">
+                        </div>
+                        <div class="signature-modal-footer">
+                            <button type="button" onclick="closeSignatureModal()" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">Batal</button>
+                            <button type="submit" form="dokumenForm" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-emerald-500 border border-emerald-500 rounded-full cursor-pointer hover:bg-emerald-600 transition">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Ya, Kirim ke Admin
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Footer Info -->
@@ -470,11 +545,33 @@
             }
         }
 
+        function openSignatureModal() {
+            const modal = document.getElementById('signatureModalDokumen');
+            const errorBox = document.getElementById('signatureErrorDokumen');
+            errorBox.style.display = 'none';
+            modal.classList.add('show');
+
+            window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => {
+                    if (typeof window.dokumenSignatureResize === 'function') {
+                        window.dokumenSignatureResize();
+                    }
+                });
+            });
+        }
+
+        window.openSignatureModal = openSignatureModal;
+        window.closeSignatureModal = closeSignatureModal;
+
+        function closeSignatureModal() {
+            document.getElementById('signatureModalDokumen').classList.remove('show');
+        }
+
         // Signature Pad Initialization
         const initSignaturePadDokumen = () => {
             const canvas = document.getElementById('signatureCanvasDokumen');
             const signatureInput = document.getElementById('signatureInputDokumen');
-            const signatureBox = canvas.parentElement;
+            const signatureBox = document.getElementById('signatureBoxDokumen');
             const clearButton = document.querySelector('[onclick="clearSignatureDokumen()"]');
             const errorBox = document.getElementById('signatureErrorDokumen');
             const placeholder = signatureBox.querySelector('.signature-placeholder');
@@ -487,20 +584,25 @@
             // Resize canvas to match display size
             const resizeCanvas = () => {
                 const rect = canvas.getBoundingClientRect();
-                canvas.width = rect.width * window.devicePixelRatio;
-                canvas.height = rect.height * window.devicePixelRatio;
-                ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                canvas.width = rect.width * ratio;
+                canvas.height = rect.height * ratio;
+                ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = '#1f2937';
+                ctx.clearRect(0, 0, rect.width, rect.height);
             };
 
-            resizeCanvas();
+            window.dokumenSignatureResize = resizeCanvas;
             window.addEventListener('resize', resizeCanvas);
 
             // Pointer events for drawing
             const startDrawing = (e) => {
+                if (!canvas.width || !canvas.height) {
+                    resizeCanvas();
+                }
                 const rect = canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
@@ -538,7 +640,7 @@
         const clearSignatureDokumen = () => {
             const canvas = document.getElementById('signatureCanvasDokumen');
             const signatureInput = document.getElementById('signatureInputDokumen');
-            const placeholder = canvas.parentElement.querySelector('.signature-placeholder');
+            const placeholder = document.getElementById('signatureBoxDokumen').querySelector('.signature-placeholder');
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             signatureInput.value = '';
@@ -552,8 +654,16 @@
             addFileInput('bukti_kompetensi');
             initSignaturePadDokumen();
 
+            const openButton = document.getElementById('openSignatureDokumenBtn');
+            if (openButton) {
+                openButton.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    openSignatureModal();
+                });
+            }
+
             // Form validation
-            const form = document.querySelector('form');
+            const form = document.getElementById('dokumenForm');
             const signatureInput = document.getElementById('signatureInputDokumen');
             const signatureError = document.getElementById('signatureErrorDokumen');
             const canvas = document.getElementById('signatureCanvasDokumen');
@@ -562,7 +672,26 @@
                 if (!signatureInput.value) {
                     event.preventDefault();
                     signatureError.style.display = 'block';
-                    canvas.scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById('signatureModalDokumen').classList.add('show');
+                    window.requestAnimationFrame(() => {
+                        if (typeof window.dokumenSignatureResize === 'function') {
+                            window.dokumenSignatureResize();
+                        }
+                    });
+                    canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+
+            const modal = document.getElementById('signatureModalDokumen');
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeSignatureModal();
+                }
+            });
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeSignatureModal();
                 }
             });
         });

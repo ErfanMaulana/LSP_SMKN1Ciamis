@@ -1,7 +1,7 @@
 @extends('admin.layout')
 
 @section('title', 'Review Asesi - ' . $asesi->nama)
-@section('page-title', 'Review & Verifikasi Asesi')
+@section('page-title', 'Review & permohonan sertifkasi')
 
 @section('styles')
 <style>
@@ -65,19 +65,25 @@
 
     .signature-box {
         border: 1px solid #cbd5e1;
-        border-radius: 10px;
-        background: #f8fafc;
+        border-radius: 8px;
+        background: #ffffff;
         overflow: hidden;
         position: relative;
+        width: 260px;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
     }
 
     .signature-box canvas {
         width: 100%;
-        height: 180px;
+        height: 100%;
         display: block;
         touch-action: none;
         cursor: crosshair;
-        background: #fff;
+        background: transparent;
     }
 
     .signature-placeholder {
@@ -96,6 +102,29 @@
 
     .signature-box.has-signature .signature-placeholder {
         display: none;
+    }
+
+    /* Checklist table: closed boxes */
+    .checklist-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: none;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .checklist-table th,
+    .checklist-table td {
+        border: none;
+        padding: 10px 12px;
+        vertical-align: middle;
+    }
+
+    .checklist-table thead th {
+        background: #f8fafc;
+        text-transform: none;
+        color: #475569;
     }
 
     .signature-actions {
@@ -361,14 +390,17 @@
     .checklist-table {
         width: 100%;
         border-collapse: collapse;
+        border-spacing: 0;
         overflow: hidden;
-        border: 1px solid #d1d5db;
+        border: none;
+        outline: none;
         border-radius: 10px;
+        background: #fff;
     }
 
     .checklist-table th,
     .checklist-table td {
-        border: 1px solid #1f2937;
+        border: none;
         padding: 10px 8px;
         font-size: 13px;
         vertical-align: middle;
@@ -640,6 +672,10 @@
         box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     }
 
+    .modal-box-approve {
+        max-width: 620px;
+    }
+
     .modal-box h3 {
         font-size: 18px;
         font-weight: 600;
@@ -740,7 +776,7 @@
 
 @section('content')
 <div class="page-header">
-    <h2>Review & Verifikasi Asesi</h2>
+    <h2>Review & permohonan sertifkasi</h2>
     <a href="{{ route('admin.asesi.verifikasi') }}" class="btn btn-secondary">
         <i class="bi bi-arrow-left"></i> Kembali
     </a>
@@ -1096,24 +1132,6 @@
                         <i class="bi bi-trash"></i> Hapus Data Pendaftaran
                     </button>
                 </div>
-
-                <div class="signature-section">
-                    <h4><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda Tangan Admin</h4>
-                    <div class="signature-box" id="signatureBoxAdmin">
-                        <canvas id="signatureCanvasAdmin"></canvas>
-                        <div class="signature-placeholder" id="signaturePlaceholderAdmin">
-                            <i class="bi bi-pen"></i>
-                            <span>Silakan tanda tangan admin sebelum menyetujui atau menolak pendaftaran.</span>
-                        </div>
-                    </div>
-                    <div class="signature-actions">
-                        <div class="signature-note">Tanda tangan ini akan tersimpan pada data verifikasi asesi.</div>
-                        <button type="button" class="btn-clear-signature" id="clearSignatureAdmin">
-                            <i class="bi bi-arrow-counterclockwise"></i> Hapus Tanda Tangan
-                        </button>
-                    </div>
-                    <div class="signature-error" id="signatureErrorAdmin">Tanda tangan admin wajib diisi.</div>
-                </div>
             </div>
         </div>
     @else
@@ -1170,9 +1188,26 @@
 
 <!-- Approve Modal -->
 <div class="modal-overlay" id="approveModal">
-    <div class="modal-box">
+    <div class="modal-box modal-box-approve">
         <h3><i class="bi bi-check-circle" style="color:#10b981;"></i> Konfirmasi Persetujuan</h3>
         <p>Apakah Anda yakin ingin <strong>menyetujui</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>? Email notifikasi akan dikirim ke <strong>{{ $asesi->email }}</strong>.</p>
+        <div class="signature-section" style="margin-top:14px;padding-top:0;border-top:none;">
+            <h4 style="display:flex;align-items:center;gap:8px;justify-content:center;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda Tangan Admin</h4>
+            <div class="signature-box" id="signatureBoxAdmin">
+                <canvas id="signatureCanvasAdmin"></canvas>
+                <div class="signature-placeholder" id="signaturePlaceholderAdmin">
+                    <i class="bi bi-pen"></i>
+                    <span>Silakan tanda tangan admin sebelum menyetujui pendaftaran.</span>
+                </div>
+            </div>
+            <div class="signature-actions" style="justify-content:center;">
+                <div class="signature-note">Tanda tangan ini akan tersimpan pada data permohonan sertifkasi.</div>
+                <button type="button" class="btn-clear-signature" id="clearSignatureAdmin">
+                    <i class="bi bi-arrow-counterclockwise"></i> Hapus Tanda Tangan
+                </button>
+            </div>
+            <div class="signature-error" id="signatureErrorAdmin">Tanda tangan admin wajib diisi.</div>
+        </div>
         <form method="POST" action="{{ route('admin.asesi.approve', $asesi->NIK) }}" onsubmit="return prepareChecklistPayload('approve')">
             @csrf
             <input type="hidden" name="tanda_tangan_admin" class="signature-admin-input">
@@ -1249,6 +1284,13 @@
     function showApproveModal() {
         document.getElementById('checklistErrorBox').style.display = 'none';
         document.getElementById('approveModal').classList.add('show');
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                if (typeof window.adminSignatureResize === 'function') {
+                    window.adminSignatureResize();
+                }
+            });
+        });
     }
 
     function updateRejectBtn() {
@@ -1407,6 +1449,8 @@
                 placeholder.style.display = 'flex';
             }
         };
+
+        window.adminSignatureResize = resizeCanvas;
 
         const getPoint = (event) => {
             const rect = canvas.getBoundingClientRect();

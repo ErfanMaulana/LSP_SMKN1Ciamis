@@ -61,7 +61,7 @@
 <div class="page-header">
     <div>
         <h2>Edit Bukti Persyaratan Dasar Pemohon</h2>
-        <p>Perbarui daftar item persyaratan untuk skema yang dipilih. Perubahan akan langsung dipakai di halaman verifikasi asesi.</p>
+        <p>Perbarui daftar item persyaratan untuk skema yang dipilih. Perubahan akan langsung dipakai di halaman permohonan sertifkasi.</p>
     </div>
     <a href="{{ route('admin.bukti-persyaratan-dasar-pemohon.index') }}" class="btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
 </div>

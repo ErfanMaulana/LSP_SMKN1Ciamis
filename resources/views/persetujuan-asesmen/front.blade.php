@@ -142,13 +142,14 @@
     .signature-box .frame {
         border: 1px solid #e5e7eb;
         border-radius: 8px;
-        padding: 12px;
-        min-height: 120px;
+        padding: 8px;
+        width: 220px;
+        aspect-ratio: 1 / 1;
         display: flex;
         align-items: center;
         justify-content: center;
         background: #fff;
-        margin-bottom: 8px;
+        margin: 0 auto 8px auto;
     }
 
     .signature-box img {
@@ -170,12 +171,17 @@
         background: #f8fafc;
         margin-bottom: 14px;
         overflow: hidden;
+        width: 100%;
+        max-width: 420px;
+        margin-left: auto;
+        margin-right: auto;
+        aspect-ratio: 2 / 1;
     }
 
     .signature-canvas {
         display: block;
         width: 100%;
-        height: 240px;
+        height: 100%;
         cursor: crosshair;
     }
 
