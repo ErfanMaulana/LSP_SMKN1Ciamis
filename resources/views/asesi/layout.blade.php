@@ -673,8 +673,9 @@
                         <strong>Pendaftaran Ditolak</strong><br>
                         Silakan perbaiki dan kirim ulang formulir.
                         @if($asesi->catatan_admin)
-                            <div style="margin-top:8px;padding:8px 10px;background:rgba(255,255,255,.45);border-radius:8px;color:inherit;white-space:pre-line;">
-                                {{ $asesi->catatan_admin }}
+                            <div style="margin-top:8px;padding:8px 10px;background:rgba(255,255,255,.45);border-radius:8px;color:inherit;">
+                                <div style="font-weight:600;">Catatan admin:</div>
+                                <div style="margin-top:4px;white-space:pre-line;">{{ $asesi->catatan_admin }}</div>
                             </div>
                         @endif
                     @elseif($isBanned)

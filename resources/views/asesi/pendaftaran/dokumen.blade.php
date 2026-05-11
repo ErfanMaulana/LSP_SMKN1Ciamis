@@ -646,6 +646,117 @@
 <script>
 let cropperInstance = null;
 let originalImageSrc = null; // stores the raw (pre-crop) image for re-editing
+const DOKUMEN_DRAFT_KEY = 'asesi_dokumen_draft_v1';
+
+function getDokumenDraft() {
+    try {
+        return JSON.parse(sessionStorage.getItem(DOKUMEN_DRAFT_KEY) || '{}');
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveDokumenDraft(next = {}) {
+    const current = getDokumenDraft();
+    const merged = { ...current, ...next };
+    try {
+        sessionStorage.setItem(DOKUMEN_DRAFT_KEY, JSON.stringify(merged));
+    } catch (e) {
+        // Ignore storage quota issues gracefully.
+    }
+}
+
+function clearDokumenDraft() {
+    try {
+        sessionStorage.removeItem(DOKUMEN_DRAFT_KEY);
+    } catch (e) {
+        // no-op
+    }
+}
+
+function saveFileRowsDraft() {
+    const countRows = (type) => {
+        const list = document.getElementById(type + '_list');
+        return list ? list.children.length : 0;
+    };
+
+    saveDokumenDraft({
+        transkripRows: countRows('transkrip_nilai'),
+        identitasRows: countRows('identitas_pribadi'),
+        kompetensiRows: countRows('bukti_kompetensi'),
+    });
+}
+
+function restoreFileRowsDraft() {
+    const draft = getDokumenDraft();
+    const applyRows = (type, wantedRows) => {
+        const total = Math.max(1, Number(wantedRows) || 1);
+        const list = document.getElementById(type + '_list');
+        if (!list) return;
+        while (list.children.length < total) {
+            addFileInput(type);
+        }
+    };
+
+    applyRows('transkrip_nilai', draft.transkripRows);
+    applyRows('identitas_pribadi', draft.identitasRows);
+    applyRows('bukti_kompetensi', draft.kompetensiRows);
+}
+
+function restorePhotoDraft() {
+    const draft = getDokumenDraft();
+    if (!draft.photoDataUrl) return;
+
+    originalImageSrc = draft.photoDataUrl;
+    const preview = document.getElementById('photo-preview');
+    const placeholder = document.getElementById('photo-placeholder');
+    const badge = document.getElementById('photo-badge');
+    const photoName = document.getElementById('pas_foto_name');
+
+    if (preview) {
+        preview.src = draft.photoDataUrl;
+        preview.style.display = 'block';
+    }
+    if (placeholder) placeholder.style.display = 'none';
+    if (badge) badge.style.display = 'none';
+    if (photoName) {
+        photoName.textContent = draft.photoName || 'pas_foto.jpg';
+        photoName.style.color = '#1e293b';
+    }
+
+    const photoBtn = document.getElementById('photo-btn-pick');
+    const photoActions = document.getElementById('photo-actions');
+    const photoOverlay = document.getElementById('photo-edit-overlay');
+    if (photoBtn) photoBtn.style.display = 'none';
+    if (photoActions) photoActions.classList.add('visible');
+    if (photoOverlay) photoOverlay.classList.add('visible');
+}
+
+function restoreSignatureDraft() {
+    const draft = getDokumenDraft();
+    if (!draft.signatureDataUrl) return;
+
+    const signatureInput = document.getElementById('signatureInputDokumen');
+    const placeholder = document.getElementById('signatureBoxDokumen')?.querySelector('.signature-placeholder');
+    const canvas = document.getElementById('signatureCanvasDokumen');
+
+    // Restore the input value
+    if (signatureInput) signatureInput.value = draft.signatureDataUrl;
+    if (placeholder) placeholder.style.display = 'none';
+
+    // Redraw the signature on the canvas
+    if (canvas && draft.signatureDataUrl) {
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = function() {
+            // Clear the canvas first
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Draw the restored signature
+            ctx.drawImage(img, 0, 0);
+        };
+        img.src = draft.signatureDataUrl;
+    }
+}
 
 function handlePhotoBoxClick() {
     if (originalImageSrc) {
@@ -713,10 +824,16 @@ function applyCrop() {
         document.getElementById('photo-placeholder').style.display = 'none';
         document.getElementById('photo-badge').style.display = 'none';
         const preview = document.getElementById('photo-preview');
-        preview.src = canvas.toDataURL('image/jpeg');
+        const photoDataUrl = canvas.toDataURL('image/jpeg');
+        preview.src = photoDataUrl;
         preview.style.display = 'block';
         document.getElementById('pas_foto_name').textContent = 'pas_foto.jpg';
         document.getElementById('pas_foto_name').style.color = '#1e293b';
+
+        saveDokumenDraft({
+            photoDataUrl: photoDataUrl,
+            photoName: 'pas_foto.jpg',
+        });
 
         // Show edit overlay and action buttons
         document.getElementById('photo-edit-overlay').classList.add('visible');
@@ -726,12 +843,6 @@ function applyCrop() {
         closeCropper();
     }, 'image/jpeg', 0.92);
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    addFileInput('transkrip_nilai');
-    addFileInput('identitas_pribadi');
-    addFileInput('bukti_kompetensi');
-});
 
 function addFileInput(type) {
     const list = document.getElementById(type + '_list');
@@ -755,11 +866,13 @@ function addFileInput(type) {
     `;
 
     list.appendChild(row);
+    saveFileRowsDraft();
 }
 
 function removeFileInput(id) {
     const row = document.getElementById('row_' + id);
     if (row) row.remove();
+    saveFileRowsDraft();
 }
 
 function onFileSelected(input, id) {
@@ -771,6 +884,7 @@ function onFileSelected(input, id) {
         span.textContent = 'Belum ada file dipilih';
         span.style.color = '#94a3b8';
     }
+    saveFileRowsDraft();
 }
 
 function openSignatureModal() {
@@ -846,7 +960,9 @@ const initSignaturePadDokumen = () => {
 
     const stopDrawing = () => {
         if (drawing) {
-            signatureInput.value = canvas.toDataURL('image/png');
+            const data = canvas.toDataURL('image/png');
+            signatureInput.value = data;
+            saveDokumenDraft({ signatureDataUrl: data });
         }
         drawing = false;
     };
@@ -865,6 +981,7 @@ function clearSignatureDokumen() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     signatureInput.value = '';
     placeholder.style.display = 'block';
+    saveDokumenDraft({ signatureDataUrl: '' });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -873,7 +990,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('signatureModalDokumen');
     const canvas = document.getElementById('signatureCanvasDokumen');
 
+    restoreFileRowsDraft();
+    restorePhotoDraft();
     initSignaturePadDokumen();
+    restoreSignatureDraft();
+
+    if (!document.getElementById('transkrip_nilai_list')?.children.length) {
+        addFileInput('transkrip_nilai');
+    }
+    if (!document.getElementById('identitas_pribadi_list')?.children.length) {
+        addFileInput('identitas_pribadi');
+    }
+    if (!document.getElementById('bukti_kompetensi_list')?.children.length) {
+        addFileInput('bukti_kompetensi');
+    }
 
     if (openButton) {
         openButton.addEventListener('click', function(event) {
@@ -891,7 +1021,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 signatureError.style.display = 'block';
                 openSignatureModal();
                 canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
             }
+
+            // On successful submit attempt, clear saved draft.
+            clearDokumenDraft();
         });
     }
 

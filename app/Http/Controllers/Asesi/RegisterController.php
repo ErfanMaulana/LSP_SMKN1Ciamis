@@ -228,9 +228,21 @@ class RegisterController extends Controller
             'tanda_tangan_pendaftar' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
         ], [
             'pas_foto.required'             => 'Pas foto wajib diupload.',
+            'pas_foto.image'                => 'Pas foto harus berupa file gambar.',
+            'pas_foto.mimes'                => 'Format pas foto harus JPG, JPEG, PNG, atau WEBP.',
+            'pas_foto.max'                  => 'Ukuran pas foto maksimal 2MB.',
             'transkrip_nilai.required'      => 'Minimal 1 file transkrip nilai wajib diupload.',
+            'transkrip_nilai.*.file'        => 'File transkrip nilai tidak valid.',
+            'transkrip_nilai.*.mimes'       => 'Format file transkrip nilai harus JPG, JPEG, PNG, WEBP, atau PDF.',
+            'transkrip_nilai.*.max'         => 'Ukuran file transkrip nilai maksimal 2MB per file.',
             'identitas_pribadi.required'    => 'Minimal 1 file identitas pribadi wajib diupload.',
+            'identitas_pribadi.*.file'      => 'File identitas pribadi tidak valid.',
+            'identitas_pribadi.*.mimes'     => 'Format file identitas pribadi harus JPG, JPEG, PNG, WEBP, atau PDF.',
+            'identitas_pribadi.*.max'       => 'Ukuran file identitas pribadi maksimal 2MB per file.',
             'bukti_kompetensi.required'     => 'Minimal 1 file bukti kompetensi wajib diupload.',
+            'bukti_kompetensi.*.file'       => 'File bukti kompetensi tidak valid.',
+            'bukti_kompetensi.*.mimes'      => 'Format file bukti kompetensi harus JPG, JPEG, PNG, WEBP, atau PDF.',
+            'bukti_kompetensi.*.max'        => 'Ukuran file bukti kompetensi maksimal 2MB per file.',
             'tanda_tangan_pendaftar.required' => 'Tanda tangan wajib diisi sebelum pendaftaran dikirim.',
         ]);
 
