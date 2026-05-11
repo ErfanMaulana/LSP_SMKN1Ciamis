@@ -177,6 +177,121 @@
     }
     .btn-crop-apply:hover { background: var(--brand-600); }
 
+    /* Signature modal styles (popup) */
+    .signature-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.58);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
+    }
+
+    .signature-modal-overlay.show {
+        display: flex;
+    }
+
+    .signature-modal {
+        width: 100%;
+        max-width: 640px;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+        overflow: hidden;
+    }
+
+    .signature-modal-header { padding: 20px 24px 12px; border-bottom: 1px solid #e5e7eb; }
+    .signature-modal-header h4 { margin: 0; font-size: 18px; font-weight: 700; color: #0f172a; display:flex; align-items:center; gap:8px; }
+    .signature-modal-header p { margin: 8px 0 0; color: #64748b; font-size: 13px; }
+
+    .signature-modal-body { padding: 18px 24px 24px; }
+    .signature-modal-actions { display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top:12px; }
+    .signature-modal-footer { padding: 16px 24px 24px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #e5e7eb; }
+
+    .signature-meta {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .signature-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 8px;
+        margin-bottom: 12px;
+        position: relative;
+        width: 220px;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .signature-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        cursor: crosshair;
+        touch-action: none;
+    }
+
+    .signature-placeholder { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#cbd5e1; font-size:14px; pointer-events:none; text-align:center; }
+
+    .signature-error { display:none; background:#fee2e2; border-left:4px solid #ef4444; padding:12px 16px; border-radius:4px; color:#991b1b; font-size:13px; margin-bottom:16px; }
+
+    .btn-signature-clear,
+    .btn-signature-cancel,
+    .btn-signature-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all .2s;
+        height: 40px;
+        padding: 0 18px;
+    }
+
+    .btn-signature-clear {
+        color: #475569;
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .btn-signature-clear:hover { background: #f1f5f9; }
+
+    .btn-signature-cancel {
+        color: #475569;
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .btn-signature-cancel:hover { background: #f1f5f9; }
+
+    .btn-signature-submit {
+        color: #fff;
+        background: #10b981;
+        border-color: #10b981;
+        min-width: 170px;
+    }
+    .btn-signature-submit:hover { background: #059669; border-color: #059669; }
+
+    .signature-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
     /* Upload card */
     .upload-card {
         border: 1px solid #e5e7eb; border-radius: 10px;
@@ -502,10 +617,10 @@
                     <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
                 </div>
                 <div class="signature-modal-actions">
-                    <p class="text-xs text-gray-500 m-0">Tanggal & waktu akan dicatat secara otomatis</p>
+                    <p class="signature-meta">Tanggal & waktu akan dicatat secara otomatis</p>
                     <button type="button" onclick="clearSignatureDokumen()"
-                        class="inline-flex items-center px-4 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">
-                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="btn-signature-clear">
+                        <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                         Hapus
@@ -513,9 +628,9 @@
                 </div>
             </div>
             <div class="signature-modal-footer">
-                <button type="button" onclick="closeSignatureModal()" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">Batal</button>
-                <button type="submit" form="dokumenForm" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-emerald-500 border border-emerald-500 rounded-full cursor-pointer hover:bg-emerald-600 transition">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="button" onclick="closeSignatureModal()" class="btn-signature-cancel">Batal</button>
+                <button type="submit" form="dokumenForm" class="btn-signature-submit">
+                    <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                     Ya, Kirim ke Admin
