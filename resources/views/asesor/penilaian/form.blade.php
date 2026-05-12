@@ -249,6 +249,7 @@
                                         min="0"
                                         max="100"
                                         step="1"
+                                        inputmode="numeric"
                                         class="nilai-input"
                                         name="nilai[{{ $elemen->id }}]"
                                         value="{{ $nilaiDefault }}"
@@ -292,6 +293,15 @@
             var row = input.closest('tr');
             var badge = row ? row.querySelector('.status-live') : null;
             var val = parseFloat(input.value);
+
+            if (!isNaN(val)) {
+                var clamped = Math.max(0, Math.min(100, val));
+                if (clamped !== val) {
+                    input.value = clamped;
+                    val = clamped;
+                }
+            }
+
             if (!isNaN(val)) {
                 count += 1;
                 sum += val;
@@ -312,6 +322,7 @@
 
     document.querySelectorAll('.nilai-input').forEach(function (input) {
         input.addEventListener('input', refreshStatusAndAverage);
+        input.addEventListener('blur', refreshStatusAndAverage);
     });
 
     var searchInput = document.getElementById('search-elemen');

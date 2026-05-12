@@ -747,13 +747,6 @@
                     </a>
                     @endif
 
-                    <!-- AKUN Section -->
-                    <div class="menu-section-title">AKUN</div>
-
-                    <a href="{{ route('asesi.profil.edit') }}" class="menu-item {{ request()->routeIs('asesi.profil.*') && request('tab') !== 'password' ? 'active' : '' }}">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Profil Saya</span>
-                    </a>
                 @endif
             </nav>
         </aside>
@@ -878,10 +871,6 @@
                     </a>
                     @endif
 
-                    <a href="{{ route('asesi.profil.edit') }}" class="bottom-nav-item {{ request()->routeIs('asesi.profil.*') ? 'active' : '' }}">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Profil</span>
-                    </a>
                 @else
                     <a href="{{ route('asesi.pendaftaran.formulir') }}" class="bottom-nav-item {{ request()->routeIs('asesi.pendaftaran.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-plus"></i>

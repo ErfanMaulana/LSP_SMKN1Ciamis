@@ -200,6 +200,11 @@
                                             <i class="bi bi-three-dots-vertical"></i>
                                         </button>
                                         <div class="action-dropdown">
+                                            @if($item->status === 'pending')
+                                            <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" title="Verifikasi">
+                                                <i class="bi bi-check2-circle" style="font-size: 16px;"></i> Verifikasi
+                                            </a>
+                                            @else
                                             <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" title="Review Detail">
                                                 <i class="bi bi-eye" style="font-size: 16px;"></i> Lihat Detail
                                             </a>
@@ -208,20 +213,6 @@
                                                 <i class="bi bi-file-earmark-pdf" style="font-size: 16px;color:#d32f2f;"></i> Generate APL 1
                                             </a>
                                             @endif
-                                            @if($item->status === 'pending')
-                                            <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Setujui pendaftaran ' . $item->nama . '?'))">
-                                                @csrf
-                                                <button type="submit" title="Setujui">
-                                                    <i class="bi bi-check-lg" style="font-size: 16px;"></i> Setujui
-                                                </button>
-                                            </form>
-                                            <form action="{{ route('admin.asesi.reject', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Tolak pendaftaran ' . $item->nama . '?'))">
-                                                @csrf
-                                                <button type="submit" title="Tolak">
-                                                    <i class="bi bi-x-lg" style="font-size: 16px;"></i> Tolak
-                                                </button>
-                                            </form>
-                                            @endif
                                             @if(!$isApproved)
                                             <form action="{{ route('admin.asesi.delete-registration', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Hapus data pendaftaran ' . $item->nama . '? Asesi akan diminta mengisi ulang formulir dari awal.'))">
                                                 @csrf
@@ -229,6 +220,7 @@
                                                     <i class="bi bi-trash" style="font-size: 16px;"></i> Hapus
                                                 </button>
                                             </form>
+                                            @endif
                                             @endif
                                         </div>
                                     </div>

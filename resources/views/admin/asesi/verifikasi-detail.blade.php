@@ -108,7 +108,7 @@
     .checklist-table {
         width: 100%;
         border-collapse: collapse;
-        border: none;
+        border: 1px solid #e5e7eb;
         border-radius: 8px;
         overflow: hidden;
         background: #fff;
@@ -116,7 +116,7 @@
 
     .checklist-table th,
     .checklist-table td {
-        border: none;
+        border: 1px solid #e5e7eb;
         padding: 10px 12px;
         vertical-align: middle;
     }
@@ -270,6 +270,19 @@
         gap: 16px;
     }
 
+    .data-pribadi-grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .signature-right {
+        display: flex;
+        align-items: start;
+        justify-content: center;
+    }
+
     .info-item {
         display: flex;
         flex-direction: column;
@@ -392,7 +405,7 @@
         border-collapse: collapse;
         border-spacing: 0;
         overflow: hidden;
-        border: none;
+        border: 1px solid #e5e7eb;
         outline: none;
         border-radius: 10px;
         background: #fff;
@@ -400,7 +413,7 @@
 
     .checklist-table th,
     .checklist-table td {
-        border: none;
+        border: 1px solid #e5e7eb;
         padding: 10px 8px;
         font-size: 13px;
         vertical-align: middle;
@@ -832,7 +845,9 @@
             <i class="bi bi-person" style="color:#0073bd;"></i> Data Pribadi
         </div>
         <div class="section-body">
-            <div class="info-grid">
+            <div class="data-pribadi-grid">
+                <div>
+                    <div class="info-grid">
                 <div class="info-item">
                     <span class="info-label">NIK</span>
                     <span class="info-value">{{ $asesi->NIK }}</span>
@@ -865,9 +880,26 @@
                     <span class="info-label">Kode Pos</span>
                     <span class="info-value">{{ $asesi->kode_pos ?? '-' }}</span>
                 </div>
-                <div class="info-item full-width">
-                    <span class="info-label">Alamat</span>
-                    <span class="info-value">{{ $asesi->alamat ?? '-' }}</span>
+                        <div class="info-item full-width">
+                            <span class="info-label">Alamat</span>
+                            <span class="info-value">{{ $asesi->alamat ?? '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="signature-right">
+                    <div style="width:100%;max-width:320px;">
+                        <div class="info-label" style="margin-bottom:8px;">Tanda Tangan Asesi</div>
+                        @if($asesi->tanda_tangan_pendaftar)
+                            <div style="border:1px solid #e5e7eb;border-radius:8px;background:#fff;padding:8px;display:flex;flex-direction:column;align-items:center;">
+                                <img src="{{ $asesi->tanda_tangan_pendaftar }}" alt="Tanda tangan {{ $asesi->nama }}" style="max-width:260px;width:100%;height:auto;">
+                                @if($asesi->tanggal_tanda_tangan_pendaftar)
+                                    <div style="font-size:11px;color:#94a3b8;margin-top:8px;">{{ \Carbon\Carbon::parse($asesi->tanggal_tanda_tangan_pendaftar)->locale('id')->translatedFormat('d M Y H:i') }}</div>
+                                @endif
+                            </div>
+                        @else
+                            <div style="color:#9ca3af;border:1px dashed #e5e7eb;border-radius:8px;padding:18px;text-align:center;">Belum ada tanda tangan</div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

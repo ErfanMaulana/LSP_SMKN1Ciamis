@@ -197,35 +197,41 @@
     .table-card {
         background: white;
         border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
-        border: 1px solid #e5e7eb;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
         overflow: hidden;
            z-index: 1;
     }
-    .table-wrap { overflow-x: auto; }
+    .table-wrap {
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: visible;
+    }
     .table-card table {
         width: 100%;
+        min-width: 760px;
         border-collapse: collapse;
-        table-layout: auto;
     }
     .table-card thead th {
         background: #f8fafc;
-        padding: 11px 16px;
+        padding: 12px 14px;
         text-align: left;
         font-size: 11px;
-        font-weight: 600;
+        font-weight: 700;
         color: #6b7280;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        border-bottom: 1px solid #e5e7eb;
+        letter-spacing: 0.4px;
+        border-bottom: 1px solid #e2e8f0;
         white-space: nowrap;
     }
     .table-card tbody td {
-        padding: 13px 16px;
+        padding: 12px 14px;
         font-size: 13px;
-        color: #374151;
-        border-bottom: 1px solid #f3f4f6;
+        color: #334155;
+        border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .table-card tbody tr:last-child td { border-bottom: none; }
     .table-card tbody tr:hover { background: #f9fafb; }
@@ -235,6 +241,13 @@
         font-weight: 600;
         color: #0f172a;
         line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .asesi-nik {
+        margin-top: 4px;
     }
 
     .asesi-email {
@@ -242,7 +255,10 @@
         color: #94a3b8;
         line-height: 1.3;
         margin-top: 2px;
-        word-break: break-all;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: normal;
     }
 
     .mono-chip {
@@ -254,6 +270,10 @@
         background: #f1f5f9;
         color: #475569;
         font-family: monospace;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     .skema-chip {
@@ -267,6 +287,9 @@
         font-size: 12px;
         font-weight: 600;
         white-space: nowrap;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .badge {
@@ -331,28 +354,25 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: #f1f5f9;
-        border: 1px solid #e2e8f0;
-        color: #475569;
-        padding: 6px 8px;
+        background: transparent;
+        border: none;
+        color: #64748b;
+        padding: 4px;
         border-radius: 6px;
         font-size: 16px;
         cursor: pointer;
         transition: all 0.2s ease;
-        width: 32px;
-        height: 32px;
+        width: 28px;
+        height: 28px;
     }
 
     .btn-kebab:hover {
-        background: #e2e8f0;
-        border-color: #cbd5e1;
         color: #0f172a;
     }
 
     .btn-kebab.active {
-        background: #0073bd;
-        border-color: #0073bd;
-        color: white;
+        background: transparent;
+        color: #0073bd;
     }
 
     .dropdown-menu {
@@ -535,14 +555,16 @@
     }
 
     /* Table Column Widths */
-    .table-card th:nth-child(1), .table-card td:nth-child(1) { width: 20%; }
-    .table-card th:nth-child(2), .table-card td:nth-child(2) { width: 12%; }
-    .table-card th:nth-child(3), .table-card td:nth-child(3) { width: 12%; }
-    .table-card th:nth-child(4), .table-card td:nth-child(4) { width: 12%; }
-    .table-card th:nth-child(5), .table-card td:nth-child(5) { width: 11%; }
-    .table-card th:nth-child(6), .table-card td:nth-child(6) { width: 11%; }
-    .table-card th:nth-child(7), .table-card td:nth-child(7) { width: 17%; }
-    .table-card th:nth-child(8), .table-card td:nth-child(8) { width: 15%; text-align: center; }
+    .table-card th:nth-child(1), .table-card td:nth-child(1) { width: 30%; }
+    .table-card th:nth-child(2), .table-card td:nth-child(2) { width: 30%; }
+    .table-card th:nth-child(3), .table-card td:nth-child(3) { width: 14%; }
+    .table-card th:nth-child(4), .table-card td:nth-child(4) { width: 18%; }
+    .table-card th:nth-child(5), .table-card td:nth-child(5) {
+        width: 8%;
+        min-width: 56px;
+        text-align: center;
+        overflow: visible;
+    }
 
     /* Card View (Mobile) */
     .card-view {
@@ -708,6 +730,17 @@
         border-top: 1px solid #f3f4f6;
     }
 
+    .card-footer .btn-kebab {
+        width: 100%;
+        height: auto;
+        justify-content: flex-start;
+        color: #0073bd;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 8px 0;
+        border-radius: 0;
+    }
+
     .card-btn {
         flex: 1;
         padding: 8px 10px;
@@ -841,7 +874,7 @@
         <h2><i class="bi bi-people"></i> Asesi</h2>
         <p>
             {{ $skema?->nama_skema ?? ($skemaNames->count() ? $skemaNames->join(', ') : 'Semua skema yang diampu') }}
-            &bull; <span id="totalAsesi">{{ $summary['total'] ?? $data->count() }}</span> asesi
+            &bull; <span id="totalAsesi">{{ $summary['total'] ?? count($data) }}</span> asesi
         </p>
     </div>
 </div>
@@ -873,7 +906,7 @@
             type="text" 
             class="search-input" 
             id="asesiSearch" 
-            placeholder="Cari nama asesi, NIK, email, atau skema..."
+            placeholder="Cari nama asesi, NIK, jurusan, atau skema..."
             autocomplete="off"
         >
         <button class="clear-search" id="clearSearch">
@@ -897,18 +930,15 @@
 </div>
 
 <div class="table-card table-view">
-    @if($data->count())
+    @if(count($data))
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
                     <th>Nama Asesi</th>
-                    <th>NIK</th>
-                    <th>Jurusan</th>
-                    <th>Skema</th>
+                    <th>Jurusan / Skema</th>
                     <th>Status Asesmen</th>
                     <th>Rekomendasi</th>
-                    <th>Periode</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -931,11 +961,13 @@
                 <tr>
                     <td>
                         <div class="asesi-name">{{ $asesi?->nama ?? '—' }}</div>
-                        <div class="asesi-email">{{ $asesi?->email ?? '' }}</div>
+                        <div class="asesi-nik"><span class="mono-chip">{{ $row->asesi_nik }}</span></div>
                     </td>
-                    <td><span class="mono-chip">{{ $row->asesi_nik }}</span></td>
-                    <td><span class="mono-chip">{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</span></td>
-                    <td><span class="skema-chip">{{ $row->skema?->nama_skema ?? '—' }}</span></td>
+                    <td>
+                        <span class="mono-chip">{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</span>
+                        <span class="period-sep">•</span>
+                        <span class="skema-chip">{{ $row->skema?->nama_skema ?? '—' }}</span>
+                    </td>
                     <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
                     <td>
                         @if($row->rekomendasi === 'lanjut')
@@ -945,11 +977,6 @@
                         @else
                             <span class="rekomendasi-empty">— Belum direview</span>
                         @endif
-                    </td>
-                    <td class="period-col">
-                        <span>{{ $row->tanggal_mulai ? \Carbon\Carbon::parse($row->tanggal_mulai)->format('d/m/Y') : '—' }}</span>
-                        <span class="period-sep">s/d</span>
-                        <span>{{ $row->tanggal_selesai ? \Carbon\Carbon::parse($row->tanggal_selesai)->format('d/m/Y') : '—' }}</span>
                     </td>
                     <td>
                         <div class="action-menu-wrapper">
@@ -1039,7 +1066,7 @@
 
 <!-- Card View (Mobile) -->
 <div class="card-view">
-    @if($data->count())
+    @if(count($data))
         @foreach($data as $row)
         @php
             $asesi = $row->asesi;
@@ -1060,19 +1087,13 @@
             <div class="card-header">
                 <div>
                     <div class="card-name">{{ $asesi?->nama ?? '—' }}</div>
-                    <div class="card-email">{{ $asesi?->email ?? '' }}</div>
+                    <div class="card-email">{{ $row->asesi_nik }}</div>
                 </div>
                 <span class="card-status-badge badge {{ $statusClass }}">{{ $statusLabel }}</span>
             </div>
 
             <!-- Card Body -->
             <div class="card-body">
-                <!-- NIK -->
-                <div class="card-field">
-                    <div class="card-label">NIK</div>
-                    <div class="card-value"><code>{{ $row->asesi_nik }}</code></div>
-                </div>
-
                 <!-- Jurusan -->
                 <div class="card-field">
                     <div class="card-label">Jurusan</div>
@@ -1288,7 +1309,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Hide results info
         searchResultsInfo.classList.remove('show');
-        totalAsesiEl.textContent = '{{ $data->count() }}';
+        totalAsesiEl.textContent = '{{ count($data) }}';
     }
 
     // Dropdown Menu Functionality
@@ -1349,20 +1370,32 @@ document.addEventListener('DOMContentLoaded', function() {
         const viewportHeight = window.innerHeight;
         const margin = 12;
         const gap = 8;
+        const mainContent = document.querySelector('.main-content');
+        const topbar = document.querySelector('.topbar');
+
+        const contentRect = mainContent
+            ? mainContent.getBoundingClientRect()
+            : { left: margin };
+        const topbarRect = topbar
+            ? topbar.getBoundingClientRect()
+            : { bottom: margin };
+
+        const minLeft = Math.max(margin, Math.floor(contentRect.left) + 8);
+        const minTop = Math.max(margin, Math.floor(topbarRect.bottom) + 6);
 
         let left = buttonRect.right - menuWidth;
-        left = Math.max(margin, Math.min(left, viewportWidth - menuWidth - margin));
+        left = Math.max(minLeft, Math.min(left, viewportWidth - menuWidth - margin));
 
         let top = buttonRect.bottom + gap;
         let positionUp = false;
 
         if (top + menuHeight > viewportHeight - margin) {
             const aboveTop = buttonRect.top - menuHeight - gap;
-            if (aboveTop >= margin) {
+            if (aboveTop >= minTop) {
                 top = aboveTop;
                 positionUp = true;
             } else {
-                top = Math.max(margin, viewportHeight - menuHeight - margin);
+                top = Math.max(minTop, viewportHeight - menuHeight - margin);
             }
         }
 

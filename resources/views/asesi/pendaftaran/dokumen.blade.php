@@ -746,13 +746,19 @@ function restoreSignatureDraft() {
 
     // Redraw the signature on the canvas
     if (canvas && draft.signatureDataUrl) {
+        // Ensure canvas is properly sized before drawing
+        if (window.dokumenSignatureResize) {
+            window.dokumenSignatureResize();
+        }
+        
         const ctx = canvas.getContext('2d');
         const img = new Image();
         img.onload = function() {
-            // Clear the canvas first
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Draw the restored signature
+            // Draw the restored signature on the properly sized canvas
             ctx.drawImage(img, 0, 0);
+        };
+        img.onerror = function() {
+            console.error('Failed to load signature image from draft');
         };
         img.src = draft.signatureDataUrl;
     }

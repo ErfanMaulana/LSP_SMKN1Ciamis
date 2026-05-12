@@ -63,6 +63,33 @@
     table { width:100%; min-width:900px; border-collapse:collapse; }
     th, td { border:1px solid #e2e8f0; padding:8px 10px; font-size:13px; vertical-align:top; }
     th { background:#f8fafc; text-align:center; }
+    td.penilaian-lanjut-cell {
+        padding: 6px 8px;
+        vertical-align: top;
+    }
+    .penilaian-lanjut-textarea {
+        width: 100%;
+        display: block;
+        border: none;
+        background: transparent;
+        padding: 0;
+        margin: 0;
+        resize: none;
+        overflow: hidden;
+        min-height: 1.45em;
+        line-height: 1.45;
+        font: inherit;
+        color: #334155;
+        box-shadow: none;
+        outline: none;
+    }
+    .penilaian-lanjut-textarea::placeholder {
+        color: #94a3b8;
+    }
+    .penilaian-lanjut-textarea:focus {
+        outline: none;
+        box-shadow: none;
+    }
 
     .pencapaian-wrap { display:flex; justify-content:center; gap:10px; }
     .pencapaian-wrap label { font-size:12px; display:inline-flex; align-items:center; gap:4px; }
@@ -77,25 +104,133 @@
 
     .hidden { display:none; }
 
+    .signature-section {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        background: #ffffff;
+        margin-top: 14px;
+    }
+
+    .signature-section h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .signature-section .signature-subtitle {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 14px;
+    }
+
+    .signature-canvas-wrapper {
+        border: 2px dashed #d1d5db;
+        border-radius: 10px;
+        background: #fafafa;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s;
+    }
+
+    .signature-canvas-wrapper.active {
+        border-color: #0073bd;
+        background: #fff;
+    }
+
+    .signature-canvas-wrapper.has-signature {
+        border-style: solid;
+        border-color: #0073bd;
+    }
+
+    .signature-canvas {
+        width: 100%;
+        height: 240px;
+        cursor: crosshair;
+        display: block;
+    }
+
+    .signature-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+        color: #9ca3af;
+        transition: opacity 0.2s;
+    }
+
+    .signature-placeholder i {
+        font-size: 28px;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .signature-placeholder span {
+        font-size: 13px;
+    }
+
+    .signature-canvas-wrapper.has-signature .signature-placeholder {
+        opacity: 0;
+    }
+
+    .signature-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .signature-date {
+        font-size: 13px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .signature-date strong {
+        color: #1e293b;
+    }
+
+    .btn-clear-signature {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+
+    .btn-clear-signature:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        color: #dc2626;
+    }
+
     @media (max-width:768px) {
         .grid-2 { grid-template-columns:1fr; }
+        .signature-canvas-wrapper {
+            max-width: 180px;
+        }
     }
 </style>
 
 <div class="card-form">
     <div class="grid-2">
-        <div class="field">
-            <label>Kode Form <span class="req">*</span></label>
-            <input type="text" name="kode_form" value="{{ $value('kode_form', '') }}">
-            @error('kode_form')<div class="error-text">{{ $message }}</div>@enderror
-        </div>
-
-        <div class="field">
-            <label>Judul Form <span class="req">*</span></label>
-            <input type="text" name="judul_form" value="{{ $value('judul_form', '') }}">
-            @error('judul_form')<div class="error-text">{{ $message }}</div>@enderror
-        </div>
-
         <div class="field">
             <label>Skema <span class="req">*</span></label>
             <input type="hidden" id="skemaIdInput" name="skema_id" value="{{ $selectedSkemaId }}" data-nomor="{{ $activeSkemaNomor }}">
@@ -118,7 +253,7 @@
 
         <div class="field">
             <label>TUK</label>
-            <input type="text" id="tukInput" name="tuk" value="{{ $value('tuk', '') }}">
+            <input type="text" id="tukInput" name="tuk" value="{{ $value('tuk', '') }}" readonly>
             @error('tuk')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -126,11 +261,6 @@
             <label>Tanggal</label>
             <input type="date" id="tanggalInput" name="tanggal" value="{{ $selectedTanggal }}">
             @error('tanggal')<div class="error-text">{{ $message }}</div>@enderror
-        </div>
-
-        <div class="field full">
-            <label>Catatan Footer</label>
-            <input type="text" name="catatan_footer" value="{{ $value('catatan_footer', '') }}">
         </div>
     </div>
 
@@ -164,12 +294,36 @@
         </div>
     </div>
 
-    <div class="grid-2" style="margin-top:14px;">
-        <div class="field"><label>Nama Asesi</label><input type="text" id="ttdAsesiNamaInput" name="ttd_asesi_nama" value="{{ $value('ttd_asesi_nama', '') }}"></div>
-        <div class="field"><label>Tanggal TTD Asesi</label><input type="date" name="ttd_asesi_tanggal" value="{{ $ttdAsesiTanggal }}"></div>
-        <div class="field"><label>Nama Asesor</label><input type="text" name="ttd_asesor_nama" value="{{ $value('ttd_asesor_nama', '') }}"></div>
-        <div class="field"><label>No Reg Asesor</label><input type="text" name="ttd_asesor_no_reg" value="{{ $value('ttd_asesor_no_reg', '') }}"></div>
-        <div class="field"><label>Tanggal TTD Asesor</label><input type="date" name="ttd_asesor_tanggal" value="{{ $ttdAsesorTanggal }}"></div>
+    <div class="grid-2" style="margin-top:16px;">
+        <div class="field full">
+            <div class="signature-section">
+                <h3><i class="bi bi-pen"></i> Tanda Tangan Asesor</h3>
+                <p class="signature-subtitle">Dengan menandatangani, asesor menyatakan pernyataan asesor telah diisi dengan benar.</p>
+
+                <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
+                    <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
+                    <div class="signature-placeholder">
+                        <i class="bi bi-pen"></i>
+                        <span>Tanda tangan di sini</span>
+                    </div>
+                </div>
+
+                <input type="hidden" name="ttd_asesor_nama" id="ttdAsesorNamaInput" value="{{ $value('ttd_asesor_nama', '') }}">
+                <input type="hidden" name="ttd_asesor_tanggal" id="ttdAsesorTanggalInput" value="{{ $ttdAsesorTanggal }}">
+                @error('ttd_asesor_nama')<div class="error-text">{{ $message }}</div>@enderror
+                @error('ttd_asesor_tanggal')<div class="error-text">{{ $message }}</div>@enderror
+
+                <div class="signature-actions">
+                    <div class="signature-date">
+                        <i class="bi bi-calendar3"></i>
+                        Tanggal: <strong id="signatureDateAsesor">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
+                    </div>
+                    <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
+                        <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="form-actions">
@@ -199,7 +353,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const tukInput = document.getElementById('tukInput');
     const tanggalInput = document.getElementById('tanggalInput');
-    const ttdAsesiNamaInput = document.getElementById('ttdAsesiNamaInput');
 
     const setNomorSkema = () => {
         nomorSkemaDisplay.value = skemaIdInput ? (skemaIdInput.getAttribute('data-nomor') || '') : '';
@@ -265,6 +418,11 @@ document.addEventListener('DOMContentLoaded', function () {
         return wrap;
     };
 
+    const autosizeTextarea = (textarea) => {
+        textarea.style.height = 'auto';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    };
+
     const renderChecklist = (units) => {
         checklistContainer.innerHTML = '';
 
@@ -327,12 +485,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     tdPencapaian.appendChild(createPencapaianCell(key, pre.pencapaian || ''));
 
                     const tdLanjut = document.createElement('td');
+                    tdLanjut.className = 'penilaian-lanjut-cell';
                     const ta = document.createElement('textarea');
                     ta.name = `detail[${key}][penilaian_lanjut]`;
                     ta.placeholder = 'Penilaian lanjut (opsional)';
-                    ta.style.minHeight = '64px';
+                    ta.className = 'penilaian-lanjut-textarea';
+                    ta.rows = 1;
                     ta.value = pre.penilaian_lanjut || '';
                     tdLanjut.appendChild(ta);
+                    autosizeTextarea(ta);
+                    ta.addEventListener('input', function () {
+                        autosizeTextarea(this);
+                    });
 
                     tdLanjut.appendChild(createHiddenInput(`detail[${key}][unit_id]`, String(unit.id)));
                     tdLanjut.appendChild(createHiddenInput(`detail[${key}][elemen_id]`, String(elemen.id)));
@@ -364,10 +528,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (tanggalInput) {
             tanggalInput.value = payload.tanggal || '';
-        }
-
-        if (ttdAsesiNamaInput && (!ttdAsesiNamaInput.value)) {
-            ttdAsesiNamaInput.value = payload.asesi?.nama || '';
         }
     };
 
@@ -410,18 +570,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 fetch(`${structureUrl}?skema_id=${encodeURIComponent(skemaId)}`),
             ]);
 
+            if (!participantsResponse.ok || !structureResponse.ok) {
+                throw new Error(`HTTP ${participantsResponse.status} / ${structureResponse.status}`);
+            }
+
             const participants = await participantsResponse.json();
             const structure = await structureResponse.json();
 
             fillAsesi(participants.asesi || [], firstHydration ? selectedAsesiNik : '');
             renderChecklist(structure.units || []);
+            document.querySelectorAll('.penilaian-lanjut-textarea').forEach((textarea) => autosizeTextarea(textarea));
             if (firstHydration && selectedAsesiNik) {
                 await fetchAsesiData(selectedAsesiNik);
             }
             firstHydration = false;
         } catch (error) {
+            console.error('Ceklis load error:', error);
             resetAsesi('-- Gagal memuat asesi --');
-            checklistContainer.innerHTML = '<div style="padding:12px;color:#b91c1c;font-size:13px;">Gagal memuat data skema.</div>';
+            checklistContainer.innerHTML = '<div style="padding:12px;color:#b91c1c;font-size:13px;">Gagal memuat data skema. Pastikan Anda memiliki akses ke skema ini.</div>';
             firstHydration = false;
         }
     };
@@ -448,6 +614,140 @@ document.addEventListener('DOMContentLoaded', function () {
             belumKompetenFields.classList.add('hidden');
         }
     };
+
+    const initSignaturePad = (config) => {
+        const {
+            canvas,
+            wrapper,
+            clearButton,
+            nameInput,
+            dateInput,
+        } = config;
+
+        if (!canvas || !wrapper || !clearButton || !nameInput || !dateInput) {
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            return;
+        }
+
+        let isDrawing = false;
+        let hasSignature = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        const updateCanvasSize = () => {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * ratio;
+            canvas.height = rect.height * ratio;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
+        };
+
+        const getPos = (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const point = event.touches && event.touches[0] ? event.touches[0] : event;
+            return {
+                x: point.clientX - rect.left,
+                y: point.clientY - rect.top,
+            };
+        };
+
+        const fillSignatureMeta = () => {
+            if (!nameInput.value) {
+                nameInput.value = 'Ditandatangani secara digital';
+            }
+
+            if (!dateInput.value) {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                dateInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+        };
+
+        const startDrawing = (event) => {
+            event.preventDefault();
+            isDrawing = true;
+            const pos = getPos(event);
+            lastX = pos.x;
+            lastY = pos.y;
+            wrapper.classList.add('active');
+        };
+
+        const draw = (event) => {
+            event.preventDefault();
+            if (!isDrawing) {
+                return;
+            }
+
+            const pos = getPos(event);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+
+            if (!hasSignature) {
+                hasSignature = true;
+                wrapper.classList.add('has-signature');
+            }
+
+            fillSignatureMeta();
+        };
+
+        const stopDrawing = () => {
+            isDrawing = false;
+            wrapper.classList.remove('active');
+        };
+
+        clearButton.addEventListener('click', function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hasSignature = false;
+            nameInput.value = '';
+            dateInput.value = '';
+            wrapper.classList.remove('has-signature');
+        });
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        window.addEventListener('resize', updateCanvasSize);
+        updateCanvasSize();
+
+        if (nameInput.value || dateInput.value) {
+            wrapper.classList.add('has-signature');
+        }
+    };
+
+    const signatureCanvasAsesor = document.getElementById('signatureCanvasAsesor');
+    const signatureWrapperAsesor = document.getElementById('signatureWrapperAsesor');
+    const clearSignatureAsesor = document.getElementById('clearSignatureAsesor');
+    const ttdAsesorNamaInput = document.getElementById('ttdAsesorNamaInput');
+    const ttdAsesorTanggalInput = document.getElementById('ttdAsesorTanggalInput');
+
+    initSignaturePad({
+        canvas: signatureCanvasAsesor,
+        wrapper: signatureWrapperAsesor,
+        clearButton: clearSignatureAsesor,
+        nameInput: ttdAsesorNamaInput,
+        dateInput: ttdAsesorTanggalInput,
+    });
 
     bulkYaBtn.addEventListener('click', () => setBulk('ya'));
     bulkTidakBtn.addEventListener('click', () => setBulk('tidak'));

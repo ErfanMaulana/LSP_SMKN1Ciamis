@@ -62,6 +62,10 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             // Persetujuan Asesmen (front) - allow asesi to sign
             Route::get('/persetujuan-asesmen/{skemaId}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesiShow'])->name('persetujuan.front.asesi.show');
             Route::post('/persetujuan-asesmen/{id}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesiSign'])->name('persetujuan.front.asesi.sign');
+
+            // Ceklis Observasi - Asesi viewing and signing
+            Route::get('/ceklis-observasi/{id}/view', [\App\Http\Controllers\Asesi\CeklisObservasiController::class, 'show'])->name('ceklis-observasi.view');
+            Route::post('/ceklis-observasi/{id}/sign', [\App\Http\Controllers\Asesi\CeklisObservasiController::class, 'sign'])->name('ceklis-observasi.sign');
         });
     });
 });

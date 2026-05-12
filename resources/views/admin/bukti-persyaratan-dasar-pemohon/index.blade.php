@@ -17,26 +17,84 @@
     .page-header h2 {
         margin:0;
         font-size:24px;
-        font-weight:700;
-        color:#0f172a;
+            justify-content:flex-start;
+            position:relative;
     }
 
-    .page-header p {
-        margin:6px 0 0;
-        color:#64748b;
-        font-size:13px;
-        max-width:720px;
-    }
+        .action-dropdown {
+            position:relative;
+            display:inline-flex;
+        }
 
-    .btn-primary {
-        display:inline-flex;
-        align-items:center;
-        gap:8px;
+        .action-trigger {
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            width:auto;
+            height:auto;
+            padding:0;
+            border:0;
+            border-radius:0;
+            background:transparent;
+            color:#64748b;
+            cursor:pointer;
+            font-size:18px;
+            line-height:1;
+        }
+
+        .action-trigger:hover {
+            background:transparent;
+            color:#0f172a;
+        }
+
+        .action-trigger:focus {
+            outline:none;
+            box-shadow:none;
+        }
+
+        .action-menu {
+            position:absolute;
+            right:0;
+            top:calc(100% + 8px);
+            min-width:160px;
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius:10px;
+            box-shadow:0 12px 30px rgba(15,23,42,.12);
+            padding:6px;
+            display:none;
+            z-index:10;
+        }
+
+        .action-menu.show {
+            display:block;
+        }
+
+        .action-menu a,
+        .action-menu button {
+            width:100%;
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:10px 12px;
+            border:none;
+            background:transparent;
+            border-radius:8px;
+            text-decoration:none;
+            font-size:13px;
+            font-weight:600;
         padding:10px 16px;
+            color:#0f172a;
+            text-align:left;
         border-radius:8px;
         background:#0073bd;
         color:#fff;
         text-decoration:none;
+
+        .action-menu a:hover,
+        .action-menu button:hover {
+            background:#f8fafc;
+        }
         font-weight:600;
         border:none;
         cursor:pointer;
@@ -195,12 +253,19 @@
                                 <td>{{ $item->updated_at?->translatedFormat('d M Y H:i') ?? '-' }}</td>
                                 <td>
                                     <div class="actions">
-                                        <a href="{{ route('admin.bukti-persyaratan-dasar-pemohon.edit', $item->id) }}" class="btn-sm btn-edit"><i class="bi bi-pencil"></i> Edit</a>
-                                        <form method="POST" action="{{ route('admin.bukti-persyaratan-dasar-pemohon.destroy', $item->id) }}" onsubmit="return confirm('Hapus data persyaratan dasar ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-sm btn-delete"><i class="bi bi-trash"></i> Hapus</button>
-                                        </form>
+                                        <div class="action-dropdown">
+                                            <button type="button" class="action-trigger" aria-label="Aksi" aria-expanded="false" onclick="toggleActionMenu(this)">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <div class="action-menu">
+                                                <a href="{{ route('admin.bukti-persyaratan-dasar-pemohon.edit', $item->id) }}"><i class="bi bi-pencil"></i> Edit</a>
+                                                <form method="POST" action="{{ route('admin.bukti-persyaratan-dasar-pemohon.destroy', $item->id) }}" onsubmit="return confirm('Hapus data persyaratan dasar ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"><i class="bi bi-trash"></i> Hapus</button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -220,4 +285,36 @@
         @endif
     </div>
 </div>
+
+<script>
+    function closeActionMenus(exceptMenu = null) {
+        document.querySelectorAll('.action-menu.show').forEach((menu) => {
+            if (menu !== exceptMenu) {
+                menu.classList.remove('show');
+                const trigger = menu.parentElement?.querySelector('.action-trigger');
+                if (trigger) {
+                    trigger.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+    }
+
+    function toggleActionMenu(button) {
+        const menu = button.parentElement?.querySelector('.action-menu');
+        if (!menu) return;
+
+        const isOpen = menu.classList.contains('show');
+        closeActionMenus();
+        if (!isOpen) {
+            menu.classList.add('show');
+            button.setAttribute('aria-expanded', 'true');
+        }
+    }
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.action-dropdown')) {
+            closeActionMenus();
+        }
+    });
+</script>
 @endsection
