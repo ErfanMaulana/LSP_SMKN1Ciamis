@@ -78,8 +78,8 @@
     .hidden { display:none; }
 
     /* Signature canvas styles to match persetujuan-asesmen */
-    .signature-canvas-wrapper { border: 2px dashed #e6eef5; border-radius: 8px; padding: 12px; min-height: 120px; background: #ffffff; position: relative; }
-    .signature-canvas { width: 100%; height: 120px; display: block; border-radius:6px; background: transparent; }
+    .signature-canvas-wrapper { border: 2px dashed #e6eef5; border-radius: 8px; padding: 12px; background: #ffffff; position: relative; display:flex; align-items:center; justify-content:center; }
+    .signature-canvas { width: 100%; max-width:260px; aspect-ratio: 1 / 1; height: auto; display: block; border-radius:6px; background: transparent; }
     .signature-placeholder { position: absolute; left: 0; right: 0; top: 0; bottom: 0; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#94a3b8; font-size:13px; pointer-events:none; }
     .signature-placeholder i { font-size:20px; margin-bottom:6px; }
     .signature-actions { margin-top:8px; display:flex; gap:8px; align-items:center; }
