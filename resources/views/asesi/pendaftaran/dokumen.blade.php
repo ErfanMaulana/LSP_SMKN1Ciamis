@@ -177,6 +177,121 @@
     }
     .btn-crop-apply:hover { background: var(--brand-600); }
 
+    /* Signature modal styles (popup) */
+    .signature-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.58);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 20px;
+    }
+
+    .signature-modal-overlay.show {
+        display: flex;
+    }
+
+    .signature-modal {
+        width: 100%;
+        max-width: 640px;
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.22);
+        overflow: hidden;
+    }
+
+    .signature-modal-header { padding: 20px 24px 12px; border-bottom: 1px solid #e5e7eb; }
+    .signature-modal-header h4 { margin: 0; font-size: 18px; font-weight: 700; color: #0f172a; display:flex; align-items:center; gap:8px; }
+    .signature-modal-header p { margin: 8px 0 0; color: #64748b; font-size: 13px; }
+
+    .signature-modal-body { padding: 18px 24px 24px; }
+    .signature-modal-actions { display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top:12px; }
+    .signature-modal-footer { padding: 16px 24px 24px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #e5e7eb; }
+
+    .signature-meta {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .signature-box {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 8px;
+        margin-bottom: 12px;
+        position: relative;
+        width: 220px;
+        aspect-ratio: 1 / 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+
+    .signature-canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: transparent;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        cursor: crosshair;
+        touch-action: none;
+    }
+
+    .signature-placeholder { position: absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#cbd5e1; font-size:14px; pointer-events:none; text-align:center; }
+
+    .signature-error { display:none; background:#fee2e2; border-left:4px solid #ef4444; padding:12px 16px; border-radius:4px; color:#991b1b; font-size:13px; margin-bottom:16px; }
+
+    .btn-signature-clear,
+    .btn-signature-cancel,
+    .btn-signature-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all .2s;
+        height: 40px;
+        padding: 0 18px;
+    }
+
+    .btn-signature-clear {
+        color: #475569;
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .btn-signature-clear:hover { background: #f1f5f9; }
+
+    .btn-signature-cancel {
+        color: #475569;
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .btn-signature-cancel:hover { background: #f1f5f9; }
+
+    .btn-signature-submit {
+        color: #fff;
+        background: #10b981;
+        border-color: #10b981;
+        min-width: 170px;
+    }
+    .btn-signature-submit:hover { background: #059669; border-color: #059669; }
+
+    .signature-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
     /* Upload card */
     .upload-card {
         border: 1px solid #e5e7eb; border-radius: 10px;
@@ -379,7 +494,7 @@
         <p>Setelah submit, pendaftaran Anda akan dikirim ke admin untuk diverifikasi. Pastikan semua dokumen sudah benar.</p>
     </div>
 
-    <form action="{{ route('asesi.pendaftaran.dokumen.store') }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ route('asesi.pendaftaran.dokumen.store') }}" method="POST" enctype="multipart/form-data" id="dokumenForm">
         @csrf
 
         <!-- Pas Foto -->
@@ -480,12 +595,49 @@
 
         <!-- Submit -->
         <div class="reg-actions">
-            <button type="submit" class="btn-reg btn-reg-success">
+            <button type="button" class="btn-reg btn-reg-success" id="openSignatureDokumenBtn">
                 <i class="bi bi-check-circle"></i>
                 <span>Selesaikan Pendaftaran & Kirim ke Admin</span>
             </button>
         </div>
+
+        <input type="hidden" name="tanda_tangan_pendaftar" id="signatureInputDokumen" value="">
     </form>
+
+    <div class="signature-modal-overlay" id="signatureModalDokumen">
+        <div class="signature-modal">
+            <div class="signature-modal-header">
+                <h4><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda Tangan Pendaftar</h4>
+                <p>Silakan tanda tangan sebelum pendaftaran dikirim ke admin.</p>
+            </div>
+            <div class="signature-modal-body">
+                <div id="signatureErrorDokumen" class="signature-error" style="display:none;">Tanda tangan harus diisi sebelum submit</div>
+                <div class="signature-box" id="signatureBoxDokumen">
+                    <canvas id="signatureCanvasDokumen" class="signature-canvas"></canvas>
+                    <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
+                </div>
+                <div class="signature-modal-actions">
+                    <p class="signature-meta">Tanggal & waktu akan dicatat secara otomatis</p>
+                    <button type="button" onclick="clearSignatureDokumen()"
+                        class="btn-signature-clear">
+                        <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Hapus
+                    </button>
+                </div>
+            </div>
+            <div class="signature-modal-footer">
+                <button type="button" onclick="closeSignatureModal()" class="btn-signature-cancel">Batal</button>
+                <button type="submit" form="dokumenForm" class="btn-signature-submit">
+                    <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Ya, Kirim ke Admin
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -494,6 +646,123 @@
 <script>
 let cropperInstance = null;
 let originalImageSrc = null; // stores the raw (pre-crop) image for re-editing
+const DOKUMEN_DRAFT_KEY = 'asesi_dokumen_draft_v1';
+
+function getDokumenDraft() {
+    try {
+        return JSON.parse(sessionStorage.getItem(DOKUMEN_DRAFT_KEY) || '{}');
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveDokumenDraft(next = {}) {
+    const current = getDokumenDraft();
+    const merged = { ...current, ...next };
+    try {
+        sessionStorage.setItem(DOKUMEN_DRAFT_KEY, JSON.stringify(merged));
+    } catch (e) {
+        // Ignore storage quota issues gracefully.
+    }
+}
+
+function clearDokumenDraft() {
+    try {
+        sessionStorage.removeItem(DOKUMEN_DRAFT_KEY);
+    } catch (e) {
+        // no-op
+    }
+}
+
+function saveFileRowsDraft() {
+    const countRows = (type) => {
+        const list = document.getElementById(type + '_list');
+        return list ? list.children.length : 0;
+    };
+
+    saveDokumenDraft({
+        transkripRows: countRows('transkrip_nilai'),
+        identitasRows: countRows('identitas_pribadi'),
+        kompetensiRows: countRows('bukti_kompetensi'),
+    });
+}
+
+function restoreFileRowsDraft() {
+    const draft = getDokumenDraft();
+    const applyRows = (type, wantedRows) => {
+        const total = Math.max(1, Number(wantedRows) || 1);
+        const list = document.getElementById(type + '_list');
+        if (!list) return;
+        while (list.children.length < total) {
+            addFileInput(type);
+        }
+    };
+
+    applyRows('transkrip_nilai', draft.transkripRows);
+    applyRows('identitas_pribadi', draft.identitasRows);
+    applyRows('bukti_kompetensi', draft.kompetensiRows);
+}
+
+function restorePhotoDraft() {
+    const draft = getDokumenDraft();
+    if (!draft.photoDataUrl) return;
+
+    originalImageSrc = draft.photoDataUrl;
+    const preview = document.getElementById('photo-preview');
+    const placeholder = document.getElementById('photo-placeholder');
+    const badge = document.getElementById('photo-badge');
+    const photoName = document.getElementById('pas_foto_name');
+
+    if (preview) {
+        preview.src = draft.photoDataUrl;
+        preview.style.display = 'block';
+    }
+    if (placeholder) placeholder.style.display = 'none';
+    if (badge) badge.style.display = 'none';
+    if (photoName) {
+        photoName.textContent = draft.photoName || 'pas_foto.jpg';
+        photoName.style.color = '#1e293b';
+    }
+
+    const photoBtn = document.getElementById('photo-btn-pick');
+    const photoActions = document.getElementById('photo-actions');
+    const photoOverlay = document.getElementById('photo-edit-overlay');
+    if (photoBtn) photoBtn.style.display = 'none';
+    if (photoActions) photoActions.classList.add('visible');
+    if (photoOverlay) photoOverlay.classList.add('visible');
+}
+
+function restoreSignatureDraft() {
+    const draft = getDokumenDraft();
+    if (!draft.signatureDataUrl) return;
+
+    const signatureInput = document.getElementById('signatureInputDokumen');
+    const placeholder = document.getElementById('signatureBoxDokumen')?.querySelector('.signature-placeholder');
+    const canvas = document.getElementById('signatureCanvasDokumen');
+
+    // Restore the input value
+    if (signatureInput) signatureInput.value = draft.signatureDataUrl;
+    if (placeholder) placeholder.style.display = 'none';
+
+    // Redraw the signature on the canvas
+    if (canvas && draft.signatureDataUrl) {
+        // Ensure canvas is properly sized before drawing
+        if (window.dokumenSignatureResize) {
+            window.dokumenSignatureResize();
+        }
+        
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = function() {
+            // Draw the restored signature on the properly sized canvas
+            ctx.drawImage(img, 0, 0);
+        };
+        img.onerror = function() {
+            console.error('Failed to load signature image from draft');
+        };
+        img.src = draft.signatureDataUrl;
+    }
+}
 
 function handlePhotoBoxClick() {
     if (originalImageSrc) {
@@ -561,10 +830,16 @@ function applyCrop() {
         document.getElementById('photo-placeholder').style.display = 'none';
         document.getElementById('photo-badge').style.display = 'none';
         const preview = document.getElementById('photo-preview');
-        preview.src = canvas.toDataURL('image/jpeg');
+        const photoDataUrl = canvas.toDataURL('image/jpeg');
+        preview.src = photoDataUrl;
         preview.style.display = 'block';
         document.getElementById('pas_foto_name').textContent = 'pas_foto.jpg';
         document.getElementById('pas_foto_name').style.color = '#1e293b';
+
+        saveDokumenDraft({
+            photoDataUrl: photoDataUrl,
+            photoName: 'pas_foto.jpg',
+        });
 
         // Show edit overlay and action buttons
         document.getElementById('photo-edit-overlay').classList.add('visible');
@@ -574,12 +849,6 @@ function applyCrop() {
         closeCropper();
     }, 'image/jpeg', 0.92);
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    addFileInput('transkrip_nilai');
-    addFileInput('identitas_pribadi');
-    addFileInput('bukti_kompetensi');
-});
 
 function addFileInput(type) {
     const list = document.getElementById(type + '_list');
@@ -603,11 +872,13 @@ function addFileInput(type) {
     `;
 
     list.appendChild(row);
+    saveFileRowsDraft();
 }
 
 function removeFileInput(id) {
     const row = document.getElementById('row_' + id);
     if (row) row.remove();
+    saveFileRowsDraft();
 }
 
 function onFileSelected(input, id) {
@@ -619,6 +890,164 @@ function onFileSelected(input, id) {
         span.textContent = 'Belum ada file dipilih';
         span.style.color = '#94a3b8';
     }
+    saveFileRowsDraft();
 }
+
+function openSignatureModal() {
+    const modal = document.getElementById('signatureModalDokumen');
+    const errorBox = document.getElementById('signatureErrorDokumen');
+    errorBox.style.display = 'none';
+    modal.classList.add('show');
+
+    window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+            if (typeof window.dokumenSignatureResize === 'function') {
+                window.dokumenSignatureResize();
+            }
+        });
+    });
+}
+
+function closeSignatureModal() {
+    document.getElementById('signatureModalDokumen').classList.remove('show');
+}
+
+const initSignaturePadDokumen = () => {
+    const canvas = document.getElementById('signatureCanvasDokumen');
+    const signatureInput = document.getElementById('signatureInputDokumen');
+    const signatureBox = document.getElementById('signatureBoxDokumen');
+    const errorBox = document.getElementById('signatureErrorDokumen');
+    const placeholder = signatureBox.querySelector('.signature-placeholder');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    const resizeCanvas = () => {
+        const rect = canvas.getBoundingClientRect();
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = rect.width * ratio;
+        canvas.height = rect.height * ratio;
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#1f2937';
+        ctx.clearRect(0, 0, rect.width, rect.height);
+    };
+
+    window.dokumenSignatureResize = resizeCanvas;
+    window.addEventListener('resize', resizeCanvas);
+
+    const getPoint = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        return {
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+        };
+    };
+
+    const startDrawing = (e) => {
+        if (!canvas.width || !canvas.height) {
+            resizeCanvas();
+        }
+        const { x, y } = getPoint(e);
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        placeholder.style.display = 'none';
+        errorBox.style.display = 'none';
+    };
+
+    const draw = (e) => {
+        if (!drawing) return;
+        const { x, y } = getPoint(e);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    };
+
+    const stopDrawing = () => {
+        if (drawing) {
+            const data = canvas.toDataURL('image/png');
+            signatureInput.value = data;
+            saveDokumenDraft({ signatureDataUrl: data });
+        }
+        drawing = false;
+    };
+
+    canvas.addEventListener('pointerdown', startDrawing);
+    canvas.addEventListener('pointermove', draw);
+    canvas.addEventListener('pointerup', stopDrawing);
+    canvas.addEventListener('pointerleave', stopDrawing);
+};
+
+function clearSignatureDokumen() {
+    const canvas = document.getElementById('signatureCanvasDokumen');
+    const signatureInput = document.getElementById('signatureInputDokumen');
+    const placeholder = document.getElementById('signatureBoxDokumen').querySelector('.signature-placeholder');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    signatureInput.value = '';
+    placeholder.style.display = 'block';
+    saveDokumenDraft({ signatureDataUrl: '' });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const openButton = document.getElementById('openSignatureDokumenBtn');
+    const form = document.getElementById('dokumenForm');
+    const modal = document.getElementById('signatureModalDokumen');
+    const canvas = document.getElementById('signatureCanvasDokumen');
+
+    restoreFileRowsDraft();
+    restorePhotoDraft();
+    initSignaturePadDokumen();
+    restoreSignatureDraft();
+
+    if (!document.getElementById('transkrip_nilai_list')?.children.length) {
+        addFileInput('transkrip_nilai');
+    }
+    if (!document.getElementById('identitas_pribadi_list')?.children.length) {
+        addFileInput('identitas_pribadi');
+    }
+    if (!document.getElementById('bukti_kompetensi_list')?.children.length) {
+        addFileInput('bukti_kompetensi');
+    }
+
+    if (openButton) {
+        openButton.addEventListener('click', function(event) {
+            event.preventDefault();
+            openSignatureModal();
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            const signatureInput = document.getElementById('signatureInputDokumen');
+            const signatureError = document.getElementById('signatureErrorDokumen');
+            if (!signatureInput.value) {
+                event.preventDefault();
+                signatureError.style.display = 'block';
+                openSignatureModal();
+                canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            // On successful submit attempt, clear saved draft.
+            clearDokumenDraft();
+        });
+    }
+
+    if (modal) {
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeSignatureModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeSignatureModal();
+        }
+    });
+});
 </script>
 @endsection

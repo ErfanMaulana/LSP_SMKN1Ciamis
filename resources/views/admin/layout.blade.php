@@ -1017,7 +1017,7 @@
                         </div>
                         <div class="menu-section-items">
                             @if(Auth::guard('admin')->user()->hasPermission('verifikasi-asesi.view'))
-                                <a href="{{ route('admin.asesi.verifikasi') }}"
+                                  <a href="{{ route('admin.asesi.verifikasi', ['status' => 'pending']) }}"
                                     class="menu-item {{ request()->routeIs('admin.asesi.verifikasi*') ? 'active' : '' }}">
                                     <i class="bi bi-clipboard-check"></i>
                                     <span>permohonan sertifkasi</span>
@@ -1026,30 +1026,6 @@
                                         <span
                                             style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingCount }}</span>
                                     @endif
-                                </a>
-                            @endif
-
-                            @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view'))
-                                <a href="{{ route('admin.asesmen-mandiri.index') }}"
-                                    class="menu-item {{ request()->routeIs('admin.asesmen-mandiri.*') ? 'active' : '' }}">
-                                    <i class="bi bi-journal-check"></i>
-                                    <span>Asesmen Mandiri</span>
-                                </a>
-                            @endif
-
-                            @if(Auth::guard('admin')->user()->hasPermission('nilai-asesor.view'))
-                                <a href="{{ route('admin.nilai-asesor.index') }}"
-                                    class="menu-item {{ request()->routeIs('admin.nilai-asesor.*') ? 'active' : '' }}">
-                                    <i class="bi bi-clipboard-data"></i>
-                                    <span>Nilai</span>
-                                </a>
-                            @endif
-
-                            @if(Auth::guard('admin')->user()->hasPermission('banding-asesmen.view'))
-                                <a href="{{ route('admin.banding-asesmen.index') }}"
-                                    class="menu-item {{ request()->routeIs('admin.banding-asesmen.*') ? 'active' : '' }}">
-                                    <i class="bi bi-clipboard2-check"></i>
-                                    <span>Banding Asesmen</span>
                                 </a>
                             @endif
 
@@ -1067,11 +1043,13 @@
                                     <i class="bi bi-calendar-event"></i>
                                     <span>Jadwal Ujikom</span>
                                 </a>
+                            @endif
 
-                                <a href="{{ route('admin.umpan-balik-hasil.index') }}"
-                                    class="menu-item {{ request()->routeIs('admin.umpan-balik-hasil.*') ? 'active' : '' }}">
-                                    <i class="bi bi-clipboard-data"></i>
-                                    <span>Hasil Umpan Balik Asesi</span>
+                            @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view'))
+                                <a href="{{ route('admin.asesmen-mandiri.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.asesmen-mandiri.*') ? 'active' : '' }}">
+                                    <i class="bi bi-journal-check"></i>
+                                    <span>Asesmen Mandiri</span>
                                 </a>
                             @endif
 
@@ -1096,6 +1074,30 @@
                                     class="menu-item {{ request()->routeIs('admin.rekaman-asesmen-kompetensi.*') ? 'active' : '' }}">
                                     <i class="bi bi-record-circle"></i>
                                     <span>Rekaman Asesmen Kompetensi</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('nilai-asesor.view'))
+                                <a href="{{ route('admin.nilai-asesor.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.nilai-asesor.*') ? 'active' : '' }}">
+                                    <i class="bi bi-clipboard-data"></i>
+                                    <span>Nilai</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('banding-asesmen.view'))
+                                <a href="{{ route('admin.banding-asesmen.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.banding-asesmen.*') ? 'active' : '' }}">
+                                    <i class="bi bi-clipboard2-check"></i>
+                                    <span>Banding Asesmen</span>
+                                </a>
+                            @endif
+
+                            @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view'))
+                                <a href="{{ route('admin.umpan-balik-hasil.index') }}"
+                                    class="menu-item {{ request()->routeIs('admin.umpan-balik-hasil.*') ? 'active' : '' }}">
+                                    <i class="bi bi-clipboard-data"></i>
+                                    <span>Hasil Umpan Balik Asesi</span>
                                 </a>
                             @endif
                         </div>

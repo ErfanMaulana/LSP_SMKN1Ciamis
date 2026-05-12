@@ -672,6 +672,12 @@
                         <i class="bi bi-x-circle" style="margin-right:5px;"></i>
                         <strong>Pendaftaran Ditolak</strong><br>
                         Silakan perbaiki dan kirim ulang formulir.
+                        @if($asesi->catatan_admin)
+                            <div style="margin-top:8px;padding:8px 10px;background:rgba(255,255,255,.45);border-radius:8px;color:inherit;">
+                                <div style="font-weight:600;">Catatan admin:</div>
+                                <div style="margin-top:4px;white-space:pre-line;">{{ $asesi->catatan_admin }}</div>
+                            </div>
+                        @endif
                     @elseif($isBanned)
                         <i class="bi bi-slash-circle" style="margin-right:5px;"></i>
                         <strong>Ditolak Permanen</strong><br>
@@ -746,13 +752,6 @@
                     </a>
                     @endif
 
-                    <!-- AKUN Section -->
-                    <div class="menu-section-title">AKUN</div>
-
-                    <a href="{{ route('asesi.profil.edit') }}" class="menu-item {{ request()->routeIs('asesi.profil.*') && request('tab') !== 'password' ? 'active' : '' }}">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Profil Saya</span>
-                    </a>
                 @endif
             </nav>
         </aside>
@@ -882,10 +881,6 @@
                     </a>
                     @endif
 
-                    <a href="{{ route('asesi.profil.edit') }}" class="bottom-nav-item {{ request()->routeIs('asesi.profil.*') ? 'active' : '' }}">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Profil</span>
-                    </a>
                 @else
                     <a href="{{ route('asesi.pendaftaran.formulir') }}" class="bottom-nav-item {{ request()->routeIs('asesi.pendaftaran.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-plus"></i>

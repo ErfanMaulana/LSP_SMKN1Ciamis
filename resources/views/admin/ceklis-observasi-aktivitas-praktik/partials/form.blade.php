@@ -268,6 +268,9 @@
         position: relative;
         overflow: hidden;
         transition: border-color 0.2s;
+        max-width: 260px;
+        margin: 0 auto;
+        aspect-ratio: 1 / 1;
     }
 
     .signature-canvas-wrapper.active {
@@ -282,7 +285,7 @@
 
     .signature-canvas {
         width: 100%;
-        height: 240px;
+        height: 100%;
         cursor: crosshair;
         display: block;
     }
@@ -354,6 +357,16 @@
         color: #dc2626;
     }
 
+    .penilaian-lanjut-cell {
+        padding: 8px 10px;
+    }
+
+    .penilaian-lanjut-textarea {
+        border: none;
+        background: transparent;
+        resize: vertical;
+    }
+
     @media (max-width: 768px) {
         .grid-2 {
             grid-template-columns: 1fr;
@@ -368,8 +381,8 @@
             justify-content: center;
         }
 
-        .signature-canvas {
-            height: 180px;
+        .signature-canvas-wrapper {
+            max-width: 180px;
         }
     }
 </style>
@@ -572,6 +585,11 @@
 </div>
 
 <script>
+    const autosizeTextarea = (textarea) => {
+        textarea.style.height = 'auto';
+        textarea.style.height = `${textarea.scrollHeight}px`;
+    };
+
 document.addEventListener('DOMContentLoaded', function () {
     const skemaSelect = document.getElementById('skemaSelect');
     const nomorSkemaDisplay = document.getElementById('nomorSkemaDisplay');
@@ -741,11 +759,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     tdPencapaian.appendChild(createPencapaianCell(key, prefilled.pencapaian || ''));
 
                     const tdLanjut = document.createElement('td');
+                    tdLanjut.className = 'penilaian-lanjut-cell';
                     const textarea = document.createElement('textarea');
                     textarea.name = `detail[${key}][penilaian_lanjut]`;
+                    textarea.className = 'penilaian-lanjut-textarea';
                     textarea.placeholder = 'Penilaian lanjut (opsional)';
-                    textarea.style.minHeight = '68px';
+                    textarea.rows = 1;
                     textarea.value = prefilled.penilaian_lanjut || '';
+                    textarea.addEventListener('input', function () {
+                        autosizeTextarea(this);
+                    });
                     tdLanjut.appendChild(textarea);
 
                     tdLanjut.appendChild(createHiddenInput(`detail[${key}][unit_id]`, String(unit.id)));
@@ -765,6 +788,11 @@ document.addEventListener('DOMContentLoaded', function () {
             block.appendChild(tableWrap);
             checklistContainer.appendChild(block);
         });
+
+        // Initialize autosize for all penilaian lanjut textareas
+        document.querySelectorAll('.penilaian-lanjut-textarea').forEach((textarea) => {
+            autosizeTextarea(textarea);
+        });
     };
 
     const loadParticipantsAndStructure = async () => {
@@ -783,6 +811,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 fetch(`${structureUrl}?skema_id=${encodeURIComponent(skemaId)}`),
             ]);
 
+            if (!participantsResponse.ok || !structureResponse.ok) {
+                throw new Error(`HTTP ${participantsResponse.status} / ${structureResponse.status}`);
+            }
+
             const participants = await participantsResponse.json();
             const structure = await structureResponse.json();
 
@@ -792,7 +824,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
             firstHydration = false;
         } catch (error) {
-            checklistContainer.innerHTML = '<div style="padding:12px;font-size:13px;color:#b91c1c;">Gagal memuat data skema.</div>';
+            console.error('Ceklis load error:', error);
+            checklistContainer.innerHTML = '<div style="padding:12px;font-size:13px;color:#b91c1c;">Gagal memuat data skema. Pastikan skema sudah dikonfigurasi dengan benar.</div>';
             resetSelect(asesorSelect, '-- Gagal memuat asesor --');
             resetSelect(asesiSelect, '-- Gagal memuat asesi --');
             firstHydration = false;
