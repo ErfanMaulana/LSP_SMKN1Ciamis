@@ -8,7 +8,6 @@ use App\Http\Controllers\Asesi\ProfileController;
 use App\Http\Controllers\Asesi\JadwalController;
 use App\Http\Controllers\Asesi\RegisterController;
 use App\Http\Controllers\Asesi\UmpanBalikController;
-use App\Http\Controllers\Asesi\CeklisObservasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,10 +63,9 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::get('/persetujuan-asesmen/{skemaId}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesiShow'])->name('persetujuan.front.asesi.show');
             Route::post('/persetujuan-asesmen/{id}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesiSign'])->name('persetujuan.front.asesi.sign');
 
-            // Ceklis Observasi (FR.IA.01) - asesi sign
-            Route::get('/ceklis-observasi', [CeklisObservasiController::class, 'index'])->name('ceklis-observasi.index');
-            Route::get('/ceklis-observasi/{id}/sign', [CeklisObservasiController::class, 'show'])->name('ceklis-observasi.show');
-            Route::post('/ceklis-observasi/{id}/sign', [CeklisObservasiController::class, 'sign'])->name('ceklis-observasi.sign');
+            // Ceklis Observasi - Asesi viewing and signing
+            Route::get('/ceklis-observasi/{id}/view', [\App\Http\Controllers\Asesi\CeklisObservasiController::class, 'show'])->name('ceklis-observasi.view');
+            Route::post('/ceklis-observasi/{id}/sign', [\App\Http\Controllers\Asesi\CeklisObservasiController::class, 'sign'])->name('ceklis-observasi.sign');
         });
     });
 });

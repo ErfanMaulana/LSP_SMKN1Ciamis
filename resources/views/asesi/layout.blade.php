@@ -726,11 +726,6 @@
                         <span>Persetujuan Asesmen</span>
                     </a>
 
-                    <a href="{{ route('asesi.ceklis-observasi.index') }}" class="menu-item {{ request()->routeIs('asesi.ceklis-observasi.*') ? 'active' : '' }}">
-                        <i class="bi bi-check2-square"></i>
-                        <span>Ceklis Observasi</span>
-                    </a>
-
                     @if($hasCompletedUjikom && Route::has('asesi.hasil-ujikom.index'))
                     <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-text"></i>
@@ -860,11 +855,6 @@
                     <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-check"></i>
                         <span>Persetujuan</span>
-                    </a>
-
-                    <a href="{{ route('asesi.ceklis-observasi.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.ceklis-observasi.*') ? 'active' : '' }}">
-                        <i class="bi bi-check2-square"></i>
-                        <span>Ceklis</span>
                     </a>
 
                     @if($hasCompletedUjikom && Route::has('asesi.banding.index'))

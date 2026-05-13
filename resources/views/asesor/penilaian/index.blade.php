@@ -155,73 +155,6 @@
         color: #94a3b8;
     }
 
-    .action-cell {
-        width: 96px;
-        text-align: center;
-        padding: 12px 14px;
-    }
-
-    .action-wrap { display: flex; align-items: center; justify-content: center; }
-
-    .action-menu { position: relative; display: inline-block; }
-
-    .action-btn {
-        width: 32px;
-        height: 32px;
-        border: none;
-        background: transparent;
-        border-radius: 6px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all .2s;
-        color: #475569;
-    }
-
-    .action-btn:hover {
-        background: #f1f5f9;
-        color: #0f172a;
-    }
-
-    .action-dropdown {
-        display: none;
-        position: fixed;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 24px rgba(0,0,0,.15);
-        min-width: 160px;
-        z-index: 9990;
-        overflow: hidden;
-    }
-
-    .action-dropdown.show {
-        display: block;
-    }
-
-    .action-dropdown a,
-    .action-dropdown button {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-        padding: 10px 16px;
-        border: none;
-        background: none;
-        text-align: left;
-        font-size: 14px;
-        color: #475569;
-        cursor: pointer;
-        transition: all .2s;
-        text-decoration: none;
-    }
-
-    .action-dropdown a:hover,
-    .action-dropdown button:hover {
-        background: #f8fafc;
-        color: #0F172A;
-    }
-
     @media (max-width: 768px) {
         .panel-head {
             padding: 14px;
@@ -280,7 +213,7 @@
                             <th>Email</th>
                             <th>Skema</th>
                             <th style="width:120px;">Status</th>
-                            <th class="action-cell">Aksi</th>
+                            <th style="width:150px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -292,23 +225,14 @@
                                 <td>{{ $row->asesi->email ?? '-' }}</td>
                                 <td>{{ $row->skema->nama_skema ?? '-' }}</td>
                                 <td><span class="badge-status pending"><i class="bi bi-hourglass-split"></i> Belum Dinilai</span></td>
-                                <td class="action-cell">
-                                    <div class="action-wrap">
-                                        <div class="action-menu">
-                                            @if(!empty($row->asesi_nik))
-                                                <button type="button" class="action-btn" onclick="toggleMenu(this)" aria-label="Aksi data">
-                                                    <i class="bi bi-three-dots-vertical"></i>
-                                                </button>
-                                                <div class="action-dropdown">
-                                                    <a href="{{ route('asesor.entry-penilaian.form', ['asesiNik' => $row->asesi_nik]) }}">
-                                                        <i class="bi bi-pencil-square"></i> Input Nilai
-                                                    </a>
-                                                </div>
-                                            @else
-                                                <span style="color:#94a3b8;font-size:12px;">-</span>
-                                            @endif
-                                        </div>
-                                    </div>
+                                <td>
+                                    @if(!empty($row->asesi_nik))
+                                        <a href="{{ route('asesor.entry-penilaian.form', ['asesiNik' => $row->asesi_nik]) }}" class="btn-link">
+                                            <i class="bi bi-pencil-square"></i> Input Nilai
+                                        </a>
+                                    @else
+                                        <span style="color:#94a3b8;">-</span>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -339,7 +263,7 @@
                             <th style="width:100px;">Rata-rata</th>
                             <th style="width:110px;">Kompeten</th>
                             <th style="width:150px;">Terakhir Dinilai</th>
-                            <th class="action-cell">Aksi</th>
+                            <th style="width:150px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -366,23 +290,14 @@
                                         -
                                     @endif
                                 </td>
-                                <td class="action-cell">
-                                    <div class="action-wrap">
-                                        <div class="action-menu">
-                                            @if(!empty($row->asesi_nik))
-                                                <button type="button" class="action-btn" onclick="toggleMenu(this)" aria-label="Aksi data">
-                                                    <i class="bi bi-three-dots-vertical"></i>
-                                                </button>
-                                                <div class="action-dropdown">
-                                                    <a href="{{ route('asesor.entry-penilaian.form', ['asesiNik' => $row->asesi_nik]) }}">
-                                                        <i class="bi bi-pencil-square"></i> Edit
-                                                    </a>
-                                                </div>
-                                            @else
-                                                <span style="color:#94a3b8;font-size:12px;">-</span>
-                                            @endif
-                                        </div>
-                                    </div>
+                                <td>
+                                    @if(!empty($row->asesi_nik))
+                                        <a href="{{ route('asesor.entry-penilaian.form', ['asesiNik' => $row->asesi_nik]) }}" class="btn-link">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                    @else
+                                        <span style="color:#94a3b8;">-</span>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -410,42 +325,5 @@
         document.getElementById(tabName).classList.add('active');
         event.target.closest('.tab').classList.add('active');
     }
-
-    function toggleMenu(button) {
-        const menu = button.nextElementSibling;
-        if (!menu) return;
-
-        document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
-            if (dropdown !== menu) {
-                dropdown.classList.remove('show');
-            }
-        });
-
-        menu.classList.toggle('show');
-
-        if (menu.classList.contains('show')) {
-            const buttonRect = button.getBoundingClientRect();
-            const menuHeight = menu.offsetHeight;
-            const viewportHeight = window.innerHeight;
-
-            let top = buttonRect.bottom + 8;
-            if (top + menuHeight > viewportHeight) {
-                top = buttonRect.top - menuHeight - 8;
-            }
-
-            menu.style.top = top + 'px';
-            menu.style.left = (buttonRect.left - menu.offsetWidth + button.offsetWidth) + 'px';
-        }
-
-        event.stopPropagation();
-    }
-
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.action-menu')) {
-            document.querySelectorAll('.action-dropdown.show').forEach(dropdown => {
-                dropdown.classList.remove('show');
-            });
-        }
-    });
 </script>
 @endsection
