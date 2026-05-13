@@ -1061,17 +1061,8 @@
         @foreach($data as $row)
         @php
             $asesi = $row->asesi;
-            $statusClass = match($row->status) {
-                'selesai'            => 'badge-selesai',
-                'sedang_mengerjakan' => 'badge-sedang',
-                default              => 'badge-belum',
-            };
-            $statusLabel = match($row->status) {
-                'selesai'            => 'Selesai',
-                'sedang_mengerjakan' => 'Sedang Dikerjakan',
-                default              => 'Belum Mulai',
-            };
-            $canProceed = $row->status !== 'belum_mulai';
+            // keep legacy quick-check for action availability
+            $canProceed = ($row->status ?? '') !== 'belum_mulai';
         @endphp
         <div class="asesi-card">
             <!-- Card Header -->
@@ -1080,7 +1071,7 @@
                     <div class="card-name">{{ $asesi?->nama ?? '—' }}</div>
                     <div class="card-email">{{ $row->asesi_nik }}</div>
                 </div>
-                <span class="card-status-badge badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                @include('components.asesi-status', ['row' => $row])
             </div>
 
             <!-- Card Body -->

@@ -552,7 +552,7 @@
     <div class="text">
         <h3>{{ $asesi->nama }} ({{ $asesi->NIK }})</h3>
         <p>Jurusan: {{ $asesi->jurusan?->nama_jurusan ?? '-' }} • Periode: {{ $periode }}</p>
-        <p>Status: {{ $statusLabel }} • Rekomendasi: {{ $rekomLabel }}</p>
+        <p>Status: @include('components.asesi-status', ['pivot' => $pivot]) • Rekomendasi: {{ $rekomLabel }}</p>
     </div>
 </div>
 

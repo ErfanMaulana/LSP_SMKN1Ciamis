@@ -488,16 +488,7 @@
     <div class="info-row">
         <div class="info-label">Status Asesmen</div>
         <div class="info-value">
-            @php
-                $statusText = [
-                    'selesai' => 'Selesai',
-                    'sedang_mengerjakan' => 'Sedang Dikerjakan',
-                    'belum_mulai' => 'Belum Mulai'
-                ];
-                $statusClass = 'status-' . str_replace('_', '-', $pivot->status);
-                $displayStatus = $statusText[$pivot->status] ?? $pivot->status;
-            @endphp
-            <span class="status-badge {{ $statusClass }}">{{ $displayStatus }}</span>
+            @include('components.asesi-status', ['pivot' => $pivot])
         </div>
     </div>
 
