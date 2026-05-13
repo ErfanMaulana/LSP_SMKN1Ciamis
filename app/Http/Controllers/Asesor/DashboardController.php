@@ -367,17 +367,18 @@ class DashboardController extends Controller
         // 6: Selesai
         $data = $data->sort(function ($a, $b) {
             $rank = function ($row) {
+                // 99: Tidak Lanjut / negatif (place at bottom)
                 // 0: Menunggu Asesmen Mandiri
                 // 1: Menunggu Persetujuan Asesmen
                 // 2: Menunggu Rekaman Asesmen
                 // 3: Menunggu Ceklis Observasi
                 // 4: Menunggu Entry Penilaian
                 // 5: Selesai
-                // 99: Tidak Lanjut / negatif (place at bottom)
 
+                // If rekomendasi explicitly says 'tidak_lanjut', always push to bottom
+                if (($row->rekomendasi ?? '') === 'tidak_lanjut') return 99;
                 if (!($row->has_asesmen_mandiri ?? false)) return 0;
                 if (empty($row->rekomendasi)) return 1;
-                if (($row->rekomendasi ?? '') === 'tidak_lanjut') return 99;
                 if (!($row->has_rekaman ?? false)) return 2;
                 if (!($row->has_ceklis_observasi ?? false)) return 3;
                 if (!($row->has_penilaian ?? false)) return 4;
