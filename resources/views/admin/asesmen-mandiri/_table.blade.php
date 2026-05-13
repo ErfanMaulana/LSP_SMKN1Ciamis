@@ -1,14 +1,7 @@
 <table>
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>Asesi</th>
-            <th>Skema</th>
-            <th>Status</th>
-            <th>Rekomendasi</th>
-            <th>Terakhir Update</th>
-            <th>Aksi</th>
-        </tr>
+                <td>
+                    @include('components.asesi-status', ['row' => $item])
+                </td>
     </thead>
     <tbody>
         @forelse($data as $i => $item)
