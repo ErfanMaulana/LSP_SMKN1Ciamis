@@ -946,37 +946,7 @@
                 @foreach($data as $i => $row)
                 @php
                     $asesi = $row->asesi;
-                    // Build a more specific status label based on available flags
-                    $statusLabel = '—';
-                    $statusClass = 'badge-belum';
-
-                    if (!($row->has_asesmen_mandiri ?? false)) {
-                        $statusLabel = 'Menunggu Asesmen Mandiri';
-                        $statusClass = 'badge-belum';
-                    } elseif (empty($row->rekomendasi)) {
-                        $statusLabel = 'Menunggu Persetujuan Asesmen';
-                        $statusClass = 'badge-sedang';
-                    } elseif ($row->rekomendasi === 'tidak_lanjut') {
-                        $statusLabel = 'Persetujuan: Tidak Lanjut';
-                        $statusClass = 'badge-belum';
-                    } else {
-                        // rekomendasi = 'lanjut'
-                        if (!($row->has_rekaman ?? false)) {
-                            $statusLabel = 'Menunggu Rekaman Asesmen';
-                            $statusClass = 'badge-sedang';
-                        } elseif (!($row->has_ceklis_observasi ?? false)) {
-                            $statusLabel = 'Menunggu Ceklis Observasi';
-                            $statusClass = 'badge-sedang';
-                        } elseif (!($row->has_penilaian ?? false)) {
-                            $statusLabel = 'Menunggu Entry Penilaian';
-                            $statusClass = 'badge-sedang';
-                        } else {
-                            $statusLabel = 'Selesai';
-                            $statusClass = 'badge-selesai';
-                        }
-                    }
-
-                    // allow quick legacy filter behavior
+                    // Keep legacy quick-check for action availability
                     $canProceed = ($row->status ?? '') !== 'belum_mulai';
                 @endphp
                 <tr>
@@ -989,7 +959,7 @@
                         <span class="period-sep">•</span>
                         <span class="skema-chip">{{ $row->skema?->nama_skema ?? '—' }}</span>
                     </td>
-                    <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
+                    <td>@include('components.asesi-status', ['row' => $row])</td>
                     <td>
                         @if($row->rekomendasi === 'lanjut')
                             <span class="badge badge-rekomendasi-lanjut"><i class="bi bi-check-circle-fill"></i> Dapat Lanjut</span>

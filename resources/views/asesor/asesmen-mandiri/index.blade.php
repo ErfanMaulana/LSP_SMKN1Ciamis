@@ -282,22 +282,13 @@
                 <tbody>
                     @foreach($data as $row)
                         @php
-                            $statusClass = match($row->status) {
-                                'selesai' => 'badge-selesai',
-                                'sedang_mengerjakan' => 'badge-sedang',
-                                default => 'badge-belum',
-                            };
-                            $statusLabel = match($row->status) {
-                                'selesai' => 'Selesai',
-                                'sedang_mengerjakan' => 'Sedang Dikerjakan',
-                                default => 'Belum Mulai',
-                            };
+                            // Use centralized status logic via component when available
                         @endphp
                         <tr>
                             <td>{{ $row->asesi?->nama ?? '-' }}</td>
                             <td>{{ $row->asesi_nik }}</td>
                             <td>{{ $row->skema?->nama_skema ?? '-' }}</td>
-                            <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
+                            <td>@include('components.asesi-status', ['row' => $row])</td>
                             <td>{{ $row->jawaban_count ? $row->jawaban_count . ' elemen' : 'Belum ada' }}</td>
                             <td>
                                 @if($row->rekomendasi === 'lanjut')
