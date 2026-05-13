@@ -135,6 +135,10 @@
         position: relative;
         overflow: hidden;
         transition: border-color 0.2s;
+        width: min(100%, 320px);
+        aspect-ratio: 1 / 1;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .signature-canvas-wrapper.active {
@@ -149,7 +153,7 @@
 
     .signature-canvas {
         width: 100%;
-        height: 240px;
+        height: 100%;
         cursor: crosshair;
         display: block;
     }
@@ -224,7 +228,7 @@
     @media (max-width:768px) {
         .grid-2 { grid-template-columns:1fr; }
         .signature-canvas-wrapper {
-            max-width: 180px;
+            max-width: 100%;
         }
     }
 </style>
