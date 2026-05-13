@@ -716,14 +716,14 @@
                         <span>Asesmen Mandiri</span>
                     </a>
 
-                    <a href="{{ route('asesi.jadwal.index') }}" class="menu-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
-                        <i class="bi bi-calendar-event-fill"></i>
-                        <span>Jadwal Ujikom</span>
-                    </a>
-
                     <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="menu-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-check"></i>
                         <span>Persetujuan Asesmen</span>
+                    </a>
+
+                    <a href="{{ route('asesi.jadwal.index') }}" class="menu-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-event-fill"></i>
+                        <span>Jadwal Ujikom</span>
                     </a>
 
                     @if($hasCompletedUjikom && Route::has('asesi.hasil-ujikom.index'))

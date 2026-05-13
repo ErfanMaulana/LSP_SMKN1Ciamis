@@ -357,6 +357,44 @@ class DashboardController extends Controller
             return $row;
         });
 
+        // Sort data according to assessment workflow priority:
+        // 0: Menunggu Asesmen Mandiri (no asesi mandiri answers)
+        // 1: Menunggu Persetujuan Asesmen (has mandiri answers but no rekomendasi)
+        // 2: Persetujuan: Tidak Lanjut (rekomendasi == 'tidak_lanjut')
+        // 3: Menunggu Rekaman Asesmen
+        // 4: Menunggu Ceklis Observasi
+        // 5: Menunggu Entry Penilaian
+        // 6: Selesai
+        $data = $data->sort(function ($a, $b) {
+            $rank = function ($row) {
+                // 99: Tidak Lanjut / negatif (place at bottom)
+                // 0: Menunggu Asesmen Mandiri
+                // 1: Menunggu Persetujuan Asesmen
+                // 2: Menunggu Rekaman Asesmen
+                // 3: Menunggu Ceklis Observasi
+                // 4: Menunggu Entry Penilaian
+                // 5: Selesai
+
+                // If rekomendasi explicitly says 'tidak_lanjut', always push to bottom
+                if (($row->rekomendasi ?? '') === 'tidak_lanjut') return 99;
+                if (!($row->has_asesmen_mandiri ?? false)) return 0;
+                if (empty($row->rekomendasi)) return 1;
+                if (!($row->has_rekaman ?? false)) return 2;
+                if (!($row->has_ceklis_observasi ?? false)) return 3;
+                if (!($row->has_penilaian ?? false)) return 4;
+                return 5;
+            };
+
+            $ra = $rank($a);
+            $rb = $rank($b);
+            if ($ra !== $rb) return $ra <=> $rb;
+
+            // tie-breaker: most recently updated first
+            $ta = isset($a->updated_at) ? strtotime($a->updated_at) : 0;
+            $tb = isset($b->updated_at) ? strtotime($b->updated_at) : 0;
+            return $tb <=> $ta;
+        })->values();
+
         $skema = count($skemaIds) === 1 ? Skema::find($skemaIds[0]) : null;
         $summary = [
             'total'   => $data->count(),

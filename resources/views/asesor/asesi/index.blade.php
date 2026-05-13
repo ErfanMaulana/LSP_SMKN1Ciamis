@@ -946,17 +946,8 @@
                 @foreach($data as $i => $row)
                 @php
                     $asesi = $row->asesi;
-                    $statusClass = match($row->status) {
-                        'selesai'            => 'badge-selesai',
-                        'sedang_mengerjakan' => 'badge-sedang',
-                        default              => 'badge-belum',
-                    };
-                    $statusLabel = match($row->status) {
-                        'selesai'            => 'Selesai',
-                        'sedang_mengerjakan' => 'Sedang Dikerjakan',
-                        default              => 'Belum Mulai',
-                    };
-                    $canProceed = $row->status !== 'belum_mulai';
+                    // Keep legacy quick-check for action availability
+                    $canProceed = ($row->status ?? '') !== 'belum_mulai';
                 @endphp
                 <tr>
                     <td>
@@ -968,7 +959,7 @@
                         <span class="period-sep">•</span>
                         <span class="skema-chip">{{ $row->skema?->nama_skema ?? '—' }}</span>
                     </td>
-                    <td><span class="badge {{ $statusClass }}">{{ $statusLabel }}</span></td>
+                    <td>@include('components.asesi-status', ['row' => $row])</td>
                     <td>
                         @if($row->rekomendasi === 'lanjut')
                             <span class="badge badge-rekomendasi-lanjut"><i class="bi bi-check-circle-fill"></i> Dapat Lanjut</span>
@@ -1070,17 +1061,8 @@
         @foreach($data as $row)
         @php
             $asesi = $row->asesi;
-            $statusClass = match($row->status) {
-                'selesai'            => 'badge-selesai',
-                'sedang_mengerjakan' => 'badge-sedang',
-                default              => 'badge-belum',
-            };
-            $statusLabel = match($row->status) {
-                'selesai'            => 'Selesai',
-                'sedang_mengerjakan' => 'Sedang Dikerjakan',
-                default              => 'Belum Mulai',
-            };
-            $canProceed = $row->status !== 'belum_mulai';
+            // keep legacy quick-check for action availability
+            $canProceed = ($row->status ?? '') !== 'belum_mulai';
         @endphp
         <div class="asesi-card">
             <!-- Card Header -->
@@ -1089,7 +1071,7 @@
                     <div class="card-name">{{ $asesi?->nama ?? '—' }}</div>
                     <div class="card-email">{{ $row->asesi_nik }}</div>
                 </div>
-                <span class="card-status-badge badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                @include('components.asesi-status', ['row' => $row])
             </div>
 
             <!-- Card Body -->

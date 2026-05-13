@@ -42,6 +42,41 @@
 @endphp
 
 @php
+    $asesorAsesiList = collect();
+    if (isset($asesor) && $asesor) {
+        try {
+            $skemaIds = $asesor->skemas ? $asesor->skemas->pluck('id')->map(fn($i) => (int)$i)->values()->all() : [];
+
+            // Asesi yang secara langsung ditugaskan ke asesor
+            $direct = \App\Models\Asesi::query()
+                ->where('ID_asesor', $asesor->ID_asesor)
+                ->get(['NIK', 'nama']);
+
+            // Asesi yang terdaftar pada skema yang ditugaskan ke asesor (pivot asesi_skema)
+            $bySkema = collect();
+            if (count($skemaIds)) {
+                $bySkema = \App\Models\Asesi::query()
+                    ->whereHas('skemas', function ($q) use ($skemaIds) {
+                        $q->whereIn('skemas.id', $skemaIds);
+                    })
+                    ->get(['NIK', 'nama']);
+            }
+
+            // Gabungkan, unik berdasarkan NIK
+            $combined = $direct->concat($bySkema)
+                ->unique(fn($a) => (string)$a->NIK)
+                ->sortBy('nama')
+                ->values()
+                ->map(fn($a) => ['id' => (string)$a->NIK, 'nama' => $a->nama]);
+
+            $asesorAsesiList = $combined;
+        } catch (\Throwable $e) {
+            $asesorAsesiList = collect();
+        }
+    }
+@endphp
+
+@php
     $selectedAsesiInfo = null;
     if ($record?->asesi) {
         $selectedAsesiInfo = [
@@ -147,11 +182,23 @@
 
 <div class="card-form">
     <div class="grid-2">
+
         <div class="field">
             <label>Skema Sertifikasi</label>
             <input id="kategoriSkemaInput" type="text" name="kategori_skema" value="{{ $value('kategori_skema', '') }}" readonly>
             <div class="section-note">Diisi otomatis dari skema yang dipilih.</div>
             @error('kategori_skema')<div class="error-text">{{ $message }}</div>@enderror
+        </div>
+
+        <div class="field">
+            <label>Nama Asesi <span class="req">*</span></label>
+            <select id="asesiSelect" name="asesi_nik">
+                <option value="">-- Pilih Asesi --</option>
+                @foreach($asesorAsesiList as $a)
+                    <option value="{{ $a['id'] }}" {{ $selectedAsesiNik === (string)$a['id'] ? 'selected' : '' }}>{{ $a['nama'] }} ({{ $a['id'] }})</option>
+                @endforeach
+            </select>
+            @error('asesi_nik')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field">
@@ -188,13 +235,7 @@
             <input type="text" value="{{ trim(($asesor?->nama ?? '-') . ($asesor?->no_met ? ' (' . $asesor->no_met . ')' : '')) }}" readonly>
         </div>
 
-        <div class="field">
-            <label>Nama Asesi <span class="req">*</span></label>
-            <select id="asesiSelect" name="asesi_nik">
-                <option value="">-- Pilih Asesi --</option>
-            </select>
-            @error('asesi_nik')<div class="error-text">{{ $message }}</div>@enderror
-        </div>
+
 
         <div class="field full">
             <label>Ringkasan Data Asesi</label>
@@ -298,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectedAsesiInfo = @json($selectedAsesiInfo);
     const selectedKategoriSkema = @json($value('kategori_skema', ''));
     let applyInitialSelection = true;
-    let asesiOptions = [];
+    let asesiOptions = @json($asesorAsesiList ?? []);
 
     const resetSelect = (select, placeholder) => {
         select.innerHTML = '';
@@ -393,9 +434,16 @@ document.addEventListener('DOMContentLoaded', function () {
         return '';
     };
 
-    const lockAsesiAndSkema = () => {
+    const lockAsesiOnly = () => {
         asesiSelect.classList.add('locked');
-        skemaSelect.classList.add('locked');
+    };
+
+    const lockDependentFields = () => {
+        if (tukSelect) tukSelect.classList.add('locked');
+        const mulaiInput = document.querySelector('input[name="tanggal_mulai"]');
+        const selesaiInput = document.querySelector('input[name="tanggal_selesai"]');
+        if (mulaiInput) mulaiInput.setAttribute('readonly', 'readonly');
+        if (selesaiInput) selesaiInput.setAttribute('readonly', 'readonly');
     };
 
     const applyAsesiDetail = (data) => {
@@ -410,7 +458,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (normalizedTuk) {
                 tukSelect.value = normalizedTuk;
             }
-            tukSelect.classList.add('locked');
         }
 
         if (data.asesi.jadwal) {
@@ -426,7 +473,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        lockAsesiAndSkema();
+        lockAsesiOnly();
+        lockDependentFields();
     };
 
     const checkboxCell = (name, checked) => {
@@ -549,8 +597,51 @@ document.addEventListener('DOMContentLoaded', function () {
             loadBySkema();
         });
 
-        asesiSelect.addEventListener('change', () => {
+        asesiSelect.addEventListener('change', async () => {
             syncAsesiInfo(asesiSelect.value);
+
+            const asesiNik = asesiSelect.value;
+            if (!asesiNik) {
+                // clear dependent fields
+                renderAsesiInfo(null);
+                if (tukSelect) tukSelect.value = '';
+                const mulaiInput = document.querySelector('input[name="tanggal_mulai"]');
+                const selesaiInput = document.querySelector('input[name="tanggal_selesai"]');
+                if (mulaiInput) mulaiInput.value = '';
+                if (selesaiInput) selesaiInput.value = '';
+                asesiSelect.classList.remove('locked');
+                tukSelect.classList.remove('locked');
+                if (mulaiInput) mulaiInput.removeAttribute('readonly');
+                if (selesaiInput) selesaiInput.removeAttribute('readonly');
+                return;
+            }
+
+            try {
+                const skemaId = skemaSelect.value || '';
+                const url = `${getAsesiDataUrl}?asesi_nik=${encodeURIComponent(asesiNik)}&skema_id=${encodeURIComponent(skemaId)}`;
+                const res = await fetch(url);
+                if (!res.ok) {
+                    console.error('Gagal memuat data asesi');
+                    return;
+                }
+                const detailData = await res.json();
+
+                if (detailData.asesi) {
+                    applyAsesiDetail(detailData);
+
+                    // If skema not chosen yet but asesi has skema_ids, pick first and load units
+                    if (!skemaSelect.value && detailData.asesi.skema_ids && detailData.asesi.skema_ids.length > 0) {
+                        skemaSelect.value = String(detailData.asesi.skema_ids[0]);
+                        syncNomorSkema();
+                        await loadBySkema();
+                    } else if (skemaSelect.value) {
+                        // refresh units for selected skema so units list matches
+                        await loadBySkema();
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching asesi detail:', err);
+            }
         });
 
         syncNomorSkema();
