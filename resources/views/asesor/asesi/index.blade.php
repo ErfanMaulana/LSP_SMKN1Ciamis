@@ -946,17 +946,38 @@
                 @foreach($data as $i => $row)
                 @php
                     $asesi = $row->asesi;
-                    $statusClass = match($row->status) {
-                        'selesai'            => 'badge-selesai',
-                        'sedang_mengerjakan' => 'badge-sedang',
-                        default              => 'badge-belum',
-                    };
-                    $statusLabel = match($row->status) {
-                        'selesai'            => 'Selesai',
-                        'sedang_mengerjakan' => 'Sedang Dikerjakan',
-                        default              => 'Belum Mulai',
-                    };
-                    $canProceed = $row->status !== 'belum_mulai';
+                    // Build a more specific status label based on available flags
+                    $statusLabel = '—';
+                    $statusClass = 'badge-belum';
+
+                    if (!($row->has_asesmen_mandiri ?? false)) {
+                        $statusLabel = 'Menunggu Asesmen Mandiri';
+                        $statusClass = 'badge-belum';
+                    } elseif (empty($row->rekomendasi)) {
+                        $statusLabel = 'Menunggu Persetujuan Asesmen';
+                        $statusClass = 'badge-sedang';
+                    } elseif ($row->rekomendasi === 'tidak_lanjut') {
+                        $statusLabel = 'Persetujuan: Tidak Lanjut';
+                        $statusClass = 'badge-belum';
+                    } else {
+                        // rekomendasi = 'lanjut'
+                        if (!($row->has_rekaman ?? false)) {
+                            $statusLabel = 'Menunggu Rekaman Asesmen';
+                            $statusClass = 'badge-sedang';
+                        } elseif (!($row->has_ceklis_observasi ?? false)) {
+                            $statusLabel = 'Menunggu Ceklis Observasi';
+                            $statusClass = 'badge-sedang';
+                        } elseif (!($row->has_penilaian ?? false)) {
+                            $statusLabel = 'Menunggu Entry Penilaian';
+                            $statusClass = 'badge-sedang';
+                        } else {
+                            $statusLabel = 'Selesai';
+                            $statusClass = 'badge-selesai';
+                        }
+                    }
+
+                    // allow quick legacy filter behavior
+                    $canProceed = ($row->status ?? '') !== 'belum_mulai';
                 @endphp
                 <tr>
                     <td>
