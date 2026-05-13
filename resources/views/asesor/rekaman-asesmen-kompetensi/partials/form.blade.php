@@ -45,12 +45,31 @@
     $asesorAsesiList = collect();
     if (isset($asesor) && $asesor) {
         try {
-            $asesorAsesiList = \App\Models\Asesi::query()
+            $skemaIds = $asesor->skemas ? $asesor->skemas->pluck('id')->map(fn($i) => (int)$i)->values()->all() : [];
+
+            // Asesi yang secara langsung ditugaskan ke asesor
+            $direct = \App\Models\Asesi::query()
                 ->where('ID_asesor', $asesor->ID_asesor)
-                ->orderBy('nama')
-                ->get(['NIK', 'nama'])
-                ->map(fn($a) => ['id' => (string)$a->NIK, 'nama' => $a->nama])
-                ->values();
+                ->get(['NIK', 'nama']);
+
+            // Asesi yang terdaftar pada skema yang ditugaskan ke asesor (pivot asesi_skema)
+            $bySkema = collect();
+            if (count($skemaIds)) {
+                $bySkema = \App\Models\Asesi::query()
+                    ->whereHas('skemas', function ($q) use ($skemaIds) {
+                        $q->whereIn('skemas.id', $skemaIds);
+                    })
+                    ->get(['NIK', 'nama']);
+            }
+
+            // Gabungkan, unik berdasarkan NIK
+            $combined = $direct->concat($bySkema)
+                ->unique(fn($a) => (string)$a->NIK)
+                ->sortBy('nama')
+                ->values()
+                ->map(fn($a) => ['id' => (string)$a->NIK, 'nama' => $a->nama]);
+
+            $asesorAsesiList = $combined;
         } catch (\Throwable $e) {
             $asesorAsesiList = collect();
         }
