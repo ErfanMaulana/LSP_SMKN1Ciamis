@@ -501,6 +501,11 @@
                     <i class="bi bi-clipboard-check"></i>
                     <span>Asesmen Mandiri</span>
                 </a>
+                <a href="{{ route('asesor.persetujuan-asesmen.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.persetujuan-asesmen.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <span>Persetujuan Asesmen</span>
+                </a>
                 <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}"
                     class="menu-item {{ request()->routeIs('asesor.rekaman-asesmen-kompetensi.*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i>
@@ -515,11 +520,6 @@
                     class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">
                     <i class="bi bi-journal-check"></i>
                     <span>Entry Penilaian</span>
-                </a>
-                <a href="{{ route('asesor.persetujuan-asesmen.index') }}"
-                    class="menu-item {{ request()->routeIs('asesor.persetujuan-asesmen.*') ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-check"></i>
-                    <span>Persetujuan Asesmen</span>
                 </a>
 
                 <div class="menu-section-title" style="font-size:11px; letter-spacing:.12em; margin-top:8px;">LANJUTAN</div>
