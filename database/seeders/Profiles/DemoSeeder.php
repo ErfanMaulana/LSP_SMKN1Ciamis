@@ -6,6 +6,7 @@ use Database\Seeders\Assessment\JadwalUjikomSeeder;
 use Database\Seeders\Catalog\ElemenSeeder;
 use Database\Seeders\Catalog\KriteriaSeeder;
 use Database\Seeders\Catalog\UnitSeeder;
+use Database\Seeders\Catalog\CombinedSkemaSeeder;
 use Illuminate\Database\Seeder;
 
 class DemoSeeder extends Seeder
@@ -16,11 +17,12 @@ class DemoSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            TestingSeeder::class,
+            // TestingSeeder::class,
             UnitSeeder::class,
+            CombinedSkemaSeeder::class,
             ElemenSeeder::class,
             KriteriaSeeder::class,
-            JadwalUjikomSeeder::class,
+            // JadwalUjikomSeeder::class,
         ]);
     }
 }
