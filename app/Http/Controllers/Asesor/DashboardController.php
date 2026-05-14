@@ -734,6 +734,56 @@ class DashboardController extends Controller
     }
 
     /**
+     * Export asesmen mandiri (FR.APL.02) untuk asesor.
+     */
+    public function asesmenMandiriExport($asesiNik, $skemaId)
+    {
+        $asesor = $this->getAsesor();
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+
+        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->first();
+
+        abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
+        $skema = Skema::with([
+            'units' => fn($query) => $query->orderBy('id'),
+            'units.elemens' => fn($query) => $query->orderBy('id'),
+            'units.elemens.kriteria' => fn($query) => $query->orderBy('urutan')->orderBy('id'),
+        ])->findOrFail($skemaId);
+
+        $answers = JawabanElemen::where('asesi_nik', $asesiNik)
+            ->whereHas('elemen.unit', fn ($q) => $q->where('skema_id', $skemaId))
+            ->get()
+            ->keyBy('elemen_id');
+
+        $logoPath = public_path('images/lsp.png');
+
+        $html = view('asesor.asesmen-mandiri.export-fr-apl-02', [
+            'asesi' => $asesi,
+            'asesor' => $asesor,
+            'skema' => $skema,
+            'answers' => $answers,
+            'pivot' => $pivot,
+            'logoPath' => $logoPath,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
+        $fileName = 'FR.APL.02-' . $asesi->NIK . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
+
+    /**
      * Simpan rekomendasi asesor untuk asesmen mandiri asesi
      */
     public function recommend(Request $request, $asesiNik, $skemaId = null)

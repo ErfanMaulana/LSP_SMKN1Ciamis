@@ -102,8 +102,42 @@
         color: #0f172a;
     }
 
+    .signature-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+    }
+
+    .signature-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px;
+    }
+
+    .signature-frame {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        min-height: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        margin-bottom: 8px;
+        overflow: hidden;
+    }
+
+    .signature-frame img {
+        max-width: 100%;
+        max-height: 120px;
+        object-fit: contain;
+    }
+
     @media (max-width: 768px) {
         .meta-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .signature-grid {
             grid-template-columns: 1fr;
         }
     }
@@ -168,4 +202,40 @@
 @empty
     <div class="detail-card">Belum ada detail checklist.</div>
 @endforelse
+
+<div class="detail-card">
+    <h3 style="margin:0 0 12px;font-size:16px;">Tanda Tangan</h3>
+
+    <div class="signature-grid">
+        <div class="signature-box">
+            <h4 style="margin:0 0 8px;font-size:14px;">Tanda Tangan Asesor</h4>
+            <div class="signature-frame">
+                @if($item->ttd_asesor_file)
+                    <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor">
+                @else
+                    <span style="color:#94a3b8;font-size:13px;">Belum ditandatangani</span>
+                @endif
+            </div>
+            <div style="font-size:13px;color:#334155;">
+                <strong>{{ $item->ttd_asesor_nama ?: ($item->asesor?->nama ?? 'Nama Asesor') }}</strong><br>
+                {{ $item->ttd_asesor_tanggal?->translatedFormat('d F Y') ?: 'Tanggal Tanda Tangan' }}
+            </div>
+        </div>
+
+        <div class="signature-box">
+            <h4 style="margin:0 0 8px;font-size:14px;">Tanda Tangan Asesi</h4>
+            <div class="signature-frame">
+                @if($item->ttd_asesi_file)
+                    <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi">
+                @else
+                    <span style="color:#94a3b8;font-size:13px;">Belum ditandatangani</span>
+                @endif
+            </div>
+            <div style="font-size:13px;color:#334155;">
+                <strong>{{ $item->ttd_asesi_nama ?: ($item->asesi?->nama ?? 'Nama Asesi') }}</strong><br>
+                {{ $item->ttd_asesi_tanggal?->translatedFormat('d F Y') ?: 'Tanggal Tanda Tangan' }}
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

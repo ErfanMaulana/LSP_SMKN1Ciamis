@@ -17,6 +17,35 @@
         transition: color 0.2s;
     }
 
+    .top-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    .btn-export {
+        border: none;
+        border-radius: 8px;
+        padding: 9px 14px;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        background: #0073bd;
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .btn-export:hover {
+        background: #003961;
+        color: #ffffff;
+    }
+
     .back-link:hover {
         color: #0061A5;
     }
@@ -513,9 +542,14 @@
     $totalAnswered = $answers->count();
 @endphp
 
-<a href="{{ route('asesor.asesmen-mandiri.index') }}" class="back-link">
-    <i class="bi bi-arrow-left"></i> Kembali ke daftar
-</a>
+<div class="top-actions">
+    <a href="{{ route('asesor.asesmen-mandiri.index') }}" class="back-link">
+        <i class="bi bi-arrow-left"></i> Kembali ke daftar
+    </a>
+    <a href="{{ route('asesor.asesmen-mandiri.export', ['asesiNik' => $asesi->NIK, 'skemaId' => $skema->id]) }}" class="btn-export" target="_blank">
+        <i class="bi bi-download"></i> Export FR.APL.02 (.doc)
+    </a>
+</div>
 
 <div class="result-header">
     <div class="result-header-top">

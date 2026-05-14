@@ -126,7 +126,79 @@
         color: #92400e;
     }
 
-    .action-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+    .action-wrap { display: flex; justify-content: center; }
+
+    .action-menu {
+        position: relative;
+        display: inline-block;
+    }
+
+    .action-btn {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .2s;
+    }
+
+    .action-btn:hover {
+        background: #f1f5f9;
+    }
+
+    .action-dropdown {
+        display: none;
+        position: fixed;
+        background: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .15);
+        min-width: 160px;
+        z-index: 9990;
+        overflow: hidden;
+    }
+
+    .action-dropdown.show {
+        display: block;
+    }
+
+    .dropdown-item,
+    .action-dropdown a,
+    .action-dropdown button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 10px 16px;
+        border: none;
+        background: none;
+        text-align: left;
+        font-size: 14px;
+        color: #475569;
+        cursor: pointer;
+        transition: all .2s;
+        text-decoration: none;
+    }
+
+    .dropdown-item:hover,
+    .action-dropdown a:hover,
+    .action-dropdown button:hover {
+        background: #f8fafc;
+        color: #0f172a;
+    }
+
+    .dropdown-item.danger {
+        color: #475569;
+    }
+
+    .action-dropdown button[type="submit"]:hover {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
     .pagination-wrap { padding: 14px; }
 
     .empty {
@@ -173,7 +245,7 @@
                     <th>Asesor</th>
                     <th>Rekomendasi</th>
                     <th>Dibuat</th>
-                    <th style="width: 240px;">Aksi</th>
+                    <th style="width: 80px; text-align:center;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -194,27 +266,34 @@
                             @endif
                         </td>
                         <td>{{ $item->created_at?->locale('id')->translatedFormat('d M Y H:i') }}</td>
-                        <td>
+                        <td style="text-align:center;">
                             <div class="action-wrap">
-                                <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.show', $item->id) }}" class="btn btn-secondary">
-                                    <i class="bi bi-eye"></i> Lihat
-                                </a>
+                                <div class="action-menu">
+                                    <button type="button" class="action-btn" onclick="toggleMenu(this)">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                    <div class="action-dropdown">
+                                        <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.show', $item->id) }}" class="dropdown-item">
+                                            <i class="bi bi-eye"></i> Lihat
+                                        </a>
 
-                                @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.edit'))
-                                    <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.edit', $item->id) }}" class="btn btn-primary">
-                                        <i class="bi bi-pencil-square"></i> Edit
-                                    </a>
-                                @endif
+                                        @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.edit'))
+                                            <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.edit', $item->id) }}" class="dropdown-item">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </a>
+                                        @endif
 
-                                @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.delete'))
-                                    <form method="POST" action="{{ route('admin.ceklis-observasi-aktivitas-praktik.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="bi bi-trash"></i> Hapus
-                                        </button>
-                                    </form>
-                                @endif
+                                        @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.delete'))
+                                            <form method="POST" action="{{ route('admin.ceklis-observasi-aktivitas-praktik.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');" style="margin: 0;">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="dropdown-item danger">
+                                                    <i class="bi bi-trash"></i> Hapus
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         </td>
                     </tr>
@@ -236,4 +315,33 @@
         <div class="pagination-wrap">{{ $items->links() }}</div>
     @endif
 </div>
+
+<script>
+    function toggleMenu(button) {
+        const dropdown = button.nextElementSibling;
+        const isVisible = dropdown.classList.contains('show');
+
+        document.querySelectorAll('.action-dropdown.show').forEach((menu) => {
+            if (menu !== dropdown) {
+                menu.classList.remove('show');
+            }
+        });
+
+        if (!isVisible) {
+            const rect = button.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + 4) + 'px';
+            dropdown.style.left = (rect.right - 160) + 'px';
+        }
+
+        dropdown.classList.toggle('show');
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach((menu) => {
+                menu.classList.remove('show');
+            });
+        }
+    });
+</script>
 @endsection
