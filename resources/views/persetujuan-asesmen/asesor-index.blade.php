@@ -116,9 +116,14 @@
 
 <div class="page-header">
     <h2>Persetujuan Asesmen dan Kerahasiaan</h2>
-    <a href="{{ route('asesor.persetujuan-asesmen.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Tambah Data
-    </a>
+    <div style="display:flex;gap:8px">
+        <a href="{{ route('asesor.persetujuan-asesmen.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Tambah Data
+        </a>
+        <a href="{{ route('asesor.persetujuan-asesmen.export', request()->only('search')) }}" class="btn btn-secondary">
+            <i class="bi bi-download"></i> Export DOCX
+        </a>
+    </div>
 </div>
 
 <div class="toolbar">
