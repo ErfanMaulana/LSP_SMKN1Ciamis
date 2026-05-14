@@ -1051,6 +1051,10 @@
                     Pilih status untuk setiap bukti persyaratan dasar pemohon dan bukti administratif sebelum menyetujui atau menolak pendaftaran.
                 </p>
 
+                <div class="checklist-error" id="checklistErrorBoxTop" style="display:none;margin-bottom:16px;position:sticky;top:12px;z-index:5;">
+                    Masih ada checklist yang belum diisi. Lengkapi semua item terlebih dahulu.
+                </div>
+
                 @if(!$selectedSkema)
                     <div class="checklist-error" style="display:block;">
                         Asesi ini belum terhubung ke skema. Checklist dinamis tidak dapat ditampilkan.
@@ -1410,10 +1414,14 @@
         const hasMissing = items.some((item) => !item.status);
 
         if (hasMissing) {
+            const topErrorBox = document.getElementById('checklistErrorBoxTop');
             const errorBox = document.getElementById('checklistErrorBox');
+            if (topErrorBox) {
+                topErrorBox.style.display = 'block';
+                topErrorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             if (errorBox) {
                 errorBox.style.display = 'block';
-                errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             return false;
         }
