@@ -389,6 +389,7 @@ class PersetujuanAsesmenFrontController extends Controller
             'role' => 'asesor',
             'skema' => $skema,
             'tukList' => $tukList,
+            'asesiNik' => $asesiNik,
         ]);
     }
 
