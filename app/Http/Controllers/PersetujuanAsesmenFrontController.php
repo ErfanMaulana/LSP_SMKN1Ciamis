@@ -433,6 +433,57 @@ class PersetujuanAsesmenFrontController extends Controller
         return redirect()->back()->with('success', 'Tanda tangan asesor tersimpan');
     }
 
+    /**
+     * Export persetujuan asesmen untuk asesor dalam format DOCX dengan logo.
+     */
+    public function asesorExport($asesiNik, $skemaId)
+    {
+        $account = auth()->guard('account')->user();
+        $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
+        $asesi = Asesi::where('NIK', $asesiNik)->first();
+        $skema = Skema::find($skemaId);
+
+        if (!$skema) {
+            abort(404);
+        }
+
+        $namaAsesi = $asesi ? $asesi->nama : null;
+        $useNik = $this->hasAsesiNikColumn();
+
+        $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
+            ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
+                if ($namaAsesi) {
+                    $q->where('nama_asesi', $namaAsesi);
+                }
+                if ($useNik) {
+                    $q->orWhere('asesi_nik', $asesiNik);
+                }
+            })
+            ->latest()
+            ->first();
+
+        if (!$item) {
+            abort(404, 'Persetujuan asesmen tidak ditemukan.');
+        }
+
+        $logoPath = public_path('images/lsp.png');
+
+        $html = view('persetujuan-asesmen.export-docx', [
+            'item' => $item,
+            'skema' => $skema,
+            'logoPath' => $logoPath,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
+        $fileName = 'FR.AK.01-' . $asesiNik . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
+
     public function asesiShow(Request $request, $skemaId)
     {
         $asesi = $this->resolveAsesiFromUser($request->user());
@@ -584,55 +635,6 @@ class PersetujuanAsesmenFrontController extends Controller
         ]);
 
         return redirect()->route('asesi.persetujuan-asesmen.index')->with('success', 'Tanda tangan asesi tersimpan');
-    }
-
-    /**
-     * Export persetujuan asesmen document as DOCX
-     */
-    public function asesorExport($asesiNik, $skemaId)
-    {
-        $asesi = Asesi::where('NIK', $asesiNik)->first();
-        $skema = Skema::find($skemaId);
-
-        if (!$skema) {
-            abort(404);
-        }
-
-        $namaAsesi = $asesi ? $asesi->nama : null;
-        $useNik = $this->hasAsesiNikColumn();
-
-        $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
-            ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
-                if ($namaAsesi) {
-                    $q->where('nama_asesi', $namaAsesi);
-                }
-                if ($useNik) {
-                    $q->orWhere('asesi_nik', $asesiNik);
-                }
-            })->latest()->first();
-
-        if (!$item) {
-            abort(404);
-        }
-
-        $skemaData = $skema;
-        
-        // Render view as HTML
-        $html = view('persetujuan-asesmen.export-docx', [
-            'item' => $item,
-            'skema' => $skemaData,
-        ])->render();
-
-        // Generate filename
-        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
-        $asesiId = $asesiNik ?? 'asesi';
-        $fileName = 'FR.AK.01-' . $asesiId . '-' . trim($fileSkema, '-') . '.doc';
-
-        return response($html, 200, [
-            'Content-Type' => 'application/msword; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-            'Cache-Control' => 'max-age=0',
-        ]);
     }
 }
 

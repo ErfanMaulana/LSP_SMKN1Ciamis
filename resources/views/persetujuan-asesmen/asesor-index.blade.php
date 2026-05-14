@@ -159,9 +159,6 @@
                                     <a href="{{ route('asesor.persetujuan.front.asesor.show', [$item['asesi_nik'], $item['skema_id']]) }}" class="btn btn-secondary">
                                         <i class="bi bi-eye"></i> Lihat
                                     </a>
-                                    <a href="{{ route('asesor.persetujuan.front.asesor.export', [$item['asesi_nik'], $item['skema_id']]) }}" class="btn btn-secondary">
-                                        <i class="bi bi-download"></i> Export
-                                    </a>
                                 @else
                                     <span style="font-size:12px;color:#94a3b8;">Data belum lengkap</span>
                                 @endif

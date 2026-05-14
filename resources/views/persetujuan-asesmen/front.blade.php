@@ -284,6 +284,9 @@
 <div class="top-actions">
     @if($role === 'asesor')
         <a href="{{ route('asesor.persetujuan-asesmen.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+        <a href="{{ route('asesor.persetujuan.front.asesor.export', ['asesiNik' => $item->asesi_nik ?? $item->nama_asesi, 'skemaId' => $skema->id]) }}" class="btn btn-primary" target="_blank">
+            <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
+        </a>
     @else
         <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
     @endif
