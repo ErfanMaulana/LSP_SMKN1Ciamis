@@ -149,6 +149,9 @@
         <a href="{{ route('asesor.ceklis-observasi.index') }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
+        <a href="{{ route('asesor.ceklis-observasi.export', $item->id) }}" class="btn btn-primary" target="_blank">
+            <i class="bi bi-download"></i> Export FR.IA.01 (.doc)
+        </a>
         <a href="{{ route('asesor.ceklis-observasi.edit', $item->id) }}" class="btn btn-primary">
             <i class="bi bi-pencil-square"></i> Edit
         </a>

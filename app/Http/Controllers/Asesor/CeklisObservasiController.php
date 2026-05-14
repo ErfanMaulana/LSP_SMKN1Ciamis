@@ -166,6 +166,49 @@ class CeklisObservasiController extends Controller
         return view('asesor.ceklis-observasi.show', compact('account', 'asesor', 'item', 'detailsByUnit'));
     }
 
+    public function export($id)
+    {
+        $asesor = $this->getAsesor();
+        abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        $item = CeklisObservasiAktivitasPraktik::query()
+            ->with([
+                'skema:id,nama_skema,nomor_skema',
+                'asesi:NIK,nama',
+                'details.unit:id,kode_unit,judul_unit',
+                'details.elemen:id,unit_id,nama_elemen',
+                'details.kriteria:id,elemen_id,deskripsi_kriteria,urutan',
+            ])
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->findOrFail($id);
+
+        $detailsByUnit = $item->details
+            ->sortBy([
+                ['unit_id', 'asc'],
+                ['elemen_id', 'asc'],
+                ['kriteria.urutan', 'asc'],
+                ['kriteria_id', 'asc'],
+            ])
+            ->groupBy('unit_id');
+
+        $logoPath = public_path('images/lsp.png');
+
+        $html = view('asesor.ceklis-observasi.export-docx', [
+            'item' => $item,
+            'detailsByUnit' => $detailsByUnit,
+            'logoPath' => $logoPath,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($item->skema?->nomor_skema ?? $item->skema_id));
+        $fileName = 'FR.IA.01-' . ($item->asesi_nik ?? 'asesi') . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
+
     public function edit($id)
     {
         $account = Auth::guard('account')->user();

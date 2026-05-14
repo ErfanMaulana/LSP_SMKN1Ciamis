@@ -58,6 +58,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
             Route::get('/create', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'store'])->name('store');
             Route::get('/{id}/edit', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'edit'])->name('edit');
+            Route::get('/{id}/export', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'export'])->name('export');
             Route::put('/{id}', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'update'])->name('update');
             Route::delete('/{id}', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'destroy'])->name('destroy');
             Route::get('/skema-participants', [\App\Http\Controllers\Asesor\CeklisObservasiController::class, 'participantsBySkema'])->name('skema-participants');
