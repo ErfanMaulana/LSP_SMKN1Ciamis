@@ -189,16 +189,16 @@
         </tr>
         <tr>
             <td style="width:50%; text-align:center; padding:6px;">
-                <div style="border: 1px solid #111; height: 44px; line-height: 44px; text-align:center; margin-bottom:3px; overflow:hidden;">
+                <div style="width:96px; height:54px; overflow:hidden; border:1px solid #111; display:flex; align-items:center; justify-content:center; margin:0 auto 3px;">
                     @if($item->ttd_asesor_file)
-                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" style="max-height:36px; max-width:92%; vertical-align:middle;">
+                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                     @endif
                 </div>
             </td>
             <td style="width:50%; text-align:center; padding:6px;">
-                <div style="border: 1px solid #111; height: 44px; line-height: 44px; text-align:center; margin-bottom:3px; overflow:hidden;">
+                <div style="width:96px; height:54px; overflow:hidden; border:1px solid #111; display:flex; align-items:center; justify-content:center; margin:0 auto 3px;">
                     @if($item->ttd_asesi_file)
-                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" style="max-height:36px; max-width:92%; vertical-align:middle;">
+                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                     @endif
                 </div>
             </td>
