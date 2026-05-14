@@ -293,7 +293,7 @@ class PersetujuanAsesmenFrontController extends Controller
                     'skema_id' => $skema?->id,
                     'skema_nama' => $record->judul_skema ?: ($skema?->nama_skema ?? '-'),
                     'skema_nomor' => $record->nomor_skema,
-                    'status' => $record->ttd_asesor_nama ? 'Sudah Ditandatangani' : 'Draft',
+                    'status' => $record->ttd_asesi_nama ? 'Sudah Ditandatangani' : 'Belum Ditandatangani',
                 ];
             })->values();
         }
