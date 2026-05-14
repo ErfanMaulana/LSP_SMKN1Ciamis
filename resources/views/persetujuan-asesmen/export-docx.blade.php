@@ -180,34 +180,38 @@
         <tr>
             <td colspan="4" style="font-weight:700;">Tanda Tangan</td>
         </tr>
+    </table>
+
+    <table>
         <tr>
-            <td colspan="2" style="font-weight:700;">Tanda tangan Asesor : {{ $item->ttd_asesor_nama ?: '............................' }}</td>
-            <td colspan="2">Tanggal : {{ $item->ttd_asesor_tanggal?->format('d-m-Y') ?: '............................' }}</td>
+            <td style="width:50%; text-align:center; font-weight:700; padding:6px;">Tanda Tangan Asesor</td>
+            <td style="width:50%; text-align:center; font-weight:700; padding:6px;">Tanda Tangan Asesi</td>
         </tr>
         <tr>
-            <td colspan="2" style="font-weight:700;">Tanda tangan Asesi : {{ $item->ttd_asesi_nama ?: '............................' }}</td>
-            <td colspan="2">Tanggal : {{ $item->ttd_asesi_tanggal?->format('d-m-Y') ?: '............................' }}</td>
-        </tr>
-        <tr>
-            <td colspan="2" style="text-align:center;">
-                <div style="font-weight:700; margin-bottom:4px;">Tanda Tangan Asesor</div>
-                <div style="border: 1px solid #111; height: 52px; margin-top: 4px;"></div>
-                @if($item->ttd_asesor_file)
-                    <div style="margin-top: 4px;">
-                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" style="max-height:44px; max-width:95%;">
-                    </div>
-                @endif
+            <td style="width:50%; text-align:center; padding:6px;">
+                <div style="border: 1px solid #111; height: 70px; display:flex; align-items:center; justify-content:center; margin-bottom:4px; overflow:hidden;">
+                    @if($item->ttd_asesor_file)
+                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" style="max-height:64px; max-width:95%; object-fit:contain;">
+                    @endif
+                </div>
             </td>
-            <td colspan="2" style="text-align:center;">
-                <div style="font-weight:700; margin-bottom:4px;">Tanda Tangan Asesi</div>
-                <div style="border: 1px solid #111; height: 52px; margin-top: 4px;"></div>
-                @if($item->ttd_asesi_file)
-                    <div style="margin-top: 4px;">
-                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" style="max-height:44px; max-width:95%;">
-                    </div>
-                @endif
+            <td style="width:50%; text-align:center; padding:6px;">
+                <div style="border: 1px solid #111; height: 70px; display:flex; align-items:center; justify-content:center; margin-bottom:4px; overflow:hidden;">
+                    @if($item->ttd_asesi_file)
+                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" style="max-height:64px; max-width:95%; object-fit:contain;">
+                    @endif
+                </div>
             </td>
         </tr>
+        <tr>
+            <td style="width:50%; text-align:center; padding:6px 3px; font-size:9px;">
+                <div style="font-weight:700; margin-bottom:2px;">{{ $item->ttd_asesor_nama ?: 'Nama Asesor' }}</div>
+                <div>{{ $item->ttd_asesor_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
+            </td>
+            <td style="width:50%; text-align:center; padding:6px 3px; font-size:9px;">
+                <div style="font-weight:700; margin-bottom:2px;">{{ $item->ttd_asesi_nama ?: 'Nama Asesi' }}</div>
+                <div>{{ $item->ttd_asesi_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
+            </td>
     </table>
 
     @if($item->catatan_footer)
