@@ -36,7 +36,6 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         Route::get('/asesi/{asesiNik}/review',  [DashboardController::class, 'asesiReview'])->name('asesi.review');
         Route::post('/asesi/{asesiNik}/review', [DashboardController::class, 'recommend'])->name('asesi.recommend');
         Route::get('/persetujuan-asesmen', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorIndex'])->name('persetujuan-asesmen.index');
-        Route::get('/persetujuan-asesmen/export', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorExport'])->name('persetujuan-asesmen.export');
         Route::get('/persetujuan-asesmen/create', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorCreate'])->name('persetujuan-asesmen.create');
         Route::post('/persetujuan-asesmen', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorStore'])->name('persetujuan-asesmen.store');
         Route::get('/persetujuan-asesmen/skema-participants', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'participantsBySkema'])->name('persetujuan-asesmen.skema-participants');
@@ -68,6 +67,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         });
         // Persetujuan Asesmen (front) - allow asesor to sign
         Route::get('/persetujuan-asesmen/{asesiNik}/{skemaId}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorShow'])->name('persetujuan.front.asesor.show');
+        Route::get('/persetujuan-asesmen/{asesiNik}/{skemaId}/export', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorExport'])->name('persetujuan.front.asesor.export');
         Route::post('/persetujuan-asesmen/{id}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorSign'])->name('persetujuan.front.asesor.sign');
         Route::get('/banding-asesmen/{asesiNik}/{skemaId}', [BandingAsesmenController::class, 'form'])->name('banding.form');
         Route::post('/logout',   [AuthController::class, 'logout'])->name('logout');

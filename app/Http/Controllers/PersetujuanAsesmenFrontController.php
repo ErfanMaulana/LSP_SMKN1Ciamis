@@ -305,87 +305,6 @@ class PersetujuanAsesmenFrontController extends Controller
         ]);
     }
 
-    public function asesorExport(Request $request)
-    {
-        $account = $request->user();
-        $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
-        $useNik = $this->hasAsesiNikColumn();
-        $search = $request->get('search');
-
-        $items = collect();
-
-        if ($asesor) {
-            $records = PersetujuanAsesmen::query()
-                ->where('nama_asesor', $asesor->nama)
-                ->when($search, function ($query) use ($search) {
-                    $query->where(function ($q) use ($search) {
-                        $q->where('judul_skema', 'like', "%{$search}%")
-                            ->orWhere('nomor_skema', 'like', "%{$search}%")
-                            ->orWhere('nama_asesi', 'like', "%{$search}%");
-                    });
-                })
-                ->latest()
-                ->get();
-
-            $asesiByNik = collect();
-            if ($useNik) {
-                $asesiByNik = Asesi::query()->get()->keyBy('NIK');
-            }
-
-            $items = $records->map(function ($record) use ($asesiByNik, $useNik) {
-                $asesiNik = null;
-                if ($useNik && $record->asesi_nik) {
-                    $asesiNik = $record->asesi_nik;
-                } else {
-                    $matchingAsesi = Asesi::where('nama', $record->nama_asesi)
-                        ->orderBy('NIK')
-                        ->first(['NIK']);
-                    $asesiNik = $matchingAsesi?->NIK;
-                }
-
-                $asesiNama = $record->nama_asesi;
-                if ($asesiNik && $asesiByNik->has($asesiNik)) {
-                    $asesiNama = $asesiByNik->get($asesiNik)->nama;
-                }
-
-                return [
-                    'skema_nama' => $record->judul_skema ?: ($record->judul_skema ?? '-'),
-                    'skema_nomor' => $record->nomor_skema,
-                    'asesi_nama' => $asesiNama,
-                    'status' => $record->ttd_asesi_nama ? 'Sudah Ditandatangani' : 'Belum Ditandatangani',
-                ];
-            })->values();
-        }
-
-        // Build simple HTML table that resembles the index view
-        $html = '<h2>Persetujuan Asesmen dan Kerahasiaan</h2>';
-        $html .= '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;width:100%">';
-        $html .= '<thead><tr><th style="width:45px">No</th><th>Skema</th><th>Nomor Skema</th><th>Asesi</th><th>Status</th></tr></thead>';
-        $html .= '<tbody>';
-        foreach ($items as $i => $item) {
-            $html .= '<tr>';
-            $html .= '<td>' . ($i+1) . '</td>';
-            $html .= '<td>' . e($item['skema_nama']) . '</td>';
-            $html .= '<td>' . e($item['skema_nomor']) . '</td>';
-            $html .= '<td>' . e($item['asesi_nama']) . '</td>';
-            $html .= '<td>' . e($item['status']) . '</td>';
-            $html .= '</tr>';
-        }
-        $html .= '</tbody></table>';
-
-        // Generate docx using PhpWord
-        $phpWord = new \PhpOffice\PhpWord\PhpWord();
-        $section = $phpWord->addSection();
-        \PhpOffice\PhpWord\Shared\Html::addHtml($section, $html, false, false);
-
-        $fileName = 'persetujuan-asesmen-asesor-' . date('YmdHis') . '.docx';
-        $tempFile = sys_get_temp_dir() . '/' . $fileName;
-        $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
-        $writer->save($tempFile);
-
-        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
-    }
-
     public function asesiIndex(Request $request)
     {
         $asesi = $this->resolveAsesiFromUser($request->user());
@@ -665,6 +584,55 @@ class PersetujuanAsesmenFrontController extends Controller
         ]);
 
         return redirect()->route('asesi.persetujuan-asesmen.index')->with('success', 'Tanda tangan asesi tersimpan');
+    }
+
+    /**
+     * Export persetujuan asesmen document as DOCX
+     */
+    public function asesorExport($asesiNik, $skemaId)
+    {
+        $asesi = Asesi::where('NIK', $asesiNik)->first();
+        $skema = Skema::find($skemaId);
+
+        if (!$skema) {
+            abort(404);
+        }
+
+        $namaAsesi = $asesi ? $asesi->nama : null;
+        $useNik = $this->hasAsesiNikColumn();
+
+        $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
+            ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
+                if ($namaAsesi) {
+                    $q->where('nama_asesi', $namaAsesi);
+                }
+                if ($useNik) {
+                    $q->orWhere('asesi_nik', $asesiNik);
+                }
+            })->latest()->first();
+
+        if (!$item) {
+            abort(404);
+        }
+
+        $skemaData = $skema;
+        
+        // Render view as HTML
+        $html = view('persetujuan-asesmen.export-docx', [
+            'item' => $item,
+            'skema' => $skemaData,
+        ])->render();
+
+        // Generate filename
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
+        $asesiId = $asesiNik ?? 'asesi';
+        $fileName = 'FR.AK.01-' . $asesiId . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 }
 

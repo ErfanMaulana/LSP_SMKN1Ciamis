@@ -116,14 +116,9 @@
 
 <div class="page-header">
     <h2>Persetujuan Asesmen dan Kerahasiaan</h2>
-    <div style="display:flex;gap:8px">
-        <a href="{{ route('asesor.persetujuan-asesmen.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Tambah Data
-        </a>
-        <a href="{{ route('asesor.persetujuan-asesmen.export', request()->only('search')) }}" class="btn btn-secondary">
-            <i class="bi bi-download"></i> Export DOCX
-        </a>
-    </div>
+    <a href="{{ route('asesor.persetujuan-asesmen.create') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Tambah Data
+    </a>
 </div>
 
 <div class="toolbar">
@@ -163,6 +158,9 @@
                                 @if(!empty($item['asesi_nik']) && !empty($item['skema_id']))
                                     <a href="{{ route('asesor.persetujuan.front.asesor.show', [$item['asesi_nik'], $item['skema_id']]) }}" class="btn btn-secondary">
                                         <i class="bi bi-eye"></i> Lihat
+                                    </a>
+                                    <a href="{{ route('asesor.persetujuan.front.asesor.export', [$item['asesi_nik'], $item['skema_id']]) }}" class="btn btn-secondary">
+                                        <i class="bi bi-download"></i> Export
                                     </a>
                                 @else
                                     <span style="font-size:12px;color:#94a3b8;">Data belum lengkap</span>
