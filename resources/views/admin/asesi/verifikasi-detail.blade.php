@@ -107,7 +107,8 @@
     /* Checklist table: closed boxes */
     .checklist-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
         overflow: hidden;
@@ -116,9 +117,20 @@
 
     .checklist-table th,
     .checklist-table td {
-        border: 1px solid #e5e7eb;
+        border-right: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
         padding: 10px 12px;
         vertical-align: middle;
+        background: #fff;
+    }
+
+    .checklist-table th:last-child,
+    .checklist-table td:last-child {
+        border-right: none;
+    }
+
+    .checklist-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
     .checklist-table thead th {
@@ -402,7 +414,7 @@
 
     .checklist-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
         border-spacing: 0;
         overflow: hidden;
         border: 1px solid #e5e7eb;
@@ -413,10 +425,21 @@
 
     .checklist-table th,
     .checklist-table td {
-        border: 1px solid #e5e7eb;
+        border-right: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
         padding: 10px 8px;
         font-size: 13px;
         vertical-align: middle;
+        background: #fff;
+    }
+
+    .checklist-table th:last-child,
+    .checklist-table td:last-child {
+        border-right: none;
+    }
+
+    .checklist-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
     .checklist-table th {
