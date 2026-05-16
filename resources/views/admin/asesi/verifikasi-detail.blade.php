@@ -107,7 +107,8 @@
     /* Checklist table: closed boxes */
     .checklist-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
         overflow: hidden;
@@ -116,9 +117,20 @@
 
     .checklist-table th,
     .checklist-table td {
-        border: 1px solid #e5e7eb;
+        border-right: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
         padding: 10px 12px;
         vertical-align: middle;
+        background: #fff;
+    }
+
+    .checklist-table th:last-child,
+    .checklist-table td:last-child {
+        border-right: none;
+    }
+
+    .checklist-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
     .checklist-table thead th {
@@ -402,7 +414,7 @@
 
     .checklist-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
         border-spacing: 0;
         overflow: hidden;
         border: 1px solid #e5e7eb;
@@ -413,10 +425,21 @@
 
     .checklist-table th,
     .checklist-table td {
-        border: 1px solid #e5e7eb;
+        border-right: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
         padding: 10px 8px;
         font-size: 13px;
         vertical-align: middle;
+        background: #fff;
+    }
+
+    .checklist-table th:last-child,
+    .checklist-table td:last-child {
+        border-right: none;
+    }
+
+    .checklist-table tbody tr:last-child td {
+        border-bottom: none;
     }
 
     .checklist-table th {
@@ -825,6 +848,16 @@
                 <span><i class="bi bi-envelope"></i> {{ $asesi->email ?? '-' }}</span>
                 <span><i class="bi bi-telephone"></i> {{ $asesi->telepon_hp ?? '-' }}</span>
                 <span>
+                    <i class="bi bi-book"></i>
+                    @if($asesi->skemas && $asesi->skemas->count())
+                        @foreach($asesi->skemas as $skey => $s)
+                            <span class="badge" style="background:#eef2ff;color:#0b4d84;margin-left:6px;">{{ $s->nama_skema ?? '-' }}@if(!empty($s->nomor_skema)) ({{ $s->nomor_skema }})@endif</span>
+                        @endforeach
+                    @else
+                        <span style="color:#9ca3af; margin-left:6px;">Belum terdaftar ke skema</span>
+                    @endif
+                </span>
+                <span>
                     @if($asesi->status === 'pending')
                         <span class="badge badge-pending">Menunggu Verifikasi</span>
                     @elseif($asesi->status === 'approved')
@@ -1028,6 +1061,10 @@
                     Pilih status untuk setiap bukti persyaratan dasar pemohon dan bukti administratif sebelum menyetujui atau menolak pendaftaran.
                 </p>
 
+                <div class="checklist-error" id="checklistErrorBoxTop" style="display:none;margin-bottom:16px;position:sticky;top:12px;z-index:5;">
+                    Masih ada checklist yang belum diisi. Lengkapi semua item terlebih dahulu.
+                </div>
+
                 @if(!$selectedSkema)
                     <div class="checklist-error" style="display:block;">
                         Asesi ini belum terhubung ke skema. Checklist dinamis tidak dapat ditampilkan.
@@ -1042,11 +1079,17 @@
                                 <th rowspan="2" style="width:58px;">No.</th>
                                 <th rowspan="2">Bukti Persyaratan Dasar</th>
                                 <th colspan="2">Ada</th>
-                                <th rowspan="2" style="width:120px;">Tidak Ada</th>
+                                <th rowspan="2" style="width:120px;"> 
+                                    <input type="checkbox" class="check-all-column" data-index="5" data-value="tidak_ada" style="margin-right:8px;vertical-align:middle;">Tidak Ada
+                                </th>
                             </tr>
                             <tr>
-                                <th style="width:150px;">Memenuhi Syarat</th>
-                                <th style="width:170px;">Tidak Memenuhi Syarat</th>
+                                <th style="width:150px;"> 
+                                    <input type="checkbox" class="check-all-column" data-index="3" data-value="memenuhi" style="margin-right:8px;vertical-align:middle;">Memenuhi Syarat
+                                </th>
+                                <th style="width:170px;"> 
+                                    <input type="checkbox" class="check-all-column" data-index="4" data-value="tidak_memenuhi" style="margin-right:8px;vertical-align:middle;">Tidak Memenuhi Syarat
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1094,11 +1137,17 @@
                             <th rowspan="2" style="width:58px;">No.</th>
                             <th rowspan="2">Bukti Administratif</th>
                             <th colspan="2">Ada</th>
-                            <th rowspan="2" style="width:120px;">Tidak Ada</th>
+                            <th rowspan="2" style="width:120px;"> 
+                                <input type="checkbox" class="check-all-column" data-index="5" data-value="tidak_ada" style="margin-right:8px;vertical-align:middle;">Tidak Ada
+                            </th>
                         </tr>
                         <tr>
-                            <th style="width:150px;">Memenuhi Syarat</th>
-                            <th style="width:170px;">Tidak Memenuhi Syarat</th>
+                            <th style="width:150px;"> 
+                                <input type="checkbox" class="check-all-column" data-index="3" data-value="memenuhi" style="margin-right:8px;vertical-align:middle;">Memenuhi Syarat
+                            </th>
+                            <th style="width:170px;"> 
+                                <input type="checkbox" class="check-all-column" data-index="4" data-value="tidak_memenuhi" style="margin-right:8px;vertical-align:middle;">Tidak Memenuhi Syarat
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1387,10 +1436,14 @@
         const hasMissing = items.some((item) => !item.status);
 
         if (hasMissing) {
+            const topErrorBox = document.getElementById('checklistErrorBoxTop');
             const errorBox = document.getElementById('checklistErrorBox');
+            if (topErrorBox) {
+                topErrorBox.style.display = 'block';
+                topErrorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             if (errorBox) {
                 errorBox.style.display = 'block';
-                errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
             return false;
         }
@@ -1407,6 +1460,39 @@
         }
 
         return true;
+    }
+
+    function initChecklistHeaderToggles() {
+        const headerChecks = document.querySelectorAll('.check-all-column');
+        if (!headerChecks.length) return;
+
+        headerChecks.forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                const value = this.dataset.value;
+                const colIndex = parseInt(this.dataset.index, 10);
+
+                if (this.checked) {
+                    headerChecks.forEach(function(h) { if (h !== cb) h.checked = false; });
+                }
+
+                const tables = document.querySelectorAll('.checklist-table');
+                tables.forEach(function(table) {
+                    const rows = table.querySelectorAll('tbody tr[data-checklist-row]');
+                    rows.forEach(function(row) {
+                        const td = row.children[colIndex - 1];
+                        if (!td) return;
+                        const radio = td.querySelector('input[type="radio"]');
+                        if (cb.checked) {
+                            if (radio) radio.checked = true;
+                        } else {
+                            // clear all radios in the row
+                            const all = row.querySelectorAll('input[type="radio"]');
+                            all.forEach(function(r) { r.checked = false; });
+                        }
+                    });
+                });
+            });
+        });
     }
 
     function closeModal(id) {
@@ -1554,6 +1640,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         initSignaturePadAdmin();
+        initChecklistHeaderToggles();
 
         document.querySelectorAll('form').forEach(function(form) {
             // Only enforce signature for approval form(s)

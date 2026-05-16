@@ -508,6 +508,17 @@
         position: relative;
         overflow: hidden;
         transition: border-color 0.2s;
+        width: 100%;
+        max-width: 310px;
+        margin: 0 auto;
+        aspect-ratio: 1 / 1;
+        display: block;
+    }
+
+    @media (max-width: 640px) {
+        .signature-canvas-wrapper {
+            max-width: 320px;
+        }
     }
 
     .signature-canvas-wrapper.active {
@@ -522,7 +533,7 @@
 
     .signature-canvas {
         width: 100%;
-        height: 200px;
+        height: 100%;
         cursor: crosshair;
         display: block;
     }

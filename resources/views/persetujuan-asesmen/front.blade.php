@@ -175,7 +175,13 @@
         max-width: 420px;
         margin-left: auto;
         margin-right: auto;
-        aspect-ratio: 2 / 1;
+        aspect-ratio: 1 / 1;
+    }
+
+    @media (max-width: 640px) {
+        .signature-canvas-wrapper {
+            max-width: 320px;
+        }
     }
 
     .signature-canvas {
@@ -451,6 +457,51 @@
                 @if($role === 'asesor' && empty($item->ttd_asesor_file))
                     <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" class="form-grid" id="formTandaTanganAsesor">
                         @csrf
+                        
+                        <div style="margin-top:16px; padding:12px; background:#f0f9ff; border:1px solid #bfdbfe; border-radius:8px;">
+                            <label style="display:block; margin-bottom:12px; font-weight:600; color:#1e40af;">
+                                <i class="bi bi-clipboard-check"></i> Ceklis Bukti yang Sudah Dikumpulkan
+                            </label>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" name="bukti_verifikasi_portofolio" value="1" {{ $item->bukti_verifikasi_portofolio ? 'checked' : '' }}>
+                                    <span>Hasil Verifikasi Portofolio</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" name="bukti_reviu_produk" value="1" {{ $item->bukti_reviu_produk ? 'checked' : '' }}>
+                                    <span>Hasil Reviu Produk</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" name="bukti_observasi_langsung" value="1" {{ $item->bukti_observasi_langsung ? 'checked' : '' }}>
+                                    <span>Hasil Observasi Langsung</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" name="bukti_kegiatan_terstruktur" value="1" {{ $item->bukti_kegiatan_terstruktur ? 'checked' : '' }}>
+                                    <span>Hasil Kegiatan Terstruktur</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" name="bukti_pertanyaan_lisan" value="1" {{ $item->bukti_pertanyaan_lisan ? 'checked' : '' }}>
+                                    <span>Hasil Pertanyaan Lisan</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" name="bukti_pertanyaan_tertulis" value="1" {{ $item->bukti_pertanyaan_tertulis ? 'checked' : '' }}>
+                                    <span>Hasil Pertanyaan Tertulis</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" name="bukti_pertanyaan_wawancara" value="1" {{ $item->bukti_pertanyaan_wawancara ? 'checked' : '' }}>
+                                    <span>Hasil Pertanyaan Wawancara</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <input type="checkbox" name="bukti_lainnya" value="1" {{ $item->bukti_lainnya ? 'checked' : '' }} id="buktiLainnyaCheckbox">
+                                    <span>Lainnya</span>
+                                </label>
+                            </div>
+                            <div id="buktiLainnyaKeteranganDiv" style="margin-top:12px; display:{{ $item->bukti_lainnya ? 'block' : 'none' }};">
+                                <label style="display:block; margin-bottom:6px; font-size:13px; color:#475569;">Keterangan Lainnya</label>
+                                <input type="text" name="bukti_lainnya_keterangan" placeholder="Jelaskan bukti lainnya" value="{{ $item->bukti_lainnya_keterangan }}" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
+                            </div>
+                        </div>
+                        
                         <div class="signature-canvas-wrapper" id="signatureWrapperAsesor" style="margin-top:16px;">
                             <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
                             <div class="signature-placeholder">
@@ -660,6 +711,15 @@ document.addEventListener('DOMContentLoaded', function() {
         asesorCanvas.addEventListener('touchend', stop);
         window.addEventListener('resize', resizeAsesor);
         resizeAsesor();
+    }
+
+    // Handle "Lainnya" checkbox toggle
+    const buktiLainnyaCheckbox = document.getElementById('buktiLainnyaCheckbox');
+    const buktiLainnyaKeteranganDiv = document.getElementById('buktiLainnyaKeteranganDiv');
+    if (buktiLainnyaCheckbox && buktiLainnyaKeteranganDiv) {
+        buktiLainnyaCheckbox.addEventListener('change', function() {
+            buktiLainnyaKeteranganDiv.style.display = this.checked ? 'block' : 'none';
+        });
     }
 });
 </script>

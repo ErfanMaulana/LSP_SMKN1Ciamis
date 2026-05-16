@@ -8,6 +8,7 @@ use App\Models\Asesor;
 use App\Models\Skema;
 use App\Models\Tuk;
 use App\Models\PersetujuanAsesmen;
+use App\Models\JadwalUjikom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
@@ -72,6 +73,68 @@ class PersetujuanAsesmenFrontController extends Controller
         }
 
         return $payload;
+    }
+
+    private function createPlaceholderForAsesiSkema(Asesi $asesi, Skema $skema): ?PersetujuanAsesmen
+    {
+        $useNik = $this->hasAsesiNikColumn();
+
+        $record = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
+            ->where(function ($q) use ($asesi, $useNik) {
+                $q->where('nama_asesi', $asesi->nama);
+                if ($useNik) {
+                    $q->orWhere('asesi_nik', $asesi->NIK);
+                }
+            })
+            ->latest()
+            ->first();
+
+        if ($record) {
+            return $record;
+        }
+
+        $jadwal = JadwalUjikom::query()
+            ->with(['tuk', 'skema', 'kelompoks.asesors'])
+            ->where('skema_id', $skema->id)
+            ->whereHas('peserta', function ($q) use ($asesi) {
+                $q->where('NIK', $asesi->NIK);
+            })
+            ->orderByDesc('tanggal_mulai')
+            ->first();
+
+        if (!$jadwal) {
+            return null;
+        }
+
+        $asosorName = $jadwal->kelompoks->first()?->asesors->first()?->nama
+            ?? $jadwal->asesor?->nama
+            ?? '-';
+
+        return PersetujuanAsesmen::create($this->buildDefaultPayload([
+            'judul_skema' => $skema->nama_skema ?? '',
+            'nomor_skema' => $skema->nomor_skema ?? '',
+            'nama_asesi' => $asesi->nama,
+            'asesi_nik' => $asesi->NIK,
+            'nama_asesor' => $asosorName,
+            'tuk' => $jadwal->tuk?->nama_tuk ?? '-',
+            'hari_tanggal' => trim((!empty($jadwal->tanggal_mulai) ? date('d/m/Y', strtotime((string) $jadwal->tanggal_mulai)) : '') . ' s.d. ' . (!empty($jadwal->tanggal_selesai) ? date('d/m/Y', strtotime((string) $jadwal->tanggal_selesai)) : '')),
+            'waktu' => trim(($jadwal->waktu_mulai ?? '') . ' - ' . ($jadwal->waktu_selesai ?? '')),
+            'tuk_pelaksanaan' => $jadwal->tuk?->nama_tuk ?? '-',
+        ]));
+    }
+
+    private function recordHasChecklist(PersetujuanAsesmen $record): bool
+    {
+        return (bool) (
+            $record->bukti_verifikasi_portofolio ||
+            $record->bukti_reviu_produk ||
+            $record->bukti_observasi_langsung ||
+            $record->bukti_kegiatan_terstruktur ||
+            $record->bukti_pertanyaan_lisan ||
+            $record->bukti_pertanyaan_tertulis ||
+            $record->bukti_pertanyaan_wawancara ||
+            $record->bukti_lainnya
+        );
     }
 
     private function defaultContent(): array
@@ -310,41 +373,41 @@ class PersetujuanAsesmenFrontController extends Controller
         $asesi = $this->resolveAsesiFromUser($request->user());
         $useNik = $this->hasAsesiNikColumn();
 
-        $items = collect();
-
         if ($asesi) {
-            $items = $asesi->skemas()->withPivot('status', 'tanggal_mulai', 'tanggal_selesai')->get()->map(function ($skema) use ($asesi, $useNik) {
-                $record = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
-                    ->where(function ($q) use ($asesi, $useNik) {
-                        $q->where('nama_asesi', $asesi->nama);
-                        if ($useNik) {
-                            $q->orWhere('asesi_nik', $asesi->NIK);
-                        }
-                    })
-                    ->whereNotNull('ttd_asesor_nama')
-                    ->whereNotNull('ttd_asesor_tanggal')
-                    ->latest()
-                    ->first();
-
-                if (!$record) {
-                    return null;
+            // find latest persetujuan record where asesor already signed and checked checklist
+            $record = PersetujuanAsesmen::where(function ($q) use ($asesi, $useNik) {
+                $q->where('nama_asesi', $asesi->nama);
+                if ($useNik) {
+                    $q->orWhere('asesi_nik', $asesi->NIK);
                 }
+            })
+            ->whereNotNull('ttd_asesor_nama')
+            ->whereNotNull('ttd_asesor_tanggal')
+            ->where(function ($q) {
+                $q->where('bukti_verifikasi_portofolio', 1)
+                  ->orWhere('bukti_reviu_produk', 1)
+                  ->orWhere('bukti_observasi_langsung', 1)
+                  ->orWhere('bukti_kegiatan_terstruktur', 1)
+                  ->orWhere('bukti_pertanyaan_lisan', 1)
+                  ->orWhere('bukti_pertanyaan_tertulis', 1)
+                  ->orWhere('bukti_pertanyaan_wawancara', 1)
+                  ->orWhere('bukti_lainnya', 1);
+            })
+            ->latest()
+            ->first();
 
-                return [
-                    'persetujuan_id' => $record->id,
-                    'skema_id' => $skema->id,
-                    'skema_nama' => $skema->nama_skema,
-                    'skema_nomor' => $skema->nomor_skema,
-                    'status' => $record->ttd_asesi_nama ? 'Sudah Ditandatangani Asesi' : 'Menunggu Tanda Tangan Asesi',
-                    'can_sign' => empty($record->ttd_asesi_nama),
-                ];
-            })->filter()->values();
+            if (!$record) {
+                return redirect()->route('asesi.dashboard')->with('error', 'Form belum tersedia. Asesor belum menyelesaikan ceklis bukti dan/atau belum menandatangani form.');
+            }
+
+            // find skema id for the record and redirect user directly to sign page
+            $skema = Skema::where('nomor_skema', $record->nomor_skema)->first();
+            if ($skema) {
+                return redirect()->route('asesi.persetujuan.front.asesi.show', $skema->id);
+            }
         }
 
-        return view('persetujuan-asesmen.asesi-index', [
-            'items' => $items,
-            'asesi' => $asesi,
-        ]);
+        return redirect()->route('asesi.dashboard');
     }
 
     public function asesorShow(Request $request, $asesiNik, $skemaId)
@@ -401,7 +464,29 @@ class PersetujuanAsesmenFrontController extends Controller
             'ttd_asesor_nama' => 'required|string|max:255',
             'ttd_asesor_tanggal' => 'required|date',
             'ttd_asesor_file' => 'required|string',
+            'bukti_verifikasi_portofolio' => 'nullable|boolean',
+            'bukti_reviu_produk' => 'nullable|boolean',
+            'bukti_observasi_langsung' => 'nullable|boolean',
+            'bukti_kegiatan_terstruktur' => 'nullable|boolean',
+            'bukti_pertanyaan_lisan' => 'nullable|boolean',
+            'bukti_pertanyaan_tertulis' => 'nullable|boolean',
+            'bukti_pertanyaan_wawancara' => 'nullable|boolean',
+            'bukti_lainnya' => 'nullable|boolean',
+            'bukti_lainnya_keterangan' => 'nullable|string|max:500',
         ]);
+
+        // Convert checkbox values to boolean (checkboxes send '1' or null)
+        $data['bukti_verifikasi_portofolio'] = $request->has('bukti_verifikasi_portofolio');
+        $data['bukti_reviu_produk'] = $request->has('bukti_reviu_produk');
+        $data['bukti_observasi_langsung'] = $request->has('bukti_observasi_langsung');
+        $data['bukti_kegiatan_terstruktur'] = $request->has('bukti_kegiatan_terstruktur');
+        $data['bukti_pertanyaan_lisan'] = $request->has('bukti_pertanyaan_lisan');
+        $data['bukti_pertanyaan_tertulis'] = $request->has('bukti_pertanyaan_tertulis');
+        $data['bukti_pertanyaan_wawancara'] = $request->has('bukti_pertanyaan_wawancara');
+        $data['bukti_lainnya'] = $request->has('bukti_lainnya');
+        if (!$request->has('bukti_lainnya')) {
+            $data['bukti_lainnya_keterangan'] = null;
+        }
 
         // Handle signature file from the canvas (base64 data URL)
         try {
@@ -494,25 +579,17 @@ class PersetujuanAsesmenFrontController extends Controller
 
         $skema = Skema::find($skemaId);
         if (!$skema) abort(404);
-        $useNik = $this->hasAsesiNikColumn();
-
-        $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
-            ->where(function ($q) use ($asesi, $useNik) {
-                if ($asesi) {
-                    $q->where('nama_asesi', $asesi->nama);
-                    if ($useNik) {
-                        $q->orWhere('asesi_nik', $asesi->NIK);
-                    }
-                }
-            })
-            ->whereNotNull('ttd_asesor_nama')
-            ->whereNotNull('ttd_asesor_tanggal')
-            ->latest()
-            ->first();
+        $item = $this->createPlaceholderForAsesiSkema($asesi, $skema);
 
         if (!$item) {
             return redirect()->route('asesi.persetujuan-asesmen.index')
-                ->with('error', 'Form belum tersedia. Asesor belum menandatangani persetujuan asesmen untuk skema ini.');
+                ->with('error', 'Form belum tersedia. Jadwal untuk skema ini belum dibuat oleh admin.');
+        }
+
+        // only allow asesi to view/sign if asesor already completed checklist and signed
+        if (empty($item->ttd_asesor_nama) || empty($item->ttd_asesor_tanggal) || ! $this->recordHasChecklist($item)) {
+            return redirect()->route('asesi.persetujuan-asesmen.index')
+                ->with('error', 'Form belum tersedia. Asesor belum menyelesaikan ceklis bukti dan/atau belum menandatangani form.');
         }
 
         $tukList = Tuk::orderBy('nama_tuk')->get(['id','nama_tuk','tipe_tuk','kota']);

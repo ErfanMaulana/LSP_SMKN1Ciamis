@@ -31,7 +31,7 @@
     .dd-trigger.open { border-color:#0061A5; box-shadow:0 0 0 3px rgba(0,97,165,.1); }
     .dd-trigger .chevron { font-size:12px; color:#94a3b8; transition:transform .2s; flex-shrink:0; }
     .dd-trigger.open .chevron { transform:rotate(180deg); }
-    .dd-panel { display:none; position:fixed; background:white; border:1px solid #e2e8f0; border-radius:8px; z-index:9990; box-shadow:0 8px 24px rgba(0,0,0,.12); max-height:260px; flex-direction:column; }
+    .dd-panel { display:none; position:absolute; background:white; border:1px solid #e2e8f0; border-radius:8px; z-index:9990; box-shadow:0 8px 24px rgba(0,0,0,.12); max-height:260px; flex-direction:column; }
     .dd-panel.open { display:flex; }
     .dd-search { padding:8px 10px; border-bottom:1px solid #f1f5f9; }
     .dd-search input { width:100%; padding:7px 10px; border:1px solid #e2e8f0; border-radius:6px; font-size:13px; outline:none; box-sizing:border-box; }
@@ -204,16 +204,78 @@ function toggleDd(key) {
     const open    = !panel.classList.contains('open');
     
     if (open) {
-        // Calculate position
-        const rect = trigger.getBoundingClientRect();
-        panel.style.top = (rect.bottom + 4) + 'px';
-        panel.style.left = (rect.left) + 'px';
-        panel.style.width = rect.width + 'px';
+        // Move panel to document.body to avoid clipping by parent containers (card overflow:hidden)
+        openFloatingPanel(panel, key);
     }
     
     panel.classList.toggle('open', open);
     trigger.classList.toggle('open', open);
     if (open) panel.querySelector('.dd-search input').focus();
+}
+
+function openFloatingPanel(panel, key) {
+    const wrapper = document.getElementById(key+'Wrapper');
+    const trigger = document.getElementById(key+'Trigger');
+
+    // save original position so we can restore later
+    if (!panel.__originalParent) {
+        panel.__originalParent = panel.parentNode;
+        panel.__originalNextSibling = panel.nextSibling;
+    }
+
+    // move to body
+    document.body.appendChild(panel);
+    panel.style.position = 'fixed';
+    panel.style.zIndex = 9999;
+
+    function updatePosition() {
+        const rect = trigger.getBoundingClientRect();
+        // try place below trigger; if not enough space, place above
+        const desiredTopBelow = rect.bottom + 4;
+        const desiredTopAbove = rect.top - panel.offsetHeight - 4;
+        let top = desiredTopBelow;
+        if (desiredTopBelow + panel.offsetHeight > window.innerHeight && desiredTopAbove > 8) {
+            top = desiredTopAbove;
+        }
+
+        // keep inside viewport horizontally
+        let left = rect.left;
+        left = Math.max(8, Math.min(left, window.innerWidth - rect.width - 8));
+
+        panel.style.top = Math.round(top) + 'px';
+        panel.style.left = Math.round(left) + 'px';
+        panel.style.width = rect.width + 'px';
+    }
+
+    // initial position
+    updatePosition();
+
+    // attach handlers so panel repositions on scroll/resize
+    const handler = () => requestAnimationFrame(updatePosition);
+    panel.__repositionHandler = handler;
+    window.addEventListener('scroll', handler, true);
+    window.addEventListener('resize', handler);
+    window.addEventListener('orientationchange', handler);
+}
+
+function restorePanel(panel) {
+    if (panel.__originalParent) {
+        if (panel.__originalNextSibling) panel.__originalParent.insertBefore(panel, panel.__originalNextSibling);
+        else panel.__originalParent.appendChild(panel);
+        delete panel.__originalParent;
+        delete panel.__originalNextSibling;
+    }
+    panel.style.position = '';
+    panel.style.top = '';
+    panel.style.left = '';
+    panel.style.width = '';
+    panel.style.zIndex = '';
+    if (panel.__repositionHandler) {
+        window.removeEventListener('scroll', panel.__repositionHandler, true);
+        window.removeEventListener('resize', panel.__repositionHandler);
+        window.removeEventListener('orientationchange', panel.__repositionHandler);
+        delete panel.__repositionHandler;
+    }
 }
 
 function filterDd(key, q) {
@@ -372,8 +434,11 @@ function filterAsesiList(q) {
 }
 
 function closeDd(key) {
-    document.getElementById(key+'Panel').classList.remove('open');
+    const panel = document.getElementById(key+'Panel');
+    panel.classList.remove('open');
     document.getElementById(key+'Trigger').classList.remove('open');
+    // restore panel to original container if it was moved
+    restorePanel(panel);
 }
 
 function escHtml(s) {
