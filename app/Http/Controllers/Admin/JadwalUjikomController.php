@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Asesi;
+use App\Models\PersetujuanAsesmen;
 use App\Models\JadwalUjikom;
 use App\Models\Kelompok;
 use App\Models\Tuk;
@@ -200,6 +202,80 @@ class JadwalUjikomController extends Controller
         ], $niks);
 
         DB::table('jadwal_peserta')->insert($rows);
+    }
+
+    private function syncPersetujuanAsesmenForJadwal(JadwalUjikom $jadwal, $kelompoks): void
+    {
+        $skema = $kelompoks->first()?->skema;
+        $asesor = $kelompoks->first()?->asesors->first();
+
+        if (!$skema) {
+            return;
+        }
+
+        $asesiQuery = Asesi::query()
+            ->whereIn('NIK', $kelompoks->flatMap(fn ($kelompok) => $kelompok->asesis->pluck('NIK'))->unique()->values());
+
+        $asesiList = $asesiQuery->get(['NIK', 'nama']);
+        $hasAsesiNikColumn = Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
+        $now = now();
+
+        foreach ($asesiList as $asesi) {
+            $attributes = [
+                'nomor_skema' => $skema->nomor_skema,
+                'nama_asesi' => $asesi->nama,
+            ];
+
+            if ($hasAsesiNikColumn) {
+                $attributes['asesi_nik'] = $asesi->NIK;
+            }
+
+            $defaultData = [
+                'kode_form' => 'FR.AK.01.',
+                'judul_form' => 'PERSETUJUAN ASESMEN DAN KERAHASIAAN',
+                'pengantar' => 'Persetujuan Asesmen ini untuk menjamin bahwa Asesi telah diberi arahan secara rinci tentang perencanaan dan proses asesmen',
+                'kategori_skema' => 'KKNI/Okupasi/Klaster',
+                'judul_skema' => $skema->nama_skema,
+                'tuk' => $jadwal->tuk?->nama_tuk ?? '-',
+                'nama_asesor' => $asesor?->nama ?? '-',
+                'bukti_verifikasi_portofolio' => false,
+                'bukti_reviu_produk' => false,
+                'bukti_observasi_langsung' => false,
+                'bukti_kegiatan_terstruktur' => false,
+                'bukti_pertanyaan_lisan' => false,
+                'bukti_pertanyaan_tertulis' => false,
+                'bukti_pertanyaan_wawancara' => false,
+                'bukti_lainnya' => false,
+                'bukti_lainnya_keterangan' => null,
+                'hari_tanggal' => trim((!empty($jadwal->tanggal_mulai) ? date('d/m/Y', strtotime((string) $jadwal->tanggal_mulai)) : '') . ' s.d. ' . (!empty($jadwal->tanggal_selesai) ? date('d/m/Y', strtotime((string) $jadwal->tanggal_selesai)) : '')),
+                'waktu' => trim(($jadwal->waktu_mulai ?? '') . ' - ' . ($jadwal->waktu_selesai ?? '')),
+                'tuk_pelaksanaan' => $jadwal->tuk?->nama_tuk ?? '-',
+                'pernyataan_asesi_1' => 'Bahwa saya telah mendapatkan penjelasan terkait hak dan prosedur banding asesmen dari asesor.',
+                'pernyataan_asesor' => 'Menyatakan tidak akan membuka hasil pekerjaan yang saya peroleh karena penugasan saya sebagai Asesor dalam pekerjaan Asesmen kepada siapapun atau organisasi apapun selain kepada pihak yang berwenang sehubungan dengan kewajiban saya sebagai Asesor yang ditugaskan oleh LSP.',
+                'pernyataan_asesi_2' => 'Saya setuju mengikuti asesmen dengan pemahaman bahwa informasi yang dikumpulkan hanya digunakan untuk pengembangan profesional dan hanya dapat diakses oleh orang tertentu saja.',
+                'catatan_footer' => '* Coret yang tidak perlu',
+                'ttd_asesor_nama' => null,
+                'ttd_asesor_tanggal' => null,
+                'ttd_asesor_file' => null,
+                'ttd_asesi_nama' => null,
+                'ttd_asesi_tanggal' => null,
+                'ttd_asesi_file' => null,
+            ];
+
+            $record = PersetujuanAsesmen::firstOrCreate($attributes, $defaultData);
+            
+            // Update nama_asesor, nama_asesi, dan jadwal info jika record sudah ada
+            if ($record->wasRecentlyCreated === false) {
+                $record->update([
+                    'nama_asesor' => $asesor?->nama ?? '-',
+                    'nama_asesi' => $asesi->nama,
+                    'judul_skema' => $skema->nama_skema,
+                    'hari_tanggal' => trim((!empty($jadwal->tanggal_mulai) ? date('d/m/Y', strtotime((string) $jadwal->tanggal_mulai)) : '') . ' s.d. ' . (!empty($jadwal->tanggal_selesai) ? date('d/m/Y', strtotime((string) $jadwal->tanggal_selesai)) : '')),
+                    'waktu' => trim(($jadwal->waktu_mulai ?? '') . ' - ' . ($jadwal->waktu_selesai ?? '')),
+                    'tuk_pelaksanaan' => $jadwal->tuk?->nama_tuk ?? '-',
+                ]);
+            }
+        }
     }
 
     private function selectedKelompokIds(JadwalUjikom $jadwal): array
@@ -425,6 +501,7 @@ class JadwalUjikomController extends Controller
         }
 
         $this->syncJadwalPeserta($jadwal->id, $niks);
+        $this->syncPersetujuanAsesmenForJadwal($jadwal, $kelompoks);
 
         return redirect()->route('admin.jadwal-ujikom.index')
             ->with('success', 'Jadwal Ujikom berhasil ditambahkan!');
@@ -627,6 +704,7 @@ class JadwalUjikomController extends Controller
         }
 
         $this->syncJadwalPeserta($jadwal->id, $niks);
+        $this->syncPersetujuanAsesmenForJadwal($jadwal, $kelompoks);
 
         return redirect()->route('admin.jadwal-ujikom.index')
             ->with('success', 'Jadwal Ujikom berhasil diperbarui!');

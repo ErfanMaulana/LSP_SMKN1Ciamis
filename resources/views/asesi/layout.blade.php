@@ -658,6 +658,36 @@
                 $isRejected = $asesi && $asesi->status === 'rejected';
                 $isBanned   = $asesi && $asesi->status === 'banned';
                 $hasCompletedUjikom = $asesi && method_exists($asesi, 'hasCompletedUjikom') ? $asesi->hasCompletedUjikom() : false;
+                // Determine whether to show Persetujuan Asesmen menu (only when asesor has completed checklist and signed)
+                $showPersetujuan = false;
+                if ($asesi) {
+                    try {
+                        $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
+                        $pq = \App\Models\PersetujuanAsesmen::query()
+                            ->where(function($q) use ($asesi, $useNik) {
+                                $q->where('nama_asesi', $asesi->nama);
+                                if ($useNik) {
+                                    $q->orWhere('asesi_nik', $asesi->NIK);
+                                }
+                            })
+                            ->whereNotNull('ttd_asesor_nama')
+                            ->whereNotNull('ttd_asesor_tanggal')
+                            ->where(function($q) {
+                                $q->where('bukti_verifikasi_portofolio', 1)
+                                  ->orWhere('bukti_reviu_produk', 1)
+                                  ->orWhere('bukti_observasi_langsung', 1)
+                                  ->orWhere('bukti_kegiatan_terstruktur', 1)
+                                  ->orWhere('bukti_pertanyaan_lisan', 1)
+                                  ->orWhere('bukti_pertanyaan_tertulis', 1)
+                                  ->orWhere('bukti_pertanyaan_wawancara', 1)
+                                  ->orWhere('bukti_lainnya', 1);
+                            });
+
+                        $showPersetujuan = $pq->exists();
+                    } catch (\Throwable $e) {
+                        $showPersetujuan = false;
+                    }
+                }
             @endphp
 
             {{-- Status banner for non-approved users --}}
@@ -716,10 +746,12 @@
                         <span>Asesmen Mandiri</span>
                     </a>
 
+                    @if($showPersetujuan)
                     <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="menu-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-check"></i>
                         <span>Persetujuan Asesmen</span>
                     </a>
+                    @endif
 
                     <a href="{{ route('asesi.jadwal.index') }}" class="menu-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event-fill"></i>
@@ -852,10 +884,12 @@
                         <span>Jadwal</span>
                     </a>
 
+                    @if(!empty($showPersetujuan))
                     <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-check"></i>
                         <span>Persetujuan</span>
                     </a>
+                    @endif
 
                     @if($hasCompletedUjikom && Route::has('asesi.banding.index'))
                     <a href="{{ route('asesi.banding.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.banding.*') ? 'active' : '' }}">

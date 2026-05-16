@@ -339,6 +339,11 @@
         position: relative;
         overflow: hidden;
         transition: border-color 0.2s;
+        width: 100%;
+        max-width: 210px;
+        margin-left: auto;
+        margin-right: auto;
+        aspect-ratio: 1 / 1;
     }
 
     .signature-canvas-wrapper.active {
@@ -358,9 +363,15 @@
 
     .signature-canvas {
         width: 100%;
-        height: 180px;
+        height: 100%;
         cursor: crosshair;
         display: block;
+    }
+
+    @media (max-width: 640px) {
+        .signature-canvas-wrapper {
+            max-width: 320px;
+        }
     }
 
     .signature-placeholder {

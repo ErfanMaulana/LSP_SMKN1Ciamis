@@ -848,6 +848,16 @@
                 <span><i class="bi bi-envelope"></i> {{ $asesi->email ?? '-' }}</span>
                 <span><i class="bi bi-telephone"></i> {{ $asesi->telepon_hp ?? '-' }}</span>
                 <span>
+                    <i class="bi bi-book"></i>
+                    @if($asesi->skemas && $asesi->skemas->count())
+                        @foreach($asesi->skemas as $skey => $s)
+                            <span class="badge" style="background:#eef2ff;color:#0b4d84;margin-left:6px;">{{ $s->nama_skema ?? '-' }}@if(!empty($s->nomor_skema)) ({{ $s->nomor_skema }})@endif</span>
+                        @endforeach
+                    @else
+                        <span style="color:#9ca3af; margin-left:6px;">Belum terdaftar ke skema</span>
+                    @endif
+                </span>
+                <span>
                     @if($asesi->status === 'pending')
                         <span class="badge badge-pending">Menunggu Verifikasi</span>
                     @elseif($asesi->status === 'approved')
@@ -1069,11 +1079,17 @@
                                 <th rowspan="2" style="width:58px;">No.</th>
                                 <th rowspan="2">Bukti Persyaratan Dasar</th>
                                 <th colspan="2">Ada</th>
-                                <th rowspan="2" style="width:120px;">Tidak Ada</th>
+                                <th rowspan="2" style="width:120px;"> 
+                                    <input type="checkbox" class="check-all-column" data-index="5" data-value="tidak_ada" style="margin-right:8px;vertical-align:middle;">Tidak Ada
+                                </th>
                             </tr>
                             <tr>
-                                <th style="width:150px;">Memenuhi Syarat</th>
-                                <th style="width:170px;">Tidak Memenuhi Syarat</th>
+                                <th style="width:150px;"> 
+                                    <input type="checkbox" class="check-all-column" data-index="3" data-value="memenuhi" style="margin-right:8px;vertical-align:middle;">Memenuhi Syarat
+                                </th>
+                                <th style="width:170px;"> 
+                                    <input type="checkbox" class="check-all-column" data-index="4" data-value="tidak_memenuhi" style="margin-right:8px;vertical-align:middle;">Tidak Memenuhi Syarat
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1121,11 +1137,17 @@
                             <th rowspan="2" style="width:58px;">No.</th>
                             <th rowspan="2">Bukti Administratif</th>
                             <th colspan="2">Ada</th>
-                            <th rowspan="2" style="width:120px;">Tidak Ada</th>
+                            <th rowspan="2" style="width:120px;"> 
+                                <input type="checkbox" class="check-all-column" data-index="5" data-value="tidak_ada" style="margin-right:8px;vertical-align:middle;">Tidak Ada
+                            </th>
                         </tr>
                         <tr>
-                            <th style="width:150px;">Memenuhi Syarat</th>
-                            <th style="width:170px;">Tidak Memenuhi Syarat</th>
+                            <th style="width:150px;"> 
+                                <input type="checkbox" class="check-all-column" data-index="3" data-value="memenuhi" style="margin-right:8px;vertical-align:middle;">Memenuhi Syarat
+                            </th>
+                            <th style="width:170px;"> 
+                                <input type="checkbox" class="check-all-column" data-index="4" data-value="tidak_memenuhi" style="margin-right:8px;vertical-align:middle;">Tidak Memenuhi Syarat
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1440,6 +1462,39 @@
         return true;
     }
 
+    function initChecklistHeaderToggles() {
+        const headerChecks = document.querySelectorAll('.check-all-column');
+        if (!headerChecks.length) return;
+
+        headerChecks.forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                const value = this.dataset.value;
+                const colIndex = parseInt(this.dataset.index, 10);
+
+                if (this.checked) {
+                    headerChecks.forEach(function(h) { if (h !== cb) h.checked = false; });
+                }
+
+                const tables = document.querySelectorAll('.checklist-table');
+                tables.forEach(function(table) {
+                    const rows = table.querySelectorAll('tbody tr[data-checklist-row]');
+                    rows.forEach(function(row) {
+                        const td = row.children[colIndex - 1];
+                        if (!td) return;
+                        const radio = td.querySelector('input[type="radio"]');
+                        if (cb.checked) {
+                            if (radio) radio.checked = true;
+                        } else {
+                            // clear all radios in the row
+                            const all = row.querySelectorAll('input[type="radio"]');
+                            all.forEach(function(r) { r.checked = false; });
+                        }
+                    });
+                });
+            });
+        });
+    }
+
     function closeModal(id) {
         document.getElementById(id).classList.remove('show');
         // Reset reject form if closing reject modal
@@ -1585,6 +1640,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         initSignaturePadAdmin();
+        initChecklistHeaderToggles();
 
         document.querySelectorAll('form').forEach(function(form) {
             // Only enforce signature for approval form(s)
