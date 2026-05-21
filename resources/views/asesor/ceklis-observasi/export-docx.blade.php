@@ -108,16 +108,36 @@
         </table>
     @endforelse
 
+    @php
+        $parseMultiValue = function ($raw) {
+            $raw = trim((string) $raw);
+
+            if ($raw === '') {
+                return [];
+            }
+
+            return collect(preg_split('/\s*(?:\||,|\r\n|\r|\n)\s*/', $raw))
+                ->filter(fn ($item) => trim((string) $item) !== '')
+                ->map(fn ($item) => trim((string) $item))
+                ->values();
+        };
+
+        $belumKompetenKelompok = $parseMultiValue($item->belum_kompeten_kelompok_pekerjaan ?? '');
+        $belumKompetenUnit = $parseMultiValue($item->belum_kompeten_unit ?? '');
+        $belumKompetenElemen = $parseMultiValue($item->belum_kompeten_elemen ?? '');
+        $belumKompetenKuk = $parseMultiValue($item->belum_kompeten_kuk ?? '');
+    @endphp
+
     <table class="section-gap">
         <tr>
             <td class="bold">Belum Kompeten Pada</td>
         </tr>
         <tr>
             <td>
-                Kelompok: {{ $item->belum_kompeten_kelompok_pekerjaan ?? '-' }}<br>
-                Unit: {{ $item->belum_kompeten_unit ?? '-' }}<br>
-                Elemen: {{ $item->belum_kompeten_elemen ?? '-' }}<br>
-                KUK: {{ $item->belum_kompeten_kuk ?? '-' }}
+                Kelompok: {{ $belumKompetenKelompok->isNotEmpty() ? $belumKompetenKelompok->implode(', ') : '-' }}<br>
+                Unit: {{ $belumKompetenUnit->isNotEmpty() ? $belumKompetenUnit->implode(', ') : '-' }}<br>
+                Elemen: {{ $belumKompetenElemen->isNotEmpty() ? $belumKompetenElemen->implode(', ') : '-' }}<br>
+                KUK: {{ $belumKompetenKuk->isNotEmpty() ? $belumKompetenKuk->implode(', ') : '-' }}
             </td>
         </tr>
     </table>

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\RekamanAsesmenKompetensi;
+use App\Models\PersetujuanAsesmen;
 
 class Asesi extends Model
 {
@@ -149,6 +150,19 @@ class Asesi extends Model
         return $this->skemas()
             ->where('skemas.id', $skemaId)
             ->wherePivot('rekomendasi', 'lanjut')
+            ->exists();
+    }
+
+    public function persetujuanAsesmens()
+    {
+        return $this->hasMany(PersetujuanAsesmen::class, 'asesi_nik', 'NIK');
+    }
+
+    public function hasSignedPersetujuanAsesmen(): bool
+    {
+        return $this->persetujuanAsesmens()
+            ->whereNotNull('ttd_asesi_nama')
+            ->whereNotNull('ttd_asesi_tanggal')
             ->exists();
     }
 

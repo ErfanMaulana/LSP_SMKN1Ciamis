@@ -170,28 +170,64 @@
         display: block;
     }
 
-    .filter-bar {
+    .filter-row {
         display: flex;
-        gap: 10px;
+        justify-content: flex-end;
         margin-bottom: 16px;
-        flex-wrap: wrap;
     }
-    .filter-btn {
-        padding: 8px 16px;
-        border-radius: 999px;
+
+    .filter-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .filter-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .filter-select {
+        min-width: 240px;
+        max-width: 100%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid #dbe4ef;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        color: #0f172a;
+        font-size: 14px;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        outline: none;
+    }
+
+    .filter-select:focus {
+        border-color: #0073bd;
+        box-shadow: 0 0 0 4px rgba(0, 115, 189, 0.1);
+    }
+
+    .filter-reset {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 14px;
+        border-radius: 12px;
         border: 1px solid #e2e8f0;
+        background: #fff;
+        color: #64748b;
         font-size: 13px;
         font-weight: 600;
         text-decoration: none;
-        color: #64748b;
-        background: white;
-        cursor: pointer;
         transition: all 0.2s;
     }
-    .filter-btn:hover, .filter-btn.active {
-        background: #0073bd;
-        color: white;
-        border-color: #0073bd;
+
+    .filter-reset:hover {
+        color: #0f172a;
+        border-color: #cbd5e1;
     }
 
     .table-card {
@@ -209,24 +245,24 @@
     }
     .table-card table {
         width: 100%;
-        min-width: 760px;
+        min-width: 680px;
         border-collapse: collapse;
     }
     .table-card thead th {
         background: #f8fafc;
-        padding: 12px 14px;
+        padding: 8px 10px;
         text-align: left;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 700;
         color: #6b7280;
         text-transform: uppercase;
-        letter-spacing: 0.4px;
+        letter-spacing: 0.35px;
         border-bottom: 1px solid #e2e8f0;
         white-space: nowrap;
     }
     .table-card tbody td {
-        padding: 12px 14px;
-        font-size: 13px;
+        padding: 8px 10px;
+        font-size: 12px;
         color: #334155;
         border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
@@ -263,9 +299,9 @@
 
     .mono-chip {
         display: inline-block;
-        padding: 2px 8px;
+        padding: 2px 6px;
         border-radius: 6px;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         background: #f1f5f9;
         color: #475569;
@@ -280,11 +316,11 @@
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        padding: 4px 8px;
+        padding: 3px 6px;
         border-radius: 999px;
         background: #eff6ff;
         color: #1d4ed8;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         white-space: nowrap;
         max-width: 100%;
@@ -447,6 +483,26 @@
         border-bottom: 1px solid #f3f4f6;
     }
 
+    .menu-entry-label {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .menu-entry-status {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-left: auto;
+        color: #16a34a;
+        font-size: 14px;
+    }
+
+    .menu-entry-status i {
+        font-size: 14px;
+        color: #16a34a;
+    }
+
     .dropdown-menu .menu-disabled {
         display: flex;
         align-items: center;
@@ -459,6 +515,14 @@
         background: #f8fafc;
         border-bottom: 1px solid #f3f4f6;
         cursor: not-allowed;
+    }
+
+    .dropdown-menu .menu-disabled .menu-entry-status {
+        color: #cbd5e1;
+    }
+
+    .dropdown-menu .menu-disabled .menu-entry-status i {
+        color: #cbd5e1;
     }
 
     .dropdown-menu .menu-disabled:last-child {
@@ -554,13 +618,14 @@
         to { transform: rotate(360deg); }
     }
 
-    /* Table Column Widths */
+    /* Table Column Widths (updated for Kelompok column) */
     .table-card th:nth-child(1), .table-card td:nth-child(1) { width: 30%; }
-    .table-card th:nth-child(2), .table-card td:nth-child(2) { width: 30%; }
-    .table-card th:nth-child(3), .table-card td:nth-child(3) { width: 14%; }
-    .table-card th:nth-child(4), .table-card td:nth-child(4) { width: 18%; }
-    .table-card th:nth-child(5), .table-card td:nth-child(5) {
-        width: 8%;
+    .table-card th:nth-child(2), .table-card td:nth-child(2) { width: 12%; }
+    .table-card th:nth-child(3), .table-card td:nth-child(3) { width: 26%; }
+    .table-card th:nth-child(4), .table-card td:nth-child(4) { width: 14%; }
+    .table-card th:nth-child(5), .table-card td:nth-child(5) { width: 12%; }
+    .table-card th:nth-child(6), .table-card td:nth-child(6) {
+        width: 6%;
         min-width: 56px;
         text-align: center;
         overflow: visible;
@@ -819,32 +884,17 @@
             margin-bottom: 10px;
         }
 
-        .filter-bar {
-            gap: 8px;
-            margin-bottom: 14px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-            -webkit-overflow-scrolling: touch;
-            scroll-behavior: smooth;
+        .filter-row {
+            justify-content: stretch;
         }
 
-        .filter-bar::-webkit-scrollbar {
-            height: 3px;
+        .filter-form {
+            justify-content: stretch;
         }
 
-        .filter-bar::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        .filter-bar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
-        }
-
-        .filter-btn {
-            font-size: 12px;
-            padding: 7px 13px;
-            flex-shrink: 0;
+        .filter-select,
+        .filter-reset {
+            width: 100%;
         }
 
         .table-wrap {
@@ -906,7 +956,7 @@
             type="text" 
             class="search-input" 
             id="asesiSearch" 
-            placeholder="Cari nama asesi, NIK, jurusan, atau skema..."
+            placeholder="Cari nama asesi, NIK, kelompok, jurusan, atau skema..."
             autocomplete="off"
         >
         <button class="clear-search" id="clearSearch">
@@ -918,15 +968,22 @@
 <div class="search-results-info" id="searchResultsInfo"></div>
 
 {{-- Filter --}}
-<div class="filter-bar">
-    <a href="{{ route('asesor.asesi.index') }}"
-       class="filter-btn {{ !request('status') ? 'active' : '' }}">Semua</a>
-    <a href="{{ route('asesor.asesi.index', ['status' => 'selesai']) }}"
-       class="filter-btn {{ request('status') === 'selesai' ? 'active' : '' }}">Selesai</a>
-    <a href="{{ route('asesor.asesi.index', ['status' => 'sedang_mengerjakan']) }}"
-       class="filter-btn {{ request('status') === 'sedang_mengerjakan' ? 'active' : '' }}">Sedang Dikerjakan</a>
-    <a href="{{ route('asesor.asesi.index', ['status' => 'belum_mulai']) }}"
-       class="filter-btn {{ request('status') === 'belum_mulai' ? 'active' : '' }}">Belum Mulai</a>
+<div class="filter-row">
+    <form method="GET" action="{{ route('asesor.asesi.index') }}" class="filter-form">
+        <label for="statusFilter" class="filter-label">Filter Status</label>
+        <select id="statusFilter" name="status" class="filter-select" onchange="this.form.submit()">
+            <option value="" {{ !request('status') ? 'selected' : '' }}>Semua Asesi</option>
+            <option value="selesai" {{ request('status') === 'selesai' ? 'selected' : '' }}>Selesai</option>
+            <option value="sedang_mengerjakan" {{ request('status') === 'sedang_mengerjakan' ? 'selected' : '' }}>Sedang Dikerjakan</option>
+            <option value="belum_mulai" {{ request('status') === 'belum_mulai' ? 'selected' : '' }}>Belum Mulai</option>
+        </select>
+        @if(request('status'))
+            <a href="{{ route('asesor.asesi.index') }}" class="filter-reset">
+                <i class="bi bi-x-circle"></i>
+                Reset
+            </a>
+        @endif
+    </form>
 </div>
 
 <div class="table-card table-view">
@@ -936,6 +993,7 @@
             <thead>
                 <tr>
                     <th>Nama Asesi</th>
+                    <th>Kelompok</th>
                     <th>Jurusan / Skema</th>
                     <th>Status Asesmen</th>
                     <th>Rekomendasi</th>
@@ -946,13 +1004,22 @@
                 @foreach($data as $i => $row)
                 @php
                     $asesi = $row->asesi;
+                    $kelompokNama = $asesi?->kelompok?->nama_kelompok ?? '-';
                     // Keep legacy quick-check for action availability
                     $canProceed = ($row->status ?? '') !== 'belum_mulai';
+                    $hasAsesmenMandiri = (bool) $row->has_asesmen_mandiri;
+                    $hasPenilaian = (bool) $row->has_penilaian;
+                    $hasCeklisObservasi = (bool) $row->has_ceklis_observasi;
+                    $hasRekaman = (bool) $row->has_rekaman;
                 @endphp
                 <tr>
                     <td>
                         <div class="asesi-name">{{ $asesi?->nama ?? '—' }}</div>
                         <div class="asesi-nik"><span class="mono-chip">{{ $row->asesi_nik }}</span></div>
+                        <div class="search-keywords" aria-hidden="true" style="display:none;">{{ $kelompokNama }}</div>
+                    </td>
+                    <td>
+                        {{ $kelompokNama }}
                     </td>
                     <td>
                         <span class="mono-chip">{{ $asesi?->jurusan?->kode_jurusan ?? '—' }}</span>
@@ -977,64 +1044,80 @@
                             <div class="dropdown-menu">
                                 <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Lihat detail asesmen mandiri">
                                     <i class="bi bi-eye"></i>
-                                    <span>Lihat Detail</span>
+                                    <span class="menu-entry-label">Lihat Detail</span>
                                 </a>
-                                @if($canProceed && $row->has_asesmen_mandiri)
+                                @if($canProceed && $hasAsesmenMandiri)
                                     <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Review asesmen mandiri">
                                         <i class="bi bi-pencil-square"></i>
-                                        <span>Asesmen Mandiri</span>
+                                        <span class="menu-entry-label">Asesmen Mandiri</span>
+                                        <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
                                     </a>
                                 @else
                                     <span class="menu-disabled">
                                         <i class="bi bi-pencil-square"></i>
-                                        <span>Asesmen Mandiri</span>
+                                        <span class="menu-entry-label">Asesmen Mandiri</span>
+                                        @if($hasAsesmenMandiri)
+                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                        @endif
                                     </span>
                                 @endif
                                 @if(!$canProceed)
                                     <span class="menu-disabled">
                                         <i class="bi bi-clipboard-check"></i>
-                                        <span>Penilaian</span>
+                                        <span class="menu-entry-label">Penilaian</span>
+                                        @if($hasPenilaian)
+                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                        @endif
                                     </span>
                                     <span class="menu-disabled">
                                         <i class="bi bi-check2-square"></i>
-                                        <span>Ceklis Observasi</span>
+                                        <span class="menu-entry-label">Ceklis Observasi</span>
+                                        @if($hasCeklisObservasi)
+                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                        @endif
                                     </span>
                                     <span class="menu-disabled">
                                         <i class="bi bi-file-earmark-text"></i>
-                                        <span>Rekaman Asesi</span>
+                                        <span class="menu-entry-label">Rekaman Asesi</span>
+                                        @if($hasRekaman)
+                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                        @endif
                                     </span>
                                 @else
-                                    @if($row->has_penilaian)
+                                    @if($hasPenilaian)
                                         <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Edit penilaian">
                                             <i class="bi bi-clipboard-check"></i>
-                                            <span>Penilaian</span>
+                                            <span class="menu-entry-label">Penilaian</span>
+                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
                                         </a>
                                     @else
                                         <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Mulai penilaian">
                                             <i class="bi bi-clipboard-check"></i>
-                                            <span>Penilaian</span>
+                                            <span class="menu-entry-label">Penilaian</span>
                                         </a>
                                     @endif
-                                    @if($row->has_ceklis_observasi)
+                                    @if($hasCeklisObservasi)
                                         <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
                                             <i class="bi bi-check2-square"></i>
-                                            <span>Ceklis Observasi</span>
+                                            <span class="menu-entry-label">Ceklis Observasi</span>
+                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
                                         </a>
                                     @else
                                         <a href="{{ route('asesor.ceklis-observasi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Isi ceklis observasi">
                                             <i class="bi bi-check2-square"></i>
-                                            <span>Ceklis Observasi</span>
+                                            <span class="menu-entry-label">Ceklis Observasi</span>
                                         </a>
                                     @endif
-                                    @if($row->has_rekaman)
+                                    @if($hasRekaman)
                                         <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index', ['asesi_nik' => $row->asesi_nik]) }}" title="Lihat rekaman asesmen">
                                             <i class="bi bi-file-earmark-text"></i>
-                                            <span>Rekaman Asesi</span>
+                                            <span class="menu-entry-label">Rekaman Asesi</span>
+                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
                                         </a>
                                     @else
                                         <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Buat rekaman asesmen">
                                             <i class="bi bi-file-earmark-text"></i>
-                                            <span>Rekaman Asesi</span>
+                                            <span class="menu-entry-label">Rekaman Asesi</span>
                                         </a>
                                     @endif
                                 @endif
@@ -1061,8 +1144,13 @@
         @foreach($data as $row)
         @php
             $asesi = $row->asesi;
+            $kelompokNama = $asesi?->kelompok?->nama_kelompok ?? '-';
             // keep legacy quick-check for action availability
             $canProceed = ($row->status ?? '') !== 'belum_mulai';
+            $hasAsesmenMandiri = (bool) $row->has_asesmen_mandiri;
+            $hasPenilaian = (bool) $row->has_penilaian;
+            $hasCeklisObservasi = (bool) $row->has_ceklis_observasi;
+            $hasRekaman = (bool) $row->has_rekaman;
         @endphp
         <div class="asesi-card">
             <!-- Card Header -->
@@ -1070,6 +1158,7 @@
                 <div>
                     <div class="card-name">{{ $asesi?->nama ?? '—' }}</div>
                     <div class="card-email">{{ $row->asesi_nik }}</div>
+                    <div class="search-keywords" aria-hidden="true" style="display:none;">{{ $kelompokNama }}</div>
                 </div>
                 @include('components.asesi-status', ['row' => $row])
             </div>
@@ -1085,6 +1174,11 @@
                 <div class="card-field">
                     <div class="card-label">Skema</div>
                     <div class="card-value"><span class="skema-chip">{{ $row->skema?->nama_skema ?? '—' }}</span></div>
+                </div>
+
+                <div class="card-field">
+                    <div class="card-label">Kelompok</div>
+                    <div class="card-value">{{ $kelompokNama }}</div>
                 </div>
 
                 <!-- Periode -->
@@ -1124,64 +1218,80 @@
                     <div class="dropdown-menu" style="right: auto; left: 0; min-width: 180px;">
                         <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Lihat detail asesmen mandiri">
                             <i class="bi bi-eye"></i>
-                            <span>Lihat Detail</span>
+                            <span class="menu-entry-label">Lihat Detail</span>
                         </a>
-                        @if($canProceed && $row->has_asesmen_mandiri)
+                        @if($canProceed && $hasAsesmenMandiri)
                             <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Review asesmen mandiri">
                                 <i class="bi bi-pencil-square"></i>
-                                <span>Asesmen Mandiri</span>
+                                <span class="menu-entry-label">Asesmen Mandiri</span>
+                                <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
                             </a>
                         @else
                             <span class="menu-disabled">
                                 <i class="bi bi-pencil-square"></i>
-                                <span>Asesmen Mandiri</span>
+                                <span class="menu-entry-label">Asesmen Mandiri</span>
+                                @if($hasAsesmenMandiri)
+                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                @endif
                             </span>
                         @endif
                         @if(!$canProceed)
                             <span class="menu-disabled">
                                 <i class="bi bi-clipboard-check"></i>
-                                <span>Penilaian</span>
+                                <span class="menu-entry-label">Penilaian</span>
+                                @if($hasPenilaian)
+                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                @endif
                             </span>
                             <span class="menu-disabled">
                                 <i class="bi bi-check2-square"></i>
-                                <span>Ceklis Observasi</span>
+                                <span class="menu-entry-label">Ceklis Observasi</span>
+                                @if($hasCeklisObservasi)
+                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                @endif
                             </span>
                             <span class="menu-disabled">
                                 <i class="bi bi-file-earmark-text"></i>
-                                <span>Rekaman Asesi</span>
+                                <span class="menu-entry-label">Rekaman Asesi</span>
+                                @if($hasRekaman)
+                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                @endif
                             </span>
                         @else
-                            @if($row->has_penilaian)
+                            @if($hasPenilaian)
                                 <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Edit penilaian">
                                     <i class="bi bi-clipboard-check"></i>
-                                    <span>Penilaian</span>
+                                    <span class="menu-entry-label">Penilaian</span>
+                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
                                 </a>
                             @else
                                 <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Mulai penilaian">
                                     <i class="bi bi-clipboard-check"></i>
-                                    <span>Penilaian</span>
+                                    <span class="menu-entry-label">Penilaian</span>
                                 </a>
                             @endif
-                            @if($row->has_ceklis_observasi)
+                            @if($hasCeklisObservasi)
                                 <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
                                     <i class="bi bi-check2-square"></i>
-                                    <span>Ceklis Observasi</span>
+                                    <span class="menu-entry-label">Ceklis Observasi</span>
+                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
                                 </a>
                             @else
                                 <a href="{{ route('asesor.ceklis-observasi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Isi ceklis observasi">
                                     <i class="bi bi-check2-square"></i>
-                                    <span>Ceklis Observasi</span>
+                                    <span class="menu-entry-label">Ceklis Observasi</span>
                                 </a>
                             @endif
-                            @if($row->has_rekaman)
+                            @if($hasRekaman)
                                 <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index', ['asesi_nik' => $row->asesi_nik]) }}" title="Lihat rekaman asesmen">
                                     <i class="bi bi-file-earmark-text"></i>
-                                    <span>Rekaman Asesi</span>
+                                    <span class="menu-entry-label">Rekaman Asesi</span>
+                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
                                 </a>
                             @else
                                 <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Buat rekaman asesmen">
                                     <i class="bi bi-file-earmark-text"></i>
-                                    <span>Rekaman Asesi</span>
+                                    <span class="menu-entry-label">Rekaman Asesi</span>
                                 </a>
                             @endif
                         @endif
@@ -1270,7 +1380,7 @@ document.addEventListener('DOMContentLoaded', function() {
             : allRows.filter(r => r.style.display !== 'none').length;
 
         if (displayedCount === 0) {
-            searchResultsInfo.textContent = `Tidak ada asesi yang cocok dengan "${query}"`;
+            searchResultsInfo.textContent = `Tidak ada data yang cocok dengan "${query}"`;
             searchResultsInfo.classList.add('show');
         } else {
             searchResultsInfo.textContent = `Ditemukan ${displayedCount} asesi`;

@@ -658,6 +658,7 @@
                 $isRejected = $asesi && $asesi->status === 'rejected';
                 $isBanned   = $asesi && $asesi->status === 'banned';
                 $hasCompletedUjikom = $asesi && method_exists($asesi, 'hasCompletedUjikom') ? $asesi->hasCompletedUjikom() : false;
+                $hasSignedPersetujuanAsesmen = $asesi && method_exists($asesi, 'hasSignedPersetujuanAsesmen') ? $asesi->hasSignedPersetujuanAsesmen() : false;
                 // Determine whether to show Persetujuan Asesmen menu (only when asesor has completed checklist and signed)
                 $showPersetujuan = false;
                 if ($asesi) {
@@ -753,10 +754,12 @@
                     </a>
                     @endif
 
+                    @if($hasSignedPersetujuanAsesmen)
                     <a href="{{ route('asesi.jadwal.index') }}" class="menu-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event-fill"></i>
                         <span>Jadwal Ujikom</span>
                     </a>
+                    @endif
 
                     @if($hasCompletedUjikom && Route::has('asesi.hasil-ujikom.index'))
                     <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
@@ -879,10 +882,12 @@
                         <span>Asesmen</span>
                     </a>
 
+                    @if($hasSignedPersetujuanAsesmen)
                     <a href="{{ route('asesi.jadwal.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event-fill"></i>
                         <span>Jadwal</span>
                     </a>
+                    @endif
 
                     @if(!empty($showPersetujuan))
                     <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">

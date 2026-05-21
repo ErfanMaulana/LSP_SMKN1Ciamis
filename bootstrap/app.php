@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'asesi.approved' => \App\Http\Middleware\EnsureAsesiApproved::class,
             'asesi.rekomendasi' => \App\Http\Middleware\EnsureRekomendasiLanjut::class,
+            'asesi.persetujuan.signed' => \App\Http\Middleware\EnsurePersetujuanAsesmenSigned::class,
             'ujikom.completed' => \App\Http\Middleware\EnsureUjikomCompleted::class,
             'permission' => \App\Http\Middleware\CheckAdminPermission::class,
             'super-admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
