@@ -553,11 +553,15 @@ class PersetujuanAsesmenFrontController extends Controller
         }
 
         $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
 
         $html = view('persetujuan-asesmen.export-docx', [
             'item' => $item,
             'skema' => $skema,
             'logoPath' => $logoPath,
+            'logoDataUri' => $logoDataUri,
         ])->render();
 
         $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));

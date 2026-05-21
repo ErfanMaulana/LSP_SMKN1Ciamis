@@ -763,6 +763,9 @@ class DashboardController extends Controller
             ->keyBy('elemen_id');
 
         $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
 
         $html = view('asesor.asesmen-mandiri.export-fr-apl-02', [
             'asesi' => $asesi,
@@ -771,6 +774,7 @@ class DashboardController extends Controller
             'answers' => $answers,
             'pivot' => $pivot,
             'logoPath' => $logoPath,
+            'logoDataUri' => $logoDataUri,
         ])->render();
 
         $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));

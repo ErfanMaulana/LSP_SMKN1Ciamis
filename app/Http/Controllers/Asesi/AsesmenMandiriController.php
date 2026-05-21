@@ -381,7 +381,9 @@ class AsesmenMandiriController extends Controller
                     ->keyBy('elemen_id');
 
                 $logoPath = public_path('images/lsp.png');
-                $logoUrl = file_exists($logoPath) ? 'file://' . $logoPath : null;
+                $logoUrl = file_exists($logoPath)
+                    ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+                    : null;
 
                 $pdf = Pdf::loadView('asesi.asesmen-mandiri.pdf-result', compact(
                     'account',

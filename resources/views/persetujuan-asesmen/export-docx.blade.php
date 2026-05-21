@@ -46,8 +46,8 @@
     <table style="margin-bottom:6px; table-layout:fixed;">
         <tr>
             <td class="no-border" style="width:56px; padding:0; vertical-align:middle;">
-                @if(!empty($logoPath) && file_exists($logoPath))
-                    <img src="{{ $logoPath }}" alt="Logo" width="44" height="44" style="width:44px; height:44px; object-fit:contain; display:block; margin:0 auto;">
+                @if(!empty($logoDataUri) || (!empty($logoPath) && file_exists($logoPath)))
+                    <img src="{{ $logoDataUri ?? $logoPath }}" alt="Logo" width="44" height="44" style="width:44px; height:44px; object-fit:contain; display:block; margin:0 auto;">
                 @endif
             </td>
             <td class="no-border" style="padding:0 0 0 6px; vertical-align:middle;">
@@ -189,14 +189,14 @@
         </tr>
         <tr>
             <td style="width:50%; text-align:center; padding:6px;">
-                <div style="width:96px; height:54px; overflow:hidden; border:1px solid #111; display:flex; align-items:center; justify-content:center; margin:0 auto 3px;">
+                <div style="width:96px; height:54px; overflow:hidden; border:none; display:flex; align-items:center; justify-content:center; margin:0 auto 3px;">
                     @if($item->ttd_asesor_file)
                         <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                     @endif
                 </div>
             </td>
             <td style="width:50%; text-align:center; padding:6px;">
-                <div style="width:96px; height:54px; overflow:hidden; border:1px solid #111; display:flex; align-items:center; justify-content:center; margin:0 auto 3px;">
+                <div style="width:96px; height:54px; overflow:hidden; border:none; display:flex; align-items:center; justify-content:center; margin:0 auto 3px;">
                     @if($item->ttd_asesi_file)
                         <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                     @endif
