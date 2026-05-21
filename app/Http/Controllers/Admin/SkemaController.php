@@ -186,7 +186,7 @@ class SkemaController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('admin.skema.index')->with('success', 'Skema sertifikasi berhasil ditambahkan!');
+            return redirect()->route('admin.skema.index', [], 303)->with('success', 'Skema sertifikasi berhasil ditambahkan!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Gagal menyimpan skema: ' . $e->getMessage());
@@ -300,7 +300,7 @@ class SkemaController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('admin.skema.index')->with('success', 'Skema sertifikasi berhasil diperbarui!');
+            return redirect()->route('admin.skema.index', [], 303)->with('success', 'Skema sertifikasi berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Gagal memperbarui skema: ' . $e->getMessage());

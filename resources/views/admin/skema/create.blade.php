@@ -261,12 +261,13 @@
                                 </button>
                             </div>
                         </div>
+
+                        <button type="button" class="add-btn add-unit-in-group" style="margin-top:12px;">
+                            <i class="bi bi-plus-circle"></i> Tambah Unit Kompetensi
+                        </button>
                     </div>
                 </div>
 
-                <button type="button" class="add-btn add-unit" id="addUnitBtn">
-                    <i class="bi bi-plus-circle"></i> Tambah Unit Kompetensi
-                </button>
                 <button type="button" class="add-btn add-unit" id="addGroupBtn" style="margin-left:10px;">
                     <i class="bi bi-plus-circle"></i> Tambah Kelompok Pekerjaan
                 </button>
@@ -345,25 +346,6 @@
 
     // ===== EVENT DELEGATION =====
     document.addEventListener('click', function(e) {
-        if (e.target.closest('#addUnitBtn')) {
-            const container = document.getElementById('units-container');
-            const activeGroupUnits = container.querySelector('.group-card:last-child .group-units');
-            const unitHtml = createUnitHtml(unitIndex, true);
-
-            if (activeGroupUnits) {
-                activeGroupUnits.insertAdjacentHTML('beforeend', unitHtml);
-                syncGroupUnits(activeGroupUnits.closest('.group-card'));
-            } else {
-                container.insertAdjacentHTML('beforeend', unitHtml);
-            }
-
-            unitIndex++;
-            updateNumbers();
-            updateRemoveButtons();
-            scheduleKodeUnitValidation();
-            return;
-        }
-
         if (e.target.closest('#addGroupBtn')) {
             const container = document.getElementById('units-container');
             const groupHtml = createGroupHtml(groupIndex, unitIndex);
@@ -435,6 +417,8 @@
                 groupCard.remove();
                 reindexAll();
                 updateGroupNameVisibility();
+                // ensure visibility recalculation after DOM updates settle
+                setTimeout(updateGroupNameVisibility, 0);
                 updateNumbers();
                 updateRemoveButtons();
                 scheduleKodeUnitValidation();
@@ -520,11 +504,7 @@
             </div>
 
             <div class="form-grid-4">
-                <div class="form-group">
-                    <label>Kelompok Pekerjaan</label>
-                    <input type="hidden" name="units[${uIdx}][kelompok_pekerjaan]" class="unit-group-value" value="">
-                    ${grouped ? '<div class="form-control unit-group-label" style="background:#f8fafc; color:#64748b; display:flex; align-items:center;"></div>' : '<input type="text" name="units[' + uIdx + '][kelompok_pekerjaan_display]" class="form-control unit-group-label" placeholder="Nama kelompok pekerjaan">'}
-                </div>
+                <input type="hidden" name="units[${uIdx}][kelompok_pekerjaan]" class="unit-group-value" value="">
                 <div class="form-group">
                     <label>Kode Unit <span class="required">*</span></label>
                     <input type="text" name="units[${uIdx}][kode_unit]" class="form-control" placeholder="Contoh: J.620100.001.02" required>
@@ -618,6 +598,8 @@
             reindexUnit(unit);
         });
         unitIndex = units.length;
+        // ensure group name visibility is correct after reindexing
+        updateGroupNameVisibility();
     }
 
     function reindexUnit(unitCard) {
