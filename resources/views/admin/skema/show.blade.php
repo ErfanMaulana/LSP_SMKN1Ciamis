@@ -100,66 +100,79 @@
             <h3>Unit Kompetensi</h3>
             
             <div class="units-container">
-                @foreach($skema->units as $index => $unit)
-                <div class="unit-card">
-                    <div class="unit-header">
-                        <div class="unit-number">{{ $index + 1 }}</div>
-                        <div class="unit-info">
-                            <div class="unit-title">{{ $unit->judul_unit }}</div>
-                            <div class="unit-code">{{ $unit->kode_unit }}</div>
+                @php
+                    $groupedUnits = $skema->units->groupBy(function ($unit) {
+                        $groupName = trim((string) ($unit->kelompok_pekerjaan ?? ''));
+                        return $groupName !== '' ? $groupName : 'Tanpa Kelompok';
+                    });
+                @endphp
+                @foreach($groupedUnits as $groupName => $groupUnits)
+                    @if($groupName !== 'Tanpa Kelompok' || $groupedUnits->count() > 1)
+                        <div class="section-title" style="margin-top:0;">
+                            <i class="bi bi-diagram-3"></i> Kelompok Pekerjaan: {{ $groupName }}
                         </div>
-                        <button type="button" class="toggle-btn" onclick="toggleUnit(this)">
-                            <i class="bi bi-chevron-down"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="unit-content">
-                        @if($unit->pertanyaan_unit)
-                        <div class="unit-question">
-                            <div class="question-label">
-                                <i class="bi bi-question-circle"></i> Pertanyaan Unit
+                    @endif
+                    @foreach($groupUnits as $index => $unit)
+                    <div class="unit-card">
+                        <div class="unit-header">
+                            <div class="unit-number">{{ $loop->parent->iteration }}.{{ $index + 1 }}</div>
+                            <div class="unit-info">
+                                <div class="unit-title">{{ $unit->judul_unit }}</div>
+                                <div class="unit-code">{{ $unit->kode_unit }}</div>
                             </div>
-                            <div class="question-text">{{ $unit->pertanyaan_unit }}</div>
+                            <button type="button" class="toggle-btn" onclick="toggleUnit(this)">
+                                <i class="bi bi-chevron-down"></i>
+                            </button>
                         </div>
-                        @endif
+                        
+                        <div class="unit-content">
+                            @if($unit->pertanyaan_unit)
+                            <div class="unit-question">
+                                <div class="question-label">
+                                    <i class="bi bi-question-circle"></i> Pertanyaan Unit
+                                </div>
+                                <div class="question-text">{{ $unit->pertanyaan_unit }}</div>
+                            </div>
+                            @endif
 
-                        @if($unit->elemens->count() > 0)
-                        <div class="elemens-container">
-                            <div class="section-title">
-                                <i class="bi bi-list-check"></i> Elemen Kompetensi ({{ $unit->elemens->count() }})
-                            </div>
-                            
-                            @foreach($unit->elemens as $elIndex => $elemen)
-                            <div class="elemen-item">
-                                <div class="elemen-header">
-                                    <div class="elemen-number">{{ $elIndex + 1 }}</div>
-                                    <div class="elemen-name">{{ $elemen->nama_elemen }}</div>
-                                    <button type="button" class="toggle-btn small" onclick="toggleElemen(this)">
-                                        <i class="bi bi-chevron-down"></i>
-                                    </button>
+                            @if($unit->elemens->count() > 0)
+                            <div class="elemens-container">
+                                <div class="section-title">
+                                    <i class="bi bi-list-check"></i> Elemen Kompetensi ({{ $unit->elemens->count() }})
                                 </div>
                                 
-                                @if($elemen->kriteria->count() > 0)
-                                <div class="elemen-content">
-                                    <div class="kriteria-title">
-                                        <i class="bi bi-check-circle"></i> Kriteria Unjuk Kerja ({{ $elemen->kriteria->count() }})
+                                @foreach($unit->elemens as $elIndex => $elemen)
+                                <div class="elemen-item">
+                                    <div class="elemen-header">
+                                        <div class="elemen-number">{{ $elIndex + 1 }}</div>
+                                        <div class="elemen-name">{{ $elemen->nama_elemen }}</div>
+                                        <button type="button" class="toggle-btn small" onclick="toggleElemen(this)">
+                                            <i class="bi bi-chevron-down"></i>
+                                        </button>
                                     </div>
-                                    <ul class="kriteria-list">
-                                        @foreach($elemen->kriteria as $krIndex => $kriteria)
-                                        <li class="kriteria-item">
-                                            <span class="kriteria-number">{{ $krIndex + 1 }}</span>
-                                            <span class="kriteria-text">{{ $kriteria->deskripsi_kriteria }}</span>
-                                        </li>
-                                        @endforeach
-                                    </ul>
+                                    
+                                    @if($elemen->kriteria->count() > 0)
+                                    <div class="elemen-content">
+                                        <div class="kriteria-title">
+                                            <i class="bi bi-check-circle"></i> Kriteria Unjuk Kerja ({{ $elemen->kriteria->count() }})
+                                        </div>
+                                        <ul class="kriteria-list">
+                                            @foreach($elemen->kriteria as $krIndex => $kriteria)
+                                            <li class="kriteria-item">
+                                                <span class="kriteria-number">{{ $krIndex + 1 }}</span>
+                                                <span class="kriteria-text">{{ $kriteria->deskripsi_kriteria }}</span>
+                                            </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                    @endif
                                 </div>
-                                @endif
+                                @endforeach
                             </div>
-                            @endforeach
+                            @endif
                         </div>
-                        @endif
                     </div>
-                </div>
+                    @endforeach
                 @endforeach
             </div>
         </div>

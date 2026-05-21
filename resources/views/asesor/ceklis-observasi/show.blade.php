@@ -159,6 +159,25 @@
 </div>
 
 <div class="detail-card">
+    @php
+        $parseMultiValue = function ($raw) {
+            $raw = trim((string) $raw);
+
+            if ($raw === '') {
+                return [];
+            }
+
+            return collect(preg_split('/\s*(?:\||,|\r\n|\r|\n)\s*/', $raw))
+                ->filter(fn ($item) => trim((string) $item) !== '')
+                ->map(fn ($item) => trim((string) $item))
+                ->values();
+        };
+
+        $belumKompetenKelompok = $parseMultiValue($item->belum_kompeten_kelompok_pekerjaan ?? '');
+        $belumKompetenUnit = $parseMultiValue($item->belum_kompeten_unit ?? '');
+        $belumKompetenElemen = $parseMultiValue($item->belum_kompeten_elemen ?? '');
+        $belumKompetenKuk = $parseMultiValue($item->belum_kompeten_kuk ?? '');
+    @endphp
     <div class="meta-grid">
         <div class="meta-item"><div class="label">Kode Form</div><div class="value">{{ $item->kode_form }}</div></div>
         <div class="meta-item"><div class="label">Judul Form</div><div class="value">{{ $item->judul_form }}</div></div>
@@ -167,7 +186,7 @@
         <div class="meta-item"><div class="label">Asesi</div><div class="value">{{ $item->asesi?->nama ?? $item->asesi_nik }}</div></div>
         <div class="meta-item"><div class="label">Asesor</div><div class="value">{{ $item->asesor?->nama ?? $item->ttd_asesor_nama ?? '-' }}</div></div>
         <div class="meta-item"><div class="label">Rekomendasi</div><div class="value">{{ $item->rekomendasi === 'kompeten' ? 'KOMPETEN' : 'BELUM KOMPETEN' }}</div></div>
-        <div class="meta-item"><div class="label">Belum Kompeten Pada</div><div class="value">Kelompok: {{ $item->belum_kompeten_kelompok_pekerjaan ?? '-' }}, Unit: {{ $item->belum_kompeten_unit ?? '-' }}, Elemen: {{ $item->belum_kompeten_elemen ?? '-' }}, KUK: {{ $item->belum_kompeten_kuk ?? '-' }}</div></div>
+        <div class="meta-item"><div class="label">Belum Kompeten Pada</div><div class="value">Kelompok: {{ $belumKompetenKelompok->isNotEmpty() ? $belumKompetenKelompok->implode(', ') : '-' }}, Unit: {{ $belumKompetenUnit->isNotEmpty() ? $belumKompetenUnit->implode(', ') : '-' }}, Elemen: {{ $belumKompetenElemen->isNotEmpty() ? $belumKompetenElemen->implode(', ') : '-' }}, KUK: {{ $belumKompetenKuk->isNotEmpty() ? $belumKompetenKuk->implode(', ') : '-' }}</div></div>
     </div>
 </div>
 

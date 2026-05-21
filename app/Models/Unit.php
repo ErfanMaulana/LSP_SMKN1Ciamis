@@ -8,6 +8,7 @@ class Unit extends Model
 {
     protected $fillable = [
         'skema_id',
+        'kelompok_pekerjaan',
         'kode_unit',
         'judul_unit',
         'pertanyaan_unit',

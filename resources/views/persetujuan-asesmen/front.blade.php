@@ -3,6 +3,16 @@
     $role = $role ?? 'asesi';
     $skema = $skema ?? null;
     $layout = $role === 'asesor' ? 'asesor.layout' : 'asesi.layout';
+    $hasChecklist = (bool) (
+        ($item->bukti_verifikasi_portofolio ?? false) ||
+        ($item->bukti_reviu_produk ?? false) ||
+        ($item->bukti_observasi_langsung ?? false) ||
+        ($item->bukti_kegiatan_terstruktur ?? false) ||
+        ($item->bukti_pertanyaan_lisan ?? false) ||
+        ($item->bukti_pertanyaan_tertulis ?? false) ||
+        ($item->bukti_pertanyaan_wawancara ?? false) ||
+        ($item->bukti_lainnya ?? false)
+    );
 @endphp
 
 @extends($layout)
@@ -54,12 +64,312 @@
         border-color: #fde68a;
     }
 
+    .hero-card {
+        background: linear-gradient(135deg, #0b5fa5 0%, #0f7bcf 100%);
+        color: #ffffff;
+        border-radius: 16px;
+        padding: 22px 24px;
+        margin-bottom: 18px;
+        box-shadow: 0 10px 24px rgba(2, 84, 144, 0.16);
+    }
+
+    .hero-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .hero-card h2 {
+        margin: 0 0 6px;
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    .hero-card p {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.6;
+        opacity: 0.92;
+    }
+
+    .hero-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    .hero-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 7px 12px;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .card,
+    .panel-card,
+    .signature-spot,
+    .signature-info-card,
+    .statement-card,
     .doc-wrap {
         background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+    }
+
+    .card-header,
+    .panel-title {
+        padding: 14px 16px;
+        border-bottom: 1px solid #eef2f7;
+        background: #f8fafc;
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    .card-body,
+    .panel-body {
+        padding: 16px;
+    }
+
+    .stack {
+        display: grid;
+        gap: 16px;
+    }
+
+    .work-grid {
+        display: grid;
+        grid-template-columns: 1fr 0.82fr;
+        gap: 16px;
+        align-items: start;
+    }
+
+    .checklist-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px 14px;
+    }
+
+    .checklist-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 10px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #ffffff;
+        color: #0f172a;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+
+    .checklist-item input {
+        margin-top: 2px;
+        flex: 0 0 auto;
+    }
+
+    .checklist-note {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .statement-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .statement-item {
+        padding: 12px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: #f8fafc;
+        color: #334155;
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .statement-role {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .statement-card {
+        margin-top: 16px;
+        padding: 18px;
+    }
+
+    .signature-form-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .signature-spot,
+    .signature-info-card {
+        padding: 18px;
+    }
+
+    .signature-title {
+        margin: 0 0 12px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+        text-align: center;
+    }
+
+    .signature-canvas-wrapper {
+        position: relative;
+        border: 2px dashed #cbd5e1;
+        border-radius: 10px;
+        background: #f8fafc;
+        overflow: hidden;
+        width: 100%;
+        max-width: 260px;
+        margin: 0 auto 12px auto;
+        aspect-ratio: 1 / 1;
+    }
+
+    .signature-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: crosshair;
+        display: block;
+        z-index: 3;
+        background: transparent;
+    }
+
+    .signature-placeholder {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        text-align: center;
+        pointer-events: none;
+        color: #cbd5e1;
+        z-index: 1;
+    }
+
+    .signature-placeholder i {
+        font-size: 38px;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .signature-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+
+    .signature-date {
+        font-size: 13px;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .field {
+        margin-top: 12px;
+    }
+
+    .field label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .field input {
+        width: 100%;
+        height: 42px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+        color: #0f172a;
+        background: #ffffff;
+    }
+
+    .btn-submit,
+    .btn-clear-signature {
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-submit {
+        border: none;
+        background: #0061A5;
+        color: #ffffff;
+        height: 42px;
+        padding: 0 16px;
+        font-size: 14px;
+        margin-top: 12px;
+    }
+
+    .btn-clear-signature {
+        border: 1px solid #cbd5e1;
+        background: #ffffff;
+        color: #64748b;
+        cursor: pointer;
+    }
+
+    .signature-info-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .summary-panel-top {
+        margin-bottom: 16px;
+    }
+
+    .signature-info-row {
+        display: grid;
+        grid-template-columns: 140px 12px 1fr;
+        gap: 8px;
+        align-items: start;
+        font-size: 13px;
+        color: #334155;
+    }
+
+    .signature-info-row .label {
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .doc-wrap {
         padding: 18px;
         overflow-x: auto;
+        margin-bottom: 16px;
     }
 
     .doc {
@@ -105,28 +415,8 @@
     }
 
     .panel-card {
-        background: #ffffff;
-        border-radius: 12px;
-        border: 1px solid #e5e7eb;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         margin-top: 16px;
         overflow: hidden;
-    }
-
-    .panel-title {
-        margin: 0;
-        padding: 16px 18px;
-        border-bottom: 1px solid #f1f5f9;
-        font-size: 16px;
-        font-weight: 700;
-        color: #1e293b;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .panel-body {
-        padding: 16px 18px;
     }
 
     .signature-grid {
@@ -164,124 +454,118 @@
         line-height: 1.35;
     }
 
-    .signature-canvas-wrapper {
-        position: relative;
-        border: 2px dashed #cbd5e1;
-        border-radius: 10px;
-        background: #f8fafc;
-        margin-bottom: 14px;
-        overflow: hidden;
-        width: 100%;
-        max-width: 420px;
-        margin-left: auto;
-        margin-right: auto;
-        aspect-ratio: 1 / 1;
-    }
-
-    @media (max-width: 640px) {
-        .signature-canvas-wrapper {
-            max-width: 320px;
-        }
-    }
-
-    .signature-canvas {
-        display: block;
-        width: 100%;
-        height: 100%;
-        cursor: crosshair;
-    }
-
-    .signature-placeholder {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-        pointer-events: none;
-        color: #cbd5e1;
-    }
-
-    .signature-placeholder i {
-        font-size: 42px;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .signature-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
+    .signature-preview {
+        display: grid;
         gap: 12px;
-        margin-top: 12px;
     }
 
-    .signature-date {
-        font-size: 13px;
-        color: #64748b;
+    .signature-spot {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 6px;
     }
 
-    .field {
-        margin-top: 12px;
+    .signature-spot > * {
+        width: min(100%, 440px);
     }
 
-    .field label {
-        display: block;
-        margin-bottom: 6px;
+    .signature-summary-card {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .summary-card-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .summary-card-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .summary-card-subtitle {
+        margin: 4px 0 0;
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.5;
+    }
+
+    .summary-card-table {
+        width: 100%;
+        border-collapse: collapse;
         font-size: 13px;
-        font-weight: 600;
         color: #334155;
     }
 
-    .field input {
-        width: 100%;
-        height: 42px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 10px 12px;
-        font-size: 14px;
+    .summary-card-table td {
+        padding: 8px 0;
+        vertical-align: top;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .summary-card-table td:first-child {
+        width: 44%;
+        font-weight: 700;
         color: #0f172a;
-        background: #ffffff;
+        padding-right: 10px;
     }
 
-    .error-text {
-        margin-top: 6px;
-        font-size: 12px;
-        color: #dc2626;
+    .summary-card-table tr:last-child td {
+        border-bottom: none;
     }
 
-    .btn-submit,
-    .btn-clear-signature {
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 12px;
-        font-weight: 600;
+    .summary-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .summary-badge {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #0b5fa5;
+        font-size: 12px;
+        font-weight: 700;
     }
 
-    .btn-submit {
-        border: none;
-        background: #0061A5;
-        color: #ffffff;
-        height: 42px;
-        padding: 0 16px;
-        font-size: 14px;
-    }
-
-    .btn-clear-signature {
-        border: 1px solid #cbd5e1;
-        background: #ffffff;
+    .small-note {
+        font-size: 12px;
         color: #64748b;
-        cursor: pointer;
+        line-height: 1.5;
     }
 
-    .notice.small {
-        margin-top: 12px;
+    @media (max-width: 960px) {
+        .work-grid,
+        .signature-form-layout,
+        .signature-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 720px) {
+        .checklist-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .signature-info-row {
+            grid-template-columns: 1fr;
+            gap: 4px;
+        }
+
+        .hero-card {
+            padding: 18px;
+        }
     }
 </style>
 @endsection
@@ -306,254 +590,253 @@
     <div class="notice warning">{{ session('error') }}</div>
 @endif
 
-<div class="doc-wrap">
-    <table class="doc">
-        <tr>
-            <td class="title no-border" colspan="4">{{ $item->kode_form }} &nbsp;&nbsp; {{ $item->judul_form }}</td>
-        </tr>
-        <tr>
-            <td colspan="4">{{ $item->pengantar }}</td>
-        </tr>
-
-        <tr>
-            <td style="width:30%;">Skema Sertifikasi<br>{{ $item->kategori_skema }}</td>
-            <td style="width:12%;">Judul</td>
-            <td style="width:2%;">:</td>
-            <td>{{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</td>
-        </tr>
-        <tr>
-            <td></td>
-            <td>Nomor</td>
-            <td>:</td>
-            <td>{{ $item->nomor_skema ?: ($skema->nomor_skema ?? '-') }}</td>
-        </tr>
-        <tr>
-            <td>TUK</td>
-            <td colspan="2">:</td>
-            <td>{{ $item->tuk }}</td>
-        </tr>
-        <tr>
-            <td>Nama Asesor</td>
-            <td colspan="2">:</td>
-            <td>{{ $item->nama_asesor }}</td>
-        </tr>
-        <tr>
-            <td>Nama Asesi</td>
-            <td colspan="2">:</td>
-            <td>{{ $item->nama_asesi }}</td>
-        </tr>
-
-        <tr>
-            <td>Bukti yang akan dikumpulkan:</td>
-            <td colspan="3">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;">
-                    <div><span class="check">{{ $item->bukti_verifikasi_portofolio ? 'V' : '' }}</span>Hasil Verifikasi Portofolio</div>
-                    <div><span class="check">{{ $item->bukti_reviu_produk ? 'V' : '' }}</span>Hasil Reviu Produk</div>
-                    <div><span class="check">{{ $item->bukti_observasi_langsung ? 'V' : '' }}</span>Hasil Observasi Langsung</div>
-                    <div><span class="check">{{ $item->bukti_kegiatan_terstruktur ? 'V' : '' }}</span>Hasil Kegiatan Terstruktur</div>
-                    <div><span class="check">{{ $item->bukti_pertanyaan_lisan ? 'V' : '' }}</span>Hasil Pertanyaan Lisan</div>
-                    <div><span class="check">{{ $item->bukti_pertanyaan_tertulis ? 'V' : '' }}</span>Hasil Pertanyaan Tertulis</div>
-                    <div><span class="check">{{ $item->bukti_lainnya ? 'V' : '' }}</span>Lainnya {{ $item->bukti_lainnya_keterangan ? ': ' . $item->bukti_lainnya_keterangan : '' }}</div>
-                    <div><span class="check">{{ $item->bukti_pertanyaan_wawancara ? 'V' : '' }}</span>Hasil Pertanyaan Wawancara</div>
-                </div>
-            </td>
-        </tr>
-
-        <tr>
-            <td rowspan="3">Pelaksanaan asesmen disepakati pada:</td>
-            <td>Hari / Tanggal</td>
-            <td>:</td>
-            <td>{{ $item->hari_tanggal }}</td>
-        </tr>
-        <tr>
-            <td>Waktu</td>
-            <td>:</td>
-            <td>{{ $item->waktu }}</td>
-        </tr>
-        <tr>
-            <td>TUK</td>
-            <td>:</td>
-            <td>{{ $item->tuk_pelaksanaan }}</td>
-        </tr>
-
-        <tr>
-            <td colspan="4"><strong>Asesi:</strong><br>{{ $item->pernyataan_asesi_1 }}</td>
-        </tr>
-        <tr>
-            <td colspan="4"><strong>Asesor:</strong><br>{{ $item->pernyataan_asesor }}</td>
-        </tr>
-        <tr>
-            <td colspan="4"><strong>Asesi:</strong><br>{{ $item->pernyataan_asesi_2 }}</td>
-        </tr>
-
-        <tr>
-            <td colspan="2">Tanda tangan Asesor : {{ $item->ttd_asesor_nama ?: '............................' }}</td>
-            <td colspan="2">Tanggal : {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '............................' }}</td>
-        </tr>
-        <tr>
-            <td colspan="2">Tanda tangan Asesi : {{ $item->ttd_asesi_nama ?: '............................' }}</td>
-            <td colspan="2">Tanggal : {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: '............................' }}</td>
-        </tr>
-        <tr>
-            <td colspan="4" style="padding: 16px; text-align: center; background: #f8fafc;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
-                    <div style="text-align: center;">
-                        <h4 style="margin: 0 0 12px; color: #0f172a; font-size: 14px;">Tanda Tangan Asesor</h4>
-                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; min-height: 120px; display: flex; align-items: center; justify-content: center; background: white;">
-                            @if($item->ttd_asesor_file)
-                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" style="max-width: 100%; max-height: 120px;">
-                            @else
-                                <span style="color: #94a3b8; font-size: 13px;">Belum ditandatangani</span>
-                            @endif
-                        </div>
-                        <p style="margin: 8px 0 0; font-size: 13px; color: #64748b;">
-                            <strong>{{ $item->ttd_asesor_nama ?: 'Nama Asesor' }}</strong><br>
-                            {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: 'Tanggal Pendatangan' }}
-                        </p>
-                    </div>
-
-                    <div style="text-align: center;">
-                        <h4 style="margin: 0 0 12px; color: #0f172a; font-size: 14px;">Tanda Tangan Asesi</h4>
-                        <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; min-height: 120px; display: flex; align-items: center; justify-content: center; background: white;">
-                            @if($item->ttd_asesi_file)
-                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" style="max-width: 100%; max-height: 120px;">
-                            @else
-                                <span style="color: #94a3b8; font-size: 13px;">Belum ditandatangani</span>
-                            @endif
-                        </div>
-                        <p style="margin: 8px 0 0; font-size: 13px; color: #64748b;">
-                            <strong>{{ $item->ttd_asesi_nama ?: 'Nama Asesi' }}</strong><br>
-                            {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: 'Tanggal Pendatangan' }}
-                        </p>
-                    </div>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    @if($item->catatan_footer)
-        <div class="notes"><em>{{ $item->catatan_footer }}</em></div>
-    @endif
-</div>
-
-<div class="panel-card">
-    <h3 class="panel-title"><i class="bi bi-pen"></i> Tanda Tangan</h3>
-    <div class="panel-body">
-        <div class="signature-grid">
-            <div class="signature-box">
-                <h4 style="margin:0 0 12px; color:#0f172a; font-size:14px;">Tanda Tangan Asesor</h4>
-                <div class="frame">
-                    @if($item->ttd_asesor_file)
-                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor">
-                    @else
-                        <span style="color:#94a3b8; font-size:13px;">Belum ditandatangani</span>
-                    @endif
-                </div>
-                <p class="meta">
-                    <strong>{{ $item->ttd_asesor_nama ?: 'Nama Asesor' }}</strong><br>
-                    {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: 'Tanggal Pendatangan' }}
-                </p>
-
-                @if($role === 'asesor' && empty($item->ttd_asesor_file))
-                    <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" class="form-grid" id="formTandaTanganAsesor">
-                        @csrf
-                        
-                        <div style="margin-top:16px; padding:12px; background:#f0f9ff; border:1px solid #bfdbfe; border-radius:8px;">
-                            <label style="display:block; margin-bottom:12px; font-weight:600; color:#1e40af;">
-                                <i class="bi bi-clipboard-check"></i> Ceklis Bukti yang Sudah Dikumpulkan
-                            </label>
-                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                    <input type="checkbox" name="bukti_verifikasi_portofolio" value="1" {{ $item->bukti_verifikasi_portofolio ? 'checked' : '' }}>
-                                    <span>Hasil Verifikasi Portofolio</span>
-                                </label>
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                    <input type="checkbox" name="bukti_reviu_produk" value="1" {{ $item->bukti_reviu_produk ? 'checked' : '' }}>
-                                    <span>Hasil Reviu Produk</span>
-                                </label>
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                    <input type="checkbox" name="bukti_observasi_langsung" value="1" {{ $item->bukti_observasi_langsung ? 'checked' : '' }}>
-                                    <span>Hasil Observasi Langsung</span>
-                                </label>
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                    <input type="checkbox" name="bukti_kegiatan_terstruktur" value="1" {{ $item->bukti_kegiatan_terstruktur ? 'checked' : '' }}>
-                                    <span>Hasil Kegiatan Terstruktur</span>
-                                </label>
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                    <input type="checkbox" name="bukti_pertanyaan_lisan" value="1" {{ $item->bukti_pertanyaan_lisan ? 'checked' : '' }}>
-                                    <span>Hasil Pertanyaan Lisan</span>
-                                </label>
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                    <input type="checkbox" name="bukti_pertanyaan_tertulis" value="1" {{ $item->bukti_pertanyaan_tertulis ? 'checked' : '' }}>
-                                    <span>Hasil Pertanyaan Tertulis</span>
-                                </label>
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                    <input type="checkbox" name="bukti_pertanyaan_wawancara" value="1" {{ $item->bukti_pertanyaan_wawancara ? 'checked' : '' }}>
-                                    <span>Hasil Pertanyaan Wawancara</span>
-                                </label>
-                                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                                    <input type="checkbox" name="bukti_lainnya" value="1" {{ $item->bukti_lainnya ? 'checked' : '' }} id="buktiLainnyaCheckbox">
-                                    <span>Lainnya</span>
-                                </label>
-                            </div>
-                            <div id="buktiLainnyaKeteranganDiv" style="margin-top:12px; display:{{ $item->bukti_lainnya ? 'block' : 'none' }};">
-                                <label style="display:block; margin-bottom:6px; font-size:13px; color:#475569;">Keterangan Lainnya</label>
-                                <input type="text" name="bukti_lainnya_keterangan" placeholder="Jelaskan bukti lainnya" value="{{ $item->bukti_lainnya_keterangan }}" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:6px; font-size:13px;">
-                            </div>
-                        </div>
-                        
-                        <div class="signature-canvas-wrapper" id="signatureWrapperAsesor" style="margin-top:16px;">
-                            <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
-                            <div class="signature-placeholder">
-                                <i class="bi bi-pen"></i>
-                                <span>Tanda tangan di sini</span>
-                            </div>
-                        </div>
-                        <div class="signature-actions">
-                            <div class="signature-date">
-                                <i class="bi bi-calendar3"></i>
-                                Tanggal: <strong id="signatureDateAsesor">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
-                            </div>
-                            <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
-                                <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-                            </button>
-                        </div>
-                        <div class="field">
-                            <label>Nama Asesor</label>
-                            <input type="text" name="ttd_asesor_nama" value="{{ old('ttd_asesor_nama', $item->ttd_asesor_nama ?: $item->nama_asesor) }}">
-                            @error('ttd_asesor_nama')<div class="error-text">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="field">
-                            <label>Tanggal Tanda Tangan</label>
-                            <input type="date" name="ttd_asesor_tanggal" value="{{ old('ttd_asesor_tanggal', $item->ttd_asesor_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d')) }}">
-                            @error('ttd_asesor_tanggal')<div class="error-text">{{ $message }}</div>@enderror
-                        </div>
-                        <input type="hidden" name="ttd_asesor_file" id="ttdAsesorFileInput">
-                        <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesor</button>
-                    </form>
-                @endif
+@if($role === 'asesor')
+    <div class="hero-card">
+        <div class="hero-card-top">
+            <div>
+                <h2>Detail Persetujuan Asesmen</h2>
+                <p>Lengkapi ceklis bukti, pastikan jadwal sudah benar, lalu simpan tanda tangan asesor.</p>
             </div>
+            <a href="{{ route('asesor.persetujuan.front.asesor.export', ['asesiNik' => $asesiNik, 'skemaId' => $skema->id]) }}" class="btn btn-primary" target="_blank">
+                <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
+            </a>
+        </div>
+        <div class="hero-meta">
+            <span class="hero-chip"><i class="bi bi-person-badge"></i> {{ $item->nama_asesi }}</span>
+            <span class="hero-chip"><i class="bi bi-collection"></i> {{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</span>
+            <span class="hero-chip"><i class="bi bi-clock"></i> {{ $item->hari_tanggal ?: '-' }}</span>
+        </div>
+    </div>
 
-            <div class="signature-box">
-                <h4 style="margin:0 0 12px; color:#0f172a; font-size:14px;">Tanda Tangan Asesi</h4>
-                <div class="frame">
-                    @if($item->ttd_asesi_file)
-                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi">
+    <div class="signature-info-card signature-summary-card summary-panel-top">
+        <div class="summary-card-head">
+            <div>
+                <h3 class="summary-card-title">Informasi Persetujuan</h3>
+                <p class="summary-card-subtitle">Data utama untuk pengecekan sebelum tanda tangan.</p>
+            </div>
+            <span class="summary-badge"><i class="bi bi-eye"></i> Preview Asesor</span>
+        </div>
+
+        <div class="summary-badges">
+            <span class="summary-badge"><i class="bi bi-person-badge"></i> {{ $item->nama_asesi }}</span>
+            <span class="summary-badge"><i class="bi bi-collection"></i> {{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</span>
+        </div>
+
+        <table class="summary-card-table">
+            <tr>
+                <td>Skema</td>
+    
+                <td>TUK</td>
+                <td>{{ $item->tuk }}</td>
+            </tr>
+            <tr>
+                <td>Asesor</td>
+                <td>{{ $item->nama_asesor }}</td>
+            </tr>
+            <tr>
+                <td>Asesi</td>
+                <td>{{ $item->nama_asesi }}</td>
+            </tr>
+            <tr>
+                <td>Hari / Tanggal</td>
+                <td>{{ $item->hari_tanggal ?: '-' }}</td>
+            </tr>
+            <tr>
+                <td>Waktu</td>
+                <td>{{ $item->waktu ?: '-' }}</td>
+            </tr>
+            <tr>
+                <td>TUK Pelaksanaan</td>
+                <td>{{ $item->tuk_pelaksanaan ?: '-' }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><i class="bi bi-clipboard-check"></i> Ceklis Bukti yang Sudah Dikumpulkan</div>
+        <div class="card-body">
+            @if(!$item->ttd_asesor_file)
+            <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" id="formTandaTanganAsesor">
+                @csrf
+            @endif
+            <div class="checklist-grid" style="margin-top:12px;">
+                <label class="checklist-item"><input type="checkbox" name="bukti_verifikasi_portofolio" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_verifikasi_portofolio ? 'checked' : '' }}><span>Hasil Verifikasi Portofolio</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_reviu_produk" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_reviu_produk ? 'checked' : '' }}><span>Hasil Reviu Produk</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_observasi_langsung" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_observasi_langsung ? 'checked' : '' }}><span>Hasil Observasi Langsung</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_kegiatan_terstruktur" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_kegiatan_terstruktur ? 'checked' : '' }}><span>Hasil Kegiatan Terstruktur</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_lisan" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_lisan ? 'checked' : '' }}><span>Hasil Pertanyaan Lisan</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_tertulis" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_tertulis ? 'checked' : '' }}><span>Hasil Pertanyaan Tertulis</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_wawancara" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_wawancara ? 'checked' : '' }}><span>Hasil Pertanyaan Wawancara</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_lainnya" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_lainnya ? 'checked' : '' }} id="buktiLainnyaCheckbox"><span>Lainnya {{ $item->bukti_lainnya_keterangan ? ': ' . $item->bukti_lainnya_keterangan : '' }}</span></label>
+            </div>
+            @if(!$item->ttd_asesor_file)
+                <div id="buktiLainnyaKeteranganDiv" style="margin-top:12px; display:{{ $item->bukti_lainnya ? 'block' : 'none' }};">
+                    <label style="display:block; margin-bottom:6px; font-size:13px; color:#475569; font-weight:600;">Keterangan Lainnya</label>
+                    <input type="text" name="bukti_lainnya_keterangan" placeholder="Jelaskan bukti lainnya" value="{{ $item->bukti_lainnya_keterangan }}" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; background:#fff;">
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="statement-card">
+        <div class="statement-list">
+            <div class="statement-item"><span class="statement-role">Asesi</span>{{ $item->pernyataan_asesi_1 }}</div>
+            <div class="statement-item"><span class="statement-role">Asesor</span>{{ $item->pernyataan_asesor }}</div>
+            <div class="statement-item"><span class="statement-role">Asesi</span>{{ $item->pernyataan_asesi_2 }}</div>
+        </div>
+    </div>
+
+    <div class="panel-card" style="margin-top:16px;">
+        <div class="panel-title"><i class="bi bi-pen"></i> Tanda Tangan Asesor</div>
+        <div class="panel-body">
+            <div class="signature-form-layout">
+                <div class="signature-spot">
+                    @if($item->ttd_asesor_file)
+                        <div class="signature-preview">
+                            <div style="width:100%;max-width:260px;aspect-ratio:1/1;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto 12px;">
+                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" style="max-width:100%;max-height:100%;object-fit:contain;">
+                            </div>
+                            <div class="small-note" style="text-align:center;">
+                                <strong>{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}</strong><br>
+                                {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
+                            </div>
+                        </div>
                     @else
-                        <span style="color:#94a3b8; font-size:13px;">Belum ditandatangani</span>
+                        <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" id="formTandaTanganAsesor">
+                            @csrf
+                            <div class="signature-title">Gambar tanda tangan di bawah</div>
+                            <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
+                                <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
+                                <div class="signature-placeholder">
+                                    <i class="bi bi-pen"></i>
+                                    <span>Tanda tangan di sini</span>
+                                </div>
+                            </div>
+                            <div class="signature-actions">
+                                <div class="signature-date">
+                                    <i class="bi bi-calendar3"></i>
+                                    Tanggal: <strong id="signatureDateAsesor">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
+                                </div>
+                                <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
+                                    <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                                </button>
+                            </div>
+                            <input type="hidden" name="ttd_asesor_nama" value="{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}">
+                            <input type="hidden" name="ttd_asesor_tanggal" value="{{ $item->ttd_asesor_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
+                            <input type="hidden" name="ttd_asesor_file" id="ttdAsesorFileInput">
+                            <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesor</button>
+                        </form>
                     @endif
                 </div>
-                <p class="meta">
-                    <strong>{{ $item->ttd_asesi_nama ?: 'Nama Asesi' }}</strong><br>
-                    {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: 'Tanggal Pendatangan' }}
-                </p>
 
-                @if($role !== 'asesor' && !$item->ttd_asesi_file)
-                    @if(empty($item->ttd_asesor_file) && (empty($item->ttd_asesor_nama) || empty($item->ttd_asesor_tanggal)))
-                        <div class="notice warning small">Asesor belum menandatangani form ini. Tanda tangan asesi belum dapat dilakukan.</div>
-                    @elseif($item->ttd_asesor_file || (!empty($item->ttd_asesor_nama) && !empty($item->ttd_asesor_tanggal)))
-                        <form method="POST" action="{{ route('asesi.persetujuan.front.asesi.sign', $item->id) }}" class="form-grid" id="formTandaTanganAsesi" style="margin-top:16px;">
-                            @csrf
+            </div>
+        </div>
+    </div>
+            @if(!$item->ttd_asesor_file)
+            </form>
+            @endif
+@else
+    <div class="doc-wrap">
+        <table class="doc">
+            <tr>
+                <td class="title no-border" colspan="4">{{ $item->kode_form }} &nbsp;&nbsp; {{ $item->judul_form }}</td>
+            </tr>
+            <tr>
+                <td colspan="4">{{ $item->pengantar }}</td>
+            </tr>
+            <tr>
+                <td style="width:30%;">Skema Sertifikasi<br>{{ $item->kategori_skema }}</td>
+                <td style="width:12%;">Judul</td>
+                <td style="width:2%;">:</td>
+                <td>{{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</td>
+            </tr>
+            <tr>
+                <td></td>
+                <td>Nomor</td>
+                <td>:</td>
+                <td>{{ $item->nomor_skema ?: ($skema->nomor_skema ?? '-') }}</td>
+            </tr>
+            <tr>
+                <td>TUK</td>
+                <td colspan="2">:</td>
+                <td>{{ $item->tuk }}</td>
+            </tr>
+            <tr>
+                <td>Nama Asesor</td>
+                <td colspan="2">:</td>
+                <td>{{ $item->nama_asesor }}</td>
+            </tr>
+            <tr>
+                <td>Nama Asesi</td>
+                <td colspan="2">:</td>
+                <td>{{ $item->nama_asesi }}</td>
+            </tr>
+            <tr>
+                <td>Bukti yang akan dikumpulkan:</td>
+                <td colspan="3">
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;">
+                        <div><span class="check">{{ $item->bukti_verifikasi_portofolio ? 'V' : '' }}</span>Hasil Verifikasi Portofolio</div>
+                        <div><span class="check">{{ $item->bukti_reviu_produk ? 'V' : '' }}</span>Hasil Reviu Produk</div>
+                        <div><span class="check">{{ $item->bukti_observasi_langsung ? 'V' : '' }}</span>Hasil Observasi Langsung</div>
+                        <div><span class="check">{{ $item->bukti_kegiatan_terstruktur ? 'V' : '' }}</span>Hasil Kegiatan Terstruktur</div>
+                        <div><span class="check">{{ $item->bukti_pertanyaan_lisan ? 'V' : '' }}</span>Hasil Pertanyaan Lisan</div>
+                        <div><span class="check">{{ $item->bukti_pertanyaan_tertulis ? 'V' : '' }}</span>Hasil Pertanyaan Tertulis</div>
+                        <div><span class="check">{{ $item->bukti_lainnya ? 'V' : '' }}</span>Lainnya {{ $item->bukti_lainnya_keterangan ? ': ' . $item->bukti_lainnya_keterangan : '' }}</div>
+                        <div><span class="check">{{ $item->bukti_pertanyaan_wawancara ? 'V' : '' }}</span>Hasil Pertanyaan Wawancara</div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td rowspan="3">Pelaksanaan asesmen disepakati pada:</td>
+                <td>Hari / Tanggal</td>
+                <td>:</td>
+                <td>{{ $item->hari_tanggal }}</td>
+            </tr>
+            <tr>
+                <td>Waktu</td>
+                <td>:</td>
+                <td>{{ $item->waktu }}</td>
+            </tr>
+            <tr>
+                <td>TUK</td>
+                <td>:</td>
+                <td>{{ $item->tuk_pelaksanaan }}</td>
+            </tr>
+            <tr>
+                <td colspan="4"><strong>Asesi:</strong><br>{{ $item->pernyataan_asesi_1 }}</td>
+            </tr>
+            <tr>
+                <td colspan="4"><strong>Asesor:</strong><br>{{ $item->pernyataan_asesor }}</td>
+            </tr>
+            <tr>
+                <td colspan="4"><strong>Asesi:</strong><br>{{ $item->pernyataan_asesi_2 }}</td>
+            </tr>
+            <tr>
+                <td colspan="2">Tanda tangan Asesor : {{ $item->ttd_asesor_nama ?: '............................' }}</td>
+                <td colspan="2">Tanggal : {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '............................' }}</td>
+            </tr>
+            <tr>
+                <td colspan="2">Tanda tangan Asesi : {{ $item->ttd_asesi_nama ?: '............................' }}</td>
+                <td colspan="2">Tanggal : {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: '............................' }}</td>
+            </tr>
+        </table>
+
+        @if($item->catatan_footer)
+            <div class="notes"><em>{{ $item->catatan_footer }}</em></div>
+        @endif
+    </div>
+
+    <div class="panel-card">
+        <div class="panel-title"><i class="bi bi-pen"></i> Tanda Tangan</div>
+        <div class="panel-body">
+            @if(empty($item->ttd_asesi_file))
+                @if(empty($item->ttd_asesor_file) && (empty($item->ttd_asesor_nama) || empty($item->ttd_asesor_tanggal)))
+                    <div class="notice warning">Asesor belum menandatangani form ini. Tanda tangan asesi belum dapat dilakukan.</div>
+                @else
+                    <form method="POST" action="{{ route('asesi.persetujuan.front.asesi.sign', $item->id) }}" id="formTandaTanganAsesi">
+                        @csrf
+                        <div class="signature-spot" style="max-width:560px; margin:0 auto;">
+                            <div class="signature-title">Tanda Tangan Asesi</div>
                             <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
                                 <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
                                 <div class="signature-placeholder">
@@ -577,143 +860,129 @@
                             </div>
                             <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput">
                             <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesi</button>
-                        </form>
-                    @endif
+                        </div>
+                    </form>
                 @endif
-            </div>
+            @endif
         </div>
     </div>
-</div>
+@endif
+
 @endsection
 
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const asesiCanvas = document.getElementById('signatureCanvasAsesi');
-    if (asesiCanvas) {
-        const asesiWrapper = document.getElementById('signatureWrapperAsesi');
-        const asesiClear = document.getElementById('clearSignatureAsesi');
-        const asesiDateInput = document.getElementById('ttdAsesiTanggalInput');
-        const asesiHidden = document.getElementById('ttdAsesiFileInput');
-        const asesiCtx = asesiCanvas.getContext('2d');
-        let isDrawing = false;
+    function initSignatureCanvas(config) {
+        const canvas = document.getElementById(config.canvasId);
+        if (!canvas) return;
+
+        const clearBtn = document.getElementById(config.clearBtnId);
+        const hiddenInput = document.getElementById(config.hiddenInputId);
+        const dateInput = config.dateInputId ? document.getElementById(config.dateInputId) : null;
+        const form = document.getElementById(config.formId);
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
         let lastX = 0;
         let lastY = 0;
+        const wrapper = config.wrapperId ? document.getElementById(config.wrapperId) : canvas.parentElement;
+        const placeholder = wrapper ? wrapper.querySelector('.signature-placeholder') : null;
+        let hasSignature = false;
 
-        const resizeAsesi = () => {
+        const resize = () => {
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            const rect = asesiCanvas.getBoundingClientRect();
-            asesiCanvas.width = rect.width * ratio;
-            asesiCanvas.height = rect.height * ratio;
-            asesiCtx.setTransform(1, 0, 0, 1, 0, 0);
-            asesiCtx.scale(ratio, ratio);
-            asesiCtx.lineCap = 'round';
-            asesiCtx.lineJoin = 'round';
-            asesiCtx.strokeStyle = '#0f172a';
-            asesiCtx.lineWidth = 2;
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * ratio;
+            canvas.height = rect.height * ratio;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
         };
 
         const pos = (event) => {
-            const rect = asesiCanvas.getBoundingClientRect();
+            const rect = canvas.getBoundingClientRect();
             const point = event.touches && event.touches[0] ? event.touches[0] : event;
             return { x: point.clientX - rect.left, y: point.clientY - rect.top };
         };
 
-        const start = (event) => { event.preventDefault(); isDrawing = true; const p = pos(event); lastX = p.x; lastY = p.y; };
-        const move = (event) => { event.preventDefault(); if (!isDrawing) return; const p = pos(event); asesiCtx.beginPath(); asesiCtx.moveTo(lastX, lastY); asesiCtx.lineTo(p.x, p.y); asesiCtx.stroke(); lastX = p.x; lastY = p.y; };
-        const stop = () => { isDrawing = false; };
+        const start = (event) => { event.preventDefault(); drawing = true; const p = pos(event); lastX = p.x; lastY = p.y; };
+        const move = (event) => {
+            event.preventDefault();
+            if (!drawing) return;
+            const p = pos(event);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(p.x, p.y);
+            ctx.stroke();
+            lastX = p.x;
+            lastY = p.y;
 
-        if (asesiClear) {
-            asesiClear.addEventListener('click', () => {
-                asesiCtx.clearRect(0, 0, asesiCanvas.width, asesiCanvas.height);
-                if (asesiDateInput) asesiDateInput.value = '';
-                if (asesiHidden) asesiHidden.value = '';
+            if (!hasSignature) {
+                hasSignature = true;
+                if (wrapper) wrapper.classList.add('has-signature');
+                if (placeholder) placeholder.style.display = 'none';
+            }
+        };
+        const stop = () => { drawing = false; };
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                hasSignature = false;
+                if (hiddenInput) hiddenInput.value = '';
+                if (dateInput) dateInput.value = '';
+                if (wrapper) wrapper.classList.remove('has-signature');
+                if (placeholder) placeholder.style.display = '';
             });
         }
 
-        const asesiForm = document.getElementById('formTandaTanganAsesi');
-        if (asesiForm) {
-            asesiForm.addEventListener('submit', function() {
-                if (asesiHidden) {
-                    asesiHidden.value = asesiCanvas.toDataURL('image/png');
+        if (form) {
+            form.addEventListener('submit', function() {
+                if (hiddenInput) {
+                    hiddenInput.value = canvas.toDataURL('image/png');
                 }
             });
         }
 
-        asesiCanvas.addEventListener('mousedown', start);
-        asesiCanvas.addEventListener('mousemove', move);
-        asesiCanvas.addEventListener('mouseup', stop);
-        asesiCanvas.addEventListener('mouseleave', stop);
-        asesiCanvas.addEventListener('touchstart', start, { passive: false });
-        asesiCanvas.addEventListener('touchmove', move, { passive: false });
-        asesiCanvas.addEventListener('touchend', stop);
-        window.addEventListener('resize', resizeAsesi);
-        resizeAsesi();
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', move);
+        canvas.addEventListener('mouseup', stop);
+        canvas.addEventListener('mouseleave', stop);
+        canvas.addEventListener('touchstart', start, { passive: false });
+        canvas.addEventListener('touchmove', move, { passive: false });
+        canvas.addEventListener('touchend', stop);
+        window.addEventListener('resize', resize);
+        resize();
+
+        // If hidden input already has a signature (e.g., re-render), show/hide placeholder
+        if (hiddenInput && hiddenInput.value) {
+            hasSignature = true;
+            if (wrapper) wrapper.classList.add('has-signature');
+            if (placeholder) placeholder.style.display = 'none';
+        }
     }
 
-    const asesorCanvas = document.getElementById('signatureCanvasAsesor');
-    if (asesorCanvas) {
-        const asesorWrapper = document.getElementById('signatureWrapperAsesor');
-        const asesorClear = document.getElementById('clearSignatureAsesor');
-        const asesorDateInput = document.querySelector('input[name="ttd_asesor_tanggal"]');
-        const asesorHidden = document.getElementById('ttdAsesorFileInput');
-        const asesorCtx = asesorCanvas.getContext('2d');
-        let isDrawing = false;
-        let lastX = 0;
-        let lastY = 0;
+    initSignatureCanvas({
+        canvasId: 'signatureCanvasAsesor',
+        clearBtnId: 'clearSignatureAsesor',
+        hiddenInputId: 'ttdAsesorFileInput',
+        wrapperId: 'signatureWrapperAsesor',
+        dateInputId: null,
+        formId: 'formTandaTanganAsesor',
+    });
 
-        const resizeAsesor = () => {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
-            const rect = asesorCanvas.getBoundingClientRect();
-            asesorCanvas.width = rect.width * ratio;
-            asesorCanvas.height = rect.height * ratio;
-            asesorCtx.setTransform(1, 0, 0, 1, 0, 0);
-            asesorCtx.scale(ratio, ratio);
-            asesorCtx.lineCap = 'round';
-            asesorCtx.lineJoin = 'round';
-            asesorCtx.strokeStyle = '#0f172a';
-            asesorCtx.lineWidth = 2;
-        };
+    initSignatureCanvas({
+        canvasId: 'signatureCanvasAsesi',
+        clearBtnId: 'clearSignatureAsesi',
+        hiddenInputId: 'ttdAsesiFileInput',
+        wrapperId: 'signatureWrapperAsesi',
+        dateInputId: 'ttdAsesiTanggalInput',
+        formId: 'formTandaTanganAsesi',
+    });
 
-        const pos = (event) => {
-            const rect = asesorCanvas.getBoundingClientRect();
-            const point = event.touches && event.touches[0] ? event.touches[0] : event;
-            return { x: point.clientX - rect.left, y: point.clientY - rect.top };
-        };
-
-        const start = (event) => { event.preventDefault(); isDrawing = true; const p = pos(event); lastX = p.x; lastY = p.y; };
-        const move = (event) => { event.preventDefault(); if (!isDrawing) return; const p = pos(event); asesorCtx.beginPath(); asesorCtx.moveTo(lastX, lastY); asesorCtx.lineTo(p.x, p.y); asesorCtx.stroke(); lastX = p.x; lastY = p.y; };
-        const stop = () => { isDrawing = false; };
-
-        if (asesorClear) {
-            asesorClear.addEventListener('click', () => {
-                asesorCtx.clearRect(0, 0, asesorCanvas.width, asesorCanvas.height);
-                if (asesorDateInput && !asesorDateInput.value) asesorDateInput.value = '';
-                if (asesorHidden) asesorHidden.value = '';
-            });
-        }
-
-        const asesorForm = document.getElementById('formTandaTanganAsesor');
-        if (asesorForm) {
-            asesorForm.addEventListener('submit', function() {
-                if (asesorHidden) {
-                    asesorHidden.value = asesorCanvas.toDataURL('image/png');
-                }
-            });
-        }
-
-        asesorCanvas.addEventListener('mousedown', start);
-        asesorCanvas.addEventListener('mousemove', move);
-        asesorCanvas.addEventListener('mouseup', stop);
-        asesorCanvas.addEventListener('mouseleave', stop);
-        asesorCanvas.addEventListener('touchstart', start, { passive: false });
-        asesorCanvas.addEventListener('touchmove', move, { passive: false });
-        asesorCanvas.addEventListener('touchend', stop);
-        window.addEventListener('resize', resizeAsesor);
-        resizeAsesor();
-    }
-
-    // Handle "Lainnya" checkbox toggle
     const buktiLainnyaCheckbox = document.getElementById('buktiLainnyaCheckbox');
     const buktiLainnyaKeteranganDiv = document.getElementById('buktiLainnyaKeteranganDiv');
     if (buktiLainnyaCheckbox && buktiLainnyaKeteranganDiv) {

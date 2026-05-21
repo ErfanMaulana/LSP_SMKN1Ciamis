@@ -129,6 +129,12 @@
         gap: 16px;
     }
 
+    .form-grid-4 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 2fr;
+        gap: 16px;
+    }
+
     select.form-control {
         cursor: pointer;
         appearance: none;
@@ -170,6 +176,10 @@
         font-size: 13px;
         color: #64748b;
         margin: 0 0 20px;
+    }
+
+    .group-name-field.is-hidden {
+        display: none;
     }
 
     .unit-filter {
@@ -505,7 +515,7 @@
         <div class="card">
             <div class="card-body">
                 <div class="section-label">Unit Kompetensi</div>
-                <p class="section-desc">Kelola unit kompetensi beserta elemen dan kriteria unjuk kerja (KUK).</p>
+                <p class="section-desc">Kelola kelompok pekerjaan, unit kompetensi, elemen, dan kriteria unjuk kerja (KUK).</p>
 
                 <!-- Filter Unit -->
                 <div class="unit-filter" style="margin-bottom:20px;">
@@ -529,7 +539,12 @@
 
                         <div class="unit-content">
 
-                        <div class="form-grid-3">
+                        <div class="form-grid-4">
+                            <div class="form-group">
+                                <label>Kelompok Pekerjaan</label>
+                                <input type="text" name="units[{{ $uIdx }}][kelompok_pekerjaan]" class="form-control" 
+                                       value="{{ $unit['kelompok_pekerjaan'] ?? '' }}" placeholder="Kosongkan jika hanya satu kelompok">
+                            </div>
                             <div class="form-group">
                                 <label>Kode Unit <span class="required">*</span></label>
                                 <input type="text" name="units[{{ $uIdx }}][kode_unit]" class="form-control" 
@@ -653,6 +668,9 @@
                 <button type="button" class="add-btn add-unit" id="addUnitBtn">
                     <i class="bi bi-plus-circle"></i> Tambah Unit Kompetensi
                 </button>
+                <button type="button" class="add-btn add-unit" id="addGroupBtn" style="margin-left:10px;">
+                    <i class="bi bi-plus-circle"></i> Tambah Kelompok Pekerjaan
+                </button>
             </div>
         </div>
 
@@ -676,8 +694,40 @@
 @section('scripts')
 <script>
     let unitIndex = {{ count($units ?? []) }};
+    let groupIndex = 1;
     let kodeUnitValidationTimer = null;
     let isSubmittingFromValidation = false;
+
+    function syncGroupUnits(groupCard) {
+        if (!groupCard) {
+            return;
+        }
+
+        const groupName = (groupCard.querySelector('.group-name-input')?.value || '').trim();
+        groupCard.querySelectorAll('.unit-card').forEach((unitCard) => {
+            const hiddenInput = unitCard.querySelector('input.unit-group-value');
+            if (hiddenInput) {
+                hiddenInput.value = groupName;
+            }
+
+            const label = unitCard.querySelector('.unit-group-label');
+            if (label) {
+                label.textContent = groupName || 'Akan mengikuti nama kelompok di atas';
+            }
+        });
+    }
+
+    function updateGroupNameVisibility() {
+        const groupCards = document.querySelectorAll('#units-container .group-card');
+        const showGroupNameFields = groupCards.length > 1;
+
+        groupCards.forEach((groupCard) => {
+            const groupField = groupCard.querySelector('.group-name-field');
+            if (groupField) {
+                groupField.classList.toggle('is-hidden', !showGroupNameFields);
+            }
+        });
+    }
 
     // ===== TOGGLE FUNCTIONS =====
     function toggleUnit(header) {
@@ -730,19 +780,47 @@
         updateRemoveButtons();
     }
 
-    // ===== ADD UNIT =====
-    document.getElementById('addUnitBtn').addEventListener('click', function() {
-        const container = document.getElementById('units-container');
-        const unitHtml = createUnitHtml(unitIndex);
-        container.insertAdjacentHTML('beforeend', unitHtml);
-        unitIndex++;
-        updateNumbers();
-        updateRemoveButtons();
-        scheduleKodeUnitValidation();
-    });
+    // Add unit/group via delegated clicks (works even if script runs before DOM ready)
 
     // ===== EVENT DELEGATION =====
     document.addEventListener('click', function(e) {
+        if (e.target.closest('#addUnitBtn')) {
+            const container = document.getElementById('units-container');
+            const activeGroupUnits = container.querySelector('.group-card:last-child .group-units');
+            const unitHtml = createUnitHtml(unitIndex, true);
+            if (activeGroupUnits) {
+                activeGroupUnits.insertAdjacentHTML('beforeend', unitHtml);
+                syncGroupUnits(activeGroupUnits.closest('.group-card'));
+            } else {
+                container.insertAdjacentHTML('beforeend', unitHtml);
+            }
+            unitIndex++;
+            updateNumbers();
+            updateRemoveButtons();
+            scheduleKodeUnitValidation();
+            return;
+        }
+
+        if (e.target.closest('#addGroupBtn')) {
+            const container = document.getElementById('units-container');
+            const groupHtml = createGroupHtml(groupIndex, unitIndex);
+            container.insertAdjacentHTML('beforeend', groupHtml);
+            const groupCard = container.querySelector('.group-card:last-child');
+            syncGroupUnits(groupCard);
+            groupIndex++;
+            unitIndex++;
+            updateGroupNameVisibility();
+            updateNumbers();
+            updateRemoveButtons();
+            scheduleKodeUnitValidation();
+
+            const kelompokInput = container.querySelector('.group-card:first-child .group-name-input');
+            if (kelompokInput) {
+                kelompokInput.focus();
+            }
+            return;
+        }
+
         if (e.target.closest('.add-elemen')) {
             const unitCard = e.target.closest('.unit-card');
             const uIdx = getUnitIndex(unitCard);
@@ -764,11 +842,38 @@
             updateNumbers();
             updateRemoveButtons();
         }
+
+        if (e.target.closest('.add-unit-in-group')) {
+            const groupCard = e.target.closest('.group-card');
+            const groupUnits = groupCard.querySelector('.group-units');
+            groupUnits.insertAdjacentHTML('beforeend', createUnitHtml(unitIndex, true));
+            unitIndex++;
+            syncGroupUnits(groupCard);
+            updateNumbers();
+            updateRemoveButtons();
+            scheduleKodeUnitValidation();
+        }
+
+        if (e.target.closest('.remove-group-btn')) {
+            const groupCard = e.target.closest('.group-card');
+            if (groupCard) {
+                groupCard.remove();
+                reindexAll();
+                updateGroupNameVisibility();
+                updateNumbers();
+                updateRemoveButtons();
+                scheduleKodeUnitValidation();
+            }
+        }
     });
 
     document.addEventListener('input', function(e) {
         if (e.target.matches('#units-container input[name*="[kode_unit]"]')) {
             scheduleKodeUnitValidation();
+        }
+
+        if (e.target.matches('#units-container .group-name-input')) {
+            syncGroupUnits(e.target.closest('.group-card'));
         }
     });
 
@@ -779,7 +884,32 @@
     }, true);
 
     // ===== HTML GENERATORS =====
-    function createUnitHtml(uIdx) {
+    function createGroupHtml(gIdx, uIdx) {
+        return `
+        <div class="group-card" data-group-index="${gIdx}">
+            <div class="group-header">
+                <div class="group-title">
+                    <strong>Kelompok Pekerjaan #${gIdx + 1}</strong>
+                    <small>Gunakan hanya jika ada lebih dari satu kelompok pekerjaan</small>
+                </div>
+                <div class="form-group group-name-field" style="max-width:420px; margin-bottom:0;">
+                    <label>Nama Kelompok Pekerjaan</label>
+                    <input type="text" class="form-control group-name-input" placeholder="Contoh: Front Office, Back Office, dll.">
+                </div>
+                <button type="button" class="remove-btn remove-group-btn" title="Hapus kelompok">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="group-units">
+                ${createUnitHtml(uIdx, true)}
+            </div>
+            <button type="button" class="add-btn add-unit-in-group" style="margin-top:12px;">
+                <i class="bi bi-plus-circle"></i> Tambah Unit Kompetensi
+            </button>
+        </div>`;
+    }
+
+    function createUnitHtml(uIdx, grouped = false) {
         return `
         <div class="unit-card" data-unit-index="${uIdx}">
             <div class="unit-header" onclick="toggleUnit(this)">
@@ -793,7 +923,12 @@
                 </button>
             </div>
             <div class="unit-content">
-            <div class="form-grid-3">
+            <div class="form-grid-4">
+                <div class="form-group">
+                    <label>Kelompok Pekerjaan</label>
+                    <input type="hidden" name="units[${uIdx}][kelompok_pekerjaan]" class="unit-group-value" value="">
+                    ${grouped ? '<div class="form-control unit-group-label" style="background:#f8fafc; color:#64748b; display:flex; align-items:center;">Akan mengikuti nama kelompok di atas</div>' : '<input type="text" name="units[' + uIdx + '][kelompok_pekerjaan_display]" class="form-control unit-group-label" placeholder="Nama kelompok pekerjaan">'}
+                </div>
                 <div class="form-group">
                     <label>Kode Unit <span class="required">*</span></label>
                     <input type="text" name="units[${uIdx}][kode_unit]" class="form-control" placeholder="Contoh: J.620100.001.02" required>
@@ -875,6 +1010,7 @@
         const units = document.querySelectorAll('#units-container .unit-card');
         units.forEach((unit, uIdx) => {
             unit.setAttribute('data-unit-index', uIdx);
+            unit.querySelector('input[name*="[kelompok_pekerjaan]"]').name = `units[${uIdx}][kelompok_pekerjaan]`;
             unit.querySelector('input[name*="[kode_unit]"]').name = `units[${uIdx}][kode_unit]`;
             unit.querySelector('input[name*="[judul_unit]"]').name = `units[${uIdx}][judul_unit]`;
             unit.querySelector('textarea[name*="[pertanyaan_unit]"]').name = `units[${uIdx}][pertanyaan_unit]`;
@@ -887,9 +1023,11 @@
         const uIdx = getUnitIndex(unitCard);
         if (uIdx < 0) return;
 
+        const kelompokInput = unitCard.querySelector('input[name*="[kelompok_pekerjaan]"]');
         const kodeInput = unitCard.querySelector('input[name*="[kode_unit]"]');
         const judulInput = unitCard.querySelector('input[name*="[judul_unit]"]');
         const pertanyaanArea = unitCard.querySelector('textarea[name*="[pertanyaan_unit]"]');
+        if (kelompokInput) kelompokInput.name = `units[${uIdx}][kelompok_pekerjaan]`;
         if (kodeInput) kodeInput.name = `units[${uIdx}][kode_unit]`;
         if (judulInput) judulInput.name = `units[${uIdx}][judul_unit]`;
         if (pertanyaanArea) pertanyaanArea.name = `units[${uIdx}][pertanyaan_unit]`;
@@ -942,6 +1080,30 @@
 
     // ===== UPDATE REMOVE BUTTONS =====
     function updateRemoveButtons() {
+        const groups = document.querySelectorAll('#units-container .group-card');
+        groups.forEach(group => {
+            const removeGroupBtn = group.querySelector('.remove-group-btn');
+            if (removeGroupBtn) removeGroupBtn.style.display = groups.length > 1 ? 'flex' : 'none';
+
+            const unitsInGroup = group.querySelectorAll('.unit-card');
+            unitsInGroup.forEach(unit => {
+                const removeBtn = unit.querySelector(':scope > .unit-header .remove-unit-btn');
+                if (removeBtn) removeBtn.style.display = unitsInGroup.length > 1 ? 'flex' : 'none';
+
+                const elemens = unit.querySelectorAll('.elemen-card');
+                elemens.forEach(elemen => {
+                    const removeElBtn = elemen.querySelector(':scope > .elemen-header .remove-elemen-btn');
+                    if (removeElBtn) removeElBtn.style.display = elemens.length > 1 ? 'flex' : 'none';
+
+                    const kriterias = elemen.querySelectorAll('.kriteria-item');
+                    kriterias.forEach(kriteria => {
+                        const removeKrBtn = kriteria.querySelector('.remove-kriteria-btn');
+                        if (removeKrBtn) removeKrBtn.style.display = kriterias.length > 1 ? 'flex' : 'none';
+                    });
+                });
+            });
+        });
+
         const units = document.querySelectorAll('#units-container .unit-card');
         units.forEach(unit => {
             const removeBtn = unit.querySelector(':scope > .unit-header .remove-unit-btn');
@@ -971,11 +1133,13 @@
         units.forEach(unit => {
             const kodeInput = unit.querySelector('input[name*="[kode_unit]"]');
             const judulInput = unit.querySelector('input[name*="[judul_unit]"]');
+            const kelompokInput = unit.querySelector('input[name*="[kelompok_pekerjaan]"]');
             
             const kode = kodeInput ? kodeInput.value.toLowerCase() : '';
             const judul = judulInput ? judulInput.value.toLowerCase() : '';
+            const kelompok = kelompokInput ? kelompokInput.value.toLowerCase() : '';
             
-            if (kode.includes(filter) || judul.includes(filter)) {
+            if (kode.includes(filter) || judul.includes(filter) || kelompok.includes(filter)) {
                 unit.style.display = '';
                 visibleCount++;
             } else {
@@ -1095,6 +1259,7 @@
     });
 
     // Init
+    updateGroupNameVisibility();
     updateRemoveButtons();
     validateKodeUnitByAjax();
 </script>

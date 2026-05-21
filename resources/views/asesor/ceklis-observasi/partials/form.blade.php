@@ -41,6 +41,27 @@
     $selectedTanggal = old('tanggal', ($record && $record->tanggal) ? $record->tanggal->format('Y-m-d') : '');
     $ttdAsesiTanggal = old('ttd_asesi_tanggal', ($record && $record->ttd_asesi_tanggal) ? $record->ttd_asesi_tanggal->format('Y-m-d') : '');
     $ttdAsesorTanggal = old('ttd_asesor_tanggal', ($record && $record->ttd_asesor_tanggal) ? $record->ttd_asesor_tanggal->format('Y-m-d') : '');
+
+    $parseMultiValue = function ($raw) {
+        $raw = trim((string) $raw);
+
+        if ($raw === '') {
+            return [];
+        }
+
+        return collect(preg_split('/\s*(?:\||,|\r\n|\r|\n)\s*/', $raw))
+            ->filter(fn ($item) => trim((string) $item) !== '')
+            ->map(fn ($item) => trim((string) $item))
+            ->values()
+            ->all();
+    };
+
+    $belumKompetenDefaults = [
+        'kelompok_pekerjaan' => $parseMultiValue($value('belum_kompeten_kelompok_pekerjaan', '')),
+        'unit' => $parseMultiValue($value('belum_kompeten_unit', '')),
+        'elemen' => $parseMultiValue($value('belum_kompeten_elemen', '')),
+        'kuk' => $parseMultiValue($value('belum_kompeten_kuk', '')),
+    ];
 @endphp
 
 <style>
@@ -53,6 +74,129 @@
     .field textarea { min-height:76px; resize:vertical; }
     .error-text { font-size:12px; color:#dc2626; }
     .req { color:#dc2626; }
+
+    .search-multiselect {
+        position: relative;
+    }
+
+    .search-multiselect-toggle {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        padding: 8px 11px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        text-align: left;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-multiselect-toggle:focus,
+    .search-multiselect.open .search-multiselect-toggle {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .search-multiselect-placeholder {
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .search-multiselect-values {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .search-multiselect-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 600;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .search-multiselect-chevron {
+        margin-left: auto;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+
+    .search-multiselect-dropdown {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: calc(100% + 6px);
+        z-index: 30;
+        background: #fff;
+        border: 1px solid #dbe4ef;
+        border-radius: 10px;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+    }
+
+    .search-multiselect.open .search-multiselect-dropdown {
+        display: block;
+    }
+
+    .search-multiselect-search {
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 10px 12px;
+        font-size: 13px;
+        outline: none;
+        border-radius: 0;
+    }
+
+    .search-multiselect-options {
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .search-multiselect-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #334155;
+    }
+
+    .search-multiselect-option:last-child {
+        border-bottom: none;
+    }
+
+    .search-multiselect-option:hover {
+        background: #f8fafc;
+    }
+
+    .search-multiselect-option input {
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    .search-multiselect-empty {
+        padding: 12px;
+        color: #94a3b8;
+        font-size: 13px;
+    }
 
     .checklist-wrapper { margin-top:16px; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; }
     .checklist-head { background:#f8fafc; border-bottom:1px solid #e2e8f0; padding:10px 12px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; }
@@ -290,10 +434,66 @@
             @error('rekomendasi')<div class="error-text">{{ $message }}</div>@enderror
 
             <div id="belumKompetenFields" class="grid-2 {{ old('rekomendasi', $value('rekomendasi', 'belum_kompeten')) === 'belum_kompeten' ? '' : 'hidden' }}" style="margin-top:10px;">
-                <div class="field"><label>Kelompok Pekerjaan</label><input type="text" name="belum_kompeten_kelompok_pekerjaan" value="{{ $value('belum_kompeten_kelompok_pekerjaan', '') }}"></div>
-                <div class="field"><label>Unit</label><input type="text" name="belum_kompeten_unit" value="{{ $value('belum_kompeten_unit', '') }}"></div>
-                <div class="field"><label>Elemen</label><input type="text" name="belum_kompeten_elemen" value="{{ $value('belum_kompeten_elemen', '') }}"></div>
-                <div class="field"><label>KUK</label><input type="text" name="belum_kompeten_kuk" value="{{ $value('belum_kompeten_kuk', '') }}"></div>
+                <div class="field">
+                    <label>Kelompok Pekerjaan</label>
+                    <div class="search-multiselect" data-field="kelompok_pekerjaan" data-placeholder="Cari dan pilih kelompok pekerjaan">
+                        <input type="hidden" name="belum_kompeten_kelompok_pekerjaan" value="{{ $value('belum_kompeten_kelompok_pekerjaan', '') }}">
+                        <button type="button" class="search-multiselect-toggle" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="search-multiselect-values"></span>
+                            <span class="search-multiselect-placeholder">Cari dan pilih kelompok pekerjaan</span>
+                            <i class="bi bi-chevron-down search-multiselect-chevron"></i>
+                        </button>
+                        <div class="search-multiselect-dropdown" role="listbox">
+                            <input type="text" class="search-multiselect-search" placeholder="Ketik untuk mencari...">
+                            <div class="search-multiselect-options"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Unit</label>
+                    <div class="search-multiselect" data-field="unit" data-placeholder="Cari dan pilih unit">
+                        <input type="hidden" name="belum_kompeten_unit" value="{{ $value('belum_kompeten_unit', '') }}">
+                        <button type="button" class="search-multiselect-toggle" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="search-multiselect-values"></span>
+                            <span class="search-multiselect-placeholder">Cari dan pilih unit</span>
+                            <i class="bi bi-chevron-down search-multiselect-chevron"></i>
+                        </button>
+                        <div class="search-multiselect-dropdown" role="listbox">
+                            <input type="text" class="search-multiselect-search" placeholder="Ketik untuk mencari...">
+                            <div class="search-multiselect-options"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Elemen</label>
+                    <div class="search-multiselect" data-field="elemen" data-placeholder="Cari dan pilih elemen">
+                        <input type="hidden" name="belum_kompeten_elemen" value="{{ $value('belum_kompeten_elemen', '') }}">
+                        <button type="button" class="search-multiselect-toggle" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="search-multiselect-values"></span>
+                            <span class="search-multiselect-placeholder">Cari dan pilih elemen</span>
+                            <i class="bi bi-chevron-down search-multiselect-chevron"></i>
+                        </button>
+                        <div class="search-multiselect-dropdown" role="listbox">
+                            <input type="text" class="search-multiselect-search" placeholder="Ketik untuk mencari...">
+                            <div class="search-multiselect-options"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>KUK</label>
+                    <div class="search-multiselect" data-field="kuk" data-placeholder="Cari dan pilih KUK">
+                        <input type="hidden" name="belum_kompeten_kuk" value="{{ $value('belum_kompeten_kuk', '') }}">
+                        <button type="button" class="search-multiselect-toggle" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="search-multiselect-values"></span>
+                            <span class="search-multiselect-placeholder">Cari dan pilih KUK</span>
+                            <i class="bi bi-chevron-down search-multiselect-chevron"></i>
+                        </button>
+                        <div class="search-multiselect-dropdown" role="listbox">
+                            <input type="text" class="search-multiselect-search" placeholder="Ketik untuk mencari...">
+                            <div class="search-multiselect-options"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -353,7 +553,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const asesiDataUrl = '{{ route('asesor.ceklis-observasi.get-asesi-data') }}';
     const selectedAsesiNik = @json($selectedAsesiNik);
     const initialDetailMap = @json($initialDetailMap ?? []);
+    const belumKompetenDefaults = @json($belumKompetenDefaults ?? []);
     let firstHydration = true;
+    let currentBelumKompetenOptions = {
+        kelompok_pekerjaan: [],
+        unit: [],
+        elemen: [],
+        kuk: [],
+    };
 
     const tukInput = document.getElementById('tukInput');
     const tanggalInput = document.getElementById('tanggalInput');
@@ -425,6 +632,186 @@ document.addEventListener('DOMContentLoaded', function () {
     const autosizeTextarea = (textarea) => {
         textarea.style.height = 'auto';
         textarea.style.height = `${textarea.scrollHeight}px`;
+    };
+
+    const parseMultiValue = (value) => {
+        if (!value) {
+            return [];
+        }
+
+        return String(value)
+            .split(/\s*(?:\||,|\r\n|\r|\n)\s*/)
+            .map((item) => item.trim())
+            .filter(Boolean);
+    };
+
+    const formatMultiValue = (values) => values.join(' | ');
+
+    const buildBelumKompetenOptions = (units) => {
+        const kelompokMap = new Map();
+        const unitMap = new Map();
+        const elemenMap = new Map();
+        const kukMap = new Map();
+
+        (units || []).forEach((unit) => {
+            const unitLabel = `${unit.kode_unit} - ${unit.judul_unit}`;
+            if (!kelompokMap.has(unit.judul_unit)) {
+                kelompokMap.set(unit.judul_unit, unit.judul_unit);
+            }
+            if (!unitMap.has(unitLabel)) {
+                unitMap.set(unitLabel, unitLabel);
+            }
+
+            (unit.elemens || []).forEach((elemen) => {
+                if (!elemenMap.has(elemen.nama_elemen)) {
+                    elemenMap.set(elemen.nama_elemen, elemen.nama_elemen);
+                }
+
+                (elemen.kriteria || []).forEach((kriteria) => {
+                    if (!kukMap.has(kriteria.deskripsi_kriteria)) {
+                        kukMap.set(kriteria.deskripsi_kriteria, kriteria.deskripsi_kriteria);
+                    }
+                });
+            });
+        });
+
+        return {
+            kelompok_pekerjaan: Array.from(kelompokMap.entries()).map(([value, label]) => ({ value, label })),
+            unit: Array.from(unitMap.entries()).map(([value, label]) => ({ value, label })),
+            elemen: Array.from(elemenMap.entries()).map(([value, label]) => ({ value, label })),
+            kuk: Array.from(kukMap.entries()).map(([value, label]) => ({ value, label })),
+        };
+    };
+
+    const closeMultiSelect = (container) => {
+        if (!container) {
+            return;
+        }
+
+        container.classList.remove('open');
+        const toggle = container.querySelector('.search-multiselect-toggle');
+        if (toggle) {
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    };
+
+    const renderMultiSelect = (container, options, selectedValues) => {
+        const hiddenInput = container.querySelector('input[type="hidden"]');
+        const toggle = container.querySelector('.search-multiselect-toggle');
+        const valuesWrap = container.querySelector('.search-multiselect-values');
+        const placeholder = container.querySelector('.search-multiselect-placeholder');
+        const searchInput = container.querySelector('.search-multiselect-search');
+        const optionsWrap = container.querySelector('.search-multiselect-options');
+
+        if (!hiddenInput || !toggle || !valuesWrap || !placeholder || !searchInput || !optionsWrap) {
+            return;
+        }
+
+        const selectedSet = new Set(selectedValues || []);
+
+        const syncValue = () => {
+            hiddenInput.value = formatMultiValue(Array.from(selectedSet));
+            valuesWrap.innerHTML = '';
+
+            if (selectedSet.size === 0) {
+                placeholder.style.display = 'inline';
+                return;
+            }
+
+            placeholder.style.display = 'none';
+            Array.from(selectedSet).forEach((value) => {
+                const chip = document.createElement('span');
+                chip.className = 'search-multiselect-chip';
+                chip.textContent = value;
+                valuesWrap.appendChild(chip);
+            });
+        };
+
+        const drawOptions = () => {
+            const query = searchInput.value.trim().toLowerCase();
+            optionsWrap.innerHTML = '';
+
+            const filtered = (options || []).filter((option) => {
+                const haystack = `${option.label} ${option.value}`.toLowerCase();
+                return haystack.includes(query);
+            });
+
+            if (filtered.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'search-multiselect-empty';
+                empty.textContent = 'Tidak ada opsi yang cocok.';
+                optionsWrap.appendChild(empty);
+                return;
+            }
+
+            filtered.forEach((option) => {
+                const item = document.createElement('label');
+                item.className = 'search-multiselect-option';
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = selectedSet.has(option.value);
+
+                const text = document.createElement('span');
+                text.textContent = option.label;
+
+                item.appendChild(checkbox);
+                item.appendChild(text);
+                item.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    if (selectedSet.has(option.value)) {
+                        selectedSet.delete(option.value);
+                    } else {
+                        selectedSet.add(option.value);
+                    }
+                    syncValue();
+                    drawOptions();
+                });
+
+                optionsWrap.appendChild(item);
+            });
+        };
+
+        syncValue();
+        drawOptions();
+
+        toggle.addEventListener('click', function (event) {
+            event.preventDefault();
+            const isOpen = container.classList.contains('open');
+            document.querySelectorAll('.search-multiselect.open').forEach((openContainer) => {
+                if (openContainer !== container) {
+                    closeMultiSelect(openContainer);
+                }
+            });
+            container.classList.toggle('open', !isOpen);
+            toggle.setAttribute('aria-expanded', String(!isOpen));
+            if (!isOpen) {
+                searchInput.focus();
+            }
+        });
+
+        searchInput.addEventListener('input', drawOptions);
+
+        container.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!container.contains(event.target)) {
+                closeMultiSelect(container);
+            }
+        });
+    };
+
+    const initBelumKompetenFields = (units) => {
+        currentBelumKompetenOptions = buildBelumKompetenOptions(units);
+
+        document.querySelectorAll('.search-multiselect').forEach((container) => {
+            const field = container.getAttribute('data-field');
+            const options = currentBelumKompetenOptions[field] || [];
+            const selected = parseMultiValue(belumKompetenDefaults[field] || container.querySelector('input[type="hidden"]')?.value || '');
+            renderMultiSelect(container, options, selected);
+        });
     };
 
     const renderChecklist = (units) => {
@@ -583,6 +970,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             fillAsesi(participants.asesi || [], firstHydration ? selectedAsesiNik : '');
             renderChecklist(structure.units || []);
+            initBelumKompetenFields(structure.units || []);
             document.querySelectorAll('.penilaian-lanjut-textarea').forEach((textarea) => autosizeTextarea(textarea));
             if (firstHydration && selectedAsesiNik) {
                 await fetchAsesiData(selectedAsesiNik);

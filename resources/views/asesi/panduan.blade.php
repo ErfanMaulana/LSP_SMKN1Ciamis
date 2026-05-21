@@ -315,7 +315,7 @@
         <a href="{{ route('asesi.pendaftaran.formulir') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Pendaftaran</a>
     @endif
     <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Asesmen Mandiri</a>
-    @if(isset($asesi) && method_exists($asesi, 'hasRekomendasiLanjut') && $asesi->hasRekomendasiLanjut())
+    @if(isset($asesi) && method_exists($asesi, 'hasSignedPersetujuanAsesmen') && $asesi->hasSignedPersetujuanAsesmen())
         <a href="{{ route('asesi.jadwal.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Jadwal Ujikom</a>
     @endif
     <a href="{{ route('asesi.hasil-ujikom.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Hasil Asesmen</a>

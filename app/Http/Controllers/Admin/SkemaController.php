@@ -124,6 +124,7 @@ class SkemaController extends Controller
             'jenis_skema' => 'required|in:KKNI,Okupasi,Klaster',
             'jurusan_id' => 'nullable|exists:jurusan,ID_jurusan',
             'units' => 'required|array|min:1',
+            'units.*.kelompok_pekerjaan' => 'nullable|string|max:255',
             'units.*.kode_unit' => 'required|string|max:255|distinct',
             'units.*.judul_unit' => 'required|string|max:255',
             'units.*.pertanyaan_unit' => 'nullable|string',
@@ -164,6 +165,7 @@ class SkemaController extends Controller
 
             foreach ($validated['units'] as $unitData) {
                 $unit = $skema->units()->create([
+                    'kelompok_pekerjaan' => $unitData['kelompok_pekerjaan'] ?? null,
                     'kode_unit' => $unitData['kode_unit'],
                     'judul_unit' => $unitData['judul_unit'],
                     'pertanyaan_unit' => $unitData['pertanyaan_unit'] ?? null,
@@ -184,7 +186,7 @@ class SkemaController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('admin.skema.index')->with('success', 'Skema sertifikasi berhasil ditambahkan!');
+            return redirect()->route('admin.skema.index', [], 303)->with('success', 'Skema sertifikasi berhasil ditambahkan!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Gagal menyimpan skema: ' . $e->getMessage());
@@ -237,6 +239,7 @@ class SkemaController extends Controller
             'jenis_skema' => 'required|in:KKNI,Okupasi,Klaster',
             'jurusan_id' => 'nullable|exists:jurusan,ID_jurusan',
             'units' => 'required|array|min:1',
+            'units.*.kelompok_pekerjaan' => 'nullable|string|max:255',
             'units.*.kode_unit' => 'required|string|max:255|distinct',
             'units.*.judul_unit' => 'required|string|max:255',
             'units.*.pertanyaan_unit' => 'nullable|string',
@@ -276,6 +279,7 @@ class SkemaController extends Controller
 
             foreach ($validated['units'] as $unitData) {
                 $unit = $skema->units()->create([
+                    'kelompok_pekerjaan' => $unitData['kelompok_pekerjaan'] ?? null,
                     'kode_unit' => $unitData['kode_unit'],
                     'judul_unit' => $unitData['judul_unit'],
                     'pertanyaan_unit' => $unitData['pertanyaan_unit'] ?? null,
@@ -296,7 +300,7 @@ class SkemaController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('admin.skema.index')->with('success', 'Skema sertifikasi berhasil diperbarui!');
+            return redirect()->route('admin.skema.index', [], 303)->with('success', 'Skema sertifikasi berhasil diperbarui!');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Gagal memperbarui skema: ' . $e->getMessage());

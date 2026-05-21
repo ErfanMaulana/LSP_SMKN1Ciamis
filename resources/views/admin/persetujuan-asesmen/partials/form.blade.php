@@ -164,10 +164,15 @@
     }
 
     .signature-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        height: 240px;
+        height: 100%;
         cursor: crosshair;
         display: block;
+        z-index: 3;
+        background: transparent;
     }
 
     .signature-placeholder {
@@ -179,6 +184,7 @@
         pointer-events: none;
         color: #9ca3af;
         transition: opacity 0.2s;
+        z-index: 1;
     }
 
     .signature-placeholder i {
@@ -614,6 +620,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!hasSignature) {
                 hasSignature = true;
                 wrapper.classList.add('has-signature');
+                const placeholderEl = wrapper.querySelector('.signature-placeholder');
+                if (placeholderEl) placeholderEl.style.display = 'none';
             }
 
             fillSignatureMeta();
@@ -630,6 +638,8 @@ document.addEventListener('DOMContentLoaded', function () {
             nameInput.value = '';
             dateInput.value = '';
             wrapper.classList.remove('has-signature');
+            const placeholderEl = wrapper.querySelector('.signature-placeholder');
+            if (placeholderEl) placeholderEl.style.display = '';
         });
 
         canvas.addEventListener('mousedown', startDrawing);

@@ -56,8 +56,10 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
             Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
 
-            // Jadwal Ujikom
-            Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+            // Jadwal Ujikom - only visible after persetujuan asesmen is signed
+            Route::middleware('asesi.persetujuan.signed')->group(function () {
+                Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+            });
             Route::get('/persetujuan-asesmen', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesiIndex'])->name('persetujuan-asesmen.index');
             // Persetujuan Asesmen (front) - allow asesi to sign
             Route::get('/persetujuan-asesmen/{skemaId}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesiShow'])->name('persetujuan.front.asesi.show');
