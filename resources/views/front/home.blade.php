@@ -1,7 +1,7 @@
 @extends('front.layout.app')
 
 @push('head')
-<link rel="stylesheet" href="{{ asset('css/profil.css') }}">
+<link rel="stylesheet" href="{{ asset('css/profil.css') }}?v={{ filemtime(public_path('css/profil.css')) }}">
 @endpush
 
 @section('content')
