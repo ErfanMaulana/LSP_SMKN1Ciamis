@@ -9,6 +9,7 @@ use App\Models\RekamanAsesmenKompetensi;
 use App\Models\PersetujuanAsesmen;
 use App\Models\Skema;
 use App\Models\Unit;
+use App\Models\CeklisObservasiAktivitasPraktik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -83,7 +84,6 @@ class RekamanAsesmenKompetensiController extends Controller
             'judul_form' => 'REKAMAN ASESMEN KOMPETENSI',
             'kategori_skema' => '',
             'tuk' => '',
-            'catatan_footer' => '* Coret yang tidak perlu',
             'asesi_nik' => null,
             'skema_id' => null,
         ];
@@ -112,6 +112,21 @@ class RekamanAsesmenKompetensiController extends Controller
 
             if ($existsAny) {
                 $defaults['asesi_nik'] = $asesiNik;
+            }
+        }
+
+        // Enforce that a Ceklis Observasi exists for this asesi + skema before allowing Rekaman creation
+        if ($defaults['skema_id'] && $defaults['asesi_nik']) {
+            $hasCeklis = CeklisObservasiAktivitasPraktik::query()
+                ->where('skema_id', (int) $defaults['skema_id'])
+                ->where('asesi_nik', $defaults['asesi_nik'])
+                ->exists();
+
+            if (!$hasCeklis) {
+                return redirect()->route('asesor.ceklis-observasi.create', [
+                    'asesi_nik' => $defaults['asesi_nik'],
+                    'skema_id' => $defaults['skema_id'],
+                ])->with('info', 'Silakan isi Ceklis Observasi terlebih dahulu sebelum membuat Rekaman Asesmen.');
             }
         }
 
@@ -380,7 +395,6 @@ class RekamanAsesmenKompetensiController extends Controller
             'rekomendasi' => 'required|in:kompeten,belum_kompeten',
             'tindak_lanjut' => 'nullable|string',
             'komentar_observasi' => 'nullable|string',
-            'catatan_footer' => 'nullable|string|max:255',
             'detail' => 'required|array|min:1',
             'detail.*.unit_id' => 'required|exists:units,id',
             'detail.*.observasi_demonstrasi' => 'nullable|in:1',

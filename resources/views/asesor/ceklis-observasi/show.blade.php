@@ -155,6 +155,9 @@
         <a href="{{ route('asesor.ceklis-observasi.edit', $item->id) }}" class="btn btn-primary">
             <i class="bi bi-pencil-square"></i> Edit
         </a>
+        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $item->asesi_nik, 'skema_id' => $item->skema_id]) }}" class="btn btn-primary">
+            <i class="bi bi-journal-plus"></i> Buat Rekaman Asesmen
+        </a>
     </div>
 </div>
 

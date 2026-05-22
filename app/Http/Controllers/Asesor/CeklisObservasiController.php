@@ -390,6 +390,7 @@ class CeklisObservasiController extends Controller
         $units = $skema->units->map(function ($unit) {
             return [
                 'id' => $unit->id,
+                'kelompok_pekerjaan' => $unit->kelompok_pekerjaan,
                 'kode_unit' => $unit->kode_unit,
                 'judul_unit' => $unit->judul_unit,
                 'elemens' => $unit->elemens->map(function ($elemen) {
