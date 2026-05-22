@@ -308,11 +308,6 @@
             @error('komentar_observasi')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
-        <div class="field full">
-            <label>Catatan Footer</label>
-            <input type="text" name="catatan_footer" value="{{ $value('catatan_footer', '') }}">
-            @error('catatan_footer')<div class="error-text">{{ $message }}</div>@enderror
-        </div>
     </div>
 
     <div class="form-actions">

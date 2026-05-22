@@ -178,8 +178,61 @@
         margin: 0 0 20px;
     }
 
-    .group-name-field.is-hidden {
+    .group-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 18px;
+    }
+
+    .group-header {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .group-title {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        color: #1e293b;
+    }
+
+    .group-title strong {
+        font-size: 15px;
+    }
+
+    .group-title small {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .group-units {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .group-header .form-group {
+        margin-bottom: 0;
+        min-width: 280px;
+        flex: 1;
+    }
+
+    .group-name-slot.is-hidden {
         display: none;
+    }
+
+    .group-name-input {
+        background: white;
+    }
+
+    .unit-group-label {
+        min-height: 42px;
+        border-style: dashed;
     }
 
     .unit-filter {
@@ -523,145 +576,177 @@
                 </div>
 
                 <div id="units-container">
-                    @php $units = old('units', $skema->units->toArray()); @endphp
-                    @foreach($units as $uIdx => $unit)
-                    <div class="unit-card" data-unit-index="{{ $uIdx }}">
-                        <div class="unit-header" onclick="toggleUnit(this)">
-                            <div class="unit-title">
-                                <span class="unit-number">{{ $uIdx + 1 }}</span>
-                                Unit Kompetensi #{{ $uIdx + 1 }}
-                                <i class="bi bi-chevron-down toggle-icon"></i>
-                            </div>
-                            <button type="button" class="remove-btn remove-unit-btn" onclick="event.stopPropagation(); confirmDeleteUnit(event)" title="Hapus unit" style="{{ count($units) <= 1 ? 'display:none;' : '' }}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-
-                        <div class="unit-content">
-
-                        <div class="form-grid-4">
-                            <div class="form-group">
-                                <label>Kelompok Pekerjaan</label>
-                                <input type="text" name="units[{{ $uIdx }}][kelompok_pekerjaan]" class="form-control" 
-                                       value="{{ $unit['kelompok_pekerjaan'] ?? '' }}" placeholder="Kosongkan jika hanya satu kelompok">
-                            </div>
-                            <div class="form-group">
-                                <label>Kode Unit <span class="required">*</span></label>
-                                <input type="text" name="units[{{ $uIdx }}][kode_unit]" class="form-control" 
-                                       value="{{ $unit['kode_unit'] ?? '' }}" placeholder="Contoh: J.620100.001.02" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Judul Unit <span class="required">*</span></label>
-                                <input type="text" name="units[{{ $uIdx }}][judul_unit]" class="form-control" 
-                                       value="{{ $unit['judul_unit'] ?? '' }}" placeholder="Contoh: Menggunakan Struktur Data" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Pertanyaan Unit</label>
-                            <textarea name="units[{{ $uIdx }}][pertanyaan_unit]" class="form-control" rows="2" placeholder="Contoh: Dapatkah Saya menggunakan Struktur Data?">{{ $unit['pertanyaan_unit'] ?? '' }}</textarea>
-                        </div>
-
-                        <div class="divider"></div>
-
-                        <div class="elemens-container">
-                            @php $elemens = $unit['elemens'] ?? []; @endphp
-                            @foreach($elemens as $eIdx => $elemen)
-                            <div class="elemen-card" data-elemen-index="{{ $eIdx }}">
-                                <div class="elemen-header" onclick="toggleElemen(this)">
-                                    <div class="elemen-title">
-                                        <span class="elemen-number">{{ $eIdx + 1 }}</span>
-                                        Elemen #{{ $eIdx + 1 }}
-                                        <i class="bi bi-chevron-down toggle-icon"></i>
-                                    </div>
-                                    <button type="button" class="remove-btn remove-elemen-btn" onclick="event.stopPropagation(); confirmDeleteElemen(event)" title="Hapus elemen" style="{{ count($elemens) <= 1 ? 'display:none;' : '' }}">
-                                        <i class="bi bi-x-lg"></i>
-                                    </button>
+                    @php
+                        $units = old('units', $skema->units->toArray());
+                        $groupedUnits = collect($units)->groupBy(function ($unit) {
+                            $groupName = trim((string) ($unit['kelompok_pekerjaan'] ?? ''));
+                            return $groupName !== '' ? $groupName : '__single__';
+                        });
+                        $showGroupNameFields = $groupedUnits->count() > 1;
+                        $renderedUnitIndex = 0;
+                    @endphp
+                    @foreach($groupedUnits as $groupKey => $groupItems)
+                        @php
+                            $groupName = $groupKey === '__single__' ? '' : $groupKey;
+                            $isSingleGroup = !$showGroupNameFields;
+                        @endphp
+                        <div class="group-card" data-group-index="{{ $loop->index }}">
+                            <div class="group-header">
+                                <div class="group-title">
+                                    <strong>Kelompok Pekerjaan #{{ $loop->iteration }}</strong>
+                                    <small>Gunakan hanya jika ada lebih dari satu kelompok pekerjaan</small>
                                 </div>
-
-                                <div class="elemen-content">
-
-                                <div class="form-group">
-                                    <label>Nama Elemen <span class="required">*</span></label>
-                                    <input type="text" name="units[{{ $uIdx }}][elemens][{{ $eIdx }}][nama_elemen]" class="form-control" 
-                                           value="{{ $elemen['nama_elemen'] ?? '' }}" placeholder="Contoh: Mengidentifikasi konsep data" required>
-                                </div>
-
-                                <div class="kriteria-container">
-                                    <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;margin-left:16px;">
-                                        Kriteria Unjuk Kerja (KUK) <span class="required">*</span>
-                                    </label>
-                                    @php $kriterias = $elemen['kriteria'] ?? []; @endphp
-                                    @foreach($kriterias as $kIdx => $kriteria)
-                                    <div class="kriteria-item">
-                                        <span class="kriteria-number">{{ $kIdx + 1 }}</span>
-                                        <input type="text" name="units[{{ $uIdx }}][elemens][{{ $eIdx }}][kriteria][{{ $kIdx }}][deskripsi_kriteria]" class="form-control" 
-                                               value="{{ $kriteria['deskripsi_kriteria'] ?? '' }}" placeholder="Deskripsi kriteria unjuk kerja..." required>
-                                        <button type="button" class="remove-btn remove-kriteria-btn" onclick="confirmDeleteKriteria(event)" title="Hapus kriteria" style="{{ count($kriterias) <= 1 ? 'display:none;' : '' }}">
-                                            <i class="bi bi-x"></i>
-                                        </button>
-                                    </div>
-                                    @endforeach
-                                    @if(count($kriterias) === 0)
-                                    <div class="kriteria-item">
-                                        <span class="kriteria-number">1</span>
-                                        <input type="text" name="units[{{ $uIdx }}][elemens][{{ $eIdx }}][kriteria][0][deskripsi_kriteria]" class="form-control" 
-                                               placeholder="Deskripsi kriteria unjuk kerja..." required>
-                                        <button type="button" class="remove-btn remove-kriteria-btn" title="Hapus kriteria" style="display:none;">
-                                            <i class="bi bi-x"></i>
-                                        </button>
-                                    </div>
+                                <div class="form-group group-name-slot {{ $showGroupNameFields ? '' : 'is-hidden' }}" style="max-width:420px; margin-bottom:0;">
+                                    @if($showGroupNameFields)
+                                        <label>Nama Kelompok Pekerjaan</label>
+                                        <input type="text" class="form-control group-name-input" placeholder="Contoh: Front Office, Back Office, dll." value="{{ $groupName }}">
                                     @endif
                                 </div>
-
-                                <button type="button" class="add-btn add-kriteria-btn" style="margin-left:16px;">
-                                    <i class="bi bi-plus"></i> Tambah KUK
+                                <button type="button" class="remove-btn remove-group-btn" title="Hapus kelompok" style="{{ $groupedUnits->count() <= 1 ? 'display:none;' : '' }}">
+                                    <i class="bi bi-trash"></i>
                                 </button>
-                                </div>
                             </div>
-                            @endforeach
-                            @if(count($elemens) === 0)
-                            <div class="elemen-card" data-elemen-index="0">
-                                <div class="elemen-header" onclick="toggleElemen(this)">
-                                    <div class="elemen-title">
-                                        <span class="elemen-number">1</span>
-                                        Elemen #1
-                                        <i class="bi bi-chevron-down toggle-icon"></i>
-                                    </div>
-                                    <button type="button" class="remove-btn remove-elemen-btn" onclick="event.stopPropagation(); confirmDeleteElemen(event)" title="Hapus elemen" style="display:none;">
-                                        <i class="bi bi-x-lg"></i>
-                                    </button>
-                                </div>
-                                <div class="elemen-content">
-                                <div class="form-group">
-                                    <label>Nama Elemen <span class="required">*</span></label>
-                                    <input type="text" name="units[{{ $uIdx }}][elemens][0][nama_elemen]" class="form-control" placeholder="Contoh: Mengidentifikasi konsep data" required>
-                                </div>
-                                <div class="kriteria-container">
-                                    <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;margin-left:16px;">
-                                        Kriteria Unjuk Kerja (KUK) <span class="required">*</span>
-                                    </label>
-                                    <div class="kriteria-item">
-                                        <span class="kriteria-number">1</span>
-                                        <input type="text" name="units[{{ $uIdx }}][elemens][0][kriteria][0][deskripsi_kriteria]" class="form-control" placeholder="Deskripsi kriteria unjuk kerja..." required>
-                                        <button type="button" class="remove-btn remove-kriteria-btn" title="Hapus kriteria" style="display:none;">
-                                            <i class="bi bi-x"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <button type="button" class="add-btn add-kriteria-btn" style="margin-left:16px;">
-                                    <i class="bi bi-plus"></i> Tambah KUK
-                                </button>
-                                </div>
-                            </div>
-                            @endif
-                        </div>
 
-                        <button type="button" class="add-btn add-elemen">
-                            <i class="bi bi-plus-circle"></i> Tambah Elemen
-                        </button>
+                            <div class="group-units">
+                                @foreach($groupItems as $unit)
+                                    <div class="unit-card" data-unit-index="{{ $renderedUnitIndex }}">
+                                        <div class="unit-header" onclick="toggleUnit(this)">
+                                            <div class="unit-title">
+                                                <span class="unit-number">{{ $renderedUnitIndex + 1 }}</span>
+                                                Unit Kompetensi #{{ $renderedUnitIndex + 1 }}
+                                                <i class="bi bi-chevron-down toggle-icon"></i>
+                                            </div>
+                                            <button type="button" class="remove-btn remove-unit-btn" onclick="event.stopPropagation(); confirmDeleteUnit(event)" title="Hapus unit" style="{{ count($units) <= 1 ? 'display:none;' : '' }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="unit-content">
+                                            <div class="form-grid-4">
+                                                <div class="form-group">
+                                                    <label>Kelompok Pekerjaan</label>
+                                                    <input type="hidden" name="units[{{ $renderedUnitIndex }}][kelompok_pekerjaan]" class="unit-group-value" value="{{ $groupName }}">
+                                                    @if($showGroupNameFields)
+                                                        <div class="form-control unit-group-label" style="background:#f8fafc; color:#64748b; display:flex; align-items:center;">Akan mengikuti nama kelompok di atas</div>
+                                                    @else
+                                                        <div class="form-control unit-group-label" style="background:#f8fafc; color:#64748b; display:flex; align-items:center;">Kosongkan jika hanya satu kelompok</div>
+                                                    @endif
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Kode Unit <span class="required">*</span></label>
+                                                    <input type="text" name="units[{{ $renderedUnitIndex }}][kode_unit]" class="form-control" value="{{ $unit['kode_unit'] ?? '' }}" placeholder="Contoh: J.620100.001.02" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Judul Unit <span class="required">*</span></label>
+                                                    <input type="text" name="units[{{ $renderedUnitIndex }}][judul_unit]" class="form-control" value="{{ $unit['judul_unit'] ?? '' }}" placeholder="Contoh: Menggunakan Struktur Data" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label>Pertanyaan Unit</label>
+                                                <textarea name="units[{{ $renderedUnitIndex }}][pertanyaan_unit]" class="form-control" rows="2" placeholder="Contoh: Dapatkah Saya menggunakan Struktur Data?">{{ $unit['pertanyaan_unit'] ?? '' }}</textarea>
+                                            </div>
+
+                                            <div class="divider"></div>
+
+                                            <div class="elemens-container">
+                                                @php $elemens = $unit['elemens'] ?? []; @endphp
+                                                @foreach($elemens as $eIdx => $elemen)
+                                                    <div class="elemen-card" data-elemen-index="{{ $eIdx }}">
+                                                        <div class="elemen-header" onclick="toggleElemen(this)">
+                                                            <div class="elemen-title">
+                                                                <span class="elemen-number">{{ $eIdx + 1 }}</span>
+                                                                Elemen #{{ $eIdx + 1 }}
+                                                                <i class="bi bi-chevron-down toggle-icon"></i>
+                                                            </div>
+                                                            <button type="button" class="remove-btn remove-elemen-btn" onclick="event.stopPropagation(); confirmDeleteElemen(event)" title="Hapus elemen" style="{{ count($elemens) <= 1 ? 'display:none;' : '' }}">
+                                                                <i class="bi bi-x-lg"></i>
+                                                            </button>
+                                                        </div>
+
+                                                        <div class="elemen-content">
+                                                            <div class="form-group">
+                                                                <label>Nama Elemen <span class="required">*</span></label>
+                                                                <input type="text" name="units[{{ $renderedUnitIndex }}][elemens][{{ $eIdx }}][nama_elemen]" class="form-control" value="{{ $elemen['nama_elemen'] ?? '' }}" placeholder="Contoh: Mengidentifikasi konsep data" required>
+                                                            </div>
+
+                                                            <div class="kriteria-container">
+                                                                <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;margin-left:16px;">
+                                                                    Kriteria Unjuk Kerja (KUK) <span class="required">*</span>
+                                                                </label>
+                                                                @php $kriterias = $elemen['kriteria'] ?? []; @endphp
+                                                                @foreach($kriterias as $kIdx => $kriteria)
+                                                                    <div class="kriteria-item">
+                                                                        <span class="kriteria-number">{{ $kIdx + 1 }}</span>
+                                                                        <input type="text" name="units[{{ $renderedUnitIndex }}][elemens][{{ $eIdx }}][kriteria][{{ $kIdx }}][deskripsi_kriteria]" class="form-control" value="{{ $kriteria['deskripsi_kriteria'] ?? '' }}" placeholder="Deskripsi kriteria unjuk kerja..." required>
+                                                                        <button type="button" class="remove-btn remove-kriteria-btn" onclick="confirmDeleteKriteria(event)" title="Hapus kriteria" style="{{ count($kriterias) <= 1 ? 'display:none;' : '' }}">
+                                                                            <i class="bi bi-x"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                @endforeach
+                                                                @if(count($kriterias) === 0)
+                                                                    <div class="kriteria-item">
+                                                                        <span class="kriteria-number">1</span>
+                                                                        <input type="text" name="units[{{ $renderedUnitIndex }}][elemens][{{ $eIdx }}][kriteria][0][deskripsi_kriteria]" class="form-control" placeholder="Deskripsi kriteria unjuk kerja..." required>
+                                                                        <button type="button" class="remove-btn remove-kriteria-btn" title="Hapus kriteria" style="display:none;">
+                                                                            <i class="bi bi-x"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+
+                                                            <button type="button" class="add-btn add-kriteria-btn" style="margin-left:16px;">
+                                                                <i class="bi bi-plus"></i> Tambah KUK
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                                @if(count($elemens) === 0)
+                                                    <div class="elemen-card" data-elemen-index="0">
+                                                        <div class="elemen-header" onclick="toggleElemen(this)">
+                                                            <div class="elemen-title">
+                                                                <span class="elemen-number">1</span>
+                                                                Elemen #1
+                                                                <i class="bi bi-chevron-down toggle-icon"></i>
+                                                            </div>
+                                                            <button type="button" class="remove-btn remove-elemen-btn" onclick="event.stopPropagation(); confirmDeleteElemen(event)" title="Hapus elemen" style="display:none;">
+                                                                <i class="bi bi-x-lg"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="elemen-content">
+                                                            <div class="form-group">
+                                                                <label>Nama Elemen <span class="required">*</span></label>
+                                                                <input type="text" name="units[{{ $renderedUnitIndex }}][elemens][0][nama_elemen]" class="form-control" placeholder="Contoh: Mengidentifikasi konsep data" required>
+                                                            </div>
+                                                            <div class="kriteria-container">
+                                                                <label style="font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;display:block;margin-left:16px;">
+                                                                    Kriteria Unjuk Kerja (KUK) <span class="required">*</span>
+                                                                </label>
+                                                                <div class="kriteria-item">
+                                                                    <span class="kriteria-number">1</span>
+                                                                    <input type="text" name="units[{{ $renderedUnitIndex }}][elemens][0][kriteria][0][deskripsi_kriteria]" class="form-control" placeholder="Deskripsi kriteria unjuk kerja..." required>
+                                                                    <button type="button" class="remove-btn remove-kriteria-btn" title="Hapus kriteria" style="display:none;">
+                                                                        <i class="bi bi-x"></i>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <button type="button" class="add-btn add-kriteria-btn" style="margin-left:16px;">
+                                                                <i class="bi bi-plus"></i> Tambah KUK
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                            <button type="button" class="add-btn add-elemen">
+                                                <i class="bi bi-plus-circle"></i> Tambah Elemen
+                                            </button>
+                                        </div>
+                                    </div>
+                                    @php $renderedUnitIndex++; @endphp
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
                     @endforeach
                 </div>
 
@@ -717,15 +802,28 @@
         });
     }
 
+    function renderGroupNameSlot(groupCard, showInput) {
+        if (!groupCard) {
+            return;
+        }
+
+        const slot = groupCard.querySelector('.group-name-slot');
+        if (!slot) {
+            return;
+        }
+
+        slot.classList.toggle('is-hidden', !showInput);
+        slot.innerHTML = showInput
+            ? '<label>Nama Kelompok Pekerjaan</label><input type="text" class="form-control group-name-input" placeholder="Contoh: Front Office, Back Office, dll.">'
+            : '';
+    }
+
     function updateGroupNameVisibility() {
         const groupCards = document.querySelectorAll('#units-container .group-card');
         const showGroupNameFields = groupCards.length > 1;
 
         groupCards.forEach((groupCard) => {
-            const groupField = groupCard.querySelector('.group-name-field');
-            if (groupField) {
-                groupField.classList.toggle('is-hidden', !showGroupNameFields);
-            }
+            renderGroupNameSlot(groupCard, showGroupNameFields);
         });
     }
 
@@ -892,10 +990,7 @@
                     <strong>Kelompok Pekerjaan #${gIdx + 1}</strong>
                     <small>Gunakan hanya jika ada lebih dari satu kelompok pekerjaan</small>
                 </div>
-                <div class="form-group group-name-field" style="max-width:420px; margin-bottom:0;">
-                    <label>Nama Kelompok Pekerjaan</label>
-                    <input type="text" class="form-control group-name-input" placeholder="Contoh: Front Office, Back Office, dll.">
-                </div>
+                <div class="form-group group-name-slot" style="max-width:420px; margin-bottom:0;"></div>
                 <button type="button" class="remove-btn remove-group-btn" title="Hapus kelompok">
                     <i class="bi bi-trash"></i>
                 </button>

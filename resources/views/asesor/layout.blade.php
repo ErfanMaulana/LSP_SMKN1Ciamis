@@ -506,15 +506,15 @@
                     <i class="bi bi-file-earmark-check"></i>
                     <span>Persetujuan Asesmen</span>
                 </a>
-                <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}"
-                    class="menu-item {{ request()->routeIs('asesor.rekaman-asesmen-kompetensi.*') ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>Rekaman Asesmen</span>
-                </a>
                 <a href="{{ route('asesor.ceklis-observasi.index') }}"
                     class="menu-item {{ request()->routeIs('asesor.ceklis-observasi.*') ? 'active' : '' }}">
                     <i class="bi bi-check2-square"></i>
                     <span>Ceklis Observasi</span>
+                </a>
+                <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.rekaman-asesmen-kompetensi.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Rekaman Asesmen</span>
                 </a>
                 <a href="{{ route('asesor.entry-penilaian') }}"
                     class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">

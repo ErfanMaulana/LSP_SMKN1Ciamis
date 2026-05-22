@@ -555,6 +555,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const initialDetailMap = @json($initialDetailMap ?? []);
     const belumKompetenDefaults = @json($belumKompetenDefaults ?? []);
     let firstHydration = true;
+    let availableKelompokPekerjaan = [];
     let currentBelumKompetenOptions = {
         kelompok_pekerjaan: [],
         unit: [],
@@ -564,6 +565,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const tukInput = document.getElementById('tukInput');
     const tanggalInput = document.getElementById('tanggalInput');
+    const kelompokField = document.querySelector('.search-multiselect[data-field="kelompok_pekerjaan"]')?.closest('.field');
+
+    const updateKelompokFieldVisibility = (kelompokOptions, selectedValues) => {
+        const hasSingleGroup = (kelompokOptions || []).length === 1;
+        availableKelompokPekerjaan = kelompokOptions || [];
+
+        if (kelompokField) {
+            kelompokField.classList.toggle('hidden', hasSingleGroup);
+        }
+
+        if (hasSingleGroup && (!selectedValues || selectedValues.length === 0)) {
+            const hiddenInput = document.querySelector('.search-multiselect[data-field="kelompok_pekerjaan"] input[type="hidden"]');
+            if (hiddenInput) {
+                hiddenInput.value = kelompokOptions[0].value;
+            }
+        }
+    };
 
     const setNomorSkema = () => {
         nomorSkemaDisplay.value = skemaIdInput ? (skemaIdInput.getAttribute('data-nomor') || '') : '';
@@ -647,39 +665,39 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const formatMultiValue = (values) => values.join(' | ');
 
-    const buildBelumKompetenOptions = (units) => {
-        const kelompokMap = new Map();
-        const unitMap = new Map();
-        const elemenMap = new Map();
-        const kukMap = new Map();
+    let structureUnits = [];
 
-        (units || []).forEach((unit) => {
+    const buildBelumKompetenOptions = (units) => {
+        structureUnits = units || [];
+
+        const kelompokSet = new Set();
+        const unitOptions = [];
+        const elemenOptions = [];
+        const kukOptions = [];
+
+        (structureUnits || []).forEach((unit) => {
+            const kp = unit.kelompok_pekerjaan || '(Tanpa Kelompok)';
+            kelompokSet.add(kp);
+
             const unitLabel = `${unit.kode_unit} - ${unit.judul_unit}`;
-            if (!kelompokMap.has(unit.judul_unit)) {
-                kelompokMap.set(unit.judul_unit, unit.judul_unit);
-            }
-            if (!unitMap.has(unitLabel)) {
-                unitMap.set(unitLabel, unitLabel);
-            }
+            unitOptions.push({ value: unitLabel, label: unitLabel, meta: { unitId: unit.id, kelompok: kp } });
 
             (unit.elemens || []).forEach((elemen) => {
-                if (!elemenMap.has(elemen.nama_elemen)) {
-                    elemenMap.set(elemen.nama_elemen, elemen.nama_elemen);
-                }
+                elemenOptions.push({ value: elemen.nama_elemen, label: elemen.nama_elemen, meta: { elemenId: elemen.id, unitId: unit.id } });
 
                 (elemen.kriteria || []).forEach((kriteria) => {
-                    if (!kukMap.has(kriteria.deskripsi_kriteria)) {
-                        kukMap.set(kriteria.deskripsi_kriteria, kriteria.deskripsi_kriteria);
-                    }
+                    kukOptions.push({ value: kriteria.deskripsi_kriteria, label: kriteria.deskripsi_kriteria, meta: { kriteriaId: kriteria.id, elemenId: elemen.id } });
                 });
             });
         });
 
+        const kelompokOptions = Array.from(kelompokSet).map((v) => ({ value: v, label: v }));
+
         return {
-            kelompok_pekerjaan: Array.from(kelompokMap.entries()).map(([value, label]) => ({ value, label })),
-            unit: Array.from(unitMap.entries()).map(([value, label]) => ({ value, label })),
-            elemen: Array.from(elemenMap.entries()).map(([value, label]) => ({ value, label })),
-            kuk: Array.from(kukMap.entries()).map(([value, label]) => ({ value, label })),
+            kelompok_pekerjaan: kelompokOptions,
+            unit: unitOptions,
+            elemen: elemenOptions,
+            kuk: kukOptions,
         };
     };
 
@@ -695,7 +713,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    const renderMultiSelect = (container, options, selectedValues) => {
+    const renderMultiSelect = (container, options, selectedValues, onChange) => {
         const hiddenInput = container.querySelector('input[type="hidden"]');
         const toggle = container.querySelector('.search-multiselect-toggle');
         const valuesWrap = container.querySelector('.search-multiselect-values');
@@ -766,6 +784,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     syncValue();
                     drawOptions();
+                        if (typeof onChange === 'function') {
+                            onChange(Array.from(selectedSet));
+                        }
                 });
 
                 optionsWrap.appendChild(item);
@@ -775,7 +796,7 @@ document.addEventListener('DOMContentLoaded', function () {
         syncValue();
         drawOptions();
 
-        toggle.addEventListener('click', function (event) {
+        toggle.onclick = function (event) {
             event.preventDefault();
             const isOpen = container.classList.contains('open');
             document.querySelectorAll('.search-multiselect.open').forEach((openContainer) => {
@@ -788,29 +809,103 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!isOpen) {
                 searchInput.focus();
             }
-        });
+        };
 
-        searchInput.addEventListener('input', drawOptions);
+        searchInput.oninput = drawOptions;
 
-        container.addEventListener('click', (event) => {
+        container.onclick = (event) => {
             event.stopPropagation();
-        });
+        };
 
-        document.addEventListener('click', (event) => {
-            if (!container.contains(event.target)) {
-                closeMultiSelect(container);
-            }
-        });
+        if (!container.dataset.multiSelectDocBound) {
+            document.addEventListener('click', (event) => {
+                if (!container.contains(event.target)) {
+                    closeMultiSelect(container);
+                }
+            });
+            container.dataset.multiSelectDocBound = '1';
+        }
     };
 
-    const initBelumKompetenFields = (units) => {
-        currentBelumKompetenOptions = buildBelumKompetenOptions(units);
+    const updateDependentOptions = (changedField) => {
+        // read current selected values
+        const getSelected = (field) => {
+            const c = document.querySelector(`.search-multiselect[data-field="${field}"]`);
+            if (!c) return [];
+            const hidden = c.querySelector('input[type="hidden"]');
+            return parseMultiValue(hidden?.value || '');
+        };
 
+        const selectedKelompok = getSelected('kelompok_pekerjaan');
+        const selectedUnits = getSelected('unit');
+        const selectedElemen = getSelected('elemen');
+
+        // compute unit options filtered by kelompok
+        const allOptions = buildBelumKompetenOptions(structureUnits);
+        updateKelompokFieldVisibility(allOptions.kelompok_pekerjaan, selectedKelompok);
+
+        const effectiveSelectedKelompok = (selectedKelompok.length > 0)
+            ? selectedKelompok
+            : (allOptions.kelompok_pekerjaan.length === 1 ? [allOptions.kelompok_pekerjaan[0].value] : []);
+
+        const unitOptionsFiltered = allOptions.unit.filter((opt) => {
+            if (effectiveSelectedKelompok.length === 0) return true;
+            return effectiveSelectedKelompok.includes(opt.meta.kelompok);
+        });
+
+        // auto-fill unit if only one option and none selected
+        const unitHidden = document.querySelector('.search-multiselect[data-field="unit"] input[type="hidden"]');
+        const unitSelectedNow = parseMultiValue(unitHidden?.value || '');
+        if (unitOptionsFiltered.length === 1 && unitSelectedNow.length === 0) {
+            if (unitHidden) unitHidden.value = unitOptionsFiltered[0].value;
+        }
+
+        // compute elemen options filtered by selected units
+        const selectedUnitVals = parseMultiValue(unitHidden?.value || '');
+        const selectedUnitIds = new Set(unitOptionsFiltered.filter(u => selectedUnitVals.includes(u.value)).map(u => u.meta.unitId));
+        const elemenOptionsFiltered = allOptions.elemen.filter((opt) => {
+            if (selectedUnitVals.length === 0) return true;
+            return selectedUnitIds.has(opt.meta.unitId);
+        });
+
+        // auto-fill elemen if only one option and none selected
+        const elemenHidden = document.querySelector('.search-multiselect[data-field="elemen"] input[type="hidden"]');
+        const elemenSelectedNow = parseMultiValue(elemenHidden?.value || '');
+        if (elemenOptionsFiltered.length === 1 && elemenSelectedNow.length === 0) {
+            if (elemenHidden) elemenHidden.value = elemenOptionsFiltered[0].value;
+        }
+
+        // compute kuk options filtered by selected elemen
+        const selectedElemenVals = parseMultiValue(elemenHidden?.value || '');
+        const selectedElemenIds = new Set(allOptions.elemen.filter(e => selectedElemenVals.includes(e.value)).map(e => e.meta.elemenId));
+        const kukOptionsFiltered = allOptions.kuk.filter((opt) => {
+            if (selectedElemenVals.length === 0) return true;
+            return selectedElemenIds.has(opt.meta.elemenId);
+        });
+
+        // auto-fill kuk if only one option and none selected
+        const kukHidden = document.querySelector('.search-multiselect[data-field="kuk"] input[type="hidden"]');
+        const kukSelectedNow = parseMultiValue(kukHidden?.value || '');
+        if (kukOptionsFiltered.length === 1 && kukSelectedNow.length === 0) {
+            if (kukHidden) kukHidden.value = kukOptionsFiltered[0].value;
+        }
+
+        currentBelumKompetenOptions = {
+            kelompok_pekerjaan: allOptions.kelompok_pekerjaan,
+            unit: unitOptionsFiltered,
+            elemen: elemenOptionsFiltered,
+            kuk: kukOptionsFiltered,
+        };
+
+        // render with preserved selections
         document.querySelectorAll('.search-multiselect').forEach((container) => {
             const field = container.getAttribute('data-field');
             const options = currentBelumKompetenOptions[field] || [];
-            const selected = parseMultiValue(belumKompetenDefaults[field] || container.querySelector('input[type="hidden"]')?.value || '');
-            renderMultiSelect(container, options, selected);
+            const selected = parseMultiValue(container.querySelector('input[type="hidden"]')?.value || '');
+            renderMultiSelect(container, options, selected, function (newSelected) {
+                // when a field changes, update dependents
+                updateDependentOptions(field);
+            });
         });
     };
 
@@ -970,7 +1065,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             fillAsesi(participants.asesi || [], firstHydration ? selectedAsesiNik : '');
             renderChecklist(structure.units || []);
-            initBelumKompetenFields(structure.units || []);
+            // initialize hierarchical belum kompeten options
+            buildBelumKompetenOptions(structure.units || []);
+            updateDependentOptions();
             document.querySelectorAll('.penilaian-lanjut-textarea').forEach((textarea) => autosizeTextarea(textarea));
             if (firstHydration && selectedAsesiNik) {
                 await fetchAsesiData(selectedAsesiNik);

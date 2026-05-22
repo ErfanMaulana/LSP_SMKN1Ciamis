@@ -125,6 +125,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/skema/create', [SkemaController::class, 'create'])->name('admin.skema.create')->middleware('permission:skema.create');
             Route::post('/skema', [SkemaController::class, 'store'])->name('admin.skema.store')->middleware('permission:skema.create');
             Route::post('/skema/validate-unit-codes', [SkemaController::class, 'validateUnitCodes'])->name('admin.skema.validate-unit-codes')->middleware('permission:skema.create|skema.edit');
+            Route::post('/skema/validate-nomor-skema', [SkemaController::class, 'validateNomorSkema'])->name('admin.skema.validate-nomor-skema')->middleware('permission:skema.create|skema.edit');
             Route::get('/skema/{id}', [SkemaController::class, 'show'])->name('admin.skema.show');
             Route::get('/skema/{id}/edit', [SkemaController::class, 'edit'])->name('admin.skema.edit')->middleware('permission:skema.edit');
             Route::put('/skema/{id}', [SkemaController::class, 'update'])->name('admin.skema.update')->middleware('permission:skema.edit');

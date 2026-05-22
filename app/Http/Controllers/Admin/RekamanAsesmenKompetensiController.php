@@ -59,7 +59,6 @@ class RekamanAsesmenKompetensiController extends Controller
             'judul_form' => 'REKAMAN ASESMEN KOMPETENSI',
             'kategori_skema' => 'KKNI/Okupasi/Klaster',
             'tuk' => 'sewaktu',
-            'catatan_footer' => '* Coret yang tidak perlu',
         ];
 
         return view('admin.rekaman-asesmen-kompetensi.create', compact('skemaList', 'defaults'));
@@ -207,7 +206,6 @@ class RekamanAsesmenKompetensiController extends Controller
             'rekomendasi' => 'required|in:kompeten,belum_kompeten',
             'tindak_lanjut' => 'nullable|string',
             'komentar_observasi' => 'nullable|string',
-            'catatan_footer' => 'nullable|string|max:255',
             'detail' => 'required|array|min:1',
             'detail.*.unit_id' => 'required|exists:units,id',
             'detail.*.observasi_demonstrasi' => 'nullable|in:1',

@@ -22,7 +22,6 @@ class RekamanAsesmenKompetensi extends Model
         'rekomendasi',
         'tindak_lanjut',
         'komentar_observasi',
-        'catatan_footer',
     ];
 
     protected $casts = [

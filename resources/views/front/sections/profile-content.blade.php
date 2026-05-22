@@ -98,7 +98,7 @@
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <h2 class="section-title" data-scroll-reveal>Ruang Lingkup Sertifikasi</h2>
     <p class="section-subtitle" data-scroll-reveal data-reveal-delay="70">Berbagai bidang keahlian yang telah terlisensi untuk dilakukan pengujian.</p>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="rl-grid">
       @forelse($jurusanList ?? [] as $jurusan)
         <div class="scope-card" data-scroll-reveal="zoom" data-reveal-delay="{{ 100 + ($loop->index * 70) }}">
           <div class="scope-icon {{ $jurusan['color'] }}"><i class="bi {{ $jurusan['icon'] }}"></i></div>
@@ -107,7 +107,7 @@
           <span class="skema-badge">{{ $jurusan['skema_count'] }} Skema</span>
         </div>
       @empty
-        <div class="col-span-full text-center py-8 text-gray-500">
+        <div class="rl-empty text-center py-8 text-gray-500">
           <i class="bi bi-inbox" style="font-size: 2rem;"></i>
           <p class="mt-2">Belum ada skema sertifikasi tersedia.</p>
         </div>

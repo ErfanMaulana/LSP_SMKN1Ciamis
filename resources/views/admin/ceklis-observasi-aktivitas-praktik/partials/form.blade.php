@@ -15,6 +15,8 @@
         return $defaults[$field] ?? $fallback;
     };
 
+    
+
     $selectedSkemaId = (string) $value('skema_id', '');
     $selectedAsesiNik = (string) $value('asesi_nik', '');
     $selectedAsesorId = (string) $value('asesor_id', '');
@@ -498,19 +500,63 @@
             <div id="belumKompetenFields" class="grid-2 {{ old('rekomendasi', $value('rekomendasi', 'belum_kompeten')) === 'belum_kompeten' ? '' : 'hidden' }}">
                 <div class="field">
                     <label>Kelompok Pekerjaan</label>
-                    <input type="text" name="belum_kompeten_kelompok_pekerjaan" value="{{ $value('belum_kompeten_kelompok_pekerjaan', '') }}">
+                    <div class="search-multiselect" data-field="kelompok_pekerjaan" data-placeholder="Cari dan pilih kelompok pekerjaan">
+                        <input type="hidden" name="belum_kompeten_kelompok_pekerjaan" value="{{ $value('belum_kompeten_kelompok_pekerjaan', '') }}">
+                        <button type="button" class="search-multiselect-toggle" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="search-multiselect-values"></span>
+                            <span class="search-multiselect-placeholder">Cari dan pilih kelompok pekerjaan</span>
+                            <i class="bi bi-chevron-down search-multiselect-chevron"></i>
+                        </button>
+                        <div class="search-multiselect-dropdown" role="listbox">
+                            <input type="text" class="search-multiselect-search" placeholder="Ketik untuk mencari...">
+                            <div class="search-multiselect-options"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="field">
                     <label>Unit</label>
-                    <input type="text" name="belum_kompeten_unit" value="{{ $value('belum_kompeten_unit', '') }}">
+                    <div class="search-multiselect" data-field="unit" data-placeholder="Cari dan pilih unit">
+                        <input type="hidden" name="belum_kompeten_unit" value="{{ $value('belum_kompeten_unit', '') }}">
+                        <button type="button" class="search-multiselect-toggle" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="search-multiselect-values"></span>
+                            <span class="search-multiselect-placeholder">Cari dan pilih unit</span>
+                            <i class="bi bi-chevron-down search-multiselect-chevron"></i>
+                        </button>
+                        <div class="search-multiselect-dropdown" role="listbox">
+                            <input type="text" class="search-multiselect-search" placeholder="Ketik untuk mencari...">
+                            <div class="search-multiselect-options"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="field">
                     <label>Elemen</label>
-                    <input type="text" name="belum_kompeten_elemen" value="{{ $value('belum_kompeten_elemen', '') }}">
+                    <div class="search-multiselect" data-field="elemen" data-placeholder="Cari dan pilih elemen">
+                        <input type="hidden" name="belum_kompeten_elemen" value="{{ $value('belum_kompeten_elemen', '') }}">
+                        <button type="button" class="search-multiselect-toggle" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="search-multiselect-values"></span>
+                            <span class="search-multiselect-placeholder">Cari dan pilih elemen</span>
+                            <i class="bi bi-chevron-down search-multiselect-chevron"></i>
+                        </button>
+                        <div class="search-multiselect-dropdown" role="listbox">
+                            <input type="text" class="search-multiselect-search" placeholder="Ketik untuk mencari...">
+                            <div class="search-multiselect-options"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="field">
                     <label>KUK</label>
-                    <input type="text" name="belum_kompeten_kuk" value="{{ $value('belum_kompeten_kuk', '') }}">
+                    <div class="search-multiselect" data-field="kuk" data-placeholder="Cari dan pilih KUK">
+                        <input type="hidden" name="belum_kompeten_kuk" value="{{ $value('belum_kompeten_kuk', '') }}">
+                        <button type="button" class="search-multiselect-toggle" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="search-multiselect-values"></span>
+                            <span class="search-multiselect-placeholder">Cari dan pilih KUK</span>
+                            <i class="bi bi-chevron-down search-multiselect-chevron"></i>
+                        </button>
+                        <div class="search-multiselect-dropdown" role="listbox">
+                            <input type="text" class="search-multiselect-search" placeholder="Ketik untuk mencari...">
+                            <div class="search-multiselect-options"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -602,6 +648,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const clearPencapaianBtn = document.getElementById('clearPencapaianBtn');
     const rekomendasiInputs = document.querySelectorAll('input[name="rekomendasi"]');
     const belumKompetenFields = document.getElementById('belumKompetenFields');
+    const kelompokField = document.querySelector('.search-multiselect[data-field="kelompok_pekerjaan"]')?.closest('.field');
 
     const participantsUrl = '{{ route('admin.ceklis-observasi-aktivitas-praktik.skema-participants') }}';
     const structureUrl = '{{ route('admin.ceklis-observasi-aktivitas-praktik.skema-structure') }}';
@@ -610,6 +657,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectedAsesorId = @json($selectedAsesorId);
     const initialDetailMap = @json($initialDetailMap ?? []);
     let firstHydration = true;
+    let availableKelompokPekerjaan = [];
+
+    const updateKelompokFieldVisibility = (kelompokOptions, selectedValues) => {
+        const hasSingleGroup = (kelompokOptions || []).length === 1;
+        availableKelompokPekerjaan = kelompokOptions || [];
+
+        if (kelompokField) {
+            kelompokField.classList.toggle('hidden', hasSingleGroup);
+        }
+
+        if (hasSingleGroup && (!selectedValues || selectedValues.length === 0)) {
+            const hiddenInput = document.querySelector('.search-multiselect[data-field="kelompok_pekerjaan"] input[type="hidden"]');
+            if (hiddenInput) {
+                hiddenInput.value = kelompokOptions[0].value;
+            }
+        }
+    };
 
     const setNomorSkema = () => {
         const selected = skemaSelect.options[skemaSelect.selectedIndex];
@@ -795,6 +859,199 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
+    // --- Begin hierarchical belum-kompeten helpers (admin) ---
+    let structureUnitsAdmin = [];
+
+    const parseMultiValueAdmin = (value) => {
+        if (!value) return [];
+        return String(value).split(/\s*(?:\||,|\r\n|\r|\n)\s*/).map(s => s.trim()).filter(Boolean);
+    };
+
+    const formatMultiValueAdmin = (values) => values.join(' | ');
+
+    const buildBelumKompetenOptionsAdmin = (units) => {
+        structureUnitsAdmin = units || [];
+
+        const kelompokSet = new Set();
+        const unitOptions = [];
+        const elemenOptions = [];
+        const kukOptions = [];
+
+        (structureUnitsAdmin || []).forEach((unit) => {
+            const kp = unit.kelompok_pekerjaan || '(Tanpa Kelompok)';
+            kelompokSet.add(kp);
+            const unitLabel = `${unit.kode_unit} - ${unit.judul_unit}`;
+            unitOptions.push({ value: unitLabel, label: unitLabel, meta: { unitId: unit.id, kelompok: kp } });
+
+            (unit.elemens || []).forEach((elemen) => {
+                elemenOptions.push({ value: elemen.nama_elemen, label: elemen.nama_elemen, meta: { elemenId: elemen.id, unitId: unit.id } });
+                (elemen.kriteria || []).forEach((kriteria) => {
+                    kukOptions.push({ value: kriteria.deskripsi_kriteria, label: kriteria.deskripsi_kriteria, meta: { kriteriaId: kriteria.id, elemenId: elemen.id } });
+                });
+            });
+        });
+
+        return {
+            kelompok_pekerjaan: Array.from(kelompokSet).map(v => ({ value: v, label: v })),
+            unit: unitOptions,
+            elemen: elemenOptions,
+            kuk: kukOptions,
+        };
+    };
+
+    const renderMultiSelectAdmin = (container, options, selectedValues, onChange) => {
+        const hiddenInput = container.querySelector('input[type="hidden"]');
+        const toggle = container.querySelector('.search-multiselect-toggle');
+        const valuesWrap = container.querySelector('.search-multiselect-values');
+        const placeholder = container.querySelector('.search-multiselect-placeholder');
+        const searchInput = container.querySelector('.search-multiselect-search');
+        const optionsWrap = container.querySelector('.search-multiselect-options');
+
+        if (!hiddenInput || !toggle || !valuesWrap || !placeholder || !searchInput || !optionsWrap) return;
+
+        const selectedSet = new Set(selectedValues || []);
+
+        const syncValue = () => {
+            hiddenInput.value = formatMultiValueAdmin(Array.from(selectedSet));
+            valuesWrap.innerHTML = '';
+            if (selectedSet.size === 0) {
+                placeholder.style.display = 'inline';
+                return;
+            }
+            placeholder.style.display = 'none';
+            Array.from(selectedSet).forEach((value) => {
+                const chip = document.createElement('span');
+                chip.className = 'search-multiselect-chip';
+                chip.textContent = value;
+                valuesWrap.appendChild(chip);
+            });
+        };
+
+        const drawOptions = () => {
+            const query = searchInput.value.trim().toLowerCase();
+            optionsWrap.innerHTML = '';
+            const filtered = (options || []).filter((option) => `${option.label} ${option.value}`.toLowerCase().includes(query));
+            if (filtered.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'search-multiselect-empty';
+                empty.textContent = 'Tidak ada opsi yang cocok.';
+                optionsWrap.appendChild(empty);
+                return;
+            }
+            filtered.forEach((option) => {
+                const item = document.createElement('label');
+                item.className = 'search-multiselect-option';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = selectedSet.has(option.value);
+                const text = document.createElement('span');
+                text.textContent = option.label;
+                item.appendChild(checkbox);
+                item.appendChild(text);
+                item.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    if (selectedSet.has(option.value)) selectedSet.delete(option.value); else selectedSet.add(option.value);
+                    syncValue();
+                    drawOptions();
+                    if (typeof onChange === 'function') onChange(Array.from(selectedSet));
+                });
+                optionsWrap.appendChild(item);
+            });
+        };
+
+        syncValue();
+        drawOptions();
+
+        toggle.onclick = function (event) {
+            event.preventDefault();
+            const isOpen = container.classList.contains('open');
+            document.querySelectorAll('.search-multiselect.open').forEach((openContainer) => { if (openContainer !== container) closeMulti(openContainer); });
+            container.classList.toggle('open', !isOpen);
+            toggle.setAttribute('aria-expanded', String(!isOpen));
+            if (!isOpen) searchInput.focus();
+        };
+
+        const closeMulti = (c) => { c.classList.remove('open'); const t = c.querySelector('.search-multiselect-toggle'); if (t) t.setAttribute('aria-expanded','false'); };
+
+        searchInput.oninput = drawOptions;
+        container.onclick = (e) => e.stopPropagation();
+        if (!container.dataset.multiSelectDocBound) {
+            document.addEventListener('click', (e) => { if (!container.contains(e.target)) closeMulti(container); });
+            container.dataset.multiSelectDocBound = '1';
+        }
+    };
+
+    const updateDependentOptionsAdmin = () => {
+        const getSelected = (field) => {
+            const c = document.querySelector(`.search-multiselect[data-field="${field}"]`);
+            if (!c) return [];
+            const hidden = c.querySelector('input[type="hidden"]');
+            return parseMultiValueAdmin(hidden?.value || '');
+        };
+
+        const selectedKelompok = getSelected('kelompok_pekerjaan');
+        const selectedUnits = getSelected('unit');
+        const selectedElemen = getSelected('elemen');
+
+        const all = buildBelumKompetenOptionsAdmin(structureUnitsAdmin);
+        updateKelompokFieldVisibility(all.kelompok_pekerjaan, selectedKelompok);
+
+        const effectiveSelectedKelompok = (selectedKelompok.length > 0)
+            ? selectedKelompok
+            : (all.kelompok_pekerjaan.length === 1 ? [all.kelompok_pekerjaan[0].value] : []);
+
+        const unitOptionsFiltered = all.unit.filter(opt => { if (!selectedKelompok || selectedKelompok.length === 0) return true; return selectedKelompok.includes(opt.meta.kelompok); });
+        const unitOptionsFilteredByGroup = all.unit.filter(opt => {
+            if (effectiveSelectedKelompok.length === 0) return true;
+            return effectiveSelectedKelompok.includes(opt.meta.kelompok);
+        });
+
+        // auto-fill unit if only one option and none selected
+        const unitHidden = document.querySelector('.search-multiselect[data-field="unit"] input[type="hidden"]');
+        const unitSelectedNow = parseMultiValueAdmin(unitHidden?.value || '');
+        if (unitOptionsFilteredByGroup.length === 1 && unitSelectedNow.length === 0) {
+            if (unitHidden) unitHidden.value = unitOptionsFilteredByGroup[0].value;
+        }
+
+        const selectedUnitVals = parseMultiValueAdmin(unitHidden?.value || '');
+        const selectedUnitIds = new Set(unitOptionsFilteredByGroup.filter(u => selectedUnitVals.includes(u.value)).map(u => u.meta.unitId));
+        const elemenOptionsFiltered = all.elemen.filter(opt => { if (selectedUnitVals.length === 0) return true; return selectedUnitIds.has(opt.meta.unitId); });
+
+        // auto-fill elemen if only one option and none selected
+        const elemenHidden = document.querySelector('.search-multiselect[data-field="elemen"] input[type="hidden"]');
+        const elemenSelectedNow = parseMultiValueAdmin(elemenHidden?.value || '');
+        if (elemenOptionsFiltered.length === 1 && elemenSelectedNow.length === 0) {
+            if (elemenHidden) elemenHidden.value = elemenOptionsFiltered[0].value;
+        }
+
+        const selectedElemenVals = parseMultiValueAdmin(elemenHidden?.value || '');
+        const selectedElemenIds = new Set(all.elemen.filter(e => selectedElemenVals.includes(e.value)).map(e => e.meta.elemenId));
+        const kukOptionsFiltered = all.kuk.filter(opt => { if (selectedElemenVals.length === 0) return true; return selectedElemenIds.has(opt.meta.elemenId); });
+
+        // auto-fill kuk if only one option and none selected
+        const kukHidden = document.querySelector('.search-multiselect[data-field="kuk"] input[type="hidden"]');
+        const kukSelectedNow = parseMultiValueAdmin(kukHidden?.value || '');
+        if (kukOptionsFiltered.length === 1 && kukSelectedNow.length === 0) {
+            if (kukHidden) kukHidden.value = kukOptionsFiltered[0].value;
+        }
+
+        const current = {
+            kelompok_pekerjaan: all.kelompok_pekerjaan,
+            unit: unitOptionsFilteredByGroup,
+            elemen: elemenOptionsFiltered,
+            kuk: kukOptionsFiltered,
+        };
+
+        document.querySelectorAll('.search-multiselect').forEach((container) => {
+            const field = container.getAttribute('data-field');
+            const options = current[field] || [];
+            const selected = parseMultiValueAdmin(container.querySelector('input[type="hidden"]')?.value || '');
+            renderMultiSelectAdmin(container, options, selected, function () { updateDependentOptionsAdmin(); });
+        });
+    };
+
+    // --- End hierarchical belum-kompeten helpers (admin) ---
+
     const loadParticipantsAndStructure = async () => {
         const skemaId = skemaSelect.value;
 
@@ -821,6 +1078,9 @@ document.addEventListener('DOMContentLoaded', function () {
             fillAsesor(participants.asesor || [], firstHydration ? selectedAsesorId : '');
             fillAsesi(participants.asesi || [], firstHydration ? selectedAsesiNik : '');
             renderChecklist(structure.units || []);
+            // initialize hierarchical belum kompeten options for admin
+            buildBelumKompetenOptionsAdmin(structure.units || []);
+            updateDependentOptionsAdmin();
 
             firstHydration = false;
         } catch (error) {
