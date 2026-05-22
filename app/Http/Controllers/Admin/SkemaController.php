@@ -114,6 +114,33 @@ class SkemaController extends Controller
     }
 
     /**
+     * Validate nomor_skema uniqueness (AJAX).
+     */
+    public function validateNomorSkema(Request $request)
+    {
+        $request->validate([
+            'nomor_skema' => 'required|string|max:255',
+            'id' => 'nullable|integer', // for edit mode to exclude self
+        ]);
+
+        $nomorSkema = trim($request->input('nomor_skema'));
+        $id = $request->input('id');
+
+        $query = Skema::where('nomor_skema', $nomorSkema);
+        if ($id) {
+            $query->where('id', '!=', $id);
+        }
+        $exists = $query->exists();
+
+        return response()->json([
+            'is_valid' => !$exists,
+            'message' => $exists
+                ? 'Nomor skema sudah terdaftar. Gunakan nomor skema yang berbeda.'
+                : null,
+        ]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)

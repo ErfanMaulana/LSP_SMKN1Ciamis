@@ -37,6 +37,7 @@
     .form-control.is-invalid { border-color: #ef4444; }
     .invalid-feedback { font-size: 12px; color: #ef4444; margin-top: 5px; }
     .invalid-feedback.kode-unit-feedback { display: block; }
+    .invalid-feedback.nomor-skema-feedback { display: block; }
     .form-text { font-size: 12px; color: #64748b; margin-top: 5px; }
 
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -296,6 +297,7 @@
     let unitIndex = 1;
     let groupIndex = 1;
     let kodeUnitValidationTimer = null;
+    let nomorSkemaValidationTimer = null;
     let isSubmittingFromValidation = false;
 
     function syncGroupUnits(groupCard) {
@@ -456,6 +458,10 @@
             scheduleKodeUnitValidation();
         }
 
+        if (e.target.matches('#nomor_skema')) {
+            scheduleNomorSkemaValidation();
+        }
+
         if (e.target.matches('#units-container .group-name-input')) {
             syncGroupUnits(e.target.closest('.group-card'));
         }
@@ -464,6 +470,9 @@
     document.addEventListener('blur', function(e) {
         if (e.target.matches('#units-container input[name*="[kode_unit]"]')) {
             validateKodeUnitByAjax();
+        }
+        if (e.target.matches('#nomor_skema')) {
+            validateNomorSkemaByAjax();
         }
     }, true);
 
@@ -762,12 +771,94 @@
         }
     }
 
+    function scheduleNomorSkemaValidation() {
+        clearTimeout(nomorSkemaValidationTimer);
+        nomorSkemaValidationTimer = setTimeout(validateNomorSkemaByAjax, 300);
+    }
+
+    function ensureNomorSkemaFeedback(input) {
+        let feedback = input.parentElement.querySelector('.nomor-skema-feedback');
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback nomor-skema-feedback';
+            input.parentElement.appendChild(feedback);
+        }
+        return feedback;
+    }
+
+    async function validateNomorSkemaByAjax() {
+        const input = document.querySelector('#nomor_skema');
+        if (!input) return true;
+
+        const nomorSkema = input.value.trim();
+        const feedback = ensureNomorSkemaFeedback(input);
+
+        // Clear feedback if empty
+        if (nomorSkema === '') {
+            input.classList.remove('is-invalid');
+            input.setCustomValidity('');
+            feedback.textContent = '';
+            return true;
+        }
+
+        try {
+            const token = document.querySelector('#skemaForm input[name="_token"]')?.value;
+            const response = await fetch('{{ route('admin.skema.validate-nomor-skema') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': token || '',
+                },
+                body: JSON.stringify({ nomor_skema: nomorSkema }),
+            });
+
+            if (!response.ok) {
+                input.classList.remove('is-invalid');
+                input.setCustomValidity('');
+                feedback.textContent = '';
+                return true;
+            }
+
+            const result = await response.json();
+            if (result.is_valid) {
+                input.classList.remove('is-invalid');
+                input.setCustomValidity('');
+                feedback.textContent = '';
+                return true;
+            } else {
+                input.classList.add('is-invalid');
+                input.setCustomValidity(result.message || 'Nomor skema sudah terdaftar.');
+                feedback.textContent = result.message || 'Nomor skema sudah terdaftar.';
+                feedback.style.display = 'block';
+                return false;
+            }
+        } catch (error) {
+            console.error('Nomor skema validation error:', error);
+            input.classList.remove('is-invalid');
+            input.setCustomValidity('');
+            feedback.textContent = '';
+            return true;
+        }
+    }
+
     document.getElementById('skemaForm').addEventListener('submit', async function(e) {
         if (isSubmittingFromValidation) {
             return;
         }
 
         e.preventDefault();
+        
+        // Validate nomor_skema first
+        const nomorSkemaValid = await validateNomorSkemaByAjax();
+        if (!nomorSkemaValid) {
+            const nomorSkemaInput = this.querySelector('#nomor_skema');
+            if (nomorSkemaInput) {
+                nomorSkemaInput.focus();
+            }
+            return;
+        }
+
         const isValid = await validateKodeUnitByAjax();
 
         if (!isValid) {
