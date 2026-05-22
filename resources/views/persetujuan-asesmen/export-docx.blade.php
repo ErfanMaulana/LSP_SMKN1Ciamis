@@ -64,128 +64,131 @@
 
     <table class="section-gap">
         <tr>
-            <td style="width:30%;">Skema Sertifikasi<br>{{ $item->kategori_skema }}</td>
-            <td style="width:12%;">Judul</td>
-            <td style="width:2%;">:</td>
+            <td style="width:30%; vertical-align:middle; text-align:left;" rowspan="2">Skema Sertifikasi<br>{{ $item->kategori_skema }}</td>
+            <td style="width:12%; border-right:none;">Judul</td>
+            <td style="width:2%; border-left:none;">:</td>
             <td>{{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</td>
         </tr>
         <tr>
-            <td></td>
-            <td>Nomor</td>
-            <td>:</td>
+            <td style="border-right:none;">Nomor</td>
+            <td style="border-left:none;">:</td>
             <td>{{ $item->nomor_skema ?: ($skema->nomor_skema ?? '-') }}</td>
         </tr>
         <tr>
-            <td>TUK</td>
-            <td colspan="2">:</td>
+            <td style="border-right:none;">TUK</td>
+            <td colspan="2" style="text-align:right; border-left:none;">:</td>
             <td>{{ $item->tuk }}</td>
         </tr>
         <tr>
-            <td>Nama Asesor</td>
-            <td colspan="2">:</td>
+            <td style="border-right:none;">Nama Asesor</td>
+            <td colspan="2" style="text-align:right; border-left:none;">:</td>
             <td>{{ $item->nama_asesor }}</td>
         </tr>
         <tr>
-            <td>Nama Asesi</td>
-            <td colspan="2">:</td>
+            <td style="border-right:none;">Nama Asesi</td>
+            <td colspan="2" style="text-align:right; border-left:none;">:</td>
             <td>{{ $item->nama_asesi }}</td>
         </tr>
     </table>
 
     <table class="section-gap">
         <tr>
-            <td style="font-weight:700;">Bukti yang akan dikumpulkan:</td>
-        </tr>
-    </table>
-
-    <table>
-        <tr>
-            <td style="width:5%;" class="center">{{ $item->bukti_verifikasi_portofolio ? '✓' : '☐' }}</td>
-            <td>Hasil Verifikasi Portofolio</td>
-            <td style="width:5%;" class="center">{{ $item->bukti_reviu_produk ? '✓' : '☐' }}</td>
-            <td>Hasil Reviu Produk</td>
-        </tr>
-        <tr>
-            <td class="center">{{ $item->bukti_observasi_langsung ? '✓' : '☐' }}</td>
-            <td>Hasil Observasi Langsung</td>
-            <td class="center">{{ $item->bukti_kegiatan_terstruktur ? '✓' : '☐' }}</td>
-            <td>Hasil Kegiatan Terstruktur</td>
-        </tr>
-        <tr>
-            <td class="center">{{ $item->bukti_pertanyaan_lisan ? '✓' : '☐' }}</td>
-            <td>Hasil Pertanyaan Lisan</td>
-            <td class="center">{{ $item->bukti_pertanyaan_tertulis ? '✓' : '☐' }}</td>
-            <td>Hasil Pertanyaan Tertulis</td>
-        </tr>
-        <tr>
-            <td class="center">{{ $item->bukti_pertanyaan_wawancara ? '✓' : '☐' }}</td>
-            <td>Hasil Pertanyaan Wawancara</td>
-            <td class="center">{{ $item->bukti_lainnya ? '✓' : '☐' }}</td>
-            <td>Lainnya{{ $item->bukti_lainnya_keterangan ? ' - ' . $item->bukti_lainnya_keterangan : '' }}</td>
+            <td style="width:30%; vertical-align:middle;">Bukti yang akan dikumpulkan :</td>
+            <td style="width:70%; padding:8px 10px;">
+                <table style="width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed;">
+                    <tr>
+                        <td class="no-border" style="width:50%; padding:4px 2px 4px 0;">
+                            {{ $item->bukti_verifikasi_portofolio ? '☑' : '☐' }} Hasil Verifikasi Portofolio
+                        </td>
+                        <td class="no-border" style="width:50%; padding:4px 0 4px 8px;">
+                            {{ $item->bukti_reviu_produk ? '☑' : '☐' }} Hasil Reviu Produk
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="no-border" style="padding:4px 2px 4px 0;">
+                            {{ $item->bukti_observasi_langsung ? '☑' : '☐' }} Hasil Observasi Langsung
+                        </td>
+                        <td class="no-border" style="padding:4px 0 4px 8px;">
+                            {{ $item->bukti_kegiatan_terstruktur ? '☑' : '☐' }} Hasil Kegiatan Terstruktur
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="no-border" style="padding:4px 2px 4px 0;">
+                            {{ $item->bukti_pertanyaan_lisan ? '☑' : '☐' }} Hasil Pertanyaan Lisan
+                        </td>
+                        <td class="no-border" style="padding:4px 0 4px 8px;">
+                            {{ $item->bukti_pertanyaan_tertulis ? '☑' : '☐' }} Hasil Pertanyaan Tertulis
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="no-border" style="padding:4px 2px 4px 0;">
+                            {{ $item->bukti_lainnya ? '☑' : '☐' }} Lainnya {{ $item->bukti_lainnya_keterangan ?: '......' }}
+                        </td>
+                        <td class="no-border" style="padding:4px 0 4px 8px;">
+                            {{ $item->bukti_pertanyaan_wawancara ? '☑' : '☐' }} Hasil Pertanyaan Wawancara
+                        </td>
+                    </tr>
+                </table>
+            </td>
         </tr>
     </table>
 
     <table class="section-gap">
         <tr>
-            <td style="font-weight:700;">Pelaksanaan asesmen disepakati pada:</td>
-        </tr>
-    </table>
-
-    <table>
-        <tr>
-            <td style="width:30%;">Hari / Tanggal</td>
-            <td>:</td>
+            <td rowspan="3" style="width:30%; vertical-align:middle;">Pelaksanaan asesmen disepakati pada:</td>
+            <td style="width:12%; border-right:none;">Hari / Tanggal</td>
+            <td style="width:3%; border-left:none;">:</td>
             <td>{{ $item->hari_tanggal }}</td>
         </tr>
         <tr>
-            <td>Waktu</td>
-            <td>:</td>
+            <td style="border-right:none;">Waktu</td>
+            <td style="border-left:none;">:</td>
             <td>{{ $item->waktu }}</td>
         </tr>
         <tr>
-            <td>TUK</td>
-            <td>:</td>
+            <td style="border-right:none;">TUK</td>
+            <td style="border-left:none;">:</td>
             <td>{{ $item->tuk_pelaksanaan }}</td>
         </tr>
     </table>
 
     <table class="section-gap">
         <tr>
-            <td style="font-weight:700;">Asesi:</td>
+            <td style="font-weight:700; border-bottom:none;">Asesi:</td>
         </tr>
         <tr>
-            <td>{{ $item->pernyataan_asesi_1 }}</td>
-        </tr>
-    </table>
-
-    <table class="section-gap">
-        <tr>
-            <td style="font-weight:700;">Asesor:</td>
-        </tr>
-        <tr>
-            <td>{{ $item->pernyataan_asesor }}</td>
+            <td style="border-top:none;">{{ $item->pernyataan_asesi_1 }}</td>
         </tr>
     </table>
 
     <table class="section-gap">
         <tr>
-            <td style="font-weight:700;">Asesi:</td>
+            <td style="font-weight:700; border-bottom:none;">Asesor:</td>
         </tr>
         <tr>
-            <td>{{ $item->pernyataan_asesi_2 }}</td>
+            <td style="border-top:none;">{{ $item->pernyataan_asesor }}</td>
         </tr>
     </table>
 
     <table class="section-gap">
         <tr>
-            <td colspan="4" style="font-weight:700;">Tanda Tangan</td>
+            <td style="font-weight:700; border-bottom:none;">Asesi:</td>
+        </tr>
+        <tr>
+            <td style="border-top:none;">{{ $item->pernyataan_asesi_2 }}</td>
+        </tr>
+    </table>
+
+    <table class="section-gap">
+        <tr>
+            <td colspan="4">Tanda Tangan</td>
         </tr>
     </table>
 
     <table>
         <tr>
-            <td style="width:50%; text-align:center; font-weight:700; padding:6px;">Tanda Tangan Asesor</td>
-            <td style="width:50%; text-align:center; font-weight:700; padding:6px;">Tanda Tangan Asesi</td>
+            <td style="width:50%; text-align:center; padding:6px;">Tanda Tangan Asesor</td>
+            <td style="width:50%; text-align:center; padding:6px;">Tanda Tangan Asesi</td>
         </tr>
         <tr>
             <td style="width:50%; text-align:center; padding:6px;">
@@ -204,12 +207,12 @@
             </td>
         </tr>
         <tr>
-            <td style="width:50%; text-align:center; padding:4px 3px 2px; font-size:8px;">
-                <div style="font-weight:700; margin-bottom:1px;">{{ $item->ttd_asesor_nama ?: 'Nama Asesor' }}</div>
+            <td style="width:50%; text-align:center; padding:4px 3px 2px;">
+                <div style="margin-bottom:1px;">{{ $item->ttd_asesor_nama ?: 'Nama Asesor' }}</div>
                 <div>{{ $item->ttd_asesor_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
             </td>
-            <td style="width:50%; text-align:center; padding:4px 3px 2px; font-size:8px;">
-                <div style="font-weight:700; margin-bottom:1px;">{{ $item->ttd_asesi_nama ?: 'Nama Asesi' }}</div>
+            <td style="width:50%; text-align:center; padding:4px 3px 2px;">
+                <div style="margin-bottom:1px;">{{ $item->ttd_asesi_nama ?: 'Nama Asesi' }}</div>
                 <div>{{ $item->ttd_asesi_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
             </td>
         </tr>

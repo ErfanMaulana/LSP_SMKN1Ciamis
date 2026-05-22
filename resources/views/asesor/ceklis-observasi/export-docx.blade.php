@@ -113,7 +113,7 @@
             $raw = trim((string) $raw);
 
             if ($raw === '') {
-                return [];
+                return collect();
             }
 
             return collect(preg_split('/\s*(?:\||,|\r\n|\r|\n)\s*/', $raw))

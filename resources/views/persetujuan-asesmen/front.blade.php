@@ -745,35 +745,34 @@
                 <td colspan="4">{{ $item->pengantar }}</td>
             </tr>
             <tr>
-                <td style="width:30%;">Skema Sertifikasi<br>{{ $item->kategori_skema }}</td>
-                <td style="width:12%;">Judul</td>
-                <td style="width:2%;">:</td>
+                <td style="width:30%; vertical-align:middle; text-align:left;" rowspan="2">Skema Sertifikasi<br>{{ $item->kategori_skema }}</td>
+                <td style="width:12%; border-right:none;">Judul</td>
+                <td style="width:2%; border-left:none;">:</td>
                 <td>{{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</td>
             </tr>
             <tr>
-                <td></td>
-                <td>Nomor</td>
-                <td>:</td>
+                <td style="border-right:none;">Nomor</td>
+                <td style="border-left:none;">:</td>
                 <td>{{ $item->nomor_skema ?: ($skema->nomor_skema ?? '-') }}</td>
             </tr>
             <tr>
-                <td>TUK</td>
-                <td colspan="2">:</td>
+                <td style="border-right:none;">TUK</td>
+                <td colspan="2" style="text-align:right; border-left:none;">:</td>
                 <td>{{ $item->tuk }}</td>
             </tr>
             <tr>
-                <td>Nama Asesor</td>
-                <td colspan="2">:</td>
+                <td style="border-right:none;">Nama Asesor</td>
+                <td colspan="2" style="text-align:right; border-left:none;">:</td>
                 <td>{{ $item->nama_asesor }}</td>
             </tr>
             <tr>
-                <td>Nama Asesi</td>
-                <td colspan="2">:</td>
+                <td style="border-right:none;">Nama Asesi</td>
+                <td colspan="2" style="text-align:right; border-left:none;">:</td>
                 <td>{{ $item->nama_asesi }}</td>
             </tr>
             <tr>
-                <td>Bukti yang akan dikumpulkan:</td>
-                <td colspan="3">
+                <td style="vertical-align:middle;">Bukti yang akan dikumpulkan :</td>
+                <td colspan="3" style="padding:8px 10px;">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;">
                         <div><span class="check">{{ $item->bukti_verifikasi_portofolio ? 'V' : '' }}</span>Hasil Verifikasi Portofolio</div>
                         <div><span class="check">{{ $item->bukti_reviu_produk ? 'V' : '' }}</span>Hasil Reviu Produk</div>
@@ -781,25 +780,25 @@
                         <div><span class="check">{{ $item->bukti_kegiatan_terstruktur ? 'V' : '' }}</span>Hasil Kegiatan Terstruktur</div>
                         <div><span class="check">{{ $item->bukti_pertanyaan_lisan ? 'V' : '' }}</span>Hasil Pertanyaan Lisan</div>
                         <div><span class="check">{{ $item->bukti_pertanyaan_tertulis ? 'V' : '' }}</span>Hasil Pertanyaan Tertulis</div>
-                        <div><span class="check">{{ $item->bukti_lainnya ? 'V' : '' }}</span>Lainnya {{ $item->bukti_lainnya_keterangan ? ': ' . $item->bukti_lainnya_keterangan : '' }}</div>
+                        <div><span class="check">{{ $item->bukti_lainnya ? 'V' : '' }}</span>Lainnya {{ $item->bukti_lainnya_keterangan ?: '......' }}</div>
                         <div><span class="check">{{ $item->bukti_pertanyaan_wawancara ? 'V' : '' }}</span>Hasil Pertanyaan Wawancara</div>
                     </div>
                 </td>
             </tr>
             <tr>
                 <td rowspan="3">Pelaksanaan asesmen disepakati pada:</td>
-                <td>Hari / Tanggal</td>
-                <td>:</td>
+                <td style="border-right:none;">Hari / Tanggal</td>
+                <td style="border-left:none;">:</td>
                 <td>{{ $item->hari_tanggal }}</td>
             </tr>
             <tr>
-                <td>Waktu</td>
-                <td>:</td>
+                <td style="border-right:none;">Waktu</td>
+                <td style="border-left:none;">:</td>
                 <td>{{ $item->waktu }}</td>
             </tr>
             <tr>
-                <td>TUK</td>
-                <td>:</td>
+                <td style="border-right:none;">TUK</td>
+                <td style="border-left:none;">:</td>
                 <td>{{ $item->tuk_pelaksanaan }}</td>
             </tr>
             <tr>
