@@ -1,5 +1,5 @@
 <!-- PROFIL LSP CONTENT MOVED TO HOME -->
-<section class="hero-section">
+<!-- <section class="hero-section">
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
       <div class="lg:col-span-12">
@@ -18,7 +18,7 @@
       </div>
     </div>
   </div>
-</section>
+</section> -->
 
 <section class="vm-section">
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
