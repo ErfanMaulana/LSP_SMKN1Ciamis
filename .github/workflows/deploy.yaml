@@ -36,5 +36,5 @@ jobs:
             php artisan route:list | grep admin/asesi/bulk-delete
             php artisan config:cache
         "
-#triggerr
+#triggerrr
 # 
