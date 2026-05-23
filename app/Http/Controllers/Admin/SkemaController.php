@@ -346,6 +346,39 @@ class SkemaController extends Controller
         return redirect()->route('admin.skema.index')->with('success', 'Skema sertifikasi berhasil dihapus!');
     }
 
+    /**
+     * Bulk delete multiple skema records.
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $validated = $request->validate([
+            'skema_ids' => 'required|array|min:1',
+            'skema_ids.*' => 'integer|exists:skemas,id',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $deletedCount = 0;
+
+            $skemas = Skema::findMany($validated['skema_ids']);
+            foreach ($skemas as $skema) {
+                $skema->delete();
+                $deletedCount++;
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route('admin.skema.index')
+                ->with('success', $deletedCount . ' skema berhasil dihapus!');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return back()->withInput()->with('error', 'Gagal menghapus skema: ' . $e->getMessage());
+        }
+    }
+
     private function addDuplicateUnitCodeErrors($validator, array $units): void
     {
         $seen = [];

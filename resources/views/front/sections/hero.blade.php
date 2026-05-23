@@ -1,4 +1,4 @@
-<section class="relative aspect-video min-h-0 md:min-h-[90vh] md:aspect-auto flex items-center overflow-hidden">
+<section id="beranda" class="relative aspect-video min-h-0 md:min-h-[90vh] md:aspect-auto flex items-center overflow-hidden">
 
     {{-- Slides --}}
     <div id="carousel" class="absolute inset-0 z-0" style="background: linear-gradient(135deg, #0061a5 0%, #00a8e8 100%);">

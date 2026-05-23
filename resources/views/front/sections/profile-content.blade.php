@@ -94,7 +94,7 @@
   </div>
 </section>
 
-<section class="rl-section">
+<section id="ruang-lingkup" class="rl-section">
   <div class="max-w-6xl mx-auto px-4 sm:px-6">
     <h2 class="section-title" data-scroll-reveal>Ruang Lingkup Sertifikasi</h2>
     <p class="section-subtitle" data-scroll-reveal data-reveal-delay="70">Berbagai bidang keahlian yang telah terlisensi untuk dilakukan pengujian.</p>

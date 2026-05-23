@@ -13,7 +13,7 @@ class CombinedSkemaSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            SkemaSeeder::class,
+            // SkemaSeeder::class,
             SkemaAKLSeeder::class,
             SkemaDKVSeeder::class,
             SkemaHTLSeeder::class,

@@ -17,9 +17,9 @@ use App\Http\Controllers\Front\PanduanController;
 */
 
 Route::name('front.')->group(function () {
-    Route::redirect('/profil', '/')->name('profil');
-    Route::redirect('/daftar-lsp', '/berita')->name('daftar');
-    Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
+    Route::redirect('/profil', '/#beranda')->name('profil');
+    Route::redirect('/daftar-lsp', '/#berita')->name('daftar');
+    Route::redirect('/kontak', '/#kontak')->name('kontak');
 
     // Panduan Sistem Routes
     Route::prefix('panduan')->name('panduan.')->group(function () {
@@ -31,11 +31,11 @@ Route::name('front.')->group(function () {
     });
 
     // Berita Routes
-    Route::get('/berita', [BeritaController::class, 'index'])->name('berita.index');
+    Route::redirect('/berita', '/#berita')->name('berita.index');
     Route::get('/berita/{slug}', [BeritaController::class, 'show'])->name('berita.show');
 
     // Kompetensi Routes
-    Route::get('/kompetensi-dan-data-skema', [KompetensiController::class, 'index'])->name('kompetensi.index');
+    Route::redirect('/kompetensi-dan-data-skema', '/#ruang-lingkup')->name('kompetensi.index');
     Route::get('/kompetensi-dan-data-skema/{slug}', [KompetensiController::class, 'detail'])->name('kompetensi.detail');
 
     // Registration Routes

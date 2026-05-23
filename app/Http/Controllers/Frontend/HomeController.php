@@ -9,6 +9,7 @@ use App\Models\Skema;
 use App\Models\Tuk;
 use App\Models\Asesi;
 use App\Models\Asesor;
+use App\Models\Berita;
 use App\Models\Jurusan;
 use App\Models\ProfileContent;
 use App\Models\ProfileVisionMission;
@@ -42,6 +43,11 @@ class HomeController extends Controller
         $milestones = ProfileContent::byType('milestone')->active()->get();
         $visions = ProfileVisionMission::byType('visi')->active()->get();
         $missions = ProfileVisionMission::byType('misi')->active()->get();
+        $latestBerita = Berita::where('status', 'published')
+            ->orderBy('tanggal_publikasi', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
 
         $jurusanList = Jurusan::withCount('skemas')
             ->having('skemas_count', '>', 0)
@@ -80,7 +86,8 @@ class HomeController extends Controller
             'milestones',
             'visions',
             'missions',
-            'jurusanList'
+            'jurusanList',
+            'latestBerita'
         ));
     }
     

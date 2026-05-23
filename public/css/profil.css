@@ -71,11 +71,22 @@
 .scope-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .8rem; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .skema-badge { background: var(--blue-light); color: var(--blue-accent); font-size: 0.8125rem; font-weight: 600; padding: .22rem .7rem; border-radius: 20px; display: inline-block; margin-top: auto; }
 
-.hero-section,
-.vm-section,
-.km-section,
-.rl-section {
+ .hero-section,
+ .vm-section,
+ .km-section,
+ .rl-section {
   overflow-x: clip;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+#beranda,
+#ruang-lingkup,
+#berita,
+#kontak {
+  scroll-margin-top: 92px;
 }
 
 /* ===================== RESPONSIVE ===================== */
