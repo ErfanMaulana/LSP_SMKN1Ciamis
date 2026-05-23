@@ -314,19 +314,31 @@
                                     <i class="bi bi-three-dots-vertical"></i>
                                 </button>
                                 <div class="action-dropdown">
-                                    <a href="{{ route('admin.umpan-balik-komponen.show', $item->skema_id) }}">
-                                        <i class="bi bi-eye"></i> Lihat Detail
-                                    </a>
-                                    <a href="{{ route('admin.umpan-balik-komponen.edit-skema', $item->skema_id) }}">
-                                        <i class="bi bi-pencil"></i> Edit
-                                    </a>
-                                    <form action="{{ route('admin.umpan-balik-komponen.destroy-skema', $item->skema_id) }}" method="POST" onsubmit="return openFeedbackDeleteModal(event, this, @js('Hapus semua komponen pada skema "' . ($item->skema->nama_skema ?? '-') . '" ini?'))">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit">
+                                    @if($item->skema_id)
+                                        <a href="{{ route('admin.umpan-balik-komponen.show', $item->skema_id) }}">
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </a>
+                                        <a href="{{ route('admin.umpan-balik-komponen.edit-skema', $item->skema_id) }}">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
+                                        <form action="{{ route('admin.umpan-balik-komponen.destroy-skema', $item->skema_id) }}" method="POST" onsubmit="return openFeedbackDeleteModal(event, this, @js('Hapus semua komponen pada skema "' . ($item->skema->nama_skema ?? '-') . '" ini?'))">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    @else
+                                        <button type="button" disabled>
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </button>
+                                        <button type="button" disabled>
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </button>
+                                        <button type="button" disabled>
                                             <i class="bi bi-trash"></i> Hapus
                                         </button>
-                                    </form>
+                                    @endif
                                 </div>
                             </div>
                         </td>

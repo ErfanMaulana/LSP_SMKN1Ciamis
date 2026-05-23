@@ -14,91 +14,115 @@
         flex-wrap:wrap;
     }
 
-    .page-header h2 {
-        margin:0;
-        font-size:24px;
-            justify-content:flex-start;
-            position:relative;
-    }
-
-        .action-dropdown {
-            position:relative;
-            display:inline-flex;
+        .page-header h2 {
+            margin:0;
+            font-size:24px;
         }
 
-        .action-trigger {
+        .card,
+        .card-body,
+        .table-container {
+            overflow: visible;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .actions {
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            justify-content:flex-end;
+        }
+
+        .action-menu {
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+        }
+
+        .action-btn {
             display:inline-flex;
             align-items:center;
             justify-content:center;
-            width:auto;
-            height:auto;
+            width:32px;
+            height:32px;
             padding:0;
-            border:0;
-            border-radius:0;
+            border:none;
+            border-radius:6px;
             background:transparent;
             color:#64748b;
             cursor:pointer;
             font-size:18px;
             line-height:1;
+            transition: all .2s ease;
         }
 
-        .action-trigger:hover {
-            background:transparent;
+        .action-btn:hover {
+            background:#f1f5f9;
             color:#0f172a;
         }
 
-        .action-trigger:focus {
+        .action-btn:focus {
             outline:none;
-            box-shadow:none;
         }
 
-        .action-menu {
-            position:absolute;
-            right:0;
-            top:calc(100% + 8px);
-            min-width:160px;
+        .action-dropdown {
+            position:fixed;
+            min-width:180px;
             background:#fff;
-            border:1px solid #e5e7eb;
-            border-radius:10px;
-            box-shadow:0 12px 30px rgba(15,23,42,.12);
-            padding:6px;
+            border:1px solid #e2e8f0;
+            border-radius:8px;
+            box-shadow:0 4px 24px rgba(0,0,0,.15);
+            padding:0;
             display:none;
-            z-index:10;
+            z-index:1200;
+            overflow:hidden;
+            visibility:hidden;
+            pointer-events:none;
         }
 
-        .action-menu.show {
+        .action-dropdown.show {
             display:block;
+            visibility:visible;
+            pointer-events:auto;
         }
 
-        .action-menu a,
-        .action-menu button {
+        .action-dropdown.open-up {
+            /* top is set dynamically in JS */
+        }
+
+        .action-dropdown a,
+        .action-dropdown button {
             width:100%;
             display:flex;
             align-items:center;
-            gap:8px;
-            padding:10px 12px;
+            gap:10px;
+            padding:10px 16px;
             border:none;
             background:transparent;
-            border-radius:8px;
             text-decoration:none;
-            font-size:13px;
+            font-size:14px;
             font-weight:600;
-        padding:10px 16px;
             color:#0f172a;
             text-align:left;
-        border-radius:8px;
-        background:#0073bd;
-        color:#fff;
-        text-decoration:none;
+            cursor:pointer;
+        }
 
-        .action-menu a:hover,
-        .action-menu button:hover {
+        .action-dropdown a:hover,
+        .action-dropdown button:hover {
             background:#f8fafc;
         }
-        font-weight:600;
-        border:none;
-        cursor:pointer;
-    }
+
+        .action-dropdown form {
+            margin:0;
+        }
+
+        .action-dropdown button[type="submit"]:hover {
+            background:#fef2f2;
+            color:#dc2626;
+        }
 
     .btn-primary:hover { background:#005f9c; }
 
@@ -107,10 +131,10 @@
         border:1px solid #e5e7eb;
         border-radius:12px;
         box-shadow:0 1px 3px rgba(0,0,0,.06);
-        overflow:hidden;
+        overflow:visible;
     }
 
-    .card-body { padding:20px; }
+    .card-body { padding:20px; overflow:visible; }
 
     .toolbar {
         display:flex;
@@ -138,7 +162,7 @@
         font-size:14px;
     }
 
-    .table-container { overflow-x:auto; }
+    .table-container { overflow-x:auto; overflow-y:visible; }
 
     table {
         width:100%;
@@ -175,6 +199,12 @@
         display:flex;
         gap:8px;
         flex-wrap:wrap;
+        justify-content:flex-end;
+    }
+
+    td:last-child {
+        overflow:visible;
+        position:relative;
     }
 
     .btn-sm {
@@ -253,13 +283,13 @@
                                 <td><span class="badge">{{ $item->skema->jenis_skema ?? '-' }}</span></td>
                                 <td>{{ is_array($item->items) ? count($item->items) : 0 }} item</td>
                                 <td>{{ $item->updated_at?->translatedFormat('d M Y H:i') ?? '-' }}</td>
-                                <td>
+                                <td style="position:relative; overflow:visible;">
                                     <div class="actions">
-                                        <div class="action-dropdown">
-                                            <button type="button" class="action-trigger" aria-label="Aksi" aria-expanded="false" onclick="toggleActionMenu(this)">
+                                        <div class="action-menu">
+                                            <button type="button" class="action-btn" aria-label="Aksi" aria-expanded="false" onclick="toggleActionMenu(this)">
                                                 <i class="bi bi-three-dots-vertical"></i>
                                             </button>
-                                            <div class="action-menu">
+                                            <div class="action-dropdown">
                                                 <a href="{{ route('admin.bukti-persyaratan-dasar-pemohon.edit', $item->id) }}"><i class="bi bi-pencil"></i> Edit</a>
                                                 <form method="POST" action="{{ route('admin.bukti-persyaratan-dasar-pemohon.destroy', $item->id) }}" onsubmit="return confirm('Hapus data persyaratan dasar ini?')">
                                                     @csrf
@@ -290,10 +320,13 @@
 
 <script>
     function closeActionMenus(exceptMenu = null) {
-        document.querySelectorAll('.action-menu.show').forEach((menu) => {
+        document.querySelectorAll('.action-dropdown.show').forEach((menu) => {
             if (menu !== exceptMenu) {
                 menu.classList.remove('show');
-                const trigger = menu.parentElement?.querySelector('.action-trigger');
+                menu.classList.remove('open-up');
+                menu.style.top = '';
+                menu.style.left = '';
+                const trigger = menu.parentElement?.querySelector('.action-btn');
                 if (trigger) {
                     trigger.setAttribute('aria-expanded', 'false');
                 }
@@ -302,19 +335,38 @@
     }
 
     function toggleActionMenu(button) {
-        const menu = button.parentElement?.querySelector('.action-menu');
+        const menu = button.parentElement?.querySelector('.action-dropdown');
         if (!menu) return;
 
         const isOpen = menu.classList.contains('show');
         closeActionMenus();
         if (!isOpen) {
+            const wrapper = button.closest('.action-menu');
+            const dropdownRect = wrapper?.getBoundingClientRect();
+            const buttonRect = button.getBoundingClientRect();
+            const scrollX = window.pageXOffset || document.documentElement.scrollLeft || 0;
+            const scrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+            const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+            const menuWidth = 180;
+            const openUp = dropdownRect ? (dropdownRect.bottom + 220 > viewportHeight) : false;
+            const left = Math.min(buttonRect.right - menuWidth + scrollX, viewportWidth - menuWidth - 12 + scrollX);
+            const top = openUp
+                ? (buttonRect.top + scrollY - 10)
+                : (buttonRect.bottom + scrollY + 10);
+
+            menu.classList.toggle('open-up', openUp);
             menu.classList.add('show');
+            menu.style.left = `${Math.max(12 + scrollX, left)}px`;
+            menu.style.top = openUp
+                ? `${Math.max(12 + scrollY, top - menu.offsetHeight)}px`
+                : `${top}px`;
             button.setAttribute('aria-expanded', 'true');
         }
     }
 
     document.addEventListener('click', function(event) {
-        if (!event.target.closest('.action-dropdown')) {
+        if (!event.target.closest('.action-menu')) {
             closeActionMenus();
         }
     });
