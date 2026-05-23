@@ -186,32 +186,5 @@ class UmpanBalikKomponenController extends Controller
         return redirect()->route('admin.umpan-balik-komponen.index')->with('success', 'Semua komponen pada skema ' . $skema->nama_skema . ' berhasil dihapus.');
     }
 
-    /**
-     * Cleanup orphaned umpan_balik_komponen rows where skema_id is null
-     * or references a non-existing skema. Safe by default (dry-run).
-     * To actually delete, send POST with form param `confirm=1`.
-     */
-    public function cleanupOrphans(Request $request)
-    {
-        $orphanIds = DB::table('umpan_balik_komponen as ub')
-            ->leftJoin('skemas as s', 's.id', '=', 'ub.skema_id')
-            ->whereNull('ub.skema_id')
-            ->orWhereNull('s.id')
-            ->select('ub.id')
-            ->pluck('id');
-
-        $count = $orphanIds->count();
-
-        if ($count === 0) {
-            return redirect()->route('admin.umpan-balik-komponen.index')->with('success', 'Tidak ditemukan komponen orphan.');
-        }
-
-        if (!$request->boolean('confirm')) {
-            return redirect()->route('admin.umpan-balik-komponen.index')->with('warning', "Ditemukan {$count} baris tanpa skema terkait. Kirim POST ke route 'admin.umpan-balik-komponen.cleanup-orphan' dengan field 'confirm=1' untuk menghapus.");
-        }
-
-        DB::table('umpan_balik_komponen')->whereIn('id', $orphanIds->toArray())->delete();
-
-        return redirect()->route('admin.umpan-balik-komponen.index')->with('success', "Berhasil menghapus {$count} baris orphan dari tabel umpan_balik_komponen.");
-    }
+    
 }

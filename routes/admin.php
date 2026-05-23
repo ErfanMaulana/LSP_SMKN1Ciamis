@@ -274,8 +274,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/umpan-balik-komponen', [UmpanBalikKomponenController::class, 'index'])->name('admin.umpan-balik-komponen.index');
             Route::get('/umpan-balik-komponen/create', [UmpanBalikKomponenController::class, 'create'])->name('admin.umpan-balik-komponen.create')->middleware('permission:jadwal-ujikom.create');
             Route::post('/umpan-balik-komponen', [UmpanBalikKomponenController::class, 'store'])->name('admin.umpan-balik-komponen.store')->middleware('permission:jadwal-ujikom.create');
-            // Temporary cleanup route to remove orphaned components (safe: requires confirm=1)
-            Route::post('/umpan-balik-komponen/cleanup-orphan', [UmpanBalikKomponenController::class, 'cleanupOrphans'])->name('admin.umpan-balik-komponen.cleanup-orphan')->middleware('permission:jadwal-ujikom.delete');
+            
             Route::get('/umpan-balik-komponen/skema/{skemaId}', [UmpanBalikKomponenController::class, 'show'])->name('admin.umpan-balik-komponen.show');
             Route::get('/umpan-balik-komponen/skema/{skemaId}/edit', [UmpanBalikKomponenController::class, 'editSkema'])->name('admin.umpan-balik-komponen.edit-skema')->middleware('permission:jadwal-ujikom.edit');
             Route::delete('/umpan-balik-komponen/skema/{skemaId}', [UmpanBalikKomponenController::class, 'destroyBySkema'])->name('admin.umpan-balik-komponen.destroy-skema')->middleware('permission:jadwal-ujikom.delete');
