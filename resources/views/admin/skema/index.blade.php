@@ -198,6 +198,7 @@
     <div class="skema-delete-confirm-modal">
         <h3 id="skemaBulkDeleteConfirmTitle" class="skema-delete-confirm-title">Hapus Banyak Skema</h3>
         <p id="skemaBulkDeleteConfirmText" class="skema-delete-confirm-text">0 skema akan dihapus</p>
+        <ul id="skemaBulkDeleteConfirmList" class="skema-delete-confirm-list"></ul>
         <div class="skema-delete-confirm-actions">
             <button type="button" id="skemaBulkDeleteConfirmCancel" class="skema-delete-btn-cancel">Batal</button>
             <button type="button" id="skemaBulkDeleteConfirmSubmit" class="skema-delete-btn-submit">Hapus</button>
@@ -1085,18 +1086,20 @@
         const text = document.getElementById('skemaBulkDeleteConfirmText');
         const list = document.getElementById('skemaBulkDeleteConfirmList');
 
-        if (!overlay || !text || !list) return;
+        if (!overlay || !text) return;
 
         text.textContent = `${pendingBulkSkemaIds.length} skema akan dihapus`;
-        list.innerHTML = '';
+        if (list) {
+            list.innerHTML = '';
 
-        selected.forEach((checkbox) => {
-            const row = checkbox.closest('tr');
-            const label = row?.querySelector('.user-name')?.textContent?.trim() || checkbox.value;
-            const item = document.createElement('li');
-            item.textContent = label;
-            list.appendChild(item);
-        });
+            selected.forEach((checkbox) => {
+                const row = checkbox.closest('tr');
+                const label = row?.querySelector('.user-name')?.textContent?.trim() || checkbox.value;
+                const item = document.createElement('li');
+                item.textContent = label;
+                list.appendChild(item);
+            });
+        }
 
         overlay.classList.add('show');
         overlay.setAttribute('aria-hidden', 'false');
