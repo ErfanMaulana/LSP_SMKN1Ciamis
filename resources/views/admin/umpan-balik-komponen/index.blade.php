@@ -219,9 +219,18 @@
         <h2>Komponen Umpan Balik Asesi</h2>
         <p>Daftar skema yang sudah memiliki komponen umpan balik FR.AK.03.</p>
     </div>
-    <a href="{{ route('admin.umpan-balik-komponen.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Tambah Komponen
-    </a>
+    <div style="display:flex;gap:8px;align-items:center;">
+        <a href="{{ route('admin.umpan-balik-komponen.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Tambah Komponen
+        </a>
+        <form method="POST" action="{{ route('admin.umpan-balik-komponen.cleanup-orphan') }}" onsubmit="return confirm('Hapus semua baris orphan (tanpa skema terkait)? Aksi ini tidak bisa dibatalkan.');">
+            @csrf
+            <input type="hidden" name="confirm" value="1">
+            <button type="submit" class="btn" style="background:#dc2626;color:#fff;border-radius:8px;padding:8px 12px;font-weight:600;">
+                <i class="bi bi-trash"></i> Hapus Orphan
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="stats-grid">
