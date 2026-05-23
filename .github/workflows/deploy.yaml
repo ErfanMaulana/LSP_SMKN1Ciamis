@@ -35,5 +35,5 @@ jobs:
             php artisan route:list | grep admin/asesi/bulk-delete
             php artisan config:cache
         "
-#triggerrrrrrrr   php artisan db:seed --class='Database\Seeders\Catalog\CombinedSkemaSeeder' --force
+#triggerrrrrrrrrr   php artisan db:seed --class='Database\Seeders\Catalog\CombinedSkemaSeeder' --force
 # 
