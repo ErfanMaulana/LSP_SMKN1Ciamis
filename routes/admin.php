@@ -130,7 +130,6 @@ Route::prefix('admin')->group(function () {
             Route::get('/skema/{id}/edit', [SkemaController::class, 'edit'])->name('admin.skema.edit')->middleware('permission:skema.edit');
             Route::put('/skema/{id}', [SkemaController::class, 'update'])->name('admin.skema.update')->middleware('permission:skema.edit');
             Route::delete('/skema/{id}', [SkemaController::class, 'destroy'])->name('admin.skema.destroy')->middleware('permission:skema.delete');
-            Route::post('/skema/bulk-delete', [SkemaController::class, 'bulkDestroy'])->name('admin.skema.bulk-delete')->middleware('permission:skema.delete');
         });
 
         // Bukti Persyaratan Dasar Pemohon CRUD

@@ -12,9 +12,6 @@
             <p class="subtitle">Kelola dan organisasi semua skema sertifikasi kompetensi.</p>
         </div>
         <div class="header-actions">
-            <button type="button" class="btn btn-danger" id="bulkDeleteTrigger" disabled>
-                <i class="bi bi-trash3"></i> Hapus Terpilih
-            </button>
             <a href="{{ route('admin.skema.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle"></i> Tambah Skema Baru
             </a>
@@ -92,9 +89,6 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th style="width:48px; text-align:center;">
-                                <input type="checkbox" id="selectAllSkema" aria-label="Pilih semua skema">
-                            </th>
                             <th>NOMOR SKEMA</th>
                             <th>NAMA SKEMA</th>
                             <th>JENIS SKEMA</th>
@@ -106,9 +100,6 @@
                     <tbody id="skemaTableBody">
                         @forelse($skemas as $skema)
                         <tr>
-                            <td style="text-align:center;">
-                                <input type="checkbox" class="skema-row-checkbox" value="{{ $skema->id }}" aria-label="Pilih skema {{ $skema->nama_skema }}">
-                            </td>
                             <td>
                                 <span class="code-badge">{{ $skema->nomor_skema }}</span>
                             </td>
@@ -163,7 +154,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center">Belum ada data skema sertifikasi</td>
+                            <td colspan="6" class="text-center">Belum ada data skema sertifikasi</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -193,23 +184,6 @@
         </div>
     </div>
 </div>
-
-<div id="skema-bulk-delete-confirm-overlay" class="skema-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="skemaBulkDeleteConfirmTitle" aria-hidden="true">
-    <div class="skema-delete-confirm-modal">
-        <h3 id="skemaBulkDeleteConfirmTitle" class="skema-delete-confirm-title">Hapus Banyak Skema</h3>
-        <p id="skemaBulkDeleteConfirmText" class="skema-delete-confirm-text">0 skema akan dihapus</p>
-        <ul id="skemaBulkDeleteConfirmList" class="skema-delete-confirm-list"></ul>
-        <div class="skema-delete-confirm-actions">
-            <button type="button" id="skemaBulkDeleteConfirmCancel" class="skema-delete-btn-cancel">Batal</button>
-            <button type="button" id="skemaBulkDeleteConfirmSubmit" class="skema-delete-btn-submit">Hapus</button>
-        </div>
-    </div>
-</div>
-
-<form id="bulkDeleteSkemaForm" method="POST" action="{{ route('admin.skema.bulk-delete') }}" style="display:none;">
-    @csrf
-    <div id="bulkDeleteSkemaIds"></div>
-</form>
 
 <style>
     .skema-management {
@@ -241,42 +215,6 @@
     .header-actions {
         display: flex;
         gap: 12px;
-    }
-
-    .btn-danger {
-        background: #dc2626;
-        color: white;
-    }
-
-    .btn-danger:hover:not(:disabled) {
-        background: #b91c1c;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(185, 28, 28, 0.25);
-    }
-
-    .btn-danger:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
-    }
-
-    .btn-danger {
-        background: #dc2626;
-        color: white;
-    }
-
-    .btn-danger:hover:not(:disabled) {
-        background: #b91c1c;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(185, 28, 28, 0.25);
-    }
-
-    .btn-danger:disabled {
-        opacity: 0.55;
-        cursor: not-allowed;
-        transform: none;
-        box-shadow: none;
     }
 
     .btn {
@@ -530,22 +468,6 @@
     .data-table tbody td {
         padding: 16px;
         border-bottom: 1px solid #f1f5f9;
-    }
-
-    .skema-row-checkbox,
-    #selectAllSkema {
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
-        accent-color: #0073bd;
-    }
-
-    .skema-row-checkbox,
-    #selectAllSkema {
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
-        accent-color: #0073bd;
     }
 
     .data-table tbody tr {
@@ -834,24 +756,6 @@
         gap: 10px;
     }
 
-    .skema-delete-confirm-list {
-        margin: 12px 0 0;
-        padding-left: 18px;
-        max-height: 180px;
-        overflow: auto;
-        color: #334155;
-        font-size: 13px;
-    }
-
-    .skema-delete-confirm-list {
-        margin: 12px 0 0;
-        padding-left: 18px;
-        max-height: 180px;
-        overflow: auto;
-        color: #334155;
-        font-size: 13px;
-    }
-
     .skema-delete-btn-cancel,
     .skema-delete-btn-submit {
         border: 1px solid #0073bd;
@@ -978,27 +882,6 @@
 
 <script>
     let pendingSkemaDeleteForm = null;
-    let pendingBulkSkemaIds = [];
-
-    function getSelectedSkemaCheckboxes() {
-        return Array.from(document.querySelectorAll('.skema-row-checkbox:checked'));
-    }
-
-    function syncBulkDeleteButtonState() {
-        const bulkButton = document.getElementById('bulkDeleteTrigger');
-        const selectedCount = getSelectedSkemaCheckboxes().length;
-
-        if (bulkButton) {
-            bulkButton.disabled = selectedCount === 0;
-        }
-
-        const selectAll = document.getElementById('selectAllSkema');
-        const totalCheckboxes = document.querySelectorAll('.skema-row-checkbox').length;
-        if (selectAll) {
-            selectAll.checked = totalCheckboxes > 0 && selectedCount === totalCheckboxes;
-            selectAll.indeterminate = selectedCount > 0 && selectedCount < totalCheckboxes;
-        }
-    }
 
     function openSkemaDeleteModal(event, form, message) {
         if (event) {
@@ -1060,8 +943,6 @@
             wrapper.parentNode.insertBefore(table, wrapper);
             wrapper.remove();
         }
-
-        syncBulkDeleteButtonState();
     });
 
     function toggleMenu(event, button) {
@@ -1077,43 +958,6 @@
         button.nextElementSibling.classList.toggle('show');
     }
 
-    function openBulkSkemaDeleteModal() {
-        const selected = getSelectedSkemaCheckboxes();
-        if (selected.length === 0) return;
-
-        pendingBulkSkemaIds = selected.map((checkbox) => checkbox.value);
-        const overlay = document.getElementById('skema-bulk-delete-confirm-overlay');
-        const text = document.getElementById('skemaBulkDeleteConfirmText');
-        const list = document.getElementById('skemaBulkDeleteConfirmList');
-
-        if (!overlay || !text) return;
-
-        text.textContent = `${pendingBulkSkemaIds.length} skema akan dihapus`;
-        if (list) {
-            list.innerHTML = '';
-
-            selected.forEach((checkbox) => {
-                const row = checkbox.closest('tr');
-                const label = row?.querySelector('.user-name')?.textContent?.trim() || checkbox.value;
-                const item = document.createElement('li');
-                item.textContent = label;
-                list.appendChild(item);
-            });
-        }
-
-        overlay.classList.add('show');
-        overlay.setAttribute('aria-hidden', 'false');
-    }
-
-    function closeBulkSkemaDeleteModal() {
-        const overlay = document.getElementById('skema-bulk-delete-confirm-overlay');
-        if (!overlay) return;
-
-        overlay.classList.remove('show');
-        overlay.setAttribute('aria-hidden', 'true');
-        pendingBulkSkemaIds = [];
-    }
-
     // Close dropdown when clicking outside
     document.addEventListener('click', function(event) {
         if (!event.target.closest('.action-menu')) {
@@ -1121,44 +965,6 @@
                 dropdown.classList.remove('show');
             });
         }
-    });
-
-    document.addEventListener('change', function(event) {
-        if (event.target.id === 'selectAllSkema') {
-            document.querySelectorAll('.skema-row-checkbox').forEach((checkbox) => {
-                checkbox.checked = event.target.checked;
-            });
-        }
-
-        if (event.target.classList.contains('skema-row-checkbox') || event.target.id === 'selectAllSkema') {
-            syncBulkDeleteButtonState();
-        }
-    });
-
-    document.getElementById('bulkDeleteTrigger')?.addEventListener('click', openBulkSkemaDeleteModal);
-    document.getElementById('skemaBulkDeleteConfirmCancel')?.addEventListener('click', closeBulkSkemaDeleteModal);
-    document.getElementById('skema-bulk-delete-confirm-overlay')?.addEventListener('click', function(event) {
-        if (event.target === this) {
-            closeBulkSkemaDeleteModal();
-        }
-    });
-    document.getElementById('skemaBulkDeleteConfirmSubmit')?.addEventListener('click', function() {
-        const form = document.getElementById('bulkDeleteSkemaForm');
-        const container = document.getElementById('bulkDeleteSkemaIds');
-
-        if (!form || !container || pendingBulkSkemaIds.length === 0) return;
-
-        container.innerHTML = '';
-        pendingBulkSkemaIds.forEach((id) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'skema_ids[]';
-            input.value = id;
-            container.appendChild(input);
-        });
-
-        closeBulkSkemaDeleteModal();
-        form.submit();
     });
 
     if (!window.__skemaAjaxInitialized) {
@@ -1194,7 +1000,6 @@
                 tableBody.innerHTML = data.rows || '';
                 paginationInfo.textContent = data.pagination_info || 'Menampilkan 0 sampai 0 dari 0 data';
                 paginationLinks.innerHTML = data.pagination_links || '';
-                syncBulkDeleteButtonState();
 
                 const url = new URL(window.location.href);
                 url.search = params.toString();
