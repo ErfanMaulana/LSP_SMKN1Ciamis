@@ -55,7 +55,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="btn btn-primary">
                 <i class="bi bi-check2-circle"></i> Simpan Password Baru
             </button>
         </form>

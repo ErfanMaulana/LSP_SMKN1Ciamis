@@ -531,8 +531,8 @@
     </div>
 
     <div class="form-actions">
-        <button type="submit" class="btn-primary"><i class="bi bi-save"></i> {{ $submitLabel }}</button>
-        <a href="{{ route('asesor.ceklis-observasi.index') }}" class="btn-secondary"><i class="bi bi-x-circle"></i> Batal</a>
+        <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> {{ $submitLabel }}</button>
+        <a href="{{ route('asesor.ceklis-observasi.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Batal</a>
     </div>
 </div>
 

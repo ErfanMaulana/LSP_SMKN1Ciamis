@@ -329,7 +329,7 @@
         <h2>Jadwal Uji Kompetensi</h2>
         <p>Kelola jadwal pelaksanaan uji kompetensi dan penempatan TUK</p>
     </div>
-    <a href="{{ route('admin.jadwal-ujikom.create') }}" class="btn-add">
+    <a href="{{ route('admin.jadwal-ujikom.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-lg"></i> Tambah Jadwal
     </a>
 </div>

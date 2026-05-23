@@ -358,7 +358,7 @@
         <h2>Tempat Uji Kompetensi (TUK)</h2>
         <p>Kelola data tempat uji kompetensi untuk pelaksanaan ujian sertifikasi</p>
     </div>
-    <a href="{{ route('admin.tuk.create') }}" class="btn-add">
+    <a href="{{ route('admin.tuk.create') }}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Tambah TUK
     </a>
 </div>
@@ -486,7 +486,7 @@
                         <p style="font-size: 13px; color: #9ca3af; margin: 0;">Coba kata kunci lain.</p>
 
                         @if(!$search && $status === 'all')
-                            <a href="{{ route('admin.tuk.create') }}" class="btn-add" style="display:inline-flex;margin-top:12px;">
+                            <a href="{{ route('admin.tuk.create') }}" class="btn btn-primary" style="display:inline-flex;margin-top:12px;">
                                 <i class="bi bi-plus-lg"></i> Tambah TUK Sekarang
                             </a>
                         @endif

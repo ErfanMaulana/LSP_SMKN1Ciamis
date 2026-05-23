@@ -744,8 +744,8 @@
                 </label>
             </div>
 
-            <div class="recommend-actions">
-                <button type="submit" class="btn-primary">
+                <div class="recommend-actions">
+                <button type="submit" class="btn btn-primary">
                     <i class="bi bi-save"></i> Simpan Rekomendasi
                 </button>
             </div>

@@ -43,7 +43,7 @@
                     </label>
                 @endif
 
-                <button type="submit" class="btn-primary">
+                <button type="submit" class="btn btn-primary">
                     <i class="bi bi-save"></i> Simpan Foto Profil
                 </button>
             </form>
@@ -73,7 +73,7 @@
 
                 <div class="crop-actions">
                     <button type="button" class="btn-secondary" id="cropCancel">Batal</button>
-                    <button type="button" class="btn-primary" id="cropApply">Gunakan Hasil Crop</button>
+                    <button type="button" class="btn btn-primary" id="cropApply">Gunakan Hasil Crop</button>
                 </div>
             </div>
         </div>
@@ -223,7 +223,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" class="btn btn-primary">
                         <i class="bi bi-check2-circle"></i> Simpan Password Baru
                     </button>
                 </form>

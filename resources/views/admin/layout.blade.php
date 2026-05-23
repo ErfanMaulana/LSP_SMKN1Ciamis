@@ -262,6 +262,38 @@
             flex-shrink: 0;
         }
 
+        /* Global button styles for admin pages */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: #0073bd;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #005f99;
+        }
+
+        .btn-secondary {
+            background: #eef2f7;
+            color: #334155;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
         /* Global Search */
         .global-search {
             position: relative;

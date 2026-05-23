@@ -55,9 +55,9 @@
             @error('items.*')<div class="text-danger" style="margin-top:8px;">{{ $message }}</div>@enderror
         </div>
 
-        <div class="form-actions">
-            <a href="{{ route('admin.bukti-persyaratan-dasar-pemohon.index') }}" class="btn-secondary">Batal</a>
-            <button type="submit" class="btn-primary"><i class="bi bi-save"></i> {{ $submitLabel ?? 'Simpan' }}</button>
+            <div class="form-actions">
+            <a href="{{ route('admin.bukti-persyaratan-dasar-pemohon.index') }}" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> {{ $submitLabel ?? 'Simpan' }}</button>
         </div>
     </div>
 </div>
