@@ -1,6 +1,10 @@
 @php
-    $items = old('items', $item->items ?? ['']);
-    if (empty($items)) {
+    $oldItems = old('items');
+    if ($oldItems !== null) {
+        $items = $oldItems;
+    } elseif (isset($item) && !empty($item->items)) {
+        $items = $item->items;
+    } else {
         $items = [''];
     }
 @endphp
@@ -12,7 +16,6 @@
                 <h3>Master Persyaratan Dasar</h3>
                 <p>Setiap skema hanya memiliki satu set persyaratan dasar pemohon.</p>
             </div>
-            <button type="button" class="btn-secondary" onclick="addRequirementRow()"><i class="bi bi-plus-circle"></i> Tambah Item</button>
         </div>
 
         <div class="form-grid">
@@ -37,8 +40,11 @@
         <div class="requirements-card">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
                 <div>
-                    <h4 style="margin:0;font-size:16px;color:#0f172a;">Item Persyaratan</h4>
-                    <p style="margin:6px 0 0;color:#64748b;font-size:13px;">Tambahkan daftar bukti yang harus diperiksa pada permohonan sertifkasi.</p>
+                    <h4 style="margin:0;font-size:16px;color:#0f172a;">Poin Persyaratan</h4>
+                    <p style="margin:6px 0 0;color:#64748b;font-size:13px;">Tambahkan daftar poin yang harus diperiksa pada permohonan sertifikasi.</p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary" onclick="addRequirementRow()"><i class="bi bi-plus-circle"></i> Tambah Poin</button>
                 </div>
             </div>
 
@@ -46,7 +52,7 @@
                 @foreach($items as $index => $value)
                     <div class="requirement-row">
                         <div class="requirement-number">{{ $index + 1 }}</div>
-                        <input type="text" name="items[]" class="form-control requirement-input" value="{{ $value }}" placeholder="Masukkan item persyaratan..." required>
+                        <input type="text" name="items[]" class="form-control requirement-input" value="{{ $value }}" placeholder="Masukkan poin persyaratan..." required>
                         <button type="button" class="remove-btn" onclick="removeRequirementRow(this)" title="Hapus item"><i class="bi bi-trash"></i></button>
                     </div>
                 @endforeach

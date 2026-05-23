@@ -134,13 +134,7 @@
     .btn-filter-reset:hover {
         background: #fecaca;
     }
-    .btn-add {
-        padding: 9px 18px; background: #0073bd; color: #fff;
-        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
-        cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-        white-space: nowrap;
-    }
-    .btn-add:hover { background: #005f99; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
+    /* .btn-add removed — use global .btn and .btn-primary */
 
     .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); overflow: visible; }
     .card > .admin-table-scroll {
@@ -275,7 +269,7 @@
             align-items: stretch;
         }
 
-        .page-header .btn-add {
+        .page-header .btn {
             width: 100%;
             justify-content: center;
         }

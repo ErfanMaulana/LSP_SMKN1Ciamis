@@ -20,7 +20,7 @@
     .row-item { display:grid; grid-template-columns:36px 1fr auto; gap:8px; margin-bottom:8px; align-items:center; }
     .idx { width:30px; height:30px; border-radius:6px; background:#f1f5f9; color:#475569; font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
     .btn-remove { width:30px; height:30px; border:none; border-radius:6px; background:#fee2e2; color:#991b1b; cursor:pointer; }
-    .btn-add { border:1px dashed #94a3b8; background:#fff; color:#334155; border-radius:8px; padding:8px 12px; font-size:13px; cursor:pointer; }
+    /* .btn-add removed — use global .btn and .btn-primary; keep .btn-add styles removed for consistency */
 
     .error-text { color:#dc2626; font-size:12px; margin-top:6px; }
     .actions { display:flex; gap:10px; margin-top:20px; }
@@ -52,7 +52,7 @@
                 </div>
                 @error('pernyataan')<div class="error-text">{{ $message }}</div>@enderror
                 @error('pernyataan.*')<div class="error-text">{{ $message }}</div>@enderror
-                <button type="button" id="add-row" class="btn-add" style="margin-top:6px;"><i class="bi bi-plus-circle"></i> Tambah Baris</button>
+                <button type="button" id="add-row" class="btn btn-primary" style="margin-top:6px;"><i class="bi bi-plus-circle"></i> Tambah Baris</button>
             </div>
 
             <div class="group">

@@ -38,7 +38,7 @@ class BuktiPersyaratanDasarPemohonController extends Controller
             ->get(['id', 'nama_skema', 'nomor_skema', 'jenis_skema']);
 
         $item = new BuktiPersyaratanDasarPemohon([
-            'items' => ['Fotocopy rapor atau dokumen kompetensi terkait'],
+            'items' => [''],
         ]);
 
         return view('admin.bukti-persyaratan-dasar-pemohon.create', compact('skemaList', 'item'));
