@@ -11,17 +11,16 @@
         <nav class="hidden md:flex gap-1 text-sm font-medium">
             @php
                 $navLinks = [
-                    ['href' => url('/#beranda'), 'target' => 'beranda', 'label' => 'Beranda'],
-                    ['href' => url('/#ruang-lingkup'), 'target' => 'ruang-lingkup', 'label' => 'Ruang Lingkup Sertifikasi'],
-                    ['href' => url('/#berita'), 'target' => 'berita', 'label' => 'Berita'],
-                    ['href' => url('/#kontak'), 'target' => 'kontak', 'label' => 'Kontak'],
+                    ['href' => route('front.home'), 'route' => 'front.home', 'label' => 'Beranda'],
+                    ['href' => route('front.kompetensi.index'), 'route' => 'front.kompetensi.*', 'label' => 'Ruang Lingkup Sertifikasi'],
+                    ['href' => route('front.berita.index'), 'route' => 'front.berita.*', 'label' => 'Berita'],
                 ];
             @endphp
             @foreach($navLinks as $link)
+                @php $isActive = request()->routeIs($link['route']); @endphp
                 <a href="{{ $link['href'] }}"
-                   data-nav-target="{{ $link['target'] }}"
-                   class="nav-scroll-link px-4 py-2 transition-colors duration-200 text-gray-700 hover:text-[#0073bd]"
-                   style="text-decoration: none; border-bottom: 2px solid transparent;">
+                   class="px-4 py-2 transition-colors duration-200 text-gray-700 hover:text-[#0073bd]"
+                   style="text-decoration: none; border-bottom: 2px solid {{ $isActive ? '#0073bd' : 'transparent' }}; color: {{ $isActive ? '#0073bd' : 'inherit' }};">
                     {{ $link['label'] }}
                 </a>
             @endforeach
@@ -50,20 +49,19 @@
          class="md:hidden border-t border-gray-100 bg-white px-4 pb-4 pt-2">
         @php
             $navLinks = [
-                ['href' => url('/#beranda'), 'target' => 'beranda', 'label' => 'Beranda'],
-                ['href' => url('/#ruang-lingkup'), 'target' => 'ruang-lingkup', 'label' => 'Ruang Lingkup Sertifikasi'],
-                ['href' => url('/#berita'), 'target' => 'berita', 'label' => 'Berita'],
-                ['href' => url('/#kontak'), 'target' => 'kontak', 'label' => 'Kontak'],
+                ['href' => route('front.home'), 'route' => 'front.home', 'label' => 'Beranda'],
+                ['href' => route('front.kompetensi.index'), 'route' => 'front.kompetensi.*', 'label' => 'Ruang Lingkup Sertifikasi'],
+                ['href' => route('front.berita.index'), 'route' => 'front.berita.*', 'label' => 'Berita'],
             ];
         @endphp
 
         <nav class="flex flex-col gap-2 text-sm font-medium">
             @foreach($navLinks as $link)
+                @php $isActive = request()->routeIs($link['route']); @endphp
                 <a href="{{ $link['href'] }}"
-                   data-nav-target="{{ $link['target'] }}"
                    @click="open = false"
-                   class="nav-scroll-link px-4 py-2.5 transition-colors duration-200 text-gray-700 hover:text-[#0073bd]"
-                   style="text-decoration: none; border-bottom: 2px solid transparent;">
+                   class="px-4 py-2.5 transition-colors duration-200 text-gray-700 hover:text-[#0073bd]"
+                   style="text-decoration: none; border-bottom: 2px solid {{ $isActive ? '#0073bd' : 'transparent' }}; color: {{ $isActive ? '#0073bd' : 'inherit' }};">
                     {{ $link['label'] }}
                 </a>
             @endforeach
@@ -76,76 +74,4 @@
         </nav>
     </div>
 </header>
-
-<script>
-(function () {
-    const initNavScrollSpy = () => {
-        const links = Array.from(document.querySelectorAll('[data-nav-target]'));
-        const targets = links
-            .map((link) => document.getElementById(link.dataset.navTarget))
-            .filter(Boolean);
-
-        if (!links.length || !targets.length) {
-            return;
-        }
-
-        const setActive = (targetId) => {
-            links.forEach((link) => {
-                const active = link.dataset.navTarget === targetId;
-                link.style.color = active ? '#0073bd' : '';
-                link.style.borderBottomColor = active ? '#0073bd' : 'transparent';
-                link.setAttribute('aria-current', active ? 'page' : 'false');
-            });
-        };
-
-        const getActiveTarget = () => {
-            const offset = 160;
-            let activeId = targets[0].id;
-
-            targets.forEach((target) => {
-                const rect = target.getBoundingClientRect();
-                if (rect.top <= offset) {
-                    activeId = target.id;
-                }
-            });
-
-            return activeId;
-        };
-
-        const update = () => setActive(getActiveTarget());
-
-        let ticking = false;
-        const onScroll = () => {
-            if (ticking) {
-                return;
-            }
-
-            ticking = true;
-            window.requestAnimationFrame(() => {
-                update();
-                ticking = false;
-            });
-        };
-
-        window.addEventListener('scroll', onScroll, { passive: true });
-        window.addEventListener('hashchange', update);
-        document.addEventListener('turbo:load', update);
-        window.addEventListener('load', update);
-
-        links.forEach((link) => {
-            link.addEventListener('click', () => {
-                setActive(link.dataset.navTarget);
-            });
-        });
-
-        update();
-    };
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initNavScrollSpy);
-    } else {
-        initNavScrollSpy();
-    }
-})();
-</script>
 

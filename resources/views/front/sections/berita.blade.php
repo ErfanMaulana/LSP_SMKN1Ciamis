@@ -2,9 +2,9 @@
     $latestBerita = $latestBerita ?? collect();
 @endphp
 
-<section id="berita" class="py-16 sm:py-20 bg-white">
+<section id="berita" class="py-16 sm:py-20 bg-white border-t border-gray-100">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
-        <div class="text-center mb-10 sm:mb-12">
+        <div class="text-center mb-10 sm:mb-12 max-w-3xl mx-auto">
             <h2 class="section-title" data-scroll-reveal>Berita Terbaru</h2>
             <p class="section-subtitle" data-scroll-reveal data-reveal-delay="70">Informasi terbaru seputar kegiatan, pengumuman, dan agenda LSP SMKN 1 Ciamis.</p>
         </div>
@@ -46,9 +46,12 @@
                 @endforeach
             </div>
         @else
-            <div class="bg-gray-50 border border-dashed border-gray-300 rounded-2xl p-10 text-center text-gray-500" data-scroll-reveal="zoom">
-                <i class="bi bi-newspaper text-4xl mb-3"></i>
-                <p>Belum ada berita yang dipublikasikan.</p>
+            <div class="max-w-3xl mx-auto bg-gradient-to-b from-gray-50 to-white border border-dashed border-gray-300 rounded-2xl px-6 py-12 text-center text-gray-500" data-scroll-reveal="zoom">
+                <span class="inline-flex w-14 h-14 items-center justify-center rounded-full bg-blue-50 text-blue-600 mb-4">
+                    <i class="bi bi-newspaper text-2xl"></i>
+                </span>
+                <p class="text-base font-medium text-gray-700">Belum ada berita yang dipublikasikan.</p>
+                <p class="text-sm text-gray-500 mt-1">Silakan cek kembali dalam beberapa waktu.</p>
             </div>
         @endif
     </div>
