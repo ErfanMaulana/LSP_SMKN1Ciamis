@@ -429,16 +429,9 @@ document.addEventListener('DOMContentLoaded', function () {
         return '';
     };
 
-    const lockAsesiOnly = () => {
-        asesiSelect.classList.add('locked');
-    };
-
     const lockDependentFields = () => {
-        if (tukSelect) tukSelect.classList.add('locked');
         const mulaiInput = document.querySelector('input[name="tanggal_mulai"]');
         const selesaiInput = document.querySelector('input[name="tanggal_selesai"]');
-        if (mulaiInput) mulaiInput.setAttribute('readonly', 'readonly');
-        if (selesaiInput) selesaiInput.setAttribute('readonly', 'readonly');
     };
 
     const applyAsesiDetail = (data) => {
@@ -468,7 +461,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        lockAsesiOnly();
         lockDependentFields();
     };
 
@@ -504,6 +496,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const loadBySkema = async () => {
         const skemaId = skemaSelect.value;
+        const preservedAsesiNik = applyInitialSelection ? selectedAsesiNik : (asesiSelect.value || '');
 
         if (!skemaId) {
             resetSelect(asesiSelect, '-- Pilih Asesi --');
@@ -526,7 +519,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 asesiSelect,
                 '-- Pilih Asesi --',
                 asesiOptions,
-                applyInitialSelection ? selectedAsesiNik : '',
+                preservedAsesiNik,
                 (item) => `${item.nama} (${item.id})`
             );
 
@@ -605,9 +598,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (mulaiInput) mulaiInput.value = '';
                 if (selesaiInput) selesaiInput.value = '';
                 asesiSelect.classList.remove('locked');
-                tukSelect.classList.remove('locked');
-                if (mulaiInput) mulaiInput.removeAttribute('readonly');
-                if (selesaiInput) selesaiInput.removeAttribute('readonly');
                 return;
             }
 

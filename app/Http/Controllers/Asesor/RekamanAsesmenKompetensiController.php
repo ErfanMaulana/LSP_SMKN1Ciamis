@@ -13,6 +13,7 @@ use App\Models\CeklisObservasiAktivitasPraktik;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 class RekamanAsesmenKompetensiController extends Controller
@@ -254,14 +255,23 @@ class RekamanAsesmenKompetensiController extends Controller
         $isOwnedSkema = $asesor->skemas->contains('id', $skemaId);
         abort_unless($isOwnedSkema, 403, 'Skema tidak termasuk penugasan asesor Anda.');
 
-        $asesi = Asesi::query()
+        $directAsesi = Asesi::query()
             ->where('ID_asesor', $asesor->ID_asesor)
             ->with(['jurusan:ID_jurusan,kode_jurusan,nama_jurusan'])
+            ->get(['NIK', 'nama', 'email', 'telepon_hp', 'ID_jurusan']);
+
+        $skemaAsesi = Asesi::query()
             ->whereHas('skemas', function ($query) use ($skemaId) {
                 $query->where('skemas.id', $skemaId);
             })
-            ->orderBy('nama')
-            ->get(['NIK', 'nama', 'email', 'telepon_hp', 'ID_jurusan'])
+            ->with(['jurusan:ID_jurusan,kode_jurusan,nama_jurusan'])
+            ->get(['NIK', 'nama', 'email', 'telepon_hp', 'ID_jurusan']);
+
+        $asesi = $directAsesi
+            ->concat($skemaAsesi)
+            ->unique(fn ($item) => (string) $item->NIK)
+            ->sortBy('nama')
+            ->values()
             ->map(fn ($item) => [
                 'id' => (string) $item->NIK,
                 'nama' => $item->nama,
@@ -329,13 +339,20 @@ class RekamanAsesmenKompetensiController extends Controller
         $tuk = null;
         $skema = $selectedSkemaId > 0 ? Skema::find($selectedSkemaId) : null;
         if ($skema) {
-            $persetujuan = PersetujuanAsesmen::query()
+            $persetujuanQuery = PersetujuanAsesmen::query()
                 ->where('nomor_skema', $skema->nomor_skema)
-                ->where('nama_asesi', $asesi->nama)
-                ->latest('id')
-                ->first(['tuk']);
+                ->where(function ($query) use ($asesi) {
+                    $query->where('nama_asesi', $asesi->nama);
 
-            $tuk = $persetujuan?->tuk;
+                    if (Schema::hasColumn('persetujuan_asesmen', 'asesi_nik')) {
+                        $query->orWhere('asesi_nik', $asesi->NIK);
+                    }
+                })
+                ->latest('id');
+
+            $persetujuan = $persetujuanQuery->first(['tuk', 'tuk_pelaksanaan']);
+
+            $tuk = $persetujuan?->tuk ?: $persetujuan?->tuk_pelaksanaan;
         }
 
         return response()->json([
@@ -348,6 +365,7 @@ class RekamanAsesmenKompetensiController extends Controller
                 'skema_ids' => $skemaIds,
                 'jadwal' => $jadwal,
                 'tuk' => $tuk,
+                'tuk_pelaksanaan' => $tuk,
             ],
         ]);
     }
