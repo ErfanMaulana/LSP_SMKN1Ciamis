@@ -74,7 +74,11 @@ class CeklisObservasiController extends Controller
 
         abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
 
-        $activeSkema = $asesor->skemas()->orderBy('nama_skema')->first(['skemas.id', 'nama_skema', 'nomor_skema']);
+        $skemas = $asesor->skemas()
+            ->orderBy('nama_skema')
+            ->get(['skemas.id', 'nama_skema', 'nomor_skema', 'jenis_skema']);
+
+        $activeSkema = $skemas->first();
         abort_unless((bool) $activeSkema, 403, 'Skema asesor belum ditetapkan. Hubungi admin.');
 
         $defaults = [
@@ -87,8 +91,8 @@ class CeklisObservasiController extends Controller
         ];
 
         $requestedSkemaId = (int) $request->get('skema_id');
-        if ($requestedSkemaId && $asesor->skemas->contains('id', $requestedSkemaId)) {
-            $activeSkema = $asesor->skemas->firstWhere('id', $requestedSkemaId) ?? $activeSkema;
+        if ($requestedSkemaId && $skemas->contains('id', $requestedSkemaId)) {
+            $activeSkema = $skemas->firstWhere('id', $requestedSkemaId) ?? $activeSkema;
             $defaults['skema_id'] = $activeSkema->id;
         }
 
@@ -118,7 +122,7 @@ class CeklisObservasiController extends Controller
             }
         }
 
-        return view('asesor.ceklis-observasi.create', compact('account', 'asesor', 'activeSkema', 'defaults'));
+        return view('asesor.ceklis-observasi.create', compact('account', 'asesor', 'activeSkema', 'skemas', 'defaults'));
     }
 
     public function store(Request $request)
@@ -145,7 +149,7 @@ class CeklisObservasiController extends Controller
 
         $item = CeklisObservasiAktivitasPraktik::query()
             ->with([
-                'skema:id,nama_skema,nomor_skema',
+                'skema:id,nama_skema,nomor_skema,jenis_skema',
                 'asesi:NIK,nama',
                 'details.unit:id,kode_unit,judul_unit',
                 'details.elemen:id,unit_id,nama_elemen',
@@ -173,7 +177,7 @@ class CeklisObservasiController extends Controller
 
         $item = CeklisObservasiAktivitasPraktik::query()
             ->with([
-                'skema:id,nama_skema,nomor_skema',
+                'skema:id,nama_skema,nomor_skema,jenis_skema',
                 'asesi:NIK,nama',
                 'details.unit:id,kode_unit,judul_unit',
                 'details.elemen:id,unit_id,nama_elemen',
@@ -215,15 +219,19 @@ class CeklisObservasiController extends Controller
         $asesor = $this->getAsesor();
         abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
 
+        $skemas = $asesor->skemas()
+            ->orderBy('nama_skema')
+            ->get(['skemas.id', 'nama_skema', 'nomor_skema', 'jenis_skema']);
+
         $item = CeklisObservasiAktivitasPraktik::query()
-            ->with(['details', 'skema:id,nama_skema,nomor_skema'])
+            ->with(['details', 'skema:id,nama_skema,nomor_skema,jenis_skema'])
             ->where('asesor_id', $asesor->ID_asesor)
             ->findOrFail($id);
 
         $activeSkema = $item->skema;
         abort_unless((bool) $activeSkema, 403, 'Skema pada data ceklis tidak ditemukan.');
 
-        return view('asesor.ceklis-observasi.edit', compact('account', 'asesor', 'item', 'activeSkema'));
+        return view('asesor.ceklis-observasi.edit', compact('account', 'asesor', 'item', 'activeSkema', 'skemas'));
     }
 
     public function update(Request $request, $id)

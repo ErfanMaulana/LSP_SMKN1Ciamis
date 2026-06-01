@@ -2,6 +2,7 @@
     $record = $item ?? null;
     $defaults = $defaults ?? [];
     $activeSkema = $activeSkema ?? null;
+    $skemas = $skemas ?? collect();
 
     $value = function (string $field, $fallback = '') use ($record, $defaults) {
         if (old($field) !== null) {
@@ -21,7 +22,18 @@
     }
     $activeSkemaNama = $activeSkema->nama_skema ?? '-';
     $activeSkemaNomor = $activeSkema->nomor_skema ?? '';
+    $selectedSkema = $skemas->firstWhere('id', (int) $selectedSkemaId) ?? $activeSkema;
+    $selectedSkemaJenis = $selectedSkema->jenis_skema ?? $activeSkema->jenis_skema ?? '';
     $selectedAsesiNik = (string) $value('asesi_nik', '');
+    $selectedTuk = (string) $value('tuk', '');
+    $skemaOptions = $skemas->map(function ($skema) {
+        return [
+            'id' => (string) $skema->id,
+            'nama' => $skema->nama_skema,
+            'nomor' => $skema->nomor_skema,
+            'jenis' => $skema->jenis_skema,
+        ];
+    })->values();
 
     $initialDetailMap = old('detail');
     if (!$initialDetailMap && $record) {
@@ -283,6 +295,7 @@
         aspect-ratio: 1 / 1;
         margin-left: auto;
         margin-right: auto;
+        cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='4' fill='%230073bd' stroke='white' stroke-width='2'/%3E%3Cpath d='M16 2v8M16 22v8M2 16h8M22 16h8' stroke='%230073bd' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") 16 16, crosshair;
     }
 
     .signature-canvas-wrapper.active {
@@ -298,8 +311,10 @@
     .signature-canvas {
         width: 100%;
         height: 100%;
-        cursor: crosshair;
+        cursor: inherit;
         display: block;
+        touch-action: none;
+        user-select: none;
     }
 
     .signature-placeholder {
@@ -378,17 +393,53 @@
 </style>
 
 <div class="card-form">
+    @if ($errors->any())
+        <div style="margin-bottom:14px;padding:12px 14px;border:1px solid #fecaca;background:#fef2f2;color:#b91c1c;border-radius:10px;font-size:13px;">
+            <strong>Gagal menyimpan ceklis.</strong>
+            <div style="margin-top:6px;">
+                <ul style="margin:0;padding-left:18px;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    @endif
+
+    <input type="hidden" name="kode_form" value="{{ $value('kode_form', 'FR.IA.01.') }}">
+    <input type="hidden" name="judul_form" value="{{ $value('judul_form', 'CEKLIS OBSERVASI AKTIVITAS PRAKTIK') }}">
+
     <div class="grid-2">
         <div class="field">
-            <label>Skema <span class="req">*</span></label>
-            <input type="hidden" id="skemaIdInput" name="skema_id" value="{{ $selectedSkemaId }}" data-nomor="{{ $activeSkemaNomor }}">
-            <input type="text" value="{{ $activeSkemaNama }}" readonly>
+            <label>Skema Sertifikasi <span class="req">*</span></label>
+            <select id="skemaJenisInput">
+                @foreach(['KKNI', 'Okupasi', 'Klaster'] as $jenis)
+                    <option value="{{ $jenis }}" {{ $selectedSkemaJenis === $jenis ? 'selected' : '' }}>{{ $jenis }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="field">
+            <label>Nama Skema <span class="req">*</span></label>
+            <select id="skemaIdInput" name="skema_id">
+                <option value="">-- Pilih Nama Skema --</option>
+                @foreach($skemas as $skema)
+                    <option
+                        value="{{ $skema->id }}"
+                        data-nomor="{{ $skema->nomor_skema }}"
+                        data-jenis="{{ $skema->jenis_skema }}"
+                        {{ $selectedSkemaId === (string) $skema->id ? 'selected' : '' }}
+                    >
+                        {{ $skema->nama_skema }}
+                    </option>
+                @endforeach
+            </select>
             @error('skema_id')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
         <div class="field">
             <label>Nomor Skema</label>
-            <input id="nomorSkemaDisplay" type="text" value="" readonly>
+            <input id="nomorSkemaDisplay" type="text" value="{{ $activeSkemaNomor }}" readonly>
         </div>
 
         <div class="field">
@@ -401,7 +452,18 @@
 
         <div class="field">
             <label>TUK</label>
-            <input type="text" id="tukInput" name="tuk" value="{{ $value('tuk', '') }}" readonly>
+            <select id="tukInput" name="tuk">
+                <option value="">-- Pilih TUK --</option>
+                @php
+                    $tukOptions = ['Sewaktu', 'Tempat Kerja', 'Mandiri'];
+                @endphp
+                @foreach($tukOptions as $option)
+                    <option value="{{ $option }}" {{ $selectedTuk === $option ? 'selected' : '' }}>{{ $option }}</option>
+                @endforeach
+                @if($selectedTuk !== '' && !in_array($selectedTuk, $tukOptions, true))
+                    <option value="{{ $selectedTuk }}" selected>{{ $selectedTuk }}</option>
+                @endif
+            </select>
             @error('tuk')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -538,6 +600,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const skemaJenisInput = document.getElementById('skemaJenisInput');
     const skemaIdInput = document.getElementById('skemaIdInput');
     const nomorSkemaDisplay = document.getElementById('nomorSkemaDisplay');
     const asesiSelect = document.getElementById('asesiSelect');
@@ -552,6 +615,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const structureUrl = '{{ route('asesor.ceklis-observasi.skema-structure') }}';
     const asesiDataUrl = '{{ route('asesor.ceklis-observasi.get-asesi-data') }}';
     const selectedAsesiNik = @json($selectedAsesiNik);
+    const skemaOptions = @json($skemaOptions);
     const initialDetailMap = @json($initialDetailMap ?? []);
     const belumKompetenDefaults = @json($belumKompetenDefaults ?? []);
     let firstHydration = true;
@@ -583,8 +647,41 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    const renderSkemaOptions = () => {
+        if (!skemaJenisInput || !skemaIdInput) {
+            return;
+        }
+
+        const selectedJenis = skemaJenisInput.value || '';
+        const previousSkemaId = skemaIdInput.value || '';
+        const filteredSkemas = skemaOptions.filter((skema) => !selectedJenis || skema.jenis === selectedJenis);
+
+        skemaIdInput.innerHTML = '<option value="">-- Pilih Nama Skema --</option>';
+        filteredSkemas.forEach((skema) => {
+            const option = document.createElement('option');
+            option.value = skema.id;
+            option.textContent = skema.nama;
+            option.dataset.nomor = skema.nomor || '';
+            option.dataset.jenis = skema.jenis || '';
+            skemaIdInput.appendChild(option);
+        });
+
+        if (filteredSkemas.some((skema) => skema.id === previousSkemaId)) {
+            skemaIdInput.value = previousSkemaId;
+        } else if (filteredSkemas.length > 0) {
+            skemaIdInput.value = filteredSkemas[0].id;
+        }
+
+        setNomorSkema();
+    };
+
     const setNomorSkema = () => {
-        nomorSkemaDisplay.value = skemaIdInput ? (skemaIdInput.getAttribute('data-nomor') || '') : '';
+        if (!skemaIdInput || !nomorSkemaDisplay) {
+            return;
+        }
+
+        const selectedOption = skemaIdInput.options[skemaIdInput.selectedIndex];
+        nomorSkemaDisplay.value = selectedOption ? (selectedOption.dataset.nomor || '') : '';
     };
 
     const resetAsesi = (placeholder) => {
@@ -1080,6 +1177,25 @@ document.addEventListener('DOMContentLoaded', function () {
             firstHydration = false;
         }
     };
+
+    if (skemaJenisInput) {
+        skemaJenisInput.addEventListener('change', function () {
+            renderSkemaOptions();
+            loadData();
+            fetchAsesiData(asesiSelect ? asesiSelect.value : '');
+        });
+    }
+
+    if (skemaIdInput) {
+        skemaIdInput.addEventListener('change', function () {
+            setNomorSkema();
+            loadData();
+            fetchAsesiData(asesiSelect ? asesiSelect.value : '');
+        });
+    }
+
+    renderSkemaOptions();
+    setNomorSkema();
 
     const setBulk = (value) => {
         const radios = document.querySelectorAll(`input[type="radio"][name$="[pencapaian]"][value="${value}"]`);
