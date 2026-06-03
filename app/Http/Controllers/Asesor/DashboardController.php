@@ -284,9 +284,6 @@ class DashboardController extends Controller
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
         $skemaNames = $asesor ? $asesor->skemas->pluck('nama_skema')->filter()->values() : collect();
 
-        $query = DB::table('asesi_skema')
-            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds));
-
         if (!count($skemaIds)) {
             $data  = collect();
             $skema = null;
@@ -300,12 +297,41 @@ class DashboardController extends Controller
             return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema', 'summary', 'skemaNames'));
         }
 
-        // Filter status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        // Build base query with asesi join for filtering
+        $query = DB::table('asesi_skema')
+            ->join('asesi as a', 'asesi_skema.asesi_nik', '=', 'a.NIK')
+            ->whereIn('asesi_skema.skema_id', $skemaIds);
+
+        // Filter by search (nama and NIK only)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('a.nama', 'like', "%{$search}%")
+                  ->orWhere('a.NIK', 'like', "%{$search}%");
+            });
         }
 
-        $rows = $query->orderByDesc('updated_at')->get();
+        // Filter by jurusan
+        if ($request->filled('jurusan')) {
+            $query->where('a.ID_jurusan', $request->jurusan);
+        }
+
+        // Filter by skema (in addition to asesor's skema filter)
+        if ($request->filled('skema')) {
+            $query->where('asesi_skema.skema_id', $request->skema);
+        }
+
+        // Filter by kelas
+        if ($request->filled('kelas')) {
+            $query->where('a.kelas', 'like', "%{$request->kelas}%");
+        }
+
+        // Filter status
+        if ($request->filled('status')) {
+            $query->where('asesi_skema.status', $request->status);
+        }
+
+        $rows = $query->select('asesi_skema.*')->orderByDesc('asesi_skema.updated_at')->get();
 
         // Get rekaman, asesmen mandiri, and penilaian counts
         $rekamanByAsesiSkema = DB::table('rekaman_asesmen_kompetensi')
@@ -403,7 +429,35 @@ class DashboardController extends Controller
             'belum'   => $data->where('status', 'belum_mulai')->count(),
         ];
 
-        return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema', 'summary', 'skemaNames'));
+        // Get dropdown data for filters
+        $jurusans = DB::table('jurusan')
+            ->whereIn('ID_jurusan', function($q) use ($skemaIds) {
+                $q->select('jurusan_id')
+                  ->from('skemas')
+                  ->whereIn('id', $skemaIds);
+            })
+            ->orderBy('nama_jurusan')
+            ->get();
+
+        $skemaList = Skema::whereIn('id', $skemaIds)
+            ->orderBy('nama_skema')
+            ->get();
+
+        // Get unique kelas values from asesi in this asesor's skemas
+        $kelasList = DB::table('asesi as a')
+            ->join('asesi_skema as aks', 'a.NIK', '=', 'aks.asesi_nik')
+            ->whereIn('aks.skema_id', $skemaIds)
+            ->whereNotNull('a.kelas')
+            ->where('a.kelas', '!=', '')
+            ->distinct()
+            ->pluck('a.kelas')
+            ->sort()
+            ->values();
+
+        return view('asesor.asesi.index', compact(
+            'account', 'asesor', 'data', 'skema', 'summary', 'skemaNames',
+            'jurusans', 'skemaList', 'kelasList'
+        ));
     }
 
     /**

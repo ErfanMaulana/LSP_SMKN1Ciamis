@@ -72,14 +72,12 @@ Route::prefix('admin')->group(function () {
             Route::get('/asesi/{nik}/edit', [AsesiController::class, 'edit'])->name('admin.asesi.edit')->middleware('permission:asesi.edit');
             Route::put('/asesi/{nik}', [AsesiController::class, 'update'])->name('admin.asesi.update')->middleware('permission:asesi.edit');
             Route::delete('/asesi/{nik}', [AsesiController::class, 'destroy'])->name('admin.asesi.destroy')->middleware('permission:asesi.delete');
-            Route::post('/asesi/bulk-delete', [AsesiController::class, 'bulkDelete'])->name('admin.asesi.bulk-delete')->middleware('permission:asesi.delete');
         });
 
         // Verifikasi Asesi
         Route::middleware('permission:verifikasi-asesi.view')->group(function () {
             Route::get('/asesi-verifikasi', [AsesiController::class, 'verifikasi'])->name('admin.asesi.verifikasi');
-            Route::post('/asesi-verifikasi/bulk-approve', [AsesiController::class, 'bulkApprove'])->name('admin.asesi.bulk-approve')->middleware('permission:verifikasi-asesi.approve');
-            Route::post('/asesi-verifikasi/bulk-reject', [AsesiController::class, 'bulkReject'])->name('admin.asesi.bulk-reject')->middleware('permission:verifikasi-asesi.reject');
+            // bulk approve/reject routes removed — verifikasi bulk actions disabled
             Route::get('/asesi-verifikasi/{nik}', [AsesiController::class, 'showVerifikasi'])->name('admin.asesi.verifikasi.show');
             Route::get('/asesi-verifikasi/{nik}/apl1', [AsesiController::class, 'generatePdf'])->name('admin.asesi.verifikasi.apl1')->middleware('permission:verifikasi-asesi.view');
             Route::post('/asesi-verifikasi/{nik}/approve', [AsesiController::class, 'approve'])->name('admin.asesi.approve')->middleware('permission:verifikasi-asesi.approve');

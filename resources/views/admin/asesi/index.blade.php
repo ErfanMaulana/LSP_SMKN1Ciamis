@@ -135,44 +135,17 @@
             </form>
 
             <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:14px;">
-                <button type="button" id="toggle-bulk-mode-data"
-                    style="padding:7px 12px;background:#fff;color:#64748b;border:1px solid #cbd5e1;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
-                    <i class="bi bi-ui-checks-grid"></i> Bulk
-                </button>
                 <button type="button" class="btn btn-outline" onclick="openAsesiExportModal()">
                     <i class="bi bi-download"></i> Export Data Asesi
                 </button>
             </div>
-
-            <!-- Bulk Action Bar -->
-            <div id="bulk-action-bar-data" style="display:none;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px 16px;margin-bottom:16px;align-items:center;gap:12px;flex-wrap:wrap;">
-                <span id="bulk-count-text-data" style="font-size:14px;color:#0073bd;font-weight:600;">0 item dipilih</span>
-                <div style="flex:1;"></div>
-                <button type="button" onclick="openBulkDeleteModalData()"
-                    style="padding:8px 18px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
-                    <i class="bi bi-trash"></i> Hapus Pilihan
-                </button>
-                <button type="button" onclick="clearBulkSelectionData()"
-                    style="padding:8px 14px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;">
-                    Batal
-                </button>
-            </div>
-
-            <!-- Bulk Delete Hidden Form -->
-            <form id="bulk-delete-form-data" method="POST" action="{{ route('admin.asesi.bulk-delete') }}" style="display:none;">
-                @csrf
-                <div id="bulk-delete-niks-data"></div>
-            </form>
 
             <!-- Table -->
             <div class="table-container">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th class="bulk-col-data" style="display:none;width:44px;text-align:center;">
-                                <input type="checkbox" id="bulk-select-all-data" title="Pilih semua"
-                                    style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
-                            </th>
+                            
                             <th>NAMA</th>
                             <th>SKEMA</th>
                             <th>AKUN</th>
@@ -184,10 +157,7 @@
                     <tbody>
                         @forelse($asesi as $item)
                         <tr>
-                            <td class="bulk-col-data" style="display:none;text-align:center;">
-                                <input type="checkbox" class="bulk-checkbox-data" value="{{ $item->NIK }}"
-                                    style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
-                            </td>
+                            
                             <td>
                                 <div class="user-info">
                                     <div class="user-avatar-initials">
@@ -433,32 +403,7 @@
 
 </div><!-- /.asesi-management -->
 
-<!-- BULK DELETE MODAL -->
-<div id="bulk-delete-modal-data" class="bulk-modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:white;border-radius:14px;padding:28px;width:100%;max-width:560px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
-        <h3 style="font-size:17px;font-weight:700;color:#1e293b;margin:0 0 8px 0;display:flex;align-items:center;gap:8px;">
-            <i class="bi bi-trash" style="color:#dc2626;"></i>Hapus Asesi Terpilih
-        </h3>
-        <p style="margin:8px 0 16px 0;color:#94a3b8;font-size:13px;">
-            <span id="bulk-delete-count-text-data">0 asesi akan dihapus</span>
-        </p>
-        <p style="color:#e11d48;font-size:13px;background:#fee2e2;padding:12px;border-radius:6px;margin-bottom:16px;">
-            <i class="bi bi-exclamation-triangle"></i> Perhatian: Tindakan ini tidak dapat dibatalkan. Data asesi dan akun akan dihapus sepenuhnya.
-        </p>
-        <form id="bulk-delete-form-modal-data" method="POST" action="{{ route('admin.asesi.bulk-delete') }}">
-            @csrf
-            <div id="bulk-delete-niks-modal-data"></div>
-            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;">
-                <button type="button" onclick="closeBulkDeleteModalData()"
-                    style="padding:9px 20px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;">Batal</button>
-                <button type="submit"
-                    style="padding:9px 20px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
-                    <i class="bi bi-trash"></i> Konfirmasi Hapus
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
+<!-- Bulk delete modal removed -->
 
 <!-- SINGLE DELETE CONFIRM MODAL -->
 <div id="single-delete-confirm-overlay" class="single-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="singleDeleteConfirmTitle" aria-hidden="true">
@@ -2201,25 +2146,7 @@
         return Array.from(document.querySelectorAll('.bulk-checkbox-data:checked')).map(function(cb) { return cb.value; });
     }
 
-    window.openBulkDeleteModalData = function() {
-        if (!isBulkModeDataActive) return;
-        var niks = getSelectedNiksData();
-        if (niks.length === 0) return;
-        var container = document.getElementById('bulk-delete-niks-modal-data');
-        container.innerHTML = '';
-        niks.forEach(function(nik) {
-            var inp = document.createElement('input');
-            inp.type = 'hidden'; inp.name = 'niks[]'; inp.value = nik;
-            container.appendChild(inp);
-        });
-        var countEl = document.getElementById('bulk-delete-count-text-data');
-        if (countEl) countEl.textContent = niks.length + ' asesi akan dihapus';
-        document.getElementById('bulk-delete-modal-data').style.display = 'flex';
-    };
-
-    window.closeBulkDeleteModalData = function() {
-        document.getElementById('bulk-delete-modal-data').style.display = 'none';
-    };
+    // Bulk modal functions removed (modal markup deleted)
 
     window.clearBulkSelectionData = function() {
         document.querySelectorAll('.bulk-checkbox-data').forEach(function(cb) { cb.checked = false; });
@@ -2228,10 +2155,15 @@
         updateBulkBarData();
     };
 
-    // Close modal on backdrop click
-    document.getElementById('bulk-delete-modal-data').addEventListener('click', function(e) {
-        if (e.target === this) closeBulkDeleteModalData();
-    });
+    // Close modal on backdrop click (guarded) — modal no longer present
+    var _bulkDeleteModalEl = document.getElementById('bulk-delete-modal-data');
+    if (_bulkDeleteModalEl) {
+        _bulkDeleteModalEl.addEventListener('click', function(e) {
+            if (e.target === this) {
+                if (typeof closeBulkDeleteModalData === 'function') closeBulkDeleteModalData();
+            }
+        });
+    }
 
     var toggleBulkModeDataBtn = document.getElementById('toggle-bulk-mode-data');
     if (toggleBulkModeDataBtn) {

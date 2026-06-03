@@ -953,15 +953,18 @@ class AsesiController extends Controller
             'total' => Asesi::count(),
         ];
         
-        // Get jurusan list for filter dropdown
-        $jurusanList = Jurusan::orderBy('nama_jurusan')->get();
+        // Get jurusan list for filter dropdown (include kelas items for dependent select)
+        $jurusanList = Jurusan::with('kelasItems')->orderBy('nama_jurusan')->get();
+
+        // Selected kelas filter
+        $kelasFilter = $request->query('kelas');
         
         // If AJAX request, return only table rows
         if ($request->ajax()) {
             return view('admin.asesi.partials.verifikasi-table-rows', compact('asesi'))->render();
         }
         
-        return view('admin.asesi.verifikasi', compact('asesi', 'status', 'rejectType', 'counts', 'jurusanList', 'perPage'));
+        return view('admin.asesi.verifikasi', compact('asesi', 'status', 'rejectType', 'counts', 'jurusanList', 'perPage', 'jurusanFilter', 'kelasFilter'));
     }
 
     /**
@@ -1255,156 +1258,5 @@ class AsesiController extends Controller
                 ->with('error', 'Gagal menghapus data pendaftaran: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Bulk approve multiple pending asesi.
-     */
-    public function bulkApprove(Request $request)
-    {
-        $request->validate([
-            'niks' => 'required|array|min:1',
-            'niks.*' => 'string',
-        ]);
-
-        $approved = 0;
-        $skipped  = 0;
-
-        foreach ($request->input('niks') as $nik) {
-            $asesi = Asesi::where('NIK', $nik)->where('status', 'pending')->first();
-            if (!$asesi) { $skipped++; continue; }
-
-            $noReg = $this->generateNoReg($asesi);
-
-            $asesi->update([
-                'no_reg'      => $noReg,
-                'status'      => 'approved',
-                'verified_at' => now(),
-                'verified_by' => auth('admin')->id(),
-            ]);
-
-            $existingAccount = \App\Models\Account::where('NIK', $asesi->NIK)->first();
-            $plainPassword = null;
-
-            if (!$existingAccount) {
-                $plainPassword = $noReg;
-                \App\Models\Account::create([
-                    'id'       => $noReg,
-                    'NIK'      => $asesi->NIK,
-                    'password' => $plainPassword,
-                    'role'     => 'asesi',
-                ]);
-            }
-
-            if ($asesi->email) {
-                try {
-                    \Mail::to($asesi->email)->send(new \App\Mail\AsesiApprovedMail($asesi, $noReg, $plainPassword));
-                } catch (\Exception $e) {
-                    \Log::error('Bulk approve email error: ' . $e->getMessage());
-                }
-            }
-
-            $approved++;
-        }
-
-        $msg = $approved . ' asesi berhasil disetujui.';
-        if ($skipped) $msg .= ' ' . $skipped . ' dilewati (bukan pending atau tidak ditemukan).';
-
-        return redirect()->route('admin.asesi.verifikasi')->with('success', $msg);
-    }
-
-    /**
-     * Bulk reject multiple pending asesi.
-     */
-    public function bulkReject(Request $request)
-    {
-        $request->validate([
-            'niks'          => 'required|array|min:1',
-            'niks.*'        => 'string',
-            'catatan_admin' => 'required|string',
-            'reject_type'   => 'required|in:rejected,banned',
-        ], [
-            'catatan_admin.required' => 'Catatan penolakan wajib diisi.',
-            'reject_type.required'   => 'Jenis penolakan wajib dipilih.',
-        ]);
-
-        $rejectType   = $request->input('reject_type');
-        $catatanAdmin = $request->input('catatan_admin');
-        $rejected = 0;
-        $skipped  = 0;
-
-        foreach ($request->input('niks') as $nik) {
-            $asesi = Asesi::where('NIK', $nik)->where('status', 'pending')->first();
-            if (!$asesi) { $skipped++; continue; }
-
-            $asesi->update([
-                'status'        => $rejectType,
-                'catatan_admin' => $catatanAdmin,
-                'verified_at'   => now(),
-                'verified_by'   => auth('admin')->id(),
-            ]);
-
-            if ($asesi->email) {
-                try {
-                    \Mail::to($asesi->email)->send(new \App\Mail\AsesiRejectedMail($asesi));
-                } catch (\Exception $e) {
-                    \Log::error('Bulk reject email error: ' . $e->getMessage());
-                }
-            }
-
-            $rejected++;
-        }
-
-        $label = $rejectType === 'banned' ? 'ditolak permanen' : 'ditolak';
-        $msg   = $rejected . ' asesi berhasil ' . $label . '.';
-        if ($skipped) $msg .= ' ' . $skipped . ' dilewati (bukan pending atau tidak ditemukan).';
-
-        return redirect()->route('admin.asesi.verifikasi')->with('success', $msg);
-    }
-
-    /**
-     * Bulk delete multiple asesi.
-     */
-    public function bulkDelete(Request $request)
-    {
-        $request->validate([
-            'niks' => 'required|array|min:1',
-            'niks.*' => 'string',
-        ]);
-
-        $deleted = 0;
-        $skipped = 0;
-
-        foreach ($request->input('niks') as $nik) {
-            $asesi = Asesi::where('NIK', $nik)->first();
-            if (!$asesi) {
-                $skipped++;
-                continue;
-            }
-
-            try {
-                // Delete related account if exists
-                if ($asesi->account) {
-                    $asesi->account->delete();
-                }
-                // Delete asesi record
-                $asesi->delete();
-                $deleted++;
-            } catch (\Exception $e) {
-                \Log::error('Bulk delete asesi error: ' . $e->getMessage());
-                $skipped++;
-            }
-        }
-
-        $msg = $deleted . ' asesi berhasil dihapus.';
-        if ($skipped) {
-            $msg .= ' ' . $skipped . ' tidak dihapus (tidak ditemukan atau ada error).';
-        }
-
-        // Detect which page to return to
-        if ($request->input('from_verifikasi')) {
-            return redirect()->route('admin.asesi.verifikasi')->with('success', $msg);
-        }
-
-        return redirect()->route('admin.asesi.index')->with('success', $msg);
-    }
+    
 }

@@ -92,17 +92,10 @@
         color: #ffffff;
     }
 
-    .search-bar {
-        margin: 0 0 16px;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        flex-wrap: wrap;
-    }
-
     .search-input-wrapper {
         flex: 1 1 360px;
         position: relative;
+        min-width: 0;
     }
 
     .search-input {
@@ -170,19 +163,33 @@
         display: block;
     }
 
-    .filter-row {
+    .filter-form {
+        width: 100%;
         display: flex;
-        justify-content: flex-end;
+        flex-direction: column;
+        gap: 12px;
         margin-bottom: 16px;
     }
 
-    .filter-form {
-        display: flex;
-        align-items: center;
+    .filter-row {
+        display: grid;
         gap: 10px;
-        flex-wrap: wrap;
-        width: 100%;
-        justify-content: flex-end;
+        align-items: end;
+    }
+
+    .filter-row-top {
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 280px) auto;
+    }
+
+    .filter-row-bottom {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+    }
+
+    .filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
     }
 
     .filter-label {
@@ -192,8 +199,8 @@
     }
 
     .filter-select {
-        min-width: 240px;
-        max-width: 100%;
+        width: 100%;
+        min-width: 0;
         padding: 10px 14px;
         border-radius: 12px;
         border: 1px solid #dbe4ef;
@@ -228,6 +235,11 @@
     .filter-reset:hover {
         color: #0f172a;
         border-color: #cbd5e1;
+    }
+
+    .filter-actions {
+        display: flex;
+        align-items: end;
     }
 
     .table-card {
@@ -884,17 +896,18 @@
             margin-bottom: 10px;
         }
 
-        .filter-row {
-            justify-content: stretch;
-        }
-
-        .filter-form {
-            justify-content: stretch;
-        }
-
         .filter-select,
         .filter-reset {
             width: 100%;
+        }
+
+        .filter-row-top,
+        .filter-row-bottom {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            align-items: stretch;
         }
 
         .table-wrap {
@@ -948,41 +961,86 @@
     </div>
 </div>
 
-{{-- Search Bar --}}
-<div class="search-bar">
-    <div class="search-input-wrapper">
-        <i class="bi bi-search search-icon"></i>
-        <input 
-            type="text" 
-            class="search-input" 
-            id="asesiSearch" 
-            placeholder="Cari nama asesi, NIK, kelompok, jurusan, atau skema..."
-            autocomplete="off"
-        >
-        <button class="clear-search" id="clearSearch">
-            <i class="bi bi-x-circle-fill"></i>
-        </button>
-    </div>
-</div>
-
 <div class="search-results-info" id="searchResultsInfo"></div>
 
 {{-- Filter --}}
 <div class="filter-row">
     <form method="GET" action="{{ route('asesor.asesi.index') }}" class="filter-form">
-        <label for="statusFilter" class="filter-label">Filter Status</label>
-        <select id="statusFilter" name="status" class="filter-select" onchange="this.form.submit()">
-            <option value="" {{ !request('status') ? 'selected' : '' }}>Semua Asesi</option>
-            <option value="selesai" {{ request('status') === 'selesai' ? 'selected' : '' }}>Selesai</option>
-            <option value="sedang_mengerjakan" {{ request('status') === 'sedang_mengerjakan' ? 'selected' : '' }}>Sedang Dikerjakan</option>
-            <option value="belum_mulai" {{ request('status') === 'belum_mulai' ? 'selected' : '' }}>Belum Mulai</option>
-        </select>
-        @if(request('status'))
-            <a href="{{ route('asesor.asesi.index') }}" class="filter-reset">
-                <i class="bi bi-x-circle"></i>
-                Reset
-            </a>
-        @endif
+        <div class="filter-row filter-row-top">
+            <div class="search-input-wrapper">
+                <i class="bi bi-search search-icon"></i>
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="asesiSearch" 
+                    name="search"
+                    placeholder="Cari nama atau NIK asesi..."
+                    autocomplete="off"
+                    value="{{ request('search', '') }}"
+                >
+                <button class="clear-search" id="clearSearch">
+                    <i class="bi bi-x-circle-fill"></i>
+                </button>
+            </div>
+
+            <div class="filter-field">
+                <label for="statusFilter" class="filter-label">Status</label>
+                <select id="statusFilter" name="status" class="filter-select" onchange="this.form.submit()">
+                    <option value="" {{ !request('status') ? 'selected' : '' }}>Semua Status</option>
+                    <option value="selesai" {{ request('status') === 'selesai' ? 'selected' : '' }}>Selesai</option>
+                    <option value="sedang_mengerjakan" {{ request('status') === 'sedang_mengerjakan' ? 'selected' : '' }}>Sedang Dikerjakan</option>
+                    <option value="belum_mulai" {{ request('status') === 'belum_mulai' ? 'selected' : '' }}>Belum Mulai</option>
+                </select>
+            </div>
+
+            @if(request('jurusan') || request('skema') || request('kelas') || request('status') || request('search'))
+                <div class="filter-actions">
+                    <a href="{{ route('asesor.asesi.index') }}" class="filter-reset">
+                        <i class="bi bi-x-circle"></i>
+                        Reset
+                    </a>
+                </div>
+            @endif
+        </div>
+
+        <div class="filter-row filter-row-bottom">
+            <div class="filter-field">
+                <label for="jurusanFilter" class="filter-label">Jurusan</label>
+                <select id="jurusanFilter" name="jurusan" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Jurusan</option>
+                    @foreach($jurusans ?? [] as $jurusan)
+                        <option value="{{ data_get($jurusan, 'ID_jurusan') }}" {{ request('jurusan') == data_get($jurusan, 'ID_jurusan') ? 'selected' : '' }}>
+                            {{ data_get($jurusan, 'nama_jurusan') }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="skemaFilter" class="filter-label">Skema</label>
+                <select id="skemaFilter" name="skema" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Skema</option>
+                    @foreach($skemaList ?? [] as $s)
+                        <option value="{{ $s->id }}" {{ request('skema') == $s->id ? 'selected' : '' }}>
+                            {{ $s->nama_skema }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="kelasFilter" class="filter-label">Kelas</label>
+                <select id="kelasFilter" name="kelas" class="filter-select" onchange="this.form.submit()">
+                    <option value="">Semua Kelas</option>
+                    @foreach($kelasList ?? [] as $k)
+                        <option value="{{ $k }}" {{ request('kelas') == $k ? 'selected' : '' }}>
+                            {{ $k }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+        </div>
     </form>
 </div>
 

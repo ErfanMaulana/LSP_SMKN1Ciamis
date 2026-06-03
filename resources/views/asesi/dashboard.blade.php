@@ -408,6 +408,8 @@
     <p>Anda berhasil masuk ke sistem LSP SMKN 1 Ciamis. Mulailah persiapan sertifikasi Anda dengan mengerjakan Asesmen Mandiri.</p>
 </div>
 
+{{-- Informasi Jadwal card removed as requested --}}
+
 @php
     $skemaCount      = $asesi ? $asesi->skemas()->count() : 0;
     $selesaiCount    = $asesi ? $asesi->skemas()->wherePivot('status', 'selesai')->count() : 0;
