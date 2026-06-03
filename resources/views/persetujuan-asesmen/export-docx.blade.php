@@ -5,12 +5,12 @@
     <title>FR.AK.01 - Persetujuan Asesmen dan Kerahasiaan</title>
     <style>
         @page { margin: 18px 16px; }
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 10px; color: #000; }
+        body { font-family: DejaVu Sans, Calibri, sans-serif; font-size: 14.5px; color: #000; }
         table { width: 100%; border-collapse: collapse; }
         td, th { border: 1px solid #111; padding: 4px 5px; vertical-align: top; }
         .no-border { border: none !important; }
-        .title { font-weight: 700; font-size: 11px; margin-bottom: 6px; }
-        .small { font-size: 9px; }
+        .title { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+        .small { font-size: 14.5px; }
         .center { text-align: center; }
         .bold { font-weight: 700; }
         .section-gap { margin-top: 8px; }
@@ -37,7 +37,7 @@
         }
         .checkbox.checked::before {
             content: "✓";
-            font-size: 8px;
+            font-size: 14.5px;
             font-weight: bold;
         }
     </style>
@@ -219,7 +219,7 @@
     </table>
 
     @if($item->catatan_footer)
-        <div style="margin-top: 8px; font-size: 9px; color: #333;">
+        <div style="margin-top: 8px; font-size: 14.5px; color: #333;">
             <em>{{ $item->catatan_footer }}</em>
         </div>
     @endif
