@@ -24,7 +24,7 @@ class AsesiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Asesi::with('jurusan');
+        $query = Asesi::with('jurusan', 'skemas');
         
         // Search filter
         if ($request->has('search') && $request->search != '') {
@@ -40,6 +40,13 @@ class AsesiController extends Controller
         // Jurusan filter
         if ($request->has('jurusan') && $request->jurusan != '') {
             $query->where('ID_jurusan', $request->jurusan);
+        }
+        
+        // Skema filter
+        if ($request->has('skema') && $request->skema != '') {
+            $query->whereHas('skemas', function($q) use ($request) {
+                $q->where('skemas.id', $request->skema);
+            });
         }
         
         // Status filter
