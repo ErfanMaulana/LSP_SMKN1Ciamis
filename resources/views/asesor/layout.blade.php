@@ -199,6 +199,23 @@
         .user-role {
             font-size: 11px;
             color: #64748b;
+
+            /* Signature square container for signature images */
+            .signature-square,
+            .signature-img,
+            .saved-signature img,
+            .signature-preview img,
+            img[alt*="Tanda Tangan"],
+            img[alt*="Tanda tangan"] {
+                width: 96px !important;
+                height: 96px !important;
+                object-fit: contain !important;
+                border-radius: 8px;
+                overflow: hidden;
+                display: inline-block;
+                border: 1px solid #e5e7eb;
+                background: #ffffff;
+            }
         }
 
         /* Profile Dropdown */

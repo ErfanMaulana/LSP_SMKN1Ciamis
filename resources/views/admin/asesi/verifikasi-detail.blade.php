@@ -193,7 +193,8 @@
 
     .profile-photo {
         width: 140px;
-        height: 140px;
+        aspect-ratio: 3 / 4;
+        height: auto;
         border-radius: 8px;
         object-fit: cover;
         border: 4px solid #e5e7eb;
@@ -203,7 +204,8 @@
 
     .profile-photo-placeholder {
         width: 140px;
-        height: 140px;
+        aspect-ratio: 3 / 4;
+        height: auto;
         border-radius: 8px;
         background: linear-gradient(135deg, #0073bd, #0073bd);
         display: flex;
@@ -797,6 +799,11 @@
         .profile-header {
             flex-direction: column;
             text-align: center;
+        }
+
+        .profile-photo,
+        .profile-photo-placeholder {
+            width: 120px;
         }
 
         .action-buttons {
@@ -1463,20 +1470,21 @@
     }
 
     function initChecklistHeaderToggles() {
-        const headerChecks = document.querySelectorAll('.check-all-column');
-        if (!headerChecks.length) return;
+        const tables = document.querySelectorAll('.checklist-table');
+        if (!tables.length) return;
 
-        headerChecks.forEach(function(cb) {
-            cb.addEventListener('change', function() {
-                const value = this.dataset.value;
-                const colIndex = parseInt(this.dataset.index, 10);
+        tables.forEach(function(table) {
+            const headerChecks = table.querySelectorAll('.check-all-column');
+            if (!headerChecks.length) return;
 
-                if (this.checked) {
-                    headerChecks.forEach(function(h) { if (h !== cb) h.checked = false; });
-                }
+            headerChecks.forEach(function(cb) {
+                cb.addEventListener('change', function() {
+                    const colIndex = parseInt(this.dataset.index, 10);
 
-                const tables = document.querySelectorAll('.checklist-table');
-                tables.forEach(function(table) {
+                    if (this.checked) {
+                        headerChecks.forEach(function(h) { if (h !== cb) h.checked = false; });
+                    }
+
                     const rows = table.querySelectorAll('tbody tr[data-checklist-row]');
                     rows.forEach(function(row) {
                         const td = row.children[colIndex - 1];
@@ -1485,7 +1493,6 @@
                         if (cb.checked) {
                             if (radio) radio.checked = true;
                         } else {
-                            // clear all radios in the row
                             const all = row.querySelectorAll('input[type="radio"]');
                             all.forEach(function(r) { r.checked = false; });
                         }

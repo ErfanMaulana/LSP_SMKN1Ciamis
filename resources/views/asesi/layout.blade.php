@@ -181,6 +181,27 @@
             text-align: center;
         }
 
+        .nav-icon-outline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            color: #475569;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            font-size: 18px;
+            width: auto;
+            height: auto;
+            flex-shrink: 0;
+        }
+
+        .menu-item.active .nav-icon-outline,
+        .bottom-nav-item.active .nav-icon-outline {
+            color: #0073bd;
+            border-color: #0073bd;
+        }
+
         .menu-item span {
             font-size: 14px;
             font-weight: 500;
@@ -220,6 +241,23 @@
             font-size: 22px;
             color: #1e293b;
             font-weight: 700;
+        }
+
+        /* Signature square container for signature images */
+        .signature-square,
+        .signature-img,
+        .saved-signature img,
+        .signature-preview img,
+        img[alt*="Tanda Tangan"],
+        img[alt*="Tanda tangan"] {
+            width: 96px !important;
+            height: 96px !important;
+            object-fit: contain !important;
+            border-radius: 8px;
+            overflow: hidden;
+            display: inline-block;
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
         }
 
         .topbar-right {
@@ -660,7 +698,9 @@
                 $hasCompletedUjikom = $asesi && method_exists($asesi, 'hasCompletedUjikom') ? $asesi->hasCompletedUjikom() : false;
                 $hasSignedPersetujuanAsesmen = $asesi && method_exists($asesi, 'hasSignedPersetujuanAsesmen') ? $asesi->hasSignedPersetujuanAsesmen() : false;
                 // Determine whether to show Persetujuan Asesmen menu (only when asesor has completed checklist and signed)
-                $showPersetujuan = false;
+                    // Show persetujuan/jadwal only when persetujuan asesmen data is already available.
+                    $showPersetujuan = false;
+                    $showJadwal = false;
                 if ($asesi) {
                     try {
                         $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
@@ -685,8 +725,10 @@
                             });
 
                         $showPersetujuan = $pq->exists();
+                        $showJadwal = $showPersetujuan && $hasSignedPersetujuanAsesmen;
                     } catch (\Throwable $e) {
                         $showPersetujuan = false;
+                        $showJadwal = false;
                     }
                 }
             @endphp
@@ -725,7 +767,7 @@
                 @if($isApproved)
                     <!-- Dashboard -->
                     <a href="{{ route('asesi.dashboard') }}" class="menu-item {{ request()->routeIs('asesi.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-speedometer2"></i>
+                        <i class="bi bi-grid-1x2 nav-icon-outline"></i>
                         <span>Dashboard</span>
                     </a>
                 @endif
@@ -754,7 +796,7 @@
                     </a>
                     @endif
 
-                    @if($hasSignedPersetujuanAsesmen)
+                    @if($showJadwal)
                     <a href="{{ route('asesi.jadwal.index') }}" class="menu-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event-fill"></i>
                         <span>Jadwal Ujikom</span>
@@ -873,7 +915,7 @@
             <div class="bottom-nav-menu">
                 @if($isApproved)
                     <a href="{{ route('asesi.dashboard') }}" class="bottom-nav-item {{ request()->routeIs('asesi.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-speedometer2"></i>
+                        <i class="bi bi-grid-1x2 nav-icon-outline"></i>
                         <span>Dashboard</span>
                     </a>
 
@@ -882,7 +924,7 @@
                         <span>Asesmen</span>
                     </a>
 
-                    @if($hasSignedPersetujuanAsesmen)
+                    @if($showJadwal)
                     <a href="{{ route('asesi.jadwal.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event-fill"></i>
                         <span>Jadwal</span>
