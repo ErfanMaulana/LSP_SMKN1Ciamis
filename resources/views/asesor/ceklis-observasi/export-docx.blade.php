@@ -5,12 +5,12 @@
     <title>FR.IA.01 - Ceklis Observasi Aktivitas Praktik</title>
     <style>
         @page { margin: 18px 16px; }
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 10px; color: #000; }
+        body { font-family: DejaVu Sans, Calibri, sans-serif; font-size: 14.5px; color: #000; }
         table { width: 100%; border-collapse: collapse; }
         td, th { border: 1px solid #111; padding: 4px 5px; vertical-align: top; }
         .no-border { border: none !important; }
-        .title { font-weight: 700; font-size: 11px; margin-bottom: 6px; }
-        .small { font-size: 9px; }
+        .title { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+        .small { font-size: 14.5px; }
         .center { text-align: center; }
         .bold { font-weight: 700; }
         .section-gap { margin-top: 8px; }
@@ -24,13 +24,13 @@
         .unit-header-name {
             width: 22%;
             font-weight: 700;
-            font-size: 10px;
+            font-size: 14.5px;
             vertical-align: middle;
         }
         .unit-header-label {
             width: 18%;
             font-weight: 700;
-            font-size: 10px;
+            font-size: 14.5px;
             white-space: nowrap;
         }
         .unit-header-colon {
@@ -64,7 +64,7 @@
             box-sizing: border-box;
             line-height: 1;
             text-align: center;
-            font-size: 9px;
+            font-size: 14.5px;
             vertical-align: middle;
             padding: 0;
             margin: 0;
@@ -75,7 +75,7 @@
         .meta-table .left-header {
             width: 30%;
             vertical-align: middle;
-            font-size: 11px;
+            font-size: 14.5px;
             line-height: 1.35;
         }
         .meta-table .label-col {
@@ -333,7 +333,7 @@
     </table>
 
     @if($item->catatan_footer)
-        <div style="margin-top: 8px; font-size: 9px; color: #333;">
+        <div style="margin-top: 8px; font-size: 14.5px; color: #333;">
             <em>{{ $item->catatan_footer }}</em>
         </div>
     @endif

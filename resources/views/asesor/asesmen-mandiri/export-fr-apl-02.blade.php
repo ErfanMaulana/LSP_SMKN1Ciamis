@@ -5,12 +5,12 @@
     <title>FR.APL.02 - Asesmen Mandiri</title>
     <style>
         @page { margin: 18px 16px; }
-        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 10px; color: #000; }
+        body { font-family: DejaVu Sans, Calibri, sans-serif; font-size: 14.5px; color: #000; }
         table { width: 100%; border-collapse: collapse; }
         td, th { border: 1px solid #111; padding: 4px 5px; vertical-align: top; }
         .no-border { border: none !important; }
-        .title { font-weight: 700; font-size: 11px; margin-bottom: 6px; }
-        .small { font-size: 9px; }
+        .title { font-weight: 700; font-size: 16px; margin-bottom: 6px; }
+        .small { font-size: 14.5px; }
         .center { text-align: center; }
         .bold { font-weight: 700; }
         .section-gap { margin-top: 8px; }
@@ -102,8 +102,8 @@
                             <div class="kriteria-line">-</div>
                         @endforelse
                     </td>
-                    <td class="center">{{ $answer && $answer->status === 'K' ? 'v' : '' }}</td>
-                    <td class="center">{{ $answer && $answer->status === 'BK' ? 'v' : '' }}</td>
+                    <td class="center">{{ $answer && $answer->status === 'K' ? '✔' : '' }}</td>
+                    <td class="center">{{ $answer && $answer->status === 'BK' ? '✔' : '' }}</td>
                     <td>{{ $answer->bukti ?? '' }}</td>
                 </tr>
             @endforeach
@@ -113,8 +113,8 @@
     <table class="section-gap" style="margin-top:6px; table-layout:fixed;">
         <tr>
             <td class="signature-left" rowspan="9">
-                <div style="font-weight:700; font-size:10px; margin-bottom:6px;">Rekomendasi Untuk Asesi:</div>
-                <div style="font-size:10px; line-height:1.2;">
+                <div style="font-weight:700; font-size:14.5px; margin-bottom:6px;">Rekomendasi Untuk Asesi:</div>
+                <div style="font-size:14.5px; line-height:1.2;">
                     @if($pivot->rekomendasi === 'lanjut')
                         Asesmen dapat dilanjutkan
                     @elseif($pivot->rekomendasi === 'tidak_lanjut')
