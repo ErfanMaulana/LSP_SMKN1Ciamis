@@ -14,8 +14,8 @@
         }
 
         body {
-            font-family: "Times New Roman", serif;
-            font-size: 10pt;
+            font-family: Calibri, sans-serif;
+            font-size: 11pt;
             line-height: 1.1;
             color: #000;
         }
@@ -626,7 +626,9 @@
         </table>
 
         <div class="small mt2 choice-inline">
-            Skema yang dipakai: {!! $renderChoice('KKNI', $selectedSkemaType === 'kkni') !!} / {!! $renderChoice('Okupasi', $selectedSkemaType === 'okupasi') !!} / {!! $renderChoice('Klaster', $selectedSkemaType === 'klaster') !!}
+            Skema yang dipakai: {!! $renderChoice('KKNI', $selectedSkemaType === 'kkni') !!} /
+            {!! $renderChoice('Okupasi', $selectedSkemaType === 'okupasi') !!} /
+            {!! $renderChoice('Klaster', $selectedSkemaType === 'klaster') !!}
         </div>
 
         <div class="small mt4">
@@ -870,7 +872,10 @@
                     </div>
 
                     <div class="recommend-bold">
-                        {!! $renderChoice('Diterima', strtolower(trim((string) ($rekomendasiText ?? 'Diterima'))) === 'diterima') !!} / {!! $renderChoice('Tidak diterima', strtolower(trim((string) ($rekomendasiText ?? 'Diterima'))) !== 'diterima') !!} *)
+                        {!! $renderChoice('Diterima', strtolower(trim((string) ($rekomendasiText ?? 'Diterima'))) === 'diterima') !!}
+                        /
+                        {!! $renderChoice('Tidak diterima', strtolower(trim((string) ($rekomendasiText ?? 'Diterima'))) !== 'diterima') !!}
+                        *)
                         sebagai peserta sertifikasi
                     </div>
 
@@ -913,7 +918,8 @@
                                 <div class="ttd-area">
 
                                     @if(!empty($pendaftarSignature['src']))
-                                        <img src="{{ $pendaftarSignature['src'] }}" style="{{ $pendaftarSignature['style'] }}" alt="ttd pemohon">
+                                        <img src="{{ $pendaftarSignature['src'] }}"
+                                            style="{{ $pendaftarSignature['style'] }}" alt="ttd pemohon">
                                     @endif
 
                                 </div>
@@ -969,7 +975,8 @@
                                 <div class="ttd-area">
 
                                     @if(!empty($verifikatorSignature['src']))
-                                        <img src="{{ $verifikatorSignature['src'] }}" style="{{ $verifikatorSignature['style'] }}" alt="ttd admin">
+                                        <img src="{{ $verifikatorSignature['src'] }}"
+                                            style="{{ $verifikatorSignature['style'] }}" alt="ttd admin">
                                     @endif
 
                                 </div>

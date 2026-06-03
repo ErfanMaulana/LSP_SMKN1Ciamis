@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Asesor;
 use App\Http\Controllers\Controller;
 use App\Models\Asesor;
 use App\Models\Asesi;
+use App\Models\Kelas;
 use App\Models\Skema;
 use App\Models\Kelompok;
 use App\Models\JadwalUjikom;
@@ -429,34 +430,39 @@ class DashboardController extends Controller
             'belum'   => $data->where('status', 'belum_mulai')->count(),
         ];
 
-        // Get dropdown data for filters
+        $selectedJurusan = $request->filled('jurusan') ? (string) $request->jurusan : '';
+
+        // Jurusan is the parent filter, so only show jurusan that are reachable
+        // from the asesor's assigned skemas.
         $jurusans = DB::table('jurusan')
-            ->whereIn('ID_jurusan', function($q) use ($skemaIds) {
+            ->whereIn('ID_jurusan', function ($q) use ($skemaIds) {
                 $q->select('jurusan_id')
-                  ->from('skemas')
-                  ->whereIn('id', $skemaIds);
+                    ->from('skemas')
+                    ->whereIn('id', $skemaIds)
+                    ->whereNotNull('jurusan_id');
             })
             ->orderBy('nama_jurusan')
             ->get();
 
-        $skemaList = Skema::whereIn('id', $skemaIds)
-            ->orderBy('nama_skema')
-            ->get();
+        $skemaQuery = Skema::whereIn('id', $skemaIds)
+            ->orderBy('nama_skema');
 
-        // Get unique kelas values from asesi in this asesor's skemas
-        $kelasList = DB::table('asesi as a')
-            ->join('asesi_skema as aks', 'a.NIK', '=', 'aks.asesi_nik')
-            ->whereIn('aks.skema_id', $skemaIds)
-            ->whereNotNull('a.kelas')
-            ->where('a.kelas', '!=', '')
-            ->distinct()
-            ->pluck('a.kelas')
-            ->sort()
-            ->values();
+        $kelasQuery = Kelas::query()
+            ->orderBy('nama_kelas');
+
+        if ($selectedJurusan !== '') {
+            $skemaQuery->where('jurusan_id', $selectedJurusan);
+            $kelasQuery->where('ID_jurusan', $selectedJurusan);
+        } else {
+            $kelasQuery->whereRaw('1 = 0');
+        }
+
+        $skemaList = $skemaQuery->get();
+        $kelasList = $kelasQuery->get();
 
         return view('asesor.asesi.index', compact(
             'account', 'asesor', 'data', 'skema', 'summary', 'skemaNames',
-            'jurusans', 'skemaList', 'kelasList'
+            'jurusans', 'skemaList', 'kelasList', 'selectedJurusan'
         ));
     }
 

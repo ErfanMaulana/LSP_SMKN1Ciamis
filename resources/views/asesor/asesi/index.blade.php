@@ -1006,7 +1006,7 @@
         <div class="filter-row filter-row-bottom">
             <div class="filter-field">
                 <label for="jurusanFilter" class="filter-label">Jurusan</label>
-                <select id="jurusanFilter" name="jurusan" class="filter-select" onchange="this.form.submit()">
+                <select id="jurusanFilter" name="jurusan" class="filter-select">
                     <option value="">Semua Jurusan</option>
                     @foreach($jurusans ?? [] as $jurusan)
                         <option value="{{ data_get($jurusan, 'ID_jurusan') }}" {{ request('jurusan') == data_get($jurusan, 'ID_jurusan') ? 'selected' : '' }}>
@@ -1018,25 +1018,33 @@
 
             <div class="filter-field">
                 <label for="skemaFilter" class="filter-label">Skema</label>
-                <select id="skemaFilter" name="skema" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Semua Skema</option>
-                    @foreach($skemaList ?? [] as $s)
-                        <option value="{{ $s->id }}" {{ request('skema') == $s->id ? 'selected' : '' }}>
-                            {{ $s->nama_skema }}
-                        </option>
-                    @endforeach
+                <select id="skemaFilter" name="skema" class="filter-select" onchange="this.form.submit()" {{ empty($selectedJurusan) ? 'disabled' : '' }}>
+                    @if(empty($selectedJurusan))
+                        <option value="">Pilih jurusan dulu</option>
+                    @else
+                        <option value="">Semua Skema</option>
+                        @foreach($skemaList ?? [] as $s)
+                            <option value="{{ $s->id }}" {{ request('skema') == $s->id ? 'selected' : '' }}>
+                                {{ $s->nama_skema }}
+                            </option>
+                        @endforeach
+                    @endif
                 </select>
             </div>
 
             <div class="filter-field">
                 <label for="kelasFilter" class="filter-label">Kelas</label>
-                <select id="kelasFilter" name="kelas" class="filter-select" onchange="this.form.submit()">
-                    <option value="">Semua Kelas</option>
-                    @foreach($kelasList ?? [] as $k)
-                        <option value="{{ $k }}" {{ request('kelas') == $k ? 'selected' : '' }}>
-                            {{ $k }}
-                        </option>
-                    @endforeach
+                <select id="kelasFilter" name="kelas" class="filter-select" onchange="this.form.submit()" {{ empty($selectedJurusan) ? 'disabled' : '' }}>
+                    @if(empty($selectedJurusan))
+                        <option value="">Pilih jurusan dulu</option>
+                    @else
+                        <option value="">Semua Kelas</option>
+                        @foreach($kelasList ?? [] as $k)
+                            <option value="{{ data_get($k, 'nama_kelas') }}" {{ request('kelas') == data_get($k, 'nama_kelas') ? 'selected' : '' }}>
+                                {{ data_get($k, 'nama_kelas') }}
+                            </option>
+                        @endforeach
+                    @endif
                 </select>
             </div>
 
@@ -1375,6 +1383,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('asesiSearch');
     const clearBtn = document.getElementById('clearSearch');
     const searchResultsInfo = document.getElementById('searchResultsInfo');
+    const filterForm = document.querySelector('.filter-form');
+    const jurusanFilter = document.getElementById('jurusanFilter');
+    const skemaFilter = document.getElementById('skemaFilter');
+    const kelasFilter = document.getElementById('kelasFilter');
     const tableBody = document.querySelector('.table-card tbody');
     const cardView = document.querySelector('.card-view');
     const totalAsesiEl = document.getElementById('totalAsesi');
@@ -1408,6 +1420,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         performSearch(query);
     });
+
+    if (jurusanFilter && filterForm) {
+        jurusanFilter.addEventListener('change', function() {
+            if (skemaFilter) {
+                skemaFilter.value = '';
+            }
+
+            if (kelasFilter) {
+                kelasFilter.value = '';
+            }
+
+            filterForm.submit();
+        });
+    }
 
     function performSearch(query) {
         const lowerQuery = query.toLowerCase();

@@ -177,8 +177,8 @@
                                                 <i class="bi bi-eye" style="font-size: 16px;"></i> Lihat Detail
                                             </a>
                                             @if($isApproved)
-                                            <a href="{{ route('admin.asesi.verifikasi.apl1', $item->NIK) }}" target="_blank" title="Generate APL 1">
-                                                <i class="bi bi-file-earmark-pdf" style="font-size: 16px;color:#d32f2f;"></i> Generate APL 1
+                                            <a href="{{ route('admin.asesi.verifikasi.apl1', $item->NIK) }}" download title="Generate APL 1 (DOCX)">
+                                                <i class="bi bi-file-earmark-word" style="font-size: 16px;color:#1e88e5;"></i> Generate APL 1 (Word)
                                             </a>
                                             @endif
                                             @if(!$isApproved)

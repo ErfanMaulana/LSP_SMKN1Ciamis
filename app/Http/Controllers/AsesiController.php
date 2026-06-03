@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Shared\Html as WordHtml;
+use PhpOffice\PhpWord\IOFactory as WordIO;
 
 class AsesiController extends Controller
 {
@@ -480,11 +483,404 @@ class AsesiController extends Controller
             'catatanAdmin' => $asesi->catatan_admin,
         ];
 
-        $pdf = Pdf::loadView('admin.asesi.pdf.formulir', $data)->setPaper('a4', 'portrait');
+        // Render the same view as HTML and convert to Word (DOCX)
+        $html = view('admin.asesi.pdf.formulir', $data)->render();
 
-        $fileName = 'FR_APL_01_' . ($asesi->NIK ?? 'asesi') . '.pdf';
+        $phpWord = new PhpWord();
+        $section = $phpWord->addSection([
+            'marginTop' => 800,
+            'marginRight' => 680,
+            'marginBottom' => 800,
+            'marginLeft' => 680,
+        ]);
 
-        return $pdf->stream($fileName);
+        // Clean HTML: PHPWord's HTML importer expects a fragment (no <html>/<head>/<style>).
+        libxml_use_internal_errors(true);
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        // Prepend XML encoding to help DOMDocument handle UTF-8 correctly
+        $dom->loadHTML('<?xml encoding="utf-8" ?>' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        // Remove all <style> and <link> nodes to avoid CSS parsing issues
+        $styleTags = $dom->getElementsByTagName('style');
+        for ($i = $styleTags->length - 1; $i >= 0; $i--) {
+            $styleTags->item($i)->parentNode->removeChild($styleTags->item($i));
+        }
+        $linkTags = $dom->getElementsByTagName('link');
+        for ($i = $linkTags->length - 1; $i >= 0; $i--) {
+            $linkTags->item($i)->parentNode->removeChild($linkTags->item($i));
+        }
+
+        $body = $dom->getElementsByTagName('body')->item(0);
+        $fragment = '';
+        if ($body) {
+            foreach ($body->childNodes as $node) {
+                $fragment .= $dom->saveHTML($node);
+            }
+        } else {
+            // fallback to whole HTML
+            $fragment = $html;
+        }
+        libxml_clear_errors();
+
+        // Build DOCX directly in a layout that mirrors the FR.APL.01 template.
+        try {
+            $safeText = function ($value): string {
+                if ($value === null) {
+                    return '';
+                }
+
+                if ($value instanceof \Illuminate\Support\Collection) {
+                    return $value->map(function ($item) {
+                        if (is_scalar($item)) {
+                            return (string) $item;
+                        }
+
+                        if (is_object($item) && method_exists($item, '__toString')) {
+                            return (string) $item;
+                        }
+
+                        return json_encode($item);
+                    })->implode(', ');
+                }
+
+                if (is_array($value)) {
+                    return implode(', ', array_map(function ($item) {
+                        if (is_scalar($item)) {
+                            return (string) $item;
+                        }
+
+                        if (is_object($item) && method_exists($item, '__toString')) {
+                            return (string) $item;
+                        }
+
+                        return json_encode($item);
+                    }, $value));
+                }
+
+                if (is_object($value)) {
+                    if (method_exists($value, '__toString')) {
+                        return (string) $value;
+                    }
+
+                    return json_encode($value);
+                }
+
+                return (string) $value;
+            };
+
+            $fontTitle = ['name' => 'Times New Roman', 'size' => 12, 'bold' => true];
+            $fontBody = ['name' => 'Calibri', 'size' => 10.5];
+            $fontSmall = ['name' => 'Calibri', 'size' => 9];
+            $fontBold = ['name' => 'Calibri', 'size' => 10.5, 'bold' => true];
+
+            $skema = $data['skema'] ?? null;
+            $unitList = $skema ? ($skema->units ?? collect()) : collect();
+            $selectedSkemaType = strtolower(trim((string) ($skema->jenis_skema ?? '')));
+            $dokumenList = is_array($data['bukti_persyaratan']) ? $data['bukti_persyaratan'] : [];
+            $administratifList = is_array($data['bukti_administratif']) ? $data['bukti_administratif'] : [];
+
+            $isLaki = str_contains(strtolower((string) ($asesi->jenis_kelamin ?? '')), 'laki');
+            $isPerempuan = str_contains(strtolower((string) ($asesi->jenis_kelamin ?? '')), 'perempuan') || strtolower((string) ($asesi->jenis_kelamin ?? '')) === 'p';
+
+            $section->addText('FR.APL.01. permohonan sertifkasi', $fontTitle, ['alignment' => 'center']);
+            $section->addText('Bagian 1 : Rincian Data Pemohon Sertifikasi', $fontBold, ['alignment' => 'center']);
+            $section->addText('Pada bagian ini, cantumkan data pribadi, data pendidikan formal serta data pekerjaan anda pada saat ini.', $fontSmall, ['alignment' => 'center']);
+            $section->addTextBreak(1);
+
+            $makeLineTable = function (array $rows) use ($section, $fontBody) {
+                $table = $section->addTable([
+                    'borderSize' => 0,
+                    'cellMargin' => 0,
+                    'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+                    'width' => 100,
+                    'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+                ]);
+
+                foreach ($rows as $row) {
+                    $table->addRow();
+                    $table->addCell(3000, ['valign' => 'top'])->addText($row[0], $fontBody);
+                    $table->addCell(300, ['valign' => 'top'])->addText(':', $fontBody, ['alignment' => 'center']);
+                    $table->addCell(7800, ['valign' => 'top', 'borderBottomSize' => 6, 'borderBottomColor' => '000000'])->addText($row[1], $fontBody);
+                }
+            };
+
+            $makeLineTable([
+                ['Nama lengkap', $safeText($asesi->nama ?? '')],
+                ['No. KTP/NIK/Paspor', $safeText($asesi->NIK ?? '')],
+                ['Tempat / tgl. Lahir', trim($safeText($asesi->tempat_lahir ?? '') . ' / ' . optional($asesi->tanggal_lahir)->format('d-m-Y'))],
+                ['Jenis kelamin', ($isLaki ? '☑' : '☐') . ' Laki-laki    ' . ($isPerempuan ? '☑' : '☐') . ' Wanita *)'],
+                ['Kebangsaan', $safeText($asesi->kebangsaan ?? '')],
+                ['Alamat rumah', $safeText($asesi->alamat ?? '')],
+                ['Kode pos', $safeText($asesi->kode_pos ?? '')],
+                ['No. Telepon/E-mail', 'Rumah: ' . $safeText($asesi->telepon_rumah ?? '') . '    Kantor: ' . $safeText($asesi->no_fax_lembaga ?? '') . '    HP: ' . $safeText($asesi->telepon_hp ?? '') . '    E-mail: ' . $safeText($asesi->email ?? '')],
+                ['Kualifikasi Pendidikan', $safeText($asesi->pendidikan_terakhir ?? '')],
+            ]);
+
+            $section->addText('*Coret yang tidak perlu', $fontSmall);
+            $section->addTextBreak(1);
+
+            $section->addText('b. Data Pekerjaan Sekarang', $fontBold);
+            $makeLineTable([
+                ['Nama Institusi / Perusahaan', $safeText($asesi->nama_lembaga ?? '')],
+                ['Jabatan', $safeText($asesi->jabatan ?? '')],
+                ['Alamat Kantor', $safeText($asesi->alamat_lembaga ?? '')],
+                ['Kode pos', $safeText($asesi->unit_lembaga ?? '')],
+                ['No. Telp/Fax/E-mail', 'Telp: ' . $safeText($asesi->telepon_rumah ?? '') . '    Fax: ' . $safeText($asesi->no_fax_lembaga ?? '') . '    E-mail: ' . $safeText($asesi->email_lembaga ?? '')],
+            ]);
+
+            $section->addTextBreak(1);
+            $section->addText('Bagian 2 : Data Sertifikasi', $fontBold);
+            $section->addText('Tuliskan Judul dan Nomor Skema Sertifikasi yang anda ajukan berikut Daftar Unit Kompetensi sesuai kemasan pada skema sertifikasi untuk mendapatkan pengakuan sesuai dengan latar belakang pendidikan, pelatihan serta pengalaman kerja yang anda miliki.', $fontSmall);
+
+            $section->addTextBreak(1);
+            $section->addTable([
+                'borderSize' => 6,
+                'borderColor' => '000000',
+                'cellMargin' => 60,
+                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+                'width' => 100,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+            ])->addRow();
+
+            $dataTable = $section->addTable([
+                'borderSize' => 6,
+                'borderColor' => '000000',
+                'cellMargin' => 60,
+                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+                'width' => 100,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+            ]);
+            $dataTable->addRow();
+            $dataTable->addCell(2800, ['valign' => 'center'])->addText('Skema Sertifikasi', $fontBody, ['alignment' => 'center']);
+            $dataTable->addCell(9200, ['valign' => 'center'])->addText('( ' . ($selectedSkemaType === 'kkni' ? '☑' : '☐') . ' KKNI / ' . ($selectedSkemaType === 'okupasi' ? '☑' : '☐') . ' Okupasi / ' . ($selectedSkemaType === 'klaster' ? '☑' : '☐') . ' Klaster )', $fontBody);
+            $dataTable->addRow();
+            $dataTable->addCell(2800, ['valign' => 'center'])->addText('Judul', $fontBody, ['alignment' => 'center']);
+            $dataTable->addCell(9200, ['valign' => 'center'])->addText($safeText($skema->nama_skema ?? '-'), $fontBody);
+            $dataTable->addRow();
+            $dataTable->addCell(2800, ['valign' => 'center'])->addText('Nomor', $fontBody, ['alignment' => 'center']);
+            $dataTable->addCell(9200, ['valign' => 'center'])->addText($safeText($skema->nomor_skema ?? '-'), $fontBody);
+            $dataTable->addRow();
+            $dataTable->addCell(2800, ['valign' => 'center'])->addText('Tujuan Asesmen', $fontBody, ['alignment' => 'center']);
+            $dataTable->addCell(9200, ['valign' => 'center'])->addText('☑ Sertifikasi    ☐ Pengakuan Kompetensi Terkini (PKT)    ☐ Rekognisi Pembelajaran Lampau (RPL)    ☐ Lainnya', $fontBody);
+
+            $section->addTextBreak(1);
+            $section->addText('Skema yang dipakai: ' . ($selectedSkemaType === 'kkni' ? '☑ KKNI' : '☐ KKNI') . ' / ' . ($selectedSkemaType === 'okupasi' ? '☑ Okupasi' : '☐ Okupasi') . ' / ' . ($selectedSkemaType === 'klaster' ? '☑ Klaster' : '☐ Klaster'), $fontSmall);
+            $section->addTextBreak(1);
+
+            $section->addText('Daftar Unit Kompetensi sesuai kemasan:', $fontSmall);
+            $unitTable = $section->addTable([
+                'borderSize' => 6,
+                'borderColor' => '000000',
+                'cellMargin' => 60,
+                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+                'width' => 100,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+            ]);
+            $unitTable->addRow();
+            $unitTable->addCell(600, ['valign' => 'center'])->addText('No.', $fontBody, ['alignment' => 'center']);
+            $unitTable->addCell(2200, ['valign' => 'center'])->addText('Kode Unit', $fontBody, ['alignment' => 'center']);
+            $unitTable->addCell(5000, ['valign' => 'center'])->addText('Judul Unit', $fontBody, ['alignment' => 'center']);
+            $unitTable->addCell(3400, ['valign' => 'center'])->addText('Standar Kompetensi Kerja', $fontBody, ['alignment' => 'center']);
+
+            if ($unitList instanceof \Illuminate\Support\Collection && $unitList->isNotEmpty()) {
+                foreach ($unitList as $index => $unit) {
+                    $unitTable->addRow();
+                    $unitTable->addCell(600)->addText((string) ($index + 1), $fontBody, ['alignment' => 'center']);
+                    $unitTable->addCell(2200)->addText($safeText($unit->kode_unit ?? $unit->kode ?? '-'), $fontBody);
+                    $unitTable->addCell(5000)->addText($safeText($unit->judul_unit ?? $unit->nama_unit ?? $unit->judul ?? '-'), $fontBody);
+                    $unitTable->addCell(3400)->addText($safeText($unit->standar_kompetensi ?? 'SKKNI'), $fontBody);
+                }
+            } else {
+                $unitTable->addRow();
+                $unitTable->addCell(600)->addText('1', $fontBody, ['alignment' => 'center']);
+                $unitTable->addCell(2200)->addText('...', $fontBody);
+                $unitTable->addCell(5000)->addText('...', $fontBody);
+                $unitTable->addCell(3400)->addText('...', $fontBody);
+            }
+
+            $section->addTextBreak(1);
+            $section->addText('Bagian 3 : Bukti Kelengkapan Pemohon', $fontBold);
+            $section->addText('3.1 Bukti Persyaratan Dasar Pemohon', $fontSmall);
+
+            $docTable = $section->addTable([
+                'borderSize' => 6,
+                'borderColor' => '000000',
+                'cellMargin' => 60,
+                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+                'width' => 100,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+            ]);
+            $docTable->addRow();
+            $docTable->addCell(600, ['valign' => 'center'])->addText('No.', $fontBody, ['alignment' => 'center']);
+            $docTable->addCell(6500, ['valign' => 'center'])->addText('Bukti Persyaratan Dasar', $fontBody, ['alignment' => 'center']);
+            $docTable->addCell(1200, ['valign' => 'center'])->addText('Ada Memenuhi Syarat', $fontBody, ['alignment' => 'center']);
+            $docTable->addCell(1200, ['valign' => 'center'])->addText('Tidak Memenuhi Syarat', $fontBody, ['alignment' => 'center']);
+            $docTable->addCell(1200, ['valign' => 'center'])->addText('Tidak Ada', $fontBody, ['alignment' => 'center']);
+
+            $docRows = !empty($dokumenList) ? $dokumenList : [
+                'Fotocopy Rapor pada kesesuaian/hasil nilai yang relevan',
+                'Fotocopy Sertifikat/Surat Keterangan telah melaksanakan PKL bidang Multimedia',
+                'Portofolio / Bukti pendukung kompetensi lain',
+            ];
+
+            foreach ($docRows as $index => $row) {
+                $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '');
+                $state = is_array($row) ? ($row['status'] ?? '') : '';
+                $docTable->addRow();
+                $docTable->addCell(600)->addText((string) ($index + 1), $fontBody, ['alignment' => 'center']);
+                $docTable->addCell(6500)->addText($safeText($label), $fontBody);
+                $docTable->addCell(1200)->addText($state === 'memenuhi' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
+                $docTable->addCell(1200)->addText($state === 'tidak_memenuhi' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
+                $docTable->addCell(1200)->addText($state === 'tidak_ada' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
+            }
+
+            $section->addTextBreak(1);
+            $section->addText('3.2 Bukti Administratif', $fontSmall);
+            $adminTable = $section->addTable([
+                'borderSize' => 6,
+                'borderColor' => '000000',
+                'cellMargin' => 60,
+                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+                'width' => 100,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+            ]);
+            $adminTable->addRow();
+            $adminTable->addCell(600, ['valign' => 'center'])->addText('No.', $fontBody, ['alignment' => 'center']);
+            $adminTable->addCell(6500, ['valign' => 'center'])->addText('Bukti Administratif', $fontBody, ['alignment' => 'center']);
+            $adminTable->addCell(1200, ['valign' => 'center'])->addText('Ada Memenuhi Syarat', $fontBody, ['alignment' => 'center']);
+            $adminTable->addCell(1200, ['valign' => 'center'])->addText('Tidak Memenuhi Syarat', $fontBody, ['alignment' => 'center']);
+            $adminTable->addCell(1200, ['valign' => 'center'])->addText('Tidak Ada', $fontBody, ['alignment' => 'center']);
+
+            $adminRows = !empty($administratifList) ? $administratifList : [
+                'Fotocopy Kartu Pelajar',
+                'Fotocopy Kartu Keluarga/KTP',
+                'Pas foto 3 x 4 berwarna sebanyak 2 lembar',
+            ];
+
+            foreach ($adminRows as $index => $row) {
+                $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '');
+                $state = is_array($row) ? ($row['status'] ?? '') : '';
+                $adminTable->addRow();
+                $adminTable->addCell(600)->addText((string) ($index + 1), $fontBody, ['alignment' => 'center']);
+                $adminTable->addCell(6500)->addText($safeText($label), $fontBody);
+                $adminTable->addCell(1200)->addText($state === 'memenuhi' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
+                $adminTable->addCell(1200)->addText($state === 'tidak_memenuhi' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
+                $adminTable->addCell(1200)->addText($state === 'tidak_ada' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
+            }
+
+            $section->addTextBreak(1);
+            $signTable = $section->addTable([
+                'borderSize' => 0,
+                'cellMargin' => 0,
+                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
+                'width' => 100,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+            ]);
+            $signTable->addRow();
+            $signTable->addCell(6200, ['valign' => 'top'])->addText('Rekomendasi (diisi oleh LSP):', $fontBold);
+            $signTable->addCell(5200, ['valign' => 'top'])->addText('Pemohon/ Kandidat :', $fontBold, ['alignment' => 'center']);
+            $signTable->addRow();
+            $signTable->addCell(6200, ['valign' => 'top'])->addText('Berdasarkan ketentuan persyaratan dasar, maka pemohon: ' . ((strtolower(trim((string) ($data['rekomendasiText'] ?? 'Diterima'))) === 'diterima') ? 'Diterima' : 'Tidak diterima') . ' sebagai peserta sertifikasi', $fontBody);
+            $candidateCell = $signTable->addCell(5200, ['valign' => 'top']);
+            $candidateCell->addText('Nama : ' . $safeText($asesi->nama ?? '-'), $fontBody);
+            $candidateCell->addTextBreak(2);
+
+            // Prepare temporary image storage for data URIs
+            $tempImages = [];
+            $saveDataUriToTemp = function (?string $dataUri) use (&$tempImages) {
+                if (!$dataUri || !is_string($dataUri)) {
+                    return null;
+                }
+                if (!preg_match('/^data:image\/([a-zA-Z0-9+]+);base64,(.*)$/s', $dataUri, $m)) {
+                    return null;
+                }
+                $ext = strtolower($m[1]);
+                if ($ext === 'jpeg') $ext = 'jpg';
+                $raw = base64_decode(str_replace(["\r", "\n"], ['', ''], $m[2]));
+                if ($raw === false) {
+                    return null;
+                }
+                $tmp = tempnam(sys_get_temp_dir(), 'apl_img_') . '.' . $ext;
+                file_put_contents($tmp, $raw);
+                if (@getimagesize($tmp) === false) {
+                    @unlink($tmp);
+                    return null;
+                }
+                $tempImages[] = $tmp;
+                return $tmp;
+            };
+
+            if (!empty($pendaftarSignature['src'])) {
+                $imgPath = $pendaftarSignature['src'];
+                if (str_starts_with($imgPath, 'data:')) {
+                    $imgPath = $saveDataUriToTemp($imgPath);
+                    if ($imgPath === null) {
+                        \Log::warning('PHPWord: invalid pendaftar signature data URI for APL.01 (skipping image)');
+                    }
+                }
+                if (!empty($imgPath) && file_exists($imgPath)) {
+                    $candidateCell->addImage($imgPath, ['width' => 140, 'height' => 52, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+                }
+            }
+
+            $candidateCell->addText($safeText($data['pendaftarSignedAt'] ?? '-'), $fontBody, ['alignment' => 'center']);
+            $signTable->addRow();
+            $signTable->addCell(6200, ['valign' => 'top'])->addText('* coret yang tidak sesuai', $fontSmall);
+            $adminCell = $signTable->addCell(5200, ['valign' => 'top']);
+            $adminCell->addText('Admin LSP :', $fontBold);
+            $adminCell->addText('Nama : ' . $safeText($data['adminSignerName'] ?? '-'), $fontBody);
+            $adminCell->addTextBreak(2);
+            if (!empty($verifikatorSignature['src'])) {
+                $imgAdmin = $verifikatorSignature['src'];
+                if (str_starts_with($imgAdmin, 'data:')) {
+                    $imgAdmin = $saveDataUriToTemp($imgAdmin);
+                    if ($imgAdmin === null) {
+                        \Log::warning('PHPWord: invalid verifikator signature data URI for APL.01 (skipping image)');
+                    }
+                }
+                if (!empty($imgAdmin) && file_exists($imgAdmin)) {
+                    $adminCell->addImage($imgAdmin, ['width' => 140, 'height' => 52, 'alignment' => \PhpOffice\PhpWord\SimpleType\Jc::CENTER]);
+                }
+            }
+            $adminCell->addText($safeText($data['adminSignedAt'] ?? '-'), $fontBody, ['alignment' => 'center']);
+
+        } catch (\Throwable $e) {
+            \Log::error('PHPWord build failed for APL.01: ' . $e->getMessage());
+            // Fallback to PDF to keep functionality working
+            $pdf = Pdf::loadView('admin.asesi.pdf.formulir', $data)->setPaper('a4', 'portrait');
+            $fileNamePdf = 'FR_APL_01_' . ($asesi->NIK ?? 'asesi') . '.pdf';
+            return $pdf->stream($fileNamePdf);
+        }
+
+        $fileName = 'FR_APL_01_' . ($asesi->NIK ?? 'asesi') . '.docx';
+
+        $tempFile = tempnam(sys_get_temp_dir(), 'apl_') . '.docx';
+        try {
+            \Log::info('PHPWord: attempting to write DOCX to ' . $tempFile);
+            $writer = WordIO::createWriter($phpWord, 'Word2007');
+            $writer->save($tempFile);
+            \Log::info('PHPWord: DOCX written to ' . $tempFile);
+            // cleanup any temporary images created from data URIs
+            if (!empty($tempImages) && is_array($tempImages)) {
+                foreach ($tempImages as $ti) {
+                    try {
+                        if (file_exists($ti)) {
+                            @unlink($ti);
+                        }
+                    } catch (\Throwable $_) {
+                        // ignore cleanup errors
+                    }
+                }
+                \Log::info('PHPWord: cleaned up ' . count($tempImages) . ' temp images for APL.01');
+            }
+        } catch (\Throwable $e) {
+            \Log::error('PHPWord write failed for APL.01: ' . $e->getMessage());
+            // If saving fails, fallback to PDF as before
+            $pdf = Pdf::loadView('admin.asesi.pdf.formulir', $data)->setPaper('a4', 'portrait');
+            $fileNamePdf = 'FR_APL_01_' . ($asesi->NIK ?? 'asesi') . '.pdf';
+            return $pdf->stream($fileNamePdf);
+        }
+
+        return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
     }
 
     /**
