@@ -501,10 +501,10 @@ class RekamanAsesmenKompetensiController extends Controller
         }
 
         $data['asesor_id'] = $asesor->ID_asesor;
-        $data['kode_form'] = $data['kode_form'] ?: 'FR.AK.02.';
-        $data['judul_form'] = $data['judul_form'] ?: 'REKAMAN ASESMEN KOMPETENSI';
-        $data['kategori_skema'] = $data['kategori_skema'] ?: Skema::find($data['skema_id'])?->jenis_skema;
-        $data['tuk'] = $data['tuk'] ?: null;
+        $data['kode_form'] = $data['kode_form'] ?? 'FR.AK.02.';
+        $data['judul_form'] = $data['judul_form'] ?? 'REKAMAN ASESMEN KOMPETENSI';
+        $data['kategori_skema'] = $data['kategori_skema'] ?? Skema::find($data['skema_id'])?->jenis_skema;
+        $data['tuk'] = $data['tuk'] ?? null;
 
         return [$data, $details];
     }
