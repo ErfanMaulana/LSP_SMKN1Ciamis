@@ -8,6 +8,7 @@ use App\Models\Asesor;
 use App\Models\RekamanAsesmenKompetensi;
 use App\Models\PersetujuanAsesmen;
 use App\Models\Skema;
+use App\Models\JadwalUjikom;
 use App\Models\Unit;
 use App\Models\CeklisObservasiAktivitasPraktik;
 use Illuminate\Http\Request;
@@ -27,6 +28,37 @@ class RekamanAsesmenKompetensiController extends Controller
         }
 
         return Asesor::with('skemas')->where('no_met', $account->id)->first();
+    }
+
+    private function isAsesiAssignedToSkema(Asesor $asesor, string $asesiNik, int $skemaId): bool
+    {
+        $assignedDirectly = Asesi::query()
+            ->where('NIK', $asesiNik)
+            ->where('ID_asesor', $asesor->ID_asesor)
+            ->exists();
+
+        if ($assignedDirectly) {
+            return true;
+        }
+
+        return Asesi::query()
+            ->where('NIK', $asesiNik)
+            ->whereHas('skemas', function ($query) use ($skemaId) {
+                $query->where('skemas.id', $skemaId);
+            })
+            ->exists();
+    }
+
+    private function resolveJadwalForAsesiSkema(string $asesiNik, int $skemaId): ?JadwalUjikom
+    {
+        return JadwalUjikom::query()
+            ->with('tuk')
+            ->where('skema_id', $skemaId)
+            ->whereHas('peserta', function ($query) use ($asesiNik) {
+                $query->where('NIK', $asesiNik);
+            })
+            ->latest('id')
+            ->first();
     }
 
     public function index(Request $request)
@@ -118,6 +150,11 @@ class RekamanAsesmenKompetensiController extends Controller
 
         // Enforce that a Ceklis Observasi exists for this asesi + skema before allowing Rekaman creation
         if ($defaults['skema_id'] && $defaults['asesi_nik']) {
+            $jadwal = $this->resolveJadwalForAsesiSkema($defaults['asesi_nik'], (int) $defaults['skema_id']);
+            if ($jadwal?->tuk) {
+                $defaults['tuk'] = $jadwal->tuk->nama_tuk ?? '';
+            }
+
             $hasCeklis = CeklisObservasiAktivitasPraktik::query()
                 ->where('skema_id', (int) $defaults['skema_id'])
                 ->where('asesi_nik', $defaults['asesi_nik'])
@@ -339,20 +376,8 @@ class RekamanAsesmenKompetensiController extends Controller
         $tuk = null;
         $skema = $selectedSkemaId > 0 ? Skema::find($selectedSkemaId) : null;
         if ($skema) {
-            $persetujuanQuery = PersetujuanAsesmen::query()
-                ->where('nomor_skema', $skema->nomor_skema)
-                ->where(function ($query) use ($asesi) {
-                    $query->where('nama_asesi', $asesi->nama);
-
-                    if (Schema::hasColumn('persetujuan_asesmen', 'asesi_nik')) {
-                        $query->orWhere('asesi_nik', $asesi->NIK);
-                    }
-                })
-                ->latest('id');
-
-            $persetujuan = $persetujuanQuery->first(['tuk', 'tuk_pelaksanaan']);
-
-            $tuk = $persetujuan?->tuk ?: $persetujuan?->tuk_pelaksanaan;
+            $jadwal = $this->resolveJadwalForAsesiSkema($asesi->NIK, $selectedSkemaId);
+            $tuk = $jadwal?->tuk?->nama_tuk;
         }
 
         return response()->json([
@@ -430,13 +455,7 @@ class RekamanAsesmenKompetensiController extends Controller
             ]);
         }
 
-        $validAsesi = Asesi::query()
-            ->where('NIK', $data['asesi_nik'])
-            ->where('ID_asesor', $asesor->ID_asesor)
-            ->whereHas('skemas', function ($query) use ($data) {
-                $query->where('skemas.id', $data['skema_id']);
-            })
-            ->exists();
+        $validAsesi = $this->isAsesiAssignedToSkema($asesor, (string) $data['asesi_nik'], (int) $data['skema_id']);
 
         if (!$validAsesi) {
             throw ValidationException::withMessages([

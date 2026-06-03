@@ -75,6 +75,48 @@ class PersetujuanAsesmenFrontController extends Controller
         return $payload;
     }
 
+    private function resolveJadwalForAsesiSkema(Asesi $asesi, Skema $skema): ?JadwalUjikom
+    {
+        return JadwalUjikom::query()
+            ->with(['tuk', 'skema', 'kelompoks.asesors'])
+            ->where('skema_id', $skema->id)
+            ->whereHas('peserta', function ($query) use ($asesi) {
+                $query->where('NIK', $asesi->NIK);
+            })
+            ->orderByDesc('tanggal_mulai')
+            ->first();
+    }
+
+    private function buildPrefillDefaults(?Asesi $asesi, ?Skema $skema): array
+    {
+        $defaults = [];
+
+        if ($skema) {
+            $defaults['judul_skema'] = $skema->nama_skema ?? '';
+            $defaults['nomor_skema'] = $skema->nomor_skema ?? '';
+        }
+
+        if ($asesi) {
+            $defaults['nama_asesi'] = $asesi->nama ?? '';
+        }
+
+        if ($asesi && $skema) {
+            $jadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema);
+
+            if ($jadwal?->tuk) {
+                $defaults['tuk'] = match ($jadwal->tuk->tipe_tuk) {
+                    'sewaktu' => 'Sewaktu',
+                    'tempat_kerja' => 'Tempat Kerja',
+                    'mandiri' => 'Mandiri',
+                    default => $jadwal->tuk->tipe_tuk,
+                };
+                $defaults['tuk_pelaksanaan'] = $jadwal->tuk->nama_tuk ?? '';
+            }
+        }
+
+        return $defaults;
+    }
+
     private function createPlaceholderForAsesiSkema(Asesi $asesi, Skema $skema): ?PersetujuanAsesmen
     {
         $useNik = $this->hasAsesiNikColumn();
@@ -93,14 +135,7 @@ class PersetujuanAsesmenFrontController extends Controller
             return $record;
         }
 
-        $jadwal = JadwalUjikom::query()
-            ->with(['tuk', 'skema', 'kelompoks.asesors'])
-            ->where('skema_id', $skema->id)
-            ->whereHas('peserta', function ($q) use ($asesi) {
-                $q->where('NIK', $asesi->NIK);
-            })
-            ->orderByDesc('tanggal_mulai')
-            ->first();
+        $jadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema);
 
         if (!$jadwal) {
             return null;
@@ -259,8 +294,20 @@ class PersetujuanAsesmenFrontController extends Controller
     {
         $account = $request->user();
         $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
+        $skema = null;
+        $asesi = null;
 
-        $defaults = array_merge($this->defaultContent(), [
+        $skemaId = $request->query('skema_id');
+        if (!empty($skemaId)) {
+            $skema = Skema::find($skemaId);
+        }
+
+        $asesiNik = $request->query('asesi_nik');
+        if (!empty($asesiNik)) {
+            $asesi = Asesi::where('NIK', $asesiNik)->first();
+        }
+
+        $defaults = array_merge($this->defaultContent(), $this->buildPrefillDefaults($asesi, $skema), [
             'nama_asesor' => $asesor?->nama ?? '-',
         ]);
 
@@ -350,13 +397,20 @@ class PersetujuanAsesmenFrontController extends Controller
                     $asesiNama = $asesiByNik->get($asesiNik)->nama;
                 }
 
+                $status = 'Belum Ditandatangani Asesor';
+                if (!empty($record->ttd_asesor_nama)) {
+                    $status = !empty($record->ttd_asesi_nama)
+                        ? 'Sudah Ditandatangani'
+                        : 'Belum Ditandatangani Asesi';
+                }
+
                 return [
                     'asesi_nik' => $asesiNik,
                     'asesi_nama' => $asesiNama,
                     'skema_id' => $skema?->id,
                     'skema_nama' => $record->judul_skema ?: ($skema?->nama_skema ?? '-'),
                     'skema_nomor' => $record->nomor_skema,
-                    'status' => $record->ttd_asesi_nama ? 'Sudah Ditandatangani' : 'Belum Ditandatangani',
+                    'status' => $status,
                 ];
             })->values();
         }

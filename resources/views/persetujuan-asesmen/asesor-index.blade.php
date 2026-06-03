@@ -101,6 +101,20 @@
 
     .action-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
 
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+    }
+    .status-badge--warning { background: #fef3c7; color: #92400e; }
+    .status-badge--info { background: #dbeafe; color: #1d4ed8; }
+    .status-badge--success { background: #dcfce7; color: #166534; }
+
     .pagination-wrap { padding: 14px; }
 
     .empty {
@@ -116,9 +130,6 @@
 
 <div class="page-header">
     <h2>Persetujuan Asesmen dan Kerahasiaan</h2>
-    <a href="{{ route('asesor.persetujuan-asesmen.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Tambah Data
-    </a>
 </div>
 
 <div class="toolbar">
@@ -152,7 +163,18 @@
                         <td>{{ $item['skema_nama'] }}</td>
                         <td>{{ $item['skema_nomor'] }}</td>
                         <td>{{ $item['asesi_nama'] }}</td>
-                        <td>{{ $item['status'] }}</td>
+                        <td>
+                            @php
+                                $status = $item['status'] ?? '-';
+                                $statusClass = 'status-badge--warning';
+                                if ($status === 'Belum Ditandatangani Asesi') {
+                                    $statusClass = 'status-badge--info';
+                                } elseif ($status === 'Sudah Ditandatangani') {
+                                    $statusClass = 'status-badge--success';
+                                }
+                            @endphp
+                            <span class="status-badge {{ $statusClass }}">{{ $status }}</span>
+                        </td>
                         <td>
                             <div class="action-wrap">
                                 @if(!empty($item['asesi_nik']) && !empty($item['skema_id']))

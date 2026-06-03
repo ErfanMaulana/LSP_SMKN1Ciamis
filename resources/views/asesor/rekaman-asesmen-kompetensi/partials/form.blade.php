@@ -18,6 +18,8 @@
     $selectedSkemaId = (string) $value('skema_id', '');
     $selectedAsesiNik = (string) $value('asesi_nik', '');
     $selectedTuk = (string) $value('tuk', '');
+    $lockSkema = !empty($selectedAsesiNik) && !empty($selectedSkemaId);
+    $lockTuk = !empty($selectedAsesiNik) && !empty($selectedSkemaId);
 
     $initialDetailMap = old('detail');
     if (!$initialDetailMap && $record) {
@@ -203,7 +205,7 @@
 
         <div class="field">
             <label>Skema <span class="req">*</span></label>
-            <select id="skemaSelect" name="skema_id">
+            <select id="skemaSelect" class="{{ $lockSkema ? 'locked' : '' }}" {{ $lockSkema ? 'disabled' : '' }}>
                 <option value="">-- Pilih Skema --</option>
                 @foreach($skemaList as $skema)
                     <option value="{{ $skema->id }}" data-nomor="{{ $skema->nomor_skema }}" data-jenis="{{ $skema->jenis_skema ?? '' }}" {{ $selectedSkemaId === (string) $skema->id ? 'selected' : '' }}>
@@ -211,6 +213,7 @@
                     </option>
                 @endforeach
             </select>
+            <input type="hidden" name="skema_id" id="skemaIdInput" value="{{ $selectedSkemaId }}">
             @error('skema_id')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -221,12 +224,13 @@
 
         <div class="field">
             <label>TUK</label>
-            <select name="tuk">
+            <select id="tukSelect" class="{{ $lockTuk ? 'locked' : '' }}" {{ $lockTuk ? 'disabled' : '' }}>
                 <option value="">-- Pilih TUK --</option>
                 <option value="Sewaktu" {{ $selectedTuk === 'Sewaktu' ? 'selected' : '' }}>Sewaktu</option>
                 <option value="Tempat Kerja" {{ $selectedTuk === 'Tempat Kerja' ? 'selected' : '' }}>Tempat Kerja</option>
                 <option value="Mandiri" {{ $selectedTuk === 'Mandiri' ? 'selected' : '' }}>Mandiri</option>
             </select>
+            <input type="hidden" name="tuk" id="tukInput" value="{{ $selectedTuk }}">
             @error('tuk')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -319,12 +323,14 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const skemaSelect = document.getElementById('skemaSelect');
+    const skemaIdInput = document.getElementById('skemaIdInput');
     const nomorSkemaInput = document.getElementById('nomorSkemaInput');
     const asesiSelect = document.getElementById('asesiSelect');
     const unitRowsContainer = document.getElementById('unitRowsContainer');
     const kategoriSkemaInput = document.getElementById('kategoriSkemaInput');
     const asesiInfoGrid = document.getElementById('asesiInfoGrid');
-    const tukSelect = document.querySelector('select[name="tuk"]');
+    const tukSelect = document.getElementById('tukSelect');
+    const tukInput = document.getElementById('tukInput');
 
     const participantsUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.skema-participants') }}';
     const unitsUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.skema-units') }}';
@@ -382,10 +388,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const syncNomorSkema = () => {
         const selected = skemaSelect.options[skemaSelect.selectedIndex];
+        const skemaValue = skemaSelect.value || '';
+        if (skemaIdInput) {
+            skemaIdInput.value = skemaValue;
+        }
         nomorSkemaInput.value = selected ? (selected.getAttribute('data-nomor') || '') : '';
         if (kategoriSkemaInput) {
             kategoriSkemaInput.value = selected ? (selected.getAttribute('data-jenis') || '') : '';
         }
+    };
+
+    const syncTukValue = (value) => {
+        if (tukInput) {
+            tukInput.value = value || '';
+        }
+        if (tukSelect && tukSelect.value !== (value || '')) {
+            tukSelect.value = value || '';
+        }
+    };
+
+    const setFieldLocked = (select, locked) => {
+        if (!select) return;
+        select.disabled = !!locked;
+        select.classList.toggle('locked', !!locked);
     };
 
     const renderAsesiInfo = (item) => {
@@ -444,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (tukSelect) {
             const normalizedTuk = normalizeTukValue(data.asesi.tuk || data.asesi.tuk_pelaksanaan);
             if (normalizedTuk) {
-                tukSelect.value = normalizedTuk;
+                syncTukValue(normalizedTuk);
             }
         }
 
@@ -461,6 +486,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        setFieldLocked(skemaSelect, true);
+        setFieldLocked(tukSelect, true);
         lockDependentFields();
     };
 
@@ -498,10 +525,15 @@ document.addEventListener('DOMContentLoaded', function () {
         const skemaId = skemaSelect.value;
         const preservedAsesiNik = applyInitialSelection ? selectedAsesiNik : (asesiSelect.value || '');
 
+        syncNomorSkema();
+
         if (!skemaId) {
             resetSelect(asesiSelect, '-- Pilih Asesi --');
             renderAsesiInfo(null);
             unitRowsContainer.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;">Pilih skema untuk memuat unit kompetensi.</td></tr>';
+            setFieldLocked(skemaSelect, false);
+            setFieldLocked(tukSelect, false);
+            syncTukValue('');
             return;
         }
 
@@ -585,6 +617,12 @@ document.addEventListener('DOMContentLoaded', function () {
             loadBySkema();
         });
 
+        if (tukSelect) {
+            tukSelect.addEventListener('change', () => {
+                syncTukValue(tukSelect.value);
+            });
+        }
+
         asesiSelect.addEventListener('change', async () => {
             syncAsesiInfo(asesiSelect.value);
 
@@ -592,7 +630,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!asesiNik) {
                 // clear dependent fields
                 renderAsesiInfo(null);
-                if (tukSelect) tukSelect.value = '';
+                if (tukSelect) {
+                    setFieldLocked(skemaSelect, false);
+                    setFieldLocked(tukSelect, false);
+                }
+                syncTukValue('');
                 const mulaiInput = document.querySelector('input[name="tanggal_mulai"]');
                 const selesaiInput = document.querySelector('input[name="tanggal_selesai"]');
                 if (mulaiInput) mulaiInput.value = '';
