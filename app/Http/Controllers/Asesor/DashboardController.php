@@ -11,6 +11,7 @@ use App\Models\Kelompok;
 use App\Models\JadwalUjikom;
 use App\Models\JawabanElemen;
 use App\Models\AsesorNilaiElemen;
+use App\Models\PersetujuanAsesmen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -380,6 +381,29 @@ class DashboardController extends Controller
             $row->has_penilaian = isset($penilaianByAsesiSkema[$key]);
             $row->has_ceklis_observasi = isset($ceklisByAsesiSkema[$key]);
             $row->ceklis_observasi_id = $ceklisByAsesiSkema[$key] ?? null;
+
+            // Persetujuan Asesmen status: check latest persetujuan record for this asesi+skema
+            $row->persetujuan_exists = false;
+            $row->persetujuan_signed_by_asesor = false;
+            $row->persetujuan_signed_by_asesi = false;
+            if ($row->skema) {
+                $p = PersetujuanAsesmen::where('nomor_skema', $row->skema->nomor_skema)
+                    ->where(function ($q) use ($row) {
+                        $q->where('nama_asesi', $row->asesi?->nama ?? '');
+                        if (method_exists($row->asesi, 'NIK') || !empty($row->asesi?->NIK)) {
+                            $q->orWhere('asesi_nik', $row->asesi_nik);
+                        }
+                    })
+                    ->latest()
+                    ->first();
+
+                if ($p) {
+                    $row->persetujuan_exists = true;
+                    $row->persetujuan_signed_by_asesor = !empty($p->ttd_asesor_nama);
+                    $row->persetujuan_signed_by_asesi = !empty($p->ttd_asesi_nama);
+                    $row->persetujuan_id = $p->id;
+                }
+            }
             
             return $row;
         });

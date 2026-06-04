@@ -478,6 +478,12 @@ class PersetujuanAsesmenFrontController extends Controller
         $namaAsesi = $asesi ? $asesi->nama : null;
         $useNik = $this->hasAsesiNikColumn();
 
+        // Prevent asesor from viewing/signing if the asesi hasn't been recommended
+        if ($asesi && $skema && ! $asesi->hasRekomendasiLanjutForSkema($skema->id)) {
+            return redirect()->route('asesor.persetujuan-asesmen.index')
+                ->with('error', 'Asesi belum direkomendasikan dari asesmen mandiri; asesor tidak dapat menandatangani.');
+        }
+
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
             ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
                 if ($namaAsesi) {
@@ -513,6 +519,20 @@ class PersetujuanAsesmenFrontController extends Controller
     public function asesorSign(Request $request, $id)
     {
         $item = PersetujuanAsesmen::findOrFail($id);
+
+        // Ensure asesi was recommended for this skema before allowing asesor to sign
+        $useNik = $this->hasAsesiNikColumn();
+        $asesiForCheck = null;
+        if ($useNik && !empty($item->asesi_nik)) {
+            $asesiForCheck = Asesi::where('NIK', $item->asesi_nik)->first();
+        } else {
+            $asesiForCheck = Asesi::where('nama', $item->nama_asesi)->first();
+        }
+
+        $skemaForCheck = Skema::where('nomor_skema', $item->nomor_skema)->first();
+        if ($asesiForCheck && $skemaForCheck && ! $asesiForCheck->hasRekomendasiLanjutForSkema($skemaForCheck->id)) {
+            return redirect()->back()->with('error', 'Asesi belum direkomendasikan dari asesmen mandiri; asesor tidak dapat menandatangani.');
+        }
 
         $data = $request->validate([
             'ttd_asesor_nama' => 'required|string|max:255',
