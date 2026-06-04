@@ -13,7 +13,7 @@
         .small { font-size: 14.5px; }
         .center { text-align: center; }
         .bold { font-weight: 700; }
-        .section-gap { margin-top: 8px; }
+        .section-gap { margin-top: 0px; }
         .signature-box {
             border: 1px solid #111;
             height: 52px;

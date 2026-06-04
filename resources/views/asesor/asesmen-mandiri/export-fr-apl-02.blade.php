@@ -13,7 +13,7 @@
         .small { font-size: 14.5px; }
         .center { text-align: center; }
         .bold { font-weight: 700; }
-        .section-gap { margin-top: 8px; }
+        .section-gap { margin-top: 0px; }
         .kriteria-line { margin-left: 8px; }
         .signature-box { border: none; height: 52px; display: flex; align-items: center; justify-content: center; margin-top: 4px; margin-bottom: 4px; overflow: hidden; }
         .signature-box img { max-height: 44px; max-width: 95%; }
@@ -110,10 +110,10 @@
         </table>
     @endforeach
 
-    <table class="section-gap" style="margin-top:6px; table-layout:fixed;">
+    <table class="section-gap" style="margin-top:0px; table-layout:fixed;">
         <tr>
             <td class="signature-left" rowspan="9">
-                <div style="font-weight:700; font-size:14.5px; margin-bottom:6px;">Rekomendasi Untuk Asesi:</div>
+                <div style="font-weight:700; font-size:14.5px; margin-bottom:0px;">Rekomendasi Untuk Asesi:</div>
                 <div style="font-size:14.5px; line-height:1.2;">
                     @if($pivot->rekomendasi === 'lanjut')
                         Asesmen dapat dilanjutkan

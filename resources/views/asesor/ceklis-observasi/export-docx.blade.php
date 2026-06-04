@@ -13,7 +13,7 @@
         .small { font-size: 14.5px; }
         .center { text-align: center; }
         .bold { font-weight: 700; }
-        .section-gap { margin-top: 8px; }
+        .section-gap { margin-top: 0px; }
         .unit-header-table td {
             vertical-align: middle;
             padding: 5px 7px;
@@ -143,26 +143,22 @@
             <td class="value-col">{{ $item->skema?->nomor_skema ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="left-header">TUK</td>
-            <td class="label-col">&nbsp;</td>
+            <td class="left-header" colspan="2">TUK</td>
             <td class="colon-col">:</td>
             <td class="value-col">{{ $item->tuk ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="left-header">Nama Asesor</td>
-            <td class="label-col">&nbsp;</td>
+            <td class="left-header" colspan="2">Nama Asesor</td>
             <td class="colon-col">:</td>
             <td class="value-col">{{ $item->ttd_asesor_nama ?? $item->asesor?->nama ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="left-header">Nama Asesi</td>
-            <td class="label-col">&nbsp;</td>
+            <td class="left-header" colspan="2">Nama Asesi</td>
             <td class="colon-col">:</td>
             <td class="value-col">{{ $item->asesi?->nama ?? $item->asesi_nik ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="left-header">Tanggal</td>
-            <td class="label-col">&nbsp;</td>
+            <td class="left-header" colspan="2">Tanggal</td>
             <td class="colon-col">:</td>
             <td class="value-col">{{ $tanggalDisplay }}</td>
         </tr>
@@ -221,8 +217,8 @@
                     <td class="center">{{ $idx + 1 }}</td>
                     <td>{{ $detail->elemen?->nama_elemen ?? '-' }}</td>
                     <td>{{ $detail->kriteria?->deskripsi_kriteria ?? '-' }}</td>
-                    <td class="center"><span class="check-box">{!! $isYa ? '&#10003;' : '&nbsp;' !!}</span></td>
-                    <td class="center"><span class="check-box">{!! $isTidak ? '&#10003;' : '&nbsp;' !!}</span></td>
+                    <td class="center">{!! $isYa ? '☑' : '☐' !!}</td>
+                    <td class="center">{!! $isTidak ? '☑' : '☐' !!}</span></td>
                     <td>{{ $detail->penilaian_lanjut ?: '-' }}</td>
                 </tr>
             @endforeach
@@ -261,11 +257,11 @@
     <table class="section-gap" style="table-layout:fixed; width:100%;">
         <tr>
             <td rowspan="7" style="width:37%; vertical-align:top; padding:0;">
-                <div style="padding:6px 8px 4px; font-weight:700;">Rekomendasi:</div>
+                <div style="padding:6px 8px 4px; font-weight:700; margin-left:8px;">Rekomendasi:</div>
                 <table style="width:100%; table-layout:fixed; border-collapse:collapse; border:none; margin:0;">
                     <tr>
                         <td style="width:18px; padding:4px 0 0 8px; vertical-align:top; border:none; text-align:center;">
-                            <span class="check-box">{!! $isKompeten ? '&#10003;' : '&nbsp;' !!}</span>
+                            <span class="center">{!! $isKompeten ? '☑' : '☐' !!}</span>
                         </td>
                         <td style="padding:2px 8px 8px 2px; vertical-align:top; border:none;">
                             Asesi telah memenuhi pencapaian seluruh kriteria unjuk kerja, direkomendasikan <strong>KOMPETEN</strong>
@@ -273,7 +269,7 @@
                     </tr>
                     <tr>
                         <td style="width:18px; padding:6px 0 0 8px; vertical-align:top; border:none; text-align:center;">
-                            <span class="check-box">{!! $isBelumKompeten ? '&#10003;' : '&nbsp;' !!}</span>
+                            <span class="center">{!! $isBelumKompeten ? '☑' : '☐' !!}</span>
                         </td>
                         <td style="padding:4px 8px 8px 2px; vertical-align:top; border:none;">
                             Asesi belum memenuhi pencapaian seluruh kriteria unjuk kerja, direkomendasikan <strong>BELUM KOMPETEN</strong>
