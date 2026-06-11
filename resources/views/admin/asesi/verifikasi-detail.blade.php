@@ -550,7 +550,7 @@
     .btn-approve {
         flex: 1;
         padding: 12px 24px;
-        background: #10b981;
+        background: #0073bd;
         color: #fff;
         border: none;
         border-radius: 8px;
@@ -565,7 +565,7 @@
     }
 
     .btn-approve:hover {
-        background: #059669;
+        background: #005a9e;
     }
 
     .btn-reject {
@@ -761,7 +761,7 @@
 
     .btn-confirm-approve {
         padding: 10px 20px;
-        background: #10b981;
+        background: #0073bd;
         color: #fff;
         border: none;
         border-radius: 8px;
