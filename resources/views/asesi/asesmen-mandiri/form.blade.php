@@ -315,8 +315,8 @@
 
     .bukti-input:focus {
         outline: none;
-        border-color: #16a34a;
-        box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+        border-color: #0073bd;
+        box-shadow: 0 0 0 2px rgba(135, 202, 243, 0.1);
     }
 
     .bukti-input::placeholder {
@@ -377,13 +377,13 @@
     }
 
     .btn-submit {
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        background: #0073bd;
         color: white;
     }
 
     .btn-submit:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.4);
     }
 
     /* Rekomendasi Banner */
@@ -1318,7 +1318,7 @@
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
             <button type="button" id="finalConfirmCancel" style="padding:9px 16px;background:#f1f5f9;color:#475569;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Batal</button>
-            <button type="button" id="finalConfirmOk" style="padding:9px 16px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Ya, Selesaikan</button>
+            <button type="button" id="finalConfirmOk" style="padding:9px 16px;background:#0073bd;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Ya, Selesaikan</button>
         </div>
     </div>
 </div>

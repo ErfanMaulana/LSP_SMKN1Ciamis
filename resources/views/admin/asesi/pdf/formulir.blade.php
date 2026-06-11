@@ -15,8 +15,8 @@
 
         body {
             font-family: Calibri, sans-serif;
-            font-size: 11pt;
-            line-height: 1.1;
+            font-size: 10pt;
+            line-height: 1.15;
             color: #000;
         }
 

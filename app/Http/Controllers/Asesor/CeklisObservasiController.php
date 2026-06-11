@@ -12,6 +12,7 @@ use App\Models\Skema;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class CeklisObservasiController extends Controller
@@ -118,6 +119,7 @@ class CeklisObservasiController extends Controller
                 }
 
                 $defaults['asesi_nik'] = $asesi->NIK;
+                $defaults['asesi_nama'] = $asesi->nama;
                 $defaults['ttd_asesi_nama'] = $asesi->nama;
             }
         }
@@ -325,7 +327,6 @@ class CeklisObservasiController extends Controller
             ->whereHas('skemas', function ($query) use ($skemaId) {
                 $query->where('skemas.id', $skemaId);
             })
-            ->with(['kelompok.jadwals.tuk'])
             ->first(['NIK', 'nama', 'kelompok_id']);
 
         if (!$asesi) {
@@ -335,20 +336,22 @@ class CeklisObservasiController extends Controller
         $tukName = null;
         $tanggal = null;
 
-        if ($asesi->relationLoaded('kelompok') && $asesi->kelompok) {
-            $jadwals = $asesi->kelompok->jadwals ?? collect();
-            if ($jadwals->isNotEmpty()) {
-                $filtered = $jadwals->where('skema_id', $skemaId);
-                $jadwalPick = ($filtered->isNotEmpty() ? $filtered : $jadwals)
-                    ->sortBy('tanggal_mulai')
-                    ->first();
+        $jadwalPick = \App\Models\JadwalUjikom::query()
+            ->with('tuk')
+            ->where('skema_id', $skemaId)
+            ->whereHas('peserta', function ($query) use ($validated) {
+                $query->where('NIK', $validated['asesi_nik']);
+            })
+            ->orderBy('tanggal_mulai')
+            ->first();
 
-                if ($jadwalPick) {
-                    $tukName = $jadwalPick->tuk?->nama_tuk;
-                    $tanggal = $jadwalPick->tanggal_mulai?->format('Y-m-d')
-                        ?? $jadwalPick->tanggal_selesai?->format('Y-m-d');
-                }
-            }
+        if ($jadwalPick) {
+            $tukName = $jadwalPick->tuk?->nama_tuk;
+            $tanggal = $jadwalPick->tanggal_mulai
+                ? Carbon::parse($jadwalPick->tanggal_mulai)->format('Y-m-d')
+                : ($jadwalPick->tanggal_selesai
+                    ? Carbon::parse($jadwalPick->tanggal_selesai)->format('Y-m-d')
+                    : null);
         }
 
         if (!$tukName) {

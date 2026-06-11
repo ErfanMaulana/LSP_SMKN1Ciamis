@@ -515,6 +515,14 @@
         color: #16a34a;
     }
 
+    .menu-entry-status-pending {
+        color: #d97706;
+    }
+
+    .menu-entry-status-pending i {
+        color: #d97706;
+    }
+
     .dropdown-menu .menu-disabled {
         display: flex;
         align-items: center;
@@ -1071,9 +1079,15 @@
                 @php
                     $asesi = $row->asesi;
                     $kelompokNama = $asesi?->kelompok?->nama_kelompok ?? '-';
-                    // Keep legacy quick-check for action availability
-                    $canProceed = ($row->status ?? '') !== 'belum_mulai';
                     $hasAsesmenMandiri = (bool) $row->has_asesmen_mandiri;
+                    $mandiriRecommended = in_array(($row->rekomendasi ?? ''), ['lanjut', 'tidak_lanjut'], true);
+                    $mandiriPending = $hasAsesmenMandiri && ! $mandiriRecommended;
+                    $mandiriCompleted = $mandiriRecommended;
+                    $persetujuanSignedByAsesor = $row->persetujuan_signed_by_asesor ?? false;
+                    $rekamanExists = $row->has_rekaman ?? false;
+                    $ceklisExists = $row->has_ceklis_observasi ?? false;
+                    $penilaianExists = $row->has_penilaian ?? false;
+                    $canProceed = ($row->status ?? '') !== 'belum_mulai';
                     $hasPenilaian = (bool) $row->has_penilaian;
                     $hasCeklisObservasi = (bool) $row->has_ceklis_observasi;
                     $hasRekaman = (bool) $row->has_rekaman;
@@ -1112,44 +1126,85 @@
                                     <i class="bi bi-eye"></i>
                                     <span class="menu-entry-label">Lihat Detail</span>
                                 </a>
-                                @if($canProceed && $hasAsesmenMandiri)
+
+                                @if($hasAsesmenMandiri)
                                     <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Review asesmen mandiri">
                                         <i class="bi bi-pencil-square"></i>
                                         <span class="menu-entry-label">Asesmen Mandiri</span>
-                                        <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                        <span class="menu-entry-status {{ $mandiriPending ? 'menu-entry-status-pending' : '' }}" aria-hidden="true">
+                                            <i class="{{ $mandiriPending ? 'bi bi-circle-fill' : 'bi bi-check-circle-fill' }}"></i>
+                                        </span>
                                     </a>
                                 @else
                                     <span class="menu-disabled">
                                         <i class="bi bi-pencil-square"></i>
                                         <span class="menu-entry-label">Asesmen Mandiri</span>
-                                        @if($hasAsesmenMandiri)
-                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                        @endif
                                     </span>
                                 @endif
-                                @if(!$canProceed)
+
+                                {{-- Persetujuan Asesmen --}}
+                                @if($mandiriRecommended)
+                                    <a href="{{ route('asesor.persetujuan.front.asesor.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Buka persetujuan asesmen">
+                                        <i class="bi bi-file-check"></i>
+                                        <span class="menu-entry-label">Persetujuan Asesmen</span>
+                                        <span class="menu-entry-status {{ $persetujuanSignedByAsesor ? '' : 'menu-entry-status-pending' }}" aria-hidden="true">
+                                            <i class="{{ $persetujuanSignedByAsesor ? 'bi bi-check-circle-fill' : 'bi bi-circle-fill' }}"></i>
+                                        </span>
+                                    </a>
+                                @else
                                     <span class="menu-disabled">
-                                        <i class="bi bi-clipboard-check"></i>
-                                        <span class="menu-entry-label">Penilaian</span>
-                                        @if($hasPenilaian)
-                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                        @endif
+                                        <i class="bi bi-file-check"></i>
+                                        <span class="menu-entry-label">Persetujuan Asesmen</span>
+                                        <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
                                     </span>
+                                @endif
+
+                                {{-- Ceklis Observasi --}}
+                                @if($persetujuanSignedByAsesor)
+                                    @if($hasCeklisObservasi && !empty($row->ceklis_observasi_id))
+                                        <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
+                                            <i class="bi bi-check2-square"></i>
+                                            <span class="menu-entry-label">Ceklis Observasi</span>
+                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('asesor.ceklis-observasi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Isi ceklis observasi">
+                                            <i class="bi bi-check2-square"></i>
+                                            <span class="menu-entry-label">Ceklis Observasi</span>
+                                        </a>
+                                    @endif
+                                @else
                                     <span class="menu-disabled">
                                         <i class="bi bi-check2-square"></i>
                                         <span class="menu-entry-label">Ceklis Observasi</span>
-                                        @if($hasCeklisObservasi)
-                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                        @endif
+                                        <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
                                     </span>
+                                @endif
+
+                                {{-- Rekaman Asesmen --}}
+                                @if($hasCeklisObservasi)
+                                    @if($rekamanExists)
+                                        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index', ['asesi_nik' => $row->asesi_nik]) }}" title="Lihat rekaman asesmen">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                            <span class="menu-entry-label">Rekaman Asesmen</span>
+                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Buat rekaman asesmen">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                            <span class="menu-entry-label">Rekaman Asesmen</span>
+                                        </a>
+                                    @endif
+                                @else
                                     <span class="menu-disabled">
                                         <i class="bi bi-file-earmark-text"></i>
-                                        <span class="menu-entry-label">Rekaman Asesi</span>
-                                        @if($hasRekaman)
-                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                        @endif
+                                        <span class="menu-entry-label">Rekaman Asesmen</span>
+                                        <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
                                     </span>
-                                @else
+                                @endif
+
+                                {{-- Penilaian --}}
+                                @if($rekamanExists)
                                     @if($hasPenilaian)
                                         <a href="{{ route('asesor.entry-penilaian.form', $row->asesi_nik) }}" title="Edit penilaian">
                                             <i class="bi bi-clipboard-check"></i>
@@ -1162,30 +1217,12 @@
                                             <span class="menu-entry-label">Penilaian</span>
                                         </a>
                                     @endif
-                                    @if($hasCeklisObservasi)
-                                        <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
-                                            <i class="bi bi-check2-square"></i>
-                                            <span class="menu-entry-label">Ceklis Observasi</span>
-                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                        </a>
-                                    @else
-                                        <a href="{{ route('asesor.ceklis-observasi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Isi ceklis observasi">
-                                            <i class="bi bi-check2-square"></i>
-                                            <span class="menu-entry-label">Ceklis Observasi</span>
-                                        </a>
-                                    @endif
-                                    @if($hasRekaman)
-                                        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index', ['asesi_nik' => $row->asesi_nik]) }}" title="Lihat rekaman asesmen">
-                                            <i class="bi bi-file-earmark-text"></i>
-                                            <span class="menu-entry-label">Rekaman Asesi</span>
-                                            <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                        </a>
-                                    @else
-                                        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Buat rekaman asesmen">
-                                            <i class="bi bi-file-earmark-text"></i>
-                                            <span class="menu-entry-label">Rekaman Asesi</span>
-                                        </a>
-                                    @endif
+                                @else
+                                    <span class="menu-disabled">
+                                        <i class="bi bi-clipboard-check"></i>
+                                        <span class="menu-entry-label">Penilaian</span>
+                                        <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
+                                    </span>
                                 @endif
                             </div>
                         </div>
@@ -1211,9 +1248,11 @@
         @php
             $asesi = $row->asesi;
             $kelompokNama = $asesi?->kelompok?->nama_kelompok ?? '-';
-            // keep legacy quick-check for action availability
-            $canProceed = ($row->status ?? '') !== 'belum_mulai';
-            $hasAsesmenMandiri = (bool) $row->has_asesmen_mandiri;
+                $hasAsesmenMandiri = (bool) $row->has_asesmen_mandiri;
+                $mandiriRecommended = in_array(($row->rekomendasi ?? ''), ['lanjut', 'tidak_lanjut'], true);
+                $mandiriPending = $hasAsesmenMandiri && ! $mandiriRecommended;
+                $mandiriCompleted = $mandiriRecommended;
+                $canProceed = ($row->status ?? '') !== 'belum_mulai';
             $hasPenilaian = (bool) $row->has_penilaian;
             $hasCeklisObservasi = (bool) $row->has_ceklis_observasi;
             $hasRekaman = (bool) $row->has_rekaman;
@@ -1286,42 +1325,53 @@
                             <i class="bi bi-eye"></i>
                             <span class="menu-entry-label">Lihat Detail</span>
                         </a>
-                        @if($canProceed && $hasAsesmenMandiri)
+                                @if($canProceed && ($hasAsesmenMandiri || $mandiriCompleted))
                             <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Review asesmen mandiri">
                                 <i class="bi bi-pencil-square"></i>
                                 <span class="menu-entry-label">Asesmen Mandiri</span>
-                                <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                        <span class="menu-entry-status {{ $mandiriCompleted ? '' : 'menu-entry-status-pending' }}" aria-hidden="true">
+                                            <i class="{{ $mandiriCompleted ? 'bi bi-check-circle-fill' : 'bi bi-circle-fill' }}"></i>
+                                </span>
                             </a>
                         @else
                             <span class="menu-disabled">
                                 <i class="bi bi-pencil-square"></i>
                                 <span class="menu-entry-label">Asesmen Mandiri</span>
-                                @if($hasAsesmenMandiri)
-                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                        @if($hasAsesmenMandiri || $mandiriCompleted)
+                                            <span class="menu-entry-status {{ $mandiriCompleted ? '' : 'menu-entry-status-pending' }}" aria-hidden="true">
+                                                <i class="{{ $mandiriCompleted ? 'bi bi-check-circle-fill' : 'bi bi-circle-fill' }}"></i>
+                                    </span>
                                 @endif
                             </span>
                         @endif
-                        @if(!$canProceed)
+                        @if($mandiriPending)
+                            <span class="menu-disabled">
+                                <i class="bi bi-file-check"></i>
+                                <span class="menu-entry-label">Persetujuan Asesmen</span>
+                                <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
+                            </span>
+                        @else
+                            <a href="{{ route('asesor.persetujuan.front.asesor.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Buka persetujuan asesmen">
+                                <i class="bi bi-file-check"></i>
+                                <span class="menu-entry-label">Persetujuan Asesmen</span>
+                                <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                            </a>
+                        @endif
+                        @if($mandiriPending)
                             <span class="menu-disabled">
                                 <i class="bi bi-clipboard-check"></i>
                                 <span class="menu-entry-label">Penilaian</span>
-                                @if($hasPenilaian)
-                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                @endif
+                                <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
                             </span>
                             <span class="menu-disabled">
                                 <i class="bi bi-check2-square"></i>
                                 <span class="menu-entry-label">Ceklis Observasi</span>
-                                @if($hasCeklisObservasi)
-                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                @endif
+                                <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
                             </span>
                             <span class="menu-disabled">
                                 <i class="bi bi-file-earmark-text"></i>
-                                <span class="menu-entry-label">Rekaman Asesi</span>
-                                @if($hasRekaman)
-                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                @endif
+                                <span class="menu-entry-label">Rekaman Asesmen</span>
+                                <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
                             </span>
                         @else
                             @if($hasPenilaian)
@@ -1336,28 +1386,36 @@
                                     <span class="menu-entry-label">Penilaian</span>
                                 </a>
                             @endif
-                            @if($hasCeklisObservasi)
-                                <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
-                                    <i class="bi bi-check2-square"></i>
-                                    <span class="menu-entry-label">Ceklis Observasi</span>
-                                    <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                                </a>
+                            @if($persetujuanSignedByAsesor)
+                                @if($hasCeklisObservasi && !empty($row->ceklis_observasi_id))
+                                    <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
+                                        <i class="bi bi-check2-square"></i>
+                                        <span class="menu-entry-label">Ceklis Observasi</span>
+                                        <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
+                                    </a>
+                                @else
+                                    <a href="{{ route('asesor.ceklis-observasi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Isi ceklis observasi">
+                                        <i class="bi bi-check2-square"></i>
+                                        <span class="menu-entry-label">Ceklis Observasi</span>
+                                    </a>
+                                @endif
                             @else
-                                <a href="{{ route('asesor.ceklis-observasi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Isi ceklis observasi">
+                                <span class="menu-disabled">
                                     <i class="bi bi-check2-square"></i>
                                     <span class="menu-entry-label">Ceklis Observasi</span>
-                                </a>
+                                    <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
+                                </span>
                             @endif
-                            @if($hasRekaman)
+                            @if($hasCeklisObservasi)
                                 <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index', ['asesi_nik' => $row->asesi_nik]) }}" title="Lihat rekaman asesmen">
                                     <i class="bi bi-file-earmark-text"></i>
-                                    <span class="menu-entry-label">Rekaman Asesi</span>
+                                    <span class="menu-entry-label">Rekaman Asesmen</span>
                                     <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
                                 </a>
                             @else
                                 <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $row->asesi_nik, 'skema_id' => $row->skema_id]) }}" title="Buat rekaman asesmen">
                                     <i class="bi bi-file-earmark-text"></i>
-                                    <span class="menu-entry-label">Rekaman Asesi</span>
+                                    <span class="menu-entry-label">Rekaman Asesmen</span>
                                 </a>
                             @endif
                         @endif
