@@ -8,13 +8,20 @@
     .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; gap:12px; flex-wrap:wrap; }
     .page-header h2 { margin:0; font-size:22px; font-weight:700; color:#0f172a; }
 
-    .toolbar { background:#fff; border-radius:12px; box-shadow:0 1px 3px rgba(0,0,0,.08); padding:16px; margin-bottom:16px; }
-    .search-row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-    .search-box { flex:1; min-width:280px; position:relative; }
-    .search-box i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:#94a3b8; }
-    .search-box input { width:100%; border:1px solid #d1d5db; border-radius:8px; padding:10px 12px 10px 36px; font-size:13px; }
+    .toolbar { margin-bottom:16px; }
+    .search-row { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:center; }
+    .search-box { flex:1; min-width:300px; position:relative; }
+    .search-box i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:16px; }
+    .search-box input { width:100%; padding:10px 14px 10px 42px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px; font-family:inherit; transition:all 0.2s; }
+    .search-box input:focus { outline:none; border-color:#0073bd; box-shadow:0 0 0 3px rgba(0,115,189,0.1); }
 
-    .btn { border:none; border-radius:8px; padding:10px 14px; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+    .filter-group { display:flex; gap:12px; flex-wrap:wrap; }
+    .btn-filter-search { padding:9px 14px; background:#0073bd; color:white; border:none; border-radius:8px; font-size:14px; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:6px; transition:background 0.2s; }
+    .btn-filter-search:hover { background:#005f99; }
+    .btn-filter-reset { padding:9px 12px; background:#fee2e2; color:#dc2626; border:none; border-radius:8px; font-size:14px; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:6px; text-decoration:none; transition:background 0.2s; }
+    .btn-filter-reset:hover { background:#fecaca; }
+
+    .btn { border:none; border-radius:8px; padding:10px 14px; font-size:14px; font-family:inherit; text-decoration:none; display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
     .btn-primary { background:#0073bd; color:#fff; }
     .btn-secondary { background:#64748b; color:#fff; }
     .btn-danger { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; }
@@ -53,10 +60,12 @@
     <form method="GET" action="{{ route('admin.rekaman-asesmen-kompetensi.index') }}" class="search-row">
         <div class="search-box">
             <i class="bi bi-search"></i>
-            <input type="text" name="search" value="{{ $search }}" placeholder="Cari skema, asesor, atau asesi...">
+            <input type="text" name="search" value="{{ $search }}" placeholder="Cari skema, asesor, atau asesi..." autocomplete="off">
         </div>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
-        <a href="{{ route('admin.rekaman-asesmen-kompetensi.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+        <div class="filter-group">
+            <button type="submit" class="btn-filter-search"><i class="bi bi-funnel"></i> Filter</button>
+            <a href="{{ route('admin.rekaman-asesmen-kompetensi.index') }}" class="btn-filter-reset"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+        </div>
     </form>
 </div>
 
