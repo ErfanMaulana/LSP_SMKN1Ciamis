@@ -32,6 +32,9 @@
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
         <a href="{{ route('asesor.rekaman-asesmen-kompetensi.edit', $item->id) }}" class="btn btn-primary"><i class="bi bi-pencil-square"></i> Edit</a>
+        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.export', $item->id) }}" class="btn" style="background:#15803d;color:#fff;">
+            <i class="bi bi-file-earmark-word"></i> Ekspor Word
+        </a>
     </div>
 </div>
 

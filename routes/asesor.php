@@ -48,6 +48,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
             Route::get('/create', [RekamanAsesmenKompetensiController::class, 'create'])->name('create');
             Route::post('/', [RekamanAsesmenKompetensiController::class, 'store'])->name('store');
             Route::get('/{id}', [RekamanAsesmenKompetensiController::class, 'show'])->name('show');
+            Route::get('/{id}/export', [RekamanAsesmenKompetensiController::class, 'export'])->name('export');
             Route::get('/{id}/edit', [RekamanAsesmenKompetensiController::class, 'edit'])->name('edit');
             Route::put('/{id}', [RekamanAsesmenKompetensiController::class, 'update'])->name('update');
             Route::delete('/{id}', [RekamanAsesmenKompetensiController::class, 'destroy'])->name('destroy');

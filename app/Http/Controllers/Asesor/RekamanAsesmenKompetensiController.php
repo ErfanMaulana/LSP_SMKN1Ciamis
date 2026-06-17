@@ -66,11 +66,16 @@ class RekamanAsesmenKompetensiController extends Controller
         $account = Auth::guard('account')->user();
         $asesor = $this->getAsesor();
         $search = trim((string) $request->get('search'));
+        $rekomendasi = trim((string) $request->get('rekomendasi'));
 
         if (!$asesor) {
             $items = RekamanAsesmenKompetensi::query()->whereRaw('1 = 0')->paginate(10);
 
-            return view('asesor.rekaman-asesmen-kompetensi.index', compact('account', 'asesor', 'items', 'search'));
+            if ($request->ajax()) {
+                return view('asesor.rekaman-asesmen-kompetensi.partials.table-rows', compact('items'))->render();
+            }
+
+            return view('asesor.rekaman-asesmen-kompetensi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi'));
         }
 
         $items = RekamanAsesmenKompetensi::query()
@@ -92,11 +97,18 @@ class RekamanAsesmenKompetensiController extends Controller
                         });
                 });
             })
+            ->when($rekomendasi !== '', function ($query) use ($rekomendasi) {
+                $query->where('rekomendasi', $rekomendasi);
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('asesor.rekaman-asesmen-kompetensi.index', compact('account', 'asesor', 'items', 'search'));
+        if ($request->ajax()) {
+            return view('asesor.rekaman-asesmen-kompetensi.partials.table-rows', compact('items'))->render();
+        }
+
+        return view('asesor.rekaman-asesmen-kompetensi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi'));
     }
 
     public function create(Request $request)
@@ -263,6 +275,48 @@ class RekamanAsesmenKompetensiController extends Controller
         ])->values();
 
         return view('asesor.rekaman-asesmen-kompetensi.show', compact('account', 'asesor', 'item', 'details'));
+    }
+
+    public function export($id)
+    {
+        $asesor = $this->getAsesor();
+        abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        $item = RekamanAsesmenKompetensi::query()
+            ->with([
+                'skema:id,nama_skema,nomor_skema,jenis_skema',
+                'asesi:NIK,nama',
+                'details.unit:id,kode_unit,judul_unit',
+            ])
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->findOrFail($id);
+
+        $ceklis = CeklisObservasiAktivitasPraktik::query()
+            ->where('skema_id', $item->skema_id)
+            ->where('asesi_nik', $item->asesi_nik)
+            ->first();
+
+        $logoPath = public_path('images/lsp.png');
+
+        $details = $item->details->sortBy([
+            ['unit.id', 'asc'],
+        ])->values();
+
+        $html = view('asesor.rekaman-asesmen-kompetensi.export-docx', [
+            'item' => $item,
+            'ceklis' => $ceklis,
+            'details' => $details,
+            'logoPath' => $logoPath,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($item->skema?->nomor_skema ?? $item->skema_id));
+        $fileName = 'FR.AK.02-' . ($item->asesi_nik ?? 'asesi') . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 
     public function edit($id)
