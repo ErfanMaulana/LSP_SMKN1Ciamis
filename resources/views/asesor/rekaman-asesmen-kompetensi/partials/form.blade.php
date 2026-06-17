@@ -21,6 +21,23 @@
     $lockSkema = !empty($selectedAsesiNik) && !empty($selectedSkemaId);
     $lockTuk = !empty($selectedAsesiNik) && !empty($selectedSkemaId);
 
+    $selectedTipeTuk = '';
+    if (!empty($selectedTuk)) {
+        $tukRecord = \App\Models\Tuk::where('nama_tuk', $selectedTuk)->first();
+        if ($tukRecord) {
+            $selectedTipeTuk = $tukRecord->tipe_tuk;
+        }
+    }
+    if (empty($selectedTipeTuk) && !empty($defaults['tipe_tuk'])) {
+        $selectedTipeTuk = $defaults['tipe_tuk'];
+    }
+    $tipeTukLabels = [
+        'sewaktu'       => 'Sewaktu',
+        'tempat_kerja'  => 'Tempat Kerja',
+        'mandiri'       => 'Mandiri',
+    ];
+    $selectedTipeTukLabel = $tipeTukLabels[$selectedTipeTuk] ?? $selectedTipeTuk;
+
     $initialDetailMap = old('detail');
     if (!$initialDetailMap && $record) {
         $initialDetailMap = $record->details->mapWithKeys(function ($detail) {
@@ -223,13 +240,11 @@
         </div>
 
         <div class="field">
-            <label>TUK</label>
-            <select id="tukSelect" class="{{ $lockTuk ? 'locked' : '' }}" {{ $lockTuk ? 'disabled' : '' }}>
-                <option value="">-- Pilih TUK --</option>
-                <option value="Sewaktu" {{ $selectedTuk === 'Sewaktu' ? 'selected' : '' }}>Sewaktu</option>
-                <option value="Tempat Kerja" {{ $selectedTuk === 'Tempat Kerja' ? 'selected' : '' }}>Tempat Kerja</option>
-                <option value="Mandiri" {{ $selectedTuk === 'Mandiri' ? 'selected' : '' }}>Mandiri</option>
-            </select>
+            <label>Tipe TUK</label>
+            <input id="tipeTukDisplay" type="text"
+                value="{{ $selectedTipeTukLabel }}"
+                placeholder="Otomatis terisi dari jadwal" readonly
+                style="background:#f8fafc;color:#64748b;">
             <input type="hidden" name="tuk" id="tukInput" value="{{ $selectedTuk }}">
             @error('tuk')<div class="error-text">{{ $message }}</div>@enderror
         </div>
@@ -329,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const unitRowsContainer = document.getElementById('unitRowsContainer');
     const kategoriSkemaInput = document.getElementById('kategoriSkemaInput');
     const asesiInfoGrid = document.getElementById('asesiInfoGrid');
-    const tukSelect = document.getElementById('tukSelect');
+    const tipeTukDisplay = document.getElementById('tipeTukDisplay');
     const tukInput = document.getElementById('tukInput');
 
     const participantsUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.skema-participants') }}';
@@ -398,12 +413,19 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    const syncTukValue = (value) => {
+    const syncTukValue = (value, tipeTuk = '') => {
         if (tukInput) {
             tukInput.value = value || '';
         }
-        if (tukSelect && tukSelect.value !== (value || '')) {
-            tukSelect.value = value || '';
+        if (tipeTukDisplay) {
+            const tipeTukMap = {
+                'sewaktu': 'Sewaktu',
+                'tempat_kerja': 'Tempat Kerja',
+                'mandiri': 'Mandiri',
+            };
+            const rawTipe = tipeTuk || '';
+            tipeTukDisplay.value = rawTipe ? (tipeTukMap[rawTipe] || rawTipe) : '';
+            tipeTukDisplay.placeholder = rawTipe ? '' : 'Otomatis terisi dari jadwal';
         }
     };
 
@@ -436,24 +458,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    const normalizeTukValue = (value) => {
-        const text = String(value || '').toLowerCase();
-
-        if (text.includes('sewaktu')) {
-            return 'Sewaktu';
-        }
-
-        if (text.includes('tempat kerja')) {
-            return 'Tempat Kerja';
-        }
-
-        if (text.includes('mandiri')) {
-            return 'Mandiri';
-        }
-
-        return '';
-    };
-
     const lockDependentFields = () => {
         const mulaiInput = document.querySelector('input[name="tanggal_mulai"]');
         const selesaiInput = document.querySelector('input[name="tanggal_selesai"]');
@@ -466,12 +470,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         renderAsesiInfo(data.asesi);
 
-        if (tukSelect) {
-            const normalizedTuk = normalizeTukValue(data.asesi.tuk || data.asesi.tuk_pelaksanaan);
-            if (normalizedTuk) {
-                syncTukValue(normalizedTuk);
-            }
-        }
+        syncTukValue(data.asesi.tuk || data.asesi.tuk_pelaksanaan || '', data.asesi.tipe_tuk || '');
 
         if (data.asesi.jadwal) {
             const mulaiInput = document.querySelector('input[name="tanggal_mulai"]');
@@ -487,7 +486,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         setFieldLocked(skemaSelect, true);
-        setFieldLocked(tukSelect, true);
         lockDependentFields();
     };
 
@@ -532,7 +530,6 @@ document.addEventListener('DOMContentLoaded', function () {
             renderAsesiInfo(null);
             unitRowsContainer.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;">Pilih skema untuk memuat unit kompetensi.</td></tr>';
             setFieldLocked(skemaSelect, false);
-            setFieldLocked(tukSelect, false);
             syncTukValue('');
             return;
         }
@@ -617,12 +614,6 @@ document.addEventListener('DOMContentLoaded', function () {
             loadBySkema();
         });
 
-        if (tukSelect) {
-            tukSelect.addEventListener('change', () => {
-                syncTukValue(tukSelect.value);
-            });
-        }
-
         asesiSelect.addEventListener('change', async () => {
             syncAsesiInfo(asesiSelect.value);
 
@@ -630,10 +621,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!asesiNik) {
                 // clear dependent fields
                 renderAsesiInfo(null);
-                if (tukSelect) {
-                    setFieldLocked(skemaSelect, false);
-                    setFieldLocked(tukSelect, false);
-                }
+                setFieldLocked(skemaSelect, false);
                 syncTukValue('');
                 const mulaiInput = document.querySelector('input[name="tanggal_mulai"]');
                 const selesaiInput = document.querySelector('input[name="tanggal_selesai"]');

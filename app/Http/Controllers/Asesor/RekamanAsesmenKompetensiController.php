@@ -117,6 +117,7 @@ class RekamanAsesmenKompetensiController extends Controller
             'judul_form' => 'REKAMAN ASESMEN KOMPETENSI',
             'kategori_skema' => '',
             'tuk' => '',
+            'tipe_tuk' => '',
             'asesi_nik' => null,
             'skema_id' => null,
         ];
@@ -150,9 +151,49 @@ class RekamanAsesmenKompetensiController extends Controller
 
         // Enforce that a Ceklis Observasi exists for this asesi + skema before allowing Rekaman creation
         if ($defaults['skema_id'] && $defaults['asesi_nik']) {
-            $jadwal = $this->resolveJadwalForAsesiSkema($defaults['asesi_nik'], (int) $defaults['skema_id']);
-            if ($jadwal?->tuk) {
-                $defaults['tuk'] = $jadwal->tuk->nama_tuk ?? '';
+            $asesiModel = Asesi::where('NIK', $defaults['asesi_nik'])->first(['NIK', 'nama', 'kelompok_id']);
+            $jadwalPick = null;
+            if ($asesiModel) {
+                $jadwalPick = JadwalUjikom::query()
+                    ->with('tuk')
+                    ->where('skema_id', (int) $defaults['skema_id'])
+                    ->whereHas('peserta', function ($query) use ($asesiModel) {
+                        $query->where('NIK', $asesiModel->NIK);
+                    })
+                    ->orderBy('tanggal_mulai')
+                    ->first();
+
+                if (!$jadwalPick && $asesiModel->kelompok_id) {
+                    $jadwalPick = JadwalUjikom::query()
+                        ->with('tuk')
+                        ->where('skema_id', (int) $defaults['skema_id'])
+                        ->whereHas('kelompoks', function ($query) use ($asesiModel) {
+                            $query->where('kelompok.id', $asesiModel->kelompok_id);
+                        })
+                        ->orderBy('tanggal_mulai')
+                        ->first();
+                }
+            }
+
+            if ($jadwalPick?->tuk) {
+                $defaults['tuk'] = $jadwalPick->tuk->nama_tuk ?? '';
+                $defaults['tipe_tuk'] = $jadwalPick->tuk->tipe_tuk ?? '';
+            } else {
+                $skema = Skema::find((int) $defaults['skema_id']);
+                if ($skema && $asesiModel) {
+                    $persetujuan = PersetujuanAsesmen::query()
+                        ->where('nomor_skema', $skema->nomor_skema)
+                        ->where('nama_asesi', $asesiModel->nama)
+                        ->latest('id')
+                        ->first(['tuk']);
+                    if ($persetujuan) {
+                        $defaults['tuk'] = $persetujuan->tuk;
+                        $tukRecord = \App\Models\Tuk::where('nama_tuk', $persetujuan->tuk)->first();
+                        if ($tukRecord) {
+                            $defaults['tipe_tuk'] = $tukRecord->tipe_tuk;
+                        }
+                    }
+                }
             }
 
             $hasCeklis = CeklisObservasiAktivitasPraktik::query()
@@ -361,23 +402,57 @@ class RekamanAsesmenKompetensiController extends Controller
             $skemaIds = [];
         }
 
-        $jadwal = null;
-        if ($asesi->relationLoaded('kelompok') && $asesi->kelompok) {
-            $jadwals = $asesi->kelompok->jadwals ?? null;
-            if ($jadwals && $jadwals->isNotEmpty()) {
-                $first = $jadwals->sortBy('tanggal_mulai')->first();
-                $jadwal = [
-                    'tanggal_mulai' => $first->tanggal_mulai?->format('Y-m-d') ?? null,
-                    'tanggal_selesai' => $first->tanggal_selesai?->format('Y-m-d') ?? null,
+        $tukName = null;
+        $tipeTuk = null;
+        $jadwalData = null;
+
+        if ($selectedSkemaId > 0) {
+            $jadwalPick = JadwalUjikom::query()
+                ->with('tuk')
+                ->where('skema_id', $selectedSkemaId)
+                ->whereHas('peserta', function ($query) use ($asesi) {
+                    $query->where('NIK', $asesi->NIK);
+                })
+                ->orderBy('tanggal_mulai')
+                ->first();
+
+            if (!$jadwalPick && $asesi->kelompok_id) {
+                $jadwalPick = JadwalUjikom::query()
+                    ->with('tuk')
+                    ->where('skema_id', $selectedSkemaId)
+                    ->whereHas('kelompoks', function ($query) use ($asesi) {
+                        $query->where('kelompok.id', $asesi->kelompok_id);
+                    })
+                    ->orderBy('tanggal_mulai')
+                    ->first();
+            }
+
+            if ($jadwalPick) {
+                $tukName = $jadwalPick->tuk?->nama_tuk;
+                $tipeTuk = $jadwalPick->tuk?->tipe_tuk;
+                $jadwalData = [
+                    'tanggal_mulai' => $jadwalPick->tanggal_mulai?->format('Y-m-d') ?? null,
+                    'tanggal_selesai' => $jadwalPick->tanggal_selesai?->format('Y-m-d') ?? null,
                 ];
             }
         }
 
-        $tuk = null;
-        $skema = $selectedSkemaId > 0 ? Skema::find($selectedSkemaId) : null;
-        if ($skema) {
-            $jadwal = $this->resolveJadwalForAsesiSkema($asesi->NIK, $selectedSkemaId);
-            $tuk = $jadwal?->tuk?->nama_tuk;
+        if (!$tukName && $selectedSkemaId > 0) {
+            $skema = Skema::find($selectedSkemaId);
+            if ($skema) {
+                $persetujuan = PersetujuanAsesmen::query()
+                    ->where('nomor_skema', $skema->nomor_skema)
+                    ->where('nama_asesi', $asesi->nama)
+                    ->latest('id')
+                    ->first(['tuk']);
+                $tukName = $persetujuan?->tuk;
+                if ($tukName) {
+                    $tukRecord = \App\Models\Tuk::where('nama_tuk', $tukName)->first();
+                    if ($tukRecord) {
+                        $tipeTuk = $tukRecord->tipe_tuk;
+                    }
+                }
+            }
         }
 
         return response()->json([
@@ -388,9 +463,10 @@ class RekamanAsesmenKompetensiController extends Controller
                 'telepon_hp' => $asesi->telepon_hp,
                 'jurusan' => $asesi->jurusan?->kode_jurusan ? trim($asesi->jurusan->kode_jurusan . ' - ' . $asesi->jurusan->nama_jurusan) : ($asesi->jurusan?->nama_jurusan ?? '-'),
                 'skema_ids' => $skemaIds,
-                'jadwal' => $jadwal,
-                'tuk' => $tuk,
-                'tuk_pelaksanaan' => $tuk,
+                'jadwal' => $jadwalData,
+                'tuk' => $tukName,
+                'tuk_pelaksanaan' => $tukName,
+                'tipe_tuk' => $tipeTuk,
             ],
         ]);
     }

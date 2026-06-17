@@ -257,11 +257,6 @@
 </style>
 
 <div class="detail-card">
-    @if (session('success'))
-        <div class="alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
 
     <h2 style="margin: 0 0 20px; font-size: 22px; font-weight: 700; color: #0f172a;">
         {{ $ceklis->judul_form }}
@@ -356,30 +351,39 @@
             <h3><i class="bi bi-pen"></i> Tanda Tangan Asesi</h3>
             <p class="signature-subtitle">Dengan menandatangani, asesi menyatakan telah menerima dan menyetujui hasil penilaian di atas.</p>
 
-            <div class="signature-canvas-wrapper" id="signatureWrapper">
-                <canvas class="signature-canvas" id="signatureCanvas"></canvas>
-                <div class="signature-placeholder">
-                    <i class="bi bi-pen"></i>
-                    <span>Tanda tangan di sini</span>
-                </div>
+            <div class="signature-canvas-wrapper {{ $ceklis->ttd_asesi_file ? 'has-signature readonly' : '' }}" id="signatureWrapper" {!! $ceklis->ttd_asesi_file ? 'style="border-style: solid; border-color: #cbd5e1; background: #fff;"' : '' !!}>
+                @if($ceklis->ttd_asesi_file)
+                    <img src="{{ asset('storage/' . ltrim($ceklis->ttd_asesi_file, '/')) }}" class="signature-saved-img" id="savedSignatureImgAsesi" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; pointer-events:none;">
+                @else
+                    <canvas class="signature-canvas" id="signatureCanvas"></canvas>
+                    <div class="signature-placeholder">
+                        <i class="bi bi-pen"></i>
+                        <span>Tanda tangan di sini</span>
+                    </div>
+                @endif
             </div>
 
             <input type="hidden" name="ttd_asesi_nama" id="ttdAsesiNamaInput" value="{{ $ceklis->ttd_asesi_nama ?? '' }}">
             <input type="hidden" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ $ceklis->ttd_asesi_tanggal ? $ceklis->ttd_asesi_tanggal->format('Y-m-d') : '' }}">
+            <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput" value="{{ $ceklis->ttd_asesi_file ?? '' }}">
 
             <div class="signature-actions">
                 <div class="signature-date">
                     <i class="bi bi-calendar3"></i>
-                    Tanggal: <strong id="signatureDate">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
+                    Tanggal: <strong id="signatureDate">{{ $ceklis->ttd_asesi_tanggal ? $ceklis->ttd_asesi_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
                 </div>
+                @if(!$ceklis->ttd_asesi_file)
                 <button type="button" class="btn-clear-signature" id="clearSignature">
                     <i class="bi bi-eraser"></i> Hapus Tanda Tangan
                 </button>
+                @endif
             </div>
         </div>
 
         <div class="form-actions">
+            @if(!$ceklis->ttd_asesi_file)
             <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Tandatangani & Simpan</button>
+            @endif
             <a href="{{ route('asesi.dashboard') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Kembali</a>
         </div>
     </form>
@@ -394,112 +398,132 @@ document.addEventListener('DOMContentLoaded', function () {
     const ttdAsesiTanggalInput = document.getElementById('ttdAsesiTanggalInput');
     const signForm = document.getElementById('signForm');
 
-    const ctx = canvas.getContext('2d');
-    let isDrawing = false;
-    let hasSignature = false;
-    let lastX = 0;
-    let lastY = 0;
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let hasSignature = false;
+        let lastX = 0;
+        let lastY = 0;
 
-    const updateCanvasSize = () => {
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * ratio;
-        canvas.height = rect.height * ratio;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.scale(ratio, ratio);
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.strokeStyle = '#0f172a';
-        ctx.lineWidth = 2;
-    };
-
-    const getPos = (event) => {
-        const rect = canvas.getBoundingClientRect();
-        const point = event.touches && event.touches[0] ? event.touches[0] : event;
-        return {
-            x: point.clientX - rect.left,
-            y: point.clientY - rect.top,
+        const updateCanvasSize = () => {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * ratio;
+            canvas.height = rect.height * ratio;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(ratio, ratio);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#0f172a';
+            ctx.lineWidth = 2;
         };
-    };
 
-    const fillSignatureMeta = () => {
-        if (!ttdAsesiNamaInput.value) {
-            ttdAsesiNamaInput.value = '{{ $account->nama }}';
+        const getPos = (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const point = event.touches && event.touches[0] ? event.touches[0] : event;
+            return {
+                x: point.clientX - rect.left,
+                y: point.clientY - rect.top,
+            };
+        };
+
+        const fillSignatureMeta = () => {
+            if (!ttdAsesiNamaInput.value) {
+                ttdAsesiNamaInput.value = '{{ $account->nama }}';
+            }
+
+            if (!ttdAsesiTanggalInput.value) {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                ttdAsesiTanggalInput.value = `${yyyy}-${mm}-${dd}`;
+            }
+        };
+
+        const startDrawing = (event) => {
+            event.preventDefault();
+            isDrawing = true;
+            const pos = getPos(event);
+            lastX = pos.x;
+            lastY = pos.y;
+            wrapper.classList.add('active');
+        };
+
+        const draw = (event) => {
+            event.preventDefault();
+            if (!isDrawing) return;
+
+            const pos = getPos(event);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            lastX = pos.x;
+            lastY = pos.y;
+
+            if (!hasSignature) {
+                hasSignature = true;
+                wrapper.classList.add('has-signature');
+            }
+
+            fillSignatureMeta();
+        };
+
+        const stopDrawing = () => {
+            isDrawing = false;
+            wrapper.classList.remove('active');
+        };
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                hasSignature = false;
+                ttdAsesiNamaInput.value = '';
+                ttdAsesiTanggalInput.value = '';
+                wrapper.classList.remove('has-signature');
+                const fileInput = document.getElementById('ttdAsesiFileInput');
+                if (fileInput) {
+                    fileInput.value = '';
+                }
+                const savedImg = document.getElementById('savedSignatureImgAsesi');
+                if (savedImg) {
+                    savedImg.remove();
+                }
+            });
         }
 
-        if (!ttdAsesiTanggalInput.value) {
-            const now = new Date();
-            const yyyy = now.getFullYear();
-            const mm = String(now.getMonth() + 1).padStart(2, '0');
-            const dd = String(now.getDate()).padStart(2, '0');
-            ttdAsesiTanggalInput.value = `${yyyy}-${mm}-${dd}`;
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseleave', stopDrawing);
+
+        canvas.addEventListener('touchstart', startDrawing, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        if (signForm) {
+            signForm.addEventListener('submit', function (e) {
+                if (!hasSignature) {
+                    e.preventDefault();
+                    alert('Silakan tanda tangani terlebih dahulu');
+                    return;
+                }
+
+                const fileInput = document.getElementById('ttdAsesiFileInput');
+                if (fileInput && fileInput.value === '' && canvas) {
+                    fileInput.value = canvas.toDataURL('image/png');
+                }
+            });
         }
-    };
 
-    const startDrawing = (event) => {
-        event.preventDefault();
-        isDrawing = true;
-        const pos = getPos(event);
-        lastX = pos.x;
-        lastY = pos.y;
-        wrapper.classList.add('active');
-    };
+        window.addEventListener('resize', updateCanvasSize);
+        updateCanvasSize();
 
-    const draw = (event) => {
-        event.preventDefault();
-        if (!isDrawing) return;
-
-        const pos = getPos(event);
-        ctx.beginPath();
-        ctx.moveTo(lastX, lastY);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-        lastX = pos.x;
-        lastY = pos.y;
-
-        if (!hasSignature) {
-            hasSignature = true;
+        if (ttdAsesiNamaInput.value || ttdAsesiTanggalInput.value) {
             wrapper.classList.add('has-signature');
+            hasSignature = true;
         }
-
-        fillSignatureMeta();
-    };
-
-    const stopDrawing = () => {
-        isDrawing = false;
-        wrapper.classList.remove('active');
-    };
-
-    clearBtn.addEventListener('click', () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        hasSignature = false;
-        ttdAsesiNamaInput.value = '';
-        ttdAsesiTanggalInput.value = '';
-        wrapper.classList.remove('has-signature');
-    });
-
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
-    canvas.addEventListener('mouseleave', stopDrawing);
-
-    canvas.addEventListener('touchstart', startDrawing, { passive: false });
-    canvas.addEventListener('touchmove', draw, { passive: false });
-    canvas.addEventListener('touchend', stopDrawing);
-
-    signForm.addEventListener('submit', function (e) {
-        if (!hasSignature) {
-            e.preventDefault();
-            alert('Silakan tanda tangani terlebih dahulu');
-            return;
-        }
-    });
-
-    window.addEventListener('resize', updateCanvasSize);
-    updateCanvasSize();
-
-    if (ttdAsesiNamaInput.value || ttdAsesiTanggalInput.value) {
-        wrapper.classList.add('has-signature');
     }
 });
 </script>

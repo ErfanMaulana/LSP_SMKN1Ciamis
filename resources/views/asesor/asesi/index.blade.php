@@ -1084,6 +1084,9 @@
                     $mandiriPending = $hasAsesmenMandiri && ! $mandiriRecommended;
                     $mandiriCompleted = $mandiriRecommended;
                     $persetujuanSignedByAsesor = $row->persetujuan_signed_by_asesor ?? false;
+                    $persetujuanSignedByAsesi  = $row->persetujuan_signed_by_asesi  ?? false;
+                    // Ceklis Observasi hanya bisa diakses jika persetujuan sudah ditandatangani oleh KEDUA pihak
+                    $persetujuanFullySigned = $persetujuanSignedByAsesor && $persetujuanSignedByAsesi;
                     $rekamanExists = $row->has_rekaman ?? false;
                     $ceklisExists = $row->has_ceklis_observasi ?? false;
                     $penilaianExists = $row->has_penilaian ?? false;
@@ -1091,6 +1094,8 @@
                     $hasPenilaian = (bool) $row->has_penilaian;
                     $hasCeklisObservasi = (bool) $row->has_ceklis_observasi;
                     $hasRekaman = (bool) $row->has_rekaman;
+                    // Persetujuan Asesmen hanya bisa diakses jika asesi sudah memiliki jadwal dari admin
+                    $canAccessPersetujuan = ($row->has_jadwal ?? false);
                 @endphp
                 <tr>
                     <td>
@@ -1143,7 +1148,7 @@
                                 @endif
 
                                 {{-- Persetujuan Asesmen --}}
-                                @if($mandiriRecommended)
+                                @if($canAccessPersetujuan)
                                     <a href="{{ route('asesor.persetujuan.front.asesor.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Buka persetujuan asesmen">
                                         <i class="bi bi-file-check"></i>
                                         <span class="menu-entry-label">Persetujuan Asesmen</span>
@@ -1159,8 +1164,8 @@
                                     </span>
                                 @endif
 
-                                {{-- Ceklis Observasi --}}
-                                @if($persetujuanSignedByAsesor)
+                                {{-- Ceklis Observasi: hanya aktif jika persetujuan ditandatangani oleh KEDUA pihak (asesor + asesi) --}}
+                                @if($persetujuanFullySigned)
                                     @if($hasCeklisObservasi && !empty($row->ceklis_observasi_id))
                                         <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
                                             <i class="bi bi-check2-square"></i>
@@ -1174,7 +1179,7 @@
                                         </a>
                                     @endif
                                 @else
-                                    <span class="menu-disabled">
+                                    <span class="menu-disabled" title="Persetujuan asesmen harus ditandatangani oleh asesor dan asesi terlebih dahulu">
                                         <i class="bi bi-check2-square"></i>
                                         <span class="menu-entry-label">Ceklis Observasi</span>
                                         <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
@@ -1248,14 +1253,20 @@
         @php
             $asesi = $row->asesi;
             $kelompokNama = $asesi?->kelompok?->nama_kelompok ?? '-';
-                $hasAsesmenMandiri = (bool) $row->has_asesmen_mandiri;
-                $mandiriRecommended = in_array(($row->rekomendasi ?? ''), ['lanjut', 'tidak_lanjut'], true);
-                $mandiriPending = $hasAsesmenMandiri && ! $mandiriRecommended;
-                $mandiriCompleted = $mandiriRecommended;
-                $canProceed = ($row->status ?? '') !== 'belum_mulai';
+            $hasAsesmenMandiri = (bool) $row->has_asesmen_mandiri;
+            $mandiriRecommended = in_array(($row->rekomendasi ?? ''), ['lanjut', 'tidak_lanjut'], true);
+            $mandiriPending = $hasAsesmenMandiri && ! $mandiriRecommended;
+            $mandiriCompleted = $mandiriRecommended;
+            $canProceed = ($row->status ?? '') !== 'belum_mulai';
+            $persetujuanSignedByAsesor = $row->persetujuan_signed_by_asesor ?? false;
+            $persetujuanSignedByAsesi  = $row->persetujuan_signed_by_asesi  ?? false;
+            // Ceklis Observasi hanya bisa diakses jika persetujuan sudah ditandatangani oleh KEDUA pihak
+            $persetujuanFullySigned = $persetujuanSignedByAsesor && $persetujuanSignedByAsesi;
             $hasPenilaian = (bool) $row->has_penilaian;
             $hasCeklisObservasi = (bool) $row->has_ceklis_observasi;
             $hasRekaman = (bool) $row->has_rekaman;
+            // Persetujuan Asesmen hanya bisa diakses jika asesi sudah memiliki jadwal dari admin
+            $canAccessPersetujuan = ($row->has_jadwal ?? false);
         @endphp
         <div class="asesi-card">
             <!-- Card Header -->
@@ -1344,18 +1355,20 @@
                                 @endif
                             </span>
                         @endif
-                        @if($mandiriPending)
+                        @if($canAccessPersetujuan)
+                            <a href="{{ route('asesor.persetujuan.front.asesor.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Buka persetujuan asesmen">
+                                <i class="bi bi-file-check"></i>
+                                <span class="menu-entry-label">Persetujuan Asesmen</span>
+                                <span class="menu-entry-status {{ $persetujuanSignedByAsesor ? '' : 'menu-entry-status-pending' }}" aria-hidden="true">
+                                    <i class="{{ $persetujuanSignedByAsesor ? 'bi bi-check-circle-fill' : 'bi bi-circle-fill' }}"></i>
+                                </span>
+                            </a>
+                        @else
                             <span class="menu-disabled">
                                 <i class="bi bi-file-check"></i>
                                 <span class="menu-entry-label">Persetujuan Asesmen</span>
                                 <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>
                             </span>
-                        @else
-                            <a href="{{ route('asesor.persetujuan.front.asesor.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Buka persetujuan asesmen">
-                                <i class="bi bi-file-check"></i>
-                                <span class="menu-entry-label">Persetujuan Asesmen</span>
-                                <span class="menu-entry-status" aria-hidden="true"><i class="bi bi-check-circle-fill"></i></span>
-                            </a>
                         @endif
                         @if($mandiriPending)
                             <span class="menu-disabled">
@@ -1386,7 +1399,8 @@
                                     <span class="menu-entry-label">Penilaian</span>
                                 </a>
                             @endif
-                            @if($persetujuanSignedByAsesor)
+                            {{-- Ceklis Observasi: hanya aktif jika persetujuan ditandatangani oleh KEDUA pihak (asesor + asesi) --}}
+                            @if($persetujuanFullySigned)
                                 @if($hasCeklisObservasi && !empty($row->ceklis_observasi_id))
                                     <a href="{{ route('asesor.ceklis-observasi.show', $row->ceklis_observasi_id) }}" title="Lihat detail ceklis observasi">
                                         <i class="bi bi-check2-square"></i>
@@ -1400,7 +1414,7 @@
                                     </a>
                                 @endif
                             @else
-                                <span class="menu-disabled">
+                                <span class="menu-disabled" title="Persetujuan asesmen harus ditandatangani oleh asesor dan asesi terlebih dahulu">
                                     <i class="bi bi-check2-square"></i>
                                     <span class="menu-entry-label">Ceklis Observasi</span>
                                     <span class="menu-entry-status menu-entry-status-pending" aria-hidden="true"><i class="bi bi-circle-fill"></i></span>

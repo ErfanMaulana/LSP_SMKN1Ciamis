@@ -45,15 +45,103 @@ class DashboardController extends Controller
             ? DB::table('asesi_skema')->whereIn('skema_id', $skemaIds)->count()
             : 0;
 
-        $selesai = count($skemaIds)
-            ? DB::table('asesi_skema')->whereIn('skema_id', $skemaIds)->where('status', 'selesai')->count()
-            : 0;
+        $selesai = 0;
+        $sedang = 0;
+        $belum = 0;
 
-        $sedang = count($skemaIds)
-            ? DB::table('asesi_skema')->whereIn('skema_id', $skemaIds)->where('status', 'sedang_mengerjakan')->count()
-            : 0;
+        if (count($skemaIds)) {
+            $rows = DB::table('asesi_skema')->whereIn('skema_id', $skemaIds)->get();
+            $niks = $rows->pluck('asesi_nik')->unique()->values();
 
-        $belum = $totalAsesi - $selesai - $sedang;
+            $rekamanByAsesiSkema = DB::table('rekaman_asesmen_kompetensi')
+                ->where('asesor_id', $asesor->ID_asesor)
+                ->select(DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`"), 'id')
+                ->get()
+                ->pluck('id', 'asset_key');
+            
+            $asesmenByAsesiSkema = DB::table('jawaban_elemens as je')
+                ->join('elemens as e', 'je.elemen_id', '=', 'e.id')
+                ->join('units as u', 'e.unit_id', '=', 'u.id')
+                ->whereIn('je.asesi_nik', $niks)
+                ->whereIn('u.skema_id', $skemaIds)
+                ->select(DB::raw("CONCAT(je.asesi_nik, '|', u.skema_id) as `asset_key`"), 'je.id')
+                ->get()
+                ->pluck('id', 'asset_key');
+            
+            $penilaianByAsesiSkema = DB::table('asesor_nilai_elemens')
+                ->where('asesor_id', $asesor->ID_asesor)
+                ->whereIn('asesi_nik', $niks)
+                ->select(DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`"), 'id')
+                ->get()
+                ->pluck('id', 'asset_key');
+
+            $ceklisByAsesiSkema = DB::table('ceklis_observasi_aktivitas_praktiks')
+                ->where('asesor_id', $asesor->ID_asesor)
+                ->whereIn('asesi_nik', $niks)
+                ->whereIn('skema_id', $skemaIds)
+                ->select(
+                    DB::raw("MAX(id) as id"),
+                    DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`")
+                )
+                ->groupBy('asesi_nik', 'skema_id')
+                ->get()
+                ->pluck('id', 'asset_key');
+
+            $skemas = Skema::whereIn('id', $skemaIds)->get(['id', 'nomor_skema'])->keyBy('id');
+            $nomorSkemas = $skemas->pluck('nomor_skema')->filter()->unique()->values();
+            
+            $persetujuans = DB::table('persetujuan_asesmen')
+                ->whereIn('nomor_skema', $nomorSkemas)
+                ->get()
+                ->groupBy(function($item) {
+                    return $item->nomor_skema . '|' . ($item->asesi_nik ?: $item->nama_asesi);
+                });
+
+            foreach ($rows as $row) {
+                $row->asesi = Asesi::where('NIK', $row->asesi_nik)->first();
+                $row->skema = $skemas->get($row->skema_id);
+                
+                $key = "{$row->asesi_nik}|{$row->skema_id}";
+                $has_rekaman = isset($rekamanByAsesiSkema[$key]);
+                $has_asesmen_mandiri = isset($asesmenByAsesiSkema[$key]);
+                $has_penilaian = isset($penilaianByAsesiSkema[$key]);
+                $has_ceklis = isset($ceklisByAsesiSkema[$key]);
+
+                $persetujuanSignedByAsesor = false;
+                $persetujuanSignedByAsesi = false;
+                if ($row->skema) {
+                    $pList = $persetujuans->get($row->skema->nomor_skema . '|' . $row->asesi_nik) 
+                        ?? ($row->asesi ? $persetujuans->get($row->skema->nomor_skema . '|' . $row->asesi->nama) : null);
+                    
+                    $p = $pList ? $pList->sortByDesc('id')->first() : null;
+                    if ($p) {
+                        $persetujuanSignedByAsesor = !empty($p->ttd_asesor_nama);
+                        $persetujuanSignedByAsesi = !empty($p->ttd_asesi_nama);
+                    }
+                }
+                
+                $persetujuanFullySigned = $persetujuanSignedByAsesor && $persetujuanSignedByAsesi;
+                $rekomendasi = $row->rekomendasi ?? '';
+
+                if (!$has_asesmen_mandiri) {
+                    $belum++;
+                } elseif (empty($rekomendasi)) {
+                    $sedang++;
+                } elseif ($rekomendasi === 'tidak_lanjut') {
+                    $belum++;
+                } elseif (!$persetujuanFullySigned) {
+                    $sedang++;
+                } elseif (!$has_ceklis) {
+                    $sedang++;
+                } elseif (!$has_rekaman) {
+                    $sedang++;
+                } elseif (!$has_penilaian) {
+                    $sedang++;
+                } else {
+                    $selesai++;
+                }
+            }
+        }
 
         $stats = compact('totalAsesi', 'selesai', 'sedang', 'belum');
 
@@ -370,8 +458,14 @@ class DashboardController extends Controller
             ->get()
             ->pluck('id', 'asset_key');
 
+        // Check scheduling for asesi (both direct and via kelompok)
+        $scheduledKelompokIds = DB::table('jadwal_kelompok')->pluck('kelompok_id')->unique()->toArray();
+        $directScheduledKelompokIds = DB::table('jadwal_ujikom')->whereNotNull('kelompok_id')->pluck('kelompok_id')->unique()->toArray();
+        $allScheduledKelompokIds = array_unique(array_merge($scheduledKelompokIds, $directScheduledKelompokIds));
+        $scheduledAsesiNiks = DB::table('jadwal_peserta')->pluck('asesi_nik')->unique()->toArray();
+
         // Attach asesi data
-        $data = $rows->map(function ($row) use ($rekamanByAsesiSkema, $asesmenByAsesiSkema, $penilaianByAsesiSkema) {
+        $data = $rows->map(function ($row) use ($rekamanByAsesiSkema, $asesmenByAsesiSkema, $penilaianByAsesiSkema, $ceklisByAsesiSkema, $allScheduledKelompokIds, $scheduledAsesiNiks) {
             $row->asesi = Asesi::where('NIK', $row->asesi_nik)->first();
             $row->skema = Skema::find($row->skema_id);
             
@@ -381,6 +475,10 @@ class DashboardController extends Controller
             $row->has_penilaian = isset($penilaianByAsesiSkema[$key]);
             $row->has_ceklis_observasi = isset($ceklisByAsesiSkema[$key]);
             $row->ceklis_observasi_id = $ceklisByAsesiSkema[$key] ?? null;
+
+            // Attach has_jadwal flag
+            $row->has_jadwal = in_array($row->asesi_nik, $scheduledAsesiNiks) 
+                || ($row->asesi && $row->asesi->kelompok_id && in_array($row->asesi->kelompok_id, $allScheduledKelompokIds));
 
             // Persetujuan Asesmen status: check latest persetujuan record for this asesi+skema
             $row->persetujuan_exists = false;
@@ -408,32 +506,26 @@ class DashboardController extends Controller
             return $row;
         });
 
-        // Sort data according to assessment workflow priority:
-        // 0: Menunggu Asesmen Mandiri (no asesi mandiri answers)
-        // 1: Menunggu Persetujuan Asesmen (has mandiri answers but no rekomendasi)
-        // 2: Persetujuan: Tidak Lanjut (rekomendasi == 'tidak_lanjut')
-        // 3: Menunggu Rekaman Asesmen
-        // 4: Menunggu Ceklis Observasi
-        // 5: Menunggu Entry Penilaian
-        // 6: Selesai
+        // Sort data according to assessment workflow priority
         $data = $data->sort(function ($a, $b) {
             $rank = function ($row) {
-                // 99: Tidak Lanjut / negatif (place at bottom)
-                // 0: Menunggu Asesmen Mandiri
-                // 1: Menunggu Persetujuan Asesmen
-                // 2: Menunggu Rekaman Asesmen
-                // 3: Menunggu Ceklis Observasi
-                // 4: Menunggu Entry Penilaian
-                // 5: Selesai
+                $hasAsesmenMandiri = (bool) ($row->has_asesmen_mandiri ?? false);
+                $rekomendasi = $row->rekomendasi ?? '';
+                $persetujuanSignedByAsesor = (bool) ($row->persetujuan_signed_by_asesor ?? false);
+                $persetujuanSignedByAsesi = (bool) ($row->persetujuan_signed_by_asesi ?? false);
+                $persetujuanFullySigned = $persetujuanSignedByAsesor && $persetujuanSignedByAsesi;
+                $hasRekaman = (bool) ($row->has_rekaman ?? false);
+                $hasCeklis = (bool) ($row->has_ceklis_observasi ?? false);
+                $hasPenilaian = (bool) ($row->has_penilaian ?? false);
 
-                // If rekomendasi explicitly says 'tidak_lanjut', always push to bottom
-                if (($row->rekomendasi ?? '') === 'tidak_lanjut') return 99;
-                if (!($row->has_asesmen_mandiri ?? false)) return 0;
-                if (empty($row->rekomendasi)) return 1;
-                if (!($row->has_rekaman ?? false)) return 2;
-                if (!($row->has_ceklis_observasi ?? false)) return 3;
-                if (!($row->has_penilaian ?? false)) return 4;
-                return 5;
+                if (($rekomendasi) === 'tidak_lanjut') return 99;
+                if (!$hasAsesmenMandiri) return 0;
+                if (empty($rekomendasi)) return 1;
+                if (!$persetujuanFullySigned) return 2;
+                if (!$hasCeklis) return 3;
+                if (!$hasRekaman) return 4;
+                if (!$hasPenilaian) return 5;
+                return 6;
             };
 
             $ra = $rank($a);
@@ -447,11 +539,46 @@ class DashboardController extends Controller
         })->values();
 
         $skema = count($skemaIds) === 1 ? Skema::find($skemaIds[0]) : null;
+
+        // Calculate counts based on actual workflow status
+        $selesaiCount = 0;
+        $sedangCount = 0;
+        $belumCount = 0;
+
+        foreach ($data as $row) {
+            $hasAsesmenMandiri = (bool) $row->has_asesmen_mandiri;
+            $rekomendasi = $row->rekomendasi ?? '';
+            $persetujuanSignedByAsesor = (bool) ($row->persetujuan_signed_by_asesor ?? false);
+            $persetujuanSignedByAsesi = (bool) ($row->persetujuan_signed_by_asesi ?? false);
+            $persetujuanFullySigned = $persetujuanSignedByAsesor && $persetujuanSignedByAsesi;
+            $hasRekaman = (bool) $row->has_rekaman;
+            $hasCeklis = (bool) $row->has_ceklis_observasi;
+            $hasPenilaian = (bool) $row->has_penilaian;
+
+            if (!$hasAsesmenMandiri) {
+                $belumCount++;
+            } elseif (empty($rekomendasi)) {
+                $sedangCount++;
+            } elseif ($rekomendasi === 'tidak_lanjut') {
+                $belumCount++;
+            } elseif (!$persetujuanFullySigned) {
+                $sedangCount++;
+            } elseif (!$hasCeklis) {
+                $sedangCount++;
+            } elseif (!$hasRekaman) {
+                $sedangCount++;
+            } elseif (!$hasPenilaian) {
+                $sedangCount++;
+            } else {
+                $selesaiCount++;
+            }
+        }
+
         $summary = [
             'total'   => $data->count(),
-            'selesai' => $data->where('status', 'selesai')->count(),
-            'sedang'  => $data->where('status', 'sedang_mengerjakan')->count(),
-            'belum'   => $data->where('status', 'belum_mulai')->count(),
+            'selesai' => $selesaiCount,
+            'sedang'  => $sedangCount,
+            'belum'   => $belumCount,
         ];
 
         $selectedJurusan = $request->filled('jurusan') ? (string) $request->jurusan : '';

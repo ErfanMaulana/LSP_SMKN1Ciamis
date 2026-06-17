@@ -27,6 +27,13 @@
     $selectedAsesiNik = (string) $value('asesi_nik', '');
     $selectedAsesiNama = (string) $value('asesi_nama', '');
     $selectedTuk = (string) $value('tuk', '');
+    $selectedTipeTuk = (string) $value('tipe_tuk', '');
+    $tipeTukLabels = [
+        'sewaktu'       => 'Sewaktu',
+        'tempat_kerja'  => 'Tempat Kerja',
+        'mandiri'       => 'Mandiri',
+    ];
+    $selectedTipeTukLabel = $tipeTukLabels[$selectedTipeTuk] ?? $selectedTipeTuk;
     $skemaOptions = $skemas->map(function ($skema) {
         return [
             'id' => (string) $skema->id,
@@ -413,9 +420,23 @@
     <div class="grid-2">
         <div class="field full">
             <label>Asesi <span class="req">*</span></label>
-            <select id="asesiSelect" name="asesi_nik">
-                <option value="">-- Pilih Asesi --</option>
-            </select>
+            @if($selectedAsesiNik !== '' && $selectedAsesiNama !== '')
+                {{-- Asesi sudah diketahui dari URL (dibuka dari action tabel) – tampilkan readonly --}}
+                <input type="text"
+                    value="{{ $selectedAsesiNama }} ({{ $selectedAsesiNik }})"
+                    readonly
+                    style="background:#f8fafc;color:#334155;font-weight:600;">
+                <input type="hidden" id="asesiNikHidden" name="asesi_nik" value="{{ $selectedAsesiNik }}">
+                {{-- Select tersembunyi supaya JS tidak error saat mencari #asesiSelect --}}
+                <select id="asesiSelect" style="display:none;">
+                    <option value="{{ $selectedAsesiNik }}" selected>{{ $selectedAsesiNama }}</option>
+                </select>
+            @else
+                {{-- Asesi belum dipilih – tampilkan select AJAX biasa --}}
+                <select id="asesiSelect" name="asesi_nik">
+                    <option value="">-- Pilih Asesi --</option>
+                </select>
+            @endif
             @error('asesi_nik')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -437,8 +458,13 @@
         </div>
 
         <div class="field">
-            <label>TUK</label>
-            <input id="tukInput" type="text" name="tuk" value="{{ $selectedTuk }}" readonly>
+            <label>Tipe TUK</label>
+            <input id="tipeTukDisplay" type="text"
+                value="{{ $selectedTipeTukLabel }}"
+                placeholder="Otomatis terisi dari jadwal" readonly
+                style="background:#f8fafc;color:#64748b;">
+            {{-- Nama TUK disimpan sebagai nilai field tuk --}}
+            <input id="tukInput" type="hidden" name="tuk" value="{{ $selectedTuk }}">
             @error('tuk')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -543,6 +569,9 @@
 
                 <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
                     <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
+                    @if($value('ttd_asesor_file'))
+                        <img src="{{ asset('storage/' . ltrim($value('ttd_asesor_file'), '/')) }}" class="signature-saved-img" id="savedSignatureImgAsesor" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; pointer-events:none;">
+                    @endif
                     <div class="signature-placeholder">
                         <i class="bi bi-pen"></i>
                         <span>Tanda tangan di sini</span>
@@ -551,6 +580,8 @@
 
                 <input type="hidden" name="ttd_asesor_nama" id="ttdAsesorNamaInput" value="{{ $value('ttd_asesor_nama', '') }}">
                 <input type="hidden" name="ttd_asesor_tanggal" id="ttdAsesorTanggalInput" value="{{ $ttdAsesorTanggal }}">
+                <input type="hidden" name="ttd_asesor_file" id="ttdAsesorFileInput" value="{{ $value('ttd_asesor_file', '') }}">
+                <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput" value="{{ $value('ttd_asesi_file', '') }}">
                 @error('ttd_asesor_nama')<div class="error-text">{{ $message }}</div>@enderror
                 @error('ttd_asesor_tanggal')<div class="error-text">{{ $message }}</div>@enderror
 
@@ -1074,8 +1105,22 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Isi nama TUK ke hidden input (disimpan ke DB)
         if (tukInput) {
             tukInput.value = payload.tuk || '';
+        }
+
+        // Isi Tipe TUK ke display input (readonly, informatif)
+        const tipeTukDisplay = document.getElementById('tipeTukDisplay');
+        if (tipeTukDisplay) {
+            const tipeTukMap = {
+                'sewaktu': 'Sewaktu',
+                'tempat_kerja': 'Tempat Kerja',
+                'mandiri': 'Mandiri',
+            };
+            const rawTipe = payload.tipe_tuk || '';
+            tipeTukDisplay.value = rawTipe ? (tipeTukMap[rawTipe] || rawTipe) : '';
+            tipeTukDisplay.placeholder = rawTipe ? '' : 'Otomatis terisi dari jadwal';
         }
 
         if (tanggalInput) {
@@ -1274,6 +1319,15 @@ document.addEventListener('DOMContentLoaded', function () {
             nameInput.value = '';
             dateInput.value = '';
             wrapper.classList.remove('has-signature');
+
+            const fileInput = document.getElementById(canvas.id === 'signatureCanvasAsesor' ? 'ttdAsesorFileInput' : 'ttdAsesiFileInput');
+            if (fileInput) {
+                fileInput.value = '';
+            }
+            const savedImg = document.getElementById(canvas.id === 'signatureCanvasAsesor' ? 'savedSignatureImgAsesor' : 'savedSignatureImgAsesi');
+            if (savedImg) {
+                savedImg.remove();
+            }
         });
 
         canvas.addEventListener('mousedown', startDrawing);
@@ -1290,6 +1344,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (nameInput.value || dateInput.value) {
             wrapper.classList.add('has-signature');
+            hasSignature = true;
         }
     };
 
@@ -1314,8 +1369,17 @@ document.addEventListener('DOMContentLoaded', function () {
     rekomendasiInputs.forEach((input) => input.addEventListener('change', toggleBelumKompeten));
     asesiSelect.addEventListener('change', () => fetchAsesiData(asesiSelect.value));
 
-    setNomorSkema();
     loadData();
     toggleBelumKompeten();
+
+    const form = signatureCanvasAsesor ? signatureCanvasAsesor.closest('form') : null;
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            const fileInput = document.getElementById('ttdAsesorFileInput');
+            if (fileInput && fileInput.value === '' && signatureCanvasAsesor && signatureWrapperAsesor && signatureWrapperAsesor.classList.contains('has-signature')) {
+                fileInput.value = signatureCanvasAsesor.toDataURL('image/png');
+            }
+        });
+    }
 });
 </script>

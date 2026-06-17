@@ -429,22 +429,29 @@
         text-align: center;
     }
 
-    .signature-box .frame {
+    .signature-box img {
+        width: 220px;
+        height: 220px;
+        object-fit: contain;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
-        padding: 8px;
-        width: 220px;
-        aspect-ratio: 1 / 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         background: #fff;
+        display: block;
         margin: 0 auto 8px auto;
     }
 
-    .signature-box img {
-        max-width: 100%;
-        max-height: 120px;
+    .signature-box .no-img-placeholder {
+        width: 220px;
+        height: 220px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 8px auto;
+        font-size: 12px;
+        color: #94a3b8;
     }
 
     .signature-box .meta {
@@ -687,21 +694,64 @@
     </div>
 
     <div class="panel-card" style="margin-top:16px;">
-        <div class="panel-title"><i class="bi bi-pen"></i> Tanda Tangan Asesor</div>
+        <div class="panel-title"><i class="bi bi-pen"></i> Tanda Tangan</div>
         <div class="panel-body">
-            <div class="signature-form-layout">
-                <div class="signature-spot">
-                    @if($item->ttd_asesor_file)
-                        <div class="signature-preview">
-                            <div style="width:100%;max-width:260px;aspect-ratio:1/1;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;margin:0 auto 12px;">
-                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" style="max-width:100%;max-height:100%;object-fit:contain;">
-                            </div>
-                            <div class="small-note" style="text-align:center;">
+            @if($item->ttd_asesor_file)
+                @if(!empty($item->ttd_asesi_file))
+                    {{-- Kedua pihak sudah menandatangani --}}
+                    <div class="notice success" style="margin-bottom:20px;">
+                        <i class="bi bi-check-circle-fill"></i>
+                        Persetujuan asesmen telah ditandatangani oleh asesor dan asesi.
+                    </div>
+                    <div class="signature-grid">
+                        {{-- TTD Asesor --}}
+                        <div class="signature-box">
+                            <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesor</p>
+                            <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Tanda Tangan Asesor">
+                            <p class="meta">
                                 <strong>{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}</strong><br>
                                 {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
-                            </div>
+                            </p>
                         </div>
-                    @else
+                        {{-- TTD Asesi --}}
+                        <div class="signature-box">
+                            <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesi</p>
+                            <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Tanda Tangan Asesi">
+                            <p class="meta">
+                                <strong>{{ $item->ttd_asesi_nama }}</strong><br>
+                                {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
+                            </p>
+                        </div>
+                    </div>
+                @else
+                    {{-- Hanya asesor yang sudah TTD, menunggu asesi --}}
+                    <div class="notice warning" style="margin-bottom:20px;">
+                        <i class="bi bi-hourglass-split"></i>
+                        Tanda tangan asesor sudah tersimpan. Menunggu tanda tangan dari asesi.
+                    </div>
+                    <div class="signature-grid">
+                        <div class="signature-box">
+                            <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesor</p>
+                            <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Tanda Tangan Asesor">
+                            <p class="meta">
+                                <strong>{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}</strong><br>
+                                {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
+                            </p>
+                        </div>
+                        <div class="signature-box">
+                            <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesi</p>
+                            <div class="no-img-placeholder" style="color:#94a3b8;flex-direction:column;gap:8px;">
+                                <i class="bi bi-hourglass-split" style="font-size:28px;"></i>
+                                <span>Menunggu tanda tangan asesi</span>
+                            </div>
+                            <p class="meta" style="color:#94a3b8;">Belum ditandatangani</p>
+                        </div>
+                    </div>
+                @endif
+            @else
+                {{-- Asesor belum TTD, tampilkan form canvas --}}
+                <div class="signature-form-layout">
+                    <div class="signature-spot">
                         <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" id="formTandaTanganAsesor">
                             @csrf
                             <div class="signature-title">Gambar tanda tangan di bawah</div>
@@ -726,15 +776,12 @@
                             <input type="hidden" name="ttd_asesor_file" id="ttdAsesorFileInput">
                             <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesor</button>
                         </form>
-                    @endif
+                    </div>
                 </div>
-
-            </div>
+            @endif
         </div>
     </div>
-            @if(!$item->ttd_asesor_file)
-            </form>
-            @endif
+
 @else
     <div class="doc-wrap">
         <table class="doc">
@@ -828,40 +875,70 @@
     <div class="panel-card">
         <div class="panel-title"><i class="bi bi-pen"></i> Tanda Tangan</div>
         <div class="panel-body">
-            @if(empty($item->ttd_asesi_file))
-                @if(empty($item->ttd_asesor_file) && (empty($item->ttd_asesor_nama) || empty($item->ttd_asesor_tanggal)))
-                    <div class="notice warning">Asesor belum menandatangani form ini. Tanda tangan asesi belum dapat dilakukan.</div>
-                @else
-                    <form method="POST" action="{{ route('asesi.persetujuan.front.asesi.sign', $item->id) }}" id="formTandaTanganAsesi">
-                        @csrf
-                        <div class="signature-spot" style="max-width:560px; margin:0 auto;">
-                            <div class="signature-title">Tanda Tangan Asesi</div>
-                            <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
-                                <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
-                                <div class="signature-placeholder">
-                                    <i class="bi bi-pen"></i>
-                                    <span>Tanda tangan di sini</span>
-                                </div>
+            @if(!empty($item->ttd_asesi_file))
+                {{-- Kedua pihak sudah menandatangani – tampilkan hasil tanda tangan --}}
+                <div class="notice success" style="margin-bottom:20px;">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Persetujuan asesmen telah ditandatangani oleh asesor dan asesi.
+                </div>
+                <div class="signature-grid">
+                    {{-- Tanda Tangan Asesor --}}
+                    <div class="signature-box">
+                        <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesor</p>
+                        @if(!empty($item->ttd_asesor_file))
+                            <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Tanda Tangan Asesor">
+                        @else
+                            <div class="no-img-placeholder">Tidak ada gambar</div>
+                        @endif
+                        <p class="meta">
+                            <strong>{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}</strong><br>
+                            {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
+                        </p>
+                    </div>
+                    {{-- Tanda Tangan Asesi --}}
+                    <div class="signature-box">
+                        <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesi</p>
+                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Tanda Tangan Asesi">
+                        <p class="meta">
+                            <strong>{{ $item->ttd_asesi_nama }}</strong><br>
+                            {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
+                        </p>
+                    </div>
+                </div>
+            @elseif(empty($item->ttd_asesor_file) && (empty($item->ttd_asesor_nama) || empty($item->ttd_asesor_tanggal)))
+                {{-- Asesor belum tanda tangan --}}
+                <div class="notice warning">Asesor belum menandatangani form ini. Tanda tangan asesi belum dapat dilakukan.</div>
+            @else
+                {{-- Asesor sudah tanda tangan, tampilkan form tanda tangan asesi --}}
+                <form method="POST" action="{{ route('asesi.persetujuan.front.asesi.sign', $item->id) }}" id="formTandaTanganAsesi">
+                    @csrf
+                    <div class="signature-spot" style="max-width:560px; margin:0 auto;">
+                        <div class="signature-title">Tanda Tangan Asesi</div>
+                        <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
+                            <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
+                            <div class="signature-placeholder">
+                                <i class="bi bi-pen"></i>
+                                <span>Tanda tangan di sini</span>
                             </div>
-                            <div class="signature-actions">
-                                <div class="signature-date">
-                                    <i class="bi bi-calendar3"></i>
-                                    Tanggal: <strong id="signatureDateAsesi">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
-                                </div>
-                                <button type="button" class="btn-clear-signature" id="clearSignatureAsesi">
-                                    <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-                                </button>
-                            </div>
-                            <div class="field">
-                                <label>Tanggal Tanda Tangan</label>
-                                <input type="date" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ old('ttd_asesi_tanggal', $item->ttd_asesi_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d')) }}" required>
-                                @error('ttd_asesi_tanggal')<div class="error-text">{{ $message }}</div>@enderror
-                            </div>
-                            <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput">
-                            <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesi</button>
                         </div>
-                    </form>
-                @endif
+                        <div class="signature-actions">
+                            <div class="signature-date">
+                                <i class="bi bi-calendar3"></i>
+                                Tanggal: <strong id="signatureDateAsesi">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
+                            </div>
+                            <button type="button" class="btn-clear-signature" id="clearSignatureAsesi">
+                                <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                            </button>
+                        </div>
+                        <div class="field">
+                            <label>Tanggal Tanda Tangan</label>
+                            <input type="date" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ old('ttd_asesi_tanggal', $item->ttd_asesi_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d')) }}" required>
+                            @error('ttd_asesi_tanggal')<div class="error-text">{{ $message }}</div>@enderror
+                        </div>
+                        <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput">
+                        <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesi</button>
+                    </div>
+                </form>
             @endif
         </div>
     </div>
