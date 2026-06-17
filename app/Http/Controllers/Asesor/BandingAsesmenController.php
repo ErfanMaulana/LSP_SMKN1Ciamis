@@ -88,6 +88,11 @@ class BandingAsesmenController extends Controller
             }
         }
 
+        $keputusan = $request->get('keputusan', '');
+        if ($keputusan !== '') {
+            $query->where('aks.rekomendasi', $keputusan);
+        }
+
         $rows = $query->orderByDesc('aks.updated_at')->paginate(12)->withQueryString();
 
         $statsBase = DB::table('asesi_skema as aks')
@@ -107,7 +112,11 @@ class BandingAsesmenController extends Controller
             'tidak_banding' => (clone $statsBase)->where('b.status', 'tidak_banding')->count(),
         ];
 
-        return view('asesor.banding.index', compact('account', 'asesor', 'rows', 'stats', 'search', 'status'));
+        if ($request->ajax()) {
+            return view('asesor.banding.partials.table-rows', compact('rows'))->render();
+        }
+
+        return view('asesor.banding.index', compact('account', 'asesor', 'rows', 'stats', 'search', 'status', 'keputusan'));
     }
 
     public function form(string $asesiNik, int $skemaId)

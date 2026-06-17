@@ -312,15 +312,18 @@
     .modal-content {
         background-color: #fff;
         border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
         width: 90%;
         max-width: 500px;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
         animation: slideUp 0.3s ease;
     }
 
     @keyframes slideUp {
         from {
-            transform: translateY(50px);
+            transform: translateY(30px);
             opacity: 0;
         }
         to {
@@ -335,6 +338,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0;
     }
 
     .modal-header h3 {
@@ -356,14 +360,34 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
     }
 
     .modal-close:hover {
         color: #0f172a;
+        background: #f1f5f9;
     }
 
     .modal-body {
         padding: 20px 24px;
+        overflow-y: auto;
+        max-height: 400px;
+    }
+
+    /* Custom scrollbar for modal body */
+    .modal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+    .modal-body::-webkit-scrollbar-track {
+        background: #f8fafc; 
+    }
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #cbd5e1; 
+        border-radius: 4px;
+    }
+    .modal-body::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8; 
     }
 
     .kkm-list {
@@ -431,7 +455,7 @@
 
     .btn-save-kkm {
         padding: 6px 12px;
-        background: #10b981;
+        background: #0061a5;
         color: #fff;
         border: none;
         border-radius: 6px;
@@ -441,7 +465,7 @@
     }
 
     .btn-save-kkm:hover {
-        background: #059669;
+        background: #004a7a;
     }
 
     .modal-footer {
@@ -505,6 +529,11 @@
                 @foreach($skemas as $skema)
                     <option value="{{ $skema->id }}" {{ request('skema_id') == $skema->id ? 'selected' : '' }}>{{ $skema->nama_skema }}</option>
                 @endforeach
+            </select>
+            <select id="nilaiAsesorHasilFilter" name="hasil" class="filter-select">
+                <option value="">Semua Hasil</option>
+                <option value="kompeten" {{ request('hasil') === 'kompeten' ? 'selected' : '' }}>Kompeten</option>
+                <option value="belum_kompeten" {{ request('hasil') === 'belum_kompeten' ? 'selected' : '' }}>Belum Kompeten</option>
             </select>
         </div>
     </div>
@@ -707,6 +736,7 @@ function ajaxLoadNilaiAsesor(url) {
 function serializeFilterForm() {
     const searchInput = document.getElementById('nilaiAsesorSearchInput');
     const skemaFilter = document.getElementById('nilaiAsesorSkemaFilter');
+    const hasilFilter = document.getElementById('nilaiAsesorHasilFilter');
     const url = new URL('{{ route('admin.nilai-asesor.index') }}', window.location.origin);
 
     if (searchInput && searchInput.value.trim() !== '') {
@@ -717,12 +747,17 @@ function serializeFilterForm() {
         url.searchParams.set('skema_id', skemaFilter.value.trim());
     }
 
+    if (hasilFilter && hasilFilter.value.trim() !== '') {
+        url.searchParams.set('hasil', hasilFilter.value.trim());
+    }
+
     return url.toString();
 }
 
 function bindNilaiAsesorAjaxSearch() {
     const searchInput = document.getElementById('nilaiAsesorSearchInput');
     const skemaFilter = document.getElementById('nilaiAsesorSkemaFilter');
+    const hasilFilter = document.getElementById('nilaiAsesorHasilFilter');
 
     syncNilaiAsesorSkemaPlaceholderColor();
 
@@ -738,6 +773,12 @@ function bindNilaiAsesorAjaxSearch() {
     if (skemaFilter) {
         skemaFilter.addEventListener('change', function() {
             syncNilaiAsesorSkemaPlaceholderColor();
+            ajaxLoadNilaiAsesor(serializeFilterForm());
+        });
+    }
+
+    if (hasilFilter) {
+        hasilFilter.addEventListener('change', function() {
             ajaxLoadNilaiAsesor(serializeFilterForm());
         });
     }

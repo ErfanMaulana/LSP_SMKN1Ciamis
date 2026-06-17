@@ -352,6 +352,7 @@ class PersetujuanAsesmenFrontController extends Controller
         $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
         $useNik = $this->hasAsesiNikColumn();
         $search = $request->get('search');
+        $statusFilter = $request->get('status');
 
         $items = collect();
 
@@ -364,6 +365,25 @@ class PersetujuanAsesmenFrontController extends Controller
                             ->orWhere('nomor_skema', 'like', "%{$search}%")
                             ->orWhere('nama_asesi', 'like', "%{$search}%");
                     });
+                })
+                ->when($statusFilter, function ($query) use ($statusFilter) {
+                    if ($statusFilter === 'belum_asesor') {
+                        $query->where(function($q) {
+                            $q->whereNull('ttd_asesor_nama')->orWhere('ttd_asesor_nama', '');
+                        });
+                    } elseif ($statusFilter === 'belum_asesi') {
+                        $query->where(function($q) {
+                            $q->whereNotNull('ttd_asesor_nama')->where('ttd_asesor_nama', '!=', '');
+                        })->where(function($q) {
+                            $q->whereNull('ttd_asesi_nama')->orWhere('ttd_asesi_nama', '');
+                        });
+                    } elseif ($statusFilter === 'sudah') {
+                        $query->where(function($q) {
+                            $q->whereNotNull('ttd_asesor_nama')->where('ttd_asesor_nama', '!=', '');
+                        })->where(function($q) {
+                            $q->whereNotNull('ttd_asesi_nama')->where('ttd_asesi_nama', '!=', '');
+                        });
+                    }
                 })
                 ->latest()
                 ->get();
@@ -415,10 +435,15 @@ class PersetujuanAsesmenFrontController extends Controller
             })->values();
         }
 
+        if ($request->ajax()) {
+            return view('persetujuan-asesmen.partials.asesor-table-rows', compact('items'))->render();
+        }
+
         return view('persetujuan-asesmen.asesor-index', [
             'items' => $items,
             'asesor' => $asesor,
             'search' => $search,
+            'status' => $statusFilter,
         ]);
     }
 

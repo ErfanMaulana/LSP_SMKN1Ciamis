@@ -58,65 +58,92 @@
         font-weight: 600;
     }
 
-    .filter-bar {
+    .filter-form {
+        width: 100%;
         display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
-        align-items: center;
+        flex-direction: column;
+        gap: 12px;
         margin-bottom: 16px;
     }
 
-    .search-box {
-        flex: 1 1 320px;
-        position: relative;
+    .filter-row {
+        display: grid;
+        gap: 10px;
+        align-items: end;
     }
 
-    .search-box i {
+    .filter-row-top {
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 280px) minmax(240px, 280px);
+    }
+
+    .filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .filter-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .search-input-wrapper {
+        flex: 1 1 360px;
+        position: relative;
+        min-width: 0;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 44px 12px 42px;
+        border: 1px solid #dbe4ef;
+        border-radius: 14px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 4px rgba(0, 115, 189, 0.1);
+    }
+
+    .search-icon {
         position: absolute;
-        left: 12px;
+        left: 14px;
         top: 50%;
         transform: translateY(-50%);
         color: #94a3b8;
-        font-size: 15px;
-    }
-
-    .search-box input {
-        width: 100%;
-        padding: 10px 12px 10px 38px;
-        border: 1px solid #dbe4ef;
-        border-radius: 10px;
-        font-size: 13px;
-        background: #ffffff;
+        font-size: 16px;
+        pointer-events: none;
     }
 
     .filter-select {
-        padding: 9px 12px;
+        width: 100%;
+        min-width: 0;
+        padding: 10px 14px;
+        border-radius: 12px;
         border: 1px solid #dbe4ef;
-        border-radius: 10px;
-        font-size: 13px;
-        background: #ffffff;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        color: #0f172a;
+        font-size: 14px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        outline: none;
     }
 
-    .btn-filter {
-        background: #0073bd;
-        color: #ffffff;
-        border: none;
-        border-radius: 10px;
-        padding: 9px 14px;
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
+    .filter-select:focus {
+        border-color: #0073bd;
+        box-shadow: 0 0 0 4px rgba(0, 115, 189, 0.1);
     }
 
-    .btn-reset {
-        background: #f1f5f9;
-        color: #475569;
-        border: none;
-        border-radius: 10px;
-        padding: 9px 14px;
-        font-size: 12px;
-        font-weight: 600;
-        text-decoration: none;
+    @media (max-width: 900px) {
+        .filter-row-top {
+            grid-template-columns: 1fr;
+        }
     }
 
     .table-card {
@@ -179,9 +206,9 @@
     .badge-sedang  { background: #fef3c7; color: #d97706; }
     .badge-belum   { background: #f1f5f9; color: #6b7280; }
 
-    .badge-rekom-lanjut { background: #d1fae5; color: #059669; }
-    .badge-rekom-tidak { background: #fee2e2; color: #dc2626; }
-    .badge-rekom-pending { background: #f1f5f9; color: #94a3b8; }
+    .badge-rekomendasi-lanjut { background: #d1fae5; color: #059669; }
+    .badge-rekomendasi-tidak { background: #fee2e2; color: #dc2626; }
+    .badge-rekomendasi-pending { background: #f1f5f9; color: #94a3b8; }
 
     .btn-review {
         display: inline-flex;
@@ -225,7 +252,7 @@
 @section('content')
 <div class="page-header">
     <div>
-        <h2><i class="bi bi-clipboard-check"></i> Asesmen Mandiri</h2>
+        <h2>Asesmen Mandiri</h2>
         <p>Kelola rekomendasi asesmen mandiri untuk asesi.</p>
     </div>
 </div>
@@ -249,77 +276,138 @@
     </div>
 </div>
 
-<form method="GET" action="{{ route('asesor.asesmen-mandiri.index') }}" class="filter-bar">
-    <div class="search-box">
-        <i class="bi bi-search"></i>
-        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama asesi, NIK, atau skema">
+<form method="GET" action="{{ route('asesor.asesmen-mandiri.index') }}" class="filter-form" id="asesmenMandiriFilterForm">
+    <div class="filter-row filter-row-top">
+        <div class="search-input-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input
+                type="text"
+                class="search-input"
+                id="asesmenMandiriSearchInput"
+                name="search"
+                value="{{ $search }}"
+                placeholder="Cari nama asesi, NIK, atau skema..."
+                autocomplete="off"
+            >
+        </div>
+        <div class="filter-field">
+            <label class="filter-label">Status</label>
+            <select name="status" id="asesmenMandiriStatusFilter" class="filter-select">
+                <option value="">Semua Status</option>
+                <option value="selesai" {{ $status === 'selesai' ? 'selected' : '' }}>Selesai</option>
+                <option value="sedang_mengerjakan" {{ $status === 'sedang_mengerjakan' ? 'selected' : '' }}>Sedang Dikerjakan</option>
+                <option value="belum_mulai" {{ $status === 'belum_mulai' ? 'selected' : '' }}>Belum Mulai</option>
+            </select>
+        </div>
+        <div class="filter-field">
+            <label class="filter-label">Rekomendasi</label>
+            <select name="rekomendasi" id="asesmenMandiriRekomendasiFilter" class="filter-select">
+                <option value="">Semua Rekomendasi</option>
+                <option value="lanjut" {{ $rekomendasi === 'lanjut' ? 'selected' : '' }}>Lanjut</option>
+                <option value="tidak_lanjut" {{ $rekomendasi === 'tidak_lanjut' ? 'selected' : '' }}>Tidak Lanjut</option>
+                <option value="belum" {{ $rekomendasi === 'belum' ? 'selected' : '' }}>Belum Direview</option>
+            </select>
+        </div>
     </div>
-    <select name="status" class="filter-select">
-        <option value="" {{ $status === '' ? 'selected' : '' }}>Semua Status</option>
-        <option value="selesai" {{ $status === 'selesai' ? 'selected' : '' }}>Selesai</option>
-        <option value="sedang_mengerjakan" {{ $status === 'sedang_mengerjakan' ? 'selected' : '' }}>Sedang Dikerjakan</option>
-        <option value="belum_mulai" {{ $status === 'belum_mulai' ? 'selected' : '' }}>Belum Mulai</option>
-    </select>
-    <button type="submit" class="btn-filter"><i class="bi bi-funnel"></i> Filter</button>
-    <a href="{{ route('asesor.asesmen-mandiri.index') }}" class="btn-reset"><i class="bi bi-arrow-clockwise"></i> Reset</a>
 </form>
 
-<div class="table-card">
-    @if($data->count())
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Asesi</th>
-                        <th>NIK</th>
-                        <th>Skema</th>
-                        <th>Status</th>
-                        <th>Jawaban</th>
-                        <th>Rekomendasi</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($data as $row)
-                        @php
-                            // Use centralized status logic via component when available
-                        @endphp
-                        <tr>
-                            <td>{{ $row->asesi?->nama ?? '-' }}</td>
-                            <td>{{ $row->asesi_nik }}</td>
-                            <td>{{ $row->skema?->nama_skema ?? '-' }}</td>
-                            <td>@include('components.asesi-status', ['row' => $row])</td>
-                            <td>{{ $row->jawaban_count ? $row->jawaban_count . ' elemen' : 'Belum ada' }}</td>
-                            <td>
-                                @if($row->rekomendasi === 'lanjut')
-                                    <span class="badge badge-rekom-lanjut">Lanjut</span>
-                                @elseif($row->rekomendasi === 'tidak_lanjut')
-                                    <span class="badge badge-rekom-tidak">Tidak Lanjut</span>
-                                @else
-                                    <span class="badge badge-rekom-pending">Belum Direview</span>
-                                @endif
-                            </td>
-                            <td>
-                                @if($row->has_asesmen_mandiri)
-                                    <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" class="btn-review">
-                                        <i class="bi bi-eye"></i> Review
-                                    </a>
-                                @else
-                                    <span class="btn-review disabled">
-                                        <i class="bi bi-eye"></i> Review
-                                    </span>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    @else
-        <div class="empty-state">
-            <i class="bi bi-inbox"></i>
-            <p>Belum ada asesmen mandiri untuk ditampilkan.</p>
-        </div>
-    @endif
+<div class="table-card" id="asesmenMandiriTableContainer">
+    @include('asesor.asesmen-mandiri.partials.table-rows')
 </div>
+
+<script>
+    let asesmenMandiriAjaxController = null;
+    let asesmenMandiriSearchTimer = null;
+
+    function ajaxLoadAsesmenMandiri(url) {
+        if (asesmenMandiriAjaxController) {
+            asesmenMandiriAjaxController.abort();
+        }
+
+        asesmenMandiriAjaxController = new AbortController();
+
+        const tableContainer = document.getElementById('asesmenMandiriTableContainer');
+        if (tableContainer) {
+            tableContainer.style.opacity = '0.5';
+        }
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            signal: asesmenMandiriAjaxController.signal
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Gagal memuat data asesmen mandiri');
+            }
+            return response.text();
+        })
+        .then(function(html) {
+            if (tableContainer) {
+                tableContainer.innerHTML = html;
+                tableContainer.style.opacity = '1';
+            }
+
+            window.history.replaceState({}, '', url);
+        })
+        .catch(function(error) {
+            if (error.name !== 'AbortError') {
+                console.error(error);
+                if (tableContainer) {
+                    tableContainer.style.opacity = '1';
+                }
+            }
+        });
+    }
+
+    function serializeFilterForm() {
+        const searchInput = document.getElementById('asesmenMandiriSearchInput');
+        const statusFilter = document.getElementById('asesmenMandiriStatusFilter');
+        const rekomendasiFilter = document.getElementById('asesmenMandiriRekomendasiFilter');
+        const url = new URL('{{ route('asesor.asesmen-mandiri.index') }}', window.location.origin);
+
+        if (searchInput && searchInput.value.trim() !== '') {
+            url.searchParams.set('search', searchInput.value.trim());
+        }
+
+        if (statusFilter && statusFilter.value.trim() !== '') {
+            url.searchParams.set('status', statusFilter.value.trim());
+        }
+
+        if (rekomendasiFilter && rekomendasiFilter.value.trim() !== '') {
+            url.searchParams.set('rekomendasi', rekomendasiFilter.value.trim());
+        }
+
+        return url.toString();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('asesmenMandiriSearchInput');
+        const statusFilter = document.getElementById('asesmenMandiriStatusFilter');
+        const rekomendasiFilter = document.getElementById('asesmenMandiriRekomendasiFilter');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(asesmenMandiriSearchTimer);
+                asesmenMandiriSearchTimer = setTimeout(function() {
+                    ajaxLoadAsesmenMandiri(serializeFilterForm());
+                }, 400);
+            });
+        }
+
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function() {
+                ajaxLoadAsesmenMandiri(serializeFilterForm());
+            });
+        }
+
+        if (rekomendasiFilter) {
+            rekomendasiFilter.addEventListener('change', function() {
+                ajaxLoadAsesmenMandiri(serializeFilterForm());
+            });
+        }
+    });
+</script>
 @endsection

@@ -32,6 +32,14 @@ class NilaiAsesorController extends Controller
             $query->where('ane.skema_id', $skemaId);
         }
 
+        if ($hasil = $request->get('hasil')) {
+            if ($hasil === 'kompeten') {
+                $query->havingRaw('AVG(ane.nilai) >= COALESCE(MAX(s.kkm), 0)');
+            } elseif ($hasil === 'belum_kompeten') {
+                $query->havingRaw('AVG(ane.nilai) < COALESCE(MAX(s.kkm), 0)');
+            }
+        }
+
         $data = $query
             ->orderByDesc('terakhir_dinilai')
             ->paginate(15)
@@ -42,6 +50,10 @@ class NilaiAsesorController extends Controller
             ->first();
 
         $skemas = Skema::orderBy('nama_skema')->get(['id', 'nama_skema', 'nomor_skema', 'kkm']);
+
+        if ($request->ajax()) {
+            return view('admin.nilai-asesor.partials.table-content', compact('data', 'stats', 'skemas'))->render();
+        }
 
         return view('admin.nilai-asesor.index', compact('data', 'stats', 'skemas'));
     }

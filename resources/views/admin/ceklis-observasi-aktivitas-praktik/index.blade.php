@@ -70,6 +70,24 @@
         flex-wrap: wrap;
     }
 
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
     .btn-filter-search {
         padding: 9px 14px;
         background: #0073bd;
@@ -276,14 +294,23 @@
 </div>
 
 <div class="toolbar">
-    <form method="GET" action="{{ route('admin.ceklis-observasi-aktivitas-praktik.index') }}" class="search-row">
+    <form method="GET" action="{{ route('admin.ceklis-observasi-aktivitas-praktik.index') }}" class="search-row" id="filterForm">
         <div class="search-box">
             <i class="bi bi-search"></i>
             <input type="text" name="search" value="{{ $search }}" placeholder="Cari skema, asesor, atau asesi..." autocomplete="off">
         </div>
         <div class="filter-group">
-            <button type="submit" class="btn-filter-search"><i class="bi bi-funnel"></i> Filter</button>
-            <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.index') }}" class="btn-filter-reset"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+            <select name="skema" class="filter-select">
+                <option value="">Semua Skema</option>
+                @foreach($skemaList ?? [] as $skemaName)
+                    <option value="{{ $skemaName }}" {{ ($skemaFilter ?? '') === $skemaName ? 'selected' : '' }}>{{ $skemaName }}</option>
+                @endforeach
+            </select>
+            <select name="rekomendasi" class="filter-select">
+                <option value="">Semua Rekomendasi</option>
+                <option value="kompeten" {{ ($rekomendasiFilter ?? '') === 'kompeten' ? 'selected' : '' }}>Kompeten</option>
+                <option value="belum_kompeten" {{ ($rekomendasiFilter ?? '') === 'belum_kompeten' ? 'selected' : '' }}>Belum Kompeten</option>
+            </select>
         </div>
     </form>
 </div>
@@ -303,71 +330,16 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($items as $item)
-                    <tr>
-                        <td>{{ $isPaginator ? $items->firstItem() + $loop->index : $loop->iteration }}</td>
-                        <td>
-                            <div>{{ $item->skema?->nama_skema ?? '-' }}</div>
-                            <small style="color:#64748b;">{{ $item->skema?->nomor_skema ?? '-' }}</small>
-                        </td>
-                        <td>{{ $item->asesi?->nama ?? $item->asesi_nik }}</td>
-                        <td>{{ $item->asesor?->nama ?? '-' }}</td>
-                        <td>
-                            @if($item->rekomendasi === 'kompeten')
-                                <span class="badge success">Kompeten</span>
-                            @else
-                                <span class="badge warning">Belum Kompeten</span>
-                            @endif
-                        </td>
-                        <td>{{ $item->created_at?->locale('id')->translatedFormat('d M Y H:i') }}</td>
-                        <td style="text-align:center;">
-                            <div class="action-wrap">
-                                <div class="action-menu">
-                                    <button type="button" class="action-btn" onclick="toggleMenu(this)">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <div class="action-dropdown">
-                                        <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.show', $item->id) }}" class="dropdown-item">
-                                            <i class="bi bi-eye"></i> Lihat
-                                        </a>
-
-                                        @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.edit'))
-                                            <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.edit', $item->id) }}" class="dropdown-item">
-                                                <i class="bi bi-pencil"></i> Edit
-                                            </a>
-                                        @endif
-
-                                        @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.delete'))
-                                            <form method="POST" action="{{ route('admin.ceklis-observasi-aktivitas-praktik.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');" style="margin: 0;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="dropdown-item danger">
-                                                    <i class="bi bi-trash"></i> Hapus
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty">
-                                <i class="bi bi-inboxes" style="font-size: 28px;"></i>
-                                <div>Belum ada data ceklis observasi aktivitas praktik.</div>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
+                @include('admin.ceklis-observasi-aktivitas-praktik.partials.table-rows')
             </tbody>
         </table>
     </div>
 
-    @if($isPaginator && $items->hasPages())
-        <div class="pagination-wrap">{{ $items->links() }}</div>
-    @endif
+    <div class="pagination-wrap" id="paginationWrap">
+        @if($isPaginator && $items->hasPages())
+            {{ $items->links() }}
+        @endif
+    </div>
 </div>
 
 <script>
@@ -396,6 +368,77 @@
                 menu.classList.remove('show');
             });
         }
+    });
+
+    // AJAX Search and Filters
+    const filterForm = document.getElementById('filterForm');
+    const tableBody = document.querySelector('table tbody');
+    const paginationWrap = document.getElementById('paginationWrap');
+
+    function performAjaxSearch(pageUrl = null) {
+        if (!filterForm || !tableBody || !paginationWrap) return;
+
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        
+        let url = pageUrl ? pageUrl : (filterForm.action + '?' + params.toString());
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Gagal memuat data.');
+            return response.json();
+        })
+        .then(data => {
+            tableBody.innerHTML = data.rows || '';
+            paginationWrap.innerHTML = data.pagination || '';
+            window.history.replaceState({}, '', url);
+        })
+        .catch(error => console.error('Search error:', error));
+    }
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            performAjaxSearch();
+        });
+
+        const searchInput = filterForm.querySelector('input[name="search"]');
+        if (searchInput) {
+            searchInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    performAjaxSearch();
+                }
+            });
+
+            let searchTimer = null;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    performAjaxSearch();
+                }, 300);
+            });
+        }
+
+        const filterSelects = filterForm.querySelectorAll('.filter-select');
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                performAjaxSearch();
+            });
+        });
+    }
+
+    paginationWrap?.addEventListener('click', function(event) {
+        const link = event.target.closest('a');
+        if (!link) return;
+
+        event.preventDefault();
+        performAjaxSearch(link.href);
     });
 </script>
 @endsection

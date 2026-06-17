@@ -15,6 +15,7 @@ class PersetujuanAsesmenController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
+        $skemaFilter = $request->get('skema');
 
         $items = PersetujuanAsesmen::query()
             ->when($search, function ($query) use ($search) {
@@ -25,11 +26,25 @@ class PersetujuanAsesmenController extends Controller
                         ->orWhere('nama_asesi', 'like', "%{$search}%");
                 });
             })
+            ->when($skemaFilter, function ($query) use ($skemaFilter) {
+                $query->where('judul_skema', $skemaFilter);
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.persetujuan-asesmen.index', compact('items', 'search'));
+        $skemaList = Skema::query()
+            ->orderBy('nama_skema')
+            ->pluck('nama_skema');
+
+        if ($request->ajax() || $request->expectsJson()) {
+            return response()->json([
+                'rows' => view('admin.persetujuan-asesmen.partials.table-rows', compact('items'))->render(),
+                'pagination' => $items->hasPages() ? (string) $items->links() : '',
+            ]);
+        }
+
+        return view('admin.persetujuan-asesmen.index', compact('items', 'search', 'skemaList', 'skemaFilter'));
     }
 
     public function create()

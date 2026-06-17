@@ -1,9 +1,9 @@
 @forelse($asesi as $item)
 <tr>
-    <td class="bulk-col" style="display:none;text-align:center;">
-        <input type="checkbox" class="bulk-checkbox" value="{{ $item->NIK }}"
-            style="width:16px;height:16px;cursor:pointer;accent-color:#0073bd;">
-    </td>
+    @php
+        $isApproved = strtolower(trim((string) $item->status)) === 'approved';
+    @endphp
+
     <td>
         <div class="user-info">
             @if($item->pas_foto)
@@ -22,12 +22,15 @@
         <span class="nik-text">{{ $item->NIK }}</span>
     </td>
     <td>
+        <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? '-' }} / {{ $item->kelas ?? '-' }}</span>
+    </td>
+    <td>
         <span class="date-text">{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->locale('id')->translatedFormat('d M Y') : '-' }}</span>
     </td>
     <td>
         @if($item->status === 'pending')
             <span class="badge badge-pending">Menunggu</span>
-        @elseif($item->status === 'approved')
+        @elseif($isApproved)
             <span class="badge badge-approved">Disetujui</span>
         @elseif($item->status === 'banned')
             <span class="badge badge-rejected">Ditolak Permanen</span>
@@ -41,30 +44,27 @@
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
             <div class="action-dropdown">
+                @if($item->status === 'pending')
+                <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" title="Verifikasi">
+                    <i class="bi bi-check2-circle" style="font-size: 16px;"></i> Verifikasi
+                </a>
+                @else
                 <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" title="Review Detail">
                     <i class="bi bi-eye" style="font-size: 16px;"></i> Lihat Detail
                 </a>
-                @if($item->status === 'pending')
-                <form action="{{ route('admin.asesi.approve', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Setujui pendaftaran ' . $item->nama . '?'))">
-                    @csrf
-                    <button type="submit" title="Setujui">
-                        <i class="bi bi-check-lg" style="font-size: 16px;"></i> Setujui
-                    </button>
-                </form>
-                <form action="{{ route('admin.asesi.reject', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Tolak pendaftaran ' . $item->nama . '?'))">
-                    @csrf
-                    <button type="submit" title="Tolak">
-                        <i class="bi bi-x-lg" style="font-size: 16px;"></i> Tolak
-                    </button>
-                </form>
+                @if($isApproved)
+                <a href="{{ route('admin.asesi.verifikasi.apl1', $item->NIK) }}" download title="Generate APL 1 (DOCX)">
+                    <i class="bi bi-file-earmark-word" style="font-size: 16px;color:#1e88e5;"></i> Generate APL 1 (Word)
+                </a>
                 @endif
-                @if($item->status !== 'approved')
+                @if(!$isApproved)
                 <form action="{{ route('admin.asesi.delete-registration', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Hapus data pendaftaran ' . $item->nama . '? Asesi akan diminta mengisi ulang formulir dari awal.'))">
                     @csrf
                     <button type="submit" title="Hapus Data Pendaftaran" style="color:#dc2626;">
                         <i class="bi bi-trash" style="font-size: 16px;"></i> Hapus
                     </button>
                 </form>
+                @endif
                 @endif
             </div>
         </div>

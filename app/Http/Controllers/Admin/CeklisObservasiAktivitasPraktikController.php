@@ -17,6 +17,8 @@ class CeklisObservasiAktivitasPraktikController extends Controller
     public function index(Request $request)
     {
         $search = trim((string) $request->get('search'));
+        $skemaFilter = $request->get('skema');
+        $rekomendasiFilter = $request->get('rekomendasi');
 
         $items = CeklisObservasiAktivitasPraktik::query()
             ->with([
@@ -42,11 +44,30 @@ class CeklisObservasiAktivitasPraktikController extends Controller
                         });
                 });
             })
+            ->when($skemaFilter, function ($query) use ($skemaFilter) {
+                $query->whereHas('skema', function ($skemaQuery) use ($skemaFilter) {
+                    $skemaQuery->where('nama_skema', $skemaFilter);
+                });
+            })
+            ->when($rekomendasiFilter, function ($query) use ($rekomendasiFilter) {
+                $query->where('rekomendasi', $rekomendasiFilter);
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.ceklis-observasi-aktivitas-praktik.index', compact('items', 'search'));
+        $skemaList = Skema::query()
+            ->orderBy('nama_skema')
+            ->pluck('nama_skema');
+
+        if ($request->ajax() || $request->expectsJson()) {
+            return response()->json([
+                'rows' => view('admin.ceklis-observasi-aktivitas-praktik.partials.table-rows', compact('items'))->render(),
+                'pagination' => $items->hasPages() ? (string) $items->links() : '',
+            ]);
+        }
+
+        return view('admin.ceklis-observasi-aktivitas-praktik.index', compact('items', 'search', 'skemaList', 'skemaFilter', 'rekomendasiFilter'));
     }
 
     public function create()

@@ -695,6 +695,7 @@ class DashboardController extends Controller
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
         $search = trim((string) $request->get('search'));
         $status = (string) $request->get('status');
+        $rekomendasi = (string) $request->get('rekomendasi');
 
         if (!$asesor || !count($skemaIds)) {
             $data = collect();
@@ -707,13 +708,25 @@ class DashboardController extends Controller
                 'pending_review' => 0,
             ];
 
-            return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status'));
+            if ($request->ajax()) {
+                return view('asesor.asesmen-mandiri.partials.table-rows', compact('data'))->render();
+            }
+
+            return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi'));
         }
 
         $query = DB::table('asesi_skema')->whereIn('skema_id', $skemaIds);
 
         if ($status !== '') {
             $query->where('status', $status);
+        }
+
+        if ($rekomendasi !== '') {
+            if ($rekomendasi === 'belum') {
+                $query->whereNull('rekomendasi');
+            } else {
+                $query->where('rekomendasi', $rekomendasi);
+            }
         }
 
         if ($search !== '') {
@@ -774,7 +787,11 @@ class DashboardController extends Controller
             'pending_review' => $data->where('status', 'selesai')->whereNull('rekomendasi')->count(),
         ];
 
-        return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status'));
+        if ($request->ajax()) {
+            return view('asesor.asesmen-mandiri.partials.table-rows', compact('data'))->render();
+        }
+
+        return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi'));
     }
 
     /**

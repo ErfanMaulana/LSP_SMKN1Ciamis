@@ -73,8 +73,8 @@
             <option value="ditolak" {{ $status === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
             <option value="tidak_banding" {{ $status === 'tidak_banding' ? 'selected' : '' }}>Tidak Banding</option>
         </select>
-        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Filter</button>
-        <a class="btn btn-light" href="{{ route('admin.banding-asesmen.index') }}"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
+        <!-- <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Filter</button>
+        <a class="btn btn-light" href="{{ route('admin.banding-asesmen.index') }}"><i class="bi bi-arrow-counterclockwise"></i> Reset</a> -->
     </form>
 </div>
 
