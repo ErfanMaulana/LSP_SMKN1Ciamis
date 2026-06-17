@@ -521,18 +521,24 @@ class PersetujuanAsesmenFrontController extends Controller
 
         $tukList = Tuk::orderBy('nama_tuk')->get(['id','nama_tuk','tipe_tuk','kota']);
 
+        $savedSignature = $asesor ? $asesor->saved_tanda_tangan : null;
+
         return view('persetujuan-asesmen.front', [
             'item' => $item,
             'role' => 'asesor',
             'skema' => $skema,
             'tukList' => $tukList,
             'asesiNik' => $asesiNik,
+            'savedSignature' => $savedSignature,
         ]);
     }
 
     public function asesorSign(Request $request, $id)
     {
         $item = PersetujuanAsesmen::findOrFail($id);
+
+        $account = $request->user();
+        $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
 
         // Ensure asesi was recommended for this skema before allowing asesor to sign
         $useNik = $this->hasAsesiNikColumn();
@@ -555,6 +561,7 @@ class PersetujuanAsesmenFrontController extends Controller
             'ttd_asesor_nama' => 'required|string|max:255',
             'ttd_asesor_tanggal' => 'required|date',
             'ttd_asesor_file' => 'required|string',
+            'simpan_tanda_tangan' => 'nullable|in:0,1',
             'bukti_verifikasi_portofolio' => 'nullable|boolean',
             'bukti_reviu_produk' => 'nullable|boolean',
             'bukti_observasi_langsung' => 'nullable|boolean',
@@ -604,6 +611,10 @@ class PersetujuanAsesmenFrontController extends Controller
         }
 
         Log::info('Updating asesor signature', ['id' => $item->id, 'data' => $data]);
+
+        if ($request->input('simpan_tanda_tangan') === '1' && $asesor) {
+            $asesor->update(['saved_tanda_tangan' => $request->ttd_asesor_file]);
+        }
 
         $item->update($data);
 

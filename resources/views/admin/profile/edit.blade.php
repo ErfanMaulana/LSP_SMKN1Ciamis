@@ -184,6 +184,59 @@
             </div>
         </div>
     </div>
+
+    {{-- Tanda Tangan Tersimpan --}}
+    <div class="card glass-card signature-manage-card" style="margin-top:18px;">
+        <div class="card-header">
+            <h3><i class="bi bi-pen"></i> Tanda Tangan Tersimpan</h3>
+        </div>
+        <div class="card-body">
+            <p style="font-size:13px;color:#64748b;margin-bottom:16px;">
+                Simpan tanda tangan Anda agar dapat digunakan kembali dengan cepat pada setiap form yang memerlukan tanda tangan admin.
+            </p>
+
+            @if($admin->tanda_tangan)
+                <div id="savedSignatureSection">
+                    <p style="font-size:13px;font-weight:600;color:#334155;margin-bottom:10px;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Tanda tangan sudah tersimpan</p>
+                    <div style="border:1px solid #e5e7eb;border-radius:10px;background:#fafafa;padding:12px;display:inline-block;margin-bottom:14px;">
+                        <img src="{{ $admin->tanda_tangan }}" id="savedSignatureImg" alt="Tanda Tangan Tersimpan" style="max-width:220px;height:auto;display:block;">
+                    </div>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button type="button" class="btn btn-outline-danger" id="btnGantiTTD" onclick="toggleReplaceMode()">
+                            <i class="bi bi-arrow-repeat"></i> Ganti Tanda Tangan
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="btnHapusTTD" onclick="hapusTandaTangan()">
+                            <i class="bi bi-trash"></i> Hapus Tanda Tangan
+                        </button>
+                    </div>
+                </div>
+                <div id="replaceSignatureSection" style="display:none;margin-top:16px;">
+                    <p style="font-size:13px;font-weight:600;color:#334155;margin-bottom:8px;">Gambar tanda tangan baru:</p>
+                    @include('admin.profile._signature_canvas_widget')
+                    <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+                        <button type="button" class="btn btn-primary" id="btnSimpanGantiTTD" onclick="simpanTandaTangan()">
+                            <i class="bi bi-save"></i> Simpan Tanda Tangan Baru
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="cancelReplaceMode()">
+                            <i class="bi bi-x"></i> Batal
+                        </button>
+                    </div>
+                </div>
+            @else
+                <div id="newSignatureSection">
+                    <p style="font-size:13px;font-weight:600;color:#334155;margin-bottom:8px;">Gambar tanda tangan Anda:</p>
+                    @include('admin.profile._signature_canvas_widget')
+                    <div style="margin-top:14px;">
+                        <button type="button" class="btn btn-primary" id="btnSimpanTTD" onclick="simpanTandaTangan()">
+                            <i class="bi bi-save"></i> Simpan Tanda Tangan
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            <div id="ttdStatusMsg" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -239,6 +292,97 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 18px;
     }
+
+    .btn-outline-danger {
+        background: #fff;
+        color: #dc2626;
+        border: 1.5px solid #fca5a5;
+        border-radius: 10px;
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all .2s;
+        text-decoration: none;
+    }
+    .btn-outline-danger:hover { background: #fee2e2; border-color: #ef4444; }
+
+    .btn-outline-secondary {
+        background: #fff;
+        color: #64748b;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 9px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all .2s;
+        text-decoration: none;
+    }
+    .btn-outline-secondary:hover { background: #f1f5f9; }
+
+    /* Signature canvas widget */
+    .sig-canvas-wrapper {
+        border: 2px dashed #d1d5db;
+        border-radius: 12px;
+        background: #fafafa;
+        position: relative;
+        overflow: hidden;
+        max-width: 320px;
+        height: 160px;
+        transition: border-color .2s;
+        cursor: crosshair;
+    }
+    .sig-canvas-wrapper.has-sig {
+        border-style: solid;
+        border-color: #0061a5;
+    }
+    .sig-canvas-wrapper canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+    .sig-canvas-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        pointer-events: none;
+        gap: 6px;
+        transition: opacity .2s;
+    }
+    .sig-canvas-placeholder i { font-size: 24px; }
+    .sig-canvas-placeholder span { font-size: 12px; }
+    .sig-canvas-wrapper.has-sig .sig-canvas-placeholder { opacity: 0; }
+    .sig-canvas-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+    }
+    .btn-clear-sig {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 7px 12px;
+        font-size: 12px;
+        color: #64748b;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all .2s;
+    }
+    .btn-clear-sig:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
 
     .card {
         border-radius: 16px;
@@ -456,39 +600,154 @@
         const previewPlaceholder = document.getElementById('avatarPreviewPlaceholder');
         const removeCheckbox = document.querySelector('input[name="remove_foto_profil"]');
 
-        if (!input || !previewImage || !previewPlaceholder) {
-            return;
-        }
-
-        input.addEventListener('change', function (event) {
-            const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
-
-            if (!file) {
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                previewImage.src = e.target.result;
-                previewImage.style.display = 'block';
-                previewPlaceholder.style.display = 'none';
-
-                if (removeCheckbox) {
-                    removeCheckbox.checked = false;
-                }
-            };
-
-            reader.readAsDataURL(file);
-        });
-
-        if (removeCheckbox) {
-            removeCheckbox.addEventListener('change', function () {
-                if (this.checked) {
-                    previewImage.style.display = 'none';
-                    previewPlaceholder.style.display = 'flex';
-                }
+        if (input && previewImage && previewPlaceholder) {
+            input.addEventListener('change', function (event) {
+                const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                    previewPlaceholder.style.display = 'none';
+                    if (removeCheckbox) removeCheckbox.checked = false;
+                };
+                reader.readAsDataURL(file);
             });
+            if (removeCheckbox) {
+                removeCheckbox.addEventListener('change', function () {
+                    if (this.checked) {
+                        previewImage.style.display = 'none';
+                        previewPlaceholder.style.display = 'flex';
+                    }
+                });
+            }
         }
     })();
+
+    // ─── Tanda Tangan Admin ───────────────────────────
+    const _saveUrl   = @json(route('admin.profile.save-signature'));
+    const _deleteUrl = @json(route('admin.profile.delete-signature'));
+    const _csrf      = @json(csrf_token());
+
+    let _profileSigHas = false;
+
+    function initProfileSigPad() {
+        const wrapper = document.getElementById('profileSigWrapper');
+        const canvas  = document.getElementById('profileSigCanvas');
+        if (!wrapper || !canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let pts = [];
+
+        const resize = () => {
+            const r = Math.max(window.devicePixelRatio || 1, 1);
+            const rect = canvas.getBoundingClientRect();
+            canvas.width  = rect.width  * r;
+            canvas.height = rect.height * r;
+            ctx.setTransform(r, 0, 0, r, 0, 0);
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.lineWidth = 2.5; ctx.strokeStyle = '#111827';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            _profileSigHas = false;
+            wrapper.classList.remove('has-sig');
+        };
+
+        const pt = e => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+
+        canvas.addEventListener('pointerdown', e => { drawing = true; pts = [pt(e)]; canvas.setPointerCapture?.(e.pointerId); });
+        canvas.addEventListener('pointermove', e => {
+            if (!drawing) return;
+            const p = pt(e); pts.push(p);
+            if (pts.length < 2) return;
+            const prev = pts[pts.length - 2];
+            ctx.beginPath(); ctx.moveTo(prev.x, prev.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+            if (!_profileSigHas) { _profileSigHas = true; wrapper.classList.add('has-sig'); }
+        });
+        canvas.addEventListener('pointerup',    () => { drawing = false; pts = []; });
+        canvas.addEventListener('pointerleave', () => { drawing = false; pts = []; });
+
+        document.getElementById('profileSigClear')?.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            _profileSigHas = false;
+            wrapper.classList.remove('has-sig');
+        });
+
+        window.addEventListener('resize', resize);
+        resize();
+    }
+
+    function simpanTandaTangan() {
+        const canvas = document.getElementById('profileSigCanvas');
+        if (!canvas || !_profileSigHas) {
+            showTTDStatus('Silakan gambar tanda tangan terlebih dahulu.', 'error');
+            return;
+        }
+        const dataUrl = canvas.toDataURL('image/png');
+        fetch(_saveUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _csrf, 'Accept': 'application/json' },
+            body: JSON.stringify({ tanda_tangan: dataUrl }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showTTDStatus('Tanda tangan berhasil disimpan!', 'success');
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                showTTDStatus(data.message || 'Terjadi kesalahan.', 'error');
+            }
+        })
+        .catch(() => showTTDStatus('Terjadi kesalahan jaringan.', 'error'));
+    }
+
+    function hapusTandaTangan() {
+        if (!confirm('Yakin ingin menghapus tanda tangan tersimpan?')) return;
+        fetch(_deleteUrl, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': _csrf, 'Accept': 'application/json' },
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showTTDStatus('Tanda tangan dihapus.', 'success');
+                setTimeout(() => location.reload(), 900);
+            } else {
+                showTTDStatus(data.message || 'Terjadi kesalahan.', 'error');
+            }
+        })
+        .catch(() => showTTDStatus('Terjadi kesalahan jaringan.', 'error'));
+    }
+
+    function toggleReplaceMode() {
+        document.getElementById('replaceSignatureSection').style.display = 'block';
+        document.getElementById('savedSignatureSection').querySelector('#btnGantiTTD').style.display = 'none';
+        document.getElementById('savedSignatureSection').querySelector('#btnHapusTTD').style.display = 'none';
+        setTimeout(() => initProfileSigPad(), 50);
+    }
+
+    function cancelReplaceMode() {
+        document.getElementById('replaceSignatureSection').style.display = 'none';
+        document.getElementById('savedSignatureSection').querySelector('#btnGantiTTD').style.display = '';
+        document.getElementById('savedSignatureSection').querySelector('#btnHapusTTD').style.display = '';
+    }
+
+    function showTTDStatus(msg, type) {
+        const el = document.getElementById('ttdStatusMsg');
+        if (!el) return;
+        el.textContent = msg;
+        el.style.display = 'block';
+        if (type === 'success') {
+            el.style.background = '#f0fdf4'; el.style.color = '#166534'; el.style.border = '1px solid #bbf7d0';
+        } else {
+            el.style.background = '#fef2f2'; el.style.color = '#991b1b'; el.style.border = '1px solid #fecaca';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Init canvas only for new signature section (no existing TTD)
+        const newSec = document.getElementById('newSignatureSection');
+        if (newSec) initProfileSigPad();
+    });
 </script>
 @endsection

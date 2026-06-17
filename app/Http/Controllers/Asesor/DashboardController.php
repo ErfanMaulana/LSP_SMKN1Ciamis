@@ -292,6 +292,46 @@ class DashboardController extends Controller
     }
 
     /**
+     * Simpan tanda tangan asesor (base64 data URL) ke profil.
+     */
+    public function saveSignature(Request $request)
+    {
+        $request->validate(['tanda_tangan' => ['required', 'string']]);
+
+        $data = $request->input('tanda_tangan');
+
+        if (!preg_match('/^data:image\/(png|jpeg|jpg|gif|webp);base64,/', $data)) {
+            return response()->json(['success' => false, 'message' => 'Format tanda tangan tidak valid.'], 422);
+        }
+
+        $asesor = $this->getAsesor();
+
+        if (!$asesor) {
+            return response()->json(['success' => false, 'message' => 'Profil asesor tidak ditemukan.'], 404);
+        }
+
+        $asesor->update(['saved_tanda_tangan' => $data]);
+
+        return response()->json(['success' => true, 'message' => 'Tanda tangan berhasil disimpan.']);
+    }
+
+    /**
+     * Hapus tanda tangan tersimpan dari profil asesor.
+     */
+    public function deleteSignature(Request $request)
+    {
+        $asesor = $this->getAsesor();
+
+        if (!$asesor) {
+            return response()->json(['success' => false, 'message' => 'Profil asesor tidak ditemukan.'], 404);
+        }
+
+        $asesor->update(['saved_tanda_tangan' => null]);
+
+        return response()->json(['success' => true, 'message' => 'Tanda tangan berhasil dihapus.']);
+    }
+
+    /**
      * Jadwal ujikom yang ditugaskan ke asesor login.
      */
     public function jadwalIndex(Request $request)
@@ -821,27 +861,26 @@ class DashboardController extends Controller
         $asesor  = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
         $search = trim((string) $request->get('search'));
-        $status = (string) $request->get('status');
+        
+        $status = $request->input('status');
+        if ($status === null) {
+            $status = 'menunggu_review';
+        }
 
         if (!$asesor || !count($skemaIds)) {
             $data = collect();
             $summary = [
                 'total' => 0,
-                'selesai' => 0,
-                'sedang' => 0,
-                'belum' => 0,
-                'reviewed' => 0,
                 'pending_review' => 0,
+                'belum_dikerjakan' => 0,
+                'sudah_direkomendasikan' => 0,
+                'tidak_direkomendasikan' => 0,
             ];
 
             return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status'));
         }
 
         $query = DB::table('asesi_skema')->whereIn('skema_id', $skemaIds);
-
-        if ($status !== '') {
-            $query->where('status', $status);
-        }
 
         if ($search !== '') {
             $query
@@ -881,7 +920,7 @@ class DashboardController extends Controller
             ->get()
             ->pluck('total', 'asset_key');
 
-        $data = $rows->map(function ($row) use ($asesiMap, $skemaMap, $asesmenByAsesiSkema) {
+        $allData = $rows->map(function ($row) use ($asesiMap, $skemaMap, $asesmenByAsesiSkema) {
             $row->asesi = $asesiMap[$row->asesi_nik] ?? null;
             $row->skema = $skemaMap[$row->skema_id] ?? null;
 
@@ -893,13 +932,24 @@ class DashboardController extends Controller
         });
 
         $summary = [
-            'total' => $data->count(),
-            'selesai' => $data->where('status', 'selesai')->count(),
-            'sedang' => $data->where('status', 'sedang_mengerjakan')->count(),
-            'belum' => $data->where('status', 'belum_mulai')->count(),
-            'reviewed' => $data->whereNotNull('rekomendasi')->count(),
-            'pending_review' => $data->where('status', 'selesai')->whereNull('rekomendasi')->count(),
+            'total' => $allData->count(),
+            'pending_review' => $allData->filter(fn($row) => $row->status === 'selesai' && empty($row->rekomendasi))->count(),
+            'belum_dikerjakan' => $allData->filter(fn($row) => $row->status !== 'selesai')->count(),
+            'sudah_direkomendasikan' => $allData->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'lanjut')->count(),
+            'tidak_direkomendasikan' => $allData->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'tidak_lanjut')->count(),
         ];
+
+        if ($status === 'menunggu_review') {
+            $data = $allData->filter(fn($row) => $row->status === 'selesai' && empty($row->rekomendasi));
+        } elseif ($status === 'belum_dikerjakan') {
+            $data = $allData->filter(fn($row) => $row->status !== 'selesai');
+        } elseif ($status === 'sudah_direkomendasikan') {
+            $data = $allData->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'lanjut');
+        } elseif ($status === 'tidak_direkomendasikan') {
+            $data = $allData->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'tidak_lanjut');
+        } else {
+            $data = $allData;
+        }
 
         return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status'));
     }

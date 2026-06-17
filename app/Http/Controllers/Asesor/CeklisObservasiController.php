@@ -270,6 +270,10 @@ class CeklisObservasiController extends Controller
             ->where('asesor_id', $asesor->ID_asesor)
             ->findOrFail($id);
 
+        if (empty($item->ttd_asesi_file)) {
+            return redirect()->back()->with('error', 'Form FR.IA.01 belum dapat diexport karena asesi belum menandatangani ceklis observasi.');
+        }
+
         $detailsByUnit = $item->details
             ->sortBy([
                 ['unit_id', 'asc'],

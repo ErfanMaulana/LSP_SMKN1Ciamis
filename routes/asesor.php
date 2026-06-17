@@ -20,6 +20,8 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         Route::put('/profil', [DashboardController::class, 'updateProfil'])->name('profil.update');
         Route::get('/ubah-password', [DashboardController::class, 'passwordForm'])->name('password.edit');
         Route::put('/ubah-password', [DashboardController::class, 'updatePassword'])->name('password.update');
+        Route::post('/profil/tanda-tangan', [DashboardController::class, 'saveSignature'])->name('profil.save-signature');
+        Route::delete('/profil/tanda-tangan', [DashboardController::class, 'deleteSignature'])->name('profil.delete-signature');
         Route::get('/jadwal', [DashboardController::class, 'jadwalIndex'])->name('jadwal.index');
         Route::get('/kelompok', [DashboardController::class, 'kelompokIndex'])->name('kelompok.index');
         Route::get('/kelompok/{id}', [DashboardController::class, 'kelompokShow'])->name('kelompok.show');

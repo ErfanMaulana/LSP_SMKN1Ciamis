@@ -15,7 +15,6 @@
         .bold { font-weight: 700; }
         .section-gap { margin-top: 0px; }
         .signature-box {
-            border: 1px solid #111;
             height: 52px;
             display: flex;
             align-items: center;
@@ -185,38 +184,28 @@
         </tr>
     </table>
 
-    <table>
-        <tr>
-            <td style="width:50%; text-align:center; padding:6px;">Tanda Tangan Asesor</td>
-            <td style="width:50%; text-align:center; padding:6px;">Tanda Tangan Asesi</td>
-        </tr>
-        <tr>
-            <td style="width:50%; text-align:center; padding:6px;">
-                <div style="width:96px; height:54px; overflow:hidden; border:none; display:flex; align-items:center; justify-content:center; margin:0 auto 3px;">
-                    @if($item->ttd_asesor_file)
-                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
-                    @endif
-                </div>
-            </td>
-            <td style="width:50%; text-align:center; padding:6px;">
-                <div style="width:96px; height:54px; overflow:hidden; border:none; display:flex; align-items:center; justify-content:center; margin:0 auto 3px;">
-                    @if($item->ttd_asesi_file)
-                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
-                    @endif
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td style="width:50%; text-align:center; padding:4px 3px 2px;">
-                <div style="margin-bottom:1px;">{{ $item->ttd_asesor_nama ?: 'Nama Asesor' }}</div>
-                <div>{{ $item->ttd_asesor_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
-            </td>
-            <td style="width:50%; text-align:center; padding:4px 3px 2px;">
-                <div style="margin-bottom:1px;">{{ $item->ttd_asesi_nama ?: 'Nama Asesi' }}</div>
-                <div>{{ $item->ttd_asesi_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
-            </td>
-        </tr>
-    </table>
+    <div style="width:100%; overflow:hidden; margin-top:2px;">
+        <div style="width:49%; float:left; text-align:center; padding:6px 0;">
+            <div style="margin-bottom:6px;">Tanda Tangan Asesor</div>
+            <div style="margin:0 auto 3px;">
+                @if($item->ttd_asesor_file)
+                    <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:inline-block;">
+                @endif
+            </div>
+            <div style="margin-bottom:1px;">{{ $item->ttd_asesor_nama ?: 'Nama Asesor' }}</div>
+            <div>{{ $item->ttd_asesor_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
+        </div>
+        <div style="width:49%; float:right; text-align:center; padding:6px 0;">
+            <div style="margin-bottom:6px;">Tanda Tangan Asesi</div>
+            <div style="margin:0 auto 3px;">
+                @if($item->ttd_asesi_file)
+                    <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:inline-block;">
+                @endif
+            </div>
+            <div style="margin-bottom:1px;">{{ $item->ttd_asesi_nama ?: 'Nama Asesi' }}</div>
+            <div>{{ $item->ttd_asesi_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
+        </div>
+    </div>
 
     @if($item->catatan_footer)
         <div style="margin-top: 8px; font-size: 14.5px; color: #333;">

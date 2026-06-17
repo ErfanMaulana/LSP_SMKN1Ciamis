@@ -32,7 +32,7 @@
 
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 12px;
         margin-bottom: 18px;
     }
@@ -43,6 +43,26 @@
         border-radius: 12px;
         padding: 14px 16px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        border-color: #0073bd;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card.active {
+        border-color: #0073bd;
+        background-color: #f0f9ff;
+        box-shadow: 0 0 0 2px rgba(0, 115, 189, 0.2);
+    }
+
+    .stat-card.active .stat-value {
+        color: #0073bd;
     }
 
     .stat-value {
@@ -208,13 +228,19 @@
         color: #94a3b8;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1024px) {
+        .stats-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
         .stats-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
     }
 
-    @media (max-width: 640px) {
+    @media (max-width: 480px) {
         .stats-grid {
             grid-template-columns: 1fr;
         }
@@ -231,35 +257,34 @@
 </div>
 
 <div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-value">{{ $summary['total'] ?? 0 }}</div>
-        <div class="stat-label">Total Asesi</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{{ $summary['selesai'] ?? 0 }}</div>
-        <div class="stat-label">Selesai Asesmen</div>
-    </div>
-    <div class="stat-card">
+    <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'menunggu_review', 'search' => $search]) }}" class="stat-card {{ $status === 'menunggu_review' ? 'active' : '' }}">
         <div class="stat-value">{{ $summary['pending_review'] ?? 0 }}</div>
         <div class="stat-label">Menunggu Review</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-value">{{ $summary['reviewed'] ?? 0 }}</div>
-        <div class="stat-label">Sudah Direkomendasi</div>
-    </div>
+    </a>
+    <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'belum_dikerjakan', 'search' => $search]) }}" class="stat-card {{ $status === 'belum_dikerjakan' ? 'active' : '' }}">
+        <div class="stat-value">{{ $summary['belum_dikerjakan'] ?? 0 }}</div>
+        <div class="stat-label">Belum Dikerjakan</div>
+    </a>
+    <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'sudah_direkomendasikan', 'search' => $search]) }}" class="stat-card {{ $status === 'sudah_direkomendasikan' ? 'active' : '' }}">
+        <div class="stat-value">{{ $summary['sudah_direkomendasikan'] ?? 0 }}</div>
+        <div class="stat-label">Sudah Direkomendasikan</div>
+    </a>
+    <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'tidak_direkomendasikan', 'search' => $search]) }}" class="stat-card {{ $status === 'tidak_direkomendasikan' ? 'active' : '' }}">
+        <div class="stat-value">{{ $summary['tidak_direkomendasikan'] ?? 0 }}</div>
+        <div class="stat-label">Tidak Direkomendasikan</div>
+    </a>
+    <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'all', 'search' => $search]) }}" class="stat-card {{ $status === 'all' ? 'active' : '' }}">
+        <div class="stat-value">{{ $summary['total'] ?? 0 }}</div>
+        <div class="stat-label">Total Asesi</div>
+    </a>
 </div>
 
 <form method="GET" action="{{ route('asesor.asesmen-mandiri.index') }}" class="filter-bar">
+    <input type="hidden" name="status" value="{{ $status }}">
     <div class="search-box">
         <i class="bi bi-search"></i>
         <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama asesi, NIK, atau skema">
     </div>
-    <select name="status" class="filter-select">
-        <option value="" {{ $status === '' ? 'selected' : '' }}>Semua Status</option>
-        <option value="selesai" {{ $status === 'selesai' ? 'selected' : '' }}>Selesai</option>
-        <option value="sedang_mengerjakan" {{ $status === 'sedang_mengerjakan' ? 'selected' : '' }}>Sedang Dikerjakan</option>
-        <option value="belum_mulai" {{ $status === 'belum_mulai' ? 'selected' : '' }}>Belum Mulai</option>
-    </select>
     <button type="submit" class="btn-filter"><i class="bi bi-funnel"></i> Filter</button>
     <a href="{{ route('asesor.asesmen-mandiri.index') }}" class="btn-reset"><i class="bi bi-arrow-clockwise"></i> Reset</a>
 </form>

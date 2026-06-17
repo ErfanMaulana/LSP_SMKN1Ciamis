@@ -1112,8 +1112,10 @@
         <h3><i class="bi bi-pen"></i> Tanda Tangan Asesi</h3>
         <p class="signature-subtitle">Dengan menandatangani, saya menyatakan bahwa semua jawaban di atas adalah benar dan sesuai dengan kompetensi yang saya miliki.</p>
 
+        @php $asesiSavedTTD = $asesi->tanda_tangan ?? null; @endphp
+
         @if($pivot && $pivot->tanda_tangan && ($pivot->status === 'selesai' || $pivot->rekomendasi))
-        {{-- Signature sudah tersimpan --}}
+        {{-- Signature sudah tersimpan di pivot --}}
         <div class="signature-saved-display">
             <img src="{{ $pivot->tanda_tangan }}" alt="Tanda Tangan Asesi">
             <div class="signature-saved-meta">
@@ -1123,33 +1125,91 @@
         </div>
         @elseif(!($pivot && ($pivot->status === 'selesai' || $pivot->rekomendasi)))
         {{-- Form tanda tangan --}}
-        @if($pivot && $pivot->tanda_tangan)
-        <div class="signature-saved-meta" style="justify-content:flex-start;margin-bottom:10px;">
-            <i class="bi bi-pencil-square"></i>
-            Tanda tangan sudah tersimpan. Gambar ulang untuk mengubah tanda tangan.
-        </div>
-        @endif
-        <div class="signature-canvas-wrapper" id="signatureWrapper">
-            <canvas class="signature-canvas" id="signatureCanvas"></canvas>
-            <div class="signature-placeholder" id="signaturePlaceholder">
-                <i class="bi bi-pen"></i>
-                <span>Tanda tangan di sini</span>
+
+        @if($asesiSavedTTD)
+            {{-- Ada TTD tersimpan di profil: tampilkan pilihan --}}
+            <div id="sigChoiceWrap" style="margin-bottom:14px;">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="optSavedAsesiLabel">
+                    <input type="radio" name="sig_choice_asesi" value="saved" checked id="optSavedAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#10b981;">
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
+                        <div style="font-size:12px;color:#64748b;">Menggunakan TTD yang sudah disimpan di profil Anda</div>
+                    </div>
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="optNewAsesiLabel">
+                    <input type="radio" name="sig_choice_asesi" value="new" id="optNewAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#0073bd;">
+                    <div>
+                        <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda tangan baru</div>
+                        <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk asesmen ini</div>
+                    </div>
+                </label>
             </div>
-        </div>
+
+            {{-- Preview TTD tersimpan --}}
+            <div id="savedAsesiSigPreview">
+                <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
+                    <img src="{{ $asesiSavedTTD }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                </div>
+                <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
+            </div>
+
+            {{-- Canvas tanda tangan baru (tersembunyi) --}}
+            <div id="newAsesiSigDraw" style="display:none;">
+                <div class="signature-canvas-wrapper" id="signatureWrapper">
+                    <canvas class="signature-canvas" id="signatureCanvas"></canvas>
+                    <div class="signature-placeholder" id="signaturePlaceholder">
+                        <i class="bi bi-pen"></i>
+                        <span>Tanda tangan di sini</span>
+                    </div>
+                </div>
+                <div class="signature-actions" style="justify-content:space-between;margin-top:8px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="saveAsesiSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
+                        <label for="saveAsesiSigCheck" style="font-size:12px;color:#475569;cursor:pointer;">Simpan sebagai tanda tangan saya</label>
+                    </div>
+                    <button type="button" class="btn-clear-signature" id="clearSignature">
+                        <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                    </button>
+                </div>
+            </div>
+
+        @else
+            {{-- Tidak ada TTD tersimpan: langsung canvas --}}
+            @if($pivot && $pivot->tanda_tangan)
+            <div class="signature-saved-meta" style="justify-content:flex-start;margin-bottom:10px;">
+                <i class="bi bi-pencil-square"></i>
+                Tanda tangan sudah tersimpan. Gambar ulang untuk mengubah tanda tangan.
+            </div>
+            @endif
+            <div class="signature-canvas-wrapper" id="signatureWrapper">
+                <canvas class="signature-canvas" id="signatureCanvas"></canvas>
+                <div class="signature-placeholder" id="signaturePlaceholder">
+                    <i class="bi bi-pen"></i>
+                    <span>Tanda tangan di sini</span>
+                </div>
+            </div>
+            <div class="signature-actions" style="justify-content:space-between;margin-top:8px;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <input type="checkbox" id="saveAsesiSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
+                    <label for="saveAsesiSigCheck" style="font-size:12px;color:#475569;cursor:pointer;">Simpan sebagai tanda tangan saya</label>
+                </div>
+                <button type="button" class="btn-clear-signature" id="clearSignature">
+                    <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                </button>
+            </div>
+        @endif
+
         <input type="hidden" id="savedTandaTangan" value="{{ $pivot->tanda_tangan ?? '' }}">
         <input type="hidden" name="tanda_tangan" id="tandaTanganInput">
         <div class="signature-error" id="signatureError">
             <i class="bi bi-exclamation-circle"></i>
             <span>Tanda tangan wajib diisi sebelum menyelesaikan asesmen.</span>
         </div>
-        <div class="signature-actions">
+        <div class="signature-actions" style="justify-content:flex-end;">
             <div class="signature-date">
                 <i class="bi bi-calendar3"></i>
                 Tanggal: <strong id="signatureDate">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
             </div>
-            <button type="button" class="btn-clear-signature" id="clearSignature">
-                <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-            </button>
         </div>
         @endif
     </div>
@@ -1491,8 +1551,9 @@
             submitBtn.addEventListener('click', function(e) {
                 setBuktiRequired(true);
                 const confirmModal = document.getElementById('finalConfirmModal');
+                const hiddenInputVal = hiddenInput ? hiddenInput.value : '';
 
-                if (!hasSignature) {
+                if (!hasSignature && !hiddenInputVal) {
                     e.preventDefault();
                     errorEl.style.display = 'flex';
                     document.querySelector('.signature-section').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1546,5 +1607,66 @@
             }
         }
     })();
+
+    // ─── Pilihan TTD tersimpan vs baru (asesmen mandiri) ──────────────
+    function toggleAsesiSigChoice() {
+        const optSaved = document.getElementById('optSavedAsesi');
+        const savedPreview = document.getElementById('savedAsesiSigPreview');
+        const newDraw = document.getElementById('newAsesiSigDraw');
+        const optSavedLabel = document.getElementById('optSavedAsesiLabel');
+        const optNewLabel = document.getElementById('optNewAsesiLabel');
+        const hiddenInput = document.getElementById('tandaTanganInput');
+        const savedSrc = document.querySelector('#savedAsesiSigPreview img')?.src || '';
+
+        if (!optSaved) return;
+
+        if (optSaved.checked) {
+            if (savedPreview) savedPreview.style.display = '';
+            if (newDraw) newDraw.style.display = 'none';
+            optSavedLabel.style.borderColor = '#d1fae5'; optSavedLabel.style.background = '#f0fdf4';
+            optNewLabel.style.borderColor = '#e2e8f0'; optNewLabel.style.background = '#f8fafc';
+            // Pre-fill hidden input
+            if (hiddenInput && savedSrc) hiddenInput.value = savedSrc;
+        } else {
+            if (savedPreview) savedPreview.style.display = 'none';
+            if (newDraw) newDraw.style.display = 'block';
+            optSavedLabel.style.borderColor = '#e2e8f0'; optSavedLabel.style.background = '#f8fafc';
+            optNewLabel.style.borderColor = '#bfdbfe'; optNewLabel.style.background = '#eff6ff';
+            if (hiddenInput) hiddenInput.value = '';
+        }
+    }
+
+    // Pre-fill dengan TTD tersimpan jika opsi "saved" dipilih secara default
+    document.addEventListener('DOMContentLoaded', function() {
+        const optSaved = document.getElementById('optSavedAsesi');
+        if (optSaved && optSaved.checked) {
+            const savedSrc = document.querySelector('#savedAsesiSigPreview img')?.src || '';
+            const hiddenInput = document.getElementById('tandaTanganInput');
+            if (hiddenInput && savedSrc) hiddenInput.value = savedSrc;
+        }
+
+        // Hook submit_final untuk menyimpan TTD baru ke profil jika checkbox dicentang
+        const submitBtn = document.querySelector('[name="submit_final"]');
+        const asesiSaveUrl = @json(route('asesi.profil.save-signature'));
+        const asesiCsrf   = @json(csrf_token());
+
+        if (submitBtn && asesiSaveUrl) {
+            submitBtn.addEventListener('click', function() {
+                const saveCheck = document.getElementById('saveAsesiSigCheck');
+                const optNew = document.getElementById('optNewAsesi');
+                const hiddenInput = document.getElementById('tandaTanganInput');
+
+                // Simpan TTD baru jika checkbox dicentang (baik mode "new" maupun mode no-saved)
+                const isNewMode = !optNew || optNew.checked;
+                if (saveCheck && saveCheck.checked && isNewMode && hiddenInput && hiddenInput.value) {
+                    fetch(asesiSaveUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': asesiCsrf, 'Accept': 'application/json' },
+                        body: JSON.stringify({ tanda_tangan: hiddenInput.value }),
+                    }).catch(() => {});
+                }
+            }, true); // capture phase so it runs before signature validation
+        }
+    });
 </script>
 @endsection

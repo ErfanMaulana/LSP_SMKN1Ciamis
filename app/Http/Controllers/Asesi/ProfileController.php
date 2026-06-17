@@ -84,4 +84,46 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Password berhasil diperbarui!')->with('tab', 'password');
     }
+
+    /**
+     * Simpan tanda tangan asesi (base64 data URL) ke profil.
+     */
+    public function saveSignature(Request $request)
+    {
+        $request->validate(['tanda_tangan' => ['required', 'string']]);
+
+        $data = $request->input('tanda_tangan');
+
+        if (!preg_match('/^data:image\/(png|jpeg|jpg|gif|webp);base64,/', $data)) {
+            return response()->json(['success' => false, 'message' => 'Format tanda tangan tidak valid.'], 422);
+        }
+
+        $account = Auth::guard('account')->user();
+        $asesi   = Asesi::where('NIK', $account->NIK)->first();
+
+        if (!$asesi) {
+            return response()->json(['success' => false, 'message' => 'Data asesi tidak ditemukan.'], 404);
+        }
+
+        $asesi->update(['tanda_tangan' => $data]);
+
+        return response()->json(['success' => true, 'message' => 'Tanda tangan berhasil disimpan.']);
+    }
+
+    /**
+     * Hapus tanda tangan tersimpan dari profil asesi.
+     */
+    public function deleteSignature(Request $request)
+    {
+        $account = Auth::guard('account')->user();
+        $asesi   = Asesi::where('NIK', $account->NIK)->first();
+
+        if (!$asesi) {
+            return response()->json(['success' => false, 'message' => 'Data asesi tidak ditemukan.'], 404);
+        }
+
+        $asesi->update(['tanda_tangan' => null]);
+
+        return response()->json(['success' => true, 'message' => 'Tanda tangan berhasil dihapus.']);
+    }
 }
