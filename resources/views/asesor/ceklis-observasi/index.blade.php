@@ -5,47 +5,127 @@
 
 @section('styles')
 <style>
-    .toolbar {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-        padding: 14px;
-        margin-bottom: 16px;
+    .page-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        gap: 10px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        gap: 12px;
         flex-wrap: wrap;
     }
-
-    .search-box {
-        flex: 1;
-        min-width: 240px;
+    .page-header h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
     }
-
-    .search-box input {
-        width: 100%;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        padding: 9px 12px;
+    .page-header p {
         font-size: 13px;
+        color: #64748b;
+        margin: 4px 0 0;
     }
 
-    .btn {
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #0073bd;
+        color: #ffffff;
         border: none;
         border-radius: 8px;
         padding: 9px 14px;
-        font-size: 13px;
+        font-size: 12px;
+        font-weight: 600;
         text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
+        transition: background 0.2s ease;
+        white-space: nowrap;
+    }
+    .btn-action:hover {
+        background: #003961;
+        color: #ffffff;
     }
 
-    .btn-primary { background: #0073bd; color: #fff; }
-    .btn-secondary { background: #64748b; color: #fff; }
-    .btn-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .filter-form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .filter-row {
+        display: grid;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .filter-row-top {
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
+    }
+
+    .filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .filter-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .search-input-wrapper {
+        flex: 1 1 360px;
+        position: relative;
+        min-width: 0;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 12px 44px 12px 42px;
+        border: 1px solid #dbe4ef;
+        border-radius: 14px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 4px rgba(0, 115, 189, 0.1);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 16px;
+        pointer-events: none;
+    }
+
+    .filter-select {
+        width: 100%;
+        min-width: 0;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid #dbe4ef;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        color: #0f172a;
+        font-size: 14px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        outline: none;
+    }
+
+    .filter-select:focus {
+        border-color: #0073bd;
+        box-shadow: 0 0 0 4px rgba(0, 115, 189, 0.1);
+    }
 
     .card {
         background: #ffffff;
@@ -55,124 +135,118 @@
     }
 
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; font-size: 13px; }
-    th { text-align: left; background: #f8fafc; color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: .3px; }
+    th {
+        text-align: left;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        color: #64748b;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 10px 12px;
+    }
+    td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #334155;
+        vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
 
     .badge {
         display: inline-flex;
         align-items: center;
         border-radius: 999px;
-        padding: 2px 10px;
+        padding: 4px 10px;
         font-size: 11px;
         font-weight: 700;
         text-transform: uppercase;
     }
+    .badge-rekomendasi-kompeten { background: #dcfce7; color: #15803d; }
+    .badge-rekomendasi-belum { background: #fef3c7; color: #92400e; }
 
-    .badge.success { background: #dcfce7; color: #15803d; }
-    .badge.warning { background: #fef3c7; color: #92400e; }
-
-    .action-wrap {
-        display: flex;
-        justify-content: center;
-    }
-
-    .action-menu {
-        position: relative;
-        display: inline-block;
-    }
-
-    .action-btn {
-        width: 32px;
-        height: 32px;
-        border: none;
-        background: transparent;
-        border-radius: 6px;
-        cursor: pointer;
-        display: flex;
+    .btn-review {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        transition: all .2s;
-    }
-
-    .action-btn:hover {
-        background: #f1f5f9;
-    }
-
-    .action-dropdown {
-        display: none;
-        position: fixed;
-        background: #ffffff;
+        gap: 6px;
+        background: #0073bd;
+        color: white;
+        padding: 6px 12px;
         border-radius: 8px;
-        box-shadow: 0 4px 24px rgba(0, 0, 0, .15);
-        min-width: 160px;
-        z-index: 9990;
-        overflow: hidden;
-    }
-
-    .action-dropdown.show {
-        display: block;
-    }
-
-    .dropdown-item,
-    .action-dropdown a,
-    .action-dropdown button {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-        padding: 10px 16px;
-        border: none;
-        background: none;
-        text-align: left;
-        font-size: 14px;
-        color: #475569;
-        cursor: pointer;
-        transition: all .2s;
+        font-size: 12px;
+        font-weight: 600;
         text-decoration: none;
+        transition: background 0.2s;
+        white-space: nowrap;
     }
-
-    .dropdown-item:hover,
-    .action-dropdown a:hover,
-    .action-dropdown button:hover {
-        background: #f8fafc;
-        color: #0f172a;
-    }
-
-    .dropdown-item.danger {
-        color: #475569;
-    }
-
-    .action-dropdown button[type="submit"]:hover {
-        background: #fef2f2;
-        color: #dc2626;
-    }
-
-    .empty {
-        padding: 26px;
-        text-align: center;
+    .btn-review:hover { background: #003961; color: white; }
+    .btn-review.disabled {
+        background: #e2e8f0;
         color: #64748b;
+        pointer-events: none;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+    }
+    .empty-state i {
+        font-size: 36px;
+        color: #d1d5db;
+        display: block;
+        margin-bottom: 8px;
     }
 
     .pager {
         padding: 12px;
     }
+
+    @media (max-width: 900px) {
+        .filter-row-top {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 @endsection
 
 @section('content')
-@php
-    $isPaginator = is_object($items) && method_exists($items, 'firstItem');
-@endphp
-<div class="toolbar">
-    <form method="GET" action="{{ route('asesor.ceklis-observasi.index') }}" class="search-box">
-        <input type="text" name="search" value="{{ $search }}" placeholder="Cari asesi atau skema...">
-    </form>
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="{{ route('asesor.ceklis-observasi.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i> Reset</a>
-        <a href="{{ route('asesor.ceklis-observasi.create') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Isi Ceklis</a>
+<div class="page-header">
+    <div>
+        <h2>Ceklis Observasi Aktivitas Praktik</h2>
+        <p>Kelola ceklis observasi aktivitas praktik asesi.</p>
     </div>
+    <a href="{{ route('asesor.ceklis-observasi.create') }}" class="btn-action">
+        <i class="bi bi-plus-circle"></i> Isi Ceklis
+    </a>
 </div>
+
+<form method="GET" action="{{ route('asesor.ceklis-observasi.index') }}" class="filter-form" id="ceklisObsFilterForm">
+    <div class="filter-row filter-row-top">
+        <div class="search-input-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input
+                type="text"
+                class="search-input"
+                id="ceklisObsSearchInput"
+                name="search"
+                value="{{ $search }}"
+                placeholder="Cari asesi atau skema..."
+                autocomplete="off"
+            >
+        </div>
+        <div class="filter-field">
+            <label class="filter-label">Rekomendasi</label>
+            <select name="rekomendasi" id="ceklisObsRekomendasiFilter" class="filter-select">
+                <option value="">Semua Rekomendasi</option>
+                <option value="kompeten" {{ ($rekomendasi ?? '') === 'kompeten' ? 'selected' : '' }}>Kompeten</option>
+                <option value="belum_kompeten" {{ ($rekomendasi ?? '') === 'belum_kompeten' ? 'selected' : '' }}>Belum Kompeten</option>
+            </select>
+        </div>
+    </div>
+</form>
 
 <div class="card">
     <div style="overflow-x:auto;">
@@ -184,84 +258,100 @@
                     <th>Asesi</th>
                     <th>Rekomendasi</th>
                     <th>Tanggal</th>
-                    <th style="width:80px; text-align:center;">Aksi</th>
+                    <th style="width:100px;">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($items as $item)
-                    <tr>
-                        <td>{{ $isPaginator ? $items->firstItem() + $loop->index : $loop->iteration }}</td>
-                        <td>{{ $item->skema?->nama_skema }}<br><small style="color:#64748b;">{{ $item->skema?->nomor_skema }}</small></td>
-                        <td>{{ $item->asesi?->nama ?? $item->asesi_nik }}</td>
-                        <td>
-                            @if($item->rekomendasi === 'kompeten')
-                                <span class="badge success">Kompeten</span>
-                            @else
-                                <span class="badge warning">Belum Kompeten</span>
-                            @endif
-                        </td>
-                        <td>{{ $item->tanggal?->translatedFormat('d M Y') ?? '-' }}</td>
-                        <td style="text-align:center;">
-                            <div class="action-wrap">
-                                <div class="action-menu">
-                                    <button type="button" class="action-btn" onclick="toggleMenu(this)">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <div class="action-dropdown">
-                                        <a href="{{ route('asesor.ceklis-observasi.show', $item->id) }}" class="dropdown-item">
-                                            <i class="bi bi-eye"></i> Lihat Detail
-                                        </a>
-                                        <a href="{{ route('asesor.ceklis-observasi.edit', $item->id) }}" class="dropdown-item">
-                                            <i class="bi bi-pencil"></i> Edit
-                                        </a>
-                                        <form method="POST" action="{{ route('asesor.ceklis-observasi.destroy', $item->id) }}" onsubmit="return confirm('Hapus ceklis ini?');" style="margin: 0;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="dropdown-item danger">
-                                                <i class="bi bi-trash"></i> Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="6"><div class="empty">Belum ada ceklis observasi yang Anda isi.</div></td></tr>
-                @endforelse
+            <tbody id="ceklisObsTableContainer">
+                @include('asesor.ceklis-observasi.partials.table-rows')
             </tbody>
         </table>
     </div>
 
+    @php $isPaginator = is_object($items) && method_exists($items, 'firstItem'); @endphp
     @if($isPaginator && $items->hasPages())
         <div class="pager">{{ $items->links() }}</div>
     @endif
 </div>
 
 <script>
-    function toggleMenu(button) {
-        const dropdown = button.nextElementSibling;
-        const isVisible = dropdown.classList.contains('show');
+    let ceklisObsAjaxController = null;
+    let ceklisObsSearchTimer = null;
 
-        document.querySelectorAll('.action-dropdown.show').forEach((menu) => {
-            if (menu !== dropdown) {
-                menu.classList.remove('show');
-            }
-        });
-
-        if (!isVisible) {
-            const rect = button.getBoundingClientRect();
-            dropdown.style.top = (rect.bottom + 4) + 'px';
-            dropdown.style.left = (rect.right - 160) + 'px';
+    function ajaxLoadCeklisObs(url) {
+        if (ceklisObsAjaxController) {
+            ceklisObsAjaxController.abort();
         }
 
-        dropdown.classList.toggle('show');
+        ceklisObsAjaxController = new AbortController();
+
+        const tableContainer = document.getElementById('ceklisObsTableContainer');
+        if (tableContainer) {
+            tableContainer.style.opacity = '0.5';
+        }
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            signal: ceklisObsAjaxController.signal
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Gagal memuat data ceklis observasi');
+            }
+            return response.text();
+        })
+        .then(function(html) {
+            if (tableContainer) {
+                tableContainer.innerHTML = html;
+                tableContainer.style.opacity = '1';
+            }
+
+            window.history.replaceState({}, '', url);
+        })
+        .catch(function(error) {
+            if (error.name !== 'AbortError') {
+                console.error(error);
+                if (tableContainer) {
+                    tableContainer.style.opacity = '1';
+                }
+            }
+        });
     }
 
-    document.addEventListener('click', function (event) {
-        if (!event.target.closest('.action-menu')) {
-            document.querySelectorAll('.action-dropdown.show').forEach((menu) => {
-                menu.classList.remove('show');
+    function serializeCeklisObsForm() {
+        const searchInput = document.getElementById('ceklisObsSearchInput');
+        const rekomendasiFilter = document.getElementById('ceklisObsRekomendasiFilter');
+        const url = new URL('{{ route('asesor.ceklis-observasi.index') }}', window.location.origin);
+
+        if (searchInput && searchInput.value.trim() !== '') {
+            url.searchParams.set('search', searchInput.value.trim());
+        }
+
+        if (rekomendasiFilter && rekomendasiFilter.value.trim() !== '') {
+            url.searchParams.set('rekomendasi', rekomendasiFilter.value.trim());
+        }
+
+        return url.toString();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('ceklisObsSearchInput');
+        const rekomendasiFilter = document.getElementById('ceklisObsRekomendasiFilter');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(ceklisObsSearchTimer);
+                ceklisObsSearchTimer = setTimeout(function() {
+                    ajaxLoadCeklisObs(serializeCeklisObsForm());
+                }, 400);
+            });
+        }
+
+        if (rekomendasiFilter) {
+            rekomendasiFilter.addEventListener('change', function() {
+                ajaxLoadCeklisObs(serializeCeklisObsForm());
             });
         }
     });

@@ -1,6 +1,6 @@
 @forelse($jadwals as $i => $jadwal)
 <tr>
-    <td style="color:#94a3b8;font-weight:600;">{{ ($jadwals->currentPage() - 1) * $jadwals->perPage() + $i + 1 }}</td>
+    <td style="color:#94a3b8;font-weight:600;">{{ $jadwals->firstItem() + $i }}</td>
     <td>
         <div style="font-weight:600;color:#0F172A;">{{ $jadwal->judul_jadwal }}</div>
         <div style="font-size:12px;color:#0061a5;margin-top:2px;font-weight:600;">
@@ -59,12 +59,16 @@
                 <i class="bi bi-three-dots-vertical"></i>
             </button>
             <div class="action-dropdown">
+                <a href="{{ route('admin.jadwal-ujikom.show', $jadwal->id) }}">
+                    <i class="bi bi-eye"></i> Detail
+                </a>
                 <a href="{{ route('admin.jadwal-ujikom.edit', $jadwal->id) }}">
                     <i class="bi bi-pencil"></i> Edit
                 </a>
-                <form action="{{ route('admin.jadwal-ujikom.destroy', $jadwal->id) }}" method="POST" style="margin: 0;" data-confirm-message="Hapus jadwal &quot;{{ $jadwal->judul_jadwal }}&quot; ini?" onsubmit="return openDeleteJadwalModal(event, this)">
-                    @csrf
-                    @method('DELETE')
+                <form method="POST" action="{{ route('admin.jadwal-ujikom.destroy', $jadwal->id) }}" style="margin:0;"
+                      data-confirm-message="Hapus jadwal &quot;{{ $jadwal->judul_jadwal }}&quot; ?"
+                      onsubmit="return openDeleteJadwalModal(event, this)">
+                    @csrf @method('DELETE')
                     <button type="submit">
                         <i class="bi bi-trash"></i> Hapus
                     </button>
@@ -75,10 +79,7 @@
 </tr>
 @empty
 <tr>
-                        <a href="{{ route('admin.jadwal-ujikom.show', $jadwal->id) }}">
-                            <i class="bi bi-eye"></i> Detail
-                        </a>
-    <td colspan="9">
+    <td colspan="8">
         <div class="empty-state">
             <i class="bi bi-inbox"></i>
             <h4 style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data jadwal ujikom ditemukan</h4>

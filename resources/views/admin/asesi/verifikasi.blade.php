@@ -1,14 +1,14 @@
 @extends('admin.layout')
 
-@section('title', 'permohonan sertifkasi')
-@section('page-title', 'permohonan sertifkasi')
+@section('title', 'Permohonan Sertifikasi')
+@section('page-title', 'Permohonan Sertifikasi')
 
 @section('content')
 <div class="asesi-verifikasi">
     <!-- Header -->
     <div class="page-header">
         <div>
-            <h2>permohonan sertifkasi</h2>
+            <h2>Permohonan Sertifikasi</h2>
             <p class="subtitle">Kelola dan verifikasi pendaftaran calon asesi baru.</p>
         </div>
     </div>
@@ -64,44 +64,39 @@
     <div class="card">
         <div class="card-body">
             <!-- Filter Section -->
-            <div class="filter-section">
-                <div class="search-box" style="display:flex;gap:8px;flex:1;align-items:center;">
-                    <i class="bi bi-search"></i>
-                    <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" id="verifikasiSearchForm" style="display:flex;gap:8px;width:100%;align-items:center;">
-                        <input type="hidden" name="status" value="{{ $status }}">
-                        <input type="hidden" name="reject_type" value="{{ $rejectType }}">
-                        <input type="hidden" name="per_page" value="{{ $perPage }}">
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NIK, atau email..." style="flex:1;min-width:220px;">
-
-                        <select name="jurusan" id="filter-jurusan" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;background:#fff;color:#475569;cursor:pointer;min-width:200px;">
+            <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" id="verifikasiSearchForm">
+                <input type="hidden" name="status" value="{{ $status }}">
+                <input type="hidden" name="per_page" value="{{ $perPage }}">
+                
+                <div class="filter-section">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama, NIK, atau email..." autocomplete="off">
+                    </div>
+                    <div class="filter-group">
+                        <select name="jurusan" id="filter-jurusan" class="filter-select">
                             <option value="">Semua Jurusan</option>
                             @foreach($jurusanList as $j)
                                 <option value="{{ $j->ID_jurusan }}" {{ (string)($jurusanFilter ?? request('jurusan')) === (string)$j->ID_jurusan ? 'selected' : '' }}>{{ $j->nama_jurusan }}</option>
                             @endforeach
                         </select>
 
-                        <select name="kelas" id="filter-kelas" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;background:#fff;color:#475569;cursor:pointer;min-width:180px;">
+                        <select name="kelas" id="filter-kelas" class="filter-select">
                             <option value="">Semua Kelas</option>
                         </select>
 
-                        <button type="submit" style="padding:8px 12px;background:#0073bd;color:#fff;border:none;border-radius:8px;font-size:13px;">Cari</button>
-                    </form>
-                </div>
-                @if($status === 'rejected')
-                    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                        <label style="font-size:13px;font-weight:500;color:#64748b;white-space:nowrap;">Filter Penolakan:</label>
-                        <form method="GET" action="{{ route('admin.asesi.verifikasi') }}" style="display:flex;gap:8px;">
-                            <input type="hidden" name="status" value="rejected">
-                            <input type="hidden" name="per_page" value="{{ $perPage }}">
-                            <select name="reject_type" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;background:#fff;color:#475569;cursor:pointer;min-width:200px;" onchange="this.form.submit();">
+                        @if($status === 'rejected')
+                            <select name="reject_type" id="filter-reject-type" class="filter-select">
                                 <option value="">Semua Penolakan ({{ $counts['rejected'] }})</option>
                                 <option value="temporary" {{ $rejectType === 'temporary' ? 'selected' : '' }}>Ditolak Sementara ({{ $counts['rejected_temporary'] }})</option>
                                 <option value="permanent" {{ $rejectType === 'permanent' ? 'selected' : '' }}>Ditolak Permanen ({{ $counts['rejected_permanent'] }})</option>
                             </select>
-                        </form>
+                        @endif
+
+                        <!-- <button type="submit" class="btn-filter-search">Cari</button> -->
                     </div>
-                @endif
-            </div>
+                </div>
+            </form>
 
             @if($asesi->count() > 0)
                     <!-- bulk feature removed -->
@@ -121,80 +116,7 @@
                             </tr>
                         </thead>
                         <tbody id="verifikasiTableBody">
-                            @foreach($asesi as $item)
-                            <tr>
-                                @php
-                                    $isApproved = strtolower(trim((string) $item->status)) === 'approved';
-                                @endphp
-
-                                <td>
-                                    <div class="user-info">
-                                        @if($item->pas_foto)
-                                            <img src="{{ asset('storage/' . $item->pas_foto) }}" alt="Foto" class="user-avatar-img">
-                                        @else
-                                            <div class="user-avatar-initials">
-                                                {{ strtoupper(substr($item->nama, 0, 2)) }}
-                                            </div>
-                                        @endif
-                                        <div class="user-details">
-                                            <div class="user-name">{{ $item->nama }}</div>
-                                            
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="nik-text">{{ $item->NIK }}</span>
-                                </td>
-                                <td>
-                                    <span class="scheme-text">{{ $item->jurusan->nama_jurusan ?? '-' }} / {{ $item->kelas ?? '-' }}</span>
-                                </td>
-                                <td>
-                                    <span class="date-text">{{ $item->created_at ? \Carbon\Carbon::parse($item->created_at)->locale('id')->translatedFormat('d M Y') : '-' }}</span>
-                                </td>
-                                <td>
-                                    @if($item->status === 'pending')
-                                        <span class="badge badge-pending">Menunggu</span>
-                                    @elseif($isApproved)
-                                        <span class="badge badge-approved">Disetujui</span>
-                                    @elseif($item->status === 'banned')
-                                        <span class="badge badge-rejected">Ditolak Permanen</span>
-                                    @else
-                                        <span class="badge badge-rejected">Ditolak Sementara</span>
-                                    @endif
-                                </td>
-                                <td style="text-align:center;">
-                                    <div class="action-menu">
-                                        <button class="action-btn" onclick="toggleMenu(this)">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-                                        <div class="action-dropdown">
-                                            @if($item->status === 'pending')
-                                            <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" title="Verifikasi">
-                                                <i class="bi bi-check2-circle" style="font-size: 16px;"></i> Verifikasi
-                                            </a>
-                                            @else
-                                            <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}" title="Review Detail">
-                                                <i class="bi bi-eye" style="font-size: 16px;"></i> Lihat Detail
-                                            </a>
-                                            @if($isApproved)
-                                            <a href="{{ route('admin.asesi.verifikasi.apl1', $item->NIK) }}" download title="Generate APL 1 (DOCX)">
-                                                <i class="bi bi-file-earmark-word" style="font-size: 16px;color:#1e88e5;"></i> Generate APL 1 (Word)
-                                            </a>
-                                            @endif
-                                            @if(!$isApproved)
-                                            <form action="{{ route('admin.asesi.delete-registration', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openVerifikasiFormConfirm(event, this, @js('Hapus data pendaftaran ' . $item->nama . '? Asesi akan diminta mengisi ulang formulir dari awal.'))">
-                                                @csrf
-                                                <button type="submit" title="Hapus Data Pendaftaran" style="color:#dc2626;">
-                                                    <i class="bi bi-trash" style="font-size: 16px;"></i> Hapus
-                                                </button>
-                                            </form>
-                                            @endif
-                                            @endif
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforeach
+                            @include('admin.asesi.partials.verifikasi-table-rows')
                         </tbody>
                     </table>
                 </div>
@@ -421,16 +343,7 @@
     .search-box {
         flex: 1;
         min-width: 300px;
-    }
-
-    .search-box {
         position: relative;
-    }
-
-    .search-box > form {
-        display: flex;
-        gap: 8px;
-        align-items: center;
     }
 
     .search-box i {
@@ -443,18 +356,8 @@
         z-index: 1;
     }
 
-    .search-box button i {
-        position: static;
-        left: auto;
-        top: auto;
-        transform: none;
-        color: inherit;
-        font-size: 16px;
-        z-index: auto;
-    }
-
     .search-box input {
-        flex: 1;
+        width: 100%;
         padding: 10px 14px 10px 42px;
         border: 1px solid #e2e8f0;
         border-radius: 8px;
@@ -467,6 +370,44 @@
         border-color: #0073bd;
         box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
     }
+
+    .filter-group {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
+    .btn-filter-search {
+        padding: 9px 14px;
+        background: #0073bd;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+    }
+    .btn-filter-search:hover { background: #005f99; }
 
     /* Table */
     .table-container {
@@ -831,24 +772,14 @@
             font-size: 20px;
         }
 
-        .search-box > form {
+        .filter-group {
+            width: 100%;
             flex-direction: column;
             align-items: stretch;
-            position: relative;
         }
 
-        .search-box input {
-            height: 42px;
-            padding-top: 10px;
-            padding-bottom: 10px;
-        }
-
-        .search-box i {
-            top: 21px;
-            transform: translateY(-50%);
-        }
-
-        .search-box > form button {
+        .filter-select,
+        .btn-filter-search {
             width: 100%;
         }
 
@@ -1164,27 +1095,88 @@ function initVerifikasiAjaxSearch() {
     if (!searchForm) return;
 
     var searchInput = searchForm.querySelector('input[name="search"]');
-    if (!searchInput) return;
+    var jurusanSelect = document.getElementById('filter-jurusan');
+    var kelasSelect = document.getElementById('filter-kelas');
+    var rejectTypeSelect = document.getElementById('filter-reject-type');
 
-    function performAjaxSearch() {
+    function performAjaxSearch(pageUrl = null) {
         var tableBody = document.getElementById('verifikasiTableBody');
         if (!tableBody) return;
 
         var formData = new FormData(searchForm);
         var params = new URLSearchParams(formData);
 
-        fetch(searchForm.action + '?' + params.toString(), {
+        var url = pageUrl ? pageUrl : (searchForm.action + '?' + params.toString());
+
+        fetch(url, {
             headers: {
-                'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'text/html'
             }
         })
         .then(response => response.text())
-            .then(html => {
-            tableBody.innerHTML = html;
-            window.history.replaceState({}, '', searchForm.action + '?' + params.toString());
+        .then(html => {
+            var parser = new DOMParser();
+            var doc = parser.parseFromString(html, 'text/html');
+
+            var newTbody = doc.getElementById('verifikasiTableBody');
+            var oldTbody = document.getElementById('verifikasiTableBody');
+            if (newTbody && oldTbody) {
+                oldTbody.innerHTML = newTbody.innerHTML;
+            }
+
+            var newPagination = doc.querySelector('.pagination-container');
+            var oldPagination = document.querySelector('.pagination-container');
+            if (newPagination && oldPagination) {
+                oldPagination.outerHTML = newPagination.outerHTML;
+            } else if (oldPagination) {
+                oldPagination.innerHTML = '';
+            }
+
+            window.history.replaceState({}, '', url);
+
+            bindPaginationLinks();
+            bindPerPageInputAjax();
         })
         .catch(error => console.error('Search error:', error));
+    }
+
+    function bindPaginationLinks() {
+        document.querySelectorAll('.pagination-container .page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                performAjaxSearch(this.href);
+            });
+        });
+    }
+
+    function bindPerPageInputAjax() {
+        var perPageInput = document.querySelector('.pagination-container input[name="per_page"]');
+        if (!perPageInput || perPageInput.dataset.bound === '1') return;
+
+        var perPageForm = perPageInput.closest('form');
+        if (perPageForm) {
+            perPageForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+            });
+        }
+
+        var timer = null;
+        perPageInput.addEventListener('input', function() {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                var mainPerPage = searchForm.querySelector('input[name="per_page"]');
+                if (mainPerPage) mainPerPage.value = this.value;
+                performAjaxSearch();
+            }, 300);
+        });
+
+        perPageInput.addEventListener('change', function() {
+            var mainPerPage = searchForm.querySelector('input[name="per_page"]');
+            if (mainPerPage) mainPerPage.value = this.value;
+            performAjaxSearch();
+        });
+
+        perPageInput.dataset.bound = '1';
     }
 
     searchForm.addEventListener('submit', function (event) {
@@ -1192,19 +1184,43 @@ function initVerifikasiAjaxSearch() {
         performAjaxSearch();
     });
 
-    searchInput.addEventListener('keydown', function (event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            performAjaxSearch();
-        }
-    });
+    if (searchInput) {
+        searchInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                performAjaxSearch();
+            }
+        });
 
-    searchInput.addEventListener('input', function () {
-        performAjaxSearch();
-    });
+        var searchTimer = null;
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(performAjaxSearch, 300);
+        });
+    }
+
+    if (jurusanSelect) {
+        jurusanSelect.addEventListener('change', function () {
+            setTimeout(performAjaxSearch, 50);
+        });
+    }
+
+    if (kelasSelect) {
+        kelasSelect.addEventListener('change', function () {
+            performAjaxSearch();
+        });
+    }
+
+    if (rejectTypeSelect) {
+        rejectTypeSelect.addEventListener('change', function () {
+            performAjaxSearch();
+        });
+    }
+
+    bindPaginationLinks();
+    bindPerPageInputAjax();
 }
 
-initVerifikasiBulkActions();
 initVerifikasiAjaxSearch();
 </script>
 @endsection

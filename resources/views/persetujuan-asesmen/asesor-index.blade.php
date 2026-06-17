@@ -15,61 +15,92 @@
     }
     .page-header h2 { margin: 0; font-size: 22px; font-weight: 700; color: #0f172a; }
 
-    .toolbar {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-        padding: 16px;
+    .filter-form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
         margin-bottom: 16px;
     }
 
-    .search-row {
+    .filter-row {
+        display: grid;
+        gap: 10px;
+        align-items: end;
+    }
+
+    .filter-row-top {
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
+    }
+
+    .filter-field {
         display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        align-items: center;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
     }
 
-    .search-box {
-        flex: 1;
-        min-width: 280px;
+    .filter-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .search-input-wrapper {
+        flex: 1 1 360px;
         position: relative;
+        min-width: 0;
     }
 
-    .search-box i {
+    .search-input {
+        width: 100%;
+        padding: 12px 44px 12px 42px;
+        border: 1px solid #dbe4ef;
+        border-radius: 14px;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 4px rgba(0, 115, 189, 0.1);
+    }
+
+    .search-icon {
         position: absolute;
-        left: 12px;
+        left: 14px;
         top: 50%;
         transform: translateY(-50%);
         color: #94a3b8;
+        font-size: 16px;
+        pointer-events: none;
     }
 
-    .search-box input {
+    .filter-select {
         width: 100%;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        padding: 10px 12px 10px 36px;
-        font-size: 13px;
-    }
-
-    .btn {
-        border: none;
-        border-radius: 8px;
+        min-width: 0;
         padding: 10px 14px;
-        font-size: 13px;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        cursor: pointer;
+        border-radius: 12px;
+        border: 1px solid #dbe4ef;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+        color: #0f172a;
+        font-size: 14px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        outline: none;
     }
 
-    .btn-primary { background: #0073bd; color: #fff; }
-    .btn-secondary { background: #64748b; color: #fff; }
-    .btn-danger {
-        background: #fee2e2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
+    .filter-select:focus {
+        border-color: #0073bd;
+        box-shadow: 0 0 0 4px rgba(0, 115, 189, 0.1);
+    }
+
+    @media (max-width: 900px) {
+        .filter-row-top {
+            grid-template-columns: 1fr;
+        }
     }
 
     .card {
@@ -99,7 +130,27 @@
     }
     tr:last-child td { border-bottom: none; }
 
-    .action-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-review {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background: #0073bd;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s;
+        white-space: nowrap;
+    }
+    .btn-review:hover { background: #003961; color: white; }
+    .btn-review.disabled {
+        background: #e2e8f0;
+        color: #64748b;
+        pointer-events: none;
+    }
 
     .status-badge {
         display: inline-flex;
@@ -132,16 +183,31 @@
     <h2>Persetujuan Asesmen dan Kerahasiaan</h2>
 </div>
 
-<div class="toolbar">
-    <form method="GET" action="{{ route('asesor.persetujuan-asesmen.index') }}" class="search-row">
-        <div class="search-box">
-            <i class="bi bi-search"></i>
-            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari skema atau asesi...">
+<form method="GET" action="{{ route('asesor.persetujuan-asesmen.index') }}" class="filter-form" id="persetujuanAsesmenFilterForm">
+    <div class="filter-row filter-row-top">
+        <div class="search-input-wrapper">
+            <i class="bi bi-search search-icon"></i>
+            <input
+                type="text"
+                class="search-input"
+                id="persetujuanAsesmenSearchInput"
+                name="search"
+                value="{{ $search ?? '' }}"
+                placeholder="Cari skema atau asesi..."
+                autocomplete="off"
+            >
         </div>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Filter</button>
-        <a href="{{ route('asesor.persetujuan-asesmen.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i> Reset</a>
-    </form>
-</div>
+        <div class="filter-field">
+            <label class="filter-label">Status</label>
+            <select name="status" id="persetujuanAsesmenStatusFilter" class="filter-select">
+                <option value="">Semua Status</option>
+                <option value="belum_asesor" {{ ($status ?? '') === 'belum_asesor' ? 'selected' : '' }}>Belum Ditandatangani Asesor</option>
+                <option value="belum_asesi" {{ ($status ?? '') === 'belum_asesi' ? 'selected' : '' }}>Belum Ditandatangani Asesi</option>
+                <option value="sudah" {{ ($status ?? '') === 'sudah' ? 'selected' : '' }}>Sudah Ditandatangani</option>
+            </select>
+        </div>
+    </div>
+</form>
 
 <div class="card">
     <div class="admin-table-scroll">
@@ -156,49 +222,94 @@
                     <th style="width: 120px;">Aksi</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($items as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item['skema_nama'] }}</td>
-                        <td>{{ $item['skema_nomor'] }}</td>
-                        <td>{{ $item['asesi_nama'] }}</td>
-                        <td>
-                            @php
-                                $status = $item['status'] ?? '-';
-                                $statusClass = 'status-badge--warning';
-                                if ($status === 'Belum Ditandatangani Asesi') {
-                                    $statusClass = 'status-badge--info';
-                                } elseif ($status === 'Sudah Ditandatangani') {
-                                    $statusClass = 'status-badge--success';
-                                }
-                            @endphp
-                            <span class="status-badge {{ $statusClass }}">{{ $status }}</span>
-                        </td>
-                        <td>
-                            <div class="action-wrap">
-                                @if(!empty($item['asesi_nik']) && !empty($item['skema_id']))
-                                    <a href="{{ route('asesor.persetujuan.front.asesor.show', [$item['asesi_nik'], $item['skema_id']]) }}" class="btn btn-secondary">
-                                        <i class="bi bi-eye"></i> Lihat
-                                    </a>
-                                @else
-                                    <span style="font-size:12px;color:#94a3b8;">Data belum lengkap</span>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6">
-                            <div class="empty">
-                                <i class="bi bi-inboxes" style="font-size: 28px;"></i>
-                                <div>Belum ada asesi/skema yang terhubung ke akun asesor ini.</div>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
+            <tbody id="persetujuanAsesmenTableContainer">
+                @include('persetujuan-asesmen.partials.asesor-table-rows')
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    let persetujuanAsesmenAjaxController = null;
+    let persetujuanAsesmenSearchTimer = null;
+
+    function ajaxLoadPersetujuanAsesmen(url) {
+        if (persetujuanAsesmenAjaxController) {
+            persetujuanAsesmenAjaxController.abort();
+        }
+
+        persetujuanAsesmenAjaxController = new AbortController();
+
+        const tableContainer = document.getElementById('persetujuanAsesmenTableContainer');
+        if (tableContainer) {
+            tableContainer.style.opacity = '0.5';
+        }
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            signal: persetujuanAsesmenAjaxController.signal
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Gagal memuat data persetujuan asesmen');
+            }
+            return response.text();
+        })
+        .then(function(html) {
+            if (tableContainer) {
+                tableContainer.innerHTML = html;
+                tableContainer.style.opacity = '1';
+            }
+
+            window.history.replaceState({}, '', url);
+        })
+        .catch(function(error) {
+            if (error.name !== 'AbortError') {
+                console.error(error);
+                if (tableContainer) {
+                    tableContainer.style.opacity = '1';
+                }
+            }
+        });
+    }
+
+    function serializeFilterForm() {
+        const searchInput = document.getElementById('persetujuanAsesmenSearchInput');
+        const statusFilter = document.getElementById('persetujuanAsesmenStatusFilter');
+        const url = new URL('{{ route('asesor.persetujuan-asesmen.index') }}', window.location.origin);
+
+        if (searchInput && searchInput.value.trim() !== '') {
+            url.searchParams.set('search', searchInput.value.trim());
+        }
+
+        if (statusFilter && statusFilter.value.trim() !== '') {
+            url.searchParams.set('status', statusFilter.value.trim());
+        }
+
+        return url.toString();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('persetujuanAsesmenSearchInput');
+        const statusFilter = document.getElementById('persetujuanAsesmenStatusFilter');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(persetujuanAsesmenSearchTimer);
+                persetujuanAsesmenSearchTimer = setTimeout(function() {
+                    ajaxLoadPersetujuanAsesmen(serializeFilterForm());
+                }, 400);
+            });
+        }
+
+        if (statusFilter) {
+            statusFilter.addEventListener('change', function() {
+                ajaxLoadPersetujuanAsesmen(serializeFilterForm());
+            });
+        }
+    });
+</script>
 @endsection

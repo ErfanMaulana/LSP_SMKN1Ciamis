@@ -16,6 +16,8 @@
     .search-box input:focus { outline:none; border-color:#0073bd; box-shadow:0 0 0 3px rgba(0,115,189,0.1); }
 
     .filter-group { display:flex; gap:12px; flex-wrap:wrap; }
+    .filter-select { padding:10px 36px 10px 14px; border:1px solid #e2e8f0; border-radius:8px; font-size:14px; background:white; cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; transition:all 0.2s; }
+    .filter-select:hover { border-color:#cbd5e1; }
     .btn-filter-search { padding:9px 14px; background:#0073bd; color:white; border:none; border-radius:8px; font-size:14px; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:6px; transition:background 0.2s; }
     .btn-filter-search:hover { background:#005f99; }
     .btn-filter-reset { padding:9px 12px; background:#fee2e2; color:#dc2626; border:none; border-radius:8px; font-size:14px; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:6px; text-decoration:none; transition:background 0.2s; }
@@ -36,7 +38,16 @@
     .badge.success { background:#dcfce7; color:#15803d; }
     .badge.warning { background:#fef3c7; color:#92400e; }
 
-    .action-wrap { display:flex; gap:6px; flex-wrap:wrap; }
+    .action-wrap { display:flex; justify-content:center; }
+    .action-menu { position:relative; display:inline-block; }
+    .action-btn { width:32px; height:32px; border:none; background:transparent; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+    .action-btn:hover { background:#f1f5f9; }
+    .action-dropdown { display:none; position:fixed; background:#ffffff; border-radius:8px; box-shadow:0 4px 24px rgba(0, 0, 0, .15); min-width:160px; z-index:9990; overflow:hidden; }
+    .action-dropdown.show { display:block; }
+    .dropdown-item, .action-dropdown a, .action-dropdown button { display:flex; align-items:center; gap:10px; width:100%; padding:10px 16px; border:none; background:none; text-align:left; font-size:14px; color:#475569; cursor:pointer; transition:all .2s; text-decoration:none; }
+    .dropdown-item:hover, .action-dropdown a:hover, .action-dropdown button:hover { background:#f8fafc; color:#0f172a; }
+    .dropdown-item.danger { color:#475569; }
+    .action-dropdown button[type="submit"]:hover { background:#fef2f2; color:#dc2626; }
     .pagination-wrap { padding:14px; }
     .empty { padding:36px 16px; text-align:center; color:#64748b; }
 </style>
@@ -57,14 +68,23 @@
 </div>
 
 <div class="toolbar">
-    <form method="GET" action="{{ route('admin.rekaman-asesmen-kompetensi.index') }}" class="search-row">
+    <form method="GET" action="{{ route('admin.rekaman-asesmen-kompetensi.index') }}" class="search-row" id="filterForm">
         <div class="search-box">
             <i class="bi bi-search"></i>
             <input type="text" name="search" value="{{ $search }}" placeholder="Cari skema, asesor, atau asesi..." autocomplete="off">
         </div>
         <div class="filter-group">
-            <button type="submit" class="btn-filter-search"><i class="bi bi-funnel"></i> Filter</button>
-            <a href="{{ route('admin.rekaman-asesmen-kompetensi.index') }}" class="btn-filter-reset"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+            <select name="skema" class="filter-select">
+                <option value="">Semua Skema</option>
+                @foreach($skemaList ?? [] as $skemaName)
+                    <option value="{{ $skemaName }}" {{ ($skemaFilter ?? '') === $skemaName ? 'selected' : '' }}>{{ $skemaName }}</option>
+                @endforeach
+            </select>
+            <select name="rekomendasi" class="filter-select">
+                <option value="">Semua Rekomendasi</option>
+                <option value="kompeten" {{ ($rekomendasiFilter ?? '') === 'kompeten' ? 'selected' : '' }}>Kompeten</option>
+                <option value="belum_kompeten" {{ ($rekomendasiFilter ?? '') === 'belum_kompeten' ? 'selected' : '' }}>Belum Kompeten</option>
+            </select>
         </div>
     </form>
 </div>
@@ -80,62 +100,118 @@
                     <th>Asesor</th>
                     <th>Rekomendasi</th>
                     <th>Dibuat</th>
-                    <th style="width:240px;">Aksi</th>
+                    <th style="width:80px; text-align:center;">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($items as $item)
-                    <tr>
-                        <td>{{ $isPaginator ? $items->firstItem() + $loop->index : $loop->iteration }}</td>
-                        <td>
-                            <div>{{ $item->skema?->nama_skema ?? '-' }}</div>
-                            <small style="color:#64748b;">{{ $item->skema?->nomor_skema ?? '-' }}</small>
-                        </td>
-                        <td>{{ $item->asesi?->nama ?? $item->asesi_nik }}</td>
-                        <td>{{ $item->asesor?->nama ?? '-' }}</td>
-                        <td>
-                            @if($item->rekomendasi === 'kompeten')
-                                <span class="badge success">Kompeten</span>
-                            @else
-                                <span class="badge warning">Belum Kompeten</span>
-                            @endif
-                        </td>
-                        <td>{{ $item->created_at?->locale('id')->translatedFormat('d M Y H:i') }}</td>
-                        <td>
-                            <div class="action-wrap">
-                                <a href="{{ route('admin.rekaman-asesmen-kompetensi.show', $item->id) }}" class="btn btn-secondary">
-                                    <i class="bi bi-eye"></i> Lihat
-                                </a>
-
-                                @if(Auth::guard('admin')->user()->hasPermission('rekaman-asesmen-kompetensi.edit'))
-                                    <a href="{{ route('admin.rekaman-asesmen-kompetensi.edit', $item->id) }}" class="btn btn-primary">
-                                        <i class="bi bi-pencil-square"></i> Edit
-                                    </a>
-                                @endif
-
-                                @if(Auth::guard('admin')->user()->hasPermission('rekaman-asesmen-kompetensi.delete'))
-                                    <form method="POST" action="{{ route('admin.rekaman-asesmen-kompetensi.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="bi bi-trash"></i> Hapus
-                                        </button>
-                                    </form>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7"><div class="empty">Belum ada data rekaman asesmen kompetensi.</div></td>
-                    </tr>
-                @endforelse
+                @include('admin.rekaman-asesmen-kompetensi.partials.table-rows')
             </tbody>
         </table>
     </div>
 
-    @if($isPaginator && $items->hasPages())
-        <div class="pagination-wrap">{{ $items->links() }}</div>
-    @endif
+    <div class="pagination-wrap" id="paginationWrap">
+        @if($isPaginator && $items->hasPages())
+            {{ $items->links() }}
+        @endif
+    </div>
 </div>
+<script>
+    function toggleMenu(button) {
+        const dropdown = button.nextElementSibling;
+        const isVisible = dropdown.classList.contains('show');
+
+        document.querySelectorAll('.action-dropdown.show').forEach((menu) => {
+            if (menu !== dropdown) {
+                menu.classList.remove('show');
+            }
+        });
+
+        if (!isVisible) {
+            const rect = button.getBoundingClientRect();
+            dropdown.style.top = (rect.bottom + 4) + 'px';
+            dropdown.style.left = (rect.right - 160) + 'px';
+        }
+
+        dropdown.classList.toggle('show');
+    }
+
+    document.addEventListener('click', function (event) {
+        if (!event.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-dropdown.show').forEach((menu) => {
+                menu.classList.remove('show');
+            });
+        }
+    });
+
+    // AJAX Search and Filters
+    const filterForm = document.getElementById('filterForm');
+    const tableBody = document.querySelector('table tbody');
+    const paginationWrap = document.getElementById('paginationWrap');
+
+    function performAjaxSearch(pageUrl = null) {
+        if (!filterForm || !tableBody || !paginationWrap) return;
+
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        
+        let url = pageUrl ? pageUrl : (filterForm.action + '?' + params.toString());
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Gagal memuat data.');
+            return response.json();
+        })
+        .then(data => {
+            tableBody.innerHTML = data.rows || '';
+            paginationWrap.innerHTML = data.pagination || '';
+            window.history.replaceState({}, '', url);
+        })
+        .catch(error => console.error('Search error:', error));
+    }
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            performAjaxSearch();
+        });
+
+        const searchInput = filterForm.querySelector('input[name="search"]');
+        if (searchInput) {
+            searchInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    performAjaxSearch();
+                }
+            });
+
+            let searchTimer = null;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    performAjaxSearch();
+                }, 300);
+            });
+        }
+
+        const filterSelects = filterForm.querySelectorAll('.filter-select');
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                performAjaxSearch();
+            });
+        });
+    }
+
+    paginationWrap?.addEventListener('click', function(event) {
+        const link = event.target.closest('a');
+        if (!link) return;
+
+        event.preventDefault();
+        performAjaxSearch(link.href);
+    });
+</script>
 @endsection

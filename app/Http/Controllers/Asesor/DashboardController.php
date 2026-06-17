@@ -862,8 +862,11 @@ class DashboardController extends Controller
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
         $search = trim((string) $request->get('search'));
         
-        $status = $request->input('status');
-        if ($status === null) {
+        $status = $request->input('status') ?? '';
+        $rekomendasi = $request->input('rekomendasi') ?? '';
+
+        // If status is not specified and it's not an AJAX request, default to 'menunggu_review' to show the priority tab first
+        if ($status === '' && !$request->ajax() && !$request->has('rekomendasi')) {
             $status = 'menunggu_review';
         }
 
@@ -877,7 +880,11 @@ class DashboardController extends Controller
                 'tidak_direkomendasikan' => 0,
             ];
 
-            return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status'));
+            if ($request->ajax()) {
+                return view('asesor.asesmen-mandiri.partials.table-rows', compact('data'))->render();
+            }
+
+            return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi'));
         }
 
         $query = DB::table('asesi_skema')->whereIn('skema_id', $skemaIds);
@@ -939,19 +946,40 @@ class DashboardController extends Controller
             'tidak_direkomendasikan' => $allData->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'tidak_lanjut')->count(),
         ];
 
-        if ($status === 'menunggu_review') {
-            $data = $allData->filter(fn($row) => $row->status === 'selesai' && empty($row->rekomendasi));
-        } elseif ($status === 'belum_dikerjakan') {
-            $data = $allData->filter(fn($row) => $row->status !== 'selesai');
-        } elseif ($status === 'sudah_direkomendasikan') {
-            $data = $allData->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'lanjut');
-        } elseif ($status === 'tidak_direkomendasikan') {
-            $data = $allData->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'tidak_lanjut');
-        } else {
-            $data = $allData;
+        // Filter based on status (tabs or dropdown)
+        $data = $allData;
+        
+        if ($status !== '') {
+            if ($status === 'menunggu_review') {
+                $data = $data->filter(fn($row) => $row->status === 'selesai' && empty($row->rekomendasi));
+            } elseif ($status === 'belum_dikerjakan') {
+                $data = $data->filter(fn($row) => $row->status !== 'selesai');
+            } elseif ($status === 'sudah_direkomendasikan') {
+                $data = $data->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'lanjut');
+            } elseif ($status === 'tidak_direkomendasikan') {
+                $data = $data->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'tidak_lanjut');
+            } elseif ($status === 'selesai') {
+                $data = $data->filter(fn($row) => $row->status === 'selesai');
+            } elseif ($status === 'sedang_mengerjakan') {
+                $data = $data->filter(fn($row) => $row->status === 'sedang_mengerjakan');
+            } elseif ($status === 'belum_mulai') {
+                $data = $data->filter(fn($row) => $row->status === 'belum_mulai');
+            }
         }
 
-        return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status'));
+        if ($rekomendasi !== '') {
+            if ($rekomendasi === 'belum') {
+                $data = $data->filter(fn($row) => empty($row->rekomendasi));
+            } else {
+                $data = $data->filter(fn($row) => ($row->rekomendasi ?? '') === $rekomendasi);
+            }
+        }
+
+        if ($request->ajax()) {
+            return view('asesor.asesmen-mandiri.partials.table-rows', compact('data'))->render();
+        }
+
+        return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi'));
     }
 
     /**

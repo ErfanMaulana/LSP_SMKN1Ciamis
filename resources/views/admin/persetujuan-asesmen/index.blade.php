@@ -64,6 +64,24 @@
         flex-wrap: wrap;
     }
 
+    .filter-select {
+        padding: 10px 36px 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 14px;
+        background: white;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        transition: all 0.2s;
+    }
+
+    .filter-select:hover {
+        border-color: #cbd5e1;
+    }
+
     .btn-filter-search {
         padding: 9px 14px;
         background: #0073bd;
@@ -256,14 +274,18 @@
 </div>
 
 <div class="toolbar">
-    <form method="GET" action="{{ route('admin.persetujuan-asesmen.index') }}" class="search-row">
+    <form method="GET" action="{{ route('admin.persetujuan-asesmen.index') }}" class="search-row" id="filterForm">
         <div class="search-box">
             <i class="bi bi-search"></i>
             <input type="text" name="search" value="{{ $search }}" placeholder="Cari skema, asesor, atau asesi..." autocomplete="off">
         </div>
         <div class="filter-group">
-            <button type="submit" class="btn-filter-search"><i class="bi bi-funnel"></i> Filter</button>
-            <a href="{{ route('admin.persetujuan-asesmen.index') }}" class="btn-filter-reset"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+            <select name="skema" class="filter-select">
+                <option value="">Semua Skema</option>
+                @foreach($skemaList as $skemaName)
+                    <option value="{{ $skemaName }}" {{ $skemaFilter === $skemaName ? 'selected' : '' }}>{{ $skemaName }}</option>
+                @endforeach
+            </select>
         </div>
     </form>
 </div>
@@ -283,62 +305,16 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($items as $item)
-                    <tr>
-                        <td>{{ $isPaginator ? $items->firstItem() + $loop->index : $loop->iteration }}</td>
-                        <td>{{ $item->judul_skema }}</td>
-                        <td>{{ $item->nomor_skema }}</td>
-                        <td>{{ $item->nama_asesor }}</td>
-                        <td>{{ $item->nama_asesi }}</td>
-                        <td>{{ $item->created_at?->locale('id')->translatedFormat('d M Y H:i') }}</td>
-                        <td class="action-cell">
-                            <div class="action-wrap">
-                                <div class="action-menu">
-                                    <button type="button" class="action-btn" onclick="toggleMenu(this)" aria-label="Aksi data">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <div class="action-dropdown">
-                                        <a href="{{ route('admin.persetujuan-asesmen.show', $item->id) }}">
-                                            <i class="bi bi-eye"></i> Lihat Detail
-                                        </a>
-
-                                        @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.edit'))
-                                            <a href="{{ route('admin.persetujuan-asesmen.edit', $item->id) }}">
-                                                <i class="bi bi-pencil"></i> Edit
-                                            </a>
-                                        @endif
-
-                                        @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.delete'))
-                                            <form method="POST" action="{{ route('admin.persetujuan-asesmen.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');" style="margin:0;">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="danger">
-                                                    <i class="bi bi-trash"></i> Hapus
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty">
-                                <i class="bi bi-inboxes" style="font-size: 28px;"></i>
-                                <div>Belum ada data persetujuan asesmen.</div>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
+                @include('admin.persetujuan-asesmen.partials.table-rows')
             </tbody>
         </table>
     </div>
 
-    @if($isPaginator && $items->hasPages())
-        <div class="pagination-wrap">{{ $items->links() }}</div>
-    @endif
+    <div class="pagination-wrap" id="paginationWrap">
+        @if($isPaginator && $items->hasPages())
+            {{ $items->links() }}
+        @endif
+    </div>
 </div>
 @endsection
 
@@ -369,6 +345,77 @@
         if (!event.target.closest('.action-menu')) {
             document.querySelectorAll('.action-dropdown.show').forEach(dropdown => dropdown.classList.remove('show'));
         }
+    });
+
+    // AJAX Search and Filters
+    const filterForm = document.getElementById('filterForm');
+    const tableBody = document.querySelector('table tbody');
+    const paginationWrap = document.getElementById('paginationWrap');
+
+    function performAjaxSearch(pageUrl = null) {
+        if (!filterForm || !tableBody || !paginationWrap) return;
+
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        
+        let url = pageUrl ? pageUrl : (filterForm.action + '?' + params.toString());
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Gagal memuat data.');
+            return response.json();
+        })
+        .then(data => {
+            tableBody.innerHTML = data.rows || '';
+            paginationWrap.innerHTML = data.pagination || '';
+            window.history.replaceState({}, '', url);
+        })
+        .catch(error => console.error('Search error:', error));
+    }
+
+    if (filterForm) {
+        filterForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            performAjaxSearch();
+        });
+
+        const searchInput = filterForm.querySelector('input[name="search"]');
+        if (searchInput) {
+            searchInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    performAjaxSearch();
+                }
+            });
+
+            let searchTimer = null;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    performAjaxSearch();
+                }, 300);
+            });
+        }
+
+        const skemaSelect = filterForm.querySelector('select[name="skema"]');
+        if (skemaSelect) {
+            skemaSelect.addEventListener('change', function() {
+                performAjaxSearch();
+            });
+        }
+    }
+
+    paginationWrap?.addEventListener('click', function(event) {
+        const link = event.target.closest('a');
+        if (!link) return;
+
+        event.preventDefault();
+        performAjaxSearch(link.href);
     });
 </script>
 @endsection

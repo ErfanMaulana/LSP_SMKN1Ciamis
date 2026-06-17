@@ -122,14 +122,14 @@
                         <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
                         <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
                     </select>
-                    <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
+                    <!-- <button type="button" class="btn-filter-search" onclick="performAjaxSearch()">
                         <i class="bi bi-search"></i>
-                    </button>
-                    @if(request('search') || request('skema') || request('status'))
+                    </button> -->
+                    <!-- @if(request('search') || request('skema') || request('status'))
                     <button type="button" class="btn-filter-reset" title="Reset filter" onclick="resetFilters()">
                         <i class="bi bi-x-lg"></i>
                     </button>
-                    @endif
+                    @endif -->
                 </div>
             </div>
             </form>

@@ -36,11 +36,17 @@ class CeklisObservasiController extends Controller
         if (!$asesor) {
             $items = CeklisObservasiAktivitasPraktik::query()->whereRaw('1 = 0')->paginate(10);
             $search = trim((string) $request->get('search'));
+            $rekomendasi = (string) $request->get('rekomendasi');
 
-            return view('asesor.ceklis-observasi.index', compact('account', 'asesor', 'items', 'search'));
+            if ($request->ajax()) {
+                return view('asesor.ceklis-observasi.partials.table-rows', compact('items'))->render();
+            }
+
+            return view('asesor.ceklis-observasi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi'));
         }
 
         $search = trim((string) $request->get('search'));
+        $rekomendasi = (string) $request->get('rekomendasi');
 
         $items = CeklisObservasiAktivitasPraktik::query()
             ->with([
@@ -61,11 +67,18 @@ class CeklisObservasiController extends Controller
                         });
                 });
             })
+            ->when($rekomendasi !== '', function ($query) use ($rekomendasi) {
+                $query->where('rekomendasi', $rekomendasi);
+            })
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('asesor.ceklis-observasi.index', compact('account', 'asesor', 'items', 'search'));
+        if ($request->ajax()) {
+            return view('asesor.ceklis-observasi.partials.table-rows', compact('items'))->render();
+        }
+
+        return view('asesor.ceklis-observasi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi'));
     }
 
     public function create(Request $request)
