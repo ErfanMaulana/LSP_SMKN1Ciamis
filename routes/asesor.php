@@ -20,6 +20,8 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         Route::put('/profil', [DashboardController::class, 'updateProfil'])->name('profil.update');
         Route::get('/ubah-password', [DashboardController::class, 'passwordForm'])->name('password.edit');
         Route::put('/ubah-password', [DashboardController::class, 'updatePassword'])->name('password.update');
+        Route::post('/profil/tanda-tangan', [DashboardController::class, 'saveSignature'])->name('profil.save-signature');
+        Route::delete('/profil/tanda-tangan', [DashboardController::class, 'deleteSignature'])->name('profil.delete-signature');
         Route::get('/jadwal', [DashboardController::class, 'jadwalIndex'])->name('jadwal.index');
         Route::get('/kelompok', [DashboardController::class, 'kelompokIndex'])->name('kelompok.index');
         Route::get('/kelompok/{id}', [DashboardController::class, 'kelompokShow'])->name('kelompok.show');
@@ -46,6 +48,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
             Route::get('/create', [RekamanAsesmenKompetensiController::class, 'create'])->name('create');
             Route::post('/', [RekamanAsesmenKompetensiController::class, 'store'])->name('store');
             Route::get('/{id}', [RekamanAsesmenKompetensiController::class, 'show'])->name('show');
+            Route::get('/{id}/export', [RekamanAsesmenKompetensiController::class, 'export'])->name('export');
             Route::get('/{id}/edit', [RekamanAsesmenKompetensiController::class, 'edit'])->name('edit');
             Route::put('/{id}', [RekamanAsesmenKompetensiController::class, 'update'])->name('update');
             Route::delete('/{id}', [RekamanAsesmenKompetensiController::class, 'destroy'])->name('destroy');

@@ -57,6 +57,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/profil', [ProfileController::class, 'edit'])->name('admin.profile.edit');
         Route::put('/profil', [ProfileController::class, 'update'])->name('admin.profile.update');
         Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('admin.profile.password');
+        Route::post('/profil/tanda-tangan', [ProfileController::class, 'saveSignature'])->name('admin.profile.save-signature');
+        Route::delete('/profil/tanda-tangan', [ProfileController::class, 'deleteSignature'])->name('admin.profile.delete-signature');
 
         // Global Search
         Route::get('/search', [SearchController::class, 'search'])->name('admin.search');

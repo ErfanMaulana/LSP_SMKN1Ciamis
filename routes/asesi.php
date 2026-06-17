@@ -55,6 +55,8 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::get('/profil', [ProfileController::class, 'edit'])->name('profil.edit');
             Route::put('/profil', [ProfileController::class, 'update'])->name('profil.update');
             Route::put('/profil/password', [ProfileController::class, 'updatePassword'])->name('profil.password');
+            Route::post('/profil/tanda-tangan', [ProfileController::class, 'saveSignature'])->name('profil.save-signature');
+            Route::delete('/profil/tanda-tangan', [ProfileController::class, 'deleteSignature'])->name('profil.delete-signature');
 
             // Jadwal Ujikom - only visible after persetujuan asesmen is signed
             Route::middleware('asesi.persetujuan.signed')->group(function () {

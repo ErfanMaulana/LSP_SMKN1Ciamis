@@ -178,13 +178,48 @@
                 <tr>
                     <th style="width:48px;">No</th>
                     <th style="min-width:280px;">Unit Kompetensi</th>
-                    <th>Observasi Demonstrasi</th>
-                    <th>Portofolio</th>
-                    <th>Pernyataan Pihak Ketiga</th>
-                    <th>Pertanyaan Lisan</th>
-                    <th>Pertanyaan Tertulis</th>
-                    <th>Proyek Kerja</th>
-                    <th>Lainnya</th>
+                    <th>
+                        <div style="display:inline-flex; align-items:center; gap:6px; justify-content:center;">
+                            <input type="checkbox" class="col-select-all" data-column="observasi_demonstrasi">
+                            <span>Observasi Demonstrasi</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div style="display:inline-flex; align-items:center; gap:6px; justify-content:center;">
+                            <input type="checkbox" class="col-select-all" data-column="portofolio">
+                            <span>Portofolio</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div style="display:inline-flex; align-items:center; gap:6px; justify-content:center;">
+                            <input type="checkbox" class="col-select-all" data-column="pernyataan_pihak_ketiga">
+                            <span>Pernyataan Pihak Ketiga</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div style="display:inline-flex; align-items:center; gap:6px; justify-content:center;">
+                            <input type="checkbox" class="col-select-all" data-column="pertanyaan_lisan">
+                            <span>Pertanyaan Lisan</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div style="display:inline-flex; align-items:center; gap:6px; justify-content:center;">
+                            <input type="checkbox" class="col-select-all" data-column="pertanyaan_tertulis">
+                            <span>Pertanyaan Tertulis</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div style="display:inline-flex; align-items:center; gap:6px; justify-content:center;">
+                            <input type="checkbox" class="col-select-all" data-column="proyek_kerja">
+                            <span>Proyek Kerja</span>
+                        </div>
+                    </th>
+                    <th>
+                        <div style="display:inline-flex; align-items:center; gap:6px; justify-content:center;">
+                            <input type="checkbox" class="col-select-all" data-column="lainnya">
+                            <span>Lainnya</span>
+                        </div>
+                    </th>
                 </tr>
             </thead>
             <tbody id="unitRowsContainer">
@@ -268,6 +303,31 @@ document.addEventListener('DOMContentLoaded', function () {
         nomorSkemaInput.value = selected ? (selected.getAttribute('data-nomor') || '') : '';
     };
 
+    function updateHeaderCheckboxes() {
+        const columns = [
+            'observasi_demonstrasi',
+            'portofolio',
+            'pernyataan_pihak_ketiga',
+            'pertanyaan_lisan',
+            'pertanyaan_tertulis',
+            'proyek_kerja',
+            'lainnya'
+        ];
+        columns.forEach((column) => {
+            const headerCheckbox = document.querySelector(`.col-select-all[data-column="${column}"]`);
+            if (!headerCheckbox) return;
+            const checkboxes = document.querySelectorAll(`input[type="checkbox"][name$="[${column}]"]`);
+            if (checkboxes.length === 0) {
+                headerCheckbox.checked = false;
+                headerCheckbox.indeterminate = false;
+                return;
+            }
+            const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            headerCheckbox.checked = (checkedCount === checkboxes.length);
+            headerCheckbox.indeterminate = (checkedCount > 0 && checkedCount < checkboxes.length);
+        });
+    }
+
     const checkboxCell = (name, checked) => {
         return `<input type="checkbox" name="${name}" value="1" ${checked ? 'checked' : ''}>`;
     };
@@ -296,6 +356,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 </tr>
             `;
         }).join('');
+
+        updateHeaderCheckboxes();
     };
 
     const loadBySkema = async () => {
@@ -347,6 +409,27 @@ document.addEventListener('DOMContentLoaded', function () {
         syncNomorSkema();
         loadBySkema();
     });
+
+        // Select all feature
+
+        document.addEventListener('change', function (e) {
+            if (e.target.classList.contains('col-select-all')) {
+                const column = e.target.getAttribute('data-column');
+                const checked = e.target.checked;
+                const checkboxes = document.querySelectorAll(`input[type="checkbox"][name$="[${column}]"]`);
+                checkboxes.forEach((cb) => {
+                    cb.checked = checked;
+                });
+            }
+        });
+
+        if (unitRowsContainer) {
+            unitRowsContainer.addEventListener('change', (e) => {
+                if (e.target && e.target.type === 'checkbox') {
+                    updateHeaderCheckboxes();
+                }
+            });
+        }
 
     syncNomorSkema();
     loadBySkema();

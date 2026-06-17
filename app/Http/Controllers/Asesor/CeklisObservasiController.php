@@ -120,6 +120,24 @@ class CeklisObservasiController extends Controller
                 ->first(['NIK', 'nama']);
 
             if ($asesi) {
+                // Guard: pastikan persetujuan asesmen sudah ditandatangani oleh KEDUA pihak
+                $persetujuan = PersetujuanAsesmen::query()
+                    ->where('nomor_skema', $activeSkema->nomor_skema)
+                    ->where(function ($q) use ($asesi) {
+                        $q->where('asesi_nik', $asesi->NIK)
+                          ->orWhere('nama_asesi', $asesi->nama);
+                    })
+                    ->latest('id')
+                    ->first();
+
+                $signedByAsesor = !empty($persetujuan?->ttd_asesor_nama);
+                $signedByAsesi  = !empty($persetujuan?->ttd_asesi_nama);
+
+                if (!$persetujuan || !$signedByAsesor || !$signedByAsesi) {
+                    return redirect()->route('asesor.asesi.index')
+                        ->with('error', 'Ceklis Observasi hanya dapat diisi setelah Persetujuan Asesmen ditandatangani oleh asesor dan asesi.');
+                }
+
                 $existing = CeklisObservasiAktivitasPraktik::query()
                     ->where('asesor_id', $asesor->ID_asesor)
                     ->where('asesi_nik', $asesi->NIK)
@@ -131,9 +149,41 @@ class CeklisObservasiController extends Controller
                     return redirect()->route('asesor.ceklis-observasi.show', $existing->id);
                 }
 
-                $defaults['asesi_nik'] = $asesi->NIK;
-                $defaults['asesi_nama'] = $asesi->nama;
+                $defaults['asesi_nik']    = $asesi->NIK;
+                $defaults['asesi_nama']   = $asesi->nama;
                 $defaults['ttd_asesi_nama'] = $asesi->nama;
+
+                // Auto-fill TUK dari jadwal asesi (via jadwal_peserta atau kelompok)
+                $jadwalForAsesi = \App\Models\JadwalUjikom::query()
+                    ->with('tuk')
+                    ->where('skema_id', $activeSkema->id)
+                    ->whereHas('peserta', function ($q) use ($asesi) {
+                        $q->where('NIK', $asesi->NIK);
+                    })
+                    ->orderBy('tanggal_mulai')
+                    ->first();
+
+                if (!$jadwalForAsesi) {
+                    // Fallback: cari via kelompok asesi
+                    $asesiWithKelompok = \App\Models\Asesi::where('NIK', $asesi->NIK)
+                        ->first(['NIK', 'kelompok_id']);
+                    if ($asesiWithKelompok?->kelompok_id) {
+                        $jadwalForAsesi = \App\Models\JadwalUjikom::query()
+                            ->with('tuk')
+                            ->where('skema_id', $activeSkema->id)
+                            ->whereHas('kelompoks', function ($q) use ($asesiWithKelompok) {
+                                $q->where('kelompok.id', $asesiWithKelompok->kelompok_id);
+                            })
+                            ->orderBy('tanggal_mulai')
+                            ->first();
+                    }
+                }
+
+                if ($jadwalForAsesi) {
+                    $defaults['tuk']      = $jadwalForAsesi->tuk?->nama_tuk ?? '';
+                    $defaults['tipe_tuk'] = $jadwalForAsesi->tuk?->tipe_tuk ?? '';
+                }
+
             }
         }
 
@@ -144,6 +194,38 @@ class CeklisObservasiController extends Controller
     {
         $asesor = $this->getAsesor();
         abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        // Guard: validasi persetujuan asesmen sebelum menyimpan data
+        $skemaId  = (int) $request->input('skema_id');
+        $asesiNik = trim((string) $request->input('asesi_nik'));
+        if ($skemaId && $asesiNik) {
+            $skema = \App\Models\Skema::find($skemaId);
+            if ($skema) {
+                // Cari nama asesi untuk query persetujuan berdasarkan nama_asesi
+                $asesiObj = Asesi::where('NIK', $asesiNik)->first(['NIK', 'nama']);
+                $asesiNama = $asesiObj?->nama ?? '';
+
+                $persetujuan = PersetujuanAsesmen::query()
+                    ->where('nomor_skema', $skema->nomor_skema)
+                    ->where(function ($q) use ($asesiNik, $asesiNama) {
+                        $q->where('asesi_nik', $asesiNik);
+                        if ($asesiNama !== '') {
+                            $q->orWhere('nama_asesi', $asesiNama);
+                        }
+                    })
+                    ->latest('id')
+                    ->first();
+
+                $signedByAsesor = !empty($persetujuan?->ttd_asesor_nama);
+                $signedByAsesi  = !empty($persetujuan?->ttd_asesi_nama);
+
+                if (!$persetujuan || !$signedByAsesor || !$signedByAsesi) {
+                    return redirect()->back()
+                        ->with('error', 'Ceklis Observasi hanya dapat disimpan setelah Persetujuan Asesmen ditandatangani oleh asesor dan asesi.')
+                        ->withInput();
+                }
+            }
+        }
 
         [$data, $details] = $this->validatedData($request, $asesor, false);
 
@@ -200,6 +282,10 @@ class CeklisObservasiController extends Controller
             ])
             ->where('asesor_id', $asesor->ID_asesor)
             ->findOrFail($id);
+
+        if (empty($item->ttd_asesi_file)) {
+            return redirect()->back()->with('error', 'Form FR.IA.01 belum dapat diexport karena asesi belum menandatangani ceklis observasi.');
+        }
 
         $detailsByUnit = $item->details
             ->sortBy([
@@ -347,8 +433,10 @@ class CeklisObservasiController extends Controller
         }
 
         $tukName = null;
+        $tipeTuk = null;
         $tanggal = null;
 
+        // Cari jadwal via jadwal_peserta (direct asesi linkage)
         $jadwalPick = \App\Models\JadwalUjikom::query()
             ->with('tuk')
             ->where('skema_id', $skemaId)
@@ -358,9 +446,22 @@ class CeklisObservasiController extends Controller
             ->orderBy('tanggal_mulai')
             ->first();
 
+        // Fallback: cari jadwal via kelompok asesi
+        if (!$jadwalPick && $asesi->kelompok_id) {
+            $jadwalPick = \App\Models\JadwalUjikom::query()
+                ->with('tuk')
+                ->where('skema_id', $skemaId)
+                ->whereHas('kelompoks', function ($query) use ($asesi) {
+                    $query->where('kelompok.id', $asesi->kelompok_id);
+                })
+                ->orderBy('tanggal_mulai')
+                ->first();
+        }
+
         if ($jadwalPick) {
-            $tukName = $jadwalPick->tuk?->nama_tuk;
-            $tanggal = $jadwalPick->tanggal_mulai
+            $tukName  = $jadwalPick->tuk?->nama_tuk;
+            $tipeTuk  = $jadwalPick->tuk?->tipe_tuk;
+            $tanggal  = $jadwalPick->tanggal_mulai
                 ? Carbon::parse($jadwalPick->tanggal_mulai)->format('Y-m-d')
                 : ($jadwalPick->tanggal_selesai
                     ? Carbon::parse($jadwalPick->tanggal_selesai)->format('Y-m-d')
@@ -382,11 +483,12 @@ class CeklisObservasiController extends Controller
 
         return response()->json([
             'asesi' => [
-                'id' => (string) $asesi->NIK,
+                'id'   => (string) $asesi->NIK,
                 'nama' => $asesi->nama,
             ],
-            'tuk' => $tukName,
-            'tanggal' => $tanggal,
+            'tuk'      => $tukName,
+            'tipe_tuk' => $tipeTuk,
+            'tanggal'  => $tanggal,
         ]);
     }
 
@@ -459,9 +561,11 @@ class CeklisObservasiController extends Controller
             'belum_kompeten_kuk' => 'nullable|string|max:255',
             'ttd_asesi_nama' => 'nullable|string|max:255',
             'ttd_asesi_tanggal' => 'nullable|date',
+            'ttd_asesi_file' => 'nullable|string',
             'ttd_asesor_nama' => 'nullable|string|max:255',
             'ttd_asesor_no_reg' => 'nullable|string|max:255',
             'ttd_asesor_tanggal' => 'nullable|date',
+            'ttd_asesor_file' => 'nullable|string',
             'catatan_footer' => 'nullable|string|max:255',
             'detail' => 'required|array|min:1',
             'detail.*.unit_id' => 'required|exists:units,id',
@@ -535,6 +639,27 @@ class CeklisObservasiController extends Controller
         }
         if (empty($data['ttd_asesor_no_reg'])) {
             $data['ttd_asesor_no_reg'] = $asesor->no_met;
+        }
+
+        // Decode and save signature files if base64 data URL
+        foreach (['ttd_asesor_file' => 'signature_asesor_', 'ttd_asesi_file' => 'signature_asesi_'] as $field => $prefix) {
+            if (!empty($data[$field]) && strpos($data[$field], 'data:image') === 0) {
+                try {
+                    $signatureData = $data[$field];
+                    list($type, $signatureData) = explode(';', $signatureData);
+                    list(, $signatureData) = explode(',', $signatureData);
+                    $signatureData = base64_decode($signatureData);
+
+                    $filename = $prefix . uniqid() . '_' . time() . '.png';
+                    $path = 'ceklis-observasi/signatures';
+
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path . '/' . $filename, $signatureData);
+                    $data[$field] = $path . '/' . $filename;
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to save ' . $field . ': ' . $e->getMessage());
+                    unset($data[$field]);
+                }
+            }
         }
 
         return [$data, $details];

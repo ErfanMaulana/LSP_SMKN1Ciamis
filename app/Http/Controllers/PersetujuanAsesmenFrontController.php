@@ -80,8 +80,17 @@ class PersetujuanAsesmenFrontController extends Controller
         return JadwalUjikom::query()
             ->with(['tuk', 'skema', 'kelompoks.asesors'])
             ->where('skema_id', $skema->id)
-            ->whereHas('peserta', function ($query) use ($asesi) {
-                $query->where('NIK', $asesi->NIK);
+            ->where(function ($query) use ($asesi) {
+                $query->whereHas('peserta', function ($q) use ($asesi) {
+                    $q->where('NIK', $asesi->NIK);
+                });
+
+                if (!empty($asesi->kelompok_id)) {
+                    $query->orWhere('kelompok_id', $asesi->kelompok_id)
+                          ->orWhereHas('kelompoks', function ($q) use ($asesi) {
+                              $q->where('kelompok.id', $asesi->kelompok_id);
+                          });
+                }
             })
             ->orderByDesc('tanggal_mulai')
             ->first();
@@ -503,10 +512,15 @@ class PersetujuanAsesmenFrontController extends Controller
         $namaAsesi = $asesi ? $asesi->nama : null;
         $useNik = $this->hasAsesiNikColumn();
 
-        // Prevent asesor from viewing/signing if the asesi hasn't been recommended
-        if ($asesi && $skema && ! $asesi->hasRekomendasiLanjutForSkema($skema->id)) {
+        // Persetujuan Asesmen hanya bisa diakses asesor jika asesi sudah memiliki jadwal ujikon dari admin
+        $hasJadwal = false;
+        if ($asesi && $skema) {
+            $hasJadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema) !== null;
+        }
+
+        if (!$hasJadwal) {
             return redirect()->route('asesor.persetujuan-asesmen.index')
-                ->with('error', 'Asesi belum direkomendasikan dari asesmen mandiri; asesor tidak dapat menandatangani.');
+                ->with('error', 'Asesi belum memiliki jadwal ujikon dari admin; persetujuan asesmen belum dapat diakses.');
         }
 
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
@@ -532,18 +546,24 @@ class PersetujuanAsesmenFrontController extends Controller
 
         $tukList = Tuk::orderBy('nama_tuk')->get(['id','nama_tuk','tipe_tuk','kota']);
 
+        $savedSignature = $asesor ? $asesor->saved_tanda_tangan : null;
+
         return view('persetujuan-asesmen.front', [
             'item' => $item,
             'role' => 'asesor',
             'skema' => $skema,
             'tukList' => $tukList,
             'asesiNik' => $asesiNik,
+            'savedSignature' => $savedSignature,
         ]);
     }
 
     public function asesorSign(Request $request, $id)
     {
         $item = PersetujuanAsesmen::findOrFail($id);
+
+        $account = $request->user();
+        $asesor = $account ? Asesor::where('no_met', $account->id)->first() : null;
 
         // Ensure asesi was recommended for this skema before allowing asesor to sign
         $useNik = $this->hasAsesiNikColumn();
@@ -555,14 +575,18 @@ class PersetujuanAsesmenFrontController extends Controller
         }
 
         $skemaForCheck = Skema::where('nomor_skema', $item->nomor_skema)->first();
-        if ($asesiForCheck && $skemaForCheck && ! $asesiForCheck->hasRekomendasiLanjutForSkema($skemaForCheck->id)) {
-            return redirect()->back()->with('error', 'Asesi belum direkomendasikan dari asesmen mandiri; asesor tidak dapat menandatangani.');
+        if ($asesiForCheck && $skemaForCheck) {
+            $hasJadwal = $this->resolveJadwalForAsesiSkema($asesiForCheck, $skemaForCheck) !== null;
+            if (!$hasJadwal) {
+                return redirect()->back()->with('error', 'Asesi belum memiliki jadwal ujikon dari admin; persetujuan asesmen belum dapat ditandatangani.');
+            }
         }
 
         $data = $request->validate([
             'ttd_asesor_nama' => 'required|string|max:255',
             'ttd_asesor_tanggal' => 'required|date',
             'ttd_asesor_file' => 'required|string',
+            'simpan_tanda_tangan' => 'nullable|in:0,1',
             'bukti_verifikasi_portofolio' => 'nullable|boolean',
             'bukti_reviu_produk' => 'nullable|boolean',
             'bukti_observasi_langsung' => 'nullable|boolean',
@@ -612,6 +636,10 @@ class PersetujuanAsesmenFrontController extends Controller
         }
 
         Log::info('Updating asesor signature', ['id' => $item->id, 'data' => $data]);
+
+        if ($request->input('simpan_tanda_tangan') === '1' && $asesor) {
+            $asesor->update(['saved_tanda_tangan' => $request->ttd_asesor_file]);
+        }
 
         $item->update($data);
 

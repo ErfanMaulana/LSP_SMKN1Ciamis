@@ -60,6 +60,7 @@ class Asesi extends Model
         'tanggal_tanda_tangan_admin',
         'verifikasi_bukti_persyaratan_dasar',
         'verifikasi_bukti_administratif',
+        'tanda_tangan',
     ];
 
     protected $casts = [

@@ -228,6 +228,71 @@
                     </button>
                 </form>
             </div>
+
+            {{-- Tanda Tangan Tersimpan --}}
+            @php $asesorTTD = $asesor->saved_tanda_tangan ?? null; @endphp
+            <div class="card password-card" style="margin-top:20px;">
+                <h3>Tanda Tangan Tersimpan</h3>
+                <p class="password-intro">Simpan tanda tangan Anda untuk mempermudah penandatanganan berbagai form dokumen.</p>
+
+                @if($asesorTTD)
+                    <div id="savedSigSection">
+                        <p style="font-size:13px;font-weight:600;color:#166534;margin-bottom:10px;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Tanda tangan sudah tersimpan</p>
+                        <div style="border:1px solid #e2e8f0;border-radius:10px;background:#fafafa;padding:10px;display:inline-block;margin-bottom:14px;">
+                            <img src="{{ $asesorTTD }}" alt="Tanda Tangan Tersimpan" style="max-width:220px;height:auto;display:block;">
+                        </div>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <button type="button" class="btn btn-primary" id="btnGantiTTDAsesor" onclick="asesorToggleReplace()">
+                                <i class="bi bi-arrow-repeat"></i> Ganti Tanda Tangan
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="asesorHapusTTD()">
+                                <i class="bi bi-trash"></i> Hapus Tanda Tangan
+                            </button>
+                        </div>
+                    </div>
+                    <div id="replaceSigSection" style="display:none;margin-top:16px;">
+                        <p style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px;">Gambar tanda tangan baru:</p>
+                        <div class="signature-canvas-wrapper" id="asesorSigWrapper" style="border: 2px dashed #cbd5e1; border-radius: 10px; background: #f8fafc; overflow: hidden; width: 100%; max-width: 260px; aspect-ratio: 1 / 1; position: relative;">
+                            <canvas class="signature-canvas" id="asesorSigCanvas" style="position: absolute; inset:0; width:100%; height:100%; cursor:crosshair;"></canvas>
+                            <div class="signature-placeholder" style="position: absolute; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; color:#cbd5e1; z-index:1;">
+                                <i class="bi bi-pen" style="font-size:24px; display:block; margin-bottom:4px;"></i>
+                                <span style="font-size:12px;">Tanda tangan di sini</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+                            <button type="button" class="btn-clear-signature" id="asesorSigClearReplace" style="border: 1px solid #cbd5e1; background: #ffffff; color: #64748b; padding:6px 12px; border-radius:8px; cursor: pointer; font-size:12px;"><i class="bi bi-eraser"></i> Hapus</button>
+                            <span style="font-size:12px;color:#94a3b8;">Gunakan mouse atau layar sentuh</span>
+                        </div>
+                        <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
+                            <button type="button" class="btn btn-primary" onclick="asesorSimpanTTD()">
+                                <i class="bi bi-save"></i> Simpan Tanda Tangan Baru
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="asesorCancelReplace()">
+                                <i class="bi bi-x"></i> Batal
+                            </button>
+                        </div>
+                    </div>
+                @else
+                    <p style="font-size:13px;color:#64748b;margin-bottom:14px;">Belum ada tanda tangan tersimpan. Gambar tanda tangan Anda di bawah untuk menyimpannya.</p>
+                    <div class="signature-canvas-wrapper" id="asesorSigWrapper" style="border: 2px dashed #cbd5e1; border-radius: 10px; background: #f8fafc; overflow: hidden; width: 100%; max-width: 260px; aspect-ratio: 1 / 1; position: relative;">
+                        <canvas class="signature-canvas" id="asesorSigCanvas" style="position: absolute; inset:0; width:100%; height:100%; cursor:crosshair;"></canvas>
+                        <div class="signature-placeholder" style="position: absolute; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; color:#cbd5e1; z-index:1;">
+                            <i class="bi bi-pen" style="font-size:24px; display:block; margin-bottom:4px;"></i>
+                            <span style="font-size:12px;">Tanda tangan di sini</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+                        <button type="button" class="btn-clear-signature" id="asesorSigClear" style="border: 1px solid #cbd5e1; background: #ffffff; color: #64748b; padding:6px 12px; border-radius:8px; cursor: pointer; font-size:12px;"><i class="bi bi-eraser"></i> Hapus</button>
+                        <span style="font-size:12px;color:#94a3b8;">Gunakan mouse atau layar sentuh</span>
+                    </div>
+                    <div style="margin-top:14px;">
+                        <button type="button" class="btn btn-primary" onclick="asesorSimpanTTD()">
+                            <i class="bi bi-save"></i> Simpan Tanda Tangan
+                        </button>
+                    </div>
+                @endif
+                <div id="asesorTTDStatusMsg" style="display:none;margin-top:12px;padding:10px 14px;border-radius:8px;font-size:13px;"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -396,6 +461,124 @@
                 icon.classList.toggle('bi-eye-slash', isHidden);
             }
         });
+    });
+</script>
+<script>
+    const _asesorSaveUrl   = @json(route('asesor.profil.save-signature'));
+    const _asesorDeleteUrl = @json(route('asesor.profil.delete-signature'));
+    const _asesorCsrf      = @json(csrf_token());
+    let _asesorSigHas = false;
+
+    function initAsesorSigPad(wrapperId, canvasId, clearBtnId) {
+        const wrapper = document.getElementById(wrapperId);
+        const canvas  = document.getElementById(canvasId);
+        if (!wrapper || !canvas) return;
+        const placeholder = wrapper.querySelector('.signature-placeholder');
+        const ctx = canvas.getContext('2d');
+        let drawing = false, pts = [];
+        const resize = () => {
+            const r = Math.max(window.devicePixelRatio || 1, 1);
+            const rect = canvas.getBoundingClientRect();
+            canvas.width  = rect.width  * r;
+            canvas.height = rect.height * r;
+            ctx.setTransform(r, 0, 0, r, 0, 0);
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.lineWidth = 2.5; ctx.strokeStyle = '#0f172a';
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            _asesorSigHas = false;
+            if (placeholder) placeholder.style.display = '';
+        };
+        const pt = e => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+        canvas.addEventListener('pointerdown', e => { drawing = true; pts = [pt(e)]; canvas.setPointerCapture?.(e.pointerId); });
+        canvas.addEventListener('pointermove', e => {
+            if (!drawing) return;
+            const p = pt(e); pts.push(p);
+            if (pts.length < 2) return;
+            const prev = pts[pts.length - 2];
+            ctx.beginPath(); ctx.moveTo(prev.x, prev.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+            if (!_asesorSigHas) { 
+                _asesorSigHas = true; 
+                if (placeholder) placeholder.style.display = 'none';
+            }
+        });
+        canvas.addEventListener('pointerup',    () => { drawing = false; pts = []; });
+        canvas.addEventListener('pointerleave', () => { drawing = false; pts = []; });
+        const clearBtn = document.getElementById(clearBtnId);
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                _asesorSigHas = false;
+                if (placeholder) placeholder.style.display = '';
+            });
+        }
+        window.addEventListener('resize', resize);
+        resize();
+    }
+
+    function asesorSimpanTTD() {
+        const canvas = document.getElementById('asesorSigCanvas');
+        if (!canvas || !_asesorSigHas) {
+            asesorShowStatus('Silakan gambar tanda tangan terlebih dahulu.', 'error');
+            return;
+        }
+        fetch(_asesorSaveUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': _asesorCsrf, 'Accept': 'application/json' },
+            body: JSON.stringify({ tanda_tangan: canvas.toDataURL('image/png') }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                asesorShowStatus('Tanda tangan berhasil disimpan!', 'success');
+                setTimeout(() => location.reload(), 1100);
+            } else { asesorShowStatus(data.message || 'Terjadi kesalahan.', 'error'); }
+        })
+        .catch(() => asesorShowStatus('Terjadi kesalahan jaringan.', 'error'));
+    }
+
+    function asesorHapusTTD() {
+        if (!confirm('Yakin ingin menghapus tanda tangan tersimpan?')) return;
+        fetch(_asesorDeleteUrl, {
+            method: 'DELETE',
+            headers: { 'X-CSRF-TOKEN': _asesorCsrf, 'Accept': 'application/json' },
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                asesorShowStatus('Tanda tangan dihapus.', 'success');
+                setTimeout(() => location.reload(), 800);
+            } else { asesorShowStatus(data.message || 'Terjadi kesalahan.', 'error'); }
+        })
+        .catch(() => asesorShowStatus('Terjadi kesalahan jaringan.', 'error'));
+    }
+
+    function asesorToggleReplace() {
+        document.getElementById('replaceSigSection').style.display = 'block';
+        document.getElementById('btnGantiTTDAsesor').style.display = 'none';
+        setTimeout(() => initAsesorSigPad('asesorSigWrapper', 'asesorSigCanvas', 'asesorSigClearReplace'), 50);
+    }
+
+    function asesorCancelReplace() {
+        document.getElementById('replaceSigSection').style.display = 'none';
+        document.getElementById('btnGantiTTDAsesor').style.display = '';
+    }
+
+    function asesorShowStatus(msg, type) {
+        const el = document.getElementById('asesorTTDStatusMsg');
+        if (!el) return;
+        el.textContent = msg; el.style.display = 'block';
+        if (type === 'success') {
+            el.style.background = '#f0fdf4'; el.style.color = '#166534'; el.style.border = '1px solid #bbf7d0';
+        } else {
+            el.style.background = '#fef2f2'; el.style.color = '#991b1b'; el.style.border = '1px solid #fecaca';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Init canvas for new signature (no existing saved TTD)
+        if (document.getElementById('asesorSigWrapper') && !document.getElementById('savedSigSection')) {
+            initAsesorSigPad('asesorSigWrapper', 'asesorSigCanvas', 'asesorSigClear');
+        }
     });
 </script>
 @endsection

@@ -701,6 +701,8 @@
                     // Show persetujuan/jadwal only when persetujuan asesmen data is already available.
                     $showPersetujuan = false;
                     $showJadwal = false;
+                    $showCeklis = false;
+                    $ceklisRecord = null;
                 if ($asesi) {
                     try {
                         $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
@@ -726,9 +728,24 @@
 
                         $showPersetujuan = $pq->exists();
                         $showJadwal = $showPersetujuan && $hasSignedPersetujuanAsesmen;
+
+                        $ceklisRecord = \App\Models\CeklisObservasiAktivitasPraktik::query()
+                            ->where('asesi_nik', $asesi->NIK)
+                            ->where(function($q) {
+                                $q->whereNotNull('ttd_asesor_nama')
+                                  ->where('ttd_asesor_nama', '!=', '');
+                            })
+                            ->where(function($q) {
+                                $q->whereNotNull('ttd_asesor_file')
+                                  ->where('ttd_asesor_file', '!=', '');
+                            })
+                            ->latest('id')
+                            ->first();
+                        $showCeklis = (bool) $ceklisRecord;
                     } catch (\Throwable $e) {
                         $showPersetujuan = false;
                         $showJadwal = false;
+                        $showCeklis = false;
                     }
                 }
             @endphp
@@ -793,6 +810,13 @@
                     <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="menu-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-check"></i>
                         <span>Persetujuan Asesmen</span>
+                    </a>
+                    @endif
+
+                    @if($showCeklis && $ceklisRecord)
+                    <a href="{{ route('asesi.ceklis-observasi.view', $ceklisRecord->id) }}" class="menu-item {{ request()->routeIs('asesi.ceklis-observasi.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-medical"></i>
+                        <span>Ceklis Observasi</span>
                     </a>
                     @endif
 
@@ -935,6 +959,13 @@
                     <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-check"></i>
                         <span>Persetujuan</span>
+                    </a>
+                    @endif
+
+                    @if(!empty($showCeklis) && $ceklisRecord)
+                    <a href="{{ route('asesi.ceklis-observasi.view', $ceklisRecord->id) }}" class="bottom-nav-item {{ request()->routeIs('asesi.ceklis-observasi.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-medical"></i>
+                        <span>Ceklis</span>
                     </a>
                     @endif
 

@@ -612,20 +612,63 @@
             </div>
             <div class="signature-modal-body">
                 <div id="signatureErrorDokumen" class="signature-error" style="display:none;">Tanda tangan harus diisi sebelum submit</div>
+
+                @php $regSavedTTD = $asesi->tanda_tangan ?? null; @endphp
+
+                @if($regSavedTTD)
+                {{-- Ada TTD tersimpan di profil --}}
+                <div id="regSigChoiceWrap" style="margin-bottom:14px;">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="regOptSavedLabel">
+                        <input type="radio" name="reg_sig_choice" value="saved" checked id="regOptSaved" onchange="toggleRegSigChoice()" style="accent-color:#10b981;">
+                        <div>
+                            <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
+                            <div style="font-size:12px;color:#64748b;">Menggunakan TTD yang sudah disimpan di profil Anda</div>
+                        </div>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="regOptNewLabel">
+                        <input type="radio" name="reg_sig_choice" value="new" id="regOptNew" onchange="toggleRegSigChoice()" style="accent-color:#0073bd;">
+                        <div>
+                            <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda tangan baru</div>
+                            <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk pendaftaran ini</div>
+                        </div>
+                    </label>
+                </div>
+                <div id="regSavedSigPreview">
+                    <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
+                        <img src="{{ $regSavedTTD }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                    </div>
+                </div>
+                <div id="regNewSigDraw" style="display:none;">
+                    <div class="signature-box" id="signatureBoxDokumen">
+                        <canvas id="signatureCanvasDokumen" class="signature-canvas"></canvas>
+                        <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
+                    </div>
+                    <div class="signature-modal-actions">
+                        <p class="signature-meta">Tanggal &amp; waktu akan dicatat secara otomatis</p>
+                        <button type="button" onclick="clearSignatureDokumen()" class="btn-signature-clear">
+                            <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                            Hapus
+                        </button>
+                    </div>
+                </div>
+                @else
+                {{-- Tidak ada TTD tersimpan --}}
                 <div class="signature-box" id="signatureBoxDokumen">
                     <canvas id="signatureCanvasDokumen" class="signature-canvas"></canvas>
                     <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
                 </div>
                 <div class="signature-modal-actions">
-                    <p class="signature-meta">Tanggal & waktu akan dicatat secara otomatis</p>
-                    <button type="button" onclick="clearSignatureDokumen()"
-                        class="btn-signature-clear">
+                    <p class="signature-meta">Tanggal &amp; waktu akan dicatat secara otomatis</p>
+                    <button type="button" onclick="clearSignatureDokumen()" class="btn-signature-clear">
                         <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
                         Hapus
                     </button>
                 </div>
+                @endif
             </div>
             <div class="signature-modal-footer">
                 <button type="button" onclick="closeSignatureModal()" class="btn-signature-cancel">Batal</button>
@@ -1048,6 +1091,49 @@ document.addEventListener('DOMContentLoaded', function() {
             closeSignatureModal();
         }
     });
+
+    // Pre-fill signatureInput with saved TTD when modal opens (if "saved" is selected by default)
+    const _savedSrc = document.querySelector('#regSavedSigPreview img')?.src || '';
+    if (_savedSrc) {
+        const signatureInput = document.getElementById('signatureInputDokumen');
+        if (signatureInput) signatureInput.value = _savedSrc;
+    }
 });
+
+function toggleRegSigChoice() {
+    const optSaved = document.getElementById('regOptSaved');
+    const savedPreview = document.getElementById('regSavedSigPreview');
+    const newDraw = document.getElementById('regNewSigDraw');
+    const optSavedLabel = document.getElementById('regOptSavedLabel');
+    const optNewLabel = document.getElementById('regOptNewLabel');
+    const signatureInput = document.getElementById('signatureInputDokumen');
+    const savedSrc = document.querySelector('#regSavedSigPreview img')?.src || '';
+
+    if (!optSaved) return;
+
+    if (optSaved.checked) {
+        if (savedPreview) savedPreview.style.display = '';
+        if (newDraw) newDraw.style.display = 'none';
+        optSavedLabel.style.borderColor = '#d1fae5'; optSavedLabel.style.background = '#f0fdf4';
+        optNewLabel.style.borderColor = '#e2e8f0'; optNewLabel.style.background = '#f8fafc';
+        if (signatureInput && savedSrc) signatureInput.value = savedSrc;
+    } else {
+        if (savedPreview) savedPreview.style.display = 'none';
+        if (newDraw) {
+            newDraw.style.display = 'block';
+            // Initialize canvas when revealed
+            window.requestAnimationFrame(() => {
+                window.requestAnimationFrame(() => {
+                    if (typeof window.dokumenSignatureResize === 'function') {
+                        window.dokumenSignatureResize();
+                    }
+                });
+            });
+        }
+        optSavedLabel.style.borderColor = '#e2e8f0'; optSavedLabel.style.background = '#f8fafc';
+        optNewLabel.style.borderColor = '#bfdbfe'; optNewLabel.style.background = '#eff6ff';
+        if (signatureInput) signatureInput.value = '';
+    }
+}
 </script>
 @endsection

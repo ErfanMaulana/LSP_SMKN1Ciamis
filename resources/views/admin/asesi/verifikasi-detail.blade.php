@@ -1279,24 +1279,84 @@
     <div class="modal-box modal-box-approve">
         <h3><i class="bi bi-check-circle" style="color:#10b981;"></i> Konfirmasi Persetujuan</h3>
         <p>Apakah Anda yakin ingin <strong>menyetujui</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>? Email notifikasi akan dikirim ke <strong>{{ $asesi->email }}</strong>.</p>
+
+        @php $adminTTD = auth()->guard('admin')->user()->tanda_tangan ?? null; @endphp
+
         <div class="signature-section" style="margin-top:14px;padding-top:0;border-top:none;">
             <h4 style="display:flex;align-items:center;gap:8px;justify-content:center;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda Tangan Admin</h4>
-            <div class="signature-box" id="signatureBoxAdmin">
-                <canvas id="signatureCanvasAdmin"></canvas>
-                <div class="signature-placeholder" id="signaturePlaceholderAdmin">
-                    <i class="bi bi-pen"></i>
-                    <span>Silakan tanda tangan admin sebelum menyetujui pendaftaran.</span>
+
+            @if($adminTTD)
+                {{-- Mode pilihan: tersimpan vs baru --}}
+                <div id="sigOptionWrap" style="margin:10px 0 12px;">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="optSavedLabel">
+                        <input type="radio" name="sig_choice" value="saved" checked id="optSaved" onchange="toggleSigChoice()" style="accent-color:#10b981;">
+                        <div>
+                            <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
+                            <div style="font-size:12px;color:#64748b;">Otomatis menggunakan TTD yang sudah disimpan di profil Anda</div>
+                        </div>
+                    </label>
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="optNewLabel">
+                        <input type="radio" name="sig_choice" value="new" id="optNew" onchange="toggleSigChoice()" style="accent-color:#0073bd;">
+                        <div>
+                            <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda tangan baru</div>
+                            <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk form ini</div>
+                        </div>
+                    </label>
                 </div>
-            </div>
-            <div class="signature-actions" style="justify-content:center;">
-                <div class="signature-note">Tanda tangan ini akan tersimpan pada data permohonan sertifkasi.</div>
-                <button type="button" class="btn-clear-signature" id="clearSignatureAdmin">
-                    <i class="bi bi-arrow-counterclockwise"></i> Hapus Tanda Tangan
-                </button>
-            </div>
+
+                {{-- Preview TTD tersimpan --}}
+                <div id="savedSigPreview" style="text-align:center;">
+                    <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;">
+                        <img src="{{ $adminTTD }}" alt="TTD Tersimpan" style="max-width:280px;height:auto;display:block;">
+                    </div>
+                    <div style="font-size:11px;color:#94a3b8;margin-top:6px;">Tanda tangan tersimpan dari profil Anda</div>
+                </div>
+
+                {{-- Canvas tanda tangan baru (tersembunyi awalnya) --}}
+                <div id="newSigDraw" style="display:none;">
+                    <div class="signature-box" id="signatureBoxAdmin">
+                        <canvas id="signatureCanvasAdmin"></canvas>
+                        <div class="signature-placeholder" id="signaturePlaceholderAdmin">
+                            <i class="bi bi-pen"></i>
+                            <span>Silakan tanda tangan di sini.</span>
+                        </div>
+                    </div>
+                    <div class="signature-actions" style="justify-content:space-between;margin-top:8px;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <input type="checkbox" id="saveSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
+                            <label for="saveSigCheck" style="font-size:12px;color:#475569;cursor:pointer;">Simpan sebagai tanda tangan saya</label>
+                        </div>
+                        <button type="button" class="btn-clear-signature" id="clearSignatureAdmin">
+                            <i class="bi bi-arrow-counterclockwise"></i> Hapus
+                        </button>
+                    </div>
+                </div>
+
+            @else
+                {{-- Belum ada TTD tersimpan: langsung tampilkan canvas --}}
+                <div class="signature-box" id="signatureBoxAdmin">
+                    <canvas id="signatureCanvasAdmin"></canvas>
+                    <div class="signature-placeholder" id="signaturePlaceholderAdmin">
+                        <i class="bi bi-pen"></i>
+                        <span>Silakan tanda tangan admin sebelum menyetujui pendaftaran.</span>
+                    </div>
+                </div>
+                <div class="signature-actions" style="justify-content:space-between;margin-top:8px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="checkbox" id="saveSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
+                        <label for="saveSigCheck" style="font-size:12px;color:#475569;cursor:pointer;">Simpan sebagai tanda tangan saya</label>
+                    </div>
+                    <button type="button" class="btn-clear-signature" id="clearSignatureAdmin">
+                        <i class="bi bi-arrow-counterclockwise"></i> Hapus Tanda Tangan
+                    </button>
+                </div>
+            @endif
+
+            <div class="signature-note" style="text-align:center;margin-top:8px;">Tanda tangan ini akan tersimpan pada data permohonan sertifkasi.</div>
             <div class="signature-error" id="signatureErrorAdmin">Tanda tangan admin wajib diisi.</div>
         </div>
-        <form method="POST" action="{{ route('admin.asesi.approve', $asesi->NIK) }}" onsubmit="return prepareChecklistPayload('approve')">
+
+        <form method="POST" action="{{ route('admin.asesi.approve', $asesi->NIK) }}" onsubmit="return prepareChecklistPayload('approve')" id="approveForm">
             @csrf
             <input type="hidden" name="tanda_tangan_admin" class="signature-admin-input">
             <input type="hidden" name="verifikasi_bukti_persyaratan_dasar" id="approveChecklistPersyaratan">
@@ -1379,6 +1439,47 @@
                 }
             });
         });
+    }
+
+    function toggleSigChoice() {
+        const saved = document.getElementById('optSaved');
+        const savedPreview = document.getElementById('savedSigPreview');
+        const newDraw = document.getElementById('newSigDraw');
+        const optSavedLabel = document.getElementById('optSavedLabel');
+        const optNewLabel = document.getElementById('optNewLabel');
+
+        if (!saved) return;
+
+        if (saved.checked) {
+            // Gunakan TTD tersimpan
+            if (savedPreview) savedPreview.style.display = '';
+            if (newDraw) newDraw.style.display = 'none';
+            optSavedLabel.style.borderColor = '#d1fae5';
+            optSavedLabel.style.background = '#f0fdf4';
+            optNewLabel.style.borderColor = '#e2e8f0';
+            optNewLabel.style.background = '#f8fafc';
+            // Isi input dengan TTD tersimpan
+            const savedSrc = document.querySelector('#savedSigPreview img')?.src || '';
+            document.querySelectorAll('.signature-admin-input').forEach(el => el.value = savedSrc);
+        } else {
+            // Tanda tangan baru
+            if (savedPreview) savedPreview.style.display = 'none';
+            if (newDraw) newDraw.style.display = 'block';
+            optSavedLabel.style.borderColor = '#e2e8f0';
+            optSavedLabel.style.background = '#f8fafc';
+            optNewLabel.style.borderColor = '#bfdbfe';
+            optNewLabel.style.background = '#eff6ff';
+            // Kosongkan input (akan diisi saat draw)
+            document.querySelectorAll('.signature-admin-input').forEach(el => el.value = '');
+            // Init canvas jika belum
+            setTimeout(() => {
+                if (typeof window.adminSignatureResize === 'function') {
+                    window.adminSignatureResize();
+                } else {
+                    initSignaturePadAdmin();
+                }
+            }, 50);
+        }
     }
 
     function updateRejectBtn() {
@@ -1537,6 +1638,7 @@
         const clearButton = document.getElementById('clearSignatureAdmin');
         const errorBox = document.getElementById('signatureErrorAdmin');
         const placeholder = document.getElementById('signaturePlaceholderAdmin');
+        if (!canvas || !box) return;
         const ctx = canvas.getContext('2d');
 
         window.adminSignatureInput = inputEls[0] || null;
@@ -1558,20 +1660,20 @@
             ctx.strokeStyle = '#111827';
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            if (data) {
+            if (data && data.startsWith('data:')) {
                 const img = new Image();
                 img.onload = () => {
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
                     ctx.drawImage(img, 0, 0, rect.width, rect.height);
                     hasSignature = true;
                     box.classList.add('has-signature');
-                    placeholder.style.display = 'none';
+                    if (placeholder) placeholder.style.display = 'none';
                 };
                 img.src = data;
             } else {
                 hasSignature = false;
                 box.classList.remove('has-signature');
-                placeholder.style.display = 'flex';
+                if (placeholder) placeholder.style.display = 'flex';
             }
         };
 
@@ -1596,7 +1698,7 @@
         const start = (event) => {
             drawing = true;
             points = [getPoint(event)];
-            errorBox.style.display = 'none';
+            if (errorBox) errorBox.style.display = 'none';
             canvas.setPointerCapture?.(event.pointerId);
         };
 
@@ -1613,7 +1715,7 @@
             if (!hasSignature) {
                 hasSignature = true;
                 box.classList.add('has-signature');
-                placeholder.style.display = 'none';
+                if (placeholder) placeholder.style.display = 'none';
             }
             syncInputs();
         };
@@ -1626,15 +1728,17 @@
             points = [];
         };
 
-        clearButton.addEventListener('click', function() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            hasSignature = false;
-            box.classList.remove('has-signature');
-            placeholder.style.display = 'flex';
-            errorBox.style.display = 'none';
-            inputEls.forEach(function(el) { el.value = ''; });
-            window.adminSignatureInput = inputEls[0] || null;
-        });
+        if (clearButton) {
+            clearButton.addEventListener('click', function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                hasSignature = false;
+                box.classList.remove('has-signature');
+                if (placeholder) placeholder.style.display = 'flex';
+                if (errorBox) errorBox.style.display = 'none';
+                inputEls.forEach(function(el) { el.value = ''; });
+                window.adminSignatureInput = inputEls[0] || null;
+            });
+        }
 
         canvas.addEventListener('pointerdown', start);
         canvas.addEventListener('pointermove', draw);
@@ -1649,19 +1753,57 @@
         initSignaturePadAdmin();
         initChecklistHeaderToggles();
 
-        document.querySelectorAll('form').forEach(function(form) {
-            // Only enforce signature for approval form(s)
-            if (form.action.includes('/approve')) {
-                form.addEventListener('submit', function(event) {
-                    const adminInput = form.querySelector('.signature-admin-input');
-                    if (!adminInput || !adminInput.value) {
-                        event.preventDefault();
-                        document.getElementById('signatureErrorAdmin').style.display = 'block';
-                        document.getElementById('signatureCanvasAdmin').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                });
+        // Jika ada TTD tersimpan, pre-fill hidden input dengan TTD tersimpan saat modal dibuka
+        const optSaved = document.getElementById('optSaved');
+        if (optSaved && optSaved.checked) {
+            const savedSrc = document.querySelector('#savedSigPreview img')?.src || '';
+            if (savedSrc) {
+                document.querySelectorAll('.signature-admin-input').forEach(el => el.value = savedSrc);
             }
-        });
+        }
+
+        // Handle form submit untuk approve
+        const approveForm = document.getElementById('approveForm');
+        if (approveForm) {
+            approveForm.addEventListener('submit', function(event) {
+                const adminInput = approveForm.querySelector('.signature-admin-input');
+                if (!adminInput || !adminInput.value) {
+                    event.preventDefault();
+                    const errBox = document.getElementById('signatureErrorAdmin');
+                    if (errBox) errBox.style.display = 'block';
+                    const canvas = document.getElementById('signatureCanvasAdmin');
+                    if (canvas) canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return false;
+                }
+
+                // Jika menggunakan TTD baru dan checkbox simpan aktif, simpan via AJAX setelah submit
+                const optNew = document.getElementById('optNew');
+                const saveCheck = document.getElementById('saveSigCheck');
+                if (optNew && optNew.checked && saveCheck && saveCheck.checked && adminInput.value) {
+                    // Simpan TTD baru ke profil (fire-and-forget, tidak memblokir submit)
+                    fetch(@json(route('admin.profile.save-signature')), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': @json(csrf_token()),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ tanda_tangan: adminInput.value }),
+                    }).catch(() => {});
+                } else if (!optNew && saveCheck && saveCheck.checked && adminInput.value) {
+                    // Belum ada TTD tersimpan, simpan TTD baru
+                    fetch(@json(route('admin.profile.save-signature')), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': @json(csrf_token()),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ tanda_tangan: adminInput.value }),
+                    }).catch(() => {});
+                }
+            });
+        }
     });
 </script>
 @endsection
