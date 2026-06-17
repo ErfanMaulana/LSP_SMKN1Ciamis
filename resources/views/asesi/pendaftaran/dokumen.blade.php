@@ -280,11 +280,11 @@
 
     .btn-signature-submit {
         color: #fff;
-        background: #10b981;
-        border-color: #10b981;
+        background: #0073bd;
+        border-color: #0073bd;
         min-width: 170px;
     }
-    .btn-signature-submit:hover { background: #059669; border-color: #059669; }
+    .btn-signature-submit:hover { background: #005a9e; border-color: #005a9e; }
 
     .signature-icon {
         width: 16px;

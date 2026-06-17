@@ -1422,6 +1422,26 @@
                     items.classList.remove('collapsed');
                 }
             });
+
+            // Restore sidebar scroll position
+            const sidebar = document.getElementById('sidebar');
+            const savedScrollTop = localStorage.getItem('sidebar-scroll-top');
+            if (sidebar && savedScrollTop !== null) {
+                // Disable smooth scroll temporarily so restore is instant
+                sidebar.style.scrollBehavior = 'auto';
+                sidebar.scrollTop = parseInt(savedScrollTop, 10);
+                // Re-enable after restore
+                requestAnimationFrame(function () {
+                    sidebar.style.scrollBehavior = '';
+                });
+            }
+
+            // Save sidebar scroll position before any navigation
+            if (sidebar) {
+                sidebar.addEventListener('scroll', function () {
+                    localStorage.setItem('sidebar-scroll-top', sidebar.scrollTop);
+                });
+            }
         });
 
         // Close profile menu when clicking outside
