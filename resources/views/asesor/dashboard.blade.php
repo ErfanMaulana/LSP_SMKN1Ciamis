@@ -261,7 +261,6 @@
 
 {{-- Asesi Terbaru Selesai --}}
 <div class="section-title">
-    <i class="bi bi-clock-history" style="color:#2563eb;"></i>
     Asesi Terbaru Selesai Asesmen
 </div>
 

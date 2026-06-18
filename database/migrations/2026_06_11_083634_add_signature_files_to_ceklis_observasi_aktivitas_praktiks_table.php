@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('ceklis_observasi_aktivitas_praktiks', function (Blueprint $table) {
-            $table->string('ttd_asesor_file')->nullable()->after('ttd_asesor_tanggal');
-            $table->string('ttd_asesi_file')->nullable()->after('ttd_asesi_tanggal');
+            if (!Schema::hasColumn('ceklis_observasi_aktivitas_praktiks', 'ttd_asesor_file')) {
+                $table->string('ttd_asesor_file')->nullable()->after('ttd_asesor_tanggal');
+            }
+            if (!Schema::hasColumn('ceklis_observasi_aktivitas_praktiks', 'ttd_asesi_file')) {
+                $table->string('ttd_asesi_file')->nullable()->after('ttd_asesi_tanggal');
+            }
         });
     }
 

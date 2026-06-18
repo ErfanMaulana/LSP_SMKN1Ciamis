@@ -115,7 +115,6 @@
     }
 
     .signature-frame {
-        border: 1px solid #e5e7eb;
         border-radius: 8px;
         min-height: 120px;
         display: flex;

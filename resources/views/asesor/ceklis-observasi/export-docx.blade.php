@@ -293,7 +293,7 @@
             <td style="padding:8px 10px;">Tanda tangan/ Tanggal</td>
             <td style="padding:8px 0; text-align:center;">:</td>
             <td style="padding:8px 10px;">
-                <div style="width:96px; height:54px; overflow:hidden; border:1px solid #111; display:flex; align-items:center; justify-content:center; margin:0 0 4px;">
+                <div style="width:96px; height:54px; overflow:hidden; display:flex; align-items:center; justify-content:center; margin:0 0 4px;">
                     @if($item->ttd_asesi_file)
                         <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                     @endif
@@ -318,7 +318,7 @@
             <td style="padding:8px 10px;">Tanda tangan/ Tanggal</td>
             <td style="padding:8px 0; text-align:center;">:</td>
             <td style="padding:8px 10px;">
-                <div style="width:96px; height:54px; overflow:hidden; border:1px solid #111; display:flex; align-items:center; justify-content:center; margin:0 0 4px;">
+                <div style="width:96px; height:54px; overflow:hidden; display:flex; align-items:center; justify-content:center; margin:0 0 4px;">
                     @if($item->ttd_asesor_file)
                         <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                     @endif

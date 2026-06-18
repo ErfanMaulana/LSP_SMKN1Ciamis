@@ -942,7 +942,7 @@
 
 <div class="page-header">
     <div>
-        <h2><i class="bi bi-people"></i> Asesi</h2>
+        <h2>Asesi</h2>
         <p>
             {{ $skema?->nama_skema ?? ($skemaNames->count() ? $skemaNames->join(', ') : 'Semua skema yang diampu') }}
             &bull; <span id="totalAsesi">{{ $summary['total'] ?? count($data) }}</span> asesi
