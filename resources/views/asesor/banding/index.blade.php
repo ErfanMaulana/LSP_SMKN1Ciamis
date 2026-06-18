@@ -49,7 +49,7 @@
         display: block;
         margin-top: 5px;
         font-size: 24px;
-        color: #0f172a;
+        color: #0073bd;
     }
 
     .filter-form {
@@ -176,7 +176,7 @@
     .badge-keputusan-tidak { background: #fee2e2; color: #991b1b; }
 
     .badge-status-draft { background: #e2e8f0; color: #475569; }
-    .badge-status-diajukan { background: #dbeafe; color: #1e40af; }
+    .badge-status-diajukan { background: #dbeafe; color: #0073bd; }
     .badge-status-ditinjau { background: #fef3c7; color: #92400e; }
     .badge-status-diterima { background: #dcfce7; color: #166534; }
     .badge-status-ditolak { background: #fee2e2; color: #991b1b; }

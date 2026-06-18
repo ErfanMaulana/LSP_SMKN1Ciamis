@@ -161,7 +161,7 @@
             <!-- Pagination -->
             <div class="pagination-container">
                 <div class="pagination-info">
-                    Menampilkan {{ $asesor->firstItem() ?? 0 }} sampai {{ $asesor->lastItem() ?? 0 }} dari {{ $asesor->total() }} entri
+                    Menampilkan {{ $asesor->firstItem() ?? 0 }} sampai {{ $asesor->lastItem() ?? 0 }} dari {{ $asesor->total() }} data
                 </div>
                 <div class="pagination">
                     @if($asesor->currentPage() > 1)
@@ -246,7 +246,7 @@
     }
 
     .btn-primary:hover {
-        background: #003961;
+        background: #005f9a;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
     }

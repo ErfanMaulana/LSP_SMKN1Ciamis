@@ -38,7 +38,6 @@
         gap: 0;
         border-bottom: 1px solid #e2e8f0;
         background: #f8fafc;
-        overflow-x: auto;
     }
     .tab {
         padding: 12px 16px;
@@ -54,7 +53,7 @@
         top: 1px;
     }
     .tab:hover {
-        color: #0073bd;
+        color: #003961;
         background: #ffffff;
     }
     .tab.active {
@@ -112,7 +111,7 @@
         padding: 4px 10px;
         border-radius: 999px;
         background: #eff6ff;
-        color: #1d4ed8;
+        color: #0073bd;
         font-size: 11px;
         font-weight: 700;
     }
@@ -138,7 +137,7 @@
         border-radius: 7px;
         padding: 6px 10px;
         background: #eff6ff;
-        color: #1d4ed8;
+        color: #0073bd;
         text-decoration: none;
         font-size: 12px;
         font-weight: 600;
@@ -147,7 +146,7 @@
     }
     .btn-link:hover {
         background: #dbeafe;
-        color: #1e40af;
+        color: #003961;
     }
     .empty {
         text-align: center;

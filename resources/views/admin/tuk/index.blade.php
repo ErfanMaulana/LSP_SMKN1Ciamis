@@ -154,7 +154,7 @@
     }
     .badge.aktif    { background: #d1fae5; color: #065f46; }
     .badge.nonaktif { background: #fee2e2; color: #991b1b; }
-    .badge.sewaktu  { background: #dbeafe; color: #1e40af; }
+    .badge.sewaktu  { background: #dbeafe; color: #0073bd; }
     .badge.tempat_kerja { background: #fef3c7; color: #92400e; }
     .badge.mandiri  { background: #ede9fe; color: #5b21b6; }
 

@@ -255,7 +255,7 @@
 
     .badge-blue {
         background: #dbeafe;
-        color: #1d4ed8;
+        color: #0073bd;
     }
 
     .badge-green {

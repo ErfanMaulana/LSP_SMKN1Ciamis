@@ -126,7 +126,7 @@
         margin-bottom: 6px;
     }
 
-    .rek-item.lanjut .rek-status { background: #dbeafe; color: #0c4a6e; }
+    .rek-item.lanjut .rek-status { background: #dbeafe; color: #0073bd; }
     .rek-item.tidak_lanjut .rek-status { background: #ffe4e6; color: #be123c; }
 
     .rek-body .rek-meta {
@@ -291,7 +291,7 @@
 
     .asesor-assigned-meta {
         font-size: 12px;
-        color: #64748b;
+        color: #0073bd;
         margin-top: 2px;
         line-height: 1.45;
         word-break: break-word;
@@ -314,7 +314,7 @@
         border: 1px solid #bfdbfe;
         border-radius: 8px;
         font-size: 12.5px;
-        color: #0c4a6e;
+        color: #0073bd;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -493,7 +493,7 @@
 
 {{-- ─── Data Pendaftaran ─── --}}
 <div class="info-card" style="margin-top:24px;">
-    <h3><i class="bi bi-person-circle"></i> Data Pendaftaran</h3>
+    <h3><i class="bi bi-person-circle" style="color:#0073bd;"></i> Data Pendaftaran</h3>
     <div class="approved-banner">
         <i class="bi bi-check-circle-fill"></i>
         Pendaftaran Anda telah disetujui oleh admin.

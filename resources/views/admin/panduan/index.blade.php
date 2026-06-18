@@ -172,7 +172,7 @@
 
     .btn { display:inline-flex; align-items:center; gap:8px; padding:10px 16px; border-radius:8px; font-size:14px; text-decoration:none; border:none; cursor:pointer; }
     .btn-primary { background:#0073bd; color:#fff; }
-    .btn-primary:hover { background:#003961; }
+    .btn-primary:hover { background:#005f9a; }
     .btn-secondary { background:#e2e8f0; color:#334155; }
     .btn-secondary:hover { background:#cbd5e1; }
     .btn-secondary:disabled { background:#f1f5f9; color:#94a3b8; cursor:not-allowed; }

@@ -104,7 +104,7 @@
         font-weight: 600; text-decoration: none; border: none; cursor: pointer; transition: all .2s;
     }
     .btn-primary { background: #0073bd; color: #fff; }
-    .btn-primary:hover { background: #003961; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
+    .btn-primary:hover { background: #005f9a; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3); }
     .btn-xs { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
     .btn-edit { background: #eff6ff; color: #0073bd; }
     .btn-edit:hover { background: #dbeafe; }
@@ -157,7 +157,7 @@
     .asesi-badge {
         display: inline-flex; align-items: center; gap: 4px;
         padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
-        background: #dbeafe; color: #1d4ed8;
+        background: #dbeafe; color: #0073bd;
     }
     .asesi-badge.empty { background: #f1f5f9; color: #94a3b8; }
     

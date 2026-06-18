@@ -49,7 +49,7 @@
     }
 
     .btn-primary:hover {
-        background: #003961;
+        background: #005f9a;
     }
 
     .btn-secondary {

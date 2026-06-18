@@ -173,7 +173,7 @@
     font-weight: 600;
 }
 .btn-primary {
-    background: #0061a5;
+    background: #0073bd;
     color: #fff;
 }
 .btn-secondary {

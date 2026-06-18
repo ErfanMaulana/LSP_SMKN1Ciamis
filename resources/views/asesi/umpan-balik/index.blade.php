@@ -6,7 +6,7 @@
 @section('styles')
 <style>
     .page-header {
-        background: #0061A5;
+        background: #0073bd;
         border-radius: 12px;
         padding: 28px;
         margin-bottom: 24px;
@@ -44,7 +44,7 @@
     .skema-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 10px 24px rgba(0,0,0,0.10);
-        border-color: #0061A5;
+        border-color: #003961;
     }
 
     .skema-badge {
@@ -64,7 +64,7 @@
     .skema-icon {
         width: 50px;
         height: 50px;
-        background: #0061A5;
+        background: #0073bd;
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -119,7 +119,7 @@
     }
 
     .btn-fill {
-        background: #0061A5;
+        background: #0073bd;
         color: white;
     }
 
@@ -130,7 +130,7 @@
 
     .btn-view {
         background: #dbeafe;
-        color: #1e40af;
+        color: #0073bd;
     }
 
     .btn-disabled {

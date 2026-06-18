@@ -243,7 +243,7 @@
             <!-- Pagination -->
             <div class="pagination-container">
                 <div class="pagination-info">
-                    Menampilkan {{ $asesi->firstItem() ?? 0 }} sampai {{ $asesi->lastItem() ?? 0 }} dari {{ $asesi->total() }} entri
+                    Menampilkan {{ $asesi->firstItem() ?? 0 }} sampai {{ $asesi->lastItem() ?? 0 }} dari {{ $asesi->total() }} data 
                 </div>
                 <div class="pagination">
                     @if($asesi->currentPage() > 1)
@@ -277,7 +277,7 @@
                             <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                         @endif
                     @endforeach
-                    <span style="font-size:12px;color:#64748b;">Per halaman</span>
+                    <span style="font-size:14px;color:#64748b;">Data Perhalaman</span>
                     <input type="number" id="per-page-input" name="per_page" min="5" max="100" value="{{ request('per_page', 10) }}"
                         style="width:72px;height:34px;border:1px solid #e2e8f0;border-radius:8px;padding:0 8px;font-size:13px;color:#334155;">
                 </form>
@@ -331,7 +331,7 @@
                 <p style="font-size:14px;color:#64748b;margin:0;">Akun berikut memiliki role <strong>asesi</strong> namun tidak memiliki data profil asesi yang terdaftar.</p>
                 <div style="display:flex;gap:10px;">
                     <button class="btn btn-outline" onclick="openAsesiCreateModal()" style="white-space:nowrap;">
-                        <i class="bi bi-person-plus"></i> Tambah Akun
+                        <i class="bi bi-plus-circle"></i> Tambah Akun
                     </button>
                     <button class="btn btn-primary" onclick="openAsesiImportModal()" style="white-space:nowrap;">
                         <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
@@ -756,7 +756,7 @@
     }
 
     .btn-primary:hover {
-        background: #003961;
+        background: #005f9a;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
     }
@@ -767,7 +767,7 @@
     }
 
     .btn-outline:hover {
-        background: #003961;
+        background: #005f9a;
         border-color: #cbd5e1;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
@@ -1017,7 +1017,7 @@
         height: 40px;
         border-radius: 50%;
         background: #e0e7ff;
-        color: #3730a3;
+        color: #0073bd;
         display: flex;
         align-items: center;
         justify-content: center;

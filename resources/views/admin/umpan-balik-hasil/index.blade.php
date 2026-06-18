@@ -32,7 +32,7 @@
     .info-box {
         background: #eff6ff;
         border: 1px solid #bfdbfe;
-        color: #0c4a6e;
+        color: #0073bd;
         border-radius: 10px;
         padding: 14px 16px;
         font-size: 13px;
