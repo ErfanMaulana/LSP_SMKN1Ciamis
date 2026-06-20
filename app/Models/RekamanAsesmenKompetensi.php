@@ -22,11 +22,20 @@ class RekamanAsesmenKompetensi extends Model
         'rekomendasi',
         'tindak_lanjut',
         'komentar_observasi',
+        'ttd_asesor_nama',
+        'ttd_asesor_no_reg',
+        'ttd_asesor_tanggal',
+        'ttd_asesor_file',
+        'ttd_asesi_nama',
+        'ttd_asesi_tanggal',
+        'ttd_asesi_file',
     ];
 
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
+        'ttd_asesor_tanggal' => 'date',
+        'ttd_asesi_tanggal' => 'date',
     ];
 
     public function skema()

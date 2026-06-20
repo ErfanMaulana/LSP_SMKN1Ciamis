@@ -1278,7 +1278,7 @@
 <div class="modal-overlay" id="approveModal">
     <div class="modal-box modal-box-approve">
         <h3><i class="bi bi-check-circle" style="color:#10b981;"></i> Konfirmasi Persetujuan</h3>
-        <p>Apakah Anda yakin ingin <strong>menyetujui</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>? Email notifikasi akan dikirim ke <strong>{{ $asesi->email }}</strong>.</p>
+        <p>Apakah Anda yakin ingin <strong>menyetujui</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>?</p>
 
         @php $adminTTD = auth()->guard('admin')->user()->tanda_tangan ?? null; @endphp
 
@@ -1373,7 +1373,7 @@
 <div class="modal-overlay" id="rejectModal">
     <div class="modal-box">
         <h3><i class="bi bi-x-circle" style="color:#ef4444;"></i> Konfirmasi Penolakan</h3>
-        <p>Apakah Anda yakin ingin <strong>menolak</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>? Email notifikasi akan dikirim ke <strong>{{ $asesi->email }}</strong>.</p>
+        <p>Apakah Anda yakin ingin <strong>menolak</strong> pendaftaran <strong>{{ $asesi->nama }}</strong>?</p>
         <form method="POST" action="{{ route('admin.asesi.reject', $asesi->NIK) }}" id="rejectForm" onsubmit="return validateReject() && prepareChecklistPayload('reject')">
             @csrf
             <input type="hidden" name="tanda_tangan_admin" class="signature-admin-input">

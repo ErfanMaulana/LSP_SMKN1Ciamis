@@ -349,6 +349,20 @@ class PersetujuanAsesmenFrontController extends Controller
             $data['nama_asesor'] = $asesor->nama;
         }
 
+        $asesi = Asesi::where('NIK', $data['asesi_nik'])->first();
+        $skema = Skema::where('nomor_skema', $data['nomor_skema'])->first();
+        if ($asesi && $skema) {
+            $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->first();
+            if (!$pivot || $pivot->rekomendasi !== 'lanjut') {
+                return redirect()->back()
+                    ->with('error', 'Persetujuan Asesmen hanya dapat dibuat setelah Asesi direkomendasikan "Dapat Lanjut" pada Asesmen Mandiri.')
+                    ->withInput();
+            }
+        }
+
         PersetujuanAsesmen::create($data);
 
         return redirect()->route('asesor.persetujuan-asesmen.index')
@@ -441,6 +455,15 @@ class PersetujuanAsesmenFrontController extends Controller
                     'skema_nomor' => $record->nomor_skema,
                     'status' => $status,
                 ];
+            })->filter(function ($item) {
+                if (!$item['asesi_nik'] || !$item['skema_id']) {
+                    return false;
+                }
+                $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
+                    ->where('asesi_nik', $item['asesi_nik'])
+                    ->where('skema_id', $item['skema_id'])
+                    ->first();
+                return $pivot && $pivot->rekomendasi === 'lanjut';
             })->values();
         }
 
@@ -523,6 +546,18 @@ class PersetujuanAsesmenFrontController extends Controller
                 ->with('error', 'Asesi belum memiliki jadwal ujikon dari admin; persetujuan asesmen belum dapat diakses.');
         }
 
+        if ($asesi) {
+            $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skemaId)
+                ->first();
+
+            if (!$pivot || $pivot->rekomendasi !== 'lanjut') {
+                return redirect()->route('asesor.persetujuan-asesmen.index')
+                    ->with('error', 'Persetujuan Asesmen hanya dapat diakses setelah Asesi direkomendasikan "Dapat Lanjut" pada Asesmen Mandiri.');
+            }
+        }
+
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
             ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
                 if ($namaAsesi) {
@@ -579,6 +614,15 @@ class PersetujuanAsesmenFrontController extends Controller
             $hasJadwal = $this->resolveJadwalForAsesiSkema($asesiForCheck, $skemaForCheck) !== null;
             if (!$hasJadwal) {
                 return redirect()->back()->with('error', 'Asesi belum memiliki jadwal ujikon dari admin; persetujuan asesmen belum dapat ditandatangani.');
+            }
+
+            $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
+                ->where('asesi_nik', $asesiForCheck->NIK)
+                ->where('skema_id', $skemaForCheck->id)
+                ->first();
+
+            if (!$pivot || $pivot->rekomendasi !== 'lanjut') {
+                return redirect()->back()->with('error', 'Persetujuan Asesmen hanya dapat ditandatangani setelah Asesi direkomendasikan "Dapat Lanjut" pada Asesmen Mandiri.');
             }
         }
 

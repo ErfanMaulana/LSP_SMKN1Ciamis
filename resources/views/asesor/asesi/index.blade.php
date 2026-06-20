@@ -1094,8 +1094,8 @@
                     $hasPenilaian = (bool) $row->has_penilaian;
                     $hasCeklisObservasi = (bool) $row->has_ceklis_observasi;
                     $hasRekaman = (bool) $row->has_rekaman;
-                    // Persetujuan Asesmen hanya bisa diakses jika asesi sudah memiliki jadwal dari admin
-                    $canAccessPersetujuan = ($row->has_jadwal ?? false);
+                    // Persetujuan Asesmen hanya bisa diakses jika asesi sudah memiliki jadwal dari admin dan sudah direkomendasikan lanjut
+                    $canAccessPersetujuan = ($row->has_jadwal ?? false) && (($row->rekomendasi ?? '') === 'lanjut');
                 @endphp
                 <tr>
                     <td>
@@ -1265,8 +1265,8 @@
             $hasPenilaian = (bool) $row->has_penilaian;
             $hasCeklisObservasi = (bool) $row->has_ceklis_observasi;
             $hasRekaman = (bool) $row->has_rekaman;
-            // Persetujuan Asesmen hanya bisa diakses jika asesi sudah memiliki jadwal dari admin
-            $canAccessPersetujuan = ($row->has_jadwal ?? false);
+            // Persetujuan Asesmen hanya bisa diakses jika asesi sudah memiliki jadwal dari admin dan sudah direkomendasikan lanjut
+            $canAccessPersetujuan = ($row->has_jadwal ?? false) && (($row->rekomendasi ?? '') === 'lanjut');
         @endphp
         <div class="asesi-card">
             <!-- Card Header -->

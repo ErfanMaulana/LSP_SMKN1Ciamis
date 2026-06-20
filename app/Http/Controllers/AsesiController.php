@@ -1440,15 +1440,7 @@ class AsesiController extends Controller
             ]);
         }
         
-        // Send approval email if asesi has email
-        if ($asesi->email) {
-            try {
-                \Mail::to($asesi->email)->send(new \App\Mail\AsesiApprovedMail($asesi, $noReg, $plainPassword));
-            } catch (\Exception $e) {
-                // Log error but don't fail the approval
-                \Log::error('Failed to send approval email: ' . $e->getMessage());
-            }
-        }
+        // Email notification dispatch removed per request
         
         return redirect()->route('admin.asesi.verifikasi')
             ->with('success', 'Pendaftaran asesi ' . $asesi->nama . ' telah disetujui dan akun login telah dibuat!');
@@ -1595,14 +1587,7 @@ class AsesiController extends Controller
 
         $asesi->update($updateData);
         
-        // Send rejection email if asesi has email
-        if ($asesi->email) {
-            try {
-                \Mail::to($asesi->email)->send(new \App\Mail\AsesiRejectedMail($asesi));
-            } catch (\Exception $e) {
-                \Log::error('Failed to send rejection email: ' . $e->getMessage());
-            }
-        }
+        // Email notification dispatch removed per request
         
         $message = $rejectType === 'banned'
             ? 'Pendaftaran asesi ' . $asesi->nama . ' ditolak secara permanen.'
