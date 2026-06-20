@@ -197,6 +197,217 @@
     .btn-secondary { background:#64748b; color:#fff; }
 
     @media (max-width:768px) { .grid-2 { grid-template-columns:1fr; } }
+
+    .search-select {
+        position: relative;
+    }
+
+    .search-select-toggle {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        padding: 8px 11px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        text-align: left;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-select-toggle:focus,
+    .search-select.open .search-select-toggle {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .search-select-value {
+        font-size: 13px;
+        color: #334155;
+    }
+
+    .search-select-placeholder {
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .search-select-chevron {
+        margin-left: auto;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+
+    .search-select-dropdown {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: calc(100% + 6px);
+        z-index: 30;
+        background: #fff;
+        border: 1px solid #dbe4ef;
+        border-radius: 10px;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+    }
+
+    .search-select.open .search-select-dropdown {
+        display: block;
+    }
+
+    .search-select-search {
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 10px 12px;
+        font-size: 13px;
+        outline: none;
+        border-radius: 0;
+    }
+
+    .search-select-options {
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .search-select-option {
+        display: block;
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #334155;
+    }
+
+    .search-select-option:last-child {
+        border-bottom: none;
+    }
+
+    .search-select-option:hover {
+        background: #f8fafc;
+    }
+
+    .search-select-option.selected {
+        background: #f0f9ff;
+        color: #0073bd;
+        font-weight: 600;
+    }
+
+    .search-select-empty {
+        font-size: 13px;
+    }
+
+    .signature-section {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        background: #ffffff;
+        margin-top: 14px;
+    }
+
+    .signature-section h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .signature-canvas-wrapper {
+        border: 2px dashed #d1d5db;
+        border-radius: 10px;
+        background: #fafafa;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s;
+        width: min(100%, 320px);
+        aspect-ratio: 1 / 1;
+        margin-left: auto;
+        margin-right: auto;
+        cursor: crosshair;
+    }
+
+    .signature-canvas-wrapper.active {
+        border-color: #0073bd;
+        background: #fff;
+    }
+
+    .signature-canvas-wrapper.has-signature {
+        border-style: solid;
+        border-color: #0073bd;
+    }
+
+    .signature-canvas {
+        width: 100%;
+        height: 100%;
+        cursor: inherit;
+        display: block;
+        touch-action: none;
+        user-select: none;
+    }
+
+    .signature-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+        color: #9ca3af;
+        transition: opacity 0.2s;
+    }
+
+    .signature-placeholder i {
+        font-size: 28px;
+        display: block;
+        margin-bottom: 6px;
+    }
+
+    .signature-placeholder span {
+        font-size: 13px;
+    }
+
+    .signature-canvas-wrapper.has-signature .signature-placeholder {
+        opacity: 0;
+    }
+
+    .btn-clear-signature {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #e5e7eb;
+        background: #f8fafc;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+    }
+
+    .btn-clear-signature:hover {
+        background: #fee2e2;
+        border-color: #fca5a5;
+        color: #dc2626;
+    }
+
+    .signature-date {
+        font-size: 13px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .signature-date strong {
+        color: #1e293b;
+    }
 </style>
 
 <div class="card-form">
@@ -211,12 +422,17 @@
 
         <div class="field">
             <label>Nama Asesi <span class="req">*</span></label>
-            <select id="asesiSelect" name="asesi_nik">
-                <option value="">-- Pilih Asesi --</option>
-                @foreach($asesorAsesiList as $a)
-                    <option value="{{ $a['id'] }}" {{ $selectedAsesiNik === (string)$a['id'] ? 'selected' : '' }}>{{ $a['nama'] }} ({{ $a['id'] }})</option>
-                @endforeach
-            </select>
+            <div class="search-select" id="asesiSearchSelect">
+                <input type="hidden" id="asesiSelect" name="asesi_nik" value="{{ $selectedAsesiNik }}">
+                <button type="button" class="search-select-toggle" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="search-select-value">-- Pilih Asesi --</span>
+                    <i class="bi bi-chevron-down search-select-chevron"></i>
+                </button>
+                <div class="search-select-dropdown" role="listbox">
+                    <input type="text" class="search-select-search" placeholder="Ketik untuk mencari...">
+                    <div class="search-select-options"></div>
+                </div>
+            </div>
             @error('asesi_nik')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -364,6 +580,106 @@
 
     </div>
 
+    @php
+        $savedSignature = $asesor->saved_tanda_tangan ?? null;
+        $ttdAsesorTanggal = old('ttd_asesor_tanggal', ($record && $record->ttd_asesor_tanggal) ? $record->ttd_asesor_tanggal->format('Y-m-d') : '');
+    @endphp
+
+    <div class="grid-2" style="margin-top:16px;">
+        <div class="field full">
+            <div class="signature-section">
+                <h3><i class="bi bi-pen"></i> Tanda Tangan Asesor</h3>
+                <p class="signature-subtitle">Dengan menandatangani, asesor menyatakan pernyataan asesor telah diisi dengan benar.</p>
+
+                @if($savedSignature)
+                    {{-- Opsi Tanda Tangan --}}
+                    <div id="sigChoiceWrapAsesor" style="margin-bottom:14px; text-align: left; display: grid; gap: 8px;">
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;" id="optSavedAsesorLabel">
+                            <input type="radio" name="sig_choice_asesor" value="saved" checked id="optSavedAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#10b981;">
+                            <div>
+                                <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
+                                <div style="font-size:12px;color:#64748b;">Menggunakan TTD yang sudah disimpan di profil Anda</div>
+                            </div>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="optNewAsesorLabel">
+                            <input type="radio" name="sig_choice_asesor" value="new" id="optNewAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#0073bd;">
+                            <div>
+                                <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda tangan baru</div>
+                                <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk rekaman asesmen ini</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    {{-- Preview TTD tersimpan --}}
+                    <div id="savedAsesorSigPreview" style="margin-bottom: 12px; text-align: center;">
+                        <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
+                            <img src="{{ str_starts_with($savedSignature, 'data:image') ? $savedSignature : asset('storage/' . ltrim($savedSignature, '/')) }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                        </div>
+                        <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
+                    </div>
+
+                    {{-- Canvas tanda tangan baru (tersembunyi) --}}
+                    <div id="newAsesorSigDraw" style="display:none;">
+                        <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
+                            <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
+                            <div class="signature-placeholder">
+                                <i class="bi bi-pen"></i>
+                                <span>Tanda tangan di sini</span>
+                            </div>
+                        </div>
+                        <div class="signature-actions">
+                            <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;width:100%;margin-top:12px;">
+                                <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;margin:0;">
+                                    <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesorSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
+                                    <span>Simpan sebagai tanda tangan saya</span>
+                                </label>
+                                <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
+                                    <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    {{-- Langsung Canvas --}}
+                    <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
+                        <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
+                        @if($value('ttd_asesor_file'))
+                            <img src="{{ asset('storage/' . ltrim($value('ttd_asesor_file'), '/')) }}" class="signature-saved-img" id="savedSignatureImgAsesor" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; pointer-events:none;">
+                        @endif
+                        <div class="signature-placeholder">
+                            <i class="bi bi-pen"></i>
+                            <span>Tanda tangan di sini</span>
+                        </div>
+                    </div>
+                    <div class="signature-actions">
+                        <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;width:100%;margin-top:12px;">
+                            <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;margin:0;">
+                                <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesorSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
+                                <span>Simpan sebagai tanda tangan saya</span>
+                            </label>
+                            <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
+                                    <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
+                <input type="hidden" name="ttd_asesor_nama" id="ttdAsesorNamaInput" value="{{ $value('ttd_asesor_nama', '') }}">
+                <input type="hidden" name="ttd_asesor_tanggal" id="ttdAsesorTanggalInput" value="{{ $ttdAsesorTanggal }}">
+                <input type="hidden" name="ttd_asesor_file" id="ttdAsesorFileInput" value="{{ $value('ttd_asesor_file', '') }}">
+                @error('ttd_asesor_nama')<div class="error-text">{{ $message }}</div>@enderror
+                @error('ttd_asesor_tanggal')<div class="error-text">{{ $message }}</div>@enderror
+
+                <div class="signature-actions" style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="signature-date">
+                        <i class="bi bi-calendar3"></i>
+                        Tanggal: <strong id="signatureDateAsesor">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="form-actions">
         <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> {{ $submitLabel }}</button>
         <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Batal</a>
@@ -391,6 +707,137 @@ document.addEventListener('DOMContentLoaded', function () {
     const selectedKategoriSkema = @json($value('kategori_skema', ''));
     let applyInitialSelection = true;
     let asesiOptions = @json($asesorAsesiList ?? []);
+    let asesiList = [];
+    const asesiSearchSelect = document.getElementById('asesiSearchSelect');
+
+    const renderAsesiSelect = () => {
+        if (!asesiSearchSelect) return;
+
+        const hiddenInput = document.getElementById('asesiSelect');
+        const toggle = asesiSearchSelect.querySelector('.search-select-toggle');
+        const valueWrap = asesiSearchSelect.querySelector('.search-select-value');
+        const searchInput = asesiSearchSelect.querySelector('.search-select-search');
+        const optionsWrap = asesiSearchSelect.querySelector('.search-select-options');
+
+        if (!hiddenInput || !toggle || !valueWrap || !searchInput || !optionsWrap) {
+            return;
+        }
+
+        const syncValue = () => {
+            const val = hiddenInput.value;
+            const matched = asesiList.find(item => String(item.id) === String(val));
+            if (matched) {
+                valueWrap.textContent = `${matched.nama} (${matched.id})`;
+                valueWrap.style.color = '#334155';
+                valueWrap.style.fontWeight = '600';
+            } else {
+                valueWrap.textContent = '-- Pilih Asesi --';
+                valueWrap.style.color = '#94a3b8';
+                valueWrap.style.fontWeight = '400';
+            }
+        };
+
+        const drawOptions = () => {
+            const query = searchInput.value.trim().toLowerCase();
+            optionsWrap.innerHTML = '';
+
+            const filtered = asesiList.filter(item => {
+                const haystack = `${item.nama} ${item.id}`.toLowerCase();
+                return haystack.includes(query);
+            });
+
+            if (filtered.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'search-select-empty';
+                empty.textContent = 'Tidak ada opsi yang cocok.';
+                optionsWrap.appendChild(empty);
+                return;
+            }
+
+            filtered.forEach(item => {
+                const option = document.createElement('div');
+                option.className = 'search-select-option';
+                if (String(hiddenInput.value) === String(item.id)) {
+                    option.classList.add('selected');
+                }
+                option.textContent = `${item.nama} (${item.id})`;
+                option.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    hiddenInput.value = item.id;
+                    syncValue();
+                    closeAsesiSelect();
+                    hiddenInput.dispatchEvent(new Event('change'));
+                });
+                optionsWrap.appendChild(option);
+            });
+        };
+
+        const closeAsesiSelect = () => {
+            asesiSearchSelect.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+        };
+
+        syncValue();
+        drawOptions();
+
+        toggle.onclick = function (event) {
+            event.preventDefault();
+            const isOpen = asesiSearchSelect.classList.contains('open');
+            document.querySelectorAll('.search-select.open').forEach(c => {
+                if (c !== asesiSearchSelect) {
+                    c.classList.remove('open');
+                }
+            });
+            asesiSearchSelect.classList.toggle('open', !isOpen);
+            toggle.setAttribute('aria-expanded', String(!isOpen));
+            if (!isOpen) {
+                searchInput.value = '';
+                drawOptions();
+                searchInput.focus();
+            }
+        };
+
+        searchInput.oninput = drawOptions;
+
+        asesiSearchSelect.onclick = (event) => {
+            event.stopPropagation();
+        };
+
+        if (!asesiSearchSelect.dataset.selectDocBound) {
+            document.addEventListener('click', (event) => {
+                if (!asesiSearchSelect.contains(event.target)) {
+                    closeAsesiSelect();
+                }
+            });
+            asesiSearchSelect.dataset.selectDocBound = '1';
+        }
+    };
+
+    const resetAsesi = (placeholder) => {
+        asesiList = [];
+        if (asesiSelect) {
+            asesiSelect.value = '';
+        }
+        renderAsesiSelect();
+    };
+
+    const fillAsesi = (items, selectedValue, selectedLabel = '') => {
+        asesiList = items.map(item => ({
+            id: String(item.id),
+            nama: item.nama
+        }));
+
+        if (asesiSelect) {
+            let matched = asesiList.some(item => String(item.id) === String(selectedValue));
+            if (selectedValue && !matched && selectedLabel) {
+                asesiList.push({ id: String(selectedValue), nama: selectedLabel });
+            }
+            if (selectedValue) {
+                asesiSelect.value = String(selectedValue);
+            }
+        }
+        renderAsesiSelect();
+    };
 
     const resetSelect = (select, placeholder) => {
         select.innerHTML = '';
@@ -588,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', function () {
         syncNomorSkema();
 
         if (!skemaId) {
-            resetSelect(asesiSelect, '-- Pilih Asesi --');
+            resetAsesi('-- Pilih Asesi --');
             renderAsesiInfo(null);
             unitRowsContainer.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;">Pilih skema untuk memuat unit kompetensi.</td></tr>';
             setFieldLocked(skemaSelect, false);
@@ -606,12 +1053,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const unitPayload = await unitsResponse.json();
             asesiOptions = participants.asesi || [];
 
-            fillSelect(
-                asesiSelect,
-                '-- Pilih Asesi --',
+            fillAsesi(
                 asesiOptions,
                 preservedAsesiNik,
-                (item) => `${item.nama} (${item.id})`
+                preservedAsesiNik ? asesiOptions.find(o => String(o.id) === String(preservedAsesiNik))?.nama : ''
             );
 
             // Handle pre-selection of asesi
@@ -625,18 +1070,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (selectedAsesiOption) {
                     // Asesi exists in list, select it
                     asesiSelect.value = String(selectedAsesiOption.id);
+                    renderAsesiSelect();
                     syncAsesiInfo(selectedAsesiOption);
                 } else {
                     // Asesi not in list - fetch it separately as fallback
                     if (detailData.asesi) {
-                        const option = document.createElement('option');
-                        option.value = String(detailData.asesi.id);
-                        option.textContent = `${detailData.asesi.nama} (${detailData.asesi.id})`;
-                        asesiSelect.appendChild(option);
+                        asesiList.push({
+                            id: String(detailData.asesi.id),
+                            nama: detailData.asesi.nama
+                        });
                         asesiSelect.value = String(detailData.asesi.id);
+                        renderAsesiSelect();
                         syncAsesiInfo(detailData.asesi);
                     } else {
                         asesiSelect.value = '';
+                        renderAsesiSelect();
                         syncAsesiInfo(null);
                     }
                 }
@@ -662,8 +1110,8 @@ document.addEventListener('DOMContentLoaded', function () {
             renderUnits(unitPayload.units || []);
             applyInitialSelection = false;
         } catch (error) {
-                        console.error('Error loading skema data:', error);
-            resetSelect(asesiSelect, '-- Gagal memuat asesi --');
+            console.error('Error loading skema data:', error);
+            resetAsesi('-- Gagal memuat asesi --');
             renderAsesiInfo(null);
             unitRowsContainer.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#b91c1c;">Gagal memuat unit kompetensi.</td></tr>';
             applyInitialSelection = false;
@@ -740,6 +1188,173 @@ document.addEventListener('DOMContentLoaded', function () {
                     updateHeaderCheckboxes();
                 }
             });
+        }
+
+        function initSignatureCanvas(config) {
+            const canvas = document.getElementById(config.canvasId);
+            if (!canvas) return;
+
+            const clearBtn = document.getElementById(config.clearBtnId);
+            const hiddenInput = document.getElementById(config.hiddenInputId);
+            const dateInput = config.dateInputId ? document.getElementById(config.dateInputId) : null;
+            const nameInput = config.nameInputId ? document.getElementById(config.nameInputId) : null;
+            const form = document.getElementById(config.formId) || canvas.closest('form');
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            const wrapper = config.wrapperId ? document.getElementById(config.wrapperId) : canvas.parentElement;
+            const placeholder = wrapper ? wrapper.querySelector('.signature-placeholder') : null;
+            let hasSignature = false;
+
+            const resize = () => {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * ratio;
+                canvas.height = rect.height * ratio;
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.scale(ratio, ratio);
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2;
+            };
+
+            const pos = (event) => {
+                const rect = canvas.getBoundingClientRect();
+                const point = event.touches && event.touches[0] ? event.touches[0] : event;
+                return { x: point.clientX - rect.left, y: point.clientY - rect.top };
+            };
+
+            const start = (event) => {
+                event.preventDefault();
+                drawing = true;
+                const p = pos(event);
+                lastX = p.x;
+                lastY = p.y;
+                if (wrapper) wrapper.classList.add('active');
+            };
+
+            const move = (event) => {
+                event.preventDefault();
+                if (!drawing) return;
+                const p = pos(event);
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+                lastX = p.x;
+                lastY = p.y;
+
+                if (!hasSignature) {
+                    hasSignature = true;
+                    if (wrapper) wrapper.classList.add('has-signature');
+                }
+
+                if (nameInput && !nameInput.value) {
+                    nameInput.value = 'Ditandatangani secara digital';
+                }
+                if (dateInput && !dateInput.value) {
+                    const now = new Date();
+                    const yyyy = now.getFullYear();
+                    const mm = String(now.getMonth() + 1).padStart(2, '0');
+                    const dd = String(now.getDate()).padStart(2, '0');
+                    dateInput.value = `${yyyy}-${mm}-${dd}`;
+                }
+            };
+
+            const stop = () => {
+                drawing = false;
+                if (wrapper) wrapper.classList.remove('active');
+            };
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    hasSignature = false;
+                    if (hiddenInput) hiddenInput.value = '';
+                    if (dateInput) dateInput.value = '';
+                    if (nameInput) nameInput.value = '';
+                    if (wrapper) wrapper.classList.remove('has-signature');
+                    const savedImg = document.getElementById('savedSignatureImgAsesor');
+                    if (savedImg) savedImg.remove();
+                });
+            }
+
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const optSaved = document.getElementById('optSavedAsesor');
+                    if (optSaved && optSaved.checked) {
+                        return;
+                    }
+
+                    if (hiddenInput && hasSignature) {
+                        hiddenInput.value = canvas.toDataURL('image/png');
+                    }
+                });
+            }
+
+            canvas.addEventListener('mousedown', start);
+            canvas.addEventListener('mousemove', move);
+            canvas.addEventListener('mouseup', stop);
+            canvas.addEventListener('mouseleave', stop);
+            canvas.addEventListener('touchstart', start, { passive: false });
+            canvas.addEventListener('touchmove', move, { passive: false });
+            canvas.addEventListener('touchend', stop);
+            window.addEventListener('resize', resize);
+            resize();
+
+            if (hiddenInput && hiddenInput.value) {
+                hasSignature = true;
+                if (wrapper) wrapper.classList.add('has-signature');
+            }
+        }
+
+        initSignatureCanvas({
+            canvasId: 'signatureCanvasAsesor',
+            clearBtnId: 'clearSignatureAsesor',
+            hiddenInputId: 'ttdAsesorFileInput',
+            wrapperId: 'signatureWrapperAsesor',
+            dateInputId: 'ttdAsesorTanggalInput',
+            nameInputId: 'ttdAsesorNamaInput',
+        });
+
+        const savedSignature = @json($savedSignature ?? null);
+        window.toggleAsesorSigChoice = function() {
+            const optSaved = document.getElementById('optSavedAsesor');
+            const savedPreview = document.getElementById('savedAsesorSigPreview');
+            const newDraw = document.getElementById('newAsesorSigDraw');
+            const optSavedLabel = document.getElementById('optSavedAsesorLabel');
+            const optNewAsesorLabel = document.getElementById('optNewAsesorLabel');
+            const hiddenInput = document.getElementById('ttdAsesorFileInput');
+
+            if (!optSaved) return;
+
+            if (optSaved.checked) {
+                if (savedPreview) savedPreview.style.display = '';
+                if (newDraw) newDraw.style.display = 'none';
+                if (optSavedLabel) {
+                    optSavedLabel.style.borderColor = '#d1fae5'; optSavedLabel.style.background = '#f0fdf4';
+                }
+                if (optNewAsesorLabel) {
+                    optNewAsesorLabel.style.borderColor = '#e2e8f0'; optNewAsesorLabel.style.background = '#f8fafc';
+                }
+                if (hiddenInput && savedSignature) hiddenInput.value = savedSignature;
+            } else {
+                if (savedPreview) savedPreview.style.display = 'none';
+                if (newDraw) newDraw.style.display = 'block';
+                if (optSavedLabel) {
+                    optSavedLabel.style.borderColor = '#e2e8f0'; optSavedLabel.style.background = '#f8fafc';
+                }
+                if (optNewAsesorLabel) {
+                    optNewAsesorLabel.style.borderColor = '#bfdbfe'; optNewAsesorLabel.style.background = '#eff6ff';
+                }
+                if (hiddenInput) hiddenInput.value = '';
+            }
+        };
+
+        if (document.getElementById('optSavedAsesor')) {
+            toggleAsesorSigChoice();
         }
 
         syncNomorSkema();

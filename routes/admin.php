@@ -74,6 +74,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/asesi/{nik}/edit', [AsesiController::class, 'edit'])->name('admin.asesi.edit')->middleware('permission:asesi.edit');
             Route::put('/asesi/{nik}', [AsesiController::class, 'update'])->name('admin.asesi.update')->middleware('permission:asesi.edit');
             Route::delete('/asesi/{nik}', [AsesiController::class, 'destroy'])->name('admin.asesi.destroy')->middleware('permission:asesi.delete');
+            Route::post('/asesi/{nik}/reset-password', [AsesiController::class, 'resetPassword'])->name('admin.asesi.reset-password')->middleware('permission:asesi.edit');
         });
 
         // Verifikasi Asesi
@@ -96,6 +97,7 @@ Route::prefix('admin')->group(function () {
             Route::get('/asesor/{ID_asesor}/edit', [AsesorController::class, 'edit'])->name('admin.asesor.edit')->middleware('permission:asesor.edit');
             Route::put('/asesor/{ID_asesor}', [AsesorController::class, 'update'])->name('admin.asesor.update')->middleware('permission:asesor.edit');
             Route::delete('/asesor/{ID_asesor}', [AsesorController::class, 'destroy'])->name('admin.asesor.destroy')->middleware('permission:asesor.delete');
+            Route::post('/asesor/{ID_asesor}/reset-password', [AsesorController::class, 'resetPassword'])->name('admin.asesor.reset-password')->middleware('permission:asesor.edit');
         });
         
         // Mitra CRUD

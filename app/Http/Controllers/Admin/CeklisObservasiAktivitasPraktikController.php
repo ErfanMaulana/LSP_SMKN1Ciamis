@@ -172,6 +172,12 @@ class CeklisObservasiAktivitasPraktikController extends Controller
             ->whereHas('skemas', function ($query) use ($skemaId) {
                 $query->where('skemas.id', $skemaId);
             })
+            ->whereNotExists(function ($query) use ($skemaId) {
+                $query->select(DB::raw(1))
+                    ->from('ceklis_observasi_aktivitas_praktiks')
+                    ->whereColumn('ceklis_observasi_aktivitas_praktiks.asesi_nik', 'asesi.NIK')
+                    ->where('ceklis_observasi_aktivitas_praktiks.skema_id', $skemaId);
+            })
             ->orderBy('nama')
             ->get(['NIK', 'nama'])
             ->map(fn ($item) => [

@@ -389,12 +389,24 @@ class RekamanAsesmenKompetensiController extends Controller
 
         $directAsesi = Asesi::query()
             ->where('ID_asesor', $asesor->ID_asesor)
+            ->whereNotExists(function ($query) use ($skemaId) {
+                $query->select(DB::raw(1))
+                    ->from('rekaman_asesmen_kompetensi')
+                    ->whereColumn('rekaman_asesmen_kompetensi.asesi_nik', 'asesi.NIK')
+                    ->where('rekaman_asesmen_kompetensi.skema_id', $skemaId);
+            })
             ->with(['jurusan:ID_jurusan,kode_jurusan,nama_jurusan'])
             ->get(['NIK', 'nama', 'email', 'telepon_hp', 'ID_jurusan']);
 
         $skemaAsesi = Asesi::query()
             ->whereHas('skemas', function ($query) use ($skemaId) {
                 $query->where('skemas.id', $skemaId);
+            })
+            ->whereNotExists(function ($query) use ($skemaId) {
+                $query->select(DB::raw(1))
+                    ->from('rekaman_asesmen_kompetensi')
+                    ->whereColumn('rekaman_asesmen_kompetensi.asesi_nik', 'asesi.NIK')
+                    ->where('rekaman_asesmen_kompetensi.skema_id', $skemaId);
             })
             ->with(['jurusan:ID_jurusan,kode_jurusan,nama_jurusan'])
             ->get(['NIK', 'nama', 'email', 'telepon_hp', 'ID_jurusan']);
@@ -568,6 +580,10 @@ class RekamanAsesmenKompetensiController extends Controller
             'rekomendasi' => 'required|in:kompeten,belum_kompeten',
             'tindak_lanjut' => 'nullable|string',
             'komentar_observasi' => 'nullable|string',
+            'ttd_asesor_nama' => 'nullable|string|max:255',
+            'ttd_asesor_tanggal' => 'nullable|date',
+            'ttd_asesor_file' => 'nullable|string',
+            'simpan_tanda_tangan' => 'nullable|in:0,1',
             'detail' => 'required|array|min:1',
             'detail.*.unit_id' => 'required|exists:units,id',
             'detail.*.observasi_demonstrasi' => 'nullable|in:1',
@@ -635,6 +651,38 @@ class RekamanAsesmenKompetensiController extends Controller
         $data['judul_form'] = $data['judul_form'] ?? 'REKAMAN ASESMEN KOMPETENSI';
         $data['kategori_skema'] = $data['kategori_skema'] ?? Skema::find($data['skema_id'])?->jenis_skema;
         $data['tuk'] = $data['tuk'] ?? null;
+
+        if (empty($data['ttd_asesor_nama'])) {
+            $data['ttd_asesor_nama'] = $asesor->nama;
+        }
+        if (empty($data['ttd_asesor_tanggal'])) {
+            $data['ttd_asesor_tanggal'] = now()->format('Y-m-d');
+        }
+
+        // Handle signature image file
+        if (!empty($data['ttd_asesor_file'])) {
+            if (strpos($data['ttd_asesor_file'], 'data:image') === 0) {
+                try {
+                    $signatureData = $data['ttd_asesor_file'];
+                    list($type, $signatureData) = explode(';', $signatureData);
+                    list(, $signatureData) = explode(',', $signatureData);
+                    $signatureData = base64_decode($signatureData);
+
+                    $filename = 'signature_asesor_' . uniqid() . '_' . time() . '.png';
+                    $path = 'rekaman-asesmen/signatures';
+
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path . '/' . $filename, $signatureData);
+                    $data['ttd_asesor_file'] = $path . '/' . $filename;
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to save asesor signature image: ' . $e->getMessage());
+                    unset($data['ttd_asesor_file']);
+                }
+            }
+        }
+
+        if ($request->input('simpan_tanda_tangan') === '1' && $asesor && !empty($request->ttd_asesor_file)) {
+            $asesor->update(['saved_tanda_tangan' => $request->ttd_asesor_file]);
+        }
 
         return [$data, $details];
     }

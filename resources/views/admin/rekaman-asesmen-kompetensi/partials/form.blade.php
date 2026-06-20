@@ -19,6 +19,7 @@
     $selectedAsesiNik = (string) $value('asesi_nik', '');
     $selectedAsesorId = (string) $value('asesor_id', '');
     $selectedTuk = (string) $value('tuk', 'sewaktu');
+    $selectedAsesiNama = $record && $record->asesi ? $record->asesi->nama : '';
 
     $tukOptions = [
         'sewaktu' => 'TUK Sewaktu',
@@ -91,6 +92,110 @@
     .btn-secondary { background:#64748b; color:#fff; }
 
     @media (max-width:768px) { .grid-2 { grid-template-columns:1fr; } }
+
+    .search-select {
+        position: relative;
+    }
+
+    .search-select-toggle {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #fff;
+        padding: 8px 11px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        text-align: left;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-select-toggle:focus,
+    .search-select.open .search-select-toggle {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
+    .search-select-value {
+        font-size: 13px;
+        color: #334155;
+    }
+
+    .search-select-placeholder {
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .search-select-chevron {
+        margin-left: auto;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+
+    .search-select-dropdown {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: calc(100% + 6px);
+        z-index: 30;
+        background: #fff;
+        border: 1px solid #dbe4ef;
+        border-radius: 10px;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+    }
+
+    .search-select.open .search-select-dropdown {
+        display: block;
+    }
+
+    .search-select-search {
+        width: 100%;
+        border: none;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 10px 12px;
+        font-size: 13px;
+        outline: none;
+        border-radius: 0;
+    }
+
+    .search-select-options {
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .search-select-option {
+        display: block;
+        padding: 10px 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #334155;
+    }
+
+    .search-select-option:last-child {
+        border-bottom: none;
+    }
+
+    .search-select-option:hover {
+        background: #f8fafc;
+    }
+
+    .search-select-option.selected {
+        background: #f0f9ff;
+        color: #0073bd;
+        font-weight: 600;
+    }
+
+    .search-select-empty {
+        padding: 12px;
+        color: #94a3b8;
+        font-size: 13px;
+    }
 </style>
 
 <div class="card-form">
@@ -152,9 +257,17 @@
 
         <div class="field">
             <label>Nama Asesi <span class="req">*</span></label>
-            <select id="asesiSelect" name="asesi_nik">
-                <option value="">-- Pilih Asesi --</option>
-            </select>
+            <div class="search-select" id="asesiSearchSelect">
+                <input type="hidden" id="asesiSelect" name="asesi_nik" value="{{ $selectedAsesiNik }}">
+                <button type="button" class="search-select-toggle" aria-haspopup="listbox" aria-expanded="false">
+                    <span class="search-select-value">-- Pilih Asesi --</span>
+                    <i class="bi bi-chevron-down search-select-chevron"></i>
+                </button>
+                <div class="search-select-dropdown" role="listbox">
+                    <input type="text" class="search-select-search" placeholder="Ketik untuk mencari...">
+                    <div class="search-select-options"></div>
+                </div>
+            </div>
             @error('asesi_nik')<div class="error-text">{{ $message }}</div>@enderror
         </div>
 
@@ -273,8 +386,140 @@ document.addEventListener('DOMContentLoaded', function () {
     const unitsUrl = '{{ route('admin.rekaman-asesmen-kompetensi.skema-units') }}';
     const selectedAsesorId = @json($selectedAsesorId);
     const selectedAsesiNik = @json($selectedAsesiNik);
+    const selectedAsesiNama = @json($selectedAsesiNama);
     const initialDetailMap = @json($initialDetailMap ?? []);
     let applyInitialSelection = true;
+    let asesiList = [];
+    const asesiSearchSelect = document.getElementById('asesiSearchSelect');
+
+    const renderAsesiSelect = () => {
+        if (!asesiSearchSelect) return;
+
+        const hiddenInput = document.getElementById('asesiSelect');
+        const toggle = asesiSearchSelect.querySelector('.search-select-toggle');
+        const valueWrap = asesiSearchSelect.querySelector('.search-select-value');
+        const searchInput = asesiSearchSelect.querySelector('.search-select-search');
+        const optionsWrap = asesiSearchSelect.querySelector('.search-select-options');
+
+        if (!hiddenInput || !toggle || !valueWrap || !searchInput || !optionsWrap) {
+            return;
+        }
+
+        const syncValue = () => {
+            const val = hiddenInput.value;
+            const matched = asesiList.find(item => String(item.id) === String(val));
+            if (matched) {
+                valueWrap.textContent = `${matched.nama} (${matched.id})`;
+                valueWrap.style.color = '#334155';
+                valueWrap.style.fontWeight = '600';
+            } else {
+                valueWrap.textContent = '-- Pilih Asesi --';
+                valueWrap.style.color = '#94a3b8';
+                valueWrap.style.fontWeight = '400';
+            }
+        };
+
+        const drawOptions = () => {
+            const query = searchInput.value.trim().toLowerCase();
+            optionsWrap.innerHTML = '';
+
+            const filtered = asesiList.filter(item => {
+                const haystack = `${item.nama} ${item.id}`.toLowerCase();
+                return haystack.includes(query);
+            });
+
+            if (filtered.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'search-select-empty';
+                empty.textContent = 'Tidak ada opsi yang cocok.';
+                optionsWrap.appendChild(empty);
+                return;
+            }
+
+            filtered.forEach(item => {
+                const option = document.createElement('div');
+                option.className = 'search-select-option';
+                if (String(hiddenInput.value) === String(item.id)) {
+                    option.classList.add('selected');
+                }
+                option.textContent = `${item.nama} (${item.id})`;
+                option.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    hiddenInput.value = item.id;
+                    syncValue();
+                    closeAsesiSelect();
+                    hiddenInput.dispatchEvent(new Event('change'));
+                });
+                optionsWrap.appendChild(option);
+            });
+        };
+
+        const closeAsesiSelect = () => {
+            asesiSearchSelect.classList.remove('open');
+            toggle.setAttribute('aria-expanded', 'false');
+        };
+
+        syncValue();
+        drawOptions();
+
+        toggle.onclick = function (event) {
+            event.preventDefault();
+            const isOpen = asesiSearchSelect.classList.contains('open');
+            document.querySelectorAll('.search-select.open').forEach(c => {
+                if (c !== asesiSearchSelect) {
+                    c.classList.remove('open');
+                }
+            });
+            asesiSearchSelect.classList.toggle('open', !isOpen);
+            toggle.setAttribute('aria-expanded', String(!isOpen));
+            if (!isOpen) {
+                searchInput.value = '';
+                drawOptions();
+                searchInput.focus();
+            }
+        };
+
+        searchInput.oninput = drawOptions;
+
+        asesiSearchSelect.onclick = (event) => {
+            event.stopPropagation();
+        };
+
+        if (!asesiSearchSelect.dataset.selectDocBound) {
+            document.addEventListener('click', (event) => {
+                if (!asesiSearchSelect.contains(event.target)) {
+                    closeAsesiSelect();
+                }
+            });
+            asesiSearchSelect.dataset.selectDocBound = '1';
+        }
+    };
+
+    const resetAsesi = (placeholder) => {
+        asesiList = [];
+        if (asesiSelect) {
+            asesiSelect.value = '';
+        }
+        renderAsesiSelect();
+    };
+
+    const fillAsesi = (items, selectedValue, selectedLabel = '') => {
+        asesiList = items.map(item => ({
+            id: String(item.id),
+            nama: item.nama
+        }));
+
+        if (asesiSelect) {
+            let matched = asesiList.some(item => String(item.id) === String(selectedValue));
+            if (selectedValue && !matched && selectedLabel) {
+                asesiList.push({ id: String(selectedValue), nama: selectedLabel });
+            }
+            if (selectedValue) {
+                asesiSelect.value = String(selectedValue);
+            }
+        }
+        renderAsesiSelect();
+    };
 
     const resetSelect = (select, placeholder) => {
         select.innerHTML = '';
@@ -365,7 +610,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!skemaId) {
             resetSelect(asesorSelect, '-- Pilih Asesor --');
-            resetSelect(asesiSelect, '-- Pilih Asesi --');
+            resetAsesi('-- Pilih Asesi --');
             unitRowsContainer.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#64748b;">Pilih skema untuk memuat unit kompetensi.</td></tr>';
             return;
         }
@@ -387,19 +632,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 (item) => item.no_reg ? `${item.nama} (${item.no_reg})` : item.nama
             );
 
-            fillSelect(
-                asesiSelect,
-                '-- Pilih Asesi --',
+            fillAsesi(
                 participants.asesi || [],
                 applyInitialSelection ? selectedAsesiNik : '',
-                (item) => `${item.nama} (${item.id})`
+                applyInitialSelection ? selectedAsesiNama : ''
             );
 
             renderUnits(unitPayload.units || []);
             applyInitialSelection = false;
         } catch (error) {
             resetSelect(asesorSelect, '-- Gagal memuat asesor --');
-            resetSelect(asesiSelect, '-- Gagal memuat asesi --');
+            resetAsesi('-- Gagal memuat asesi --');
             unitRowsContainer.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#b91c1c;">Gagal memuat unit kompetensi.</td></tr>';
             applyInitialSelection = false;
         }

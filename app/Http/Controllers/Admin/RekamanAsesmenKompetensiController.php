@@ -163,6 +163,12 @@ class RekamanAsesmenKompetensiController extends Controller
             ->whereHas('skemas', function ($query) use ($skemaId) {
                 $query->where('skemas.id', $skemaId);
             })
+            ->whereNotExists(function ($query) use ($skemaId) {
+                $query->select(DB::raw(1))
+                    ->from('rekaman_asesmen_kompetensi')
+                    ->whereColumn('rekaman_asesmen_kompetensi.asesi_nik', 'asesi.NIK')
+                    ->where('rekaman_asesmen_kompetensi.skema_id', $skemaId);
+            })
             ->orderBy('nama')
             ->get(['NIK', 'nama'])
             ->map(fn ($item) => [

@@ -134,6 +134,12 @@
                                         <a href="{{ route('admin.asesor.edit', $item->ID_asesor) }}">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
+                                        <form action="{{ route('admin.asesor.reset-password', $item->ID_asesor) }}" method="POST" style="margin:0;" onsubmit="return confirm('Reset password asesor {{ $item->nama }} ke No. Met?')">
+                                            @csrf
+                                            <button type="submit">
+                                                <i class="bi bi-key"></i> Reset Password
+                                            </button>
+                                        </form>
                                         <form action="{{ route('admin.asesor.destroy', $item->ID_asesor) }}" method="POST" style="margin:0;" onsubmit="return openAsesorDeleteModal(event, this, @js('Hapus asesor ' . $item->nama . '?'))">
                                             @csrf
                                             @method('DELETE')

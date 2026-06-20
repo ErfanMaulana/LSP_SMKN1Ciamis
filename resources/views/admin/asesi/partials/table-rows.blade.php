@@ -58,6 +58,12 @@
                 <a href="{{ route('admin.asesi.edit', $item->NIK) }}">
                     <i class="bi bi-pencil"></i> Edit
                 </a>
+                <form action="{{ route('admin.asesi.reset-password', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return confirm('Reset password asesi {{ $item->nama }} ke NIK?')">
+                    @csrf
+                    <button type="submit">
+                        <i class="bi bi-key"></i> Reset Password
+                    </button>
+                </form>
                 <form action="{{ route('admin.asesi.destroy', $item->NIK) }}" method="POST" style="margin:0;" onsubmit="return openSingleDeleteModal(event, this, @js('Hapus asesi ' . $item->nama . '?'))">
                     @csrf
                     @method('DELETE')

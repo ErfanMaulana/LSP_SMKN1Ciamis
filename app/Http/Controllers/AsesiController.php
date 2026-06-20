@@ -1647,4 +1647,28 @@ class AsesiController extends Controller
         }
     }
 
+    /**
+     * Reset password asesi ke NIK.
+     */
+    public function resetPassword($nik)
+    {
+        $asesi = Asesi::findOrFail($nik);
+        $account = $asesi->account;
+
+        if (!$account) {
+            $account = Account::create([
+                'id'       => $asesi->NIK,
+                'NIK'      => $asesi->NIK,
+                'nama'     => $asesi->nama,
+                'password' => Hash::make($asesi->NIK),
+                'role'     => 'asesi',
+            ]);
+            return redirect()->back()->with('success', 'Akun asesi ' . $asesi->nama . ' belum terdaftar. Akun baru telah otomatis dibuat dengan password NIK.');
+        }
+
+        $account->password = Hash::make($asesi->NIK);
+        $account->save();
+
+        return redirect()->back()->with('success', 'Password asesi ' . $asesi->nama . ' berhasil direset ke NIK.');
+    }
 }

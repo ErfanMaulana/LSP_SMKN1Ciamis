@@ -181,4 +181,32 @@ class AsesorController extends Controller
 
         return redirect()->route('admin.asesor.index')->with('success', 'Data Asesor berhasil dihapus!');
     }
+
+    /**
+     * Reset password asesor ke No. Met.
+     */
+    public function resetPassword($ID_asesor)
+    {
+        $asesor = Asesor::findOrFail($ID_asesor);
+        if (!$asesor->no_met) {
+            return redirect()->back()->with('error', 'Asesor tidak memiliki No. Met untuk digunakan sebagai password.');
+        }
+
+        $account = $asesor->account;
+        if (!$account) {
+            $account = Account::create([
+                'id'       => $asesor->no_met,
+                'nama'     => $asesor->nama,
+                'password' => Hash::make($asesor->no_met),
+                'role'     => 'asesor',
+            ]);
+            return redirect()->back()->with('success', 'Akun asesor ' . $asesor->nama . ' belum terdaftar. Akun baru telah otomatis dibuat dengan password No. Met.');
+        }
+
+        $account->password = Hash::make($asesor->no_met);
+        $account->save();
+
+        return redirect()->back()->with('success', 'Password asesor ' . $asesor->nama . ' berhasil direset ke No. Met.');
+    }
 }
+
