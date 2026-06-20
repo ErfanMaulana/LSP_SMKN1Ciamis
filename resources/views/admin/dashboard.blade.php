@@ -280,7 +280,7 @@
 .panel-title { font-size: 14px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 7px; }
 .panel-title i { color: #0073bd; font-size: 16px; }
 .panel-link { font-size: 12px; color: #0073bd; text-decoration: none; font-weight: 500; display: flex; align-items: center; gap: 3px; }
-.panel-link:hover { color: #004f90; }
+.panel-link:hover { color: #005f9a; }
 
 /* ── Verifikasi ───────────────────────────────────────────────────── */
 .verif-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }

@@ -331,7 +331,7 @@
         padding: 3px 6px;
         border-radius: 999px;
         background: #eff6ff;
-        color: #1d4ed8;
+        color: #0073bd;
         font-size: 11px;
         font-weight: 600;
         white-space: nowrap;
@@ -679,7 +679,7 @@
         gap: 10px;
         margin-bottom: 12px;
         min-width: 0;
-        background-color: #007ac3;
+        background-color: #0073bd;
         color: #fff;
         border-radius: 8px 8px 0 0;
         padding: 18px 24px;

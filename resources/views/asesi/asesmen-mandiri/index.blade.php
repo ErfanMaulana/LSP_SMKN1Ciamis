@@ -6,7 +6,7 @@
 @section('styles')
 <style>
     .page-header {
-        background: #0061A5;
+        background: #0073bd;
         border-radius: 12px;
         padding: 28px;
         margin-bottom: 24px;
@@ -45,7 +45,7 @@
     .skema-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        border-color: #0061A5;
+        border-color: #005f9a;
     }
 
     .skema-card .skema-badge {
@@ -65,7 +65,7 @@
     .skema-icon {
         width: 50px;
         height: 50px;
-        background: #0061A5;
+        background: #0073bd;
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -93,7 +93,7 @@
     .skema-card .skema-type {
         display: inline-block;
         background: #eff6ff;
-        color: #1d4ed8;
+        color: #0073bd;
         font-size: 11px;
         padding: 3px 10px;
         border-radius: 4px;
@@ -139,7 +139,7 @@
     }
 
     .btn-start {
-        background: #0061A5;
+        background: #0073bd;
         color: white;
     }
 
@@ -149,7 +149,7 @@
     }
 
     .btn-continue {
-        background: #0061A5;
+        background: #0073bd;
         color: white;
     }
 
@@ -160,7 +160,7 @@
 
     .btn-view {
         background: #eff6ff;
-        color: #1d4ed8;
+        color: #0073bd;
     }
 
     .btn-view:hover {

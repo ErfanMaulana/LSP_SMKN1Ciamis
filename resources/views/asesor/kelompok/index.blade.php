@@ -53,7 +53,7 @@
         font-weight: 600;
         margin-left: 8px;
     }
-    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-blue { background: #dbeafe; color: #0073bd; }
     .badge-green { background: #d1fae5; color: #065f46; }
     .badge-amber { background: #fff7ed; color: #c2410c; }
     .badge-gray { background: #f1f5f9; color: #94a3b8; }
@@ -93,7 +93,7 @@
         gap: 6px;
         font-size: 12px;
         font-weight: 600;
-        color: #0369a1;
+        color: #0073bd;
         text-decoration: none;
         border: 1px solid #bae6fd;
         background: #f0f9ff;

@@ -243,6 +243,11 @@
         font-weight: 600;
     }
 
+    .btn-review:hover {
+    background: #005f9a;
+    color: #ffffff;
+    }
+
     .btn-review.disabled {
         background: #e2e8f0;
         color: #94a3b8;

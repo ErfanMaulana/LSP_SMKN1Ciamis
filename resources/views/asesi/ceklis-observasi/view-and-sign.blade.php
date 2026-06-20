@@ -293,7 +293,7 @@
         <div class="rekomendasi-label">REKOMENDASI:</div>
         <div class="rekomendasi-value">
             @if ($ceklis->rekomendasi === 'kompeten')
-                <span style="color: #059669;">✓ KOMPETEN</span>
+                <span style="color: #0073bd;">✓ KOMPETEN</span>
             @else
                 <span style="color: #dc2626;">✗ BELUM KOMPETEN</span>
             @endif
