@@ -1219,7 +1219,7 @@
     ════════════════════════════════════════════════════════ --}}
     @if($pivot && $pivot->rekomendasi)
     <div style="background:white;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.05);border:1px solid #e2e8f0;margin-top:20px;overflow:hidden;">
-        <div style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);padding:16px 20px;display:flex;align-items:center;gap:12px;">
+        <div style="background:#0073bd;padding:16px 20px;display:flex;align-items:center;gap:12px;">
             <div style="width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
                 <i class="bi bi-patch-check-fill" style="font-size:16px;color:white;"></i>
             </div>
@@ -1343,7 +1343,7 @@
             </span>
             @elseif($pivot && $pivot->status === 'selesai')
             <div class="waiting-review-box">
-                <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#d1fae5,#a7f3d0);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <div style="width:40px;height:40px;border-radius:50%;background:#0073bd;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                     <i class="bi bi-hourglass-split" style="font-size:18px;color:#065f46;"></i>
                 </div>
                 <div>

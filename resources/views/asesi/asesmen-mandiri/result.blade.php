@@ -18,11 +18,11 @@
     }
 
     .back-link:hover {
-        color: #0061A5;
+        color: #005f9a;
     }
 
     .result-header {
-        background: #0061A5;
+        background: #0073bd;
         border-radius: 12px;
         padding: 28px;
         margin-bottom: 24px;
@@ -87,7 +87,7 @@
 
     .completion-badge {
         background: #dbeafe;
-        color: #0c4a6e;
+        color: #0073bd;
         padding: 16px 24px;
         border-radius: 10px;
         display: flex;
@@ -162,7 +162,7 @@
 
     .status-badge.kompeten {
         background: #dbeafe;
-        color: #0c4a6e;
+        color: #0073bd;
     }
 
     .status-badge.belum {
@@ -216,20 +216,22 @@
 
     .btn-print {
         background: #e0e7ff;
-        color: #4338ca;
+        color: #0073bd;
     }
 
     .btn-print:hover {
-        background: #c7d2fe;
+        background: #0073bd;
+        color: white;
     }
 
     .btn-back {
-        background: #1e40af;
+        background: #0073bd;
         color: white;
     }
 
     .btn-back:hover {
-        background: #0061a5;
+        background: #0073bd;
+        color: white;
     }
 
     @media print {

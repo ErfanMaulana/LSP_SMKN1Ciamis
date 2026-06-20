@@ -65,12 +65,11 @@
     }
 
     .hero-card {
-        background: linear-gradient(135deg, #0b5fa5 0%, #0f7bcf 100%);
+        background: #0073bd;
         color: #ffffff;
         border-radius: 16px;
         padding: 22px 24px;
         margin-bottom: 18px;
-        box-shadow: 0 10px 24px rgba(2, 84, 144, 0.16);
     }
 
     .hero-card-top {
@@ -328,7 +327,7 @@
 
     .btn-submit {
         border: none;
-        background: #0061A5;
+        background: #0073bd;
         color: #ffffff;
         height: 42px;
         padding: 0 16px;
@@ -541,7 +540,7 @@
         padding: 7px 10px;
         border-radius: 999px;
         background: #eff6ff;
-        color: #0b5fa5;
+        color: #0073bd;
         font-size: 12px;
         font-weight: 700;
     }

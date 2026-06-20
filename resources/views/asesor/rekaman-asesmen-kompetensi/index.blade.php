@@ -41,7 +41,7 @@
         white-space: nowrap;
     }
     .btn-action:hover {
-        background: #003961;
+        background: #005f9a;
         color: #ffffff;
     }
 

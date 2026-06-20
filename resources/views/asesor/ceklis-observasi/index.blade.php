@@ -41,7 +41,7 @@
         white-space: nowrap;
     }
     .btn-action:hover {
-        background: #003961;
+        background: #005f9a;
         color: #ffffff;
     }
 
@@ -181,7 +181,7 @@
         transition: background 0.2s;
         white-space: nowrap;
     }
-    .btn-review:hover { background: #003961; color: white; }
+    .btn-review:hover { background: #005f9a; color: white; }
     .btn-review.disabled {
         background: #e2e8f0;
         color: #64748b;
