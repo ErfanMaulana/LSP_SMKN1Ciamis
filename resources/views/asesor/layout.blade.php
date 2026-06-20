@@ -485,6 +485,165 @@
             </div>
 
             <nav class="sidebar-menu">
+                @php
+                    $sidebarCounts = [
+                        'asesmen_mandiri' => 0,
+                        'persetujuan_asesmen' => 0,
+                        'ceklis_observasi' => 0,
+                        'rekaman_asesmen' => 0,
+                        'entry_penilaian' => 0,
+                        'banding_asesmen' => 0,
+                    ];
+
+                    if (isset($asesor) && $asesor) {
+                        $skemaIds = $asesor->skemas->pluck('id')->toArray();
+                        $nomorSkemas = $asesor->skemas->pluck('nomor_skema')->filter()->toArray();
+
+                        if (count($skemaIds)) {
+                            // 1. Asesmen Mandiri
+                            $sidebarCounts['asesmen_mandiri'] = \Illuminate\Support\Facades\DB::table('asesi_skema')
+                                ->whereIn('skema_id', $skemaIds)
+                                ->where('status', 'selesai')
+                                ->where(fn($q) => $q->whereNull('rekomendasi')->orWhere('rekomendasi', ''))
+                                ->count();
+
+                            // 2. Persetujuan Asesmen
+                            $pendingPersetujuans = \Illuminate\Support\Facades\DB::table('persetujuan_asesmen')
+                                ->whereIn('nomor_skema', $nomorSkemas)
+                                ->where('nama_asesor', $asesor->nama)
+                                ->where(fn($q) => $q->whereNull('ttd_asesor_nama')->orWhere('ttd_asesor_nama', ''))
+                                ->get(['nomor_skema', 'asesi_nik', 'nama_asesi']);
+
+                            $pendingPACount = 0;
+                            $skemaMapForPA = $asesor->skemas->keyBy('id');
+                            foreach ($pendingPersetujuans as $pa) {
+                                $asesiNik = null;
+                                if (!empty($pa->asesi_nik)) {
+                                    $asesiNik = $pa->asesi_nik;
+                                } else {
+                                    $matchingAsesi = \Illuminate\Support\Facades\DB::table('asesi')
+                                        ->where('nama', $pa->nama_asesi)
+                                        ->orderBy('NIK')
+                                        ->first(['NIK']);
+                                    $asesiNik = $matchingAsesi?->NIK;
+                                }
+
+                                if ($asesiNik) {
+                                    $sk = $skemaMapForPA->firstWhere('nomor_skema', $pa->nomor_skema);
+                                    if ($sk) {
+                                        $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
+                                            ->where('asesi_nik', $asesiNik)
+                                            ->where('skema_id', $sk->id)
+                                            ->first(['rekomendasi']);
+                                        if ($pivot && $pivot->rekomendasi === 'lanjut') {
+                                            $pendingPACount++;
+                                        }
+                                    }
+                                }
+                            }
+                            $sidebarCounts['persetujuan_asesmen'] = $pendingPACount;
+
+                            // 3. Ceklis Observasi
+                            $fullySignedPersetujuans = \Illuminate\Support\Facades\DB::table('persetujuan_asesmen')
+                                ->whereIn('nomor_skema', $nomorSkemas)
+                                ->whereNotNull('ttd_asesor_nama')->where('ttd_asesor_nama', '!=', '')
+                                ->whereNotNull('ttd_asesi_nama')->where('ttd_asesi_nama', '!=', '')
+                                ->get(['nomor_skema', 'asesi_nik', 'nama_asesi']);
+
+                            $persetujuanKeys = [];
+                            foreach ($fullySignedPersetujuans as $p) {
+                                if (!empty($p->asesi_nik)) {
+                                    $persetujuanKeys["{$p->nomor_skema}|{$p->asesi_nik}"] = true;
+                                }
+                                if (!empty($p->nama_asesi)) {
+                                    $persetujuanKeys["{$p->nomor_skema}|" . strtolower($p->nama_asesi)] = true;
+                                }
+                            }
+
+                            $asesiSkemasForCeklis = \Illuminate\Support\Facades\DB::table('asesi_skema')
+                                ->whereIn('skema_id', $skemaIds)
+                                ->get(['asesi_nik', 'skema_id']);
+
+                            $skemaMap = $asesor->skemas->keyBy('id');
+                            $ceklisKeys = \Illuminate\Support\Facades\DB::table('ceklis_observasi_aktivitas_praktiks')
+                                ->where('asesor_id', $asesor->ID_asesor)
+                                ->whereIn('skema_id', $skemaIds)
+                                ->select(\Illuminate\Support\Facades\DB::raw("CONCAT(asesi_nik, '|', skema_id) as `key`"))
+                                ->pluck('key')
+                                ->toArray();
+
+                            $asesisLookup = \Illuminate\Support\Facades\DB::table('asesi')
+                                ->whereIn('NIK', $asesiSkemasForCeklis->pluck('asesi_nik')->toArray())
+                                ->get(['NIK', 'nama'])
+                                ->keyBy('NIK');
+
+                            $pendingCeklis = 0;
+                            foreach ($asesiSkemasForCeklis as $as) {
+                                $sk = $skemaMap->get($as->skema_id);
+                                if (!$sk) continue;
+
+                                $key = "{$as->asesi_nik}|{$as->skema_id}";
+                                if (in_array($key, $ceklisKeys)) continue;
+
+                                $asesiObj = $asesisLookup->get($as->asesi_nik);
+                                $hasPersetujuan = isset($persetujuanKeys["{$sk->nomor_skema}|{$as->asesi_nik}"]) ||
+                                    ($asesiObj && isset($persetujuanKeys["{$sk->nomor_skema}|" . strtolower($asesiObj->nama)]));
+
+                                if ($hasPersetujuan) {
+                                    $pendingCeklis++;
+                                }
+                            }
+                            $sidebarCounts['ceklis_observasi'] = $pendingCeklis;
+
+                            // 4. Rekaman Asesmen
+                            $ceklisPairs = \Illuminate\Support\Facades\DB::table('ceklis_observasi_aktivitas_praktiks')
+                                ->where('asesor_id', $asesor->ID_asesor)
+                                ->whereIn('skema_id', $skemaIds)
+                                ->get(['asesi_nik', 'skema_id']);
+
+                            $rekamanKeys = \Illuminate\Support\Facades\DB::table('rekaman_asesmen_kompetensi')
+                                ->where('asesor_id', $asesor->ID_asesor)
+                                ->whereIn('skema_id', $skemaIds)
+                                ->select(\Illuminate\Support\Facades\DB::raw("CONCAT(asesi_nik, '|', skema_id) as `key`"))
+                                ->pluck('key')
+                                ->toArray();
+
+                            $pendingRekaman = 0;
+                            foreach ($ceklisPairs as $cp) {
+                                $key = "{$cp->asesi_nik}|{$cp->skema_id}";
+                                if (!in_array($key, $rekamanKeys)) {
+                                    $pendingRekaman++;
+                                }
+                            }
+                            $sidebarCounts['rekaman_asesmen'] = $pendingRekaman;
+
+                            // 5. Entry Penilaian
+                            $sidebarCounts['entry_penilaian'] = \Illuminate\Support\Facades\DB::table('asesi_skema as aks')
+                                ->whereIn('aks.skema_id', $skemaIds)
+                                ->where('aks.status', 'selesai')
+                                ->whereNotExists(function ($query) use ($asesor) {
+                                    $query->select(\Illuminate\Support\Facades\DB::raw(1))
+                                        ->from('asesor_nilai_elemens as ane')
+                                        ->whereRaw('ane.asesi_nik = aks.asesi_nik')
+                                        ->whereRaw('ane.skema_id = aks.skema_id')
+                                        ->where('ane.asesor_id', $asesor->ID_asesor);
+                                })
+                                ->count();
+
+                            // 6. Banding Asesmen
+                            $sidebarCounts['banding_asesmen'] = \Illuminate\Support\Facades\DB::table('asesi_skema as aks')
+                                ->join('banding_asesmen as b', function ($join) {
+                                    $join->on('b.asesi_nik', '=', 'aks.asesi_nik')
+                                        ->on('b.skema_id', '=', 'aks.skema_id');
+                                })
+                                ->whereIn('aks.skema_id', $skemaIds)
+                                ->whereNotNull('aks.rekomendasi')
+                                ->where('b.status', 'diajukan')
+                                ->count();
+                        }
+                    }
+                @endphp
+
                 <a href="{{ route('asesor.dashboard') }}"
                     class="menu-item {{ request()->routeIs('asesor.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i>
@@ -517,26 +676,41 @@
                     class="menu-item {{ request()->routeIs('asesor.asesmen-mandiri.*') ? 'active' : '' }}">
                     <i class="bi bi-clipboard-check"></i>
                     <span>Asesmen Mandiri</span>
+                    @if($sidebarCounts['asesmen_mandiri'] > 0)
+                        <span class="menu-badge" style="background: #ef4444;">{{ $sidebarCounts['asesmen_mandiri'] }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('asesor.persetujuan-asesmen.index') }}"
                     class="menu-item {{ request()->routeIs('asesor.persetujuan-asesmen.*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-check"></i>
                     <span>Persetujuan Asesmen</span>
+                    @if($sidebarCounts['persetujuan_asesmen'] > 0)
+                        <span class="menu-badge" style="background: #ef4444;">{{ $sidebarCounts['persetujuan_asesmen'] }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('asesor.ceklis-observasi.index') }}"
                     class="menu-item {{ request()->routeIs('asesor.ceklis-observasi.*') ? 'active' : '' }}">
                     <i class="bi bi-check2-square"></i>
                     <span>Ceklis Observasi</span>
+                    @if($sidebarCounts['ceklis_observasi'] > 0)
+                        <span class="menu-badge" style="background: #ef4444;">{{ $sidebarCounts['ceklis_observasi'] }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}"
                     class="menu-item {{ request()->routeIs('asesor.rekaman-asesmen-kompetensi.*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>Rekaman Asesmen</span>
+                    @if($sidebarCounts['rekaman_asesmen'] > 0)
+                        <span class="menu-badge" style="background: #ef4444;">{{ $sidebarCounts['rekaman_asesmen'] }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('asesor.entry-penilaian') }}"
                     class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">
                     <i class="bi bi-journal-check"></i>
                     <span>Entry Penilaian</span>
+                    @if($sidebarCounts['entry_penilaian'] > 0)
+                        <span class="menu-badge" style="background: #ef4444;">{{ $sidebarCounts['entry_penilaian'] }}</span>
+                    @endif
                 </a>
 
                 <div class="menu-section-title" style="font-size:11px; letter-spacing:.12em; margin-top:8px;">LANJUTAN</div>
@@ -545,6 +719,9 @@
                     class="menu-item {{ request()->routeIs('asesor.banding.*') ? 'active' : '' }}">
                     <i class="bi bi-clipboard2-check"></i>
                     <span>Banding Asesmen</span>
+                    @if($sidebarCounts['banding_asesmen'] > 0)
+                        <span class="menu-badge" style="background: #ef4444;">{{ $sidebarCounts['banding_asesmen'] }}</span>
+                    @endif
                 </a>
             </nav>
         </aside>
