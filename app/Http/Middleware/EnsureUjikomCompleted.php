@@ -30,7 +30,13 @@ class EnsureUjikomCompleted
 
         $query = RekamanAsesmenKompetensi::where('asesi_nik', $asesi->NIK)
             ->whereNotNull('tanggal_selesai')
-            ->where('tanggal_selesai', '<=', now());
+            ->where(function($q) {
+                $q->where('tanggal_selesai', '<=', now())
+                  ->orWhere(function($sub) {
+                      $sub->whereNotNull('ttd_asesi_file')
+                          ->where('ttd_asesi_file', '!=', '');
+                  });
+            });
 
         if ($skemaId) {
             $query->where('skema_id', $skemaId);
