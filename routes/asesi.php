@@ -42,9 +42,9 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::post('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'store'])->name('asesmen-mandiri.store');
             Route::get('/asesmen-mandiri/{skemaId}/result', [AsesmenMandiriController::class, 'result'])->name('asesmen-mandiri.result');
             Route::get('/asesmen-mandiri/{skemaId}/pdf', [AsesmenMandiriController::class, 'pdf'])->name('asesmen-mandiri.pdf');
-            Route::middleware('ujikom.completed')->group(function () {
-                Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
+            Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
 
+            Route::middleware('ujikom.completed')->group(function () {
                 // Umpan Balik Kinerja Asesor
                 Route::get('/umpan-balik', [UmpanBalikController::class, 'index'])->name('umpan-balik.index');
                 Route::get('/umpan-balik/{skemaId}', [UmpanBalikController::class, 'show'])->name('umpan-balik.show');
@@ -70,6 +70,10 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             // Ceklis Observasi - Asesi viewing and signing
             Route::get('/ceklis-observasi/{id}/view', [\App\Http\Controllers\Asesi\CeklisObservasiController::class, 'show'])->name('ceklis-observasi.view');
             Route::post('/ceklis-observasi/{id}/sign', [\App\Http\Controllers\Asesi\CeklisObservasiController::class, 'sign'])->name('ceklis-observasi.sign');
+
+            // Rekaman Asesmen - Asesi viewing and signing
+            Route::get('/rekaman-asesmen/{id}/view', [\App\Http\Controllers\Asesi\RekamanAsesmenController::class, 'show'])->name('rekaman-asesmen.view');
+            Route::post('/rekaman-asesmen/{id}/sign', [\App\Http\Controllers\Asesi\RekamanAsesmenController::class, 'sign'])->name('rekaman-asesmen.sign');
         });
     });
 });

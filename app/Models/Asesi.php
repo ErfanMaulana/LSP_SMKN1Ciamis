@@ -126,7 +126,13 @@ class Asesi extends Model
     {
         return RekamanAsesmenKompetensi::where('asesi_nik', $this->NIK)
             ->whereNotNull('tanggal_selesai')
-            ->where('tanggal_selesai', '<=', now())
+            ->where(function($q) {
+                $q->where('tanggal_selesai', '<=', now())
+                  ->orWhere(function($sub) {
+                      $sub->whereNotNull('ttd_asesi_file')
+                          ->where('ttd_asesi_file', '!=', '');
+                  });
+            })
             ->exists();
     }
 
@@ -135,7 +141,13 @@ class Asesi extends Model
         return RekamanAsesmenKompetensi::where('asesi_nik', $this->NIK)
             ->where('skema_id', $skemaId)
             ->whereNotNull('tanggal_selesai')
-            ->where('tanggal_selesai', '<=', now())
+            ->where(function($q) {
+                $q->where('tanggal_selesai', '<=', now())
+                  ->orWhere(function($sub) {
+                      $sub->whereNotNull('ttd_asesi_file')
+                          ->where('ttd_asesi_file', '!=', '');
+                  });
+            })
             ->exists();
     }
 

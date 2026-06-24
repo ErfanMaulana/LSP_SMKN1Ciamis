@@ -703,6 +703,8 @@
                     $showJadwal = false;
                     $showCeklis = false;
                     $ceklisRecord = null;
+                    $showRekaman = false;
+                    $rekamanRecord = null;
                 if ($asesi) {
                     try {
                         $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
@@ -742,10 +744,25 @@
                             ->latest('id')
                             ->first();
                         $showCeklis = (bool) $ceklisRecord;
+
+                        $rekamanRecord = \App\Models\RekamanAsesmenKompetensi::query()
+                            ->where('asesi_nik', $asesi->NIK)
+                            ->where(function($q) {
+                                $q->whereNotNull('ttd_asesor_nama')
+                                  ->where('ttd_asesor_nama', '!=', '');
+                            })
+                            ->where(function($q) {
+                                $q->whereNotNull('ttd_asesor_file')
+                                  ->where('ttd_asesor_file', '!=', '');
+                            })
+                            ->latest('id')
+                            ->first();
+                        $showRekaman = (bool) $rekamanRecord;
                     } catch (\Throwable $e) {
                         $showPersetujuan = false;
                         $showJadwal = false;
                         $showCeklis = false;
+                        $showRekaman = false;
                     }
                 }
             @endphp
@@ -801,6 +818,13 @@
                     <!-- ASESMEN Section -->
                     <div class="menu-section-title">ASESMEN</div>
 
+                    @if(Route::has('asesi.hasil-ujikom.index'))
+                    <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Status Asesmen</span>
+                    </a>
+                    @endif
+
                     <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="menu-item {{ request()->routeIs('asesi.asesmen-mandiri.*') ? 'active' : '' }}">
                         <i class="bi bi-clipboard-check"></i>
                         <span>Asesmen Mandiri</span>
@@ -813,13 +837,6 @@
                     </a>
                     @endif
 
-                    @if($showCeklis && $ceklisRecord)
-                    <a href="{{ route('asesi.ceklis-observasi.view', $ceklisRecord->id) }}" class="menu-item {{ request()->routeIs('asesi.ceklis-observasi.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-medical"></i>
-                        <span>Ceklis Observasi</span>
-                    </a>
-                    @endif
-
                     @if($showJadwal)
                     <a href="{{ route('asesi.jadwal.index') }}" class="menu-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
                         <i class="bi bi-calendar-event-fill"></i>
@@ -827,10 +844,17 @@
                     </a>
                     @endif
 
-                    @if($hasCompletedUjikom && Route::has('asesi.hasil-ujikom.index'))
-                    <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>Status Asesmen</span>
+                    @if($showCeklis && $ceklisRecord)
+                    <a href="{{ route('asesi.ceklis-observasi.view', $ceklisRecord->id) }}" class="menu-item {{ request()->routeIs('asesi.ceklis-observasi.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-medical"></i>
+                        <span>Ceklis Observasi</span>
+                    </a>
+                    @endif
+
+                    @if(!empty($showRekaman) && $rekamanRecord)
+                    <a href="{{ route('asesi.rekaman-asesmen.view', $rekamanRecord->id) }}" class="menu-item {{ request()->routeIs('asesi.rekaman-asesmen.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-ruled"></i>
+                        <span>Rekaman Asesmen</span>
                     </a>
                     @endif
 
@@ -948,13 +972,6 @@
                         <span>Asesmen</span>
                     </a>
 
-                    @if($showJadwal)
-                    <a href="{{ route('asesi.jadwal.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
-                        <i class="bi bi-calendar-event-fill"></i>
-                        <span>Jadwal</span>
-                    </a>
-                    @endif
-
                     @if(!empty($showPersetujuan))
                     <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-check"></i>
@@ -962,10 +979,24 @@
                     </a>
                     @endif
 
+                    @if($showJadwal)
+                    <a href="{{ route('asesi.jadwal.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.jadwal.*') ? 'active' : '' }}">
+                        <i class="bi bi-calendar-event-fill"></i>
+                        <span>Jadwal</span>
+                    </a>
+                    @endif
+
                     @if(!empty($showCeklis) && $ceklisRecord)
                     <a href="{{ route('asesi.ceklis-observasi.view', $ceklisRecord->id) }}" class="bottom-nav-item {{ request()->routeIs('asesi.ceklis-observasi.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-medical"></i>
                         <span>Ceklis</span>
+                    </a>
+                    @endif
+
+                    @if(!empty($showRekaman) && $rekamanRecord)
+                    <a href="{{ route('asesi.rekaman-asesmen.view', $rekamanRecord->id) }}" class="bottom-nav-item {{ request()->routeIs('asesi.rekaman-asesmen.*') ? 'active' : '' }}">
+                        <i class="bi bi-file-earmark-ruled"></i>
+                        <span>Rekaman</span>
                     </a>
                     @endif
 
