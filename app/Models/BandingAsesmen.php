@@ -19,12 +19,16 @@ class BandingAsesmen extends Model
         'catatan_admin',
         'checked_by',
         'checked_at',
+        'ttd_asesi_nama',
+        'ttd_asesi_tanggal',
+        'ttd_asesi_file',
     ];
 
     protected $casts = [
         'tanggal_asesmen' => 'date',
         'tanggal_pengajuan' => 'date',
         'checked_at' => 'datetime',
+        'ttd_asesi_tanggal' => 'date',
     ];
 
     public function asesi()

@@ -14,15 +14,13 @@
     .stat small { display:block; font-size:11px; text-transform:uppercase; color:#64748b; font-weight:700; letter-spacing:.4px; }
     .stat strong { display:block; margin-top:5px; font-size:24px; color:#0f172a; }
 
-    .toolbar { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:12px; }
-    .toolbar form { display:flex; gap:10px; flex-wrap:wrap; }
-    .input, .select { border:1px solid #cbd5e1; border-radius:8px; font-size:14px; padding:9px 12px; }
-    .input { min-width:260px; flex:1; }
-    .select { min-width:180px; background:#fff; }
-    .btn { border:none; border-radius:8px; padding:9px 14px; font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+    .btn { font-family:inherit; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition: all 0.2s ease; }
     .btn-primary { background:#0073bd; color:#fff; }
+    .btn-primary:hover { background:#005e9b; }
     .btn-light { background:#eef2ff; color:#1e3a8a; }
+    .btn-light:hover { background:#dbeafe; }
     .btn-warning { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+    .btn-warning:hover { background:#fde68a; }
     .btn-disabled { background:#e2e8f0; color:#64748b; cursor:not-allowed; }
 
     .card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:auto; }
@@ -33,7 +31,7 @@
 
     .badge { padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; display:inline-flex; align-items:center; gap:4px; }
     .badge.draft { background:#e2e8f0; color:#475569; }
-    .badge.diajukan { background:#dbeafe; color:#1e40af; }
+    .badge.diajukan { background:#dbeafe; color:#0073bd; }
     .badge.ditinjau { background:#fef3c7; color:#92400e; }
     .badge.diterima { background:#dcfce7; color:#166534; }
     .badge.ditolak { background:#fee2e2; color:#991b1b; }
@@ -64,23 +62,7 @@
     <div class="stat"><small>Tidak Banding</small><strong>{{ $stats['tidak_banding'] ?? 0 }}</strong></div>
 </div>
 
-<div class="toolbar">
-    <form method="GET" action="{{ route('asesi.banding.index') }}">
-        <input type="text" class="input" name="search" value="{{ $search ?? '' }}" placeholder="Cari nama skema atau nomor skema...">
-        <select class="select" name="status">
-            @php $currentStatus = $status ?? 'all'; @endphp
-            <option value="all" {{ $currentStatus === 'all' ? 'selected' : '' }}>Semua Status</option>
-            <option value="belum" {{ $currentStatus === 'belum' ? 'selected' : '' }}>Belum Memilih</option>
-            <option value="diajukan" {{ $currentStatus === 'diajukan' ? 'selected' : '' }}>Diajukan</option>
-            <option value="ditinjau" {{ $currentStatus === 'ditinjau' ? 'selected' : '' }}>Ditinjau</option>
-            <option value="diterima" {{ $currentStatus === 'diterima' ? 'selected' : '' }}>Diterima</option>
-            <option value="ditolak" {{ $currentStatus === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-            <option value="tidak_banding" {{ $currentStatus === 'tidak_banding' ? 'selected' : '' }}>Tidak Banding</option>
-        </select>
-        <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filter</button>
-        <a href="{{ route('asesi.banding.index') }}" class="btn btn-light"><i class="bi bi-arrow-counterclockwise"></i> Reset</a>
-    </form>
-</div>
+
 
 <div class="card">
     @if(method_exists($rows, 'count') && $rows->count())
@@ -125,18 +107,30 @@
                         <td>{{ $row->tanggal_pengajuan ? \Carbon\Carbon::parse($row->tanggal_pengajuan)->format('d-m-Y') : '-' }}</td>
                         <td>
                             <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                <a href="{{ route('asesi.banding.show', $row->skema_id) }}" class="btn {{ $row->banding_status === 'tidak_banding' ? 'btn-primary' : ($row->banding_id ? 'btn-light' : 'btn-primary') }}">
-                                    <i class="bi {{ $row->banding_id ? 'bi-eye' : 'bi-pencil-square' }}"></i>
-                                    {{ $row->banding_status === 'tidak_banding' ? 'Ubah ke Ajukan' : ($row->banding_id ? 'Lihat / Ubah' : 'Ajukan Banding') }}
-                                </a>
-
-                                @if(!$row->banding_id || in_array($row->banding_status, ['diajukan', 'ditinjau', 'tidak_banding'], true))
-                                    @if(!in_array($row->banding_status, ['diterima', 'ditolak'], true))
-                                        <form method="POST" action="{{ route('asesi.banding.decline', $row->skema_id) }}" onsubmit="return confirm('Simpan keputusan Tidak Banding untuk skema ini?');" style="display:inline;">
-                                            @csrf
-                                            <button type="submit" class="btn btn-warning"><i class="bi bi-x-octagon"></i> Tidak Banding</button>
-                                        </form>
-                                    @endif
+                                @if(empty($row->banding_id) || $statusBanding === 'draft')
+                                    <a href="{{ route('asesi.banding.show', $row->skema_id) }}" class="btn btn-primary">
+                                        <i class="bi bi-pencil-square"></i> Ajukan Banding
+                                    </a>
+                                    <form method="POST" action="{{ route('asesi.banding.decline', $row->skema_id) }}" onsubmit="return confirm('Simpan keputusan Tidak Banding untuk skema ini?');" style="display:inline;margin:0;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-warning"><i class="bi bi-x-octagon"></i> Tidak Banding</button>
+                                    </form>
+                                @elseif($statusBanding === 'tidak_banding')
+                                    <a href="{{ route('asesi.banding.show', $row->skema_id) }}" class="btn btn-primary">
+                                        <i class="bi bi-arrow-left-right"></i> Ubah ke Ajukan
+                                    </a>
+                                @elseif(in_array($statusBanding, ['diajukan', 'ditinjau']))
+                                    <a href="{{ route('asesi.banding.show', $row->skema_id) }}" class="btn btn-primary">
+                                        <i class="bi bi-pencil-square"></i> Lihat / Ubah
+                                    </a>
+                                    <form method="POST" action="{{ route('asesi.banding.decline', $row->skema_id) }}" onsubmit="return confirm('Simpan keputusan Tidak Banding untuk skema ini?');" style="display:inline;margin:0;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-warning"><i class="bi bi-x-octagon"></i> Tidak Banding</button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('asesi.banding.show', $row->skema_id) }}" class="btn btn-light">
+                                        <i class="bi bi-eye"></i> Lihat Detail
+                                    </a>
                                 @endif
                             </div>
                         </td>

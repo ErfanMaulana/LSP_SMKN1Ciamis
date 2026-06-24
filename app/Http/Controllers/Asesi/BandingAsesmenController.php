@@ -149,6 +149,17 @@ class BandingAsesmenController extends Controller
     {
         $asesi = $this->getAsesi();
 
+        // === DEBUG LOGGING (hapus setelah masalah teridentifikasi) ===
+        \Illuminate\Support\Facades\Log::info('BandingAsesmen store called', [
+            'skema_id' => $skemaId,
+            'has_ttd_asesi_file' => !empty($request->ttd_asesi_file),
+            'ttd_asesi_file_length' => strlen((string) $request->ttd_asesi_file),
+            'ttd_asesi_file_prefix' => substr((string) $request->ttd_asesi_file, 0, 30),
+            'alasan_length' => strlen((string) $request->alasan_banding),
+            'jawaban_keys' => array_keys((array) $request->jawaban),
+        ]);
+        // === END DEBUG ===
+
         if (!$asesi) {
             return redirect()->route('asesi.banding.index')
                 ->with('error', 'Data asesi tidak ditemukan.');
@@ -175,7 +186,10 @@ class BandingAsesmenController extends Controller
         }
 
         $rules = [
-            'alasan_banding' => ['required', 'string', 'max:3000', 'regex:/\\S/'],
+            'alasan_banding' => ['required', 'string', 'max:3000', 'regex:/\S/'],
+            'ttd_asesi_file' => 'nullable|string',
+            'ttd_asesi_nama' => 'nullable|string|max:255',
+            'ttd_asesi_tanggal' => 'nullable|date',
         ];
 
         foreach ($komponenIds as $komponenId) {
@@ -193,8 +207,38 @@ class BandingAsesmenController extends Controller
             ->where('skema_id', $skemaId)
             ->first();
 
+        // Cek apakah ada tanda tangan: dari form baru ATAU dari data yang sudah tersimpan
+        $incomingTtd = trim((string) $request->input('ttd_asesi_file', ''));
+        $hasExistingTtd = $existing && !empty($existing->ttd_asesi_file);
+        $hasNewTtd = !empty($incomingTtd) && strpos($incomingTtd, 'data:image') === 0;
+
+        if (!$hasNewTtd && !$hasExistingTtd) {
+            return back()
+                ->withInput()
+                ->withErrors(['ttd_asesi_file' => 'Tanda tangan asesi wajib diisi.']);
+        }
+
+
         if ($existing && in_array($existing->status, ['diterima', 'ditolak'], true)) {
             return back()->with('error', 'Banding sudah diproses dan tidak dapat diubah lagi.');
+        }
+
+        $ttdAsesiFile = $existing ? $existing->ttd_asesi_file : null;
+        if (!empty($request->ttd_asesi_file) && strpos($request->ttd_asesi_file, 'data:image') === 0) {
+            try {
+                $signatureData = $request->ttd_asesi_file;
+                list($type, $signatureData) = explode(';', $signatureData);
+                list(, $signatureData) = explode(',', $signatureData);
+                $signatureData = base64_decode($signatureData);
+
+                $filename = 'signature_asesi_' . uniqid() . '_' . time() . '.png';
+                $path = 'banding/signatures';
+
+                \Illuminate\Support\Facades\Storage::disk('public')->put($path . '/' . $filename, $signatureData);
+                $ttdAsesiFile = $path . '/' . $filename;
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to save banding ttd_asesi_file: ' . $e->getMessage());
+            }
         }
 
         $asesorId = $asesi->ID_asesor;
@@ -202,7 +246,7 @@ class BandingAsesmenController extends Controller
             $asesorId = Asesor::where('no_met', (string) $pivot->reviewed_by)->value('ID_asesor');
         }
 
-        DB::transaction(function () use ($asesi, $skemaId, $asesorId, $pivot, $validated, $komponenIds) {
+        DB::transaction(function () use ($asesi, $skemaId, $asesorId, $pivot, $validated, $komponenIds, $request, $ttdAsesiFile) {
             $banding = BandingAsesmen::updateOrCreate(
                 [
                     'asesi_nik' => $asesi->NIK,
@@ -219,6 +263,9 @@ class BandingAsesmenController extends Controller
                     'catatan_admin' => null,
                     'checked_by' => null,
                     'checked_at' => null,
+                    'ttd_asesi_nama' => $request->input('ttd_asesi_nama') ?: $asesi->nama,
+                    'ttd_asesi_tanggal' => $request->input('ttd_asesi_tanggal') ?: now()->toDateString(),
+                    'ttd_asesi_file' => $ttdAsesiFile,
                 ]
             );
 
@@ -292,6 +339,9 @@ class BandingAsesmenController extends Controller
                     'catatan_admin' => null,
                     'checked_by' => null,
                     'checked_at' => null,
+                    'ttd_asesi_nama' => null,
+                    'ttd_asesi_tanggal' => null,
+                    'ttd_asesi_file' => null,
                 ]
             );
 

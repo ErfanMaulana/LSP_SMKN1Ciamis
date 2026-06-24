@@ -299,7 +299,7 @@
     }
 
     .dropdown-menu .menu-danger i {
-        color: #dc2626;
+        color: #374151;
     }
 
     .dropdown-menu .menu-danger:hover i {

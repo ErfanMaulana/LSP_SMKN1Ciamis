@@ -6,7 +6,8 @@
 @section('styles')
 <style>
     .top-actions { margin-bottom:14px; }
-    .btn-back { display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border-radius:8px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600; font-size:13px; }
+    .btn-back { display:inline-flex; align-items:center; gap:6px; padding:10px 14px; border-radius:8px; background:#64748b; color:#fff; text-decoration:none; font-weight:600; font-size:13px; transition: all 0.2s ease; }
+    .btn-back:hover { background:#4b5563; }
     .panel { background:#fff; border:1px solid #111827; border-radius:2px; }
     .panel-head { padding:8px 10px; border-bottom:1px solid #111827; font-size:14px; font-weight:700; color:#0f172a; }
     .meta-table { width:100%; border-collapse:collapse; }
@@ -43,8 +44,13 @@
 @endsection
 
 @section('content')
-<div class="top-actions">
+<div class="top-actions" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
     <a href="{{ route('asesor.banding.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Monitoring Banding</a>
+    @if($banding && $banding->status !== 'tidak_banding')
+        <a href="{{ route('asesor.banding.export', ['asesiNik' => $asesi->NIK, 'skemaId' => $skema->id]) }}" class="btn btn-primary" style="background:#0073bd; color:#fff; border-radius:8px; padding:10px 14px; font-size:13px; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; gap:6px;" target="_blank">
+            <i class="bi bi-download"></i> Export FR.AK.04 (.doc)
+        </a>
+    @endif
 </div>
 
 @php
@@ -142,12 +148,32 @@
             @enderror
         </div>
 
+        <div class="section" style="border-top:1px solid #111827; padding:10px; margin-top:10px;">
+            <h4 style="margin:0 0 12px;font-size:14px;font-weight:700;">Tanda Tangan</h4>
+            <div class="signature-grid" style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; max-width: 500px;">
+                <div class="signature-box" style="border:1px solid #cbd5e1; border-radius:10px; padding:12px; background:#f8fafc;">
+                    <h5 style="margin:0 0 8px;font-size:13px;font-weight:600;color:#334155;">Tanda Tangan Asesi</h5>
+                    <div class="signature-frame" style="border-radius:8px; min-height:100px; max-width:200px; display:flex; align-items:center; justify-content:center; background:#fff; margin-bottom:8px; overflow:hidden; border:1px solid #cbd5e1;">
+                        @if($banding && $banding->ttd_asesi_file)
+                            <img src="{{ asset('storage/' . ltrim($banding->ttd_asesi_file, '/')) }}" alt="Signature Asesi" style="max-width:100%; max-height:100px; object-fit:contain; display:block;">
+                        @else
+                            <span style="color:#94a3b8;font-size:12px;">Belum ditandatangani</span>
+                        @endif
+                    </div>
+                    <div style="font-size:12px;color:#475569;line-height:1.4;">
+                        <strong>{{ $banding->ttd_asesi_nama ?: ($asesi->nama ?? 'Nama Asesi') }}</strong><br>
+                        Tanggal: {{ $banding && $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->translatedFormat('d F Y') : '-' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="section">
             <p>Anda mempunyai hak mengajukan banding jika menilai Proses Asesmen tidak sesuai SOP dan tidak memenuhi Prinsip Asesmen.</p>
         </div>
 
         <div class="actions">
-            <a href="{{ route('asesor.banding.index') }}" class="btn btn-secondary"><i class="bi bi-x-circle"></i> Batal</a>
+            <a href="{{ route('asesor.banding.index') }}" class="btn btn-secondary" style="background:#64748b; color:#fff; padding:10px 14px; border-radius:8px; text-decoration:none;"><i class="bi bi-arrow-left"></i> Kembali</a>
         </div>
     </div>
 </div>

@@ -117,7 +117,7 @@
         display: inline-flex;
         padding: 6px 10px;
         background: #eff6ff;
-        color: #1d4ed8;
+        color: #0073bd;
         border-radius: 999px;
         font-size: 12px;
         font-weight: 700;

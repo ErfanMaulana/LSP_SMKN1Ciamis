@@ -30,16 +30,16 @@
                 <div class="dropdown-menu">
                     <a href="{{ route('asesor.rekaman-asesmen-kompetensi.show', $item->id) }}" title="Lihat detail rekaman">
                         <i class="bi bi-eye"></i>
-                        <span class="menu-entry-label">Lihat</span>
+                        <span class="menu-entry-label">Lihat Detail</span>
                     </a>
                     <a href="{{ route('asesor.rekaman-asesmen-kompetensi.edit', $item->id) }}" title="Edit rekaman">
-                        <i class="bi bi-pencil-square"></i>
+                        <i class="bi bi-pencil"></i>
                         <span class="menu-entry-label">Edit</span>
                     </a>
-                    <a href="{{ route('asesor.rekaman-asesmen-kompetensi.export', $item->id) }}" title="Ekspor ke Word">
+                    <!-- <a href="{{ route('asesor.rekaman-asesmen-kompetensi.export', $item->id) }}" title="Ekspor ke Word">
                         <i class="bi bi-file-earmark-word"></i>
                         <span class="menu-entry-label">Ekspor Word</span>
-                    </a>
+                    </a> -->
                     <form method="POST" action="{{ route('asesor.rekaman-asesmen-kompetensi.destroy', $item->id) }}" onsubmit="return confirm('Hapus rekaman ini?');" style="margin:0;">
                         @csrf
                         @method('DELETE')

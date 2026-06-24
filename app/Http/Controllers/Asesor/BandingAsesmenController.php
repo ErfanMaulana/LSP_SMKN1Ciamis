@@ -276,4 +276,67 @@ class BandingAsesmenController extends Controller
         return redirect()->route('asesor.banding.index')
             ->with('success', 'Banding asesmen berhasil diajukan dan menunggu pengecekan admin.');
     }
+
+    public function export(string $asesiNik, int $skemaId)
+    {
+        $asesor = $this->getAsesor();
+        abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        $isAssigned = DB::table('asesor_skema')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->where('skema_id', $skemaId)
+            ->exists();
+
+        abort_unless($isAssigned, 403, 'Skema ini tidak berada dalam penugasan Anda.');
+
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        abort_unless($pivot && !empty($pivot->rekomendasi), 404, 'Data asesi atau keputusan asesmen tidak ditemukan.');
+
+        $banding = BandingAsesmen::with(['asesi', 'asesor', 'skema', 'jawaban.komponen'])
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        if (!$banding) {
+            return redirect()->route('asesor.banding.index')
+                ->with('error', 'Banding belum diajukan oleh asesi.');
+        }
+
+        if (empty($banding->ttd_asesi_file)) {
+            return redirect()->back()->with('error', 'Form FR.AK.04 belum dapat diexport karena asesi belum menandatangani pengajuan banding.');
+        }
+
+        $komponen = BandingAsesmenKomponen::where('is_active', true)
+            ->orderBy('urutan')
+            ->orderBy('id')
+            ->get();
+
+        $existingJawaban = $banding->jawaban->keyBy('komponen_id');
+
+        $logoPath = public_path('images/lsp.png');
+
+        $html = view('asesor.banding.export-docx', [
+            'asesor' => $asesor,
+            'asesi' => $banding->asesi,
+            'skema' => $banding->skema,
+            'pivot' => $pivot,
+            'komponen' => $komponen,
+            'banding' => $banding,
+            'existingJawaban' => $existingJawaban,
+            'logoPath' => $logoPath,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($banding->skema?->nomor_skema ?? $skemaId));
+        $fileName = 'FR.AK.04-' . ($asesiNik ?? 'asesi') . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
 }

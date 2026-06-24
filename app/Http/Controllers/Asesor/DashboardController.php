@@ -823,7 +823,7 @@ class DashboardController extends Controller
             );
         }
 
-        return redirect()->route('asesor.entry-penilaian.form', $asesiNik)
+        return redirect()->route('asesor.entry-penilaian')
             ->with('success', 'Nilai per elemen berhasil disimpan.');
     }
 
