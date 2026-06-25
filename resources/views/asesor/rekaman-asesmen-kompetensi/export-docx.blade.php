@@ -384,14 +384,14 @@
         ─────────────────────────────── */
         .lampiran-title {
             font-size: 11pt;
-            font-weight: bold;
-            margin: 6px 0 2px 0.29in;
+            font-weight: normal;
+            margin: 6px 0 2px 0;
             padding: 0;
         }
 
         ol.lampiran-list {
-            margin: 0 0 0 0.54in;
-            padding: 0 0 0 0;
+            margin: 0 0 0 18px;
+            padding: 0;
             list-style-type: decimal;
             font-size: 11pt;
         }
@@ -413,16 +413,18 @@
     <!-- ═══════════════════════════════════════════════════
      HEADER: Logo + Form Title
 ═══════════════════════════════════════════════════ -->
-    <div class="header-wrap">
-        <div class="header-logo-cell">
-            @if(!empty($logoPath) && file_exists($logoPath))
-                <img src="{{ $logoPath }}" alt="Logo">
-            @endif
-        </div>
-        <div class="header-title-cell">
-            <div class="header-title">{{ $item->kode_form }} {{ $item->judul_form }}</div>
-        </div>
-    </div>
+    <table style="width:100%; border-collapse:collapse; margin-bottom:6px; border:none; table-layout:fixed;">
+        <tr>
+            <td style="width:52px; padding:0; vertical-align:middle; border:none;">
+                @if(!empty($logoPath) && file_exists($logoPath))
+                    <img src="{{ $logoPath }}" alt="Logo" width="44" height="44" style="width:44px; height:44px; object-fit:contain; display:block;">
+                @endif
+            </td>
+            <td style="padding:0 0 0 8px; vertical-align:middle; border:none;">
+                <div class="header-title" style="margin:0;">{{ $item->kode_form }} {{ $item->judul_form }}</div>
+            </td>
+        </tr>
+    </table>
 
     @php
         $skemaKategori = trim((string) ($item->skema?->jenis_skema ?? $item->kategori_skema ?? ''));
@@ -463,9 +465,9 @@
         <tr>
             <td class="c12" colspan="2">TUK</td>
             <td class="c3">:</td>
-            <td class="c4" style="padding-left:20px;">
-                @if($item->tuk)
-                    {{ $item->tuk }}
+            <td class="c4">
+                @if($item->tipe_tuk)
+                    {{ $item->tipe_tuk }}
                 @else
                     Sewaktu/<s>Tempat Kerja/Mandiri</s>*
                 @endif
@@ -499,202 +501,156 @@
     </table>
 
     <!-- Instruction -->
-    <p class="instr">Beri tanda centang (√) di kolom yang sesuai untuk mencerminkan bukti yang sesuai untuk setiap Unit
+    <p class="instr">Beri tanda centang (✔) di kolom yang sesuai untuk mencerminkan bukti yang sesuai untuk setiap Unit
         Kompetensi.</p>
 
-    <!-- ═══════════════════════════════════════════════════
-     CHECKLIST TABLE
-     gridCol: 4849/708/708/1280/708/708/712/712 twips
-     Header row height: 1540 twips ≈ 108px
-     textDirection: btLr (bottom-to-top in CSS)
-═══════════════════════════════════════════════════ -->
-    <table class="ck-table">
+    <!-- ONE UNIFIED TABLE: checklist + rekomendasi + tindak lanjut + komentar + asesi + asesor -->
+    <table style="width:100%; border-collapse:collapse; table-layout:fixed; border:1px solid #000; margin:0; padding:0;">
         <colgroup>
-            <col class="cw-unit">
-            <col class="cw-obs">
-            <col class="cw-port">
-            <col class="cw-pihak">
-            <col class="cw-lisan">
-            <col class="cw-tulis">
-            <col class="cw-proyek">
-            <col class="cw-lain">
+            <col style="width:46.69%">
+            <col style="width:6.82%">
+            <col style="width:6.82%">
+            <col style="width:12.33%">
+            <col style="width:6.82%">
+            <col style="width:6.82%">
+            <col style="width:6.86%">
+            <col style="width:6.86%">
         </colgroup>
-        <thead>
-            <tr>
-                <!-- "Unit Kompetensi" — horizontal, bottom-aligned, bold, centered -->
-                <th class="th-unit">Unit Kompetensi</th>
-
-                <!-- All other headers: vertical btLr (reads bottom → top) -->
-                <th class="th-vert">
-                    <span class="th-vert-inner">Observasi Demonstrasi</span>
-                </th>
-                <th class="th-vert">
-                    <span class="th-vert-inner">Portofolio</span>
-                </th>
-                <!-- "Pernyataan Pihak Ketiga Pertanyaan Wawancara" — wider col, same direction -->
-                <th class="th-vert">
-                    <span class="th-vert-inner">Pernyataan Pihak Ketiga Pertanyaan Wawancara</span>
-                </th>
-                <th class="th-vert">
-                    <span class="th-vert-inner">Pertanyaan Lisan</span>
-                </th>
-                <th class="th-vert">
-                    <span class="th-vert-inner">Pertanyaan Tertulis</span>
-                </th>
-                <th class="th-vert">
-                    <span class="th-vert-inner">Proyek Kerja</span>
-                </th>
-                <th class="th-vert">
-                    <span class="th-vert-inner">Lainnya</span>
-                </th>
-            </tr>
-        </thead>
+        <!-- ── HEADER ROW (in tbody so it does NOT repeat on page breaks) ── -->
         <tbody>
+            <tr style="height:108px;">
+                <td style="border:1px solid #000; vertical-align:bottom; text-align:center; font-size:11pt; font-weight:bold; padding:4px 8px; background:#fff;">Unit Kompetensi</td>
+                <td style="border:1px solid #000; vertical-align:bottom; text-align:center; padding:2px 0; background:#fff;">
+                    <span style="display:block; writing-mode:vertical-rl; transform:rotate(180deg); font-size:9.5pt; font-weight:bold; white-space:normal; word-break:keep-all; text-align:left; margin:0 auto; padding:4px 3px 6px 3px;">Observasi Demonstrasi</span>
+                </td>
+                <td style="border:1px solid #000; vertical-align:bottom; text-align:center; padding:2px 0; background:#fff;">
+                    <span style="display:block; writing-mode:vertical-rl; transform:rotate(180deg); font-size:9.5pt; font-weight:bold; white-space:normal; word-break:keep-all; text-align:left; margin:0 auto; padding:4px 3px 6px 3px;">Portofolio</span>
+                </td>
+                <td style="border:1px solid #000; vertical-align:bottom; text-align:center; padding:2px 0; background:#fff;">
+                    <span style="display:block; writing-mode:vertical-rl; transform:rotate(180deg); font-size:9.5pt; font-weight:bold; white-space:normal; word-break:keep-all; text-align:left; margin:0 auto; padding:4px 3px 6px 3px;">Pernyataan Pihak Ketiga Pertanyaan Wawancara</span>
+                </td>
+                <td style="border:1px solid #000; vertical-align:bottom; text-align:center; padding:2px 0; background:#fff;">
+                    <span style="display:block; writing-mode:vertical-rl; transform:rotate(180deg); font-size:9.5pt; font-weight:bold; white-space:normal; word-break:keep-all; text-align:left; margin:0 auto; padding:4px 3px 6px 3px;">Pertanyaan Lisan</span>
+                </td>
+                <td style="border:1px solid #000; vertical-align:bottom; text-align:center; padding:2px 0; background:#fff;">
+                    <span style="display:block; writing-mode:vertical-rl; transform:rotate(180deg); font-size:9.5pt; font-weight:bold; white-space:normal; word-break:keep-all; text-align:left; margin:0 auto; padding:4px 3px 6px 3px;">Pertanyaan Tertulis</span>
+                </td>
+                <td style="border:1px solid #000; vertical-align:bottom; text-align:center; padding:2px 0; background:#fff;">
+                    <span style="display:block; writing-mode:vertical-rl; transform:rotate(180deg); font-size:9.5pt; font-weight:bold; white-space:normal; word-break:keep-all; text-align:left; margin:0 auto; padding:4px 3px 6px 3px;">Proyek Kerja</span>
+                </td>
+                <td style="border:1px solid #000; vertical-align:bottom; text-align:center; padding:2px 0; background:#fff;">
+                    <span style="display:block; writing-mode:vertical-rl; transform:rotate(180deg); font-size:9.5pt; font-weight:bold; white-space:normal; word-break:keep-all; text-align:left; margin:0 auto; padding:4px 3px 6px 3px;">Lainnya</span>
+                </td>
+            </tr>
+
+            <!-- ── DETAIL ROWS ── -->
             @forelse($details as $detail)
                 <tr>
-                    <td class="td-unit">
+                    <td style="border:1px solid #000; text-align:left; padding:4px 8px 4px 9px; vertical-align:middle; font-size:11pt; height:24px;">
                         @if($detail->unit?->kode_unit)
                             <strong>{{ $detail->unit->kode_unit }}</strong><br>
                         @endif
                         {{ $detail->unit?->judul_unit ?? '-' }}
                     </td>
-                    <td>{!! $detail->observasi_demonstrasi ? '√' : '' !!}</td>
-                    <td>{!! $detail->portofolio ? '√' : '' !!}</td>
-                    <td>{!! $detail->pernyataan_pihak_ketiga ? '√' : '' !!}</td>
-                    <td>{!! $detail->pertanyaan_lisan ? '√' : '' !!}</td>
-                    <td>{!! $detail->pertanyaan_tertulis ? '√' : '' !!}</td>
-                    <td>{!! $detail->proyek_kerja ? '√' : '' !!}</td>
-                    <td>{!! $detail->lainnya ? '√' : '' !!}</td>
+                    <td style="border:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">{!! $detail->observasi_demonstrasi ? '✔' : '' !!}</td>
+                    <td style="border:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">{!! $detail->portofolio ? '✔' : '' !!}</td>
+                    <td style="border:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">{!! $detail->pernyataan_pihak_ketiga ? '✔' : '' !!}</td>
+                    <td style="border:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">{!! $detail->pertanyaan_lisan ? '✔' : '' !!}</td>
+                    <td style="border:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">{!! $detail->pertanyaan_tertulis ? '✔' : '' !!}</td>
+                    <td style="border:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">{!! $detail->proyek_kerja ? '✔' : '' !!}</td>
+                    <td style="border:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">{!! $detail->lainnya ? '✔' : '' !!}</td>
                 </tr>
             @empty
                 <tr>
-                    <td colspan="8" style="text-align:center; padding:6px;">Tidak ada unit kompetensi.</td>
+                    <td colspan="8" style="border:1px solid #000; text-align:center; padding:6px; font-size:11pt;">Tidak ada unit kompetensi.</td>
                 </tr>
             @endforelse
 
-            <!-- Rekomendasi hasil asesmen -->
+            <!-- ── REKOMENDASI ── -->
             @php
                 $isKompeten = $item->rekomendasi === 'kompeten';
                 $isBelumKompeten = $item->rekomendasi === 'belum_kompeten';
             @endphp
             <tr>
-                <td class="td-label" style="vertical-align:middle;">Rekomendasi hasil asesmen</td>
-                <td colspan="7" class="td-value" style="vertical-align:middle;">
-                    <span class="cb-glyph">{!! $isKompeten ? '☑' : '☐' !!}</span>
-                    <span class="cb-label"> Kompeten</span>
-                    <span class="cb-label"> / </span>
-                    <span class="cb-glyph">{!! $isBelumKompeten ? '☑' : '☐' !!}</span>
-                    <span class="cb-label"> Belum kompeten</span>
+                <td style="border:1px solid #000; text-align:left; font-weight:normal; padding:5px 8px 5px 9px; vertical-align:middle; font-size:11pt;">Rekomendasi hasil asesmen</td>
+                <td colspan="7" style="border:1px solid #000; text-align:left; padding:5px 8px; vertical-align:middle; font-size:11pt;">
+                    <span style="font-size:11pt; vertical-align:middle;">{!! $isKompeten ? '☑' : '☐' !!}</span>
+                    <span style="font-weight:bold; font-size:11pt;"> Kompeten</span>
+                    <span style="font-weight:bold; font-size:11pt;"> / </span>
+                    <span style="font-size:11pt; vertical-align:middle;">{!! $isBelumKompeten ? '☑' : '☐' !!}</span>
+                    <span style="font-weight:bold; font-size:11pt;"> Belum kompeten</span>
                 </td>
             </tr>
 
-            <!-- Tindak lanjut yang dibutuhkan -->
+            <!-- ── TINDAK LANJUT ── -->
             <tr>
-                <td class="td-label" style="vertical-align:top; line-height:1.3;">
+                <td style="border:1px solid #000; text-align:left; font-weight:bold; padding:5px 8px 5px 9px; vertical-align:top; font-size:11pt; line-height:1.3;">
                     Tindak lanjut yang dibutuhkan
-                    <span class="td-label-sub">(Masukkan pekerjaan tambahan dan asesmen yang diperlukan untuk mencapai
-                        kompetensi)</span>
+                    <span style="font-weight:normal; font-size:11pt; color:#333; display:block; margin-top:2px;">(Masukkan pekerjaan tambahan dan asesmen yang diperlukan untuk mencapai kompetensi)</span>
                 </td>
-                <td class="td-value" colspan="7">{{ $item->tindak_lanjut ?: '' }}</td>
+                <td colspan="7" style="border:1px solid #000; text-align:left; padding:5px 8px; vertical-align:top; font-size:11pt;">{{ $item->tindak_lanjut ?: '' }}</td>
             </tr>
 
-            <!-- Komentar / Observasi oleh asesor -->
+            <!-- ── KOMENTAR ── -->
             <tr>
-                <td class="td-label" style="vertical-align:top;">Komentar/ Observasi oleh asesor</td>
-                <td class="td-value" colspan="7">{{ $item->komentar_observasi ?: '' }}</td>
+                <td style="border:1px solid #000; text-align:left; font-weight:normal; padding:5px 8px 5px 9px; vertical-align:top; font-size:11pt;">Komentar/ Observasi oleh asesor</td>
+                <td colspan="7" style="border:1px solid #000; text-align:left; padding:5px 8px; vertical-align:top; font-size:11pt;">{{ $item->komentar_observasi ?: '' }}</td>
+            </tr>
+
+            <!-- ── ASESI HEADER ── -->
+            <tr>
+                <td colspan="8" style="border:1px solid #000; font-weight:bold; padding:3px 9px; font-size:11pt;">Asesi :</td>
+            </tr>
+            <!-- ── ASESI NAMA ── -->
+            <tr>
+                <td style="border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 9px; font-size:11pt; width:32.70%;">Nama</td>
+                <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; font-size:11pt; width:1.37%;">:</td>
+                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 8px; font-size:11pt;">{{ $ceklis->ttd_asesi_nama ?? $item->asesi?->nama ?? '' }}</td>
+            </tr>
+            <!-- ── ASESI TTD ── -->
+            <tr>
+                <td style="border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:5px 9px; vertical-align:middle; font-size:11pt; line-height:1.5;">Tanda tangan<br>dan Tanggal</td>
+                <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">:</td>
+                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:4px 8px; vertical-align:top; font-size:11pt;">
+                    <div style="min-height:54px; display:block;">
+                        @if(!empty($ceklis->ttd_asesi_file))
+                            <img src="{{ asset('storage/' . ltrim($ceklis->ttd_asesi_file, '/')) }}" alt="Ttd Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                        @endif
+                    </div>
+                    <div style="font-size:10pt; margin-top:2px;">{{ $ceklis->ttd_asesi_tanggal?->format('d-m-Y') ?? $item->tanggal_mulai?->format('d-m-Y') ?? '' }}</div>
+                </td>
+            </tr>
+
+            <!-- ── ASESOR HEADER ── -->
+            <tr>
+                <td colspan="8" style="border:1px solid #000; font-weight:bold; padding:3px 9px; font-size:11pt;">Asesor :</td>
+            </tr>
+            <!-- ── ASESOR NAMA ── -->
+            <tr>
+                <td style="border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 9px; font-size:11pt;">Nama</td>
+                <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; font-size:11pt;">:</td>
+                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 8px; font-size:11pt;">{{ $ceklis->ttd_asesor_nama ?? $item->asesor?->nama ?? '' }}</td>
+            </tr>
+            <!-- ── ASESOR NO REG ── -->
+            <tr>
+                <td style="border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 9px; font-size:11pt;">No. Reg</td>
+                <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; font-size:11pt;">:</td>
+                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 8px; font-size:11pt;">{{ $ceklis->ttd_asesor_no_reg ?? $item->asesor?->no_met ?? '' }}</td>
+            </tr>
+            <!-- ── ASESOR TTD ── -->
+            <tr>
+                <td style="border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:5px 9px; vertical-align:middle; font-size:11pt; line-height:1.5;">Tanda tangan<br>dan Tanggal</td>
+                <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">:</td>
+                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:4px 8px; vertical-align:top; font-size:11pt;">
+                    <div style="min-height:54px; display:block;">
+                        @if(!empty($ceklis->ttd_asesor_file))
+                            <img src="{{ asset('storage/' . ltrim($ceklis->ttd_asesor_file, '/')) }}" alt="Ttd Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                        @endif
+                    </div>
+                    <div style="font-size:10pt; margin-top:2px;">{{ $ceklis->ttd_asesor_tanggal?->format('d-m-Y') ?? $item->tanggal_mulai?->format('d-m-Y') ?? '' }}</div>
+                </td>
             </tr>
         </tbody>
-    </table>
-
-    <!-- ═══════════════════════════════════════════════════
-     SIGNATURE TABLE — ASESI
-     gridCol: 3368 / 141 / 6789 twips
-     Outer border sz=12 (thick=2px), inner sz=4 (1px)
-═══════════════════════════════════════════════════ -->
-    <table class="sig-table">
-        <colgroup>
-            <col class="cs-label">
-            <col class="cs-colon">
-            <col class="cs-value">
-        </colgroup>
-        <!-- Section header: "Asesi :" -->
-        <tr>
-            <td colspan="3" class="sig-header-td">Asesi :</td>
-        </tr>
-        <!-- Nama -->
-        <tr>
-            <td class="sig-inner sig-outer-left" style="padding:3px 8px 3px 9px;">Nama</td>
-            <td class="sig-inner" style="text-align:center; padding:3px 2px;">:</td>
-            <td class="sig-inner sig-outer-right" style="padding:3px 8px;">
-                {{ $ceklis->ttd_asesi_nama ?? $item->asesi?->nama ?? '' }}</td>
-        </tr>
-        <!-- Tanda tangan dan Tanggal -->
-        <tr>
-            <td class="sig-inner sig-outer-left sig-outer-bottom"
-                style="padding:5px 8px 5px 9px; vertical-align:middle;">
-                <span class="sig-ttd-label">Tanda tangan<br>dan Tanggal</span>
-            </td>
-            <td class="sig-inner sig-outer-bottom" style="text-align:center; padding:3px 2px; vertical-align:middle;">:
-            </td>
-            <td class="sig-inner sig-outer-right sig-outer-bottom" style="padding:4px 8px; vertical-align:top;">
-                <div class="sig-box">
-                    @if(!empty($ceklis->ttd_asesi_file))
-                        <img src="{{ asset('storage/' . ltrim($ceklis->ttd_asesi_file, '/')) }}" alt="Ttd Asesi">
-                    @endif
-                </div>
-                <div class="sig-date">
-                    {{ $ceklis->ttd_asesi_tanggal?->format('d-m-Y') ?? $item->tanggal_mulai?->format('d-m-Y') ?? '' }}
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    <!-- ═══════════════════════════════════════════════════
-     SIGNATURE TABLE — ASESOR
-═══════════════════════════════════════════════════ -->
-    <table class="sig-table">
-        <colgroup>
-            <col class="cs-label">
-            <col class="cs-colon">
-            <col class="cs-value">
-        </colgroup>
-        <!-- Section header: "Asesor :" -->
-        <tr>
-            <td colspan="3" class="sig-header-td">Asesor :</td>
-        </tr>
-        <!-- Nama -->
-        <tr>
-            <td class="sig-inner sig-outer-left" style="padding:3px 8px 3px 9px;">Nama</td>
-            <td class="sig-inner" style="text-align:center; padding:3px 2px;">:</td>
-            <td class="sig-inner sig-outer-right" style="padding:3px 8px;">
-                {{ $ceklis->ttd_asesor_nama ?? $item->asesor?->nama ?? '' }}</td>
-        </tr>
-        <!-- No. Reg -->
-        <tr>
-            <td class="sig-inner sig-outer-left" style="padding:3px 8px 3px 9px;">No. Reg</td>
-            <td class="sig-inner" style="text-align:center; padding:3px 2px;">:</td>
-            <td class="sig-inner sig-outer-right" style="padding:3px 8px;">
-                {{ $ceklis->ttd_asesor_no_reg ?? $item->asesor?->no_met ?? '' }}</td>
-        </tr>
-        <!-- Tanda tangan dan Tanggal -->
-        <tr>
-            <td class="sig-inner sig-outer-left sig-outer-bottom"
-                style="padding:5px 8px 5px 9px; vertical-align:middle;">
-                <span class="sig-ttd-label">Tanda tangan<br>dan Tanggal</span>
-            </td>
-            <td class="sig-inner sig-outer-bottom" style="text-align:center; padding:3px 2px; vertical-align:middle;">:
-            </td>
-            <td class="sig-inner sig-outer-right sig-outer-bottom" style="padding:4px 8px; vertical-align:top;">
-                <div class="sig-box">
-                    @if(!empty($ceklis->ttd_asesor_file))
-                        <img src="{{ asset('storage/' . ltrim($ceklis->ttd_asesor_file, '/')) }}" alt="Ttd Asesor">
-                    @endif
-                </div>
-                <div class="sig-date">
-                    {{ $ceklis->ttd_asesor_tanggal?->format('d-m-Y') ?? $item->tanggal_mulai?->format('d-m-Y') ?? '' }}
-                </div>
-            </td>
-        </tr>
     </table>
 
     <!-- ═══════════════════════════════════════════════════
