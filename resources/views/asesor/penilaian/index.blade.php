@@ -146,7 +146,7 @@
     }
     .btn-link:hover {
         background: #dbeafe;
-        color: #003961;
+        color: #005f9a;
     }
     .empty {
         text-align: center;

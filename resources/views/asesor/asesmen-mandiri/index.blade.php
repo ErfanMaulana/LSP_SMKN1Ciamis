@@ -68,7 +68,7 @@
     .stat-value {
         font-size: 22px;
         font-weight: 700;
-        color: #0f172a;
+        color: #0073bd;
         margin-bottom: 4px;
     }
 

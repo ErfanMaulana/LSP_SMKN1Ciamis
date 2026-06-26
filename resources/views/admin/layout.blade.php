@@ -928,7 +928,7 @@
                 @if(Auth::guard('admin')->user()->hasPermission('dashboard.view'))
                     <a href="{{ route('admin.dashboard') }}"
                         class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                        <i class="bi bi-speedometer2"></i>
+                        <i class="bi bi-grid-1x2 nav-icon-outline"></i>
                         <span>Dashboard</span>
                     </a>
                 @endif

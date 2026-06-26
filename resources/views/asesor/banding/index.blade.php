@@ -197,7 +197,7 @@
         transition: background 0.2s;
         white-space: nowrap;
     }
-    .btn-review:hover { background: #003961; color: white; }
+    .btn-review:hover { background: #005f9a; color: white; }
     .btn-review.disabled {
         background: #e2e8f0;
         color: #64748b;
@@ -221,6 +221,29 @@
     @media (max-width: 900px) {
         .filter-row-top {
             grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header h2 {
+            font-size: 18px;
+        }
+        .page-header p {
+            font-size: 12px;
+        }
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .stat-card {
+            padding: 10px 12px;
+        }
+        .stat-card small {
+            font-size: 10px;
+        }
+        .stat-card strong {
+            font-size: 20px;
+            margin-top: 4px;
         }
     }
 </style>
@@ -283,7 +306,7 @@
 </form>
 
 <div class="card">
-    <div style="overflow-x:auto;">
+    <div class="admin-table-scroll">
         <table>
             <thead>
                 <tr>

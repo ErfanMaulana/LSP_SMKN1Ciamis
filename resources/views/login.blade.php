@@ -10,13 +10,13 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --brand: #0061A5;
+            --brand: #0073bd;
             --brand-dark: #004f87;
             --brand-shadow: rgba(0, 97, 165, 0.30);
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f0f2f5;
             height: 100vh;
             display: flex;

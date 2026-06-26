@@ -12,7 +12,7 @@
     .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:16px; }
     .stat { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:14px; }
     .stat small { display:block; font-size:11px; text-transform:uppercase; color:#64748b; font-weight:700; letter-spacing:.4px; }
-    .stat strong { display:block; margin-top:5px; font-size:24px; color:#0f172a; }
+    .stat strong { display:block; margin-top:5px; font-size:24px; color:#0073bd; }
 
     .btn { font-family:inherit; border:none; border-radius:6px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition: all 0.2s ease; }
     .btn-primary { background:#0073bd; color:#fff; }

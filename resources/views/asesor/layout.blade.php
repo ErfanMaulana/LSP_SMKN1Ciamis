@@ -139,6 +139,7 @@
         .main-content {
             flex: 1;
             margin-left: 260px;
+            min-width: 0;
         }
 
         .topbar {
@@ -404,6 +405,12 @@
             border: 1px solid #fecaca;
         }
 
+        .admin-table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         /* ── Mobile ──────────────────────────────────────── */
         .mobile-toggle {
             display: none;
@@ -646,11 +653,9 @@
 
                 <a href="{{ route('asesor.dashboard') }}"
                     class="menu-item {{ request()->routeIs('asesor.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i>
+                    <i class="bi bi-grid-1x2 nav-icon-outline"></i>
                     <span>Dashboard</span>
                 </a>
-
-                <div class="menu-section-title">PROGRAM SERTIFIKASI</div>
 
                 <div class="menu-section-title" style="font-size:11px; letter-spacing:.12em; margin-top:6px;">PERSIAPAN</div>
 

@@ -61,9 +61,12 @@
     }
 
     .summary-total .summary-value { color: #0073bd; }
-    .summary-selesai .summary-value { color: #059669; }
+    .summary-selesai .summary-value { color: #0073bd; }
+    .summary-sedang .summary-value { color: #0073bd; }
+    .summary-belum .summary-value { color: #0073bd; }
+    /* .summary-selesai .summary-value { color: #059669; }
     .summary-sedang .summary-value { color: #d97706; }
-    .summary-belum .summary-value { color: #6b7280; }
+    .summary-belum .summary-value { color: #6b7280; } */
 
     .page-header-actions {
         display: inline-flex;
