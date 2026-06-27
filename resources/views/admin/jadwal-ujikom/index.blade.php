@@ -157,11 +157,11 @@
         display: inline-flex; align-items: center; gap: 4px;
         padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
     }
-    .badge.dijadwalkan { background: #dbeafe; color: #1e40af; }
+    .badge.dijadwalkan { background: #dbeafe; color: #0073bd; }
     .badge.berlangsung { background: #fef3c7; color: #92400e; }
     .badge.selesai     { background: #d1fae5; color: #065f46; }
     .badge.dibatalkan  { background: #fee2e2; color: #991b1b; }
-    .badge.kelompok-count { background: #e0f2fe; color: #0369a1; }
+    .badge.kelompok-count { background: #e0f2fe; color: #0073bd; }
 
     .kuota-bar {
         width: 100%; background: #f1f5f9; border-radius: 20px; height: 6px; margin-top: 4px; overflow: hidden;

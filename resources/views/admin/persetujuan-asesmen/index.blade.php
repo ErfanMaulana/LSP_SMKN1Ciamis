@@ -15,6 +15,21 @@
     }
     .page-header h2 { margin: 0; font-size: 22px; font-weight: 700; color: #0f172a; }
 
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
+    .stat-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s;
+    }
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    .stat-icon { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 18px; flex-shrink: 0; }
+    .stat-icon.blue { background: #0073bd; }
+    .stat-icon.green { background: #0073bd; }
+    .stat-icon.purple { background: #0073bd; }
+    .stat-label { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+    .stat-value { font-size: 22px; color: #0f172a; font-weight: 700; margin-top: 2px; }
+
     .toolbar {
         margin-bottom: 16px;
     }
@@ -271,6 +286,30 @@
             <i class="bi bi-plus-circle"></i> Tambah Data
         </a>
     @endif
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="bi bi-layout-text-sidebar-reverse"></i></div>
+        <div>
+            <div class="stat-label">Total Skema</div>
+            <div class="stat-value">{{ $stats['total_skema'] }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon green"><i class="bi bi-person-check"></i></div>
+        <div>
+            <div class="stat-label">Total Asesi</div>
+            <div class="stat-value">{{ $stats['total_asesi'] }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon purple"><i class="bi bi-person-badge"></i></div>
+        <div>
+            <div class="stat-label">Total Asesor</div>
+            <div class="stat-value">{{ $stats['total_asesor'] }}</div>
+        </div>
+    </div>
 </div>
 
 <div class="toolbar">

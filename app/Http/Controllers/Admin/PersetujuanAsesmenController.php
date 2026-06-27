@@ -37,6 +37,12 @@ class PersetujuanAsesmenController extends Controller
             ->orderBy('nama_skema')
             ->pluck('nama_skema');
 
+        $stats = [
+            'total_skema' => PersetujuanAsesmen::distinct('judul_skema')->count('judul_skema'),
+            'total_asesi' => PersetujuanAsesmen::distinct('nama_asesi')->count('nama_asesi'),
+            'total_asesor' => PersetujuanAsesmen::distinct('nama_asesor')->count('nama_asesor'),
+        ];
+
         if ($request->ajax() || $request->expectsJson()) {
             return response()->json([
                 'rows' => view('admin.persetujuan-asesmen.partials.table-rows', compact('items'))->render(),
@@ -44,7 +50,7 @@ class PersetujuanAsesmenController extends Controller
             ]);
         }
 
-        return view('admin.persetujuan-asesmen.index', compact('items', 'search', 'skemaList', 'skemaFilter'));
+        return view('admin.persetujuan-asesmen.index', compact('items', 'search', 'skemaList', 'skemaFilter', 'stats'));
     }
 
     public function create()

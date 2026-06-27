@@ -11,11 +11,18 @@ class BandingAsesmenKomponenController extends Controller
     public function index(Request $request)
     {
         $search = trim((string) $request->get('search', ''));
+        $status = $request->get('status', 'all');
 
         $query = BandingAsesmenKomponen::query();
 
         if ($search !== '') {
             $query->where('pernyataan', 'like', "%{$search}%");
+        }
+
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
         }
 
         $komponen = $query->orderBy('urutan')->orderBy('id')->paginate(10)->withQueryString();
@@ -26,7 +33,7 @@ class BandingAsesmenKomponenController extends Controller
             'inactive' => BandingAsesmenKomponen::where('is_active', false)->count(),
         ];
 
-        return view('admin.banding-asesmen-komponen.index', compact('komponen', 'stats', 'search'));
+        return view('admin.banding-asesmen-komponen.index', compact('komponen', 'stats', 'search', 'status'));
     }
 
     public function create()
@@ -65,6 +72,13 @@ class BandingAsesmenKomponenController extends Controller
 
         return redirect()->route('admin.banding-asesmen-komponen.index')
             ->with('success', 'Komponen ceklis banding berhasil ditambahkan.');
+    }
+
+    public function show(int $id)
+    {
+        $komponen = BandingAsesmenKomponen::findOrFail($id);
+
+        return view('admin.banding-asesmen-komponen.show', compact('komponen'));
     }
 
     public function edit(int $id)
