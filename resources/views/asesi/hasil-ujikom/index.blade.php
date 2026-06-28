@@ -68,7 +68,7 @@
 
     .overall-badge.progressing {
         background: #eff6ff;
-        color: #1d4ed8;
+        color: #0073bd;
         border: 1px solid #bfdbfe;
     }
 
@@ -432,8 +432,8 @@
                     <div class="progress-bar-fill" style="width: {{ $progressPercentage }}%;"></div>
                 </div>
 
-                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px 20px; color: #1e40af; margin-bottom: 25px; font-size: 13.5px; line-height: 1.5; display: flex; align-items: flex-start; gap: 10px;">
-                    <i class="bi bi-info-circle-fill" style="font-size: 18px; color: #1d4ed8; flex-shrink: 0; margin-top: 2px;"></i>
+                <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 16px 20px; color: #0073bd; margin-bottom: 25px; font-size: 13.5px; line-height: 1.5; display: flex; align-items: flex-start; gap: 10px;">
+                    <i class="bi bi-info-circle-fill" style="font-size: 18px; color: #0073bd; flex-shrink: 0; margin-top: 2px;"></i>
                     <div>
                         <strong>Hasil Uji Kompetensi Belum Tersedia.</strong>
                         <p style="margin: 4px 0 0 0; opacity: 0.95;">

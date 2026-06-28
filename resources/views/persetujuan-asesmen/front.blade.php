@@ -607,7 +607,7 @@
                 <h2>Detail Persetujuan Asesmen</h2>
                 <p>Lengkapi ceklis bukti, pastikan jadwal sudah benar, lalu simpan tanda tangan asesor.</p>
             </div>
-            @if(!empty($item->ttd_asesi_file))
+            <!-- @if(!empty($item->ttd_asesi_file))
                 <a href="{{ route('asesor.persetujuan.front.asesor.export', ['asesiNik' => $asesiNik, 'skemaId' => $skema->id]) }}" class="btn btn-primary" target="_blank">
                     <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
                 </a>
@@ -615,7 +615,7 @@
                 <button class="btn btn-primary" disabled title="Asesi belum menandatangani, tidak dapat mengekspor">
                     <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
                 </button>
-            @endif
+            @endif -->
         </div>
         <div class="hero-meta">
             <span class="hero-chip"><i class="bi bi-person-badge"></i> {{ $item->nama_asesi }}</span>

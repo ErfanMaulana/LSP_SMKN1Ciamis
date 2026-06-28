@@ -235,14 +235,14 @@
         color: #4b5563;
     }
     .berita-content a {
-        color: #2563eb;
+        color: #0073bd;
         text-decoration: underline;
     }
     .berita-content a:hover {
-        color: #1d4ed8;
+        color: #0073bd;
     }
     .berita-content blockquote {
-        border-left: 4px solid #2563eb;
+        border-left: 4px solid #0073bd;
         padding-left: 1rem;
         margin: 1.5rem 0;
         font-style: italic;

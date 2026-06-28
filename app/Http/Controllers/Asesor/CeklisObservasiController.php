@@ -297,11 +297,15 @@ class CeklisObservasiController extends Controller
             ->groupBy('unit_id');
 
         $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
 
         $html = view('asesor.ceklis-observasi.export-docx', [
             'item' => $item,
             'detailsByUnit' => $detailsByUnit,
             'logoPath' => $logoPath,
+            'logoDataUri' => $logoDataUri,
         ])->render();
 
         $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($item->skema?->nomor_skema ?? $item->skema_id));

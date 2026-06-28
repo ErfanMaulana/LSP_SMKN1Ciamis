@@ -179,33 +179,60 @@
     </table>
 
     <table class="section-gap">
-        <tr>
+        <!-- <tr>
             <td colspan="4">Tanda Tangan</td>
+        </tr> -->
+        {{-- Baris 1: Asesor --}}
+        <tr>
+            <td style="width:50%; padding:4px 8px; border-right:none; vertical-align:middle;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr>
+                        <td class="no-border" style="white-space:nowrap; vertical-align:middle; padding:2px 4px 2px 0;">Tanda tangan Asesor &nbsp;:</td>
+                        <td class="no-border" style="vertical-align:middle; padding:2px 0;">
+                            @if($item->ttd_asesor_file)
+                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="TTD Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                            @else
+                                ......................................
+                            @endif
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td style="width:50%; padding:4px 8px; border-left:none; vertical-align:middle;">
+                Tanggal &nbsp;:
+                @if($item->ttd_asesor_tanggal)
+                    {{ $item->ttd_asesor_tanggal->format('d-m-Y') }}
+                @else
+                    ......................................
+                @endif
+            </td>
+        </tr>
+        {{-- Baris 2: Asesi --}}
+        <tr>
+            <td style="padding:4px 8px; border-right:none; vertical-align:middle;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr>
+                        <td class="no-border" style="white-space:nowrap; vertical-align:middle; padding:2px 4px 2px 0;">Tanda tangan Asesi &nbsp;&nbsp;:</td>
+                        <td class="no-border" style="vertical-align:middle; padding:2px 0;">
+                            @if($item->ttd_asesi_file)
+                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="TTD Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                            @else
+                                ......................................
+                            @endif
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td style="padding:4px 8px; border-left:none; vertical-align:middle;">
+                Tanggal &nbsp;:
+                @if($item->ttd_asesi_tanggal)
+                    {{ $item->ttd_asesi_tanggal->format('d-m-Y') }}
+                @else
+                    ......................................
+                @endif
+            </td>
         </tr>
     </table>
-
-    <div style="width:100%; overflow:hidden; margin-top:2px;">
-        <div style="width:49%; float:left; text-align:center; padding:6px 0;">
-            <div style="margin-bottom:6px;">Tanda Tangan Asesor</div>
-            <div style="margin:0 auto 3px;">
-                @if($item->ttd_asesor_file)
-                    <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:inline-block;">
-                @endif
-            </div>
-            <div style="margin-bottom:1px;">{{ $item->ttd_asesor_nama ?: 'Nama Asesor' }}</div>
-            <div>{{ $item->ttd_asesor_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
-        </div>
-        <div style="width:49%; float:right; text-align:center; padding:6px 0;">
-            <div style="margin-bottom:6px;">Tanda Tangan Asesi</div>
-            <div style="margin:0 auto 3px;">
-                @if($item->ttd_asesi_file)
-                    <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:inline-block;">
-                @endif
-            </div>
-            <div style="margin-bottom:1px;">{{ $item->ttd_asesi_nama ?: 'Nama Asesi' }}</div>
-            <div>{{ $item->ttd_asesi_tanggal?->format('d-m-Y') ?: 'Tanggal Pendatangan' }}</div>
-        </div>
-    </div>
 
     @if($item->catatan_footer)
         <div style="margin-top: 8px; font-size: 14.5px; color: #333;">

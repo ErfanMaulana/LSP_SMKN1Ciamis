@@ -136,7 +136,7 @@
         }
 
         .btn-login:hover {
-            background: #0061A5;
+            background: #005f9a;
         }
 
         .container-main {
@@ -421,7 +421,7 @@
         }
 
         .btn-primary:hover {
-            background: #0061A5;
+            background: #005f9a;
             box-shadow: 0 4px 12px rgba(0, 115, 189, 0.3);
         }
 

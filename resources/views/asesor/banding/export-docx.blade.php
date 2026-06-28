@@ -185,8 +185,8 @@
     <table style="margin-bottom:12px; table-layout:fixed; width:100%;">
         <tr>
             <td class="no-border" style="width:56px; padding:0; vertical-align:middle;">
-                @if(!empty($logoPath) && file_exists($logoPath))
-                    <img src="{{ $logoPath }}" alt="Logo" width="44" height="44" style="width:44px; height:44px; object-fit:contain; display:block; margin:0 auto;">
+                @if(!empty($logoDataUri) || (!empty($logoPath) && file_exists($logoPath)))
+                    <img src="{{ $logoDataUri ?? $logoPath }}" alt="Logo" width="44" height="44" style="width:44px; height:44px; object-fit:contain; display:block; margin:0 auto;">
                 @endif
             </td>
             <td class="no-border" style="padding:0 0 0 8px; vertical-align:middle;">

@@ -318,6 +318,9 @@ class BandingAsesmenController extends Controller
         $existingJawaban = $banding->jawaban->keyBy('komponen_id');
 
         $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
 
         $html = view('asesor.banding.export-docx', [
             'asesor' => $asesor,
@@ -328,6 +331,7 @@ class BandingAsesmenController extends Controller
             'banding' => $banding,
             'existingJawaban' => $existingJawaban,
             'logoPath' => $logoPath,
+            'logoDataUri' => $logoDataUri,
         ])->render();
 
         $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($banding->skema?->nomor_skema ?? $skemaId));
