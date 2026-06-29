@@ -28,7 +28,8 @@
                         @endif -->
 
                         @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.delete'))
-                            <form method="POST" action="{{ route('admin.persetujuan-asesmen.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');" style="margin:0;">
+                            <form method="POST" action="{{ route('admin.persetujuan-asesmen.destroy', $item->id) }}"
+                                  onsubmit="return openPersetujuanDeleteModal(event, this, @js('Apakah Anda yakin menghapus data persetujuan asesmen asesi \'' . $item->nama_asesi . '\' ini?'))" style="margin:0;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="danger">

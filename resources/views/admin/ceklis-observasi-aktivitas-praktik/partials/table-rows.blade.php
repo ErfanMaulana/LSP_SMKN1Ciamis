@@ -37,7 +37,8 @@
                         @endif -->
 
                         @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.delete'))
-                            <form method="POST" action="{{ route('admin.ceklis-observasi-aktivitas-praktik.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');" style="margin: 0;">
+                            <form method="POST" action="{{ route('admin.ceklis-observasi-aktivitas-praktik.destroy', $item->id) }}"
+                                  onsubmit="return openCeklisDeleteModal(event, this, @js('Apakah Anda yakin menghapus data ceklis observasi aktivitas praktik asesi \'' . ($item->asesi?->nama ?? $item->asesi_nik) . '\' ini?'))" style="margin: 0;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="dropdown-item danger">

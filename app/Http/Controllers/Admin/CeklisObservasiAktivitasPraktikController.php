@@ -20,12 +20,7 @@ class CeklisObservasiAktivitasPraktikController extends Controller
         $skemaFilter = $request->get('skema');
         $rekomendasiFilter = $request->get('rekomendasi');
 
-        $items = CeklisObservasiAktivitasPraktik::query()
-            ->with([
-                'skema:id,nama_skema,nomor_skema',
-                'asesi:NIK,nama',
-                'asesor:ID_asesor,nama,no_met',
-            ])
+        $query = CeklisObservasiAktivitasPraktik::query()
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('kode_form', 'like', "%{$search}%")
@@ -51,7 +46,21 @@ class CeklisObservasiAktivitasPraktikController extends Controller
             })
             ->when($rekomendasiFilter, function ($query) use ($rekomendasiFilter) {
                 $query->where('rekomendasi', $rekomendasiFilter);
-            })
+            });
+
+        $stats = [
+            'skema' => (clone $query)->distinct('skema_id')->count('skema_id'),
+            'asesi' => (clone $query)->distinct('asesi_nik')->count('asesi_nik'),
+            'asesor' => (clone $query)->whereNotNull('asesor_id')->distinct('asesor_id')->count('asesor_id'),
+            'kompeten' => (clone $query)->where('rekomendasi', 'kompeten')->count(),
+            'tidak_kompeten' => (clone $query)->where('rekomendasi', 'belum_kompeten')->count(),
+        ];
+
+        $items = $query->with([
+                'skema:id,nama_skema,nomor_skema',
+                'asesi:NIK,nama',
+                'asesor:ID_asesor,nama,no_met',
+            ])
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -64,10 +73,11 @@ class CeklisObservasiAktivitasPraktikController extends Controller
             return response()->json([
                 'rows' => view('admin.ceklis-observasi-aktivitas-praktik.partials.table-rows', compact('items'))->render(),
                 'pagination' => $items->hasPages() ? (string) $items->links() : '',
+                'stats' => $stats,
             ]);
         }
 
-        return view('admin.ceklis-observasi-aktivitas-praktik.index', compact('items', 'search', 'skemaList', 'skemaFilter', 'rekomendasiFilter'));
+        return view('admin.ceklis-observasi-aktivitas-praktik.index', compact('items', 'search', 'skemaList', 'skemaFilter', 'rekomendasiFilter', 'stats'));
     }
 
     public function create()

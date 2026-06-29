@@ -711,7 +711,7 @@
                 </a>
                 <a href="{{ route('asesor.entry-penilaian') }}"
                     class="menu-item {{ request()->routeIs('asesor.entry-penilaian*') ? 'active' : '' }}">
-                    <i class="bi bi-journal-check"></i>
+                    <i class="bi bi-clipboard-data"></i>
                     <span>Entry Penilaian</span>
                     @if($sidebarCounts['entry_penilaian'] > 0)
                         <span class="menu-badge" style="background: #ef4444;">{{ $sidebarCounts['entry_penilaian'] }}</span>

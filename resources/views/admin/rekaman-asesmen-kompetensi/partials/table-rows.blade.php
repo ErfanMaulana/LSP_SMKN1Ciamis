@@ -37,7 +37,8 @@
                         @endif -->
 
                         @if(Auth::guard('admin')->user()->hasPermission('rekaman-asesmen-kompetensi.delete'))
-                            <form method="POST" action="{{ route('admin.rekaman-asesmen-kompetensi.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');" style="margin: 0;">
+                            <form method="POST" action="{{ route('admin.rekaman-asesmen-kompetensi.destroy', $item->id) }}"
+                                  onsubmit="return openRekamanDeleteModal(event, this, @js('Apakah Anda yakin menghapus rekaman asesmen kompetensi asesi \'' . ($item->asesi?->nama ?? $item->asesi_nik) . '\' ini?'))" style="margin: 0;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="dropdown-item danger">

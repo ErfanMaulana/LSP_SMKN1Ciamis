@@ -50,6 +50,102 @@
     .action-dropdown button[type="submit"]:hover { background:#fef2f2; color:#dc2626; }
     .pagination-wrap { padding:14px; }
     .empty { padding:36px 16px; text-align:center; color:#64748b; }
+
+    .rekaman-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .rekaman-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .rekaman-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .rekaman-delete-confirm-overlay.show .rekaman-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .rekaman-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .rekaman-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .rekaman-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .rekaman-delete-btn-cancel,
+    .rekaman-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .rekaman-delete-btn-cancel {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .rekaman-delete-btn-cancel:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    .rekaman-delete-btn-submit {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .rekaman-delete-btn-submit:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .rekaman-delete-confirm-overlay,
+        .rekaman-delete-confirm-modal {
+            transition: none;
+        }
+    }
 </style>
 @endsection
 
@@ -115,6 +211,18 @@
         @endif
     </div>
 </div>
+
+<div id="rekaman-delete-confirm-overlay" class="rekaman-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="rekamanDeleteConfirmTitle" aria-hidden="true">
+    <div class="rekaman-delete-confirm-modal">
+        <h3 id="rekamanDeleteConfirmTitle" class="rekaman-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="rekamanDeleteConfirmText" class="rekaman-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="rekaman-delete-confirm-actions">
+            <button type="button" id="rekamanDeleteConfirmCancel" class="rekaman-delete-btn-cancel">Batal</button>
+            <button type="button" id="rekamanDeleteConfirmSubmit" class="rekaman-delete-btn-submit">Hapus</button>
+        </div>
+    </div>
+</div>
+
 <script>
     function toggleMenu(button) {
         const dropdown = button.nextElementSibling;
@@ -212,6 +320,60 @@
 
         event.preventDefault();
         performAjaxSearch(link.href);
+    });
+
+    let pendingRekamanDeleteForm = null;
+
+    window.openRekamanDeleteModal = function(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingRekamanDeleteForm = form;
+
+        const overlay = document.getElementById('rekaman-delete-confirm-overlay');
+        const text = document.getElementById('rekamanDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    };
+
+    window.closeRekamanDeleteModal = function() {
+        const overlay = document.getElementById('rekaman-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingRekamanDeleteForm = null;
+    };
+
+    const rekamanDeleteOverlay = document.getElementById('rekaman-delete-confirm-overlay');
+    const rekamanDeleteCancelBtn = document.getElementById('rekamanDeleteConfirmCancel');
+    const rekamanDeleteSubmitBtn = document.getElementById('rekamanDeleteConfirmSubmit');
+
+    rekamanDeleteCancelBtn?.addEventListener('click', closeRekamanDeleteModal);
+
+    rekamanDeleteOverlay?.addEventListener('click', function(event) {
+        if (event.target === rekamanDeleteOverlay) {
+            closeRekamanDeleteModal();
+        }
+    });
+
+    rekamanDeleteSubmitBtn?.addEventListener('click', function() {
+        if (!pendingRekamanDeleteForm) return;
+        const formToSubmit = pendingRekamanDeleteForm;
+        closeRekamanDeleteModal();
+        formToSubmit.submit();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeRekamanDeleteModal();
+        }
     });
 </script>
 @endsection

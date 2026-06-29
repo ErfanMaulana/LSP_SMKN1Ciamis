@@ -195,7 +195,7 @@
     .btn-detail {
         padding: 5px 10px;
         background: #f0f7ff;
-        color: #0061a5;
+        color: #0073bd;
         border: 1px solid #bfdbfe;
         border-radius: 6px;
         font-size: 11px;
@@ -208,7 +208,7 @@
     }
 
     .btn-detail:hover {
-        background: #0061a5;
+        background: #005f99;
         color: #fff;
     }
 
@@ -269,7 +269,7 @@
 
     .btn-kkm-setting {
         padding: 10px 16px;
-        background: #0061a5;
+        background: #0073bd;
         color: #fff;
         border: none;
         border-radius: 8px;
@@ -283,7 +283,7 @@
     }
 
     .btn-kkm-setting:hover {
-        background: #004a7a;
+        background: #005f99;
     }
 
     .modal {
@@ -437,7 +437,7 @@
 
     .kkm-input:focus {
         outline: none;
-        border-color: #0061a5;
+        border-color: #0073bd;
         box-shadow: 0 0 0 3px rgba(0, 97, 165, 0.1);
     }
 
@@ -455,7 +455,7 @@
 
     .btn-save-kkm {
         padding: 6px 12px;
-        background: #0061a5;
+        background: #0073bd;
         color: #fff;
         border: none;
         border-radius: 6px;
@@ -465,7 +465,7 @@
     }
 
     .btn-save-kkm:hover {
-        background: #004a7a;
+        background: #005f99;
     }
 
     .modal-footer {
