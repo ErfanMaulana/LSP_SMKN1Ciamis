@@ -33,87 +33,18 @@ class BandingAsesmenController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
-        $query = DB::table('asesi_skema as aks')
-            ->join('skemas as s', 's.id', '=', 'aks.skema_id')
-            ->leftJoin('banding_asesmen as b', function ($join) {
-                $join->on('b.asesi_nik', '=', 'aks.asesi_nik')
-                    ->on('b.skema_id', '=', 'aks.skema_id');
-            })
-            ->where('aks.asesi_nik', $asesi->NIK)
-            ->whereNotNull('aks.rekomendasi')
-            ->select([
-                'aks.skema_id',
-                'aks.rekomendasi',
-                'aks.tanggal_selesai',
-                's.nama_skema',
-                's.nomor_skema',
-                'b.id as banding_id',
-                'b.status as banding_status',
-                'b.tanggal_pengajuan',
-                'b.checked_at',
-            ]);
-
-        $search = trim((string) $request->get('search', ''));
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('s.nama_skema', 'like', "%{$search}%")
-                    ->orWhere('s.nomor_skema', 'like', "%{$search}%");
-            });
-        }
-
-        $status = $request->get('status', 'all');
-        if ($status !== 'all') {
-            if ($status === 'belum') {
-                $query->whereNull('b.id');
-            } else {
-                $query->where('b.status', $status);
-            }
-        }
-
-        $rows = $query->orderByDesc('aks.updated_at')->paginate(12)->withQueryString();
-
-        $statsBase = DB::table('asesi_skema as aks')
-            ->leftJoin('banding_asesmen as b', function ($join) {
-                $join->on('b.asesi_nik', '=', 'aks.asesi_nik')
-                    ->on('b.skema_id', '=', 'aks.skema_id');
-            })
-            ->where('aks.asesi_nik', $asesi->NIK)
-            ->whereNotNull('aks.rekomendasi');
-
-        $stats = [
-            'total' => (clone $statsBase)->count(),
-            'belum_memilih' => (clone $statsBase)->whereNull('b.id')->count(),
-            'diajukan' => (clone $statsBase)->where('b.status', 'diajukan')->count(),
-            'ditinjau' => (clone $statsBase)->where('b.status', 'ditinjau')->count(),
-            'diterima' => (clone $statsBase)->where('b.status', 'diterima')->count(),
-            'ditolak' => (clone $statsBase)->where('b.status', 'ditolak')->count(),
-            'tidak_banding' => (clone $statsBase)->where('b.status', 'tidak_banding')->count(),
-        ];
-
-        return view('asesi.banding.index', compact('account', 'asesi', 'rows', 'stats', 'search', 'status'));
-    }
-
-    public function show(int $skemaId)
-    {
-        $account = Auth::guard('account')->user();
-        $asesi = $this->getAsesi();
-
-        if (!$asesi) {
-            return redirect()->route('asesi.banding.index')
-                ->with('error', 'Data asesi tidak ditemukan.');
-        }
-
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesi->NIK)
-            ->where('skema_id', $skemaId)
+            ->whereNotNull('rekomendasi')
+            ->orderByDesc('updated_at')
             ->first();
 
-        if (!$pivot || empty($pivot->rekomendasi)) {
-            return redirect()->route('asesi.banding.index')
-                ->with('error', 'Keputusan asesmen belum tersedia, sehingga banding belum bisa diajukan.');
+        if (!$pivot) {
+            return redirect()->route('asesi.dashboard')
+                ->with('warning', 'Keputusan asesmen belum tersedia, sehingga banding belum bisa diajukan.');
         }
 
-        $skema = Skema::findOrFail($skemaId);
+        $skema = Skema::findOrFail($pivot->skema_id);
 
         $komponen = BandingAsesmenKomponen::where('is_active', true)
             ->orderBy('urutan')
@@ -121,13 +52,13 @@ class BandingAsesmenController extends Controller
             ->get();
 
         if ($komponen->isEmpty()) {
-            return redirect()->route('asesi.banding.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Komponen ceklis banding belum tersedia. Hubungi admin.');
         }
 
         $banding = BandingAsesmen::with('jawaban')
             ->where('asesi_nik', $asesi->NIK)
-            ->where('skema_id', $skemaId)
+            ->where('skema_id', $skema->id)
             ->first();
 
         $existingJawaban = $banding
@@ -143,6 +74,11 @@ class BandingAsesmenController extends Controller
             'banding',
             'existingJawaban'
         ));
+    }
+
+    public function show(int $skemaId)
+    {
+        return redirect()->route('asesi.banding.index');
     }
 
     public function store(Request $request, int $skemaId)
@@ -219,8 +155,8 @@ class BandingAsesmenController extends Controller
         }
 
 
-        if ($existing && in_array($existing->status, ['diterima', 'ditolak'], true)) {
-            return back()->with('error', 'Banding sudah diproses dan tidak dapat diubah lagi.');
+        if ($existing && in_array($existing->status, ['diajukan', 'ditinjau', 'diterima', 'ditolak', 'asesmen_ulang'], true)) {
+            return back()->with('error', 'Banding sudah diajukan/diproses dan tidak dapat diubah lagi.');
         }
 
         $ttdAsesiFile = $existing ? $existing->ttd_asesi_file : null;
@@ -241,12 +177,14 @@ class BandingAsesmenController extends Controller
             }
         }
 
+        $buktiPendukung = $existing ? $existing->bukti_pendukung : null;
+
         $asesorId = $asesi->ID_asesor;
         if (!$asesorId && !empty($pivot->reviewed_by)) {
             $asesorId = Asesor::where('no_met', (string) $pivot->reviewed_by)->value('ID_asesor');
         }
 
-        DB::transaction(function () use ($asesi, $skemaId, $asesorId, $pivot, $validated, $komponenIds, $request, $ttdAsesiFile) {
+        DB::transaction(function () use ($asesi, $skemaId, $asesorId, $pivot, $validated, $komponenIds, $request, $ttdAsesiFile, $buktiPendukung) {
             $banding = BandingAsesmen::updateOrCreate(
                 [
                     'asesi_nik' => $asesi->NIK,
@@ -266,6 +204,7 @@ class BandingAsesmenController extends Controller
                     'ttd_asesi_nama' => $request->input('ttd_asesi_nama') ?: $asesi->nama,
                     'ttd_asesi_tanggal' => $request->input('ttd_asesi_tanggal') ?: now()->toDateString(),
                     'ttd_asesi_file' => $ttdAsesiFile,
+                    'bukti_pendukung' => $buktiPendukung,
                 ]
             );
 
@@ -313,8 +252,8 @@ class BandingAsesmenController extends Controller
             ->where('skema_id', $skemaId)
             ->first();
 
-        if ($existing && in_array($existing->status, ['diterima', 'ditolak'], true)) {
-            return back()->with('error', 'Banding sudah diproses admin dan keputusan tidak dapat diubah lagi.');
+        if ($existing && in_array($existing->status, ['diajukan', 'ditinjau', 'diterima', 'ditolak', 'asesmen_ulang'], true)) {
+            return back()->with('error', 'Banding sudah diajukan/diproses dan tidak dapat diubah lagi.');
         }
 
         $asesorId = $asesi->ID_asesor;

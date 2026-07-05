@@ -33,7 +33,33 @@ class RekamanAsesmenController extends Controller
             ['unit.id', 'asc'],
         ])->values();
 
-        return view('asesi.rekaman-asesmen.view-and-sign', compact('item', 'details', 'account'));
+        $asesiModel = \App\Models\Asesi::where('NIK', $account->id)->first(['NIK', 'tanda_tangan_pendaftar', 'tanda_tangan']);
+        $savedSignature = null;
+        if ($asesiModel) {
+            $raw = $asesiModel->tanda_tangan_pendaftar ?? $asesiModel->tanda_tangan ?? null;
+            $savedSignature = $this->formatSignatureUrl($raw);
+        }
+
+        return view('asesi.rekaman-asesmen.view-and-sign', compact('item', 'details', 'account', 'savedSignature'));
+    }
+
+    private function formatSignatureUrl(?string $sig): ?string
+    {
+        if (empty($sig)) return null;
+        $sig = trim($sig);
+        if (str_contains($sig, '/storage/')) {
+            return asset('storage/' . ltrim(explode('/storage/', $sig)[1], '/'));
+        }
+        if (str_starts_with($sig, 'http://') || str_starts_with($sig, 'https://')) {
+            return $sig;
+        }
+        if (str_starts_with($sig, 'rekaman-asesmen/') || str_starts_with($sig, 'ceklis-observasi/') || str_starts_with($sig, 'persetujuan-asesmen/') || str_starts_with($sig, 'signatures/') || str_starts_with($sig, 'pendaftar/')) {
+            return asset('storage/' . ltrim($sig, '/'));
+        }
+        if (str_starts_with($sig, 'data:image')) {
+            return preg_replace('/\s+/', '', $sig);
+        }
+        return 'data:image/png;base64,' . preg_replace('/\s+/', '', $sig);
     }
 
     /**
@@ -61,20 +87,30 @@ class RekamanAsesmenController extends Controller
         }
 
         $ttdAsesiFile = $item->ttd_asesi_file;
-        if (!empty($request->ttd_asesi_file) && strpos($request->ttd_asesi_file, 'data:image') === 0) {
-            try {
-                $signatureData = $request->ttd_asesi_file;
-                list($type, $signatureData) = explode(';', $signatureData);
-                list(, $signatureData) = explode(',', $signatureData);
-                $signatureData = base64_decode($signatureData);
+        $rawInput = $request->ttd_asesi_file ?? '';
 
-                $filename = 'signature_asesi_' . uniqid() . '_' . time() . '.png';
-                $path = 'rekaman-asesmen/signatures';
-
-                \Illuminate\Support\Facades\Storage::disk('public')->put($path . '/' . $filename, $signatureData);
-                $ttdAsesiFile = $path . '/' . $filename;
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Failed to save ttd_asesi_file on rekaman asesmen: ' . $e->getMessage());
+        if (!empty($rawInput)) {
+            if (str_starts_with($rawInput, 'data:image')) {
+                // Canvas base64 data URL — decode and save
+                try {
+                    $parts = explode('base64,', $rawInput);
+                    $b64 = end($parts);
+                    $binary = base64_decode(preg_replace('/\s+/', '', $b64), true);
+                    if ($binary !== false && strlen($binary) > 50) {
+                        $filename = 'signature_asesi_' . uniqid() . '_' . time() . '.png';
+                        $path = 'rekaman-asesmen/signatures';
+                        \Illuminate\Support\Facades\Storage::disk('public')->put($path . '/' . $filename, $binary);
+                        $ttdAsesiFile = $path . '/' . $filename;
+                    }
+                } catch (\Exception $ex) {
+                    \Illuminate\Support\Facades\Log::error('Failed to save ttd_asesi_file on rekaman asesmen: ' . $ex->getMessage());
+                }
+            } elseif (str_contains($rawInput, '/storage/')) {
+                // Full URL path from saved signature — convert to relative
+                $ttdAsesiFile = ltrim(explode('/storage/', $rawInput)[1], '/');
+            } elseif (str_starts_with($rawInput, 'rekaman-asesmen/') || str_starts_with($rawInput, 'ceklis-observasi/') || str_starts_with($rawInput, 'persetujuan-asesmen/') || str_starts_with($rawInput, 'signatures/') || str_starts_with($rawInput, 'pendaftar/')) {
+                // Already a relative storage path
+                $ttdAsesiFile = $rawInput;
             }
         }
 

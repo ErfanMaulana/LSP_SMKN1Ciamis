@@ -22,6 +22,7 @@ class BandingAsesmen extends Model
         'ttd_asesi_nama',
         'ttd_asesi_tanggal',
         'ttd_asesi_file',
+        'bukti_pendukung',
     ];
 
     protected $casts = [

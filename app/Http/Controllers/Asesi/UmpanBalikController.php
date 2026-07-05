@@ -30,25 +30,14 @@ class UmpanBalikController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
-        $skemas = $asesi->skemas()->get();
+        $skema = $asesi->skemas()->first();
 
-        $skemas = $skemas->map(function ($skema) use ($asesi) {
-            $totalKomponen = UmpanBalikKomponen::where('skema_id', $skema->id)
-                ->where('is_active', true)
-                ->count();
+        if (!$skema) {
+            return redirect()->route('asesi.dashboard')
+                ->with('warning', 'Skema belum terdaftar untuk akun Anda.');
+        }
 
-            $totalTerisi = UmpanBalikHasil::where('asesi_nik', $asesi->NIK)
-                ->where('skema_id', $skema->id)
-                ->count();
-
-            $skema->total_komponen = $totalKomponen;
-            $skema->total_terisi = $totalTerisi;
-            $skema->umpan_balik_selesai = $totalKomponen > 0 && $totalKomponen === $totalTerisi;
-
-            return $skema;
-        });
-
-        return view('asesi.umpan-balik.index', compact('account', 'asesi', 'skemas'));
+        return redirect()->route('asesi.umpan-balik.show', $skema->id);
     }
 
     public function show(int $skemaId)
@@ -57,14 +46,14 @@ class UmpanBalikController extends Controller
         $asesi = $this->getAsesi();
 
         if (!$asesi) {
-            return redirect()->route('asesi.umpan-balik.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
         $skema = $asesi->skemas()->where('skemas.id', $skemaId)->first();
 
         if (!$skema) {
-            return redirect()->route('asesi.umpan-balik.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Skema tidak terdaftar untuk akun Anda.');
         }
 
@@ -78,7 +67,12 @@ class UmpanBalikController extends Controller
             ->get()
             ->keyBy('komponen_id');
 
-        return view('asesi.umpan-balik.form', compact('account', 'asesi', 'skema', 'komponenList', 'existing'));
+        $totalKomponen = $komponenList->count();
+        $totalTerisi = $existing->count();
+        $isCompleted = $totalKomponen > 0 && $totalKomponen === $totalTerisi;
+        $submittedAt = $existing->max('updated_at');
+
+        return view('asesi.umpan-balik.form', compact('account', 'asesi', 'skema', 'komponenList', 'existing', 'isCompleted', 'submittedAt'));
     }
 
     public function store(Request $request, int $skemaId)
@@ -86,14 +80,14 @@ class UmpanBalikController extends Controller
         $asesi = $this->getAsesi();
 
         if (!$asesi) {
-            return redirect()->route('asesi.umpan-balik.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
         $skema = $asesi->skemas()->where('skemas.id', $skemaId)->first();
 
         if (!$skema) {
-            return redirect()->route('asesi.umpan-balik.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Skema tidak terdaftar untuk akun Anda.');
         }
 
@@ -102,7 +96,7 @@ class UmpanBalikController extends Controller
             ->pluck('id');
 
         if ($komponenIds->isEmpty()) {
-            return redirect()->route('asesi.umpan-balik.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Komponen umpan balik untuk skema ini belum tersedia.');
         }
 
@@ -115,15 +109,13 @@ class UmpanBalikController extends Controller
 
             foreach ($komponenIds as $komponenId) {
                 $rules["jawaban.$komponenId.hasil"] = 'required|in:ya,tidak';
-                $rules["jawaban.$komponenId.catatan"] = ['required', 'string', 'max:1000', 'regex:/\\S/'];
+                $rules["jawaban.$komponenId.catatan"] = ['nullable', 'string', 'max:1000'];
             }
 
             $request->validate($rules, [
                 'jawaban.required' => 'Semua komponen umpan balik wajib diisi.',
                 'jawaban.*.hasil.required' => 'Silakan pilih hasil Ya/Tidak pada semua komponen.',
                 'jawaban.*.hasil.in' => 'Pilihan hasil harus Ya atau Tidak.',
-                'jawaban.*.catatan.required' => 'Catatan/komentar wajib diisi pada setiap komponen.',
-                'jawaban.*.catatan.regex' => 'Catatan/komentar tidak boleh hanya berisi spasi.',
             ]);
         } else {
             $request->validate([
@@ -151,13 +143,11 @@ class UmpanBalikController extends Controller
                 ],
                 [
                     'hasil' => 'required|in:ya,tidak',
-                    'catatan' => ['required', 'string', 'max:1000', 'regex:/\\S/'],
+                    'catatan' => ['nullable', 'string', 'max:1000'],
                 ],
                 [
                     'hasil.required' => 'Silakan pilih hasil Ya/Tidak pada komponen yang Anda isi.',
                     'hasil.in' => 'Pilihan hasil harus Ya atau Tidak.',
-                    'catatan.required' => 'Catatan/komentar wajib diisi pada komponen yang Anda isi.',
-                    'catatan.regex' => 'Catatan/komentar tidak boleh hanya berisi spasi.',
                 ]
             );
 
@@ -196,7 +186,7 @@ class UmpanBalikController extends Controller
         );
 
         if ($isFinalSubmit) {
-            return redirect()->route('asesi.umpan-balik.index')
+            return redirect()->route('asesi.umpan-balik.show', $skemaId)
                 ->with('success', 'Umpan balik untuk skema "' . $skema->nama_skema . '" berhasil diselesaikan.');
         }
 

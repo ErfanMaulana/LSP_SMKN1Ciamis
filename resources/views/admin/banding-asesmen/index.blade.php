@@ -34,6 +34,7 @@
     .badge.ditinjau { background:#fef3c7; color:#92400e; }
     .badge.diterima { background:#dcfce7; color:#166534; }
     .badge.ditolak { background:#fee2e2; color:#991b1b; }
+    .badge.asesmen_ulang { background:#fef3c7; color:#92400e; }
     .badge.tidak_banding { background:#e5e7eb; color:#374151; }
 
     .btn-detail { background:#e0f2fe; color:#0c4a6e; border-radius:6px; padding:7px 10px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
@@ -59,6 +60,7 @@
     <div class="stat"><small>Ditinjau</small><strong>{{ $stats['ditinjau'] }}</strong></div>
     <div class="stat"><small>Diterima</small><strong>{{ $stats['diterima'] }}</strong></div>
     <div class="stat"><small>Ditolak</small><strong>{{ $stats['ditolak'] }}</strong></div>
+    <div class="stat"><small>Asesmen Ulang</small><strong>{{ $stats['asesmen_ulang'] }}</strong></div>
     <div class="stat"><small>Tidak Banding</small><strong>{{ $stats['tidak_banding'] }}</strong></div>
 </div>
 
@@ -71,6 +73,7 @@
             <option value="ditinjau" {{ $status === 'ditinjau' ? 'selected' : '' }}>Ditinjau</option>
             <option value="diterima" {{ $status === 'diterima' ? 'selected' : '' }}>Diterima</option>
             <option value="ditolak" {{ $status === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+            <option value="asesmen_ulang" {{ $status === 'asesmen_ulang' ? 'selected' : '' }}>Asesmen Ulang</option>
             <option value="tidak_banding" {{ $status === 'tidak_banding' ? 'selected' : '' }}>Tidak Banding</option>
         </select>
         <!-- <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i> Filter</button>
@@ -100,6 +103,7 @@
                             'ditinjau' => 'Ditinjau',
                             'diterima' => 'Diterima',
                             'ditolak' => 'Ditolak',
+                            'asesmen_ulang' => 'Perlu Asesmen Ulang',
                             'tidak_banding' => 'Tidak Banding',
                         ][$item->status] ?? ucfirst($item->status);
                     @endphp

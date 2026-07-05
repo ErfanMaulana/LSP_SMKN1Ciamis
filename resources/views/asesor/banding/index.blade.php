@@ -180,6 +180,7 @@
     .badge-status-ditinjau { background: #fef3c7; color: #92400e; }
     .badge-status-diterima { background: #dcfce7; color: #166534; }
     .badge-status-ditolak { background: #fee2e2; color: #991b1b; }
+    .badge-status-asesmen_ulang { background: #fef3c7; color: #92400e; }
     .badge-status-tidak_banding { background: #e5e7eb; color: #374151; }
 
     .btn-review {
@@ -187,17 +188,17 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
-        background: #0073bd;
-        color: white;
+        background: #e0f2fe;
+        color: #0c4a6e;
         padding: 6px 12px;
         border-radius: 8px;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 700;
         text-decoration: none;
         transition: background 0.2s;
         white-space: nowrap;
     }
-    .btn-review:hover { background: #005f9a; color: white; }
+    .btn-review:hover { background: #bae6fd; color: #0c4a6e; }
     .btn-review.disabled {
         background: #e2e8f0;
         color: #64748b;
@@ -263,6 +264,7 @@
     <div class="stat-card"><small>Ditinjau</small><strong>{{ $stats['ditinjau'] ?? 0 }}</strong></div>
     <div class="stat-card"><small>Diterima</small><strong>{{ $stats['diterima'] ?? 0 }}</strong></div>
     <div class="stat-card"><small>Ditolak</small><strong>{{ $stats['ditolak'] ?? 0 }}</strong></div>
+    <div class="stat-card"><small>Asesmen Ulang</small><strong>{{ $stats['asesmen_ulang'] ?? 0 }}</strong></div>
     <div class="stat-card"><small>Tidak Banding</small><strong>{{ $stats['tidak_banding'] ?? 0 }}</strong></div>
 </div>
 
@@ -290,6 +292,7 @@
                 <option value="ditinjau" {{ $currentStatus === 'ditinjau' ? 'selected' : '' }}>Ditinjau</option>
                 <option value="diterima" {{ $currentStatus === 'diterima' ? 'selected' : '' }}>Diterima</option>
                 <option value="ditolak" {{ $currentStatus === 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                <option value="asesmen_ulang" {{ $currentStatus === 'asesmen_ulang' ? 'selected' : '' }}>Perlu Asesmen Ulang</option>
                 <option value="tidak_banding" {{ $currentStatus === 'tidak_banding' ? 'selected' : '' }}>Tidak Banding</option>
             </select>
         </div>
@@ -310,7 +313,6 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width:46px;">No</th>
                     <th>Asesi</th>
                     <th>Skema</th>
                     <th>Keputusan Asesmen</th>

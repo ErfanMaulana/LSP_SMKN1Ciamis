@@ -32,11 +32,11 @@
                         <td>
                             @if($row->has_asesmen_mandiri)
                                 <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" class="btn-review">
-                                    <i class="bi bi-eye"></i> Review
+                                    <i class="bi bi-eye"></i> Detail
                                 </a>
                             @else
                                 <span class="btn-review disabled">
-                                    <i class="bi bi-eye"></i> Review
+                                    <i class="bi bi-eye"></i> Detail
                                 </span>
                             @endif
                         </td>

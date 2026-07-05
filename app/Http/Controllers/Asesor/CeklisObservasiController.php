@@ -187,7 +187,9 @@ class CeklisObservasiController extends Controller
             }
         }
 
-        return view('asesor.ceklis-observasi.create', compact('account', 'asesor', 'activeSkema', 'skemas', 'defaults'));
+        $savedSignature = $this->formatSignatureToUrl($asesor?->saved_tanda_tangan);
+
+        return view('asesor.ceklis-observasi.create', compact('account', 'asesor', 'activeSkema', 'skemas', 'defaults', 'savedSignature'));
     }
 
     public function store(Request $request)
@@ -229,6 +231,10 @@ class CeklisObservasiController extends Controller
 
         [$data, $details] = $this->validatedData($request, $asesor, false);
 
+        if ($request->input('simpan_tanda_tangan') === '1' && $asesor && !empty($data['ttd_asesor_file'])) {
+            $asesor->update(['saved_tanda_tangan' => $data['ttd_asesor_file']]);
+        }
+
         DB::transaction(function () use ($data, $details) {
             $item = CeklisObservasiAktivitasPraktik::create($data);
             $item->details()->createMany($details);
@@ -236,6 +242,35 @@ class CeklisObservasiController extends Controller
 
         return redirect()->route('asesor.ceklis-observasi.index')
             ->with('success', 'Ceklis observasi berhasil disimpan.');
+    }
+
+    private function formatSignatureToUrl(?string $sig): ?string
+    {
+        if (empty($sig)) {
+            return null;
+        }
+
+        $sig = trim($sig);
+
+        if (str_contains($sig, '/storage/')) {
+            $relativePath = ltrim(explode('/storage/', $sig)[1], '/');
+            return asset('storage/' . $relativePath);
+        }
+
+        if (str_starts_with($sig, 'http://') || str_starts_with($sig, 'https://')) {
+            return $sig;
+        }
+
+        if (str_starts_with($sig, 'ceklis-observasi/') || str_starts_with($sig, 'persetujuan-asesmen/') || str_starts_with($sig, 'signatures/') || str_starts_with($sig, 'pendaftar/')) {
+            return asset('storage/' . ltrim($sig, '/'));
+        }
+
+        if (str_starts_with($sig, 'data:image')) {
+            return preg_replace('/\s+/', '', $sig);
+        }
+
+        $clean = preg_replace('/\s+/', '', $sig);
+        return 'data:image/png;base64,' . $clean;
     }
 
     public function show($id)
@@ -301,11 +336,40 @@ class CeklisObservasiController extends Controller
             ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
             : null;
 
+        // Convert signature files to Base64 data URIs (same as FR.AK.01 export)
+        $ttdAsesiDataUri = null;
+        if (!empty($item->ttd_asesi_file)) {
+            if (str_starts_with($item->ttd_asesi_file, 'data:image')) {
+                $ttdAsesiDataUri = $item->ttd_asesi_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesi_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesiDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $ttdAsesorDataUri = null;
+        if (!empty($item->ttd_asesor_file)) {
+            if (str_starts_with($item->ttd_asesor_file, 'data:image')) {
+                $ttdAsesorDataUri = $item->ttd_asesor_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesor_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesorDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
         $html = view('asesor.ceklis-observasi.export-docx', [
-            'item' => $item,
-            'detailsByUnit' => $detailsByUnit,
-            'logoPath' => $logoPath,
-            'logoDataUri' => $logoDataUri,
+            'item'           => $item,
+            'detailsByUnit'  => $detailsByUnit,
+            'logoPath'       => $logoPath,
+            'logoDataUri'    => $logoDataUri,
+            'ttdAsesiDataUri' => $ttdAsesiDataUri,
+            'ttdAsesorDataUri' => $ttdAsesorDataUri,
         ])->render();
 
         $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($item->skema?->nomor_skema ?? $item->skema_id));
@@ -336,7 +400,9 @@ class CeklisObservasiController extends Controller
         $activeSkema = $item->skema;
         abort_unless((bool) $activeSkema, 403, 'Skema pada data ceklis tidak ditemukan.');
 
-        return view('asesor.ceklis-observasi.edit', compact('account', 'asesor', 'item', 'activeSkema', 'skemas'));
+        $savedSignature = $this->formatSignatureToUrl($asesor?->saved_tanda_tangan);
+
+        return view('asesor.ceklis-observasi.edit', compact('account', 'asesor', 'item', 'activeSkema', 'skemas', 'savedSignature'));
     }
 
     public function update(Request $request, $id)
@@ -349,6 +415,10 @@ class CeklisObservasiController extends Controller
             ->findOrFail($id);
 
         [$data, $details] = $this->validatedData($request, $asesor, true);
+
+        if ($request->input('simpan_tanda_tangan') === '1' && $asesor && !empty($data['ttd_asesor_file'])) {
+            $asesor->update(['saved_tanda_tangan' => $data['ttd_asesor_file']]);
+        }
 
         DB::transaction(function () use ($item, $data, $details) {
             $item->update($data);

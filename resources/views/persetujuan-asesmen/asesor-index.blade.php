@@ -214,10 +214,9 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 45px;">No</th>
+                    <th>Asesi</th>
                     <th>Skema</th>
                     <th>Nomor Skema</th>
-                    <th>Asesi</th>
                     <th>Status</th>
                     <th style="width: 120px;">Aksi</th>
                 </tr>

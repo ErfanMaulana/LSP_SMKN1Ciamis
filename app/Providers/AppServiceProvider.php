@@ -22,5 +22,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::defaultView('vendor.pagination.admin-custom');
         Paginator::defaultSimpleView('vendor.pagination.admin-custom');
+
+        \Carbon\Carbon::setLocale('id');
+        setlocale(LC_TIME, 'id_ID.utf8', 'id_ID', 'id', 'indonesian');
     }
 }

@@ -74,6 +74,11 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         Route::post('/persetujuan-asesmen/{id}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorSign'])->name('persetujuan.front.asesor.sign');
         Route::get('/banding-asesmen/{asesiNik}/{skemaId}', [BandingAsesmenController::class, 'form'])->name('banding.form');
         Route::get('/banding-asesmen/{asesiNik}/{skemaId}/export', [BandingAsesmenController::class, 'export'])->name('banding.export');
+        
+        // Umpan Balik dari Asesi
+        Route::get('/umpan-balik', [\App\Http\Controllers\Asesor\UmpanBalikController::class, 'index'])->name('umpan-balik.index');
+        Route::get('/umpan-balik/{asesiNik}/{skemaId}', [\App\Http\Controllers\Asesor\UmpanBalikController::class, 'show'])->name('umpan-balik.show');
+        
         Route::post('/logout',   [AuthController::class, 'logout'])->name('logout');
     });
 });

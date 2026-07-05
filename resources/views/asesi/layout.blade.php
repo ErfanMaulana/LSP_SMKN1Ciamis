@@ -831,7 +831,7 @@
                     </a>
 
                     @if($showPersetujuan)
-                    <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="menu-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">
+                    <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="menu-item {{ request()->routeIs('asesi.persetujuan-asesmen.*', 'asesi.persetujuan.front.*') ? 'active' : '' }}">
                         <i class="bi bi-file-earmark-check"></i>
                         <span>Persetujuan Asesmen</span>
                     </a>

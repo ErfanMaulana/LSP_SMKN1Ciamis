@@ -606,7 +606,7 @@
     <i class="bi bi-check-circle-fill"></i>
     <div class="text">
         <h3>Asesmen Mandiri Selesai</h3>
-        <p>Diselesaikan pada {{ \Carbon\Carbon::parse($pivot->tanggal_selesai)->format('d M Y, H:i') }} WIB</p>
+        <p>Diselesaikan pada {{ \Carbon\Carbon::parse($pivot->tanggal_selesai)->setTimezone('Asia/Jakarta')->translatedFormat('d F Y, H:i') }} WIB</p>
     </div>
 </div>
 @endif

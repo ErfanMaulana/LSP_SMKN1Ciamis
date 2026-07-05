@@ -42,6 +42,7 @@ class BandingAsesmenController extends Controller
             'ditinjau' => BandingAsesmen::where('status', 'ditinjau')->count(),
             'diterima' => BandingAsesmen::where('status', 'diterima')->count(),
             'ditolak' => BandingAsesmen::where('status', 'ditolak')->count(),
+            'asesmen_ulang' => BandingAsesmen::where('status', 'asesmen_ulang')->count(),
             'tidak_banding' => BandingAsesmen::where('status', 'tidak_banding')->count(),
         ];
 
@@ -100,7 +101,7 @@ class BandingAsesmenController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:ditinjau,diterima,ditolak',
+            'status' => 'required|in:ditinjau,diterima,ditolak,asesmen_ulang',
             'catatan_admin' => 'nullable|string|max:2000',
         ]);
 

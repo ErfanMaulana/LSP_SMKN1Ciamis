@@ -947,11 +947,38 @@
                     Persetujuan asesmen telah ditandatangani oleh asesor dan asesi.
                 </div>
                 <div class="signature-grid">
+                    @php
+                        $ttdAsesorSrc = null;
+                        if (!empty($item->ttd_asesor_file)) {
+                            $f = $item->ttd_asesor_file;
+                            if (str_contains($f, '/storage/')) {
+                                $f = ltrim(explode('/storage/', $f)[1], '/');
+                            }
+                            if (str_starts_with($f, 'http://') || str_starts_with($f, 'https://') || str_starts_with($f, 'data:image')) {
+                                $ttdAsesorSrc = $f;
+                            } else {
+                                $ttdAsesorSrc = asset('storage/' . ltrim($f, '/'));
+                            }
+                        }
+
+                        $ttdAsesiSrc = null;
+                        if (!empty($item->ttd_asesi_file)) {
+                            $f = $item->ttd_asesi_file;
+                            if (str_contains($f, '/storage/')) {
+                                $f = ltrim(explode('/storage/', $f)[1], '/');
+                            }
+                            if (str_starts_with($f, 'http://') || str_starts_with($f, 'https://') || str_starts_with($f, 'data:image')) {
+                                $ttdAsesiSrc = $f;
+                            } else {
+                                $ttdAsesiSrc = asset('storage/' . ltrim($f, '/'));
+                            }
+                        }
+                    @endphp
                     {{-- Tanda Tangan Asesor --}}
                     <div class="signature-box">
                         <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesor</p>
-                        @if(!empty($item->ttd_asesor_file))
-                            <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Tanda Tangan Asesor">
+                        @if($ttdAsesorSrc)
+                            <img src="{{ $ttdAsesorSrc }}" alt="Tanda Tangan Asesor">
                         @else
                             <div class="no-img-placeholder">Tidak ada gambar</div>
                         @endif
@@ -963,7 +990,11 @@
                     {{-- Tanda Tangan Asesi --}}
                     <div class="signature-box">
                         <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesi</p>
-                        <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Tanda Tangan Asesi">
+                        @if($ttdAsesiSrc)
+                            <img src="{{ $ttdAsesiSrc }}" alt="Tanda Tangan Asesi">
+                        @else
+                            <div class="no-img-placeholder">Tidak ada gambar</div>
+                        @endif
                         <p class="meta">
                             <strong>{{ $item->ttd_asesi_nama }}</strong><br>
                             {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
@@ -979,23 +1010,70 @@
                     @csrf
                     <div class="signature-spot" style="max-width:560px; margin:0 auto;">
                         <div class="signature-title">Tanda Tangan Asesi</div>
-                        <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
-                            <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
-                            <div class="signature-placeholder">
-                                <i class="bi bi-pen"></i>
-                                <span>Tanda tangan di sini</span>
+
+                        @if(isset($savedSignature) && $savedSignature)
+                            {{-- Ada TTD tersimpan di profil: tampilkan pilihan --}}
+                            <div id="sigChoiceWrapAsesi" style="margin-bottom:14px; text-align: left;">
+                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="optSavedAsesiLabel">
+                                    <input type="radio" name="sig_choice_asesi" value="saved" checked id="optSavedAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#10b981;">
+                                    <div>
+                                        <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
+                                        <div style="font-size:12px;color:#64748b;">Menggunakan TTD yang sudah disimpan di profil Anda</div>
+                                    </div>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="optNewAsesiLabel">
+                                    <input type="radio" name="sig_choice_asesi" value="new" id="optNewAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#0073bd;">
+                                    <div>
+                                        <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda tangan baru</div>
+                                        <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk persetujuan ini</div>
+                                    </div>
+                                </label>
                             </div>
-                        </div>
-                        <div class="signature-actions">
-                            <div class="signature-date">
-                                <i class="bi bi-calendar3"></i>
-                                Tanggal: <strong id="signatureDateAsesi">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
+
+                            {{-- Preview TTD tersimpan --}}
+                            <div id="savedAsesiSigPreview" style="margin-bottom: 12px; text-align: center;">
+                                <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
+                                    <img src="{{ $savedSignature }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                                </div>
+                                <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
                             </div>
-                            <button type="button" class="btn-clear-signature" id="clearSignatureAsesi">
-                                <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-                            </button>
-                        </div>
-                        <div class="field">
+
+                            {{-- Canvas tanda tangan baru (tersembunyi) --}}
+                            <div id="newAsesiSigDraw" style="display:none;">
+                                <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
+                                    <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
+                                    <div class="signature-placeholder">
+                                        <i class="bi bi-pen"></i>
+                                        <span>Tanda tangan di sini</span>
+                                    </div>
+                                </div>
+                                <div class="signature-actions" style="margin-top:8px;">
+                                    <button type="button" class="btn-clear-signature" id="clearSignatureAsesi">
+                                        <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                                    </button>
+                                </div>
+                            </div>
+                        @else
+                            {{-- Belum ada TTD tersimpan: Tampilkan canvas gambar langsung --}}
+                            <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
+                                <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
+                                <div class="signature-placeholder">
+                                    <i class="bi bi-pen"></i>
+                                    <span>Tanda tangan di sini</span>
+                                </div>
+                            </div>
+                            <div class="signature-actions">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesiSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
+                                    <label for="saveAsesiSigCheck" style="font-size:12px;color:#475569;cursor:pointer;margin:0;">Simpan sebagai tanda tangan saya</label>
+                                </div>
+                                <button type="button" class="btn-clear-signature" id="clearSignatureAsesi">
+                                    <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                                </button>
+                            </div>
+                        @endif
+
+                        <div class="field" style="margin-top:14px;">
                             <label>Tanggal Tanda Tangan</label>
                             <input type="date" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ old('ttd_asesi_tanggal', $item->ttd_asesi_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d')) }}" required>
                             @error('ttd_asesi_tanggal')<div class="error-text">{{ $message }}</div>@enderror
@@ -1170,6 +1248,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 optNewLabel.style.borderColor = '#bfdbfe'; optNewLabel.style.background = '#eff6ff';
             }
             if (hiddenInput) hiddenInput.value = '';
+            setTimeout(function() {
+                window.dispatchEvent(new Event('resize'));
+            }, 50);
+        }
+    };
+
+    window.toggleAsesiSigChoice = function() {
+        const optSaved = document.getElementById('optSavedAsesi');
+        const savedPreview = document.getElementById('savedAsesiSigPreview');
+        const newDraw = document.getElementById('newAsesiSigDraw');
+        const optSavedLabel = document.getElementById('optSavedAsesiLabel');
+        const optNewLabel = document.getElementById('optNewAsesiLabel');
+        const hiddenInput = document.getElementById('ttdAsesiFileInput');
+
+        if (!optSaved) return;
+
+        if (optSaved.checked) {
+            if (savedPreview) savedPreview.style.display = '';
+            if (newDraw) newDraw.style.display = 'none';
+            if (optSavedLabel) {
+                optSavedLabel.style.borderColor = '#d1fae5'; optSavedLabel.style.background = '#f0fdf4';
+            }
+            if (optNewLabel) {
+                optNewLabel.style.borderColor = '#e2e8f0'; optNewLabel.style.background = '#f8fafc';
+            }
+            if (hiddenInput && savedSignature) hiddenInput.value = savedSignature;
+        } else {
+            if (savedPreview) savedPreview.style.display = 'none';
+            if (newDraw) newDraw.style.display = 'block';
+            if (optSavedLabel) {
+                optSavedLabel.style.borderColor = '#e2e8f0'; optSavedLabel.style.background = '#f8fafc';
+            }
+            if (optNewLabel) {
+                optNewLabel.style.borderColor = '#bfdbfe'; optNewLabel.style.background = '#eff6ff';
+            }
+            if (hiddenInput) hiddenInput.value = '';
+            setTimeout(function() {
+                window.dispatchEvent(new Event('resize'));
+            }, 50);
         }
     };
 
@@ -1177,6 +1294,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const optSaved = document.getElementById('optSavedAsesor');
     if (optSaved && optSaved.checked) {
         const hiddenInput = document.getElementById('ttdAsesorFileInput');
+        if (hiddenInput && savedSignature) hiddenInput.value = savedSignature;
+    }
+
+    const optSavedAsesi = document.getElementById('optSavedAsesi');
+    if (optSavedAsesi && optSavedAsesi.checked) {
+        const hiddenInput = document.getElementById('ttdAsesiFileInput');
         if (hiddenInput && savedSignature) hiddenInput.value = savedSignature;
     }
 });

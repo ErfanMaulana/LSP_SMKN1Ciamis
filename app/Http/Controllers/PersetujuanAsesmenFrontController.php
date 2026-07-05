@@ -77,8 +77,9 @@ class PersetujuanAsesmenFrontController extends Controller
 
     private function resolveJadwalForAsesiSkema(Asesi $asesi, Skema $skema): ?JadwalUjikom
     {
-        return JadwalUjikom::query()
-            ->with(['tuk', 'skema', 'kelompoks.asesors'])
+        // 1. Direct participant or kelompok match
+        $jadwal = JadwalUjikom::query()
+            ->with(['tuk', 'skema', 'kelompoks.asesors', 'asesor'])
             ->where('skema_id', $skema->id)
             ->where(function ($query) use ($asesi) {
                 $query->whereHas('peserta', function ($q) use ($asesi) {
@@ -94,6 +95,117 @@ class PersetujuanAsesmenFrontController extends Controller
             })
             ->orderByDesc('tanggal_mulai')
             ->first();
+
+        if ($jadwal) {
+            return $jadwal;
+        }
+
+        // 2. Check if asesi has an assigned asesor or kelompok with a schedule
+        if (!empty($asesi->ID_asesor)) {
+            $jadwalByAsesor = JadwalUjikom::query()
+                ->with(['tuk', 'skema', 'kelompoks.asesors', 'asesor'])
+                ->where('skema_id', $skema->id)
+                ->where(function ($q) use ($asesi) {
+                    $q->where('asesor_id', $asesi->ID_asesor)
+                      ->orWhereHas('kelompoks.asesors', function ($sq) use ($asesi) {
+                          $sq->where('asesor.ID_asesor', $asesi->ID_asesor);
+                      });
+                })
+                ->orderByDesc('tanggal_mulai')
+                ->first();
+
+            if ($jadwalByAsesor) {
+                return $jadwalByAsesor;
+            }
+        }
+
+        // 3. Fallback: Any schedule created for this skema
+        return JadwalUjikom::query()
+            ->with(['tuk', 'skema', 'kelompoks.asesors', 'asesor'])
+            ->where('skema_id', $skema->id)
+            ->orderByDesc('tanggal_mulai')
+            ->first();
+    }
+
+    private function autoFillScheduleDetails(PersetujuanAsesmen $item, ?Asesi $asesi, ?Skema $skema): PersetujuanAsesmen
+    {
+        if (!$asesi || !$skema) {
+            return $item;
+        }
+
+        $jadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema);
+        if (!$jadwal) {
+            return $item;
+        }
+
+        $updated = false;
+
+        // 1. Hari / Tanggal
+        if (empty($item->hari_tanggal) || $item->hari_tanggal === '-' || str_contains($item->hari_tanggal, 's.d.')) {
+            if (!empty($jadwal->tanggal_mulai)) {
+                $tglMulai = \Carbon\Carbon::parse($jadwal->tanggal_mulai)->locale('id');
+                $tglSelesai = !empty($jadwal->tanggal_selesai) ? \Carbon\Carbon::parse($jadwal->tanggal_selesai)->locale('id') : null;
+
+                if ($tglSelesai && $tglMulai->format('Y-m-d') !== $tglSelesai->format('Y-m-d')) {
+                    $item->hari_tanggal = $tglMulai->isoFormat('D MMMM YYYY') . ' s.d. ' . $tglSelesai->isoFormat('D MMMM YYYY');
+                } else {
+                    $item->hari_tanggal = $tglMulai->isoFormat('dddd, D MMMM YYYY');
+                }
+                $updated = true;
+            }
+        }
+
+        // 2. Waktu
+        if (empty($item->waktu) || $item->waktu === '-') {
+            if (!empty($jadwal->waktu_mulai)) {
+                $waktuStr = $jadwal->waktu_mulai;
+                if (!empty($jadwal->waktu_selesai)) {
+                    $waktuStr .= ' - ' . $jadwal->waktu_selesai;
+                }
+                if (!str_contains(strtoupper($waktuStr), 'WIB')) {
+                    $waktuStr .= ' WIB';
+                }
+                $item->waktu = $waktuStr;
+                $updated = true;
+            }
+        }
+
+        // 3. TUK Pelaksanaan
+        if (empty($item->tuk_pelaksanaan) || $item->tuk_pelaksanaan === '-') {
+            if ($jadwal->tuk?->nama_tuk) {
+                $item->tuk_pelaksanaan = $jadwal->tuk->nama_tuk;
+                $updated = true;
+            }
+        }
+
+        // 4. TUK Tipe
+        if (empty($item->tuk) || $item->tuk === '-' || $item->tuk === 'Sewaktu/Tempat Kerja/Mandiri*') {
+            if ($jadwal->tuk) {
+                $item->tuk = match ($jadwal->tuk->tipe_tuk) {
+                    'sewaktu' => 'Sewaktu',
+                    'tempat_kerja' => 'Tempat Kerja',
+                    'mandiri' => 'Mandiri',
+                    default => $jadwal->tuk->tipe_tuk ?? 'Sewaktu',
+                };
+                $updated = true;
+            }
+        }
+
+        // 5. Nama Asesor (if missing)
+        if (empty($item->nama_asesor) || $item->nama_asesor === '-') {
+            $asesorName = $jadwal->kelompoks->first()?->asesors->first()?->nama
+                ?? $jadwal->asesor?->nama;
+            if ($asesorName) {
+                $item->nama_asesor = $asesorName;
+                $updated = true;
+            }
+        }
+
+        if ($updated) {
+            $item->save();
+        }
+
+        return $item;
     }
 
     private function buildPrefillDefaults(?Asesi $asesi, ?Skema $skema): array
@@ -141,7 +253,7 @@ class PersetujuanAsesmenFrontController extends Controller
             ->first();
 
         if ($record) {
-            return $record;
+            return $this->autoFillScheduleDetails($record, $asesi, $skema);
         }
 
         $jadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema);
@@ -154,15 +266,42 @@ class PersetujuanAsesmenFrontController extends Controller
             ?? $jadwal->asesor?->nama
             ?? '-';
 
+        $tglMulai = !empty($jadwal->tanggal_mulai) ? \Carbon\Carbon::parse($jadwal->tanggal_mulai)->locale('id') : null;
+        $tglSelesai = !empty($jadwal->tanggal_selesai) ? \Carbon\Carbon::parse($jadwal->tanggal_selesai)->locale('id') : null;
+        
+        $hariTanggalStr = '-';
+        if ($tglMulai) {
+            if ($tglSelesai && $tglMulai->format('Y-m-d') !== $tglSelesai->format('Y-m-d')) {
+                $hariTanggalStr = $tglMulai->isoFormat('D MMMM YYYY') . ' s.d. ' . $tglSelesai->isoFormat('D MMMM YYYY');
+            } else {
+                $hariTanggalStr = $tglMulai->isoFormat('dddd, D MMMM YYYY');
+            }
+        }
+
+        $waktuStr = '-';
+        if (!empty($jadwal->waktu_mulai)) {
+            $waktuStr = $jadwal->waktu_mulai . (!empty($jadwal->waktu_selesai) ? ' - ' . $jadwal->waktu_selesai : '') . ' WIB';
+        }
+
+        $tukTipe = 'Sewaktu';
+        if ($jadwal->tuk) {
+            $tukTipe = match ($jadwal->tuk->tipe_tuk) {
+                'sewaktu' => 'Sewaktu',
+                'tempat_kerja' => 'Tempat Kerja',
+                'mandiri' => 'Mandiri',
+                default => $jadwal->tuk->tipe_tuk ?? 'Sewaktu',
+            };
+        }
+
         return PersetujuanAsesmen::create($this->buildDefaultPayload([
             'judul_skema' => $skema->nama_skema ?? '',
             'nomor_skema' => $skema->nomor_skema ?? '',
             'nama_asesi' => $asesi->nama,
             'asesi_nik' => $asesi->NIK,
             'nama_asesor' => $asosorName,
-            'tuk' => $jadwal->tuk?->nama_tuk ?? '-',
-            'hari_tanggal' => trim((!empty($jadwal->tanggal_mulai) ? date('d/m/Y', strtotime((string) $jadwal->tanggal_mulai)) : '') . ' s.d. ' . (!empty($jadwal->tanggal_selesai) ? date('d/m/Y', strtotime((string) $jadwal->tanggal_selesai)) : '')),
-            'waktu' => trim(($jadwal->waktu_mulai ?? '') . ' - ' . ($jadwal->waktu_selesai ?? '')),
+            'tuk' => $tukTipe,
+            'hari_tanggal' => $hariTanggalStr,
+            'waktu' => $waktuStr,
             'tuk_pelaksanaan' => $jadwal->tuk?->nama_tuk ?? '-',
         ]));
     }
@@ -579,6 +718,10 @@ class PersetujuanAsesmenFrontController extends Controller
             ]));
         }
 
+        if ($item && $asesi && $skema) {
+            $item = $this->autoFillScheduleDetails($item, $asesi, $skema);
+        }
+
         $tukList = Tuk::orderBy('nama_tuk')->get(['id','nama_tuk','tipe_tuk','kota']);
 
         $savedSignature = $asesor ? $asesor->saved_tanda_tangan : null;
@@ -655,34 +798,16 @@ class PersetujuanAsesmenFrontController extends Controller
             $data['bukti_lainnya_keterangan'] = null;
         }
 
-        // Handle signature file from the canvas (base64 data URL)
-        try {
-            $signatureData = $request->ttd_asesor_file;
-
-            if (strpos($signatureData, 'data:image') === 0) {
-                list($type, $signatureData) = explode(';', $signatureData);
-                list(, $signatureData) = explode(',', $signatureData);
-                $signatureData = base64_decode($signatureData);
-            } else {
-                $signatureData = base64_decode($signatureData);
+        if ($request->has('ttd_asesor_file') && !empty($request->ttd_asesor_file)) {
+            $savedFile = $this->processAndSaveSignature($request->ttd_asesor_file, 'asesor', $item->id);
+            if ($savedFile) {
+                $data['ttd_asesor_file'] = $savedFile;
+                if ($request->input('simpan_tanda_tangan') === '1' && $asesor) {
+                    $asesor->update(['saved_tanda_tangan' => $savedFile]);
+                }
             }
-
-            $filename = 'signature_asesor_' . $item->id . '_' . time() . '.png';
-            $path = 'persetujuan-asesmen/signatures';
-
-            Storage::disk('public')->put($path . '/' . $filename, $signatureData);
-            $data['ttd_asesor_file'] = $path . '/' . $filename;
-
-            Log::info('Asesor signature image saved', ['file' => $data['ttd_asesor_file']]);
-        } catch (\Exception $e) {
-            Log::error('Failed to save asesor signature image', ['error' => $e->getMessage()]);
+        } else {
             return redirect()->back()->with('error', 'Tanda tangan asesor tidak tersimpan. Pastikan tanda tangan digambar di canvas sebelum menyimpan.');
-        }
-
-        Log::info('Updating asesor signature', ['id' => $item->id, 'data' => $data]);
-
-        if ($request->input('simpan_tanda_tangan') === '1' && $asesor) {
-            $asesor->update(['saved_tanda_tangan' => $request->ttd_asesor_file]);
         }
 
         $item->update($data);
@@ -728,11 +853,48 @@ class PersetujuanAsesmenFrontController extends Controller
             ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
             : null;
 
+        $ttdAsesiDataUri = null;
+        if (!empty($item->ttd_asesi_file)) {
+            if (str_starts_with($item->ttd_asesi_file, 'data:image')) {
+                $ttdAsesiDataUri = $item->ttd_asesi_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesi_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesiDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $ttdAsesorDataUri = null;
+        if (!empty($item->ttd_asesor_file)) {
+            if (str_starts_with($item->ttd_asesor_file, 'data:image')) {
+                $ttdAsesorDataUri = $item->ttd_asesor_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesor_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesorDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $asesor = null;
+        if (!empty($item->nama_asesor)) {
+            $asesor = \App\Models\Asesor::where('nama', $item->nama_asesor)->first();
+        }
+        if (!$asesor && !empty($item->reviewed_by)) {
+            $asesor = \App\Models\Asesor::where('no_met', (string) $item->reviewed_by)->first();
+        }
+
         $html = view('persetujuan-asesmen.export-docx', [
             'item' => $item,
             'skema' => $skema,
+            'asesor' => $asesor,
             'logoPath' => $logoPath,
             'logoDataUri' => $logoDataUri,
+            'ttdAsesiDataUri' => $ttdAsesiDataUri,
+            'ttdAsesorDataUri' => $ttdAsesorDataUri,
         ])->render();
 
         $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
@@ -761,11 +923,8 @@ class PersetujuanAsesmenFrontController extends Controller
                 ->with('error', 'Form belum tersedia. Jadwal untuk skema ini belum dibuat oleh admin.');
         }
 
-        // only allow asesi to view/sign if asesor already completed checklist and signed
-        if (empty($item->ttd_asesor_nama) || empty($item->ttd_asesor_tanggal) || ! $this->recordHasChecklist($item)) {
-            return redirect()->route('asesi.persetujuan-asesmen.index')
-                ->with('error', 'Form belum tersedia. Asesor belum menyelesaikan ceklis bukti dan/atau belum menandatangani form.');
-        }
+        $rawTtd = $asesi->tanda_tangan_pendaftar ?? $asesi->tanda_tangan;
+        $savedSignature = $this->formatSignatureToUrl($rawTtd);
 
         $tukList = Tuk::orderBy('nama_tuk')->get(['id','nama_tuk','tipe_tuk','kota']);
 
@@ -774,7 +933,72 @@ class PersetujuanAsesmenFrontController extends Controller
             'role' => 'asesi',
             'skema' => $skema,
             'tukList' => $tukList,
+            'savedSignature' => $savedSignature,
         ]);
+    }
+
+    private function formatSignatureToUrl(?string $sig): ?string
+    {
+        if (empty($sig)) {
+            return null;
+        }
+
+        $sig = trim($sig);
+
+        if (str_contains($sig, '/storage/')) {
+            $relativePath = ltrim(explode('/storage/', $sig)[1], '/');
+            return asset('storage/' . $relativePath);
+        }
+
+        if (str_starts_with($sig, 'http://') || str_starts_with($sig, 'https://')) {
+            return $sig;
+        }
+
+        if (str_starts_with($sig, 'persetujuan-asesmen/') || str_starts_with($sig, 'signatures/') || str_starts_with($sig, 'pendaftar/')) {
+            return asset('storage/' . ltrim($sig, '/'));
+        }
+
+        if (str_starts_with($sig, 'data:image')) {
+            return preg_replace('/\s+/', '', $sig);
+        }
+
+        $clean = preg_replace('/\s+/', '', $sig);
+        return 'data:image/png;base64,' . $clean;
+    }
+
+    private function processAndSaveSignature(?string $rawSig, string $prefix, int $itemId): ?string
+    {
+        if (empty($rawSig)) {
+            return null;
+        }
+
+        $rawSig = trim($rawSig);
+
+        if (str_contains($rawSig, '/storage/')) {
+            return ltrim(explode('/storage/', $rawSig)[1], '/');
+        }
+
+        if (str_starts_with($rawSig, 'persetujuan-asesmen/') || str_starts_with($rawSig, 'signatures/') || str_starts_with($rawSig, 'pendaftar/')) {
+            return ltrim($rawSig, '/');
+        }
+
+        $b64 = $rawSig;
+        if (str_contains($b64, 'base64,')) {
+            $parts = explode('base64,', $b64);
+            $b64 = end($parts);
+        }
+
+        $cleanB64 = preg_replace('/\s+/', '', $b64);
+        $binary = base64_decode($cleanB64, true);
+
+        if ($binary !== false && strlen($binary) > 50) {
+            $filename = 'signature_' . $prefix . '_' . $itemId . '_' . time() . '.png';
+            $relativePath = 'persetujuan-asesmen/signatures/' . $filename;
+            Storage::disk('public')->put($relativePath, $binary);
+            return $relativePath;
+        }
+
+        return $rawSig;
     }
 
     public function asesiSign(Request $request, $id)
@@ -818,6 +1042,7 @@ class PersetujuanAsesmenFrontController extends Controller
 
         $data = $request->validate([
             'ttd_asesi_tanggal' => 'required|date_format:Y-m-d',
+            'simpan_tanda_tangan' => 'nullable|in:0,1',
         ], [
             'ttd_asesi_tanggal.required' => 'Tanggal harus diisi',
             'ttd_asesi_tanggal.date_format' => 'Format tanggal tidak valid',
@@ -827,31 +1052,12 @@ class PersetujuanAsesmenFrontController extends Controller
 
         // Handle signature image file
         if ($request->has('ttd_asesi_file') && !empty($request->ttd_asesi_file)) {
-            try {
-                $signatureData = $request->ttd_asesi_file;
-                
-                // Extract base64 data
-                if (strpos($signatureData, 'data:image') === 0) {
-                    list($type, $signatureData) = explode(';', $signatureData);
-                    list(, $signatureData) = explode(',', $signatureData);
-                    $signatureData = base64_decode($signatureData);
-                } else {
-                    $signatureData = base64_decode($signatureData);
+            $savedFile = $this->processAndSaveSignature($request->ttd_asesi_file, 'asesi', $item->id);
+            if ($savedFile) {
+                $data['ttd_asesi_file'] = $savedFile;
+                if ($request->input('simpan_tanda_tangan') === '1' && $asesi) {
+                    $asesi->update(['tanda_tangan_pendaftar' => $savedFile]);
                 }
-                
-                // Create filename
-                $filename = 'signature_asesi_' . $item->id . '_' . time() . '.png';
-                $path = 'persetujuan-asesmen/signatures';
-                
-                // Store file
-                Storage::disk('public')->put($path . '/' . $filename, $signatureData);
-                
-                $data['ttd_asesi_file'] = $path . '/' . $filename;
-                
-                Log::info('Signature image saved', ['file' => $data['ttd_asesi_file']]);
-            } catch (\Exception $e) {
-                Log::error('Failed to save signature image', ['error' => $e->getMessage()]);
-                // Continue without image, don't fail validation
             }
         }
 

@@ -1343,7 +1343,7 @@
             </span>
             @elseif($pivot && $pivot->status === 'selesai')
             <div class="waiting-review-box">
-                <div style="width:40px;height:40px;border-radius:50%;background:#0073bd;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <div style="width:40px;height:40px;border-radius:50%;background:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid #e0f2fe;">
                     <i class="bi bi-hourglass-split" style="font-size:18px;color:#065f46;"></i>
                 </div>
                 <div>
