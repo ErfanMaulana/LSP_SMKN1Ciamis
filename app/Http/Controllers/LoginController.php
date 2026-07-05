@@ -64,9 +64,9 @@ class LoginController extends Controller
             );
 
             if ($account->isAsesor()) {
-                return redirect()->intended(route('asesor.dashboard'))->with('success', 'Login berhasil!');
+                return redirect()->route('asesor.dashboard')->with('success', 'Login berhasil!');
             }
-            return redirect()->intended(route('asesi.dashboard'))->with('success', 'Login berhasil!');
+            return redirect()->route('asesi.dashboard')->with('success', 'Login berhasil!');
         }
 
         $errorMsg = $role === 'asesi' 

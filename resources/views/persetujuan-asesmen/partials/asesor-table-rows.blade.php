@@ -1,9 +1,8 @@
 @forelse($items as $item)
     <tr>
-        <td>{{ $loop->iteration }}</td>
+        <td>{{ $item['asesi_nama'] }}</td>
         <td>{{ $item['skema_nama'] }}</td>
         <td>{{ $item['skema_nomor'] }}</td>
-        <td>{{ $item['asesi_nama'] }}</td>
         <td>
             @php
                 $status = $item['status'] ?? '-';
@@ -30,7 +29,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="6">
+        <td colspan="5">
             <div class="empty">
                 <i class="bi bi-inboxes" style="font-size: 28px;"></i>
                 <div>Belum ada asesi/skema yang terhubung ke akun asesor ini.</div>

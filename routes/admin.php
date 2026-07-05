@@ -288,6 +288,7 @@ Route::prefix('admin')->group(function () {
         // Hasil Umpan Balik Asesi
         Route::middleware('permission:jadwal-ujikom.view')->group(function () {
             Route::get('/umpan-balik-hasil', [UmpanBalikHasilController::class, 'index'])->name('admin.umpan-balik-hasil.index');
+            Route::get('/umpan-balik-hasil/{asesiNik}/{skemaId}', [UmpanBalikHasilController::class, 'show'])->name('admin.umpan-balik-hasil.show');
         });
 
         // Banding Asesmen

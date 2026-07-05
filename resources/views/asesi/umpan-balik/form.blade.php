@@ -232,6 +232,85 @@
         .actions { flex-direction: column-reverse; align-items: stretch; }
         .btn { justify-content: center; width: 100%; }
     }
+
+    /* Custom Modal Popup (Admin Style) */
+    .custom-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(3px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .custom-modal-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .custom-modal-card {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
+        transform: translateY(10px) scale(0.96);
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .custom-modal-overlay.show .custom-modal-card {
+        transform: translateY(0) scale(1);
+    }
+
+    .custom-modal-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .custom-modal-text {
+        margin: 10px 0 0;
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.5;
+    }
+
+    .custom-modal-actions {
+        margin-top: 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .custom-modal-btn {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 22px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        background: #0073bd;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .custom-modal-btn:hover {
+        background: #005f99;
+    }
 </style>
 @endsection
 
@@ -250,6 +329,61 @@
 <div class="empty">
     <i class="bi bi-info-circle" style="font-size:36px;display:block;margin-bottom:8px;"></i>
     Komponen umpan balik untuk skema ini belum tersedia.
+</div>
+@elseif(!empty($isCompleted))
+<div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:14px; padding:24px; margin-bottom:20px; text-align:center;">
+    <div style="width:56px; height:56px; background:#dcfce7; color:#16a34a; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 14px;">
+        <i class="bi bi-check-circle-fill"></i>
+    </div>
+    <h3 style="font-size:18px; font-weight:700; color:#166534; margin:0 0 6px;">Anda Sudah Mengisi Umpan Balik Asesor</h3>
+    <p style="font-size:13.5px; color:#15803d; margin:0 0 14px;">
+        Terima kasih! Seluruh komponen umpan balik kinerja asesor untuk skema <strong>{{ $skema->nama_skema }}</strong> telah berhasil Anda selesaikan.
+    </p>
+    @if($submittedAt)
+        <div style="font-size:12px; color:#475569;">
+            <i class="bi bi-clock-history"></i> Diselesaikan pada: <strong>{{ \Carbon\Carbon::parse($submittedAt)->setTimezone('Asia/Jakarta')->locale('id')->isoFormat('D MMMM YYYY, HH:mm') }} WIB</strong>
+        </div>
+    @endif
+</div>
+
+<div class="komponen-card" style="padding:20px;">
+    <h4 style="margin:0 0 16px; font-size:15px; font-weight:700; color:#0f172a;">Ringkasan Jawaban Umpan Balik Anda</h4>
+    <div style="display:flex; flex-direction:column; gap:16px;">
+        @foreach($komponenList as $index => $komponen)
+            @php
+                $itemHasil = $existing->get($komponen->id);
+                $jawabanStr = strtolower((string) optional($itemHasil)->jawaban);
+                $catatanStr = optional($itemHasil)->catatan;
+            @endphp
+            <div style="border-bottom:1px solid #f1f5f9; padding-bottom:14px;">
+                <div style="font-size:11px; font-weight:700; text-transform:uppercase; color:#64748b; margin-bottom:4px;">Komponen {{ $index + 1 }}</div>
+                <div style="font-size:13.5px; font-weight:600; color:#1e293b; margin-bottom:8px;">{{ $komponen->pernyataan }}</div>
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <div>
+                        <span style="font-size:12px; color:#64748b;">Pilihan: </span>
+                        @if($jawabanStr === 'ya')
+                            <span style="padding:3px 10px; background:#dcfce7; color:#15803d; border-radius:999px; font-size:12px; font-weight:700;"><i class="bi bi-check-lg"></i> Ya</span>
+                        @elseif($jawabanStr === 'tidak')
+                            <span style="padding:3px 10px; background:#fee2e2; color:#b91c1c; border-radius:999px; font-size:12px; font-weight:700;"><i class="bi bi-x-lg"></i> Tidak</span>
+                        @else
+                            <span style="padding:3px 10px; background:#f1f5f9; color:#64748b; border-radius:999px; font-size:12px; font-weight:600;">-</span>
+                        @endif
+                    </div>
+                    @if($catatanStr)
+                        <div style="font-size:13px; color:#475569; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:6px 12px; flex:1; min-width:200px;">
+                            <strong>Catatan:</strong> {{ $catatanStr }}
+                        </div>
+                    @endif
+                </div>
+            </div>
+        @endforeach
+    </div>
+</div>
+
+<div class="actions" style="margin-top:20px;">
+    <a href="{{ route('asesi.dashboard') }}" class="btn btn-back">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </a>
 </div>
 @else
 <div class="alert-box">
@@ -299,7 +433,7 @@
                 </div>
 
                 <label class="catatan-label">
-                    Catatan / Komentar Asesi <span class="required-mark">*</span>
+                    Catatan / Komentar Asesi
                 </label>
                 <textarea class="catatan-input"
                           name="jawaban[{{ $komponen->id }}][catatan]"
@@ -309,8 +443,8 @@
     @endforeach
 
     <div class="actions">
-        <a href="{{ route('asesi.umpan-balik.index') }}" class="btn btn-back">
-            <i class="bi bi-arrow-left"></i> Kembali
+        <a href="{{ route('asesi.dashboard') }}" class="btn btn-back">
+            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
         </a>
         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-left:auto;">
             <button type="submit" name="save_draft" class="btn btn-save">
@@ -323,10 +457,44 @@
     </div>
 </form>
 @endif
+
+<!-- Custom Modal for Validation Alerts -->
+<div id="customModalOverlay" class="custom-modal-overlay">
+    <div class="custom-modal-card">
+        <h3 id="customModalTitle" class="custom-modal-title">Perhatian</h3>
+        <p id="customModalText" class="custom-modal-text"></p>
+        <div class="custom-modal-actions">
+            <button type="button" id="customModalCloseBtn" class="custom-modal-btn">OK</button>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
+    function showCustomModal(title, message, onOk) {
+        const overlay = document.getElementById('customModalOverlay');
+        const titleEl = document.getElementById('customModalTitle');
+        const textEl = document.getElementById('customModalText');
+        const closeBtn = document.getElementById('customModalCloseBtn');
+
+        if (!overlay || !titleEl || !textEl || !closeBtn) return;
+
+        titleEl.textContent = title || 'Perhatian';
+        textEl.textContent = message || '';
+        overlay.classList.add('show');
+
+        const handleClose = () => {
+            overlay.classList.remove('show');
+            closeBtn.removeEventListener('click', handleClose);
+            if (typeof onOk === 'function') {
+                onOk();
+            }
+        };
+
+        closeBtn.addEventListener('click', handleClose);
+    }
+
     document.getElementById('umpanBalikForm')?.addEventListener('submit', function (event) {
         const isFinalSubmit = event.submitter && event.submitter.name === 'submit_final';
 
@@ -338,20 +506,12 @@
 
         for (const card of komponenCards) {
             const selected = card.querySelector('input[type="radio"]:checked');
-            const textarea = card.querySelector('textarea');
 
             if (!selected) {
                 event.preventDefault();
-                alert('Untuk menyelesaikan, semua komponen wajib memilih Ya/Tidak.');
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return;
-            }
-
-            if (!textarea || !textarea.value.trim()) {
-                event.preventDefault();
-                alert('Untuk menyelesaikan, catatan/komentar wajib diisi pada semua komponen.');
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                textarea.focus();
+                showCustomModal('Perhatian', 'Untuk menyelesaikan, semua komponen wajib memilih Ya/Tidak.', function() {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
                 return;
             }
         }

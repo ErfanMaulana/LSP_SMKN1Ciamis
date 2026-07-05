@@ -1228,6 +1228,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const start = (event) => {
                 event.preventDefault();
+                // If the canvas has 0 dimensions (e.g. was hidden when initialized), resize now
+                if (canvas.width === 0 || canvas.height === 0) {
+                    resize();
+                }
                 drawing = true;
                 const p = pos(event);
                 lastX = p.x;
@@ -1350,6 +1354,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     optNewAsesorLabel.style.borderColor = '#bfdbfe'; optNewAsesorLabel.style.background = '#eff6ff';
                 }
                 if (hiddenInput) hiddenInput.value = '';
+                // Trigger canvas resize now that the container is visible
+                setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 50);
             }
         };
 

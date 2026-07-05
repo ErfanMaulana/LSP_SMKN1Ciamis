@@ -126,12 +126,12 @@
 
     .btn-review {
         display: inline-flex; align-items: center; gap: 5px;
-        background: #0073bd; color: white;
+        background: #e0f2fe; color: #0c4a6e;
         padding: 5px 14px; border-radius: 6px;
-        font-size: 12px; font-weight: 500; text-decoration: none;
+        font-size: 12px; font-weight: 700; text-decoration: none;
         transition: background 0.2s;
     }
-    .btn-review:hover { background: #005a9e; color: white; }
+    .btn-review:hover { background: #bae6fd; color: #0c4a6e; }
 
     .empty-state {
         text-align: center; padding: 50px 20px; color: #94a3b8;
@@ -270,7 +270,6 @@
         <table>
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Nama Asesi</th>
                     <th>NIK</th>
                     <th>No. Reg</th>
@@ -281,7 +280,6 @@
             <tbody>
                 @foreach($recentCompleted as $i => $row)
                 <tr>
-                    <td>{{ $i + 1 }}</td>
                     <td>
                         <div style="font-weight:600;color:#1e3a5f;">{{ $row->asesi?->nama ?? '-' }}</div>
                     </td>
@@ -294,7 +292,7 @@
                     </td>
                     <td>
                         <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" class="btn-review">
-                            <i class="bi bi-eye"></i> Review
+                            <i class="bi bi-eye"></i> Detail
                         </a>
                     </td>
                 </tr>

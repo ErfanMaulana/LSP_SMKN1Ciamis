@@ -35,6 +35,7 @@
     .badge.ditinjau { background:#fef3c7; color:#92400e; }
     .badge.diterima { background:#dcfce7; color:#166534; }
     .badge.ditolak { background:#fee2e2; color:#991b1b; }
+    .badge.asesmen_ulang { background:#fef3c7; color:#92400e; }
     .badge.tidak_banding { background:#e5e7eb; color:#374151; }
 
     .empty { padding:54px 18px; text-align:center; color:#94a3b8; }
@@ -59,6 +60,7 @@
     <div class="stat"><small>Ditinjau</small><strong>{{ $stats['ditinjau'] ?? 0 }}</strong></div>
     <div class="stat"><small>Diterima</small><strong>{{ $stats['diterima'] ?? 0 }}</strong></div>
     <div class="stat"><small>Ditolak</small><strong>{{ $stats['ditolak'] ?? 0 }}</strong></div>
+    <div class="stat"><small>Asesmen Ulang</small><strong>{{ $stats['asesmen_ulang'] ?? 0 }}</strong></div>
     <div class="stat"><small>Tidak Banding</small><strong>{{ $stats['tidak_banding'] ?? 0 }}</strong></div>
 </div>
 
@@ -87,6 +89,7 @@
                             'ditinjau' => 'Ditinjau',
                             'diterima' => 'Diterima',
                             'ditolak' => 'Ditolak',
+                            'asesmen_ulang' => 'Perlu Asesmen Ulang',
                             'tidak_banding' => 'Tidak Banding',
                         ][$statusBanding] ?? ucfirst($statusBanding);
                     @endphp
@@ -119,15 +122,8 @@
                                     <a href="{{ route('asesi.banding.show', $row->skema_id) }}" class="btn btn-primary">
                                         <i class="bi bi-arrow-left-right"></i> Ubah ke Ajukan
                                     </a>
-                                @elseif(in_array($statusBanding, ['diajukan', 'ditinjau']))
-                                    <a href="{{ route('asesi.banding.show', $row->skema_id) }}" class="btn btn-primary">
-                                        <i class="bi bi-pencil-square"></i> Lihat / Ubah
-                                    </a>
-                                    <form method="POST" action="{{ route('asesi.banding.decline', $row->skema_id) }}" onsubmit="return confirm('Simpan keputusan Tidak Banding untuk skema ini?');" style="display:inline;margin:0;">
-                                        @csrf
-                                        <button type="submit" class="btn btn-warning"><i class="bi bi-x-octagon"></i> Tidak Banding</button>
-                                    </form>
                                 @else
+                                    {{-- diajukan, ditinjau, diterima, ditolak, asesmen_ulang --}}
                                     <a href="{{ route('asesi.banding.show', $row->skema_id) }}" class="btn btn-light">
                                         <i class="bi bi-eye"></i> Lihat Detail
                                     </a>

@@ -5,50 +5,429 @@
 
 @section('styles')
 <style>
-    .top-actions { margin-bottom:14px; }
-    .btn-back { display:inline-flex; align-items:center; gap:6px; padding:9px 14px; border-radius:8px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600; font-size:13px; }
-    .panel { background:#fff; border:1px solid #111827; border-radius:2px; }
-    .panel-head { padding:8px 10px; border-bottom:1px solid #111827; font-size:14px; font-weight:700; color:#0f172a; }
-    .meta-table { width:100%; border-collapse:collapse; }
-    .meta-table td { border-bottom:1px solid #111827; padding:6px 8px; font-size:13px; }
-    .meta-table td:first-child { width:170px; font-weight:600; background:#f8fafc; }
+    .top-actions { margin-bottom: 20px; }
+    .btn-back { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; background: #fff; border: 1px solid #e2e8f0; color: #475569; text-decoration: none; font-weight: 600; font-size: 13.5px; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+    .btn-back:hover { background: #f8fafc; color: #1e293b; border-color: #cbd5e1; transform: translateX(-2px); }
 
-    .check-table { width:100%; border-collapse:collapse; }
-    .check-table th, .check-table td { border:1px solid #111827; padding:8px; font-size:13px; vertical-align:top; }
-    .check-table th { background:#f8fafc; font-weight:700; }
-    .check-table th:nth-child(2), .check-table th:nth-child(3), .check-table td:nth-child(2), .check-table td:nth-child(3) { width:80px; text-align:center; }
+    /* Container Card */
+    .form-container {
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.02);
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
 
-    .section { border-top:1px solid #111827; padding:10px; }
-    .section h4 { margin:0 0 8px; font-size:13px; color:#0f172a; }
-    .section p { margin:0; font-size:13px; color:#1f2937; line-height:1.45; }
+    .form-header {
+        background: linear-gradient(135deg, #0073bd, #005a96);
+        padding: 24px;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .form-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .form-header p {
+        margin: 4px 0 0;
+        font-size: 13px;
+        color: rgba(255, 255, 255, 0.85);
+    }
 
-    textarea { width:100%; min-height:120px; border:1px solid #94a3b8; border-radius:4px; padding:10px; font-family:inherit; font-size:13px; resize:vertical; }
-    textarea:focus { outline:none; border-color:#0073bd; box-shadow:0 0 0 3px rgba(0,115,189,.1); }
+    /* Metadata Panel */
+    .metadata-panel {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 20px 24px;
+    }
+    .metadata-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+    }
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .meta-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #64748b;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+    .meta-value {
+        font-size: 14.5px;
+        color: #1e293b;
+        font-weight: 600;
+    }
+    .meta-value .badge-status {
+        display: inline-flex;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .badge-status.diterima { background: #dcfce7; color: #166534; }
+    .badge-status.ditolak { background: #fee2e2; color: #991b1b; }
 
-    .status-box { margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid #cbd5e1; background:#f8fafc; font-size:13px; }
-    .status-box strong { color:#0f172a; }
+    /* Section Styles */
+    .form-section {
+        padding: 24px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    .form-section:last-of-type {
+        border-bottom: none;
+    }
+    .section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-    .actions { padding:12px 10px; border-top:1px solid #111827; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
-    .btn { font-family:inherit; border:none; border-radius:8px; padding:10px 14px; font-size:13px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none; transition: all 0.2s ease; }
-    .btn-primary { background:#0073bd; color:#fff; }
-    .btn-primary:hover { background:#005e9b; }
-    .btn-warning { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
-    .btn-warning:hover { background:#fde68a; }
-    .btn-secondary { background:#64748b; color:#fff; text-decoration:none; }
-    .btn-secondary:hover { background:#4b5563; }
+    /* Questionnaire Card Layout (Modern Cards instead of tables) */
+    .question-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .question-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        transition: all 0.2s ease;
+    }
+    .question-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .question-text {
+        font-size: 14px;
+        color: #334155;
+        line-height: 1.5;
+        flex: 1;
+    }
 
-    .error-text { margin-top:6px; color:#dc2626; font-size:12px; }
+    /* Native radio + colored label style — matches K(Kompeten)/BK(Belum Kompeten) */
+    .answer-options {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-shrink: 0;
+    }
+    .option-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        font-size: 13.5px;
+        font-weight: 600;
+        user-select: none;
+        white-space: nowrap;
+    }
+    .option-label input[type="radio"] {
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .option-label.option-ya {
+        color: #16a34a;
+    }
+    .option-label.option-ya input[type="radio"] {
+        accent-color: #16a34a;
+    }
+    .option-label.option-tidak {
+        color: #dc2626;
+    }
+    .option-label.option-tidak input[type="radio"] {
+        accent-color: #dc2626;
+    }
+    .option-label input:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+    .option-label input:disabled ~ span {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Textarea reason */
+    .reason-box {
+        margin-top: 8px;
+    }
+    textarea {
+        width: 100%;
+        min-height: 120px;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 12px;
+        font-family: inherit;
+        font-size: 13.5px;
+        line-height: 1.5;
+        resize: vertical;
+        transition: all 0.2s ease;
+        color: #1e293b;
+    }
+    textarea:focus {
+        outline: none;
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.15);
+    }
+    textarea[readonly] {
+        background: #f8fafc;
+        color: #64748b;
+        cursor: not-allowed;
+    }
+
+    /* Signature panel */
+    .signature-area {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        align-items: center;
+    }
+    .signature-instructions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .signature-instructions h4 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .signature-instructions p {
+        margin: 0;
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.5;
+    }
+    .disclaimer-box {
+        background: #eff6ff;
+        border-left: 3px solid #3b82f6;
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        color: #1e40af;
+        line-height: 1.45;
+    }
+
+    /* Signature Canvas Styling */
+    .signature-canvas-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+    .signature-canvas-wrapper {
+        border: 2px dashed #cbd5e1;
+        border-radius: 14px;
+        background: #f8fafc;
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        max-width: 280px;
+        aspect-ratio: 1.2 / 1;
+        transition: all 0.2s ease;
+    }
+    .signature-canvas-wrapper.active {
+        border-color: #0073bd;
+        background: #fff;
+    }
+    .signature-canvas-wrapper.readonly {
+        border-style: solid;
+        border-color: #e2e8f0;
+        background: #fff;
+    }
+    .signature-canvas {
+        width: 100%;
+        height: 100%;
+        cursor: crosshair;
+        display: block;
+    }
+    .signature-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+        color: #94a3b8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        transition: opacity 0.2s ease;
+    }
+    .signature-canvas-wrapper.has-signature .signature-placeholder {
+        opacity: 0;
+    }
+    .btn-clear-signature {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        color: #64748b;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+    .btn-clear-signature:hover {
+        background: #f8fafc;
+        color: #ef4444;
+        border-color: #fca5a5;
+    }
+
+    /* Status Banner at Top */
+    .status-banner {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .status-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .status-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+    .status-icon.draft { background: #f1f5f9; color: #475569; }
+    .status-icon.diajukan { background: #eff6ff; color: #1d4ed8; }
+    .status-icon.ditinjau { background: #fef3c7; color: #b45309; }
+    .status-icon.diterima { background: #dcfce7; color: #15803d; }
+    .status-icon.ditolak { background: #fee2e2; color: #b91c1c; }
+    .status-icon.asesmen_ulang { background: #fef3c7; color: #b45309; }
+    .status-icon.tidak_banding { background: #f3f4f6; color: #374151; }
+
+    .status-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .status-title {
+        font-size: 14.5px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+    .status-desc {
+        font-size: 12.5px;
+        color: #64748b;
+    }
+
+    /* Actions Footer */
+    .form-actions-footer {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+        padding: 20px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    /* Button styles */
+    .btn {
+        font-family: inherit;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 18px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .btn-primary { background: #0073bd; color: #fff; }
+    .btn-primary:hover { background: #005e9b; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,115,189,0.15); }
+    .btn-primary:active { transform: translateY(0); }
+    
+    .btn-warning { background: #fff; color: #92400e; border: 1px solid #fcd34d; }
+    .btn-warning:hover { background: #fffbeb; color: #78350f; border-color: #fbbf24; transform: translateY(-1px); }
+    
+    .btn-secondary { background: #fff; color: #475569; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #f8fafc; color: #1e293b; border-color: #cbd5e1; }
+
+    .error-text {
+        margin-top: 6px;
+        color: #ef4444;
+        font-size: 12.5px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
 
     @media (max-width: 768px) {
-        .meta-table td:first-child { width:130px; }
-        .check-table th:nth-child(2), .check-table th:nth-child(3), .check-table td:nth-child(2), .check-table td:nth-child(3) { width:58px; }
+        .question-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .answer-options {
+            width: 100%;
+        }
+        .option-label {
+            flex: 1;
+        }
+        .option-label span {
+            min-width: 0;
+            width: 100%;
+        }
+        .signature-area {
+            grid-template-columns: 1fr;
+        }
+        .signature-canvas-wrapper {
+            max-width: 100%;
+        }
     }
 </style>
 @endsection
 
 @section('content')
 <div class="top-actions">
-    <a href="{{ route('asesi.banding.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Daftar Banding</a>
+    <a href="{{ route('asesi.dashboard') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
 </div>
 
 @php
@@ -59,145 +438,205 @@
         'ditinjau' => 'Ditinjau',
         'diterima' => 'Diterima',
         'ditolak' => 'Ditolak',
+        'asesmen_ulang' => 'Perlu Asesmen Ulang',
         'tidak_banding' => 'Tidak Banding',
     ][$bandingStatus] ?? ucfirst($bandingStatus);
 
-    $isLocked = in_array($bandingStatus, ['diterima', 'ditolak'], true);
+    $isLocked = in_array($bandingStatus, ['diajukan', 'ditinjau', 'diterima', 'ditolak', 'asesmen_ulang'], true);
+    
+    $statusIconClass = [
+        'draft' => 'bi-pencil-square',
+        'diajukan' => 'bi-send-fill',
+        'ditinjau' => 'bi-hourglass-split',
+        'diterima' => 'bi-check-circle-fill',
+        'ditolak' => 'bi-x-circle-fill',
+        'asesmen_ulang' => 'bi-arrow-repeat',
+        'tidak_banding' => 'bi-x-octagon-fill',
+    ][$bandingStatus] ?? 'bi-info-circle-fill';
 @endphp
 
-<div class="status-box">
-    <div><strong>Status Banding:</strong> {{ $statusLabel }}</div>
-    @if($bandingStatus === 'tidak_banding')
-        <div style="margin-top:4px;color:#475569;">Anda sudah memilih Tidak Banding. Anda masih bisa mengubah keputusan menjadi Ajukan Banding selama belum ada keputusan final admin.</div>
-    @endif
-    @if($banding && $banding->checked_at)
-        <div style="margin-top:4px;color:#475569;">Diproses pada {{ $banding->checked_at->format('d-m-Y H:i') }} WIB</div>
-    @endif
-    @if($banding && $banding->catatan_admin)
-        <div style="margin-top:8px;"><strong>Catatan Admin:</strong> {{ $banding->catatan_admin }}</div>
-    @endif
+<div class="status-banner">
+    <div class="status-info">
+        <div class="status-icon {{ $bandingStatus }}">
+            <i class="bi {{ $statusIconClass }}"></i>
+        </div>
+        <div class="status-text">
+            <div class="status-title">Status Banding: {{ $statusLabel }}</div>
+            <div class="status-desc">
+                @if($bandingStatus === 'tidak_banding')
+                    Anda memilih Tidak Banding. Keputusan dapat diubah menjadi Ajukan Banding sebelum diproses final.
+                @elseif($bandingStatus === 'draft')
+                    Formulir banding bersifat opsional. Isi jika Anda ingin melakukan sanggahan atas keputusan asesmen.
+                @elseif($bandingStatus === 'diajukan')
+                    Menunggu verifikasi dan keputusan dari tim asesor atau admin.
+                @elseif($bandingStatus === 'ditinjau')
+                    Pengajuan banding sedang ditinjau oleh pihak penyelenggara LSP.
+                @elseif($bandingStatus === 'diterima')
+                    Banding diterima.
+                    @if($banding && $banding->catatan_admin)
+                        Catatan: {{ $banding->catatan_admin }}
+                    @endif
+                @elseif($bandingStatus === 'ditolak')
+                    Banding ditolak.
+                    @if($banding && $banding->catatan_admin)
+                        Catatan: {{ $banding->catatan_admin }}
+                    @endif
+                @elseif($bandingStatus === 'asesmen_ulang')
+                    Keputusan banding: Perlu Asesmen Ulang. Silakan hubungi pihak LSP untuk informasi jadwal asesmen ulang.
+                    @if($banding && $banding->catatan_admin)
+                        Catatan: {{ $banding->catatan_admin }}
+                    @endif
+                @endif
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="panel">
-    <div class="panel-head">FR.AK.04. BANDING ASESMEN</div>
+<div class="form-container">
+    <div class="form-header">
+        <div style="background: rgba(255,255,255,0.15); width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            <i class="bi bi-file-earmark-ruled-fill"></i>
+        </div>
+        <div>
+            <h3>FR.AK.04. BANDING ASESMEN</h3>
+            <p>Pengajuan banding atas ketidakpuasan hasil keputusan uji kompetensi</p>
+        </div>
+    </div>
 
-    <table class="meta-table">
-        <tr>
-            <td>Nama Asesi</td>
-            <td>{{ $asesi->nama }}</td>
-        </tr>
-        <tr>
-            <td>Skema Sertifikasi</td>
-            <td>{{ $skema->nama_skema }}</td>
-        </tr>
-        <tr>
-            <td>Tanggal Asesmen</td>
-            <td>{{ $pivot->tanggal_selesai ? \Carbon\Carbon::parse($pivot->tanggal_selesai)->format('d-m-Y') : '-' }}</td>
-        </tr>
-    </table>
+    <!-- Metadata Panel -->
+    <div class="metadata-panel">
+        <div class="metadata-grid">
+            <div class="meta-item">
+                <span class="meta-label">Nama Asesi</span>
+                <span class="meta-value">{{ $asesi->nama }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Skema Sertifikasi</span>
+                <span class="meta-value">{{ $skema->nama_skema }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">No. Skema</span>
+                <span class="meta-value">{{ $skema->nomor_skema }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Keputusan Asesmen</span>
+                <span class="meta-value">
+                    <span class="badge-status {{ $pivot->rekomendasi === 'lanjut' ? 'diterima' : 'ditolak' }}">
+                        {{ $pivot->rekomendasi === 'lanjut' ? 'Asesmen dapat dilanjutkan' : 'Asesmen tidak dapat dilanjutkan' }}
+                    </span>
+                </span>
+            </div>
+        </div>
+    </div>
 
-    <form method="POST" action="{{ route('asesi.banding.store', $skema->id) }}">
+    <form method="POST" action="{{ route('asesi.banding.store', $skema->id) }}" enctype="multipart/form-data">
         @csrf
 
-        <table class="check-table">
-            <thead>
-                <tr>
-                    <th>Jawablah dengan Ya atau Tidak pertanyaan-pertanyaan berikut ini</th>
-                    <th>YA</th>
-                    <th>TIDAK</th>
-                </tr>
-            </thead>
-            <tbody>
+        <!-- Checklist Questions -->
+        <div class="form-section">
+            <h4 class="section-title"><i class="bi bi-patch-question"></i> Pernyataan Sanggahan / Banding</h4>
+            <p style="font-size: 13px; color: #64748b; margin: -10px 0 16px 0;">Jawablah pertanyaan-pertanyaan berikut ini berdasarkan pelaksanaan asesmen Anda.</p>
+            
+            <div class="question-list">
                 @foreach($komponen as $item)
                     @php
                         $jawabanItem = collect($existingJawaban)->get($item->id);
                         $selected = old('jawaban.' . $item->id, optional($jawabanItem)->jawaban);
                     @endphp
-                    <tr>
-                        <td>{{ $item->pernyataan }}</td>
-                        <td>
-                            <input type="radio" name="jawaban[{{ $item->id }}]" value="ya" {{ $selected === 'ya' ? 'checked' : '' }} {{ $isLocked ? 'disabled' : '' }}>
-                        </td>
-                        <td>
-                            <input type="radio" name="jawaban[{{ $item->id }}]" value="tidak" {{ $selected === 'tidak' ? 'checked' : '' }} {{ $isLocked ? 'disabled' : '' }}>
-                        </td>
-                    </tr>
+                    <div class="question-card">
+                        <div class="question-text">{{ $item->pernyataan }}</div>
+                        <div class="answer-options">
+                            <label class="option-label option-ya">
+                                <input type="radio" name="jawaban[{{ $item->id }}]" value="ya" {{ $selected === 'ya' ? 'checked' : '' }} {{ $isLocked ? 'disabled' : '' }}>
+                                <span>Ya</span>
+                            </label>
+                            <label class="option-label option-tidak">
+                                <input type="radio" name="jawaban[{{ $item->id }}]" value="tidak" {{ $selected === 'tidak' ? 'checked' : '' }} {{ $isLocked ? 'disabled' : '' }}>
+                                <span>Tidak</span>
+                            </label>
+                        </div>
+                    </div>
                     @error('jawaban.' . $item->id)
-                        <tr>
-                            <td colspan="3" class="error-text">{{ $message }}</td>
-                        </tr>
+                        <div class="error-text"><i class="bi bi-exclamation-circle"></i> {{ $message }}</div>
                     @enderror
                 @endforeach
-            </tbody>
-        </table>
-
-        <div class="section">
-            <h4>Banding ini diajukan atas keputusan asesmen yang dibuat terhadap skema sertifikasi berikut:</h4>
-            <p>Skema Sertifikasi: {{ $skema->nama_skema }}</p>
-            <p>No. Skema Sertifikasi: {{ $skema->nomor_skema }}</p>
-            <p style="margin-top:6px;">Keputusan Asesmen: <strong>{{ $pivot->rekomendasi === 'lanjut' ? 'Asesmen dapat dilanjutkan' : 'Asesmen tidak dapat dilanjutkan' }}</strong></p>
+            </div>
         </div>
 
-        <div class="section">
-            <h4>Banding ini diajukan atas alasan sebagai berikut:</h4>
-            <textarea name="alasan_banding" {{ $isLocked ? 'readonly' : '' }}>{{ old('alasan_banding', $banding->alasan_banding ?? '') }}</textarea>
-            @error('alasan_banding')
-                <div class="error-text">{{ $message }}</div>
-            @enderror
+        <!-- Reasons Section -->
+        <div class="form-section">
+            <h4 class="section-title"><i class="bi bi-chat-left-text"></i> Alasan Pengajuan Banding</h4>
+            <div class="reason-box">
+                <textarea name="alasan_banding" placeholder="Tuliskan alasan sanggahan / banding secara rinci di sini..." {{ $isLocked ? 'readonly' : '' }}>{{ old('alasan_banding', $banding->alasan_banding ?? '') }}</textarea>
+                @error('alasan_banding')
+                    <div class="error-text"><i class="bi bi-exclamation-circle"></i> {{ $message }}</div>
+                @enderror
+            </div>
         </div>
 
-        <div class="section">
-            <h4 style="font-weight:700;"><i class="bi bi-pen"></i> Tanda Tangan Asesi</h4>
-            <p style="font-size:12px;color:#64748b;margin-bottom:12px;">Silakan tanda tangani di bawah ini untuk mengajukan banding.</p>
+        <!-- Signature Section -->
+        <div class="form-section">
+            <h4 class="section-title"><i class="bi bi-vector-pen"></i> Otorisasi & Tanda Tangan</h4>
             
-            <div class="signature-canvas-wrapper {{ $banding && $banding->ttd_asesi_file ? 'has-signature readonly' : '' }}" id="signatureWrapper" style="border: 2px dashed #d1d5db; border-radius: 10px; background: #fafafa; position: relative; overflow: hidden; max-width: 260px; aspect-ratio: 1 / 1; margin-bottom: 12px; margin-left: auto; margin-right: auto;">
-                @if($banding && $banding->ttd_asesi_file)
-                    <img src="{{ asset('storage/' . ltrim($banding->ttd_asesi_file, '/')) }}" class="signature-saved-img" id="savedSignatureImgAsesi" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; pointer-events:none;">
-                @else
-                    <canvas class="signature-canvas" id="signatureCanvas" style="width:100%; height:100%; cursor:crosshair; display:block;"></canvas>
-                    <div class="signature-placeholder" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); text-align:center; pointer-events:none; color:#9ca3af; display: flex; flex-direction: column; align-items: center; gap: 4px;">
-                        <i class="bi bi-pen" style="font-size:24px;"></i>
-                        <span style="font-size:12px;">Tanda tangan di sini</span>
+            <div class="signature-area">
+                <div class="signature-instructions">
+                    <h4>Persetujuan Hak</h4>
+                    <p>Anda berhak mengajukan banding apabila merasa proses asesmen tidak dilaksanakan sesuai dengan SOP atau tidak memenuhi prinsip-prinsip kejujuran dan objektivitas asesmen.</p>
+                    
+                    <div class="disclaimer-box">
+                        <i class="bi bi-info-circle"></i> Tanda tangan digital di sebelah kanan menyatakan persetujuan data yang Anda ajukan di atas adalah benar.
                     </div>
-                @endif
-            </div>
-
-            <input type="hidden" name="ttd_asesi_nama" id="ttdAsesiNamaInput" value="{{ $banding->ttd_asesi_nama ?? '' }}">
-            <input type="hidden" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ $banding && $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->format('Y-m-d') : '' }}">
-            <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput" value="{{ $banding && $banding->ttd_asesi_file ? asset('storage/' . ltrim($banding->ttd_asesi_file, '/')) : '' }}">
-
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                <div class="signature-date" style="font-size:12px; color:#475569;">
-                    <i class="bi bi-calendar3"></i>
-                    Tanggal: <strong id="signatureDate">{{ $banding && $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
                 </div>
-                @if(!$isLocked && (!$banding || empty($banding->ttd_asesi_file)))
-                    <button type="button" class="btn-clear-signature" id="clearSignature" style="padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid #e5e7eb; background: #f8fafc; color: #64748b; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-                    </button>
-                @endif
+
+                <div class="signature-canvas-container">
+                    <div class="signature-canvas-wrapper {{ $banding && $banding->ttd_asesi_file ? 'has-signature readonly' : '' }}" id="signatureWrapper">
+                        @if($banding && $banding->ttd_asesi_file)
+                            <img src="{{ asset('storage/' . ltrim($banding->ttd_asesi_file, '/')) }}" class="signature-saved-img" id="savedSignatureImgAsesi" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; pointer-events:none;">
+                        @else
+                            <canvas class="signature-canvas" id="signatureCanvas"></canvas>
+                            <div class="signature-placeholder">
+                                <i class="bi bi-pencil" style="font-size:20px;"></i>
+                                <span style="font-size:11px; font-weight: 600;">Gores Tanda Tangan</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <input type="hidden" name="ttd_asesi_nama" id="ttdAsesiNamaInput" value="{{ $banding->ttd_asesi_nama ?? '' }}">
+                    <input type="hidden" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ $banding && $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->format('Y-m-d') : '' }}">
+                    <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput" value="{{ $banding && $banding->ttd_asesi_file ? asset('storage/' . ltrim($banding->ttd_asesi_file, '/')) : '' }}">
+
+                    <div style="text-align: center; width: 100%;">
+                        <div class="signature-date" style="font-size:12px; color:#64748b; margin-bottom: 6px;">
+                            <i class="bi bi-calendar3"></i> Tanggal: <strong id="signatureDate">{{ $banding && $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
+                        </div>
+                        @if(!$isLocked && (!$banding || empty($banding->ttd_asesi_file)))
+                            <button type="button" class="btn-clear-signature" id="clearSignature">
+                                <i class="bi bi-eraser"></i> Bersihkan Canvas
+                            </button>
+                        @endif
+                    </div>
+                    @error('ttd_asesi_file')
+                        <div class="error-text"><i class="bi bi-exclamation-circle"></i> {{ $message }}</div>
+                    @enderror
+                </div>
             </div>
-            @error('ttd_asesi_file')
-                <div class="error-text" style="color:#dc2626; font-size:12px; margin-top:5px;">{{ $message }}</div>
-            @enderror
         </div>
 
-        <div class="section">
-            <p>Anda mempunyai hak untuk mengajukan banding jika menilai proses asesmen tidak sesuai SOP dan tidak memenuhi prinsip asesmen.</p>
-        </div>
-
-        <div class="actions">
-            <a href="{{ route('asesi.banding.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+        <!-- Footer Actions -->
+        <div class="form-actions-footer">
+            <a href="{{ route('asesi.dashboard') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali ke Dashboard</a>
             @if(!$isLocked)
-                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
                     <button
                         type="submit"
                         formaction="{{ route('asesi.banding.decline', $skema->id) }}"
                         class="btn btn-warning"
                         onclick="return confirm('Simpan keputusan Tidak Banding untuk skema ini?');">
-                        <i class="bi bi-x-octagon"></i> Pilih Tidak Banding
+                        <i class="bi bi-x-circle"></i> Pilih Tidak Banding
                     </button>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-send"></i> {{ $bandingStatus === 'tidak_banding' ? 'Ubah Menjadi Ajukan Banding' : 'Kirim Pengajuan Banding' }}</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send"></i> {{ $bandingStatus === 'tidak_banding' ? 'Ubah Menjadi Ajukan Banding' : 'Kirim Pengajuan Banding' }}
+                    </button>
                 </div>
             @endif
         </div>

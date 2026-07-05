@@ -377,9 +377,8 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width:46px;">No</th>
-                    <th>Skema</th>
                     <th>Asesi</th>
+                    <th>Skema</th>
                     <th>Rekomendasi</th>
                     <th>Periode</th>
                     <th style="width:60px; text-align:center;">Aksi</th>

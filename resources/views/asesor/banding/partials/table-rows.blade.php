@@ -7,11 +7,11 @@
             'ditinjau' => 'Ditinjau',
             'diterima' => 'Diterima',
             'ditolak' => 'Ditolak',
+            'asesmen_ulang' => 'Perlu Asesmen Ulang',
             'tidak_banding' => 'Tidak Banding',
         ][$statusBanding] ?? ucfirst($statusBanding);
     @endphp
     <tr>
-        <td>{{ method_exists($rows, 'firstItem') ? (($rows->firstItem() ?? 0) + $loop->index) : ($loop->iteration) }}</td>
         <td>
             <div style="font-weight:700;color:#0f172a;">{{ $row->asesi_nama }}</div>
             <div style="font-size:12px;color:#64748b;">NIK: {{ $row->asesi_nik }}</div>
@@ -32,7 +32,7 @@
         <td>
             @if($row->banding_id)
                 <a href="{{ route('asesor.banding.form', [$row->asesi_nik, $row->skema_id]) }}" class="btn-review">
-                    <i class="bi bi-eye"></i> Review
+                    <i class="bi bi-eye"></i> Detail
                 </a>
             @else
                 <span class="btn-review disabled">
@@ -43,7 +43,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="7">
+        <td colspan="6">
             <div class="empty-state">
                 <i class="bi bi-clipboard-x"></i>
                 <p>Belum ada data banding asesmen yang bisa ditampilkan.</p>

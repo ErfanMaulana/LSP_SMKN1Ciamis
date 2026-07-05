@@ -907,6 +907,126 @@
                 min-width: min(92vw, 320px);
             }
         }
+
+        /* Custom Confirmation Modal Styling */
+        .custom-confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .custom-confirm-overlay.show {
+            opacity: 1;
+        }
+
+        .custom-confirm-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 36px 32px 28px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15), 0 0 1px 0 rgba(15, 23, 42, 0.2);
+            transform: scale(0.92);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+
+        .custom-confirm-overlay.show .custom-confirm-card {
+            transform: scale(1);
+        }
+
+        .custom-confirm-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #ffedd5 0%, #fee2e2 100%);
+            color: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 28px;
+            animation: pulse-ring 2s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        .custom-confirm-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 10px;
+        }
+
+        .custom-confirm-text {
+            font-size: 15px;
+            color: #475569;
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+
+        .custom-confirm-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .custom-confirm-btn {
+            flex: 1;
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .custom-confirm-btn:active {
+            transform: scale(0.97);
+        }
+
+        .custom-confirm-btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .custom-confirm-btn-cancel:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .custom-confirm-btn-ok {
+            background: linear-gradient(135deg, #0061A5 0%, #004e85 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 97, 165, 0.25);
+        }
+
+        .custom-confirm-btn-ok:hover {
+            background: linear-gradient(135deg, #00528c 0%, #003c66 100%);
+            box-shadow: 0 6px 16px rgba(0, 97, 165, 0.35);
+        }
     </style>
     @yield('styles')
 </head>
@@ -1139,6 +1259,11 @@
                                     class="menu-item {{ request()->routeIs('admin.banding-asesmen.*') ? 'active' : '' }}">
                                     <i class="bi bi-clipboard2-check"></i>
                                     <span>Banding Asesmen</span>
+                                    @php $pendingBandingCount = \App\Models\BandingAsesmen::where('status', 'diajukan')->count(); @endphp
+                                    @if($pendingBandingCount > 0)
+                                        <span
+                                            style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $pendingBandingCount }}</span>
+                                    @endif
                                 </a>
                             @endif
 
@@ -1343,7 +1468,113 @@
         </main>
     </div>
 
+    <!-- Custom Confirmation Modal -->
+    <div id="custom-confirm-modal" class="custom-confirm-overlay" style="display: none;">
+        <div class="custom-confirm-card">
+            <div class="custom-confirm-icon">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <h4 class="custom-confirm-title">Konfirmasi Tindakan</h4>
+            <p id="custom-confirm-message" class="custom-confirm-text">Apakah Anda yakin ingin melakukan tindakan ini?</p>
+            <div class="custom-confirm-buttons">
+                <button id="custom-confirm-cancel" class="custom-confirm-btn custom-confirm-btn-cancel">Batal</button>
+                <button id="custom-confirm-ok" class="custom-confirm-btn custom-confirm-btn-ok">Oke</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // ===== Custom Confirmation Modal Interception =====
+        (function() {
+            const modal = document.getElementById('custom-confirm-modal');
+            const messageEl = document.getElementById('custom-confirm-message');
+            const cancelBtn = document.getElementById('custom-confirm-cancel');
+            const okBtn = document.getElementById('custom-confirm-ok');
+            
+            let onConfirmCallback = null;
+            
+            function showCustomConfirm(message, callback) {
+                onConfirmCallback = callback;
+                messageEl.textContent = message;
+                modal.style.display = 'flex';
+                // Trigger reflow for transition
+                modal.offsetHeight;
+                modal.classList.add('show');
+            }
+            
+            function hideCustomConfirm() {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                    onConfirmCallback = null;
+                }, 250);
+            }
+            
+            cancelBtn.addEventListener('click', function() {
+                hideCustomConfirm();
+            });
+            
+            okBtn.addEventListener('click', function() {
+                if (onConfirmCallback) {
+                    onConfirmCallback();
+                }
+                hideCustomConfirm();
+            });
+            
+            let confirmActive = false;
+            let confirmResult = false;
+            
+            const originalConfirm = window.confirm;
+            window.confirm = function(message) {
+                if (confirmActive) {
+                    return confirmResult;
+                }
+                
+                const currentEvent = window.event;
+                let target = null;
+                let eventType = null;
+                
+                if (currentEvent) {
+                    target = currentEvent.target || currentEvent.srcElement;
+                    eventType = currentEvent.type;
+                    
+                    // Stop propagation and prevent default action
+                    currentEvent.preventDefault();
+                    currentEvent.stopPropagation();
+                    if (currentEvent.stopImmediatePropagation) {
+                        currentEvent.stopImmediatePropagation();
+                    }
+                }
+                
+                showCustomConfirm(message, function() {
+                    confirmActive = true;
+                    confirmResult = true;
+                    
+                    if (target) {
+                        if (eventType === 'submit' && target.tagName === 'FORM') {
+                            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                            target.dispatchEvent(submitEvent);
+                            if (!submitEvent.defaultPrevented) {
+                                if (typeof target.reportValidity === 'function' && !target.reportValidity()) {
+                                    return;
+                                }
+                                target.submit();
+                            }
+                        } else {
+                            target.click();
+                        }
+                    }
+                    
+                    setTimeout(() => {
+                        confirmActive = false;
+                        confirmResult = false;
+                    }, 0);
+                });
+                
+                return false;
+            };
+        })();
+
         function toggleSidebar(forceState) {
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebarBackdrop');

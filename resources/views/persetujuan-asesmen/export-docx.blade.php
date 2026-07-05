@@ -189,8 +189,8 @@
                     <tr>
                         <td class="no-border" style="white-space:nowrap; vertical-align:middle; padding:2px 4px 2px 0;">Tanda tangan Asesor &nbsp;:</td>
                         <td class="no-border" style="vertical-align:middle; padding:2px 0;">
-                            @if($item->ttd_asesor_file)
-                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="TTD Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                            @if(!empty($ttdAsesorDataUri) || !empty($item->ttd_asesor_file))
+                                <img src="{{ $ttdAsesorDataUri ?? asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="TTD Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                             @else
                                 ......................................
                             @endif
@@ -214,8 +214,8 @@
                     <tr>
                         <td class="no-border" style="white-space:nowrap; vertical-align:middle; padding:2px 4px 2px 0;">Tanda tangan Asesi &nbsp;&nbsp;:</td>
                         <td class="no-border" style="vertical-align:middle; padding:2px 0;">
-                            @if($item->ttd_asesi_file)
-                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="TTD Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                            @if(!empty($ttdAsesiDataUri) || !empty($item->ttd_asesi_file))
+                                <img src="{{ $ttdAsesiDataUri ?? asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="TTD Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                             @else
                                 ......................................
                             @endif

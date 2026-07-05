@@ -236,16 +236,16 @@
         gap: 6px;
         padding: 6px 12px;
         border-radius: 8px;
-        background: #0073bd;
-        color: #ffffff;
+        background: #e0f2fe;
+        color: #0c4a6e;
         text-decoration: none;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 700;
     }
 
     .btn-review:hover {
-    background: #005f9a;
-    color: #ffffff;
+        background: #bae6fd;
+        color: #0c4a6e;
     }
 
     .btn-review.disabled {

@@ -294,7 +294,9 @@
             <td style="padding:8px 0; text-align:center;">:</td>
             <td style="padding:8px 10px;">
                 <div style="width:96px; height:54px; overflow:hidden; display:flex; align-items:center; justify-content:center; margin:0 0 4px;">
-                    @if($item->ttd_asesi_file)
+                    @if(!empty($ttdAsesiDataUri))
+                        <img src="{{ $ttdAsesiDataUri }}" alt="Signature Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                    @elseif($item->ttd_asesi_file)
                         <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Signature Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                     @endif
                 </div>
@@ -319,7 +321,9 @@
             <td style="padding:8px 0; text-align:center;">:</td>
             <td style="padding:8px 10px;">
                 <div style="width:96px; height:54px; overflow:hidden; display:flex; align-items:center; justify-content:center; margin:0 0 4px;">
-                    @if($item->ttd_asesor_file)
+                    @if(!empty($ttdAsesorDataUri))
+                        <img src="{{ $ttdAsesorDataUri }}" alt="Signature Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                    @elseif($item->ttd_asesor_file)
                         <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Signature Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                     @endif
                 </div>

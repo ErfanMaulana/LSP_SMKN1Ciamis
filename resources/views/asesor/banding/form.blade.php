@@ -61,6 +61,7 @@
         'ditinjau' => 'Ditinjau',
         'diterima' => 'Diterima',
         'ditolak' => 'Ditolak',
+        'asesmen_ulang' => 'Perlu Asesmen Ulang',
         'tidak_banding' => 'Tidak Banding',
     ][$bandingStatus] ?? ucfirst($bandingStatus);
 
@@ -147,6 +148,24 @@
                 <div class="error-text">{{ $message }}</div>
             @enderror
         </div>
+
+        @if($banding && $banding->bukti_pendukung)
+            <div class="section">
+                <h4>Bukti Pendukung yang Dilampirkan Asesi</h4>
+                @php
+                    $ext = strtolower(pathinfo($banding->bukti_pendukung, PATHINFO_EXTENSION));
+                @endphp
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-top:8px;">
+                    @if(in_array($ext, ['jpg','jpeg','png']))
+                        <img src="{{ asset('storage/' . ltrim($banding->bukti_pendukung, '/')) }}" alt="Bukti Pendukung" style="max-width:100%; max-height:300px; border-radius:8px; object-fit:contain;">
+                    @else
+                        <a href="{{ asset('storage/' . ltrim($banding->bukti_pendukung, '/')) }}" target="_blank" style="display:inline-flex; align-items:center; gap:6px; color:#0073bd; font-weight:600; font-size:13px; text-decoration:none;">
+                            <i class="bi bi-file-earmark-arrow-down"></i> Unduh Bukti Pendukung ({{ strtoupper($ext) }})
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @endif
 
         <div class="section" style="border-top:1px solid #111827; padding:10px; margin-top:10px;">
             <h4 style="margin:0 0 12px;font-size:14px;font-weight:700;">Tanda Tangan</h4>

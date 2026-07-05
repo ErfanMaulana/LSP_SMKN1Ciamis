@@ -206,7 +206,6 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width:50px;">#</th>
                             <th>Nama Asesi</th>
                             <th>NIK</th>
                             <th>Email</th>
@@ -218,7 +217,6 @@
                     <tbody>
                         @foreach($belumDinilai as $i => $row)
                             <tr>
-                                <td>{{ $i + 1 }}</td>
                                 <td><strong>{{ $row->asesi->nama ?? '-' }}</strong></td>
                                 <td style="font-family:monospace; font-size:12px;">{{ $row->asesi_nik }}</td>
                                 <td>{{ $row->asesi->email ?? '-' }}</td>
@@ -253,7 +251,6 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width:50px;">#</th>
                             <th>Nama Asesi</th>
                             <th>NIK</th>
                             <th>Email</th>
@@ -268,7 +265,6 @@
                     <tbody>
                         @foreach($sudahDinilai as $i => $row)
                             <tr>
-                                <td>{{ $i + 1 }}</td>
                                 <td><strong>{{ $row->asesi->nama ?? '-' }}</strong></td>
                                 <td style="font-family:monospace; font-size:12px;">{{ $row->asesi_nik }}</td>
                                 <td>{{ $row->asesi->email ?? '-' }}</td>

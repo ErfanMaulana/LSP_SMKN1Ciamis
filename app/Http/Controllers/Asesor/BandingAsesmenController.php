@@ -39,6 +39,7 @@ class BandingAsesmenController extends Controller
                     'ditinjau' => 0,
                     'diterima' => 0,
                     'ditolak' => 0,
+                    'asesmen_ulang' => 0,
                     'tidak_banding' => 0,
                 ],
             ]);
@@ -109,6 +110,7 @@ class BandingAsesmenController extends Controller
             'ditinjau' => (clone $statsBase)->where('b.status', 'ditinjau')->count(),
             'diterima' => (clone $statsBase)->where('b.status', 'diterima')->count(),
             'ditolak' => (clone $statsBase)->where('b.status', 'ditolak')->count(),
+            'asesmen_ulang' => (clone $statsBase)->where('b.status', 'asesmen_ulang')->count(),
             'tidak_banding' => (clone $statsBase)->where('b.status', 'tidak_banding')->count(),
         ];
 
@@ -231,7 +233,7 @@ class BandingAsesmenController extends Controller
             ->where('skema_id', $skemaId)
             ->first();
 
-        if ($existing && in_array($existing->status, ['diterima', 'ditolak'], true)) {
+        if ($existing && in_array($existing->status, ['diterima', 'ditolak', 'asesmen_ulang'], true)) {
             return back()->with('error', 'Banding sudah diperiksa admin dan tidak dapat diubah lagi.');
         }
 

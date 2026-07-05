@@ -500,6 +500,7 @@
                         'rekaman_asesmen' => 0,
                         'entry_penilaian' => 0,
                         'banding_asesmen' => 0,
+                        'umpan_balik' => 0,
                     ];
 
                     if (isset($asesor) && $asesor) {
@@ -686,7 +687,7 @@
                     @endif
                 </a>
                 <a href="{{ route('asesor.persetujuan-asesmen.index') }}"
-                    class="menu-item {{ request()->routeIs('asesor.persetujuan-asesmen.*') ? 'active' : '' }}">
+                    class="menu-item {{ request()->routeIs('asesor.persetujuan-asesmen.*', 'asesor.persetujuan.front.*') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-check"></i>
                     <span>Persetujuan Asesmen</span>
                     @if($sidebarCounts['persetujuan_asesmen'] > 0)
@@ -727,6 +728,11 @@
                     @if($sidebarCounts['banding_asesmen'] > 0)
                         <span class="menu-badge" style="background: #ef4444;">{{ $sidebarCounts['banding_asesmen'] }}</span>
                     @endif
+                </a>
+                <a href="{{ route('asesor.umpan-balik.index') }}"
+                    class="menu-item {{ request()->routeIs('asesor.umpan-balik.*') ? 'active' : '' }}">
+                    <i class="bi bi-chat-left-text-fill"></i>
+                    <span>Umpan Balik Asesi</span>
                 </a>
             </nav>
         </aside>

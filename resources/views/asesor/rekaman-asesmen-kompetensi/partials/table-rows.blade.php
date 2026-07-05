@@ -3,13 +3,12 @@
 @endphp
 @forelse($items as $item)
     <tr>
-        <td>{{ $isPaginator ? $items->firstItem() + $loop->index : $loop->iteration }}</td>
+        <td>{{ $item->asesi?->nama ?? $item->asesi_nik }}</td>
         <td>
             {{ $item->skema?->nama_skema ?? '-' }}
             <br>
             <small style="color:#64748b;">{{ $item->skema?->nomor_skema ?? '-' }}</small>
         </td>
-        <td>{{ $item->asesi?->nama ?? $item->asesi_nik }}</td>
         <td>
             @if($item->rekomendasi === 'kompeten')
                 <span class="badge badge-rekomendasi-kompeten">Kompeten</span>
@@ -54,7 +53,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="6">
+        <td colspan="5">
             <div class="empty-state">
                 <i class="bi bi-inbox"></i>
                 <p>Belum ada rekaman asesmen kompetensi.</p>

@@ -55,10 +55,10 @@ class AuthController extends Controller
             );
 
             if ($account->isAsesi()) {
-                return redirect()->intended(route('asesi.dashboard'))->with('success', 'Login berhasil!');
+                return redirect()->route('asesi.dashboard')->with('success', 'Login berhasil!');
             }
             if ($account->isAsesor()) {
-                return redirect()->intended(route('asesor.dashboard'))->with('success', 'Login berhasil!');
+                return redirect()->route('asesor.dashboard')->with('success', 'Login berhasil!');
             }
 
             // Fallback
