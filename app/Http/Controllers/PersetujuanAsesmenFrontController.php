@@ -517,6 +517,7 @@ class PersetujuanAsesmenFrontController extends Controller
         $statusFilter = $request->get('status');
 
         $items = collect();
+        $viewMode = (string) $request->get('view', 'menunggu');
 
         if ($asesor) {
             $records = PersetujuanAsesmen::query()
@@ -604,6 +605,20 @@ class PersetujuanAsesmenFrontController extends Controller
                     ->first();
                 return $pivot && $pivot->rekomendasi === 'lanjut';
             })->values();
+
+            // Count totals before filtering by view
+            $pendingCount = $items->filter(fn($i) => $i['status'] !== 'Sudah Ditandatangani')->count();
+            $completedCount = $items->filter(fn($i) => $i['status'] === 'Sudah Ditandatangani')->count();
+
+            // Filter by view mode
+            if ($viewMode === 'selesai') {
+                $items = $items->filter(fn($i) => $i['status'] === 'Sudah Ditandatangani')->values();
+            } else {
+                $items = $items->filter(fn($i) => $i['status'] !== 'Sudah Ditandatangani')->values();
+            }
+        } else {
+            $pendingCount = 0;
+            $completedCount = 0;
         }
 
         if ($request->ajax()) {
@@ -615,6 +630,9 @@ class PersetujuanAsesmenFrontController extends Controller
             'asesor' => $asesor,
             'search' => $search,
             'status' => $statusFilter,
+            'viewMode' => $viewMode,
+            'pendingCount' => $pendingCount ?? 0,
+            'completedCount' => $completedCount ?? 0,
         ]);
     }
 

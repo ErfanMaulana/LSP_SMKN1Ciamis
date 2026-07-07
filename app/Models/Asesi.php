@@ -11,6 +11,17 @@ class Asesi extends Model
 {
     use HasFactory;
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saving(function ($model) {
+            if ($model->isDirty('tanda_tangan_pendaftar') && $model->tanda_tangan_pendaftar) {
+                $model->tanda_tangan = $model->tanda_tangan_pendaftar;
+            }
+        });
+    }
+
     protected $table = 'asesi';
     protected $primaryKey = 'NIK';
     public $incrementing = false;

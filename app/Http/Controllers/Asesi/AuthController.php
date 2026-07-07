@@ -120,6 +120,170 @@ class AuthController extends Controller
             return view('asesi.dashboard-pending', compact('account', 'asesi'));
         }
 
-        return view('asesi.dashboard', compact('account', 'asesi'));
+        // Fetch all schemas registered for this candidate (via pivot asesi_skema)
+        $asesiSkemas = \DB::table('asesi_skema')
+            ->join('skemas', 'asesi_skema.skema_id', '=', 'skemas.id')
+            ->where('asesi_skema.asesi_nik', $asesi->NIK)
+            ->select('skemas.*', 'asesi_skema.status as status_mandiri', 'asesi_skema.tanggal_selesai as tgl_selesai_mandiri')
+            ->get();
+
+        $hasilUjikom = [];
+
+        foreach ($asesiSkemas as $skema) {
+            // 1. Pendaftaran: completed since they are approved asesi
+            $stepPendaftaran = [
+                'name' => 'Pendaftaran & Verifikasi',
+                'status' => 'completed',
+                'label' => 'Terverifikasi',
+                'description' => 'Berkas pendaftaran Anda telah diverifikasi oleh admin.'
+            ];
+
+            // 2. Asesmen Mandiri
+            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
+            $stepMandiri = [
+                'name' => 'Asesmen Mandiri (FR.APL.02)',
+                'status' => $isMandiriSelesai ? 'completed' : 'pending',
+                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
+                'description' => $isMandiriSelesai 
+                    ? 'Anda telah menyelesaikan pengisian form asesmen mandiri.'
+                    : 'Silakan isi form asesmen mandiri terlebih dahulu.'
+            ];
+
+            // 3. Persetujuan Asesmen
+            $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
+            $persetujuan = \DB::table('persetujuan_asesmen')
+                ->where('nomor_skema', $skema->nomor_skema)
+                ->where(function($q) use ($asesi, $useNik) {
+                    $q->where('nama_asesi', $asesi->nama);
+                    if ($useNik) {
+                        $q->orWhere('asesi_nik', $asesi->NIK);
+                    }
+                })
+                ->first();
+
+            $isPersetujuanSelesai = $persetujuan && !empty($persetujuan->ttd_asesi_nama) && !empty($persetujuan->ttd_asesor_nama);
+            $isPersetujuanReady = (bool)(
+                $persetujuan 
+                && !empty($persetujuan->ttd_asesor_nama) 
+                && !empty($persetujuan->ttd_asesor_tanggal)
+                && (
+                    $persetujuan->bukti_verifikasi_portofolio ||
+                    $persetujuan->bukti_reviu_produk ||
+                    $persetujuan->bukti_observasi_langsung ||
+                    $persetujuan->bukti_kegiatan_terstruktur ||
+                    $persetujuan->bukti_pertanyaan_lisan ||
+                    $persetujuan->bukti_pertanyaan_tertulis ||
+                    $persetujuan->bukti_pertanyaan_wawancara ||
+                    $persetujuan->bukti_lainnya
+                )
+            );
+            $stepPersetujuan = [
+                'name' => 'Persetujuan Asesmen (FR.APL.03)',
+                'status' => $isPersetujuanSelesai ? 'completed' : 'pending',
+                'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
+                'description' => $isPersetujuanSelesai 
+                    ? 'Persetujuan asesmen telah disepakati dan ditandatangani oleh Anda dan Asesor.'
+                    : 'Harap periksa dan tandatangani dokumen persetujuan asesmen.',
+                'is_ready' => $isPersetujuanReady
+            ];
+
+            // 4. Jadwal Ujikom
+            $jadwal = \DB::table('jadwal_peserta')
+                ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
+                ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
+                ->where('jadwal_ujikom.skema_id', $skema->id)
+                ->select('jadwal_ujikom.*')
+                ->first();
+
+            $isJadwalSelesai = (bool)$jadwal;
+            
+            $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
+            if ($isJadwalSelesai) {
+                $tukName = \DB::table('tuk')->where('id', $jadwal->tuk_id)->value('nama_tuk') ?? 'TUK';
+                $tglMulai = $jadwal->tanggal_mulai ? \Carbon\Carbon::parse($jadwal->tanggal_mulai)->locale('id')->isoFormat('D MMMM YYYY') : '-';
+                $jadwalDesc = 'Jadwal Anda: ' . $tglMulai . ' di ' . $tukName;
+            }
+
+            $stepJadwal = [
+                'name' => 'Jadwal Uji Kompetensi',
+                'status' => $isJadwalSelesai ? 'completed' : 'pending',
+                'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
+                'description' => $jadwalDesc
+            ];
+
+            // 5. Penilaian / Ceklis Observasi
+            $ceklis = \DB::table('ceklis_observasi_aktivitas_praktiks')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->first();
+
+            $isPenilaianSelesai = $ceklis && !empty($ceklis->ttd_asesi_file) && !empty($ceklis->ttd_asesor_file);
+            
+            $penilaianLabel = 'Belum Dinilai';
+            $penilaianDesc = 'Menunggu penilaian observasi praktik dari Asesor.';
+            if ($ceklis) {
+                if ($isPenilaianSelesai) {
+                    $penilaianLabel = 'Selesai & Ditandatangani';
+                    $penilaianDesc = 'Proses observasi praktik telah dinilai dan disetujui kedua belah pihak.';
+                } elseif (!empty($ceklis->ttd_asesor_file)) {
+                    $penilaianLabel = 'Menunggu Tanda Tangan Anda';
+                    $penilaianDesc = 'Asesor telah menilai. Harap masuk ke menu Ceklis Observasi untuk menandatanganinya.';
+                }
+            }
+
+            $stepPenilaian = [
+                'name' => 'Penilaian & Ceklis Observasi (FR.IA.01)',
+                'status' => $isPenilaianSelesai ? 'completed' : 'pending',
+                'label' => $penilaianLabel,
+                'description' => $penilaianDesc
+            ];
+
+            // 6. Rekaman Asesmen (FR.AK.02)
+            $rekaman = \DB::table('rekaman_asesmen_kompetensi')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->first();
+
+            $isRekamanSelesai = $rekaman && !empty($rekaman->ttd_asesi_file) && !empty($rekaman->ttd_asesor_file);
+
+            $rekamanLabel = 'Belum Diisi';
+            $rekamanDesc = 'Menunggu pengisian rekaman asesmen dari Asesor.';
+            if ($rekaman) {
+                if ($isRekamanSelesai) {
+                    $rekamanLabel = 'Selesai & Ditandatangani';
+                    $rekamanDesc = 'Rekaman asesmen kompetensi telah ditandatangani oleh kedua belah pihak.';
+                } elseif (!empty($rekaman->ttd_asesor_file)) {
+                    $rekamanLabel = 'Menunggu Tanda Tangan Anda';
+                    $rekamanDesc = 'Asesor telah mengisi rekaman asesmen. Harap periksa dan tandatangan.';
+                }
+            }
+
+            $stepRekaman = [
+                'name' => 'Rekaman Asesmen (FR.AK.02)',
+                'status' => $isRekamanSelesai ? 'completed' : 'pending',
+                'label' => $rekamanLabel,
+                'description' => $rekamanDesc
+            ];
+
+            // Check if all are completed
+            $allCompleted = $isMandiriSelesai && $isPersetujuanSelesai && $isJadwalSelesai && $isPenilaianSelesai && $isRekamanSelesai;
+
+            $hasilUjikom[] = (object)[
+                'skema_id' => $skema->id,
+                'nama_skema' => $skema->nama_skema,
+                'nomor_skema' => $skema->nomor_skema,
+                'steps' => [$stepPendaftaran, $stepMandiri, $stepJadwal, $stepPersetujuan, $stepPenilaian, $stepRekaman],
+                'all_completed' => $allCompleted,
+                'ceklis' => $ceklis,
+                'rekaman' => $rekaman,
+                'rekomendasi' => $ceklis ? $ceklis->rekomendasi : null,
+                'tanggal_ceklis' => $ceklis && $ceklis->ttd_asesi_tanggal ? \Carbon\Carbon::parse($ceklis->ttd_asesi_tanggal)->locale('id')->isoFormat('D MMMM YYYY') : null,
+                'asesor_nama' => $ceklis && $ceklis->ttd_asesor_nama ? $ceklis->ttd_asesor_nama : null,
+            ];
+        }
+
+        $hasilUjikom = collect($hasilUjikom);
+
+        return view('asesi.dashboard', compact('account', 'asesi', 'hasilUjikom'));
     }
 }

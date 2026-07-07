@@ -600,12 +600,12 @@
         <div class="rekom-head">Rekomendasi</div>
         <div class="rekom-content">
             <div style="display:flex;flex-direction:column;gap:6px;">
-                <label><input type="radio" name="rekomendasi" value="kompeten" {{ old('rekomendasi', $value('rekomendasi', 'belum_kompeten')) === 'kompeten' ? 'checked' : '' }}> Asesi direkomendasikan <strong>KOMPETEN</strong></label>
-                <label><input type="radio" name="rekomendasi" value="belum_kompeten" {{ old('rekomendasi', $value('rekomendasi', 'belum_kompeten')) === 'belum_kompeten' ? 'checked' : '' }}> Asesi direkomendasikan <strong>BELUM KOMPETEN</strong></label>
+                <label><input type="radio" name="rekomendasi" value="kompeten" {{ old('rekomendasi', $value('rekomendasi', 'kompeten')) === 'kompeten' ? 'checked' : '' }}> Asesi direkomendasikan <strong>KOMPETEN</strong></label>
+                <label><input type="radio" name="rekomendasi" value="belum_kompeten" {{ old('rekomendasi', $value('rekomendasi', 'kompeten')) === 'belum_kompeten' ? 'checked' : '' }}> Asesi direkomendasikan <strong>BELUM KOMPETEN</strong></label>
             </div>
             @error('rekomendasi')<div class="error-text">{{ $message }}</div>@enderror
 
-            <div id="belumKompetenFields" class="grid-2 {{ old('rekomendasi', $value('rekomendasi', 'belum_kompeten')) === 'belum_kompeten' ? '' : 'hidden' }}" style="margin-top:10px;">
+            <div id="belumKompetenFields" class="grid-2 {{ old('rekomendasi', $value('rekomendasi', 'kompeten')) === 'belum_kompeten' ? '' : 'hidden' }}" style="margin-top:10px;">
                 <div class="field">
                     <label>Kelompok Pekerjaan</label>
                     <div class="search-multiselect" data-field="kelompok_pekerjaan" data-placeholder="Cari dan pilih kelompok pekerjaan">

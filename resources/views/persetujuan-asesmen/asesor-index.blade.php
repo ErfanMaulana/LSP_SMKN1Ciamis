@@ -30,7 +30,7 @@
     }
 
     .filter-row-top {
-        grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 280px) auto;
     }
 
     .filter-field {
@@ -173,6 +173,58 @@
         text-align: center;
         color: #64748b;
     }
+
+    .view-switcher {
+        display: inline-flex;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        background: #f1f5f9;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .view-switcher-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .view-switcher-btn:hover {
+        color: #334155;
+        background: #e2e8f0;
+    }
+    .view-switcher-btn.active {
+        background: #0073bd;
+        color: #fff;
+        box-shadow: 0 2px 4px rgba(0,115,189,.25);
+    }
+    .view-switcher-btn .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .view-switcher-btn.active .count-badge {
+        background: rgba(255,255,255,.25);
+        color: #fff;
+    }
+    .view-switcher-btn:not(.active) .count-badge {
+        background: #e2e8f0;
+        color: #64748b;
+    }
 </style>
 @endsection
 
@@ -206,6 +258,19 @@
                 <option value="sudah" {{ ($status ?? '') === 'sudah' ? 'selected' : '' }}>Sudah Ditandatangani</option>
             </select>
         </div>
+        <div class="filter-field">
+            <label class="filter-label" style="visibility: hidden;">Switcher</label>
+            <div class="view-switcher" id="persetujuanViewSwitcher">
+                <button type="button" class="view-switcher-btn {{ ($viewMode ?? 'menunggu') === 'menunggu' ? 'active' : '' }}" data-view="menunggu">
+                    <i class="bi bi-hourglass-split"></i> Menunggu
+                    <span class="count-badge">{{ $pendingCount ?? 0 }}</span>
+                </button>
+                <button type="button" class="view-switcher-btn {{ ($viewMode ?? 'menunggu') === 'selesai' ? 'active' : '' }}" data-view="selesai">
+                    <i class="bi bi-check-circle-fill"></i> Selesai
+                    <span class="count-badge">{{ $completedCount ?? 0 }}</span>
+                </button>
+            </div>
+        </div>
     </div>
 </form>
 
@@ -231,6 +296,33 @@
 <script>
     let persetujuanAsesmenAjaxController = null;
     let persetujuanAsesmenSearchTimer = null;
+    let persetujuanCurrentView = '{{ $viewMode ?? "menunggu" }}';
+
+    // Caching HTML to prevent loading delay when switching views
+    let persetujuanCache = {
+        'menunggu': null,
+        'selesai': null
+    };
+
+    function prefetchPersetujuanView() {
+        const otherView = persetujuanCurrentView === 'menunggu' ? 'selesai' : 'menunggu';
+        const url = serializeFilterForm(otherView);
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) return response.text();
+            throw new Error('Prefetch failed');
+        })
+        .then(html => {
+            persetujuanCache[otherView] = html;
+        })
+        .catch(err => console.warn('Prefetch warning:', err));
+    }
 
     function ajaxLoadPersetujuanAsesmen(url) {
         if (persetujuanAsesmenAjaxController) {
@@ -263,7 +355,9 @@
                 tableContainer.style.opacity = '1';
             }
 
+            persetujuanCache[persetujuanCurrentView] = html;
             window.history.replaceState({}, '', url);
+            prefetchPersetujuanView();
         })
         .catch(function(error) {
             if (error.name !== 'AbortError') {
@@ -275,10 +369,12 @@
         });
     }
 
-    function serializeFilterForm() {
+    function serializeFilterForm(viewMode) {
         const searchInput = document.getElementById('persetujuanAsesmenSearchInput');
         const statusFilter = document.getElementById('persetujuanAsesmenStatusFilter');
         const url = new URL('{{ route('asesor.persetujuan-asesmen.index') }}', window.location.origin);
+
+        url.searchParams.set('view', viewMode || persetujuanCurrentView);
 
         if (searchInput && searchInput.value.trim() !== '') {
             url.searchParams.set('search', searchInput.value.trim());
@@ -294,19 +390,56 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('persetujuanAsesmenSearchInput');
         const statusFilter = document.getElementById('persetujuanAsesmenStatusFilter');
+        const tableContainer = document.getElementById('persetujuanAsesmenTableContainer');
+
+        // Store initial view into cache
+        if (tableContainer) {
+            persetujuanCache[persetujuanCurrentView] = tableContainer.innerHTML;
+        }
+
+        // Prefetch other view in background immediately
+        prefetchPersetujuanView();
+
+        function handleFilterChange() {
+            // Clear cache since query has changed
+            persetujuanCache['menunggu'] = null;
+            persetujuanCache['selesai'] = null;
+            ajaxLoadPersetujuanAsesmen(serializeFilterForm(persetujuanCurrentView));
+        }
 
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(persetujuanAsesmenSearchTimer);
-                persetujuanAsesmenSearchTimer = setTimeout(function() {
-                    ajaxLoadPersetujuanAsesmen(serializeFilterForm());
-                }, 400);
+                persetujuanAsesmenSearchTimer = setTimeout(handleFilterChange, 400);
             });
         }
 
         if (statusFilter) {
-            statusFilter.addEventListener('change', function() {
-                ajaxLoadPersetujuanAsesmen(serializeFilterForm());
+            statusFilter.addEventListener('change', handleFilterChange);
+        }
+
+        // Switcher buttons
+        const switcher = document.getElementById('persetujuanViewSwitcher');
+        if (switcher) {
+            switcher.querySelectorAll('.view-switcher-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const targetView = this.dataset.view;
+                    if (targetView === persetujuanCurrentView) return;
+
+                    persetujuanCurrentView = targetView;
+                    switcher.querySelectorAll('.view-switcher-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    if (persetujuanCache[targetView]) {
+                        if (tableContainer) {
+                            tableContainer.innerHTML = persetujuanCache[targetView];
+                        }
+                        const url = serializeFilterForm(targetView);
+                        window.history.replaceState({}, '', url);
+                    } else {
+                        ajaxLoadPersetujuanAsesmen(serializeFilterForm(targetView));
+                    }
+                });
             });
         }
     });

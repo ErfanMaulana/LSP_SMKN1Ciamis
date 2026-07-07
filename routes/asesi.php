@@ -42,7 +42,7 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
             Route::post('/asesmen-mandiri/{skemaId}', [AsesmenMandiriController::class, 'store'])->name('asesmen-mandiri.store');
             Route::get('/asesmen-mandiri/{skemaId}/result', [AsesmenMandiriController::class, 'result'])->name('asesmen-mandiri.result');
             Route::get('/asesmen-mandiri/{skemaId}/pdf', [AsesmenMandiriController::class, 'pdf'])->name('asesmen-mandiri.pdf');
-            Route::get('/hasil-ujikom', [AsesmenMandiriController::class, 'hasilUjikom'])->name('hasil-ujikom.index');
+
 
             Route::middleware('ujikom.completed')->group(function () {
                 // Umpan Balik Kinerja Asesor

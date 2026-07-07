@@ -154,6 +154,58 @@
         color: #94a3b8;
     }
 
+    .view-switcher {
+        display: inline-flex;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        background: #f1f5f9;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .view-switcher-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .view-switcher-btn:hover {
+        color: #334155;
+        background: #e2e8f0;
+    }
+    .view-switcher-btn.active {
+        background: #0073bd;
+        color: #fff;
+        box-shadow: 0 2px 4px rgba(0,115,189,.25);
+    }
+    .view-switcher-btn .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .view-switcher-btn.active .count-badge {
+        background: rgba(255,255,255,.25);
+        color: #fff;
+    }
+    .view-switcher-btn:not(.active) .count-badge {
+        background: #e2e8f0;
+        color: #64748b;
+    }
+
     @media (max-width: 768px) {
         .panel-head {
             padding: 14px;
@@ -161,17 +213,6 @@
 
         .panel-head h3 {
             font-size: 15px;
-        }
-
-        .tabs-wrapper {
-            -webkit-overflow-scrolling: touch;
-            white-space: nowrap;
-        }
-
-        .tab {
-            flex: 0 0 auto;
-            padding: 11px 14px;
-            font-size: 12px;
         }
 
         .table-wrap {
@@ -188,15 +229,16 @@
             <h3>Data Asesi Ujikom</h3>
             <p>Total asesi ujikom: {{ $asesiData->count() }} orang</p>
         </div>
-    </div>
-
-    <div class="tabs-wrapper">
-        <button class="tab active" onclick="switchTab(event, 'belum')">
-            <i class="bi bi-clock-history"></i> Belum Dinilai ({{ $belumDinilai->count() }})
-        </button>
-        <button class="tab" onclick="switchTab(event, 'sudah')">
-            <i class="bi bi-check-circle"></i> Sudah Dinilai ({{ $sudahDinilai->count() }})
-        </button>
+        <div class="view-switcher" id="penilaianViewSwitcher">
+            <button type="button" class="view-switcher-btn active" data-view="belum">
+                <i class="bi bi-hourglass-split"></i> Menunggu
+                <span class="count-badge">{{ $belumDinilai->count() }}</span>
+            </button>
+            <button type="button" class="view-switcher-btn" data-view="sudah">
+                <i class="bi bi-check-circle-fill"></i> Selesai
+                <span class="count-badge">{{ $sudahDinilai->count() }}</span>
+            </button>
+        </div>
     </div>
 
     {{-- Tab: Belum Dinilai --}}
@@ -309,16 +351,26 @@
 </div>
 
 <script>
-    function switchTab(event, tabName) {
-        event.preventDefault();
-        
-        // Hide all tabs
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-        
-        // Show selected tab
-        document.getElementById(tabName).classList.add('active');
-        event.target.closest('.tab').classList.add('active');
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const switcher = document.getElementById('penilaianViewSwitcher');
+        if (switcher) {
+            switcher.querySelectorAll('.view-switcher-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const targetView = this.dataset.view;
+                    
+                    // Toggle active button class
+                    switcher.querySelectorAll('.view-switcher-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Toggle active tab content
+                    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                    const targetEl = document.getElementById(targetView);
+                    if (targetEl) {
+                        targetEl.classList.add('active');
+                    }
+                });
+            });
+        }
+    });
 </script>
 @endsection

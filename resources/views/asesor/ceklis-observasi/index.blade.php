@@ -60,7 +60,7 @@
     }
 
     .filter-row-top {
-        grid-template-columns: minmax(0, 1fr) minmax(240px, 280px);
+        grid-template-columns: minmax(0, 1fr) minmax(240px, 280px) auto;
     }
 
     .filter-field {
@@ -209,6 +209,58 @@
             grid-template-columns: 1fr;
         }
     }
+
+    .view-switcher {
+        display: inline-flex;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        background: #f1f5f9;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .view-switcher-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .view-switcher-btn:hover {
+        color: #334155;
+        background: #e2e8f0;
+    }
+    .view-switcher-btn.active {
+        background: #0073bd;
+        color: #fff;
+        box-shadow: 0 2px 4px rgba(0,115,189,.25);
+    }
+    .view-switcher-btn .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .view-switcher-btn.active .count-badge {
+        background: rgba(255,255,255,.25);
+        color: #fff;
+    }
+    .view-switcher-btn:not(.active) .count-badge {
+        background: #e2e8f0;
+        color: #64748b;
+    }
 </style>
 @endsection
 
@@ -245,6 +297,19 @@
                 <option value="belum_kompeten" {{ ($rekomendasi ?? '') === 'belum_kompeten' ? 'selected' : '' }}>Belum Kompeten</option>
             </select>
         </div>
+        <div class="filter-field">
+            <label class="filter-label" style="visibility: hidden;">Switcher</label>
+            <div class="view-switcher" id="ceklisObsViewSwitcher">
+                <button type="button" class="view-switcher-btn {{ ($viewMode ?? 'menunggu') === 'menunggu' ? 'active' : '' }}" data-view="menunggu">
+                    <i class="bi bi-hourglass-split"></i> Menunggu
+                    <span class="count-badge">{{ $pendingCount ?? 0 }}</span>
+                </button>
+                <button type="button" class="view-switcher-btn {{ ($viewMode ?? 'menunggu') === 'selesai' ? 'active' : '' }}" data-view="selesai">
+                    <i class="bi bi-check-circle-fill"></i> Selesai
+                    <span class="count-badge">{{ $completedCount ?? 0 }}</span>
+                </button>
+            </div>
+        </div>
     </div>
 </form>
 
@@ -256,6 +321,7 @@
                     <th>Asesi</th>
                     <th>Skema</th>
                     <th>Rekomendasi</th>
+                    <th>Status</th>
                     <th>Tanggal</th>
                     <th style="width:100px;">Aksi</th>
                 </tr>
@@ -275,6 +341,33 @@
 <script>
     let ceklisObsAjaxController = null;
     let ceklisObsSearchTimer = null;
+    let ceklisObsCurrentView = '{{ $viewMode ?? "menunggu" }}';
+
+    // Caching HTML to prevent loading delay when switching views
+    let ceklisObsCache = {
+        'menunggu': null,
+        'selesai': null
+    };
+
+    function prefetchCeklisObsView() {
+        const otherView = ceklisObsCurrentView === 'menunggu' ? 'selesai' : 'menunggu';
+        const url = serializeCeklisObsForm(otherView);
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) return response.text();
+            throw new Error('Prefetch failed');
+        })
+        .then(html => {
+            ceklisObsCache[otherView] = html;
+        })
+        .catch(err => console.warn('Prefetch warning:', err));
+    }
 
     function ajaxLoadCeklisObs(url) {
         if (ceklisObsAjaxController) {
@@ -307,7 +400,9 @@
                 tableContainer.style.opacity = '1';
             }
 
+            ceklisObsCache[ceklisObsCurrentView] = html;
             window.history.replaceState({}, '', url);
+            prefetchCeklisObsView();
         })
         .catch(function(error) {
             if (error.name !== 'AbortError') {
@@ -319,10 +414,12 @@
         });
     }
 
-    function serializeCeklisObsForm() {
+    function serializeCeklisObsForm(viewMode) {
         const searchInput = document.getElementById('ceklisObsSearchInput');
         const rekomendasiFilter = document.getElementById('ceklisObsRekomendasiFilter');
         const url = new URL('{{ route('asesor.ceklis-observasi.index') }}', window.location.origin);
+
+        url.searchParams.set('view', viewMode || ceklisObsCurrentView);
 
         if (searchInput && searchInput.value.trim() !== '') {
             url.searchParams.set('search', searchInput.value.trim());
@@ -338,19 +435,56 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('ceklisObsSearchInput');
         const rekomendasiFilter = document.getElementById('ceklisObsRekomendasiFilter');
+        const tableContainer = document.getElementById('ceklisObsTableContainer');
+
+        // Store initial view into cache
+        if (tableContainer) {
+            ceklisObsCache[ceklisObsCurrentView] = tableContainer.innerHTML;
+        }
+
+        // Prefetch other view in background immediately
+        prefetchCeklisObsView();
+
+        function handleFilterChange() {
+            // Clear cache since query has changed
+            ceklisObsCache['menunggu'] = null;
+            ceklisObsCache['selesai'] = null;
+            ajaxLoadCeklisObs(serializeCeklisObsForm(ceklisObsCurrentView));
+        }
 
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(ceklisObsSearchTimer);
-                ceklisObsSearchTimer = setTimeout(function() {
-                    ajaxLoadCeklisObs(serializeCeklisObsForm());
-                }, 400);
+                ceklisObsSearchTimer = setTimeout(handleFilterChange, 400);
             });
         }
 
         if (rekomendasiFilter) {
-            rekomendasiFilter.addEventListener('change', function() {
-                ajaxLoadCeklisObs(serializeCeklisObsForm());
+            rekomendasiFilter.addEventListener('change', handleFilterChange);
+        }
+
+        // Switcher buttons
+        const switcher = document.getElementById('ceklisObsViewSwitcher');
+        if (switcher) {
+            switcher.querySelectorAll('.view-switcher-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const targetView = this.dataset.view;
+                    if (targetView === ceklisObsCurrentView) return;
+
+                    ceklisObsCurrentView = targetView;
+                    switcher.querySelectorAll('.view-switcher-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    if (ceklisObsCache[targetView]) {
+                        if (tableContainer) {
+                            tableContainer.innerHTML = ceklisObsCache[targetView];
+                        }
+                        const url = serializeCeklisObsForm(targetView);
+                        window.history.replaceState({}, '', url);
+                    } else {
+                        ajaxLoadCeklisObs(serializeCeklisObsForm(targetView));
+                    }
+                });
             });
         }
     });

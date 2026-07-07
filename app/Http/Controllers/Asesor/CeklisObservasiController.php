@@ -47,38 +47,151 @@ class CeklisObservasiController extends Controller
 
         $search = trim((string) $request->get('search'));
         $rekomendasi = (string) $request->get('rekomendasi');
+        $viewMode = (string) $request->get('view', 'menunggu');
 
-        $items = CeklisObservasiAktivitasPraktik::query()
+        // Fetch completed ceklis records for this asesor
+        $completedRows = CeklisObservasiAktivitasPraktik::query()
             ->with([
                 'skema:id,nama_skema,nomor_skema',
                 'asesi:NIK,nama',
             ])
             ->where('asesor_id', $asesor->ID_asesor)
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('judul_form', 'like', "%{$search}%")
-                        ->orWhereHas('skema', function ($sq) use ($search) {
-                            $sq->where('nama_skema', 'like', "%{$search}%")
-                                ->orWhere('nomor_skema', 'like', "%{$search}%");
-                        })
-                        ->orWhereHas('asesi', function ($aq) use ($search) {
-                            $aq->where('nama', 'like', "%{$search}%")
-                                ->orWhere('NIK', 'like', "%{$search}%");
-                        });
-                });
-            })
-            ->when($rekomendasi !== '', function ($query) use ($rekomendasi) {
-                $query->where('rekomendasi', $rekomendasi);
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
+
+        foreach ($completedRows as $c) {
+            $c->is_pending = false;
+        }
+
+        // Fetch pending ceklis records
+        $skemaIds = $asesor->skemas->pluck('id')->toArray();
+        $nomorSkemas = $asesor->skemas->pluck('nomor_skema')->toArray();
+
+        // 1. Get fully signed persetujuan_asesmen records
+        $fullySignedPersetujuans = DB::table('persetujuan_asesmen')
+            ->whereIn('nomor_skema', $nomorSkemas)
+            ->whereNotNull('ttd_asesor_nama')->where('ttd_asesor_nama', '!=', '')
+            ->whereNotNull('ttd_asesi_nama')->where('ttd_asesi_nama', '!=', '')
+            ->get(['nomor_skema', 'asesi_nik', 'nama_asesi']);
+
+        $persetujuanKeys = [];
+        foreach ($fullySignedPersetujuans as $p) {
+            if (!empty($p->asesi_nik)) {
+                $persetujuanKeys["{$p->nomor_skema}|{$p->asesi_nik}"] = true;
+            }
+            if (!empty($p->nama_asesi)) {
+                $persetujuanKeys["{$p->nomor_skema}|" . strtolower($p->nama_asesi)] = true;
+            }
+        }
+
+        // 2. Get registered asesis for these skemas
+        $asesiSkemasForCeklis = DB::table('asesi_skema')
+            ->whereIn('skema_id', $skemaIds)
+            ->get(['asesi_nik', 'skema_id']);
+
+        // 3. Existing ceklis map
+        $ceklisKeys = [];
+        foreach ($completedRows as $cr) {
+            $ceklisKeys["{$cr->asesi_nik}|{$cr->skema_id}"] = true;
+        }
+
+        // 4. Get asesi details
+        $asesisLookup = Asesi::whereIn('NIK', $asesiSkemasForCeklis->pluck('asesi_nik')->toArray())
+            ->get(['NIK', 'nama'])
+            ->keyBy('NIK');
+
+        $pendingRows = [];
+        foreach ($asesiSkemasForCeklis as $as) {
+            $sk = $asesor->skemas->firstWhere('id', $as->skema_id);
+            if (!$sk) continue;
+
+            $key = "{$as->asesi_nik}|{$as->skema_id}";
+            if (isset($ceklisKeys[$key])) continue;
+
+            $asesiObj = $asesisLookup->get($as->asesi_nik);
+            $hasPersetujuan = isset($persetujuanKeys["{$sk->nomor_skema}|{$as->asesi_nik}"]) ||
+                ($asesiObj && isset($persetujuanKeys["{$sk->nomor_skema}|" . strtolower($asesiObj->nama)]));
+
+            if ($hasPersetujuan && $asesiObj) {
+                $obj = new CeklisObservasiAktivitasPraktik();
+                $obj->id = null;
+                $obj->is_pending = true;
+                $obj->asesi_nik = $as->asesi_nik;
+                $obj->skema_id = $as->skema_id;
+                $obj->asesor_id = $asesor->ID_asesor;
+                $obj->rekomendasi = null;
+                $obj->tanggal = null;
+                $obj->setRelation('asesi', $asesiObj);
+                $obj->setRelation('skema', $sk);
+
+                $pendingRows[] = $obj;
+            }
+        }
+
+        // Combine all rows for counting
+        $allRows = collect(array_merge($pendingRows, $completedRows->all()));
+        $pendingCount = collect($pendingRows)->count();
+        $completedCount = $completedRows->count();
+
+        // View mode filter (switcher)
+        if ($viewMode === 'selesai') {
+            $allRows = $allRows->filter(fn($row) => !$row->is_pending);
+        } else {
+            $allRows = $allRows->filter(fn($row) => $row->is_pending);
+        }
+
+        // Search Filter
+        if ($search !== '') {
+            $allRows = $allRows->filter(function ($row) use ($search) {
+                $matchAsesi = $row->asesi && (str_contains(strtolower($row->asesi->nama), strtolower($search)) || str_contains($row->asesi->NIK, $search));
+                $matchSkema = $row->skema && (str_contains(strtolower($row->skema->nama_skema), strtolower($search)) || str_contains(strtolower($row->skema->nomor_skema), strtolower($search)));
+                return $matchAsesi || $matchSkema;
+            });
+        }
+
+        // Rekomendasi filter (only relevant for 'selesai' view)
+        if ($rekomendasi !== '' && $viewMode === 'selesai') {
+            $allRows = $allRows->filter(function ($row) use ($rekomendasi) {
+                if ($rekomendasi === 'kompeten') {
+                    return $row->rekomendasi === 'kompeten';
+                }
+                if ($rekomendasi === 'belum_kompeten') {
+                    return $row->rekomendasi === 'belum_kompeten';
+                }
+                return true;
+            });
+        }
+
+        // Sort
+        $allRows = $allRows->sort(function ($a, $b) {
+            if ($a->is_pending && $b->is_pending) {
+                return strcmp($a->asesi->nama ?? '', $b->asesi->nama ?? '');
+            }
+            if ($a->is_pending) return -1;
+            if ($b->is_pending) return 1;
+            return ($b->id ?? 0) <=> ($a->id ?? 0);
+        });
+
+        // Paginate collection
+        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 10;
+        $currentItems = $allRows->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $items = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentItems,
+            $allRows->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(),
+                'query' => $request->query(),
+            ]
+        );
 
         if ($request->ajax()) {
             return view('asesor.ceklis-observasi.partials.table-rows', compact('items'))->render();
         }
 
-        return view('asesor.ceklis-observasi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi'));
+        return view('asesor.ceklis-observasi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi', 'viewMode', 'pendingCount', 'completedCount'));
     }
 
     public function create(Request $request)

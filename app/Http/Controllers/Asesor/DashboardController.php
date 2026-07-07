@@ -946,6 +946,20 @@ class DashboardController extends Controller
             'tidak_direkomendasikan' => $allData->filter(fn($row) => $row->status === 'selesai' && ($row->rekomendasi ?? '') === 'tidak_lanjut')->count(),
         ];
 
+        $viewMode = $request->input('view') ?? '';
+        if ($viewMode === '') {
+            if ($status === 'menunggu_review') {
+                $viewMode = 'menunggu';
+            } elseif ($status === 'sudah_direkomendasikan' || $status === 'tidak_direkomendasikan') {
+                $viewMode = 'selesai';
+            } else {
+                $viewMode = 'menunggu';
+            }
+        }
+
+        $pendingCount = $summary['pending_review'];
+        $completedCount = $summary['sudah_direkomendasikan'] + $summary['tidak_direkomendasikan'];
+
         // Filter based on status (tabs or dropdown)
         $data = $allData;
         
@@ -965,6 +979,12 @@ class DashboardController extends Controller
             } elseif ($status === 'belum_mulai') {
                 $data = $data->filter(fn($row) => $row->status === 'belum_mulai');
             }
+        } else {
+            if ($viewMode === 'selesai') {
+                $data = $data->filter(fn($row) => $row->status === 'selesai' && !empty($row->rekomendasi));
+            } else {
+                $data = $data->filter(fn($row) => $row->status === 'selesai' && empty($row->rekomendasi));
+            }
         }
 
         if ($rekomendasi !== '') {
@@ -979,7 +999,7 @@ class DashboardController extends Controller
             return view('asesor.asesmen-mandiri.partials.table-rows', compact('data'))->render();
         }
 
-        return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi'));
+        return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi', 'viewMode', 'pendingCount', 'completedCount'));
     }
 
     /**

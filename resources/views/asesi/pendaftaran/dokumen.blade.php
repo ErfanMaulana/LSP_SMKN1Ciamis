@@ -613,7 +613,19 @@
             <div class="signature-modal-body">
                 <div id="signatureErrorDokumen" class="signature-error" style="display:none;">Tanda tangan harus diisi sebelum submit</div>
 
-                @php $regSavedTTD = $asesi->tanda_tangan ?? null; @endphp
+                @php
+                    $regSavedTTD = $asesi->tanda_tangan ?? null;
+                    if ($regSavedTTD) {
+                        $regSavedTTD = trim($regSavedTTD);
+                        if (str_contains($regSavedTTD, '/storage/')) {
+                            $regSavedTTD = asset('storage/' . ltrim(explode('/storage/', $regSavedTTD)[1], '/'));
+                        } elseif (str_starts_with($regSavedTTD, 'persetujuan-asesmen/') || str_starts_with($regSavedTTD, 'signatures/') || str_starts_with($regSavedTTD, 'pendaftar/') || str_starts_with($regSavedTTD, 'dokumen_asesi/')) {
+                            $regSavedTTD = asset('storage/' . ltrim($regSavedTTD, '/'));
+                        } elseif (!str_starts_with($regSavedTTD, 'http://') && !str_starts_with($regSavedTTD, 'https://') && !str_starts_with($regSavedTTD, 'data:image')) {
+                            $regSavedTTD = 'data:image/png;base64,' . preg_replace('/\s+/', '', $regSavedTTD);
+                        }
+                    }
+                @endphp
 
                 @if($regSavedTTD)
                 {{-- Ada TTD tersimpan di profil --}}

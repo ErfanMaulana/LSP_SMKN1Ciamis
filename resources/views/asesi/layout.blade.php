@@ -818,12 +818,7 @@
                     <!-- ASESMEN Section -->
                     <div class="menu-section-title">ASESMEN</div>
 
-                    @if(Route::has('asesi.hasil-ujikom.index'))
-                    <a href="{{ route('asesi.hasil-ujikom.index') }}" class="menu-item {{ request()->routeIs('asesi.hasil-ujikom.*') ? 'active' : '' }}">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>Status Asesmen</span>
-                    </a>
-                    @endif
+
 
                     <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="menu-item {{ request()->routeIs('asesi.asesmen-mandiri.*') ? 'active' : '' }}">
                         <i class="bi bi-clipboard-check"></i>
