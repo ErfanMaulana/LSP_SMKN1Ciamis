@@ -1166,6 +1166,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         return;
                     }
                 }
+                if (config.canvasId === 'signatureCanvasAsesi') {
+                    const optSaved = document.getElementById('optSavedAsesi');
+                    if (optSaved && optSaved.checked) {
+                        return;
+                    }
+                }
 
                 if (hiddenInput) {
                     hiddenInput.value = canvas.toDataURL('image/png');

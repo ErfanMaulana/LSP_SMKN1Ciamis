@@ -67,6 +67,7 @@ class RekamanAsesmenKompetensiController extends Controller
         $asesor = $this->getAsesor();
         $search = trim((string) $request->get('search'));
         $rekomendasi = trim((string) $request->get('rekomendasi'));
+        $viewMode = (string) $request->get('view', 'menunggu');
 
         if (!$asesor) {
             $items = RekamanAsesmenKompetensi::query()->whereRaw('1 = 0')->paginate(10);
@@ -75,40 +76,121 @@ class RekamanAsesmenKompetensiController extends Controller
                 return view('asesor.rekaman-asesmen-kompetensi.partials.table-rows', compact('items'))->render();
             }
 
-            return view('asesor.rekaman-asesmen-kompetensi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi'));
+            return view('asesor.rekaman-asesmen-kompetensi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi', 'viewMode')
+                + ['pendingCount' => 0, 'completedCount' => 0]);
         }
 
-        $items = RekamanAsesmenKompetensi::query()
+        // Fetch completed rekaman records
+        $completedRows = RekamanAsesmenKompetensi::query()
             ->with([
                 'skema:id,nama_skema,nomor_skema',
                 'asesi:NIK,nama',
             ])
             ->where('asesor_id', $asesor->ID_asesor)
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('kode_form', 'like', "%{$search}%")
-                        ->orWhereHas('skema', function ($skemaQuery) use ($search) {
-                            $skemaQuery->where('nama_skema', 'like', "%{$search}%")
-                                ->orWhere('nomor_skema', 'like', "%{$search}%");
-                        })
-                        ->orWhereHas('asesi', function ($asesiQuery) use ($search) {
-                            $asesiQuery->where('nama', 'like', "%{$search}%")
-                                ->orWhere('NIK', 'like', "%{$search}%");
-                        });
-                });
-            })
-            ->when($rekomendasi !== '', function ($query) use ($rekomendasi) {
-                $query->where('rekomendasi', $rekomendasi);
-            })
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->get();
+
+        foreach ($completedRows as $c) {
+            $c->is_pending = false;
+        }
+
+        // Fetch pending rekaman records (ceklis exists but rekaman doesn't)
+        $skemaIds = $asesor->skemas->pluck('id')->toArray();
+
+        $ceklisPairs = CeklisObservasiAktivitasPraktik::query()
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->whereIn('skema_id', $skemaIds)
+            ->get(['asesi_nik', 'skema_id']);
+
+        $rekamanKeys = [];
+        foreach ($completedRows as $cr) {
+            $rekamanKeys["{$cr->asesi_nik}|{$cr->skema_id}"] = true;
+        }
+
+        $asesisLookup = Asesi::whereIn('NIK', $ceklisPairs->pluck('asesi_nik')->unique()->toArray())
+            ->get(['NIK', 'nama'])
+            ->keyBy('NIK');
+
+        $pendingRows = [];
+        foreach ($ceklisPairs as $cp) {
+            $key = "{$cp->asesi_nik}|{$cp->skema_id}";
+            if (isset($rekamanKeys[$key])) continue;
+
+            $asesiObj = $asesisLookup->get($cp->asesi_nik);
+            $sk = $asesor->skemas->firstWhere('id', $cp->skema_id);
+            if (!$asesiObj || !$sk) continue;
+
+            $obj = new RekamanAsesmenKompetensi();
+            $obj->id = null;
+            $obj->is_pending = true;
+            $obj->asesi_nik = $cp->asesi_nik;
+            $obj->skema_id = $cp->skema_id;
+            $obj->asesor_id = $asesor->ID_asesor;
+            $obj->rekomendasi = null;
+            $obj->tanggal_mulai = null;
+            $obj->tanggal_selesai = null;
+            $obj->setRelation('asesi', $asesiObj);
+            $obj->setRelation('skema', $sk);
+
+            $pendingRows[] = $obj;
+        }
+
+        // Combine for counting
+        $allRows = collect(array_merge($pendingRows, $completedRows->all()));
+        $pendingCount = count($pendingRows);
+        $completedCount = $completedRows->count();
+
+        // View mode filter
+        if ($viewMode === 'selesai') {
+            $allRows = $allRows->filter(fn($row) => !$row->is_pending);
+        } else {
+            $allRows = $allRows->filter(fn($row) => $row->is_pending);
+        }
+
+        // Search Filter
+        if ($search !== '') {
+            $allRows = $allRows->filter(function ($row) use ($search) {
+                $matchAsesi = $row->asesi && (str_contains(strtolower($row->asesi->nama), strtolower($search)) || str_contains($row->asesi->NIK, $search));
+                $matchSkema = $row->skema && (str_contains(strtolower($row->skema->nama_skema), strtolower($search)) || str_contains(strtolower($row->skema->nomor_skema), strtolower($search)));
+                return $matchAsesi || $matchSkema;
+            });
+        }
+
+        // Rekomendasi filter (only relevant for selesai)
+        if ($rekomendasi !== '' && $viewMode === 'selesai') {
+            $allRows = $allRows->filter(fn($row) => $row->rekomendasi === $rekomendasi);
+        }
+
+        // Sort
+        $allRows = $allRows->sort(function ($a, $b) {
+            if ($a->is_pending && $b->is_pending) {
+                return strcmp($a->asesi->nama ?? '', $b->asesi->nama ?? '');
+            }
+            if ($a->is_pending) return -1;
+            if ($b->is_pending) return 1;
+            return ($b->id ?? 0) <=> ($a->id ?? 0);
+        });
+
+        // Paginate
+        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 10;
+        $currentItems = $allRows->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $items = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentItems,
+            $allRows->count(),
+            $perPage,
+            $currentPage,
+            [
+                'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath(),
+                'query' => $request->query(),
+            ]
+        );
 
         if ($request->ajax()) {
             return view('asesor.rekaman-asesmen-kompetensi.partials.table-rows', compact('items'))->render();
         }
 
-        return view('asesor.rekaman-asesmen-kompetensi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi'));
+        return view('asesor.rekaman-asesmen-kompetensi.index', compact('account', 'asesor', 'items', 'search', 'rekomendasi', 'viewMode', 'pendingCount', 'completedCount'));
     }
 
     public function create(Request $request)

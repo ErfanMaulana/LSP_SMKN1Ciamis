@@ -93,7 +93,7 @@
     }
 
     .filter-row-top {
-        grid-template-columns: minmax(0, 1fr) minmax(240px, 280px) minmax(240px, 280px);
+        grid-template-columns: minmax(0, 1fr) minmax(200px, 240px) minmax(200px, 240px) auto;
     }
 
     .filter-field {
@@ -260,22 +260,62 @@
         color: #94a3b8;
     }
 
-    @media (max-width: 1024px) {
-        .stats-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-    }
-
-    @media (max-width: 768px) {
-        .stats-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-    }
-
-    @media (max-width: 480px) {
-        .stats-grid {
+    @media (max-width: 900px) {
+        .filter-row-top {
             grid-template-columns: 1fr;
         }
+    }
+
+    .view-switcher {
+        display: inline-flex;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        background: #f1f5f9;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    .view-switcher-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        transition: all .2s ease;
+        white-space: nowrap;
+    }
+    .view-switcher-btn:hover {
+        color: #334155;
+        background: #e2e8f0;
+    }
+    .view-switcher-btn.active {
+        background: #0073bd;
+        color: #fff;
+        box-shadow: 0 2px 4px rgba(0,115,189,.25);
+    }
+    .view-switcher-btn .count-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+    }
+    .view-switcher-btn.active .count-badge {
+        background: rgba(255,255,255,.25);
+        color: #fff;
+    }
+    .view-switcher-btn:not(.active) .count-badge {
+        background: #e2e8f0;
+        color: #64748b;
     }
 </style>
 @endsection
@@ -343,6 +383,19 @@
                 <option value="belum" {{ $rekomendasi === 'belum' ? 'selected' : '' }}>Belum Direview</option>
             </select>
         </div>
+        <div class="filter-field">
+            <label class="filter-label" style="visibility: hidden;">Switcher</label>
+            <div class="view-switcher" id="asesmenMandiriViewSwitcher">
+                <button type="button" class="view-switcher-btn {{ ($viewMode ?? 'menunggu') === 'menunggu' ? 'active' : '' }}" data-view="menunggu">
+                    <i class="bi bi-hourglass-split"></i> Menunggu
+                    <span class="count-badge">{{ $pendingCount ?? 0 }}</span>
+                </button>
+                <button type="button" class="view-switcher-btn {{ ($viewMode ?? 'menunggu') === 'selesai' ? 'active' : '' }}" data-view="selesai">
+                    <i class="bi bi-check-circle-fill"></i> Selesai
+                    <span class="count-badge">{{ $completedCount ?? 0 }}</span>
+                </button>
+            </div>
+        </div>
     </div>
 </form>
 
@@ -353,6 +406,33 @@
 <script>
     let asesmenMandiriAjaxController = null;
     let asesmenMandiriSearchTimer = null;
+    let asesmenMandiriCurrentView = '{{ $viewMode ?? "menunggu" }}';
+
+    // Caching HTML to prevent loading delay when switching views
+    let asesmenMandiriCache = {
+        'menunggu': null,
+        'selesai': null
+    };
+
+    function prefetchAsesmenMandiriView() {
+        const otherView = asesmenMandiriCurrentView === 'menunggu' ? 'selesai' : 'menunggu';
+        const url = serializeFilterForm(otherView);
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) return response.text();
+            throw new Error('Prefetch failed');
+        })
+        .then(html => {
+            asesmenMandiriCache[otherView] = html;
+        })
+        .catch(err => console.warn('Prefetch warning:', err));
+    }
 
     function ajaxLoadAsesmenMandiri(url) {
         if (asesmenMandiriAjaxController) {
@@ -385,7 +465,9 @@
                 tableContainer.style.opacity = '1';
             }
 
+            asesmenMandiriCache[asesmenMandiriCurrentView] = html;
             window.history.replaceState({}, '', url);
+            prefetchAsesmenMandiriView();
         })
         .catch(function(error) {
             if (error.name !== 'AbortError') {
@@ -397,11 +479,13 @@
         });
     }
 
-    function serializeFilterForm() {
+    function serializeFilterForm(viewMode) {
         const searchInput = document.getElementById('asesmenMandiriSearchInput');
         const statusFilter = document.getElementById('asesmenMandiriStatusFilter');
         const rekomendasiFilter = document.getElementById('asesmenMandiriRekomendasiFilter');
         const url = new URL('{{ route('asesor.asesmen-mandiri.index') }}', window.location.origin);
+
+        url.searchParams.set('view', viewMode || asesmenMandiriCurrentView);
 
         if (searchInput && searchInput.value.trim() !== '') {
             url.searchParams.set('search', searchInput.value.trim());
@@ -422,25 +506,65 @@
         const searchInput = document.getElementById('asesmenMandiriSearchInput');
         const statusFilter = document.getElementById('asesmenMandiriStatusFilter');
         const rekomendasiFilter = document.getElementById('asesmenMandiriRekomendasiFilter');
+        const tableContainer = document.getElementById('asesmenMandiriTableContainer');
+
+        // Store initial view into cache
+        if (tableContainer) {
+            asesmenMandiriCache[asesmenMandiriCurrentView] = tableContainer.innerHTML;
+        }
+
+        // Prefetch other view in background immediately
+        prefetchAsesmenMandiriView();
+
+        function handleFilterChange() {
+            // Clear cache since query has changed
+            asesmenMandiriCache['menunggu'] = null;
+            asesmenMandiriCache['selesai'] = null;
+            ajaxLoadAsesmenMandiri(serializeFilterForm(asesmenMandiriCurrentView));
+        }
 
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(asesmenMandiriSearchTimer);
-                asesmenMandiriSearchTimer = setTimeout(function() {
-                    ajaxLoadAsesmenMandiri(serializeFilterForm());
-                }, 400);
+                asesmenMandiriSearchTimer = setTimeout(handleFilterChange, 400);
             });
         }
 
         if (statusFilter) {
-            statusFilter.addEventListener('change', function() {
-                ajaxLoadAsesmenMandiri(serializeFilterForm());
-            });
+            statusFilter.addEventListener('change', handleFilterChange);
         }
 
         if (rekomendasiFilter) {
-            rekomendasiFilter.addEventListener('change', function() {
-                ajaxLoadAsesmenMandiri(serializeFilterForm());
+            rekomendasiFilter.addEventListener('change', handleFilterChange);
+        }
+
+        // Switcher buttons
+        const switcher = document.getElementById('asesmenMandiriViewSwitcher');
+        if (switcher) {
+            switcher.querySelectorAll('.view-switcher-btn').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const targetView = this.dataset.view;
+                    if (targetView === asesmenMandiriCurrentView) return;
+
+                    asesmenMandiriCurrentView = targetView;
+                    switcher.querySelectorAll('.view-switcher-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // If status filter dropdown is set, we clear it to switch between global Menunggu and Selesai view modes smoothly
+                    if (statusFilter && statusFilter.value !== '') {
+                        statusFilter.value = '';
+                    }
+
+                    if (asesmenMandiriCache[targetView]) {
+                        if (tableContainer) {
+                            tableContainer.innerHTML = asesmenMandiriCache[targetView];
+                        }
+                        const url = serializeFilterForm(targetView);
+                        window.history.replaceState({}, '', url);
+                    } else {
+                        ajaxLoadAsesmenMandiri(serializeFilterForm(targetView));
+                    }
+                });
             });
         }
     });
