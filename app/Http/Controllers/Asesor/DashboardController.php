@@ -55,7 +55,7 @@ class DashboardController extends Controller
 
             $rekamanByAsesiSkema = DB::table('rekaman_asesmen_kompetensi')
                 ->where('asesor_id', $asesor->ID_asesor)
-                ->select(DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`"), 'id')
+                ->select(DB::raw("asesi_nik || '|' || skema_id as `asset_key`"), 'id')
                 ->get()
                 ->pluck('id', 'asset_key');
             
@@ -64,14 +64,14 @@ class DashboardController extends Controller
                 ->join('units as u', 'e.unit_id', '=', 'u.id')
                 ->whereIn('je.asesi_nik', $niks)
                 ->whereIn('u.skema_id', $skemaIds)
-                ->select(DB::raw("CONCAT(je.asesi_nik, '|', u.skema_id) as `asset_key`"), 'je.id')
+                ->select(DB::raw("je.asesi_nik || '|' || u.skema_id as `asset_key`"), 'je.id')
                 ->get()
                 ->pluck('id', 'asset_key');
             
             $penilaianByAsesiSkema = DB::table('asesor_nilai_elemens')
                 ->where('asesor_id', $asesor->ID_asesor)
                 ->whereIn('asesi_nik', $niks)
-                ->select(DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`"), 'id')
+                ->select(DB::raw("asesi_nik || '|' || skema_id as `asset_key`"), 'id')
                 ->get()
                 ->pluck('id', 'asset_key');
 
@@ -81,7 +81,7 @@ class DashboardController extends Controller
                 ->whereIn('skema_id', $skemaIds)
                 ->select(
                     DB::raw("MAX(id) as id"),
-                    DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`")
+                    DB::raw("asesi_nik || '|' || skema_id as `asset_key`")
                 )
                 ->groupBy('asesi_nik', 'skema_id')
                 ->get()
@@ -466,7 +466,7 @@ class DashboardController extends Controller
         // Get rekaman, asesmen mandiri, and penilaian counts
         $rekamanByAsesiSkema = DB::table('rekaman_asesmen_kompetensi')
             ->where('asesor_id', $asesor->ID_asesor)
-            ->select(DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`"), 'id')
+            ->select(DB::raw("asesi_nik || '|' || skema_id as `asset_key`"), 'id')
             ->get()
             ->pluck('id', 'asset_key');
         
@@ -475,14 +475,14 @@ class DashboardController extends Controller
             ->join('units as u', 'e.unit_id', '=', 'u.id')
             ->whereIn('je.asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
             ->whereIn('u.skema_id', $skemaIds)
-            ->select(DB::raw("CONCAT(je.asesi_nik, '|', u.skema_id) as `asset_key`"), 'je.id')
+            ->select(DB::raw("je.asesi_nik || '|' || u.skema_id as `asset_key`"), 'je.id')
             ->get()
             ->pluck('id', 'asset_key');
         
         $penilaianByAsesiSkema = DB::table('asesor_nilai_elemens')
             ->where('asesor_id', $asesor->ID_asesor)
             ->whereIn('asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
-            ->select(DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`"), 'id')
+            ->select(DB::raw("asesi_nik || '|' || skema_id as `asset_key`"), 'id')
             ->get()
             ->pluck('id', 'asset_key');
 
@@ -492,7 +492,7 @@ class DashboardController extends Controller
             ->whereIn('skema_id', $skemaIds)
             ->select(
                 DB::raw("MAX(id) as id"),
-                DB::raw("CONCAT(asesi_nik, '|', skema_id) as `asset_key`")
+                DB::raw("asesi_nik || '|' || skema_id as `asset_key`")
             )
             ->groupBy('asesi_nik', 'skema_id')
             ->get()
@@ -921,7 +921,7 @@ class DashboardController extends Controller
             ->whereIn('u.skema_id', $skemaIds)
             ->select(
                 DB::raw("COUNT(je.id) as total"),
-                DB::raw("CONCAT(je.asesi_nik, '|', u.skema_id) as `asset_key`")
+                DB::raw("je.asesi_nik || '|' || u.skema_id as `asset_key`")
             )
             ->groupBy('je.asesi_nik', 'u.skema_id')
             ->get()

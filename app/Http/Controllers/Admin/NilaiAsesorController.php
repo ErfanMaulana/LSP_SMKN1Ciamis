@@ -46,7 +46,7 @@ class NilaiAsesorController extends Controller
             ->withQueryString();
 
         $stats = DB::table('asesor_nilai_elemens')
-            ->selectRaw('COUNT(DISTINCT CONCAT(asesi_nik, "-", skema_id)) as total_form, COUNT(*) as total_elemen_dinilai, ROUND(AVG(nilai), 2) as rata_global')
+            ->selectRaw('COUNT(DISTINCT asesi_nik || "-" || skema_id) as total_form, COUNT(*) as total_elemen_dinilai, ROUND(AVG(nilai), 2) as rata_global')
             ->first();
 
         $skemas = Skema::orderBy('nama_skema')->get(['id', 'nama_skema', 'nomor_skema', 'kkm']);

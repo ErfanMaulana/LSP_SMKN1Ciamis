@@ -68,8 +68,8 @@
         </button>
         <button class="tab-btn" onclick="switchTab('tab-akun-orphan', this)">
             <i class="bi bi-person-x"></i> Belum Aktivasi
-            @if($akunTanpaAsesi->count() > 0)
-                <span class="tab-badge">{{ $akunTanpaAsesi->count() }}</span>
+            @if($akunTanpaAsesi->total() > 0)
+                <span class="tab-badge">{{ $akunTanpaAsesi->total() }}</span>
             @endif
         </button>
     </div>
@@ -402,6 +402,50 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+            <!-- Pagination for Belum Aktivasi -->
+            <div class="pagination-container">
+                <div class="pagination-info">
+                    Menampilkan {{ $akunTanpaAsesi->firstItem() ?? 0 }} sampai {{ $akunTanpaAsesi->lastItem() ?? 0 }} dari {{ $akunTanpaAsesi->total() }} data 
+                </div>
+                <div class="pagination">
+                    @if($akunTanpaAsesi->currentPage() > 1)
+                        <a href="{{ $akunTanpaAsesi->appends(['tab' => 'akun'])->previousPageUrl() }}" class="page-link">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    @endif
+                    
+                    @for($i = 1; $i <= min($akunTanpaAsesi->lastPage(), 5); $i++)
+                        <a href="{{ $akunTanpaAsesi->appends(['tab' => 'akun'])->url($i) }}" class="page-link {{ $i == $akunTanpaAsesi->currentPage() ? 'active' : '' }}">{{ $i }}</a>
+                    @endfor
+                    
+                    @if($akunTanpaAsesi->lastPage() > 5)
+                        <span class="page-dots">...</span>
+                        <a href="{{ $akunTanpaAsesi->appends(['tab' => 'akun'])->url($akunTanpaAsesi->lastPage()) }}" class="page-link">{{ $akunTanpaAsesi->lastPage() }}</a>
+                    @endif
+                    
+                    @if($akunTanpaAsesi->hasMorePages())
+                        <a href="{{ $akunTanpaAsesi->appends(['tab' => 'akun'])->nextPageUrl() }}" class="page-link">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    @endif
+                </div>
+                <form method="GET" action="{{ route('admin.asesi.index') }}" style="display:flex;align-items:center;gap:6px;">
+                    <input type="hidden" name="tab" value="akun">
+                    @foreach(request()->except('page_akun', 'per_page_akun', 'tab') as $key => $value)
+                        @if(is_array($value))
+                            @foreach($value as $v)
+                                <input type="hidden" name="{{ $key }}[]" value="{{ $v }}">
+                            @endforeach
+                        @else
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
+                    <span style="font-size:14px;color:#64748b;">Data Perhalaman</span>
+                    <input type="number" id="per-page-akun-input" name="per_page_akun" min="5" max="100" value="{{ request('per_page_akun', 10) }}"
+                        onchange="this.form.submit()"
+                        style="width:72px;height:34px;border:1px solid #e2e8f0;border-radius:8px;padding:0 8px;font-size:13px;color:#334155;">
+                </form>
             </div>
         </div>
     </div>

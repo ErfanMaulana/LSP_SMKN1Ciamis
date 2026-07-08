@@ -576,7 +576,7 @@
                             $ceklisKeys = \Illuminate\Support\Facades\DB::table('ceklis_observasi_aktivitas_praktiks')
                                 ->where('asesor_id', $asesor->ID_asesor)
                                 ->whereIn('skema_id', $skemaIds)
-                                ->select(\Illuminate\Support\Facades\DB::raw("CONCAT(asesi_nik, '|', skema_id) as `key`"))
+                                ->select(\Illuminate\Support\Facades\DB::raw("asesi_nik || '|' || skema_id as `key`"))
                                 ->pluck('key')
                                 ->toArray();
 
@@ -612,7 +612,7 @@
                             $rekamanKeys = \Illuminate\Support\Facades\DB::table('rekaman_asesmen_kompetensi')
                                 ->where('asesor_id', $asesor->ID_asesor)
                                 ->whereIn('skema_id', $skemaIds)
-                                ->select(\Illuminate\Support\Facades\DB::raw("CONCAT(asesi_nik, '|', skema_id) as `key`"))
+                                ->select(\Illuminate\Support\Facades\DB::raw("asesi_nik || '|' || skema_id as `key`"))
                                 ->pluck('key')
                                 ->toArray();
 

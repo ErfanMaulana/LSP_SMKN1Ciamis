@@ -106,11 +106,15 @@ class AsesiController extends Controller
             return view('admin.asesi.partials.table-rows', compact('asesi'))->render();
         }
 
+        $perPageAkun = (int) $request->query('per_page_akun', 10);
+        $perPageAkun = max(5, min(100, $perPageAkun));
+
         // Akun role=asesi yang tidak punya data di tabel asesi
         $akunTanpaAsesi = Account::where('role', 'asesi')
             ->whereNotIn('NIK', Asesi::pluck('NIK')->filter())
             ->orderBy('nama')
-            ->get();
+            ->paginate($perPageAkun, ['*'], 'page_akun')
+            ->appends($request->except('page_akun'));
         
         return view('admin.asesi.index', compact(
             'asesi', 
