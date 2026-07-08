@@ -136,14 +136,15 @@ class RekamanAsesmenKompetensiController extends Controller
 
         // Combine for counting
         $allRows = collect(array_merge($pendingRows, $completedRows->all()));
-        $pendingCount = count($pendingRows);
-        $completedCount = $completedRows->count();
+        
+        $pendingCount = $allRows->filter(fn($row) => $row->is_pending || empty($row->ttd_asesi_file))->count();
+        $completedCount = $allRows->filter(fn($row) => !$row->is_pending && !empty($row->ttd_asesi_file))->count();
 
         // View mode filter
         if ($viewMode === 'selesai') {
-            $allRows = $allRows->filter(fn($row) => !$row->is_pending);
+            $allRows = $allRows->filter(fn($row) => !$row->is_pending && !empty($row->ttd_asesi_file));
         } else {
-            $allRows = $allRows->filter(fn($row) => $row->is_pending);
+            $allRows = $allRows->filter(fn($row) => $row->is_pending || ($row->is_pending === false && empty($row->ttd_asesi_file)));
         }
 
         // Search Filter
@@ -214,6 +215,7 @@ class RekamanAsesmenKompetensiController extends Controller
             'tipe_tuk' => '',
             'asesi_nik' => null,
             'skema_id' => null,
+            'rekomendasi' => 'kompeten',
         ];
 
         // Pre-fill with skema_id if provided
@@ -373,6 +375,10 @@ class RekamanAsesmenKompetensiController extends Controller
             ->where('asesor_id', $asesor->ID_asesor)
             ->findOrFail($id);
 
+        if (empty($item->ttd_asesi_file) || empty($item->ttd_asesor_file)) {
+            return redirect()->back()->with('error', 'Form FR.AK.02 belum dapat diexport karena asesi atau asesor belum menandatangani rekaman asesmen.');
+        }
+
         $ceklis = CeklisObservasiAktivitasPraktik::query()
             ->where('skema_id', $item->skema_id)
             ->where('asesi_nik', $item->asesi_nik)
@@ -382,6 +388,32 @@ class RekamanAsesmenKompetensiController extends Controller
         $logoDataUri = file_exists($logoPath)
             ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
             : null;
+
+        $ttdAsesiDataUri = null;
+        if (!empty($item->ttd_asesi_file)) {
+            if (str_starts_with($item->ttd_asesi_file, 'data:image')) {
+                $ttdAsesiDataUri = $item->ttd_asesi_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesi_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesiDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $ttdAsesorDataUri = null;
+        if (!empty($item->ttd_asesor_file)) {
+            if (str_starts_with($item->ttd_asesor_file, 'data:image')) {
+                $ttdAsesorDataUri = $item->ttd_asesor_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesor_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesorDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
 
         $details = $item->details->sortBy([
             ['unit.id', 'asc'],
@@ -393,6 +425,8 @@ class RekamanAsesmenKompetensiController extends Controller
             'details' => $details,
             'logoPath' => $logoPath,
             'logoDataUri' => $logoDataUri,
+            'ttdAsesiDataUri' => $ttdAsesiDataUri,
+            'ttdAsesorDataUri' => $ttdAsesorDataUri,
         ])->render();
 
         $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($item->skema?->nomor_skema ?? $item->skema_id));

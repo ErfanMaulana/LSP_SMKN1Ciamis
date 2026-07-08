@@ -324,6 +324,19 @@ class BandingAsesmenController extends Controller
             ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
             : null;
 
+        $ttdAsesiDataUri = null;
+        if (!empty($banding->ttd_asesi_file)) {
+            if (str_starts_with($banding->ttd_asesi_file, 'data:image')) {
+                $ttdAsesiDataUri = $banding->ttd_asesi_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($banding->ttd_asesi_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesiDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
         $html = view('asesor.banding.export-docx', [
             'asesor' => $asesor,
             'asesi' => $banding->asesi,
@@ -334,6 +347,7 @@ class BandingAsesmenController extends Controller
             'existingJawaban' => $existingJawaban,
             'logoPath' => $logoPath,
             'logoDataUri' => $logoDataUri,
+            'ttdAsesiDataUri' => $ttdAsesiDataUri,
         ])->render();
 
         $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($banding->skema?->nomor_skema ?? $skemaId));

@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <title>FR.AK.04 - Banding Asesmen</title>
@@ -30,7 +31,8 @@
             font-size: 11pt;
         }
 
-        td, th {
+        td,
+        th {
             border: 1px solid #000;
             padding: 4px 6px;
             vertical-align: top;
@@ -79,7 +81,7 @@
 
         .check-table th {
             font-weight: bold;
-            background: #f3f4f6;
+            background: #ffffff;
             text-align: left;
         }
 
@@ -181,23 +183,27 @@
         }
     </style>
 </head>
+
 <body>
     <table style="margin-bottom:12px; table-layout:fixed; width:100%;">
         <tr>
             <td class="no-border" style="width:56px; padding:0; vertical-align:middle;">
                 @if(!empty($logoDataUri) || (!empty($logoPath) && file_exists($logoPath)))
-                    <img src="{{ $logoDataUri ?? $logoPath }}" alt="Logo" width="44" height="44" style="width:44px; height:44px; object-fit:contain; display:block; margin:0 auto;">
+                    <img src="{{ $logoDataUri ?? $logoPath }}" alt="Logo" width="44" height="44"
+                        style="width:44px; height:44px; object-fit:contain; display:block; margin:0 auto;">
                 @endif
             </td>
             <td class="no-border" style="padding:0 0 0 8px; vertical-align:middle;">
-                <div style="font-family: Calibri, Arial, sans-serif; font-size: 12pt; font-weight: bold; text-transform: uppercase; margin:0; line-height:1.25;">
+                <div
+                    style="font-family: Calibri, Arial, sans-serif; font-size: 12pt; font-weight: bold; text-transform: uppercase; margin:0; line-height:1.25;">
                     FR.AK.04. &nbsp;&nbsp; BANDING ASESMEN
                 </div>
             </td>
         </tr>
     </table>
 
-    <table style="width: 100%; border-collapse: collapse; table-layout: fixed; font-family: Calibri, Arial, sans-serif; font-size: 11pt; margin-bottom: 8px;">
+    <table
+        style="width: 100%; border-collapse: collapse; table-layout: fixed; font-family: Calibri, Arial, sans-serif; font-size: 11pt; margin-bottom: 8px;">
         <colgroup>
             <col style="width: auto;">
             <col style="width: 60px;">
@@ -209,9 +215,16 @@
                 <td colspan="3" style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">
                     <table style="width: 100%; border-collapse: collapse; border: none;">
                         <tr>
-                            <td style="width: 25%; padding: 0; border: none; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">Nama Asesi</td>
-                            <td style="width: 3%; padding: 0; border: none; text-align: center; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">:</td>
-                            <td style="width: 72%; padding: 0; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">{{ $asesi->nama ?? '-' }}</td>
+                            <td
+                                style="width: 25%; padding: 0; border: none; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                Nama Asesi</td>
+                            <td
+                                style="width: 3%; padding: 0; border: none; text-align: center; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                :</td>
+                            <td
+                                style="width: 72%; padding: 0; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                {{ $asesi->nama ?? '-' }}
+                            </td>
                         </tr>
                     </table>
                 </td>
@@ -221,9 +234,16 @@
                 <td colspan="3" style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">
                     <table style="width: 100%; border-collapse: collapse; border: none;">
                         <tr>
-                            <td style="width: 25%; padding: 0; border: none; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">Nama Asesor</td>
-                            <td style="width: 3%; padding: 0; border: none; text-align: center; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">:</td>
-                            <td style="width: 72%; padding: 0; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">{{ $asesor->nama ?? '-' }}</td>
+                            <td
+                                style="width: 25%; padding: 0; border: none; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                Nama Asesor</td>
+                            <td
+                                style="width: 3%; padding: 0; border: none; text-align: center; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                :</td>
+                            <td
+                                style="width: 72%; padding: 0; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                {{ $asesor->nama ?? '-' }}
+                            </td>
                         </tr>
                     </table>
                 </td>
@@ -233,18 +253,31 @@
                 <td colspan="3" style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">
                     <table style="width: 100%; border-collapse: collapse; border: none;">
                         <tr>
-                            <td style="width: 25%; padding: 0; border: none; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">Tanggal Asesmen</td>
-                            <td style="width: 3%; padding: 0; border: none; text-align: center; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">:</td>
-                            <td style="width: 72%; padding: 0; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">{{ $pivot->tanggal_selesai ? \Carbon\Carbon::parse($pivot->tanggal_selesai)->format('d-m-Y') : '-' }}</td>
+                            <td
+                                style="width: 25%; padding: 0; border: none; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                Tanggal Asesmen</td>
+                            <td
+                                style="width: 3%; padding: 0; border: none; text-align: center; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                :</td>
+                            <td
+                                style="width: 72%; padding: 0; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                {{ $pivot->tanggal_selesai ? \Carbon\Carbon::parse($pivot->tanggal_selesai)->format('d-m-Y') : '-' }}
+                            </td>
                         </tr>
                     </table>
                 </td>
             </tr>
             <!-- Questionnaire Header -->
             <tr>
-                <td style="border: 1px solid #000; padding: 4px 6px; font-weight: normal; background: #f3f4f6; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">Jawablah dengan Ya atau Tidak pertanyaan-pertanyaan berikut ini</td>
-                <td style="border: 1px solid #000; padding: 4px 6px; font-weight: normal; background: #f3f4f6; text-align: center; width: 60px; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">YA</td>
-                <td style="border: 1px solid #000; padding: 4px 6px; font-weight: normal; background: #f3f4f6; text-align: center; width: 60px; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">TIDAK</td>
+                <td
+                    style="border: 1px solid #000; padding: 4px 6px; font-weight: normal; background: #ffffff; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
+                    Jawablah dengan Ya atau Tidak pertanyaan-pertanyaan berikut ini</td>
+                <td
+                    style="border: 1px solid #000; padding: 4px 6px; font-weight: normal; background: #ffffff; text-align: center; width: 60px; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
+                    YA</td>
+                <td
+                    style="border: 1px solid #000; padding: 4px 6px; font-weight: normal; background: #ffffff; text-align: center; width: 60px; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
+                    TIDAK</td>
             </tr>
             <!-- Questionnaire Items -->
             @foreach($komponen as $item)
@@ -253,71 +286,106 @@
                     $val = optional($jawabanItem)->jawaban;
                 @endphp
                 <tr>
-                    <td style="border: 1px solid #000; padding: 4px 6px; vertical-align: top; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">{{ $item->pernyataan }}</td>
-                    <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; vertical-align: top; width: 60px; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">{{ $val === 'ya' ? '☑' : '☐' }}</td>
-                    <td style="border: 1px solid #000; padding: 4px 6px; text-align: center; vertical-align: top; width: 60px; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">{{ $val === 'tidak' ? '☑' : '☐' }}</td>
+                    <td
+                        style="border: 1px solid #000; padding: 4px 6px; vertical-align: top; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                        {{ $item->pernyataan }}
+                    </td>
+                    <td
+                        style="border: 1px solid #000; padding: 4px 6px; text-align: center; vertical-align: top; width: 60px; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                        {{ $val === 'ya' ? '☑' : '☐' }}
+                    </td>
+                    <td
+                        style="border: 1px solid #000; padding: 4px 6px; text-align: center; vertical-align: top; width: 60px; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                        {{ $val === 'tidak' ? '☑' : '☐' }}
+                    </td>
                 </tr>
             @endforeach
             <!-- Skema Sertifikasi Info -->
             <tr>
-                <td colspan="3" style="border: 1px solid #000; padding: 6px 8px; vertical-align: top; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
-                    <div style="font-weight: normal; font-size: 11pt; margin-bottom: 4px;">Banding ini diajukan atas keputusan asesmen yang dibuat terhadap skema sertifikasi berikut:</div>
+                <td colspan="3"
+                    style="border: 1px solid #000; padding: 6px 8px; vertical-align: top; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                    <div style="font-weight: normal; font-size: 11pt; margin-bottom: 4px;">Banding ini diajukan atas
+                        keputusan asesmen yang dibuat terhadap skema sertifikasi berikut:</div>
                     <div>Skema Sertifikasi: {{ $skema->nama_skema ?? '-' }}</div>
                     <div>No. Skema Sertifikasi: {{ $skema->nomor_skema ?? '-' }}</div>
-                    <div>Keputusan Asesmen: {{ ($pivot->rekomendasi ?? '') === 'lanjut' ? 'Asesmen dapat dilanjutkan' : 'Asesmen tidak dapat dilanjutkan' }}</div>
+                    <div>Keputusan Asesmen:
+                        {{ ($pivot->rekomendasi ?? '') === 'lanjut' ? 'Asesmen dapat dilanjutkan' : 'Asesmen tidak dapat dilanjutkan' }}
+                    </div>
                 </td>
             </tr>
             <!-- Alasan Banding -->
             <tr>
-                <td colspan="3" style="border: 1px solid #000; padding: 6px 8px; vertical-align: top; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
-                    <div style="font-weight: normal; font-size: 11pt; margin-bottom: 4px;">Banding ini diajukan atas alasan sebagai berikut:</div>
+                <td colspan="3"
+                    style="border: 1px solid #000; padding: 6px 8px; vertical-align: top; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                    <div style="font-weight: normal; font-size: 11pt; margin-bottom: 4px;">Banding ini diajukan atas
+                        alasan sebagai berikut:</div>
                     <div style="min-height: 50px;">{{ $banding->alasan_banding ?? '-' }}</div>
                 </td>
             </tr>
             <!-- Hak Mengajukan Banding -->
             <tr>
-                <td colspan="3" style="border: 1px solid #000; padding: 6px 8px; font-size: 10pt; font-style: normal; vertical-align: top; font-family: Calibri, Arial, sans-serif;">
-                    Anda mempunyai hak mengajukan banding jika menilai Proses Asesmen tidak sesuai SOP dan tidak memenuhi Prinsip Asesmen.
+                <td colspan="3"
+                    style="border: 1px solid #000; padding: 6px 8px; font-size: 10pt; font-style: normal; vertical-align: top; font-family: Calibri, Arial, sans-serif;">
+                    Anda mempunyai hak mengajukan banding jika menilai Proses Asesmen tidak sesuai SOP dan tidak
+                    memenuhi Prinsip Asesmen.
                 </td>
             </tr>
             <!-- Pemohon Banding (Asesi) Header -->
             <tr>
-                <td colspan="3" style="border: 1px solid #000; border-top: 2px solid #000; font-weight: normal; padding: 4px 8px; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
+                <td colspan="3"
+                    style="border: 1px solid #000; border-top: 2px solid #000; font-weight: normal; padding: 4px 8px; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
                     Pemohon Banding (Asesi) :
                 </td>
             </tr>
             <!-- Pemohon Banding Details & Signature -->
             <tr>
                 <td colspan="3" style="border: 1px solid #000; padding: 0; vertical-align: top;">
-                    <table style="width: 100%; border-collapse: collapse; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                    <table
+                        style="width: 100%; border-collapse: collapse; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
                         <colgroup>
                             <col style="width: 32.70%;">
                             <col style="width: 1.37%;">
                             <col style="width: 65.93%;">
                         </colgroup>
                         <tr>
-                            <td style="padding: 4px 8px; border: none; border-bottom: 1px solid #000; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">Nama</td>
-                            <td style="padding: 4px 2px; text-align: center; border: none; border-bottom: 1px solid #000; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">:</td>
-                            <td style="padding: 4px 8px; border: none; border-bottom: 1px solid #000; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
+                            <td
+                                style="padding: 4px 8px; border: none; border-bottom: 1px solid #000; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
+                                Nama</td>
+                            <td
+                                style="padding: 4px 2px; text-align: center; border: none; border-bottom: 1px solid #000; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
+                                :</td>
+                            <td
+                                style="padding: 4px 8px; border: none; border-bottom: 1px solid #000; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
                                 {{ $banding->ttd_asesi_nama ?? $asesi->nama ?? '' }}
                             </td>
                         </tr>
                         <tr>
-                            <td style="padding: 6px 8px; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">Tanda tangan dan Tanggal</td>
-                            <td style="padding: 6px 2px; text-align: center; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">:</td>
-                            <td style="padding: 6px 8px; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
-                                <table style="width: 100%; border-collapse: collapse; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                            <td
+                                style="padding: 6px 8px; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                Tanda tangan dan Tanggal</td>
+                            <td
+                                style="padding: 6px 2px; text-align: center; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                :</td>
+                            <td
+                                style="padding: 6px 8px; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                <table
+                                    style="width: 100%; border-collapse: collapse; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
                                     <tr>
-                                        @if(!empty($banding->ttd_asesi_file))
+                                        @if(!empty($ttdAsesiDataUri))
                                             <td style="padding: 0; border: none; width: 105px; vertical-align: middle;">
-                                                <img src="{{ asset('storage/' . ltrim($banding->ttd_asesi_file, '/')) }}" alt="Ttd Asesi" width="96" height="54" style="width: 96px; height: 54px; object-fit: contain; display: block;">
+                                                <img src="{{ $ttdAsesiDataUri }}" alt="Ttd Asesi" width="96" height="54"
+                                                    style="width: 96px; height: 54px; object-fit: contain; display: block;">
                                             </td>
-                                            <td style="padding: 0 0 0 10px; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
-                                                Tanggal: {{ $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->format('d-m-Y') : '-' }}
+                                            <td
+                                                style="padding: 0 0 0 10px; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                                Tanggal:
+                                                {{ $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->format('d-m-Y') : '-' }}
                                             </td>
                                         @else
-                                            <td style="padding: 0; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
-                                                Tanggal: {{ $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->format('d-m-Y') : '-' }}
+                                            <td
+                                                style="padding: 0; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
+                                                Tanggal:
+                                                {{ $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->format('d-m-Y') : '-' }}
                                             </td>
                                         @endif
                                     </tr>
@@ -330,4 +398,5 @@
         </tbody>
     </table>
 </body>
+
 </html>

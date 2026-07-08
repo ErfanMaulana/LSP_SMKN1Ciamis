@@ -129,14 +129,15 @@ class CeklisObservasiController extends Controller
 
         // Combine all rows for counting
         $allRows = collect(array_merge($pendingRows, $completedRows->all()));
-        $pendingCount = collect($pendingRows)->count();
-        $completedCount = $completedRows->count();
+        
+        $pendingCount = $allRows->filter(fn($row) => $row->is_pending || empty($row->ttd_asesi_file))->count();
+        $completedCount = $allRows->filter(fn($row) => !$row->is_pending && !empty($row->ttd_asesi_file))->count();
 
         // View mode filter (switcher)
         if ($viewMode === 'selesai') {
-            $allRows = $allRows->filter(fn($row) => !$row->is_pending);
+            $allRows = $allRows->filter(fn($row) => !$row->is_pending && !empty($row->ttd_asesi_file));
         } else {
-            $allRows = $allRows->filter(fn($row) => $row->is_pending);
+            $allRows = $allRows->filter(fn($row) => $row->is_pending || ($row->is_pending === false && empty($row->ttd_asesi_file)));
         }
 
         // Search Filter

@@ -605,7 +605,7 @@
             <tr>
                 <td style="border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 9px; font-size:11pt; width:32.70%;">Nama</td>
                 <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; font-size:11pt; width:1.37%;">:</td>
-                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 8px; font-size:11pt;">{{ $ceklis->ttd_asesi_nama ?? $item->asesi?->nama ?? '' }}</td>
+                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 8px; font-size:11pt;">{{ $item->ttd_asesi_nama ?? $item->asesi?->nama ?? '' }}</td>
             </tr>
             <!-- ── ASESI TTD ── -->
             <tr>
@@ -613,11 +613,11 @@
                 <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">:</td>
                 <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:4px 8px; vertical-align:top; font-size:11pt;">
                     <div style="min-height:54px; display:block;">
-                        @if(!empty($ceklis->ttd_asesi_file))
-                            <img src="{{ asset('storage/' . ltrim($ceklis->ttd_asesi_file, '/')) }}" alt="Ttd Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                        @if(!empty($ttdAsesiDataUri))
+                            <img src="{{ $ttdAsesiDataUri }}" alt="Ttd Asesi" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                         @endif
                     </div>
-                    <div style="font-size:10pt; margin-top:2px;">{{ $ceklis->ttd_asesi_tanggal?->format('d-m-Y') ?? $item->tanggal_mulai?->format('d-m-Y') ?? '' }}</div>
+                    <div style="font-size:10pt; margin-top:2px;">{{ $item->ttd_asesi_tanggal?->format('d-m-Y') ?? $item->tanggal_mulai?->format('d-m-Y') ?? '' }}</div>
                 </td>
             </tr>
 
@@ -629,13 +629,13 @@
             <tr>
                 <td style="border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 9px; font-size:11pt;">Nama</td>
                 <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; font-size:11pt;">:</td>
-                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 8px; font-size:11pt;">{{ $ceklis->ttd_asesor_nama ?? $item->asesor?->nama ?? '' }}</td>
+                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 8px; font-size:11pt;">{{ $item->ttd_asesor_nama ?? $item->asesor?->nama ?? '' }}</td>
             </tr>
             <!-- ── ASESOR NO REG ── -->
             <tr>
                 <td style="border-left:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 9px; font-size:11pt;">No. Reg</td>
                 <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; font-size:11pt;">:</td>
-                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 8px; font-size:11pt;">{{ $ceklis->ttd_asesor_no_reg ?? $item->asesor?->no_met ?? '' }}</td>
+                <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:3px 8px; font-size:11pt;">{{ $item->ttd_asesor_no_reg ?? $item->asesor?->no_met ?? '' }}</td>
             </tr>
             <!-- ── ASESOR TTD ── -->
             <tr>
@@ -643,11 +643,11 @@
                 <td style="border-top:1px solid #000; border-bottom:1px solid #000; text-align:center; padding:3px 2px; vertical-align:middle; font-size:11pt;">:</td>
                 <td colspan="6" style="border-right:1px solid #000; border-top:1px solid #000; border-bottom:1px solid #000; padding:4px 8px; vertical-align:top; font-size:11pt;">
                     <div style="min-height:54px; display:block;">
-                        @if(!empty($ceklis->ttd_asesor_file))
-                            <img src="{{ asset('storage/' . ltrim($ceklis->ttd_asesor_file, '/')) }}" alt="Ttd Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
+                        @if(!empty($ttdAsesorDataUri))
+                            <img src="{{ $ttdAsesorDataUri }}" alt="Ttd Asesor" width="96" height="54" style="width:96px; height:54px; object-fit:contain; display:block;">
                         @endif
                     </div>
-                    <div style="font-size:10pt; margin-top:2px;">{{ $ceklis->ttd_asesor_tanggal?->format('d-m-Y') ?? $item->tanggal_mulai?->format('d-m-Y') ?? '' }}</div>
+                    <div style="font-size:10pt; margin-top:2px;">{{ $item->ttd_asesor_tanggal?->format('d-m-Y') ?? $item->tanggal_mulai?->format('d-m-Y') ?? '' }}</div>
                 </td>
             </tr>
         </tbody>

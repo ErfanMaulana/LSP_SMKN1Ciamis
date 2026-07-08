@@ -133,4 +133,99 @@ class UmpanBalikController extends Controller
 
         return view('asesor.umpan-balik.show', compact('asesor', 'asesi', 'skema', 'komponenList', 'results'));
     }
+
+    public function export($asesiNik, $skemaId)
+    {
+        $asesor = $this->getAsesor();
+        if (!$asesor) {
+            abort(404, 'Data asesor tidak ditemukan.');
+        }
+
+        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+        $skema = Skema::findOrFail($skemaId);
+
+        $komponenList = UmpanBalikKomponen::where('skema_id', $skemaId)
+            ->where('is_active', true)
+            ->orderBy('urutan')
+            ->get();
+
+        $results = UmpanBalikHasil::where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->get()
+            ->keyBy('komponen_id');
+
+        $ceklis = \App\Models\CeklisObservasiAktivitasPraktik::where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        $rekaman = \App\Models\RekamanAsesmenKompetensi::where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        $jadwal = \App\Models\JadwalUjikom::with('tuk')
+            ->where('skema_id', $skemaId)
+            ->whereHas('peserta', function ($q) use ($asesiNik) {
+                $q->where('NIK', $asesiNik);
+            })
+            ->first();
+
+        // Logo Path
+        $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+
+        // Convert signature files to Base64 data URIs
+        $ttdAsesiDataUri = null;
+        $ttdAsesiFile = $ceklis?->ttd_asesi_file ?: $asesi->tanda_tangan ?: $asesi->tanda_tangan_pendaftar;
+        if (!empty($ttdAsesiFile)) {
+            if (str_starts_with($ttdAsesiFile, 'data:image')) {
+                $ttdAsesiDataUri = $ttdAsesiFile;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($ttdAsesiFile, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesiDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $ttdAsesorDataUri = null;
+        $ttdAsesorFile = $ceklis?->ttd_asesor_file ?: $asesor->saved_tanda_tangan;
+        if (!empty($ttdAsesorFile)) {
+            if (str_starts_with($ttdAsesorFile, 'data:image')) {
+                $ttdAsesorDataUri = $ttdAsesorFile;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($ttdAsesorFile, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesorDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $html = view('asesor.umpan-balik.export-docx', [
+            'asesor' => $asesor,
+            'asesi' => $asesi,
+            'skema' => $skema,
+            'komponenList' => $komponenList,
+            'results' => $results,
+            'ceklis' => $ceklis,
+            'rekaman' => $rekaman,
+            'jadwal' => $jadwal,
+            'logoPath' => $logoPath,
+            'logoDataUri' => $logoDataUri,
+            'ttdAsesiDataUri' => $ttdAsesiDataUri,
+            'ttdAsesorDataUri' => $ttdAsesorDataUri,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skemaId));
+        $fileName = 'FR.AK.03-' . ($asesiNik ?? 'asesi') . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
 }
