@@ -479,11 +479,11 @@
                         <p style="font-size: 15px; color: #6b7280; font-weight: 500; margin: 0 0 6px;">Tidak ada data TUK ditemukan</p>
                         <p style="font-size: 13px; color: #9ca3af; margin: 0;">Coba kata kunci lain.</p>
 
-                        @if(!$search && $status === 'all')
+                        <!-- @if(!$search && $status === 'all')
                             <a href="{{ route('admin.tuk.create') }}" class="btn btn-primary" style="display:inline-flex;margin-top:12px;">
                                 <i class="bi bi-plus-lg"></i> Tambah TUK Sekarang
                             </a>
-                        @endif
+                        @endif -->
                     </div>
                 </td>
             </tr>

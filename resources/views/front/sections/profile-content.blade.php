@@ -104,7 +104,7 @@
           <div class="scope-icon {{ $jurusan['color'] }}"><i class="bi {{ $jurusan['icon'] }}"></i></div>
           <h6>{{ $jurusan['nama'] }}</h6>
           <p>{{ Str::limit($jurusan['visi'] ?? 'Sertifikasi kompetensi untuk Program Keahlian ' . $jurusan['nama'], 80) }}</p>
-          <span class="skema-badge">{{ $jurusan['skema_count'] }} Skema</span>
+          <a href="{{ route('front.kompetensi.detail', strtolower($jurusan['kode'])) }}" class="skema-badge skema-badge-link">{{ $jurusan['skema_count'] }} Skema &rarr;</a>
         </div>
       @empty
         <div class="rl-empty text-center py-8 text-gray-500">

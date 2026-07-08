@@ -5,7 +5,7 @@
 @section('content')
 
 <!-- Breadcrumb -->
-<section class="bg-white py-3 sm:py-4">
+<!-- <section class="bg-white py-3 sm:py-4">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="flex items-center gap-2 text-xs sm:text-sm text-gray-600 overflow-x-auto whitespace-nowrap pb-1">
             <a href="{{ route('front.kompetensi.index') }}" class="hover:text-blue-600">Kompetensi</a>
@@ -13,7 +13,7 @@
             <span class="text-gray-900 font-semibold">{{ $jurusan['nama'] }}</span>
         </div>
     </div>
-</section>
+</section> -->
 
 <!-- Header Section -->
 <section class="bg-blue-600 text-white py-8 sm:py-12">
@@ -70,6 +70,42 @@
 
             <!-- Sidebar -->
             <div>
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 gap-4 mb-6">
+                    <!-- Total Asesor -->
+                    <div class="bg-white rounded-xl shadow-sm p-5 flex items-center gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="bi bi-person-badge-fill text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide">Total Asesor</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $jurusan['total_asesor'] }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Total Asesi -->
+                    <div class="bg-white rounded-xl shadow-sm p-5 flex items-center gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="bi bi-people-fill text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide">Total Asesi</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $jurusan['total_asesi'] }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Total Skema -->
+                    <div class="bg-white rounded-xl shadow-sm p-5 flex items-center gap-4">
+                        <div class="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="bi bi-journal-bookmark-fill text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-semibold uppercase tracking-wide">Total Skema</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $jurusan['total_skema'] }}</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Info Card -->
                 <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 lg:sticky lg:top-24">
                     <h3 class="text-lg font-bold text-gray-900 mb-6">Informasi Program</h3>
@@ -90,13 +126,6 @@
                         <hr class="border-gray-200">
 
                         <div>
-                            <p class="text-sm text-gray-600 font-semibold mb-1">DATA ASESI</p>
-                            <p class="text-lg font-bold text-gray-900">{{ $jurusan['jumlah_asesi'] }} Asesi</p>
-                        </div>
-
-                        <hr class="border-gray-200">
-
-                        <div>
                             <p class="text-sm text-gray-600 font-semibold mb-1">STANDAR KOMPETENSI</p>
                             <p class="text-gray-700 text-sm">{{ $jurusan['standar_kompetensi'] }}</p>
                         </div>
@@ -104,7 +133,7 @@
 
                     <!-- Action Button -->
                     <div class="mt-8">
-                        <a href="{{ route('front.kompetensi.index') }}" 
+                        <a href="{{ route('front.home') }}#ruang-lingkup" 
                            class="block w-full text-center px-4 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition">
                             <i class="bi bi-arrow-left mr-2"></i>Kembali
                         </a>
