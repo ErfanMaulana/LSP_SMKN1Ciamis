@@ -40,7 +40,7 @@ class UmpanBalikController extends Controller
         return redirect()->route('asesi.umpan-balik.show', $skema->id);
     }
 
-    public function show(int $skemaId)
+    public function show(Request $request, int $skemaId)
     {
         $account = Auth::guard('account')->user();
         $asesi = $this->getAsesi();
@@ -69,10 +69,16 @@ class UmpanBalikController extends Controller
 
         $totalKomponen = $komponenList->count();
         $totalTerisi = $existing->count();
+        
+        $isEditMode = (bool) $request->query('edit');
         $isCompleted = $totalKomponen > 0 && $totalKomponen === $totalTerisi;
+        if ($isEditMode) {
+            $isCompleted = false;
+        }
+        
         $submittedAt = $existing->max('updated_at');
 
-        return view('asesi.umpan-balik.form', compact('account', 'asesi', 'skema', 'komponenList', 'existing', 'isCompleted', 'submittedAt'));
+        return view('asesi.umpan-balik.form', compact('account', 'asesi', 'skema', 'komponenList', 'existing', 'isCompleted', 'submittedAt', 'isEditMode'));
     }
 
     public function store(Request $request, int $skemaId)

@@ -380,9 +380,12 @@
     </div>
 </div>
 
-<div class="actions" style="margin-top:20px;">
+<div class="actions" style="margin-top:20px; display:flex; gap:10px; align-items:center;">
     <a href="{{ route('asesi.dashboard') }}" class="btn btn-back">
         <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </a>
+    <a href="{{ route('asesi.umpan-balik.show', [$skema->id, 'edit' => 1]) }}" class="btn btn-save">
+        <i class="bi bi-pencil-square"></i> Edit Jawaban
     </a>
 </div>
 @else
@@ -443,9 +446,15 @@
     @endforeach
 
     <div class="actions">
-        <a href="{{ route('asesi.dashboard') }}" class="btn btn-back">
-            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
-        </a>
+        @if(!empty($isEditMode))
+            <a href="{{ route('asesi.umpan-balik.show', $skema->id) }}" class="btn btn-back">
+                <i class="bi bi-x-circle"></i> Batal Edit
+            </a>
+        @else
+            <a href="{{ route('asesi.dashboard') }}" class="btn btn-back">
+                <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+            </a>
+        @endif
         <div style="display:flex; gap:10px; flex-wrap:wrap; margin-left:auto;">
             <button type="submit" name="save_draft" class="btn btn-save">
                 <i class="bi bi-save"></i> Simpan Draft

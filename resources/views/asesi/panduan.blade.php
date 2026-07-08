@@ -318,7 +318,7 @@
     @if(isset($asesi) && method_exists($asesi, 'hasSignedPersetujuanAsesmen') && $asesi->hasSignedPersetujuanAsesmen())
         <a href="{{ route('asesi.jadwal.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Jadwal Ujikom</a>
     @endif
-    <a href="{{ route('asesi.hasil-ujikom.index') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Hasil Asesmen</a>
+    <a href="{{ route('asesi.dashboard') }}" class="quick-link"><i class="bi bi-arrow-right"></i> Hasil Asesmen</a>
 </div>
 
 <div class="notes-card">

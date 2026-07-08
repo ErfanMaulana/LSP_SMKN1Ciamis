@@ -19,7 +19,11 @@
         <td>
             @if(!empty($item->is_pending))
                 <span class="badge" style="background:#fef3c7; color:#d97706; padding:4px 8px; border-radius:6px; font-weight:600; font-size:11px; display:inline-block;">
-                    <i class="bi bi-hourglass-split"></i> Menunggu
+                    <i class="bi bi-hourglass-split"></i> Menunggu Pengisian
+                </span>
+            @elseif(empty($item->ttd_asesi_file))
+                <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:6px; font-weight:600; font-size:11px; display:inline-block;">
+                    <i class="bi bi-clock-history"></i> Menunggu TTD Asesi
                 </span>
             @else
                 <span class="badge" style="background:#d1fae5; color:#059669; padding:4px 8px; border-radius:6px; font-weight:600; font-size:11px; display:inline-block;">

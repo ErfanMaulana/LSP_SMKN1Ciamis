@@ -449,7 +449,7 @@
             @if(!$item->ttd_asesi_file)
             <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Tandatangani & Simpan</button>
             @endif
-            <a href="{{ route('asesi.hasil-ujikom.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+            <a href="{{ route('asesi.dashboard') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
         </div>
     </form>
 </div>

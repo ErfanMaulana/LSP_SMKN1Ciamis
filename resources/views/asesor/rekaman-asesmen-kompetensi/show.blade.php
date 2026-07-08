@@ -24,7 +24,40 @@
     th { background:#f8fafc; color:#334155; font-weight:700; }
     td:first-child, td:nth-child(2) { text-align:left; }
 
-    @media (max-width:768px) { .meta-grid { grid-template-columns:1fr; } }
+    .signature-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+    .signature-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+        background: #f8fafc;
+        text-align: center;
+    }
+    .signature-frame {
+        border: 1px dashed #cbd5e1;
+        border-radius: 8px;
+        width: 150px;
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        margin: 0 auto 12px;
+        overflow: hidden;
+    }
+    .signature-frame img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+
+    @media (max-width:768px) { 
+        .meta-grid { grid-template-columns:1fr; } 
+        .signature-grid { grid-template-columns:1fr; }
+    }
 </style>
 
 <div class="top-actions">
@@ -32,9 +65,15 @@
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
         <a href="{{ route('asesor.rekaman-asesmen-kompetensi.edit', $item->id) }}" class="btn btn-primary"><i class="bi bi-pencil-square"></i> Edit</a>
-        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.export', $item->id) }}" class="btn btn-primary" target="_blank">
-            <i class="bi bi-download"></i> Export FR.AK.02 (.doc)
-        </a>
+        @if(empty($item->ttd_asesi_file) || empty($item->ttd_asesor_file))
+            <button class="btn" style="background:#cbd5e1; color:#94a3b8; cursor:not-allowed;" onclick="alert('Form belum ditandatangani secara lengkap oleh asesi dan asesor.')" title="Belum ditandatangani lengkap">
+                <i class="bi bi-download"></i> Export FR.AK.02 (.doc)
+            </button>
+        @else
+            <a href="{{ route('asesor.rekaman-asesmen-kompetensi.export', $item->id) }}" class="btn btn-primary" target="_blank">
+                <i class="bi bi-download"></i> Export FR.AK.02 (.doc)
+            </a>
+        @endif
     </div>
 </div>
 
@@ -86,6 +125,43 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+<div class="detail-card">
+    <h3 style="margin:0 0 16px; font-size:16px; font-weight:700; color:#0f172a;">Tanda Tangan</h3>
+    <div class="signature-grid">
+        <div class="signature-box">
+            <h4 style="margin:0 0 8px; font-size:14px; font-weight:600; color:#475569;">Tanda Tangan Asesor</h4>
+            <div class="signature-frame">
+                @if($item->ttd_asesor_file)
+                    <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Ttd Asesor">
+                @else
+                    <span style="color:#94a3b8; font-size:13px;">Belum ditandatangani</span>
+                @endif
+            </div>
+            <div style="font-size:13px; color:#334155;">
+                <strong>{{ $item->ttd_asesor_nama ?: ($item->asesor?->nama ?? '-') }}</strong><br>
+                <span style="color:#64748b;">No. Reg: {{ $item->ttd_asesor_no_reg ?: ($item->asesor?->no_met ?? '-') }}</span><br>
+                {{ $item->ttd_asesor_tanggal?->translatedFormat('d F Y') ?: '-' }}
+            </div>
+        </div>
+
+        <div class="signature-box">
+            <h4 style="margin:0 0 8px; font-size:14px; font-weight:600; color:#475569;">Tanda Tangan Asesi</h4>
+            <div class="signature-frame">
+                @if($item->ttd_asesi_file)
+                    <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Ttd Asesi">
+                @else
+                    <span style="color:#94a3b8; font-size:13px;">Belum ditandatangani</span>
+                @endif
+            </div>
+            <div style="font-size:13px; color:#334155;">
+                <strong>{{ $item->ttd_asesi_nama ?: ($item->asesi?->nama ?? '-') }}</strong><br>
+                <span style="color:#64748b;">NIK: {{ $item->asesi_nik }}</span><br>
+                {{ $item->ttd_asesi_tanggal?->translatedFormat('d F Y') ?: '-' }}
+            </div>
+        </div>
     </div>
 </div>
 @endsection

@@ -78,6 +78,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         // Umpan Balik dari Asesi
         Route::get('/umpan-balik', [\App\Http\Controllers\Asesor\UmpanBalikController::class, 'index'])->name('umpan-balik.index');
         Route::get('/umpan-balik/{asesiNik}/{skemaId}', [\App\Http\Controllers\Asesor\UmpanBalikController::class, 'show'])->name('umpan-balik.show');
+        Route::get('/umpan-balik/{asesiNik}/{skemaId}/export', [\App\Http\Controllers\Asesor\UmpanBalikController::class, 'export'])->name('umpan-balik.export');
         
         Route::post('/logout',   [AuthController::class, 'logout'])->name('logout');
     });

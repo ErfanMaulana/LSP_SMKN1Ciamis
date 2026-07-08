@@ -560,8 +560,8 @@
         <div class="field full">
             <label>Rekomendasi Hasil Asesmen</label>
             <div style="display:flex;gap:12px;flex-wrap:wrap;border:1px solid #d1d5db;border-radius:8px;padding:10px 12px;">
-                <label><input type="radio" name="rekomendasi" value="kompeten" {{ old('rekomendasi', $value('rekomendasi', 'belum_kompeten')) === 'kompeten' ? 'checked' : '' }}> Kompeten</label>
-                <label><input type="radio" name="rekomendasi" value="belum_kompeten" {{ old('rekomendasi', $value('rekomendasi', 'belum_kompeten')) === 'belum_kompeten' ? 'checked' : '' }}> Belum Kompeten</label>
+                <label><input type="radio" name="rekomendasi" value="kompeten" {{ old('rekomendasi', $value('rekomendasi', 'kompeten')) === 'kompeten' ? 'checked' : '' }}> Kompeten</label>
+                <label><input type="radio" name="rekomendasi" value="belum_kompeten" {{ old('rekomendasi', $value('rekomendasi', 'kompeten')) === 'belum_kompeten' ? 'checked' : '' }}> Belum Kompeten</label>
             </div>
             @error('rekomendasi')<div class="error-text">{{ $message }}</div>@enderror
         </div>

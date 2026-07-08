@@ -16,41 +16,7 @@ class AkunAsesiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Account::where('role', 'asesi');
-
-        // Search
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('NIK', 'like', "%{$search}%")
-                  ->orWhere('nama', 'like', "%{$search}%");
-            });
-        }
-
-        // Filter status
-        if ($status = $request->input('status')) {
-            if ($status === 'verified') {
-                $query->whereIn('NIK', Asesi::whereNotNull('status')->pluck('NIK'));
-            } elseif ($status === 'unverified') {
-                $query->whereNotIn('NIK', Asesi::whereNotNull('status')->pluck('NIK'));
-            }
-        }
-
-        $accounts = $query->orderBy('created_at', 'desc')->paginate(15);
-
-        // Stats
-        $totalAkun     = Account::where('role', 'asesi')->count();
-        $verified      = Account::where('role', 'asesi')
-            ->whereIn('NIK', Asesi::whereNotNull('status')->pluck('NIK'))->count();
-        $unverified    = $totalAkun - $verified;
-
-        // If AJAX request, return only table rows
-        if ($request->ajax()) {
-            return view('admin.akun-asesi.partials.table-rows', compact('accounts'))->render();
-        }
-
-        return view('admin.akun-asesi.index', compact(
-            'accounts', 'totalAkun', 'verified', 'unverified'
-        ));
+        return redirect()->route('admin.asesi.index', ['tab' => 'akun']);
     }
 
     /**
@@ -78,13 +44,7 @@ class AkunAsesiController extends Controller
 
         $successMsg = 'Akun asesi ' . $request->nama . ' (NIK: ' . $request->NIK . ') berhasil dibuat!';
 
-        // If the form came from the asesi tab, redirect back there
-        if ($request->input('source') === 'asesi_tab') {
-            return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
-                ->with('success', $successMsg);
-        }
-
-        return redirect()->route('admin.akun-asesi.index')
+        return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
             ->with('success', $successMsg);
     }
 
@@ -104,7 +64,7 @@ class AkunAsesiController extends Controller
         $extension    = strtolower($uploadedFile->getClientOriginalExtension());
 
         if (!in_array($extension, ['csv', 'xlsx', 'txt'])) {
-            return redirect()->route('admin.akun-asesi.index')
+            return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
                 ->with('error', 'Format file tidak didukung. Gunakan .xlsx atau .csv.');
         }
 
@@ -113,7 +73,7 @@ class AkunAsesiController extends Controller
         try {
             Excel::import($import, $uploadedFile);
         } catch (\Exception $e) {
-            return redirect()->route('admin.akun-asesi.index')
+            return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
                 ->with('error', 'Gagal membaca file: ' . $e->getMessage());
         }
 
@@ -123,14 +83,7 @@ class AkunAsesiController extends Controller
 
         $type = $import->imported > 0 ? 'success' : 'error';
 
-        // If the form came from the asesi tab, redirect back there
-        if ($request->input('source') === 'asesi_tab') {
-            return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
-                ->with($type, $msg)
-                ->with('import_errors', $import->errors);
-        }
-
-        return redirect()->route('admin.akun-asesi.index')
+        return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
             ->with($type, $msg)
             ->with('import_errors', $import->errors);
     }
@@ -390,7 +343,7 @@ class AkunAsesiController extends Controller
 
         $account->delete();
 
-        return redirect()->route('admin.akun-asesi.index')
+        return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
             ->with('success', 'Akun NIK ' . $account->NIK . ' berhasil dihapus.');
     }
 
@@ -403,7 +356,7 @@ class AkunAsesiController extends Controller
         $account->password = $account->NIK;
         $account->save();
 
-        return redirect()->route('admin.akun-asesi.index')
+        return redirect()->route('admin.asesi.index', ['tab' => 'akun'])
             ->with('success', 'Password akun NIK ' . $account->NIK . ' berhasil direset ke NIK.');
     }
 }

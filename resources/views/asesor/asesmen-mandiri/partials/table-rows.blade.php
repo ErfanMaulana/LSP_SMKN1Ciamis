@@ -6,7 +6,6 @@
                     <th>Asesi</th>
                     <th>NIK</th>
                     <th>Skema</th>
-                    <th>Status</th>
                     <th>Jawaban</th>
                     <th>Rekomendasi</th>
                     <th>Aksi</th>
@@ -18,7 +17,6 @@
                         <td>{{ $row->asesi?->nama ?? '-' }}</td>
                         <td>{{ $row->asesi_nik }}</td>
                         <td>{{ $row->skema?->nama_skema ?? '-' }}</td>
-                        <td>@include('components.asesi-status', ['row' => $row])</td>
                         <td>{{ $row->jawaban_count ? $row->jawaban_count . ' elemen' : 'Belum ada' }}</td>
                         <td>
                             @if($row->rekomendasi === 'lanjut')
