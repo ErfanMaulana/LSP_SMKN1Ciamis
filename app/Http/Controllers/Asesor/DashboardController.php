@@ -55,37 +55,44 @@ class DashboardController extends Controller
 
             $rekamanByAsesiSkema = DB::table('rekaman_asesmen_kompetensi')
                 ->where('asesor_id', $asesor->ID_asesor)
-                ->select(DB::raw("asesi_nik || '|' || skema_id as `asset_key`"), 'id')
+                ->select('asesi_nik', 'skema_id', 'id')
                 ->get()
-                ->pluck('id', 'asset_key');
+                ->pluck('id', function($item) {
+                    return $item->asesi_nik . '|' . $item->skema_id;
+                });
             
             $asesmenByAsesiSkema = DB::table('jawaban_elemens as je')
                 ->join('elemens as e', 'je.elemen_id', '=', 'e.id')
                 ->join('units as u', 'e.unit_id', '=', 'u.id')
                 ->whereIn('je.asesi_nik', $niks)
                 ->whereIn('u.skema_id', $skemaIds)
-                ->select(DB::raw("je.asesi_nik || '|' || u.skema_id as `asset_key`"), 'je.id')
+                ->select('je.asesi_nik', 'u.skema_id', 'je.id')
                 ->get()
-                ->pluck('id', 'asset_key');
+                ->pluck('id', function($item) {
+                    return $item->asesi_nik . '|' . $item->skema_id;
+                });
             
             $penilaianByAsesiSkema = DB::table('asesor_nilai_elemens')
                 ->where('asesor_id', $asesor->ID_asesor)
                 ->whereIn('asesi_nik', $niks)
-                ->select(DB::raw("asesi_nik || '|' || skema_id as `asset_key`"), 'id')
+                ->select('asesi_nik', 'skema_id', 'id')
                 ->get()
-                ->pluck('id', 'asset_key');
+                ->pluck('id', function($item) {
+                    return $item->asesi_nik . '|' . $item->skema_id;
+                });
 
             $ceklisByAsesiSkema = DB::table('ceklis_observasi_aktivitas_praktiks')
                 ->where('asesor_id', $asesor->ID_asesor)
                 ->whereIn('asesi_nik', $niks)
                 ->whereIn('skema_id', $skemaIds)
-                ->select(
-                    DB::raw("MAX(id) as id"),
-                    DB::raw("asesi_nik || '|' || skema_id as `asset_key`")
-                )
-                ->groupBy('asesi_nik', 'skema_id')
+                ->select('id', 'asesi_nik', 'skema_id')
                 ->get()
-                ->pluck('id', 'asset_key');
+                ->groupBy(function($item) {
+                    return $item->asesi_nik . '|' . $item->skema_id;
+                })
+                ->map(function($group) {
+                    return $group->max('id');
+                });
 
             $skemas = Skema::whereIn('id', $skemaIds)->get(['id', 'nomor_skema'])->keyBy('id');
             $nomorSkemas = $skemas->pluck('nomor_skema')->filter()->unique()->values();
@@ -466,37 +473,44 @@ class DashboardController extends Controller
         // Get rekaman, asesmen mandiri, and penilaian counts
         $rekamanByAsesiSkema = DB::table('rekaman_asesmen_kompetensi')
             ->where('asesor_id', $asesor->ID_asesor)
-            ->select(DB::raw("asesi_nik || '|' || skema_id as `asset_key`"), 'id')
+            ->select('asesi_nik', 'skema_id', 'id')
             ->get()
-            ->pluck('id', 'asset_key');
+            ->pluck('id', function($item) {
+                return $item->asesi_nik . '|' . $item->skema_id;
+            });
         
         $asesmenByAsesiSkema = DB::table('jawaban_elemens as je')
             ->join('elemens as e', 'je.elemen_id', '=', 'e.id')
             ->join('units as u', 'e.unit_id', '=', 'u.id')
             ->whereIn('je.asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
             ->whereIn('u.skema_id', $skemaIds)
-            ->select(DB::raw("je.asesi_nik || '|' || u.skema_id as `asset_key`"), 'je.id')
+            ->select('je.asesi_nik', 'u.skema_id', 'je.id')
             ->get()
-            ->pluck('id', 'asset_key');
+            ->pluck('id', function($item) {
+                return $item->asesi_nik . '|' . $item->skema_id;
+            });
         
         $penilaianByAsesiSkema = DB::table('asesor_nilai_elemens')
             ->where('asesor_id', $asesor->ID_asesor)
             ->whereIn('asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
-            ->select(DB::raw("asesi_nik || '|' || skema_id as `asset_key`"), 'id')
+            ->select('asesi_nik', 'skema_id', 'id')
             ->get()
-            ->pluck('id', 'asset_key');
+            ->pluck('id', function($item) {
+                return $item->asesi_nik . '|' . $item->skema_id;
+            });
 
         $ceklisByAsesiSkema = DB::table('ceklis_observasi_aktivitas_praktiks')
             ->where('asesor_id', $asesor->ID_asesor)
             ->whereIn('asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
             ->whereIn('skema_id', $skemaIds)
-            ->select(
-                DB::raw("MAX(id) as id"),
-                DB::raw("asesi_nik || '|' || skema_id as `asset_key`")
-            )
-            ->groupBy('asesi_nik', 'skema_id')
+            ->select('id', 'asesi_nik', 'skema_id')
             ->get()
-            ->pluck('id', 'asset_key');
+            ->groupBy(function($item) {
+                return $item->asesi_nik . '|' . $item->skema_id;
+            })
+            ->map(function($group) {
+                return $group->max('id');
+            });
 
         // Check scheduling for asesi (both direct and via kelompok)
         $scheduledKelompokIds = DB::table('jadwal_kelompok')->pluck('kelompok_id')->unique()->toArray();
@@ -673,6 +687,14 @@ class DashboardController extends Controller
             return view('asesor.penilaian.index', compact('account', 'asesor', 'asesiData', 'sudahDinilai', 'belumDinilai'));
         }
 
+        $rekamanExists = DB::table('rekaman_asesmen_kompetensi')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->whereIn('skema_id', $skemaIds)
+            ->select('asesi_nik', 'skema_id')
+            ->get()
+            ->map(fn($item) => $item->asesi_nik . '_' . $item->skema_id)
+            ->toArray();
+
         // Ambil semua asesi dengan status selesai di skema asesor
         $asesiData = DB::table('asesi_skema as aks')
             ->leftJoinSub(
@@ -702,10 +724,11 @@ class DashboardController extends Controller
             ->where('aks.status', 'selesai')
             ->orderByDesc('aks.tanggal_selesai')
             ->get()
-            ->map(function ($row) use ($asesor) {
+            ->map(function ($row) use ($asesor, $rekamanExists) {
                 $row->asesi = Asesi::where('NIK', $row->asesi_nik)->first();
                 $row->skema = Skema::find($row->skema_id);
                 $row->sudah_dinilai = $row->total_elemen !== null;
+                $row->has_rekaman = in_array($row->asesi_nik . '_' . $row->skema_id, $rekamanExists);
                 return $row;
             });
 
@@ -730,15 +753,20 @@ class DashboardController extends Controller
         }
 
         $target = DB::table('asesi_skema as aks')
+            ->join('rekaman_asesmen_kompetensi as rak', function($join) {
+                $join->on('aks.asesi_nik', '=', 'rak.asesi_nik')
+                     ->on('aks.skema_id', '=', 'rak.skema_id');
+            })
             ->whereIn('aks.skema_id', $skemaIds)
             ->where('aks.status', 'selesai')
+            ->select('aks.*')
             ->orderByRaw("CASE WHEN aks.rekomendasi IS NULL OR aks.rekomendasi = '' THEN 0 ELSE 1 END")
             ->orderByDesc('aks.tanggal_selesai')
             ->first();
 
         if (!$target) {
             return redirect()->route('asesor.entry-penilaian')
-                ->with('error', 'Belum ada asesi dengan status selesai untuk diisi nilainya.');
+                ->with('error', 'Belum ada asesi dengan status selesai dan memiliki Rekaman Asesmen untuk diisi nilainya.');
         }
 
         return redirect()->route('asesor.entry-penilaian.form', $target->asesi_nik);
@@ -761,6 +789,16 @@ class DashboardController extends Controller
             ->first();
 
         abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
+        $hasRekaman = DB::table('rekaman_asesmen_kompetensi')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $pivot->skema_id)
+            ->exists();
+
+        if (!$hasRekaman) {
+            return redirect()->route('asesor.entry-penilaian')
+                ->with('error', 'Form penilaian belum bisa diisi karena Rekaman Asesmen belum dikerjakan.');
+        }
 
         $skema = Skema::with(['units.elemens'])->findOrFail($pivot->skema_id);
         $elemenIds = $skema->units->flatMap(fn($unit) => $unit->elemens->pluck('id'))->values()->all();
@@ -790,6 +828,16 @@ class DashboardController extends Controller
             ->first();
 
         abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
+        $hasRekaman = DB::table('rekaman_asesmen_kompetensi')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $pivot->skema_id)
+            ->exists();
+
+        if (!$hasRekaman) {
+            return redirect()->route('asesor.entry-penilaian')
+                ->with('error', 'Form penilaian belum bisa diisi karena Rekaman Asesmen belum dikerjakan.');
+        }
 
         $skema = Skema::with(['units.elemens'])->findOrFail($pivot->skema_id);
         $elemens = $skema->units->flatMap(fn($unit) => $unit->elemens)->values();
@@ -919,13 +967,14 @@ class DashboardController extends Controller
             ->join('units as u', 'e.unit_id', '=', 'u.id')
             ->whereIn('je.asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
             ->whereIn('u.skema_id', $skemaIds)
-            ->select(
-                DB::raw("COUNT(je.id) as total"),
-                DB::raw("je.asesi_nik || '|' || u.skema_id as `asset_key`")
-            )
-            ->groupBy('je.asesi_nik', 'u.skema_id')
+            ->select('je.asesi_nik', 'u.skema_id', 'je.id')
             ->get()
-            ->pluck('total', 'asset_key');
+            ->groupBy(function($item) {
+                return $item->asesi_nik . '|' . $item->skema_id;
+            })
+            ->map(function($group) {
+                return $group->count();
+            });
 
         $allData = $rows->map(function ($row) use ($asesiMap, $skemaMap, $asesmenByAsesiSkema) {
             $row->asesi = $asesiMap[$row->asesi_nik] ?? null;
