@@ -1060,13 +1060,17 @@
                                             </a>
                                         @endif
                                     @elseif($index === 4 && $row->ceklis && empty($row->ceklis->ttd_asesi_file)) {{-- Ceklis Observasi --}}
-                                        <a href="{{ route('asesi.ceklis-observasi.view', $row->ceklis->id) }}" class="btn-action btn-outline-primary">
-                                            <i class="bi bi-pen"></i> Tanda Tangani Ceklis Observasi
-                                        </a>
+                                        @if(($row->steps[3]['status'] ?? '') === 'completed')
+                                            <a href="{{ route('asesi.ceklis-observasi.view', $row->ceklis->id) }}" class="btn-action btn-outline-primary">
+                                                <i class="bi bi-pen"></i> Tanda Tangani Ceklis Observasi
+                                            </a>
+                                        @endif
                                     @elseif($index === 5 && $row->rekaman && empty($row->rekaman->ttd_asesi_file)) {{-- Rekaman Asesmen --}}
-                                        <a href="{{ route('asesi.rekaman-asesmen.view', $row->rekaman->id) }}" class="btn-action btn-outline-primary">
-                                            <i class="bi bi-pen"></i> Tanda Tangani Rekaman Asesmen
-                                        </a>
+                                        @if(($row->steps[4]['status'] ?? '') === 'completed')
+                                            <a href="{{ route('asesi.rekaman-asesmen.view', $row->rekaman->id) }}" class="btn-action btn-outline-primary">
+                                                <i class="bi bi-pen"></i> Tanda Tangani Rekaman Asesmen
+                                            </a>
+                                        @endif
                                     @endif
                                 @endif
                             </div>
