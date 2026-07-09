@@ -137,19 +137,46 @@ class AuthController extends Controller
                 'label' => 'Terverifikasi',
                 'description' => 'Berkas pendaftaran Anda telah diverifikasi oleh admin.'
             ];
+            $isStep1Completed = true;
 
             // 2. Asesmen Mandiri
             $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
+            $isStep2Completed = $isMandiriSelesai;
             $stepMandiri = [
                 'name' => 'Asesmen Mandiri (FR.APL.02)',
-                'status' => $isMandiriSelesai ? 'completed' : 'pending',
+                'status' => $isStep2Completed ? 'completed' : 'pending',
                 'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
                 'description' => $isMandiriSelesai 
                     ? 'Anda telah menyelesaikan pengisian form asesmen mandiri.'
                     : 'Silakan isi form asesmen mandiri terlebih dahulu.'
             ];
 
-            // 3. Persetujuan Asesmen
+            // 3. Jadwal Ujikom (Evaluated before Persetujuan for sequential calculation)
+            $jadwal = \DB::table('jadwal_peserta')
+                ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
+                ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
+                ->where('jadwal_ujikom.skema_id', $skema->id)
+                ->select('jadwal_ujikom.*')
+                ->first();
+
+            $isJadwalSelesai = (bool)$jadwal;
+            $isStep3Completed = $isJadwalSelesai && $isStep2Completed;
+            
+            $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
+            if ($isJadwalSelesai) {
+                $tukName = \DB::table('tuk')->where('id', $jadwal->tuk_id)->value('nama_tuk') ?? 'TUK';
+                $tglMulai = $jadwal->tanggal_mulai ? \Carbon\Carbon::parse($jadwal->tanggal_mulai)->locale('id')->isoFormat('D MMMM YYYY') : '-';
+                $jadwalDesc = 'Jadwal Anda: ' . $tglMulai . ' di ' . $tukName;
+            }
+
+            $stepJadwal = [
+                'name' => 'Jadwal Uji Kompetensi',
+                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
+                'description' => $jadwalDesc
+            ];
+
+            // 4. Persetujuan Asesmen (Evaluated after Jadwal)
             $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
             $persetujuan = \DB::table('persetujuan_asesmen')
                 ->where('nomor_skema', $skema->nomor_skema)
@@ -162,6 +189,7 @@ class AuthController extends Controller
                 ->first();
 
             $isPersetujuanSelesai = $persetujuan && !empty($persetujuan->ttd_asesi_nama) && !empty($persetujuan->ttd_asesor_nama);
+            $isStep4Completed = $isPersetujuanSelesai && $isStep3Completed;
             $isPersetujuanReady = (bool)(
                 $persetujuan 
                 && !empty($persetujuan->ttd_asesor_nama) 
@@ -179,36 +207,12 @@ class AuthController extends Controller
             );
             $stepPersetujuan = [
                 'name' => 'Persetujuan Asesmen (FR.APL.03)',
-                'status' => $isPersetujuanSelesai ? 'completed' : 'pending',
+                'status' => $isStep4Completed ? 'completed' : 'pending',
                 'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
                 'description' => $isPersetujuanSelesai 
                     ? 'Persetujuan asesmen telah disepakati dan ditandatangani oleh Anda dan Asesor.'
                     : 'Harap periksa dan tandatangani dokumen persetujuan asesmen.',
-                'is_ready' => $isPersetujuanReady
-            ];
-
-            // 4. Jadwal Ujikom
-            $jadwal = \DB::table('jadwal_peserta')
-                ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
-                ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
-                ->where('jadwal_ujikom.skema_id', $skema->id)
-                ->select('jadwal_ujikom.*')
-                ->first();
-
-            $isJadwalSelesai = (bool)$jadwal;
-            
-            $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
-            if ($isJadwalSelesai) {
-                $tukName = \DB::table('tuk')->where('id', $jadwal->tuk_id)->value('nama_tuk') ?? 'TUK';
-                $tglMulai = $jadwal->tanggal_mulai ? \Carbon\Carbon::parse($jadwal->tanggal_mulai)->locale('id')->isoFormat('D MMMM YYYY') : '-';
-                $jadwalDesc = 'Jadwal Anda: ' . $tglMulai . ' di ' . $tukName;
-            }
-
-            $stepJadwal = [
-                'name' => 'Jadwal Uji Kompetensi',
-                'status' => $isJadwalSelesai ? 'completed' : 'pending',
-                'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
-                'description' => $jadwalDesc
+                'is_ready' => $isPersetujuanReady && $isStep3Completed
             ];
 
             // 5. Penilaian / Ceklis Observasi
@@ -218,6 +222,7 @@ class AuthController extends Controller
                 ->first();
 
             $isPenilaianSelesai = $ceklis && !empty($ceklis->ttd_asesi_file) && !empty($ceklis->ttd_asesor_file);
+            $isStep5Completed = $isPenilaianSelesai && $isStep4Completed;
             
             $penilaianLabel = 'Belum Dinilai';
             $penilaianDesc = 'Menunggu penilaian observasi praktik dari Asesor.';
@@ -233,7 +238,7 @@ class AuthController extends Controller
 
             $stepPenilaian = [
                 'name' => 'Penilaian & Ceklis Observasi (FR.IA.01)',
-                'status' => $isPenilaianSelesai ? 'completed' : 'pending',
+                'status' => $isStep5Completed ? 'completed' : 'pending',
                 'label' => $penilaianLabel,
                 'description' => $penilaianDesc
             ];
@@ -245,6 +250,7 @@ class AuthController extends Controller
                 ->first();
 
             $isRekamanSelesai = $rekaman && !empty($rekaman->ttd_asesi_file) && !empty($rekaman->ttd_asesor_file);
+            $isStep6Completed = $isRekamanSelesai && $isStep5Completed;
 
             $rekamanLabel = 'Belum Diisi';
             $rekamanDesc = 'Menunggu pengisian rekaman asesmen dari Asesor.';
@@ -260,13 +266,13 @@ class AuthController extends Controller
 
             $stepRekaman = [
                 'name' => 'Rekaman Asesmen (FR.AK.02)',
-                'status' => $isRekamanSelesai ? 'completed' : 'pending',
+                'status' => $isStep6Completed ? 'completed' : 'pending',
                 'label' => $rekamanLabel,
                 'description' => $rekamanDesc
             ];
 
             // Check if all are completed
-            $allCompleted = $isMandiriSelesai && $isPersetujuanSelesai && $isJadwalSelesai && $isPenilaianSelesai && $isRekamanSelesai;
+            $allCompleted = $isStep6Completed;
 
             $hasilUjikom[] = (object)[
                 'skema_id' => $skema->id,
