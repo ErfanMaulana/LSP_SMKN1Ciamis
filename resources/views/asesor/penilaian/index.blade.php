@@ -266,9 +266,15 @@
                                 <td><span class="badge-status pending"><i class="bi bi-hourglass-split"></i> Belum Dinilai</span></td>
                                 <td>
                                     @if(!empty($row->asesi_nik))
-                                        <a href="{{ route('asesor.entry-penilaian.form', ['asesiNik' => $row->asesi_nik]) }}" class="btn-link">
-                                            <i class="bi bi-pencil-square"></i> Input Nilai
-                                        </a>
+                                        @if(!empty($row->has_rekaman))
+                                            <a href="{{ route('asesor.entry-penilaian.form', ['asesiNik' => $row->asesi_nik]) }}" class="btn-link">
+                                                <i class="bi bi-pencil-square"></i> Input Nilai
+                                            </a>
+                                        @else
+                                            <span class="btn-link disabled" style="opacity: 0.6; cursor: not-allowed; text-decoration: none; color: #64748b;" title="Lengkapi Rekaman Asesmen terlebih dahulu">
+                                                <i class="bi bi-lock-fill"></i> Input Nilai
+                                            </span>
+                                        @endif
                                     @else
                                         <span style="color:#94a3b8;">-</span>
                                     @endif
@@ -329,9 +335,15 @@
                                 </td>
                                 <td>
                                     @if(!empty($row->asesi_nik))
-                                        <a href="{{ route('asesor.entry-penilaian.form', ['asesiNik' => $row->asesi_nik]) }}" class="btn-link">
-                                            <i class="bi bi-pencil-square"></i> Edit
-                                        </a>
+                                        @if(!empty($row->has_rekaman))
+                                            <a href="{{ route('asesor.entry-penilaian.form', ['asesiNik' => $row->asesi_nik]) }}" class="btn-link">
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </a>
+                                        @else
+                                            <span class="btn-link disabled" style="opacity: 0.6; cursor: not-allowed; text-decoration: none; color: #64748b;" title="Lengkapi Rekaman Asesmen terlebih dahulu">
+                                                <i class="bi bi-lock-fill"></i> Edit
+                                            </span>
+                                        @endif
                                     @else
                                         <span style="color:#94a3b8;">-</span>
                                     @endif
