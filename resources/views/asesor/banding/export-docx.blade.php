@@ -332,12 +332,12 @@
                 </td>
             </tr>
             <!-- Pemohon Banding (Asesi) Header -->
-            <tr>
+            <!-- <tr>
                 <td colspan="3"
                     style="border: 1px solid #000; border-top: 2px solid #000; font-weight: normal; padding: 4px 8px; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
                     Pemohon Banding (Asesi) :
                 </td>
-            </tr>
+            </tr> -->
             <!-- Pemohon Banding Details & Signature -->
             <tr>
                 <td colspan="3" style="border: 1px solid #000; padding: 0; vertical-align: top;">
@@ -348,7 +348,7 @@
                             <col style="width: 1.37%;">
                             <col style="width: 65.93%;">
                         </colgroup>
-                        <tr>
+                        <!-- <tr>
                             <td
                                 style="padding: 4px 8px; border: none; border-bottom: 1px solid #000; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
                                 Nama</td>
@@ -359,7 +359,7 @@
                                 style="padding: 4px 8px; border: none; border-bottom: 1px solid #000; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
                                 {{ $banding->ttd_asesi_nama ?? $asesi->nama ?? '' }}
                             </td>
-                        </tr>
+                        </tr> -->
                         <tr>
                             <td
                                 style="padding: 6px 8px; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">

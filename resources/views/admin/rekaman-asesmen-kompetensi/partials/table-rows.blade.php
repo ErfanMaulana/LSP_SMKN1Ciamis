@@ -29,6 +29,9 @@
                         <a href="{{ route('admin.rekaman-asesmen-kompetensi.show', $item->id) }}" class="dropdown-item">
                             <i class="bi bi-eye"></i> Lihat
                         </a>
+                        <a href="{{ route('admin.rekaman-asesmen-kompetensi.export', $item->id) }}" class="dropdown-item">
+                            <i class="bi bi-download"></i> Export FR.AK.02 (.doc)
+                        </a>
 
                         <!-- @if(Auth::guard('admin')->user()->hasPermission('rekaman-asesmen-kompetensi.edit'))
                             <a href="{{ route('admin.rekaman-asesmen-kompetensi.edit', $item->id) }}" class="dropdown-item">

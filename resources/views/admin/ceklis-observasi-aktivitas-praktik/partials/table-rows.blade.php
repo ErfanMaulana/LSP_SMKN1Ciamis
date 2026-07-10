@@ -29,6 +29,9 @@
                         <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.show', $item->id) }}" class="dropdown-item">
                             <i class="bi bi-eye"></i> Lihat
                         </a>
+                        <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.export', $item->id) }}" class="dropdown-item">
+                            <i class="bi bi-download"></i> Export FR.IA.01 (.doc)
+                        </a>
 
                         <!-- @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.edit'))
                             <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.edit', $item->id) }}" class="dropdown-item">

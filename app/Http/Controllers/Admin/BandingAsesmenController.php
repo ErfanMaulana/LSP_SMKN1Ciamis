@@ -65,7 +65,7 @@ class BandingAsesmenController extends Controller
         return view('admin.banding-asesmen.show', compact('banding', 'komponen', 'jawabanMap'));
     }
 
-    public function downloadPdf(int $id)
+    public function export(int $id)
     {
         $banding = BandingAsesmen::with([
             'asesi.jurusan',
@@ -75,20 +75,61 @@ class BandingAsesmenController extends Controller
             'jawaban.komponen',
         ])->findOrFail($id);
 
-        $komponen = BandingAsesmenKomponen::orderBy('urutan')->orderBy('id')->get();
-        $jawabanMap = $banding->jawaban->keyBy('komponen_id');
-        $rekomendasiAsesmen = DB::table('asesi_skema')
+        $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $banding->asesi_nik)
             ->where('skema_id', $banding->skema_id)
-            ->value('rekomendasi');
+            ->first();
 
-        $pdf = Pdf::loadView('admin.banding-asesmen.pdf', compact('banding', 'komponen', 'jawabanMap', 'rekomendasiAsesmen'))
-            ->setPaper('a4', 'portrait');
+        if (empty($banding->ttd_asesi_file)) {
+            return redirect()->back()->with('error', 'Form FR.AK.04 belum dapat diexport karena asesi belum menandatangani pengajuan banding.');
+        }
 
-        $asesiNik = preg_replace('/[^A-Za-z0-9_-]/', '', (string) $banding->asesi_nik) ?: 'asesi';
-        $tanggal = now()->format('Ymd');
+        $komponen = BandingAsesmenKomponen::where('is_active', true)
+            ->orderBy('urutan')
+            ->orderBy('id')
+            ->get();
 
-        return $pdf->download("FR_AK_04_Banding_Asesmen_{$asesiNik}_{$tanggal}.pdf");
+        $existingJawaban = $banding->jawaban->keyBy('komponen_id');
+
+        $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+
+        $ttdAsesiDataUri = null;
+        if (!empty($banding->ttd_asesi_file)) {
+            if (str_starts_with($banding->ttd_asesi_file, 'data:image')) {
+                $ttdAsesiDataUri = $banding->ttd_asesi_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($banding->ttd_asesi_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesiDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $html = view('asesor.banding.export-docx', [
+            'asesor' => $banding->asesor,
+            'asesi' => $banding->asesi,
+            'skema' => $banding->skema,
+            'pivot' => $pivot,
+            'komponen' => $komponen,
+            'banding' => $banding,
+            'existingJawaban' => $existingJawaban,
+            'logoPath' => $logoPath,
+            'logoDataUri' => $logoDataUri,
+            'ttdAsesiDataUri' => $ttdAsesiDataUri,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($banding->skema?->nomor_skema ?? $banding->skema_id));
+        $fileName = 'FR.AK.04-' . ($banding->asesi_nik ?? 'asesi') . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 
     public function review(Request $request, int $id)

@@ -49,7 +49,7 @@ class AsesmenMandiriController extends Controller
             $query->where('asesi_skema.skema_id', $skemaId);
         }
 
-        $query->orderByRaw("FIELD(asesi_skema.status, 'selesai', 'sedang_mengerjakan', 'belum_mulai')");
+        $query->orderByRaw("CASE asesi_skema.status WHEN 'selesai' THEN 1 WHEN 'sedang_mengerjakan' THEN 2 WHEN 'belum_mulai' THEN 3 ELSE 4 END");
         $query->orderBy('asesi_skema.updated_at', 'desc');
 
         $data = $query->paginate(15)->withQueryString();
@@ -141,5 +141,58 @@ class AsesmenMandiriController extends Controller
             DB::rollBack();
             return redirect()->route('admin.asesmen-mandiri.index')->with('error', 'Gagal mereset asesmen: ' . $e->getMessage());
         }
+    }
+
+    public function export($asesiNik, $skemaId)
+    {
+        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+        $skema = Skema::with([
+            'units' => fn($query) => $query->orderBy('id'),
+            'units.elemens' => fn($query) => $query->orderBy('id'),
+            'units.elemens.kriteria' => fn($query) => $query->orderBy('urutan')->orderBy('id'),
+        ])->findOrFail($skemaId);
+
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        if (!$pivot) {
+            abort(404, 'Data asesmen tidak ditemukan.');
+        }
+
+        $answers = JawabanElemen::where('asesi_nik', $asesiNik)
+            ->whereHas('elemen.unit', fn ($q) => $q->where('skema_id', $skemaId))
+            ->get()
+            ->keyBy('elemen_id');
+
+        $asesor = null;
+        if ($pivot->reviewed_by) {
+            $asesor = \App\Models\Asesor::where('no_met', $pivot->reviewed_by)->first();
+        }
+
+        $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+
+        $html = view('asesor.asesmen-mandiri.export-fr-apl-02', [
+            'asesi' => $asesi,
+            'asesor' => $asesor,
+            'skema' => $skema,
+            'answers' => $answers,
+            'pivot' => $pivot,
+            'logoPath' => $logoPath,
+            'logoDataUri' => $logoDataUri,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
+        $fileName = 'FR.APL.02-' . $asesi->NIK . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 }

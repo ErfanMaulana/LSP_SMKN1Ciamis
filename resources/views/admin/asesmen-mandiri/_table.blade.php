@@ -55,6 +55,9 @@
                         </button>
                         <div class="action-menu" style="display:none;position:absolute;right:0;top:28px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-shadow:0 4px 12px rgba(2,6,23,0.08);z-index:50;min-width:160px;overflow:hidden;">
                             <a href="{{ route('admin.asesmen-mandiri.show', [$item->NIK, $item->skema_id]) }}" class="action-item" style="display:block;padding:10px 12px;color:#0f172a;text-decoration:none;">Lihat Detail</a>
+                            @if($item->status === 'selesai')
+                                <a href="{{ route('admin.asesmen-mandiri.export', [$item->NIK, $item->skema_id]) }}" class="action-item" style="display:block;padding:10px 12px;color:#0f172a;text-decoration:none;">Export FR.APL.02 (.doc)</a>
+                            @endif
                             <form method="POST" action="{{ route('admin.asesmen-mandiri.reset', [$item->NIK, $item->skema_id]) }}"
                                   onsubmit="return openMandiriDeleteModal(event, this, @js('Apakah Anda yakin menghapus / reset asesmen mandiri asesi \'' . $item->asesi_nama . '\'? Semua jawaban akan dihapus.'))" style="margin:0;">
                                 @csrf

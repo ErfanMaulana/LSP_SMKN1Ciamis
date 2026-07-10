@@ -20,6 +20,9 @@
                         <a href="{{ route('admin.persetujuan-asesmen.show', $item->id) }}">
                             <i class="bi bi-eye"></i> Lihat Detail
                         </a>
+                        <a href="{{ route('admin.persetujuan-asesmen.export', $item->id) }}">
+                            <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
+                        </a>
 
                         <!-- @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.edit'))
                             <a href="{{ route('admin.persetujuan-asesmen.edit', $item->id) }}">
