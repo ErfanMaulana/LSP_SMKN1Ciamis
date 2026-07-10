@@ -90,7 +90,7 @@
         font-size: 13px;
         text-align: center;
     }
-    .nilai-input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+    .nilai-input:focus { outline: none; border-color: #0073bd; box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
     .status-badge {
         display: inline-flex;
         min-width: 44px;

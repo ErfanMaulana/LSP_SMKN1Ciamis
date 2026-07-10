@@ -187,13 +187,14 @@
 <body>
     <table style="margin-bottom:12px; table-layout:fixed; width:100%;">
         <tr>
-            <td class="no-border" style="width:56px; padding:0; vertical-align:middle;">
+            <!-- <td class="no-border" style="width:56px; padding:0; vertical-align:middle;">
                 @if(!empty($logoDataUri) || (!empty($logoPath) && file_exists($logoPath)))
                     <img src="{{ $logoDataUri ?? $logoPath }}" alt="Logo" width="44" height="44"
                         style="width:44px; height:44px; object-fit:contain; display:block; margin:0 auto;">
                 @endif
             </td>
-            <td class="no-border" style="padding:0 0 0 8px; vertical-align:middle;">
+            <td class="no-border" style="padding:0 0 0 8px; vertical-align:middle;"> -->
+            <td class="no-border" style="padding:0; vertical-align:middle;">
                 <div
                     style="font-family: Calibri, Arial, sans-serif; font-size: 12pt; font-weight: bold; text-transform: uppercase; margin:0; line-height:1.25;">
                     FR.AK.04. &nbsp;&nbsp; BANDING ASESMEN

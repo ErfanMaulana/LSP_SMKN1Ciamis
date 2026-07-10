@@ -189,7 +189,7 @@
         justify-content: center;
         gap: 6px;
         background: #e0f2fe;
-        color: #0c4a6e;
+        color: #0073bd;
         padding: 6px 12px;
         border-radius: 8px;
         font-size: 12px;
@@ -198,7 +198,7 @@
         transition: background 0.2s;
         white-space: nowrap;
     }
-    .btn-review:hover { background: #bae6fd; color: #0c4a6e; }
+    .btn-review:hover { background: #bae6fd; color: #0073bd; }
     .btn-review.disabled {
         background: #e2e8f0;
         color: #64748b;

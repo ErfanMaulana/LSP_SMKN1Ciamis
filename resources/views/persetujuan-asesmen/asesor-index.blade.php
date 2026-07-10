@@ -135,20 +135,23 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
-        background: #0073bd;
-        color: white;
+        background: #e0f2fe;
+        color: #0073bd;
         padding: 6px 12px;
         border-radius: 8px;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 700;
         text-decoration: none;
         transition: background 0.2s;
         white-space: nowrap;
     }
-    .btn-review:hover { background: #005f9a; color: white; }
+    .btn-review:hover {
+        background: #bae6fd;
+        color: #0073bd;
+    }
     .btn-review.disabled {
         background: #e2e8f0;
-        color: #64748b;
+        color: #94a3b8;
         pointer-events: none;
     }
 

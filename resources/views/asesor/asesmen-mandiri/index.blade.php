@@ -237,7 +237,7 @@
         padding: 6px 12px;
         border-radius: 8px;
         background: #e0f2fe;
-        color: #0c4a6e;
+        color: #0073bd;
         text-decoration: none;
         font-size: 12px;
         font-weight: 700;
@@ -245,7 +245,7 @@
 
     .btn-review:hover {
         background: #bae6fd;
-        color: #0c4a6e;
+        color: #0073bd;
     }
 
     .btn-review.disabled {
@@ -329,10 +329,10 @@
 </div>
 
 <div class="stats-grid">
-    <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'menunggu_review', 'search' => $search]) }}" class="stat-card {{ $status === 'menunggu_review' ? 'active' : '' }}">
+    <!-- <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'menunggu_review', 'search' => $search]) }}" class="stat-card {{ $status === 'menunggu_review' ? 'active' : '' }}">
         <div class="stat-value">{{ $summary['pending_review'] ?? 0 }}</div>
         <div class="stat-label">Menunggu Review</div>
-    </a>
+    </a> -->
     <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'belum_dikerjakan', 'search' => $search]) }}" class="stat-card {{ $status === 'belum_dikerjakan' ? 'active' : '' }}">
         <div class="stat-value">{{ $summary['belum_dikerjakan'] ?? 0 }}</div>
         <div class="stat-label">Belum Dikerjakan</div>

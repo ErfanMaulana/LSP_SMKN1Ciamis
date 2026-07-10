@@ -126,12 +126,12 @@
 
     .btn-review {
         display: inline-flex; align-items: center; gap: 5px;
-        background: #e0f2fe; color: #0c4a6e;
+        background: #e0f2fe; color: #0073bd;
         padding: 5px 14px; border-radius: 6px;
         font-size: 12px; font-weight: 700; text-decoration: none;
         transition: background 0.2s;
     }
-    .btn-review:hover { background: #bae6fd; color: #0c4a6e; }
+    .btn-review:hover { background: #bae6fd; color: #0073bd; }
 
     .empty-state {
         text-align: center; padding: 50px 20px; color: #94a3b8;

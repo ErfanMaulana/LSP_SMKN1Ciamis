@@ -90,13 +90,14 @@
 <body>
     <table style="margin-bottom:8px; table-layout:fixed;">
         <tr>
-            <td class="no-border" style="width:56px; padding:0; vertical-align:middle;">
+            <!-- <td class="no-border" style="width:56px; padding:0; vertical-align:middle;">
                 @if(!empty($logoDataUri) || (!empty($logoPath) && file_exists($logoPath)))
                     <img src="{{ $logoDataUri ?? $logoPath }}" alt="Logo" width="44" height="44"
                         style="width:44px; height:44px; object-fit:contain; display:block; margin:0 auto;">
                 @endif
             </td>
-            <td class="no-border" style="padding:0 0 0 8px; vertical-align:middle;">
+            <td class="no-border" style="padding:0 0 0 8px; vertical-align:middle;"> -->
+            <td class="no-border" style="padding:0; vertical-align:middle;">
                 <div class="title" style="margin:0; text-transform: uppercase;">FR.AK.03. UMPAN BALIK DAN CATATAN
                     ASESMEN</div>
             </td>
