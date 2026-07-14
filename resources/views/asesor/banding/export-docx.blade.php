@@ -212,7 +212,7 @@
         </colgroup>
         <tbody>
             <!-- Nama Asesi -->
-            <tr>
+            <!-- <tr>
                 <td colspan="3" style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">
                     <table style="width: 100%; border-collapse: collapse; border: none;">
                         <tr>
@@ -229,7 +229,7 @@
                         </tr>
                     </table>
                 </td>
-            </tr>
+            </tr> -->
             <!-- Nama Asesor -->
             <tr>
                 <td colspan="3" style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">
@@ -339,7 +339,7 @@
                 </td>
             </tr> -->
             <!-- Pemohon Banding Details & Signature -->
-            <tr>
+            <!-- <tr>
                 <td colspan="3" style="border: 1px solid #000; padding: 0; vertical-align: top;">
                     <table
                         style="width: 100%; border-collapse: collapse; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
@@ -347,7 +347,7 @@
                             <col style="width: 32.70%;">
                             <col style="width: 1.37%;">
                             <col style="width: 65.93%;">
-                        </colgroup>
+                        </colgroup> -->
                         <!-- <tr>
                             <td
                                 style="padding: 4px 8px; border: none; border-bottom: 1px solid #000; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
@@ -360,7 +360,7 @@
                                 {{ $banding->ttd_asesi_nama ?? $asesi->nama ?? '' }}
                             </td>
                         </tr> -->
-                        <tr>
+                        <!-- <tr>
                             <td
                                 style="padding: 6px 8px; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
                                 Tanda tangan dan Tanggal</td>
@@ -392,7 +392,7 @@
                                     </tr>
                                 </table>
                             </td>
-                        </tr>
+                        </tr> -->
                     </table>
                 </td>
             </tr>

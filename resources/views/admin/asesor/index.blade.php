@@ -16,6 +16,25 @@
         </a>
     </div>
 
+    @if(session('import_errors') && count(session('import_errors')))
+        <div style="background:#fff;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.15);padding:16px 20px;margin-bottom:20px;border-left:4px solid #f59e0b;">
+            <div style="display:flex;align-items:start;gap:12px;">
+                <div style="width:36px;height:36px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-exclamation-triangle-fill" style="color:#f59e0b;font-size:18px;"></i>
+                </div>
+                <div style="flex:1;">
+                    <div style="font-weight:600;color:#1e293b;font-size:13px;margin-bottom:6px;">Catatan Import Data Asesor</div>
+                    <ul style="margin:0;padding-left:16px;line-height:1.7;color:#64748b;font-size:12px;max-height:220px;overflow:auto;">
+                        @foreach(session('import_errors') as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @endif
+
+
     <!-- Statistics Cards -->
     <div class="stats-grid">
         <a href="{{ route('admin.asesor.index') }}" class="stat-card {{ $cardFilter == '' ? 'stat-card-active' : '' }}">
@@ -75,6 +94,15 @@
                 </div>
             </div>
             </form>
+
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:14px;">
+                <button type="button" class="btn btn-primary" id="asesor-import-btn" onclick="openAsesorImportModal()">
+                    <i class="bi bi-file-earmark-arrow-up"></i> Import Excel/CSV
+                </button>
+                <button type="button" class="btn btn-outline" id="asesor-export-btn" onclick="openAsesorExportModal()">
+                    <i class="bi bi-download"></i> Export Data Asesor
+                </button>
+            </div>
 
             <!-- Table -->
             <div class="table-container">
@@ -207,6 +235,105 @@
     </div>
 </div>
 
+<!-- ASESOR EXPORT MODAL -->
+<div id="asesor-export-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:14px;padding:28px;width:100%;max-width:520px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <h3 style="font-size:17px;font-weight:700;color:#1e293b;margin:0;">
+                <i class="bi bi-download" style="color:#0073bd;"></i> Export Data Asesor
+            </h3>
+            <button onclick="closeAsesorExportModal()" style="background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+
+        <form id="asesor-export-form" action="{{ route('admin.asesor.export') }}" method="GET">
+            <div style="margin-bottom:14px;">
+                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#374151;">Filter Skema (bisa pilih lebih dari satu)</label>
+                <div id="asesor-export-skema-dropdown" style="position:relative;">
+                    <button type="button" id="asesor-export-skema-toggle"
+                            style="width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;background:#fff;cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;">
+                        <span id="asesor-export-skema-toggle-text">Semua skema</span>
+                        <i class="bi bi-chevron-down" style="color:#64748b;"></i>
+                    </button>
+                    <div id="asesor-export-skema-menu"
+                         style="display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:20;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:6px;box-shadow:0 8px 24px rgba(15,23,42,.15);min-width:100%;">
+                        <div style="padding:4px 4px 6px;">
+                            <input type="text" id="asesor-export-skema-search" placeholder="Cari skema..." autocomplete="off"
+                                   style="width:100%;padding:8px 10px;border:1px solid #dbe3ee;border-radius:7px;font-size:13px;outline:none;">
+                        </div>
+                        <label style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;background:#f0f9ff;">
+                            <input type="checkbox" id="asesor-export-skema-all-cb" style="width:16px;height:16px;accent-color:#0073bd;" checked>
+                            <span style="font-size:13px;font-weight:600;color:#0073bd;">Semua Skema</span>
+                        </label>
+                        <div style="height:1px;background:#e2e8f0;margin:4px 0;"></div>
+                        <div id="asesor-export-skema-options" style="max-height:160px;overflow-y:auto;">
+                            @foreach($skemaList as $skema)
+                                <label class="asesor-export-skema-item"
+                                       data-label="{{ strtolower($skema->nama_skema) }}"
+                                       style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;width:100%;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                    <input type="checkbox" name="skema[]" class="asesor-export-skema-option"
+                                           value="{{ $skema->id }}" data-label="{{ $skema->nama_skema }}" style="flex-shrink:0;">
+                                    <span style="font-size:13px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;">{{ $skema->nama_skema }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                <small style="color:#64748b;font-size:12px;display:block;margin-top:4px;">Klik untuk pilih lebih dari satu skema.</small>
+                <div id="asesor-export-skema-badges" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;"></div>
+            </div>
+
+            <div style="background:#eff6ff;border-left:3px solid #0073bd;padding:10px 14px;border-radius:6px;margin-bottom:16px;font-size:12px;color:#0f3a5f;line-height:1.6;">
+                Export memakai kolom: <strong>No, Nama Asesor, No. Met, Skema</strong>.
+                Filter skema dapat dipakai untuk membatasi data yang diekspor.
+            </div>
+
+            <div style="display:flex;gap:10px;">
+                <button type="button" onclick="closeAsesorExportModal()" style="flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-size:14px;font-weight:600;cursor:pointer;color:#64748b;">Batal</button>
+                <button id="asesor-export-submit-btn" type="submit"
+                        style="flex:2;padding:10px;border-radius:8px;border:none;background:#0073bd;color:white;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="bi bi-file-earmark-excel"></i> Export XLSX
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ASESOR IMPORT MODAL -->
+<div id="asesor-import-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:14px;padding:28px;width:100%;max-width:520px;margin:16px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <h3 style="font-size:17px;font-weight:700;color:#1e293b;margin:0;">
+                <i class="bi bi-file-earmark-arrow-up" style="color:#16a34a;"></i> Import Data Asesor
+            </h3>
+            <button onclick="closeAsesorImportModal()" style="background:none;border:none;font-size:20px;color:#94a3b8;cursor:pointer;line-height:1;">&times;</button>
+        </div>
+        <form id="asesor-import-form" action="{{ route('admin.asesor.import') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div id="asesor-import-drop" onclick="document.getElementById('asesor-import-file').click()"
+                 style="border:2px dashed #d1d5db;border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:#fafafa;margin-bottom:16px;">
+                <i class="bi bi-cloud-upload" style="font-size:36px;color:#9ca3af;display:block;margin-bottom:8px;"></i>
+                <p style="font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Klik atau seret file ke sini</p>
+                <p style="font-size:11px;color:#9ca3af;">.xlsx atau .csv &bull; Maks 5 MB</p>
+                <p id="asesor-import-file-label" style="margin-top:8px;font-size:12px;font-weight:600;color:#16a34a;display:none;"></p>
+            </div>
+            <input type="file" id="asesor-import-file" name="file" accept=".xlsx,.csv" style="display:none;" onchange="onAsesorImportFileChange(this)" required>
+            <div style="background:#f0fdf4;border-left:3px solid #14532d;padding:10px 14px;border-radius:6px;margin-bottom:12px;font-size:12px;color:#14532d;line-height:1.7;">
+                <strong>Format kolom:</strong> Kolom A = Nama Asesor &bull; Kolom B = No. Met &bull; Kolom C = Skema (pisahkan dengan koma jika lebih dari satu)<br>
+                Password default akun = No. Met.<br>
+                <a href="{{ route('admin.asesor.template') }}" style="color:#14532d;font-weight:700;text-decoration:underline;">
+                    <i class="bi bi-download"></i> Download template XLSX
+                </a>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button type="button" onclick="closeAsesorImportModal()" style="flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;background:white;font-size:14px;font-weight:600;cursor:pointer;color:#64748b;">Batal</button>
+                <button id="asesor-import-submit-btn" type="submit" style="flex:2;padding:10px;border-radius:8px;border:none;background:#14532d;color:white;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+                    <i class="bi bi-upload"></i> Upload &amp; Import
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <style>
     .asesor-management {
         padding: 0;
@@ -253,6 +380,18 @@
 
     .btn-primary:hover {
         background: #005f9a;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
+    }
+
+    .btn-outline {
+        background: #0073bd;
+        color: white;
+    }
+
+    .btn-outline:hover {
+        background: #005f9a;
+        border-color: #cbd5e1;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.3);
     }
@@ -948,5 +1087,218 @@
         document.querySelector('select[name="keahlian"]').value = '';
         performAjaxSearch();
     }
+
+    // ===== ASESOR EXPORT MODAL =====
+    function openAsesorExportModal() {
+        // Reset skema checkboxes
+        document.querySelectorAll('.asesor-export-skema-option').forEach(cb => cb.checked = false);
+        var allCb = document.getElementById('asesor-export-skema-all-cb');
+        if (allCb) allCb.checked = true;
+        var searchEl = document.getElementById('asesor-export-skema-search');
+        if (searchEl) searchEl.value = '';
+        applyAsesorExportSkemaSearch();
+        renderAsesorExportBadges();
+        document.getElementById('asesor-export-modal').style.display = 'flex';
+        // close skema menu if open
+        var menu = document.getElementById('asesor-export-skema-menu');
+        if (menu) menu.style.display = 'none';
+    }
+
+    function closeAsesorExportModal() {
+        document.getElementById('asesor-export-modal').style.display = 'none';
+        var menu = document.getElementById('asesor-export-skema-menu');
+        if (menu) menu.style.display = 'none';
+    }
+
+    function applyAsesorExportSkemaSearch() {
+        var q = (document.getElementById('asesor-export-skema-search')?.value || '').toLowerCase();
+        document.querySelectorAll('.asesor-export-skema-item').forEach(function(item) {
+            var lbl = item.getAttribute('data-label') || '';
+            item.style.display = lbl.includes(q) ? '' : 'none';
+        });
+    }
+
+    function renderAsesorExportBadges() {
+        var container = document.getElementById('asesor-export-skema-badges');
+        if (!container) return;
+        container.innerHTML = '';
+        var checked = Array.from(document.querySelectorAll('.asesor-export-skema-option:checked'));
+        if (checked.length === 0) {
+            var toggleText = document.getElementById('asesor-export-skema-toggle-text');
+            if (toggleText) toggleText.textContent = 'Semua skema';
+        } else {
+            var toggleText = document.getElementById('asesor-export-skema-toggle-text');
+            if (toggleText) toggleText.textContent = checked.length + ' skema dipilih';
+            checked.forEach(function(cb) {
+                var badge = document.createElement('span');
+                badge.style.cssText = 'background:#dbeafe;color:#1d4ed8;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px;';
+                badge.innerHTML = (cb.getAttribute('data-label') || cb.value) + ' <span style="cursor:pointer;font-size:14px;" data-val="' + cb.value + '">&times;</span>';
+                badge.querySelector('span').addEventListener('click', function() {
+                    var val = this.getAttribute('data-val');
+                    var el = document.querySelector('.asesor-export-skema-option[value="' + val + '"]');
+                    if (el) el.checked = false;
+                    var allCb = document.getElementById('asesor-export-skema-all-cb');
+                    if (document.querySelectorAll('.asesor-export-skema-option:checked').length === 0 && allCb) {
+                        allCb.checked = true;
+                    }
+                    renderAsesorExportBadges();
+                });
+                container.appendChild(badge);
+            });
+        }
+    }
+
+    // Toggle skema dropdown
+    var asesorExportSkemaToggle = document.getElementById('asesor-export-skema-toggle');
+    var asesorExportSkemaMenu   = document.getElementById('asesor-export-skema-menu');
+    var asesorExportSkemaSearch = document.getElementById('asesor-export-skema-search');
+
+    if (asesorExportSkemaToggle && asesorExportSkemaMenu) {
+        asesorExportSkemaToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var isOpen = asesorExportSkemaMenu.style.display === 'block';
+            asesorExportSkemaMenu.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen && asesorExportSkemaSearch) asesorExportSkemaSearch.focus();
+        });
+    }
+
+    if (asesorExportSkemaSearch) {
+        asesorExportSkemaSearch.addEventListener('input', function() {
+            applyAsesorExportSkemaSearch();
+        });
+    }
+
+    // Individual skema checkboxes
+    document.querySelectorAll('.asesor-export-skema-option').forEach(function(el) {
+        el.addEventListener('change', function() {
+            var allCb = document.getElementById('asesor-export-skema-all-cb');
+            if (allCb) allCb.checked = false;
+            if (document.querySelectorAll('.asesor-export-skema-option:checked').length === 0 && allCb) {
+                allCb.checked = true;
+            }
+            renderAsesorExportBadges();
+        });
+    });
+
+    // "Semua Skema" checkbox
+    var asesorExportSkemaAllCb = document.getElementById('asesor-export-skema-all-cb');
+    if (asesorExportSkemaAllCb) {
+        asesorExportSkemaAllCb.addEventListener('change', function() {
+            if (this.checked) {
+                document.querySelectorAll('.asesor-export-skema-option').forEach(function(cb) { cb.checked = false; });
+            }
+            renderAsesorExportBadges();
+        });
+    }
+
+    // Close dropdown on outside click
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#asesor-export-skema-dropdown')) {
+            if (asesorExportSkemaMenu) asesorExportSkemaMenu.style.display = 'none';
+        }
+    });
+
+    // Close export modal on overlay click
+    document.getElementById('asesor-export-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeAsesorExportModal();
+    });
+
+    // Close export modal on ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeAsesorExportModal();
+    });
+
+    // Loading state on submit
+    var asesorExportForm = document.getElementById('asesor-export-form');
+    if (asesorExportForm) {
+        asesorExportForm.addEventListener('submit', function() {
+            var btn = document.getElementById('asesor-export-submit-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Memproses...';
+                setTimeout(function() {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-file-earmark-excel"></i> Export XLSX';
+                    closeAsesorExportModal();
+                }, 3000);
+            }
+        });
+    }
+
+    // ===== ASESOR IMPORT MODAL =====
+    function openAsesorImportModal() {
+        var fileInput = document.getElementById('asesor-import-file');
+        if (fileInput) fileInput.value = '';
+        var label = document.getElementById('asesor-import-file-label');
+        if (label) {
+            label.textContent = '';
+            label.style.display = 'none';
+        }
+        document.getElementById('asesor-import-modal').style.display = 'flex';
+    }
+
+    function closeAsesorImportModal() {
+        document.getElementById('asesor-import-modal').style.display = 'none';
+    }
+
+    function onAsesorImportFileChange(input) {
+        var label = document.getElementById('asesor-import-file-label');
+        if (input.files && input.files.length > 0) {
+            label.textContent = 'File terpilih: ' + input.files[0].name;
+            label.style.display = 'block';
+        } else {
+            label.textContent = '';
+            label.style.display = 'none';
+        }
+    }
+
+    // Drag and drop for Asesor Import Modal
+    var asesorDropZone = document.getElementById('asesor-import-drop');
+    if (asesorDropZone) {
+        ['dragenter', 'dragover'].forEach(eventName => {
+            asesorDropZone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                asesorDropZone.style.background = '#e0f2fe';
+                asesorDropZone.style.borderColor = '#0073bd';
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            asesorDropZone.addEventListener(eventName, function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                asesorDropZone.style.background = '#fafafa';
+                asesorDropZone.style.borderColor = '#d1d5db';
+            }, false);
+        });
+
+        asesorDropZone.addEventListener('drop', function(e) {
+            var dt = e.dataTransfer;
+            var files = dt.files;
+            var fileInput = document.getElementById('asesor-import-file');
+            if (fileInput && files.length > 0) {
+                fileInput.files = files;
+                onAsesorImportFileChange(fileInput);
+            }
+        }, false);
+    }
+
+    // Submit loading state
+    var asesorImportForm = document.getElementById('asesor-import-form');
+    if (asesorImportForm) {
+        asesorImportForm.addEventListener('submit', function() {
+            var btn = document.getElementById('asesor-import-submit-btn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Memproses...';
+            }
+        });
+    }
+
+    // Close import modal on overlay click
+    document.getElementById('asesor-import-modal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeAsesorImportModal();
+    });
 </script>
 @endsection

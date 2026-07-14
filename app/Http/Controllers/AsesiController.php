@@ -971,7 +971,7 @@ class AsesiController extends Controller
             'Budi Santoso',
             '3204010101010001',
             'Bandung',
-            '2007-05-12',
+            '12/05/2007',
             'L',
             'Jl. Melati No. 1',
             '081234567890',
@@ -1157,7 +1157,7 @@ class AsesiController extends Controller
 
         foreach ($asesiRows as $i => $row) {
             $r = $i + 2;
-            $tanggalLahir = $row->tanggal_lahir ? \Carbon\Carbon::parse($row->tanggal_lahir)->format('Y-m-d') : '';
+            $tanggalLahir = $row->tanggal_lahir ? \Carbon\Carbon::parse($row->tanggal_lahir)->format('d/m/Y') : '';
 
             $values = [
                 (string) ($i + 1),
