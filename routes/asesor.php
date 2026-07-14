@@ -45,6 +45,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
             Route::get('/skema-participants', [RekamanAsesmenKompetensiController::class, 'participantsBySkema'])->name('skema-participants');
             Route::get('/get-asesi-data', [RekamanAsesmenKompetensiController::class, 'getAsesiData'])->name('get-asesi-data');
             Route::get('/skema-units', [RekamanAsesmenKompetensiController::class, 'skemaUnits'])->name('skema-units');
+            Route::get('/ceklis-status', [RekamanAsesmenKompetensiController::class, 'getCeklisStatus'])->name('ceklis-status');
             Route::get('/create', [RekamanAsesmenKompetensiController::class, 'create'])->name('create');
             Route::post('/', [RekamanAsesmenKompetensiController::class, 'store'])->name('store');
             Route::get('/{id}', [RekamanAsesmenKompetensiController::class, 'show'])->name('show');

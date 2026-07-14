@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\UmpanBalikHasilController;
 use App\Http\Controllers\Admin\PersetujuanAsesmenController;
 use App\Http\Controllers\Admin\CeklisObservasiAktivitasPraktikController;
 use App\Http\Controllers\Admin\RekamanAsesmenKompetensiController;
+use App\Http\Controllers\Admin\SettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -422,6 +423,12 @@ Route::prefix('admin')->group(function () {
             Route::get('/log-activity/admin', [LogActivityController::class, 'adminIndex'])->name('admin.log-activity.admin');
             Route::get('/log-activity/user/export', [LogActivityController::class, 'userExport'])->name('admin.log-activity.user.export');
             Route::get('/log-activity/admin/export', [LogActivityController::class, 'adminExport'])->name('admin.log-activity.admin.export');
+        });
+
+        // Pengaturan Global (Super Admin only)
+        Route::middleware('super-admin')->group(function () {
+            Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings.index');
+            Route::put('/settings', [SettingController::class, 'update'])->name('admin.settings.update');
         });
     });
 });

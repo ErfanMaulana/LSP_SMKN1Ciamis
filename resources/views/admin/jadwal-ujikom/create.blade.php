@@ -1,4 +1,4 @@
-﻿{{-- REWRITTEN: kelompok-based jadwal form --}}
+{{-- REWRITTEN: kelompok-based jadwal form --}}
 @extends('admin.layout')
 
 @section('title', 'Tambah Jadwal Ujikom')
@@ -337,11 +337,15 @@ function selectKelompok(id) {
 
 function currentKelompokList() {
     const q = (document.getElementById('kelompok-search').value || '').toLowerCase().trim();
+    const available = KELOMPOK_SOURCE.filter(function(k) {
+        return !k.locked_jadwal || selectedKelompoks.has(k.id);
+    });
+
     if (!q) {
-        return KELOMPOK_SOURCE;
+        return available;
     }
 
-    return KELOMPOK_SOURCE.filter(function(k) {
+    return available.filter(function(k) {
         return (k.nama || '').toLowerCase().includes(q)
             || (k.skema || '').toLowerCase().includes(q);
     });
@@ -393,7 +397,7 @@ function filterKelompok() {
 function openKelompokDropdown() {
     kelompokOpen = true;
     document.getElementById('kelompok-search').value = '';
-    buildKelompokItems(KELOMPOK_SOURCE);
+    buildKelompokItems(currentKelompokList());
     document.getElementById('kelompok-dropdown').style.display = '';
 
     const trigger = document.getElementById('kelompok-trigger');

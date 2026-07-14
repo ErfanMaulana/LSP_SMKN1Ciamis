@@ -101,7 +101,7 @@ class BandingAsesmenController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:ditinjau,diterima,ditolak,asesmen_ulang',
+            'status' => 'required|in:diterima,ditolak,asesmen_ulang',
             'catatan_admin' => 'nullable|string|max:2000',
         ]);
 

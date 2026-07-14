@@ -19,7 +19,7 @@ class RekamanAsesmenController extends Controller
         abort_unless($account !== null, 403);
 
         $item = RekamanAsesmenKompetensi::with([
-            'asesi:NIK,nama',
+            'asesi',
             'skema:id,nama_skema,nomor_skema',
             'details.unit:id,kode_unit,judul_unit',
             'asesor:ID_asesor,nama',
@@ -39,8 +39,9 @@ class RekamanAsesmenController extends Controller
             $raw = $asesiModel->tanda_tangan_pendaftar ?? $asesiModel->tanda_tangan ?? null;
             $savedSignature = $this->formatSignatureUrl($raw);
         }
+        $asesi = $item->asesi;
 
-        return view('asesi.rekaman-asesmen.view-and-sign', compact('item', 'details', 'account', 'savedSignature'));
+        return view('asesi.rekaman-asesmen.view-and-sign', compact('item', 'details', 'account', 'savedSignature', 'asesi'));
     }
 
     private function formatSignatureUrl(?string $sig): ?string

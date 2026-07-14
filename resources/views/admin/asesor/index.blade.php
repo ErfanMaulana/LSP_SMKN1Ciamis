@@ -62,7 +62,7 @@
                     <input type="text" name="search" placeholder="Cari berdasarkan nama atau ID..."
                            value="{{ request('search') }}" autocomplete="off">
                 </div>
-                <div class="filter-group">
+                <div class="filter-group" style="display:flex; gap:12px; align-items:center;">
                     <select class="filter-select" name="keahlian" onchange="performAjaxSearch()">
                         <option value="">Semua Skema</option>
                         @foreach($skemaList as $skema)
@@ -71,7 +71,12 @@
                             </option>
                         @endforeach
                     </select>
-                   
+                    @php
+                        $globalMax = \App\Models\Setting::get('max_asesi_per_asesor');
+                    @endphp
+                    <button type="button" class="btn btn-primary" onclick="openMaxAsesiGlobalModal('{{ $globalMax }}')" style="padding: 10px 16px; font-size: 14px; white-space: nowrap; height: 100%;">
+                        <i class="bi bi-gear-fill"></i> Atur Batas Global
+                    </button>
                 </div>
             </div>
             </form>
@@ -84,6 +89,7 @@
                             <th>NAMA ASESOR</th>
                             <th>SKEMA</th>
                             <th>NO. MET / AKUN</th>
+                            <th>BATAS ASESI</th>
                             <th>STATUS</th>
                             <th>AKSI</th>
                         </tr>
@@ -117,7 +123,18 @@
                             </td>
                             <td>
                                 <div style="font-size:13px;font-weight:600;color:#1e293b;">{{ $item->no_met ?? '—' }}</div>
-                               
+                            </td>
+                            <td>
+                                @php
+                                    $globalMax = \App\Models\Setting::get('max_asesi_per_asesor');
+                                @endphp
+                                <div style="font-size:13px;font-weight:600;color:#334155;">
+                                    @if($globalMax)
+                                        {{ $globalMax }} asesi
+                                    @else
+                                        <span style="color:#94a3b8;font-weight:normal;">Tidak dibatasi</span>
+                                    @endif
+                                </div>
                             </td>
                             <td>
                                 <span class="badge badge-active">AKTIF</span>
@@ -204,6 +221,33 @@
             <button type="button" id="asesorDeleteConfirmCancel" class="asesor-delete-btn-cancel">Batal</button>
             <button type="button" id="asesorDeleteConfirmSubmit" class="asesor-delete-btn-submit">Hapus</button>
         </div>
+    </div>
+</div>
+
+<!-- Modal Atur Batas Asesi Global -->
+<div id="asesor-limit-overlay" class="asesor-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="asesorLimitTitle" aria-hidden="true">
+    <div class="asesor-delete-confirm-modal" style="max-width: 480px;">
+        <h3 id="asesorLimitTitle" class="asesor-delete-confirm-title" style="margin-bottom: 12px;">Atur Batas Asesi Global</h3>
+        <p style="font-size: 13px; color: #64748b; margin: 0 0 16px;">
+            Atur jumlah maksimal asesi yang dapat ditangani oleh semua asesor secara general.
+        </p>
+        <form id="asesorLimitForm" action="{{ route('admin.settings.update') }}" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="form-group" style="margin-bottom: 16px; display: flex; flex-direction: column;">
+                <label for="modal_max_asesi" style="font-size: 14px; font-weight: 600; color: #334155; margin-bottom: 6px;">
+                    Jumlah Maksimal Asesi per Asesor <span style="font-weight:400;font-size:12px;color:#94a3b8;">(Kosongkan jika tidak dibatasi)</span>
+                </label>
+                <input type="number" id="modal_max_asesi" name="max_asesi_per_asesor" class="form-control" placeholder="Tidak dibatasi" min="1" max="9999" style="padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; background: #f8fafc; outline: none; transition: border-color 0.2s;">
+                <small style="font-size: 12px; color: #64748b; margin-top: 6px;">
+                    Batas ini berlaku umum untuk semua asesor yang terdaftar dalam sistem.
+                </small>
+            </div>
+            <div class="asesor-delete-confirm-actions" style="margin-top: 20px;">
+                <button type="button" onclick="closeMaxAsesiGlobalModal()" style="border: 1px solid #cbd5e1; background: #fff; color: #475569; border-radius: 8px; padding: 8px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Batal</button>
+                <button type="submit" style="background: #0073bd; border: 1px solid #0073bd; color: #fff; border-radius: 8px; padding: 8px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Simpan Batas</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -851,9 +895,36 @@
         formToSubmit.submit();
     });
 
+    function openMaxAsesiGlobalModal(currentLimit) {
+        const overlay = document.getElementById('asesor-limit-overlay');
+        const input = document.getElementById('modal_max_asesi');
+        if (!overlay || !input) return;
+
+        input.value = currentLimit ? currentLimit : '';
+
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeMaxAsesiGlobalModal() {
+        const overlay = document.getElementById('asesor-limit-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             closeAsesorDeleteModal();
+            closeMaxAsesiGlobalModal();
+        }
+    });
+
+    const asesorLimitOverlay = document.getElementById('asesor-limit-overlay');
+    asesorLimitOverlay?.addEventListener('click', function(event) {
+        if (event.target === asesorLimitOverlay) {
+            closeMaxAsesiGlobalModal();
         }
     });
 

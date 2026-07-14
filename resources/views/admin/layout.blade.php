@@ -1203,6 +1203,13 @@
                                     class="menu-item {{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
                                     <i class="bi bi-diagram-3-fill"></i>
                                     <span>Kelompok</span>
+                                    @php
+                                        $ungroupedCount = \App\Models\Asesi::where('status', 'approved')->whereNull('kelompok_id')->count();
+                                    @endphp
+                                    @if($ungroupedCount > 0)
+                                        <span
+                                            style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $ungroupedCount }}</span>
+                                    @endif
                                 </a>
                             @endif
 
@@ -1211,6 +1218,13 @@
                                     class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
                                     <i class="bi bi-calendar-event"></i>
                                     <span>Jadwal Ujikom</span>
+                                    @php
+                                        $unscheduledCount = \App\Models\Kelompok::whereDoesntHave('jadwals')->count();
+                                    @endphp
+                                    @if($unscheduledCount > 0)
+                                        <span
+                                            style="margin-left:auto;font-size:10px;padding:2px 8px;background:#ef4444;color:#fff;border-radius:10px;font-weight:600;">{{ $unscheduledCount }}</span>
+                                    @endif
                                 </a>
                             @endif
 
@@ -1367,6 +1381,8 @@
                     </div>
                 @endif
 
+
+
             </nav>
         </aside>
 
@@ -1433,6 +1449,12 @@
                                     <i class="bi bi-person"></i>
                                     <span>Profil</span>
                                 </a>
+                                @if(Auth::guard('admin')->user()->isSuperAdmin())
+                                <a href="{{ route('admin.settings.index') }}" class="profile-menu-item {{ request()->routeIs('admin.settings.*') ? 'active' : '' }}">
+                                    <i class="bi bi-gear-fill"></i>
+                                    <span>Pengaturan Sistem</span>
+                                </a>
+                                @endif
                                 <div class="profile-divider"></div>
                                 <form method="POST" action="{{ route('admin.logout') }}"
                                     style="width: 100%; margin: 0;">
@@ -1459,7 +1481,7 @@
                 @if(session('error'))
                     <div class="alert alert-error">
                         <i class="bi bi-exclamation-circle-fill"></i>
-                        <span>{{ session('error') }}</span>
+                        <span>{!! session('error') !!}</span>
                     </div>
                 @endif
 

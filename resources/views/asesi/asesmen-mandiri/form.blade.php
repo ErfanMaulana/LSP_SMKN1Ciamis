@@ -1118,6 +1118,7 @@
         {{-- Signature sudah tersimpan di pivot --}}
         <div class="signature-saved-display">
             <img src="{{ $pivot->tanda_tangan }}" alt="Tanda Tangan Asesi">
+            <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;">{{ $asesi->nama }}, {{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan)->locale('id')->isoFormat('D MMMM YYYY') }}</div>
             <div class="signature-saved-meta">
                 <i class="bi bi-check-circle-fill"></i>
                 Ditandatangani pada: {{ \Carbon\Carbon::parse($pivot->tanggal_tanda_tangan)->locale('id')->isoFormat('D MMMM YYYY, HH:mm') }} WIB
@@ -1149,6 +1150,7 @@
             <div id="savedAsesiSigPreview">
                 <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
                     <img src="{{ $asesiSavedTTD }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                    <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                 </div>
                 <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
             </div>
@@ -1162,6 +1164,7 @@
                         <span>Tanda tangan di sini</span>
                     </div>
                 </div>
+                <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                 <div class="signature-actions" style="justify-content:space-between;margin-top:8px;">
                     <div style="display:flex;align-items:center;gap:8px;">
                         <input type="checkbox" id="saveAsesiSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
@@ -1188,6 +1191,7 @@
                     <span>Tanda tangan di sini</span>
                 </div>
             </div>
+            <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
             <div class="signature-actions" style="justify-content:space-between;margin-top:8px;">
                 <div style="display:flex;align-items:center;gap:8px;">
                     <input type="checkbox" id="saveAsesiSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">

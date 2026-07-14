@@ -86,11 +86,13 @@ class AsesorController extends Controller
             'skema_ids' => 'nullable|array',
             'skema_ids.*' => 'exists:skemas,id',
             'no_met'    => 'required|string|max:50|unique:asesor,no_met|unique:accounts,id',
+            'max_asesi' => 'nullable|integer|min:1',
         ]);
 
         $asesor = Asesor::create([
-            'nama'   => $validated['nama'],
-            'no_met' => $validated['no_met'] ?? null,
+            'nama'      => $validated['nama'],
+            'no_met'    => $validated['no_met'] ?? null,
+            'max_asesi' => $validated['max_asesi'] ?? null,
         ]);
 
         // Sync skemas
@@ -141,14 +143,16 @@ class AsesorController extends Controller
             'skema_ids'   => 'nullable|array',
             'skema_ids.*' => 'exists:skemas,id',
             'no_met'      => 'nullable|string|max:50|unique:asesor,no_met,' . $asesor->ID_asesor . ',ID_asesor|unique:accounts,id,' . ($asesor->no_met ? $asesor->no_met : 'NULL'),
+            'max_asesi'   => 'nullable|integer|min:1',
         ]);
 
         $oldNoMet = $asesor->no_met;
         $newNoMet = $validated['no_met'] ?? null;
 
         $asesor->update([
-            'nama'   => $validated['nama'],
-            'no_met' => $newNoMet,
+            'nama'      => $validated['nama'],
+            'no_met'    => $newNoMet,
+            'max_asesi' => $validated['max_asesi'] ?? null,
         ]);
 
         // Sync skemas

@@ -23,6 +23,25 @@ class BandingAsesmenController extends Controller
         return Asesi::where('NIK', $account->NIK)->first();
     }
 
+    private function formatSignatureUrl(?string $sig): ?string
+    {
+        if (empty($sig)) return null;
+        $sig = trim($sig);
+        if (str_contains($sig, '/storage/')) {
+            return asset('storage/' . ltrim(explode('/storage/', $sig)[1], '/'));
+        }
+        if (str_starts_with($sig, 'http://') || str_starts_with($sig, 'https://')) {
+            return $sig;
+        }
+        if (str_starts_with($sig, 'ceklis-observasi/') || str_starts_with($sig, 'persetujuan-asesmen/') || str_starts_with($sig, 'signatures/') || str_starts_with($sig, 'pendaftar/') || str_starts_with($sig, 'banding/')) {
+            return asset('storage/' . ltrim($sig, '/'));
+        }
+        if (str_starts_with($sig, 'data:image')) {
+            return preg_replace('/\s+/', '', $sig);
+        }
+        return 'data:image/png;base64,' . preg_replace('/\s+/', '', $sig);
+    }
+
     public function index(Request $request)
     {
         $account = Auth::guard('account')->user();
@@ -46,6 +65,16 @@ class BandingAsesmenController extends Controller
 
         $skema = Skema::findOrFail($pivot->skema_id);
 
+        // Fetch final assessment result
+        $rekaman = \App\Models\RekamanAsesmenKompetensi::where('asesi_nik', $asesi->NIK)
+            ->where('skema_id', $skema->id)
+            ->first();
+
+        if (!$rekaman || empty($rekaman->rekomendasi)) {
+            return redirect()->route('asesi.dashboard')
+                ->with('warning', 'Keputusan asesmen belum tersedia, sehingga banding belum bisa diajukan.');
+        }
+
         $komponen = BandingAsesmenKomponen::where('is_active', true)
             ->orderBy('urutan')
             ->orderBy('id')
@@ -65,6 +94,14 @@ class BandingAsesmenController extends Controller
             ? $banding->jawaban->keyBy('komponen_id')
             : collect();
 
+        $isKompeten = ($rekaman->rekomendasi === 'kompeten');
+
+        $savedSignature = null;
+        if ($asesi) {
+            $raw = $asesi->tanda_tangan_pendaftar ?? $asesi->tanda_tangan ?? null;
+            $savedSignature = $this->formatSignatureUrl($raw);
+        }
+
         return view('asesi.banding.form', compact(
             'account',
             'asesi',
@@ -72,7 +109,9 @@ class BandingAsesmenController extends Controller
             'pivot',
             'komponen',
             'banding',
-            'existingJawaban'
+            'existingJawaban',
+            'isKompeten',
+            'savedSignature'
         ));
     }
 
@@ -111,6 +150,16 @@ class BandingAsesmenController extends Controller
                 ->with('error', 'Keputusan asesmen belum tersedia, sehingga banding belum bisa diajukan.');
         }
 
+        // Fetch final assessment result and ensure they are NOT kompeten
+        $rekaman = \App\Models\RekamanAsesmenKompetensi::where('asesi_nik', $asesi->NIK)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        if (!$rekaman || $rekaman->rekomendasi === 'kompeten') {
+            return redirect()->route('asesi.banding.index')
+                ->with('error', 'Banding hanya dapat diajukan oleh asesi yang dinyatakan belum kompeten.');
+        }
+
         $komponenIds = BandingAsesmenKomponen::where('is_active', true)
             ->orderBy('urutan')
             ->orderBy('id')
@@ -146,7 +195,7 @@ class BandingAsesmenController extends Controller
         // Cek apakah ada tanda tangan: dari form baru ATAU dari data yang sudah tersimpan
         $incomingTtd = trim((string) $request->input('ttd_asesi_file', ''));
         $hasExistingTtd = $existing && !empty($existing->ttd_asesi_file);
-        $hasNewTtd = !empty($incomingTtd) && strpos($incomingTtd, 'data:image') === 0;
+        $hasNewTtd = !empty($incomingTtd);
 
         if (!$hasNewTtd && !$hasExistingTtd) {
             return back()
@@ -160,20 +209,25 @@ class BandingAsesmenController extends Controller
         }
 
         $ttdAsesiFile = $existing ? $existing->ttd_asesi_file : null;
-        if (!empty($request->ttd_asesi_file) && strpos($request->ttd_asesi_file, 'data:image') === 0) {
-            try {
-                $signatureData = $request->ttd_asesi_file;
-                list($type, $signatureData) = explode(';', $signatureData);
-                list(, $signatureData) = explode(',', $signatureData);
-                $signatureData = base64_decode($signatureData);
+        if (!empty($incomingTtd)) {
+            if (strpos($incomingTtd, 'data:image') === 0) {
+                try {
+                    list($type, $signatureData) = explode(';', $incomingTtd);
+                    list(, $signatureData) = explode(',', $signatureData);
+                    $signatureData = base64_decode($signatureData);
 
-                $filename = 'signature_asesi_' . uniqid() . '_' . time() . '.png';
-                $path = 'banding/signatures';
+                    $filename = 'signature_asesi_' . uniqid() . '_' . time() . '.png';
+                    $path = 'banding/signatures';
 
-                \Illuminate\Support\Facades\Storage::disk('public')->put($path . '/' . $filename, $signatureData);
-                $ttdAsesiFile = $path . '/' . $filename;
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Failed to save banding ttd_asesi_file: ' . $e->getMessage());
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($path . '/' . $filename, $signatureData);
+                    $ttdAsesiFile = $path . '/' . $filename;
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Failed to save banding ttd_asesi_file: ' . $e->getMessage());
+                }
+            } elseif (strpos($incomingTtd, '/storage/') !== false) {
+                $ttdAsesiFile = ltrim(explode('/storage/', $incomingTtd)[1], '/');
+            } elseif (strpos($incomingTtd, 'ceklis-observasi/') === 0 || strpos($incomingTtd, 'persetujuan-asesmen/') === 0 || strpos($incomingTtd, 'signatures/') === 0 || strpos($incomingTtd, 'pendaftar/') === 0 || strpos($incomingTtd, 'banding/') === 0) {
+                $ttdAsesiFile = $incomingTtd;
             }
         }
 
@@ -246,6 +300,16 @@ class BandingAsesmenController extends Controller
         if (!$pivot || empty($pivot->rekomendasi)) {
             return redirect()->route('asesi.banding.index')
                 ->with('error', 'Keputusan asesmen belum tersedia, sehingga keputusan banding belum bisa disimpan.');
+        }
+
+        // Fetch final assessment result and ensure they are NOT kompeten
+        $rekaman = \App\Models\RekamanAsesmenKompetensi::where('asesi_nik', $asesi->NIK)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        if (!$rekaman || $rekaman->rekomendasi === 'kompeten') {
+            return redirect()->route('asesi.banding.index')
+                ->with('error', 'Keputusan tidak banding hanya dapat diajukan oleh asesi yang dinyatakan belum kompeten.');
         }
 
         $existing = BandingAsesmen::where('asesi_nik', $asesi->NIK)

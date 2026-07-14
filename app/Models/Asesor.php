@@ -17,6 +17,7 @@ class Asesor extends Model
         'no_met',
         'foto_profil',
         'saved_tanda_tangan',
+        'max_asesi',
     ];
 
     public function skemas()

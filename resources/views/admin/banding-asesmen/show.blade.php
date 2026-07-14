@@ -215,9 +215,7 @@
                             <button type="submit" name="status" value="asesmen_ulang" class="btn-action-status btn-asesmen-ulang {{ $banding->status === 'asesmen_ulang' ? 'active' : '' }}" onclick="return confirm('Apakah Anda yakin menetapkan status PERLU ASESMEN ULANG?');">
                                 <i class="bi bi-arrow-repeat"></i> Perlu Asesmen Ulang
                             </button>
-                            <button type="submit" name="status" value="ditinjau" class="btn-action-status btn-ditinjau {{ $banding->status === 'ditinjau' ? 'active' : '' }}" onclick="return confirm('Set status menjadi DITINJAU?');">
-                                <i class="bi bi-hourglass-split"></i> Tandai Ditinjau
-                            </button>
+
                         </div>
                         @error('status')<div class="error-text">{{ $message }}</div>@enderror
                     </div>

@@ -686,6 +686,30 @@ class RekamanAsesmenKompetensiController extends Controller
         ]);
     }
 
+    public function getCeklisStatus(Request $request)
+    {
+        $asesor = $this->getAsesor();
+        abort_unless((bool) $asesor, 403, 'Profil asesor tidak ditemukan.');
+
+        $asesiNik = (string) trim((string) $request->get('asesi_nik'));
+        $skemaId  = (int) $request->get('skema_id');
+
+        if (!$asesiNik || !$skemaId) {
+            return response()->json(['rekomendasi' => null]);
+        }
+
+        $ceklis = CeklisObservasiAktivitasPraktik::query()
+            ->where('skema_id', $skemaId)
+            ->where('asesi_nik', $asesiNik)
+            ->whereNotNull('rekomendasi')
+            ->orderByDesc('id')
+            ->first(['rekomendasi']);
+
+        return response()->json([
+            'rekomendasi' => $ceklis?->rekomendasi,
+        ]);
+    }
+
     private function validatedData(Request $request, Asesor $asesor): array
     {
         $data = $request->validate([
@@ -727,6 +751,22 @@ class RekamanAsesmenKompetensiController extends Controller
             throw ValidationException::withMessages([
                 'asesi_nik' => 'Asesi tidak termasuk penugasan Anda pada skema ini.',
             ]);
+        }
+
+        // Validasi: jika Ceklis Observasi belum kompeten, Rekaman Asesmen tidak bisa dikompeten
+        if ($data['rekomendasi'] === 'kompeten') {
+            $ceklis = CeklisObservasiAktivitasPraktik::query()
+                ->where('skema_id', (int) $data['skema_id'])
+                ->where('asesi_nik', (string) $data['asesi_nik'])
+                ->whereNotNull('rekomendasi')
+                ->orderByDesc('id')
+                ->first(['rekomendasi']);
+
+            if ($ceklis && $ceklis->rekomendasi === 'belum_kompeten') {
+                throw ValidationException::withMessages([
+                    'rekomendasi' => 'Rekomendasi tidak dapat dikompeten karena Ceklis Observasi menunjukkan asesi BELUM KOMPETEN.',
+                ]);
+            }
         }
 
         $rawDetails = array_values($data['detail']);

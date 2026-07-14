@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Asesor;
 use App\Models\Asesi;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class PenugasanAsesorController extends Controller
@@ -72,6 +73,7 @@ class PenugasanAsesorController extends Controller
 
         $asesi->update(['ID_asesor' => $asesor->ID_asesor]);
 
+
         return redirect()->route('admin.penugasan-asesor.show', $ID_asesor)
             ->with('success', "Asesi <strong>{$asesi->nama}</strong> berhasil ditugaskan ke asesor <strong>{$asesor->nama}</strong>.");
     }
@@ -87,6 +89,8 @@ class PenugasanAsesorController extends Controller
         ]);
 
         $asesor = Asesor::findOrFail($ID_asesor);
+
+
 
         Asesi::whereIn('NIK', $request->niks)
              ->update(['ID_asesor' => $asesor->ID_asesor]);

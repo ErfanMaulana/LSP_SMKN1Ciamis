@@ -790,7 +790,7 @@ class PersetujuanAsesmenFrontController extends Controller
         $data = $request->validate([
             'ttd_asesor_nama' => 'required|string|max:255',
             'ttd_asesor_tanggal' => 'required|date',
-            'ttd_asesor_file' => 'required|string',
+            'ttd_asesor_file' => 'nullable|string',
             'simpan_tanda_tangan' => 'nullable|in:0,1',
             'bukti_verifikasi_portofolio' => 'nullable|boolean',
             'bukti_reviu_produk' => 'nullable|boolean',
@@ -825,12 +825,15 @@ class PersetujuanAsesmenFrontController extends Controller
                 }
             }
         } else {
-            return redirect()->back()->with('error', 'Tanda tangan asesor tidak tersimpan. Pastikan tanda tangan digambar di canvas sebelum menyimpan.');
+            if (empty($item->ttd_asesor_file)) {
+                return redirect()->back()->with('error', 'Tanda tangan asesor tidak tersimpan. Pastikan tanda tangan digambar di canvas sebelum menyimpan.');
+            }
+            unset($data['ttd_asesor_file']);
         }
 
         $item->update($data);
 
-        return redirect()->back()->with('success', 'Tanda tangan asesor tersimpan');
+        return redirect()->back()->with('success', 'Persetujuan asesmen berhasil disimpan');
     }
 
     /**

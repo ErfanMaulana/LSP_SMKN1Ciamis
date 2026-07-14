@@ -525,7 +525,7 @@
             </div>
             {{-- raw input triggers cropper, hidden cropped input is submitted --}}
             <input type="file" id="pas_foto_raw" accept="image/*" style="display:none;" onchange="openCropper(this)">
-            <input type="file" name="pas_foto" id="pas_foto" style="display:none;" required>
+            <input type="file" name="pas_foto" id="pas_foto" style="display:none;">
             <span class="photo-name" id="pas_foto_name">Belum ada foto dipilih</span>
         </div>
 
@@ -646,8 +646,9 @@
                     </label>
                 </div>
                 <div id="regSavedSigPreview">
-                    <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
+                    <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;text-align:center;">
                         <img src="{{ $regSavedTTD }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                        <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                     </div>
                 </div>
                 <div id="regNewSigDraw" style="display:none;">
@@ -655,8 +656,9 @@
                         <canvas id="signatureCanvasDokumen" class="signature-canvas"></canvas>
                         <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
                     </div>
+                    <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                     <div class="signature-modal-actions">
-                        <p class="signature-meta">Tanggal &amp; waktu akan dicatat secara otomatis</p>
+                        <p class="signature-meta">Nama: {{ $asesi->nama }} &bull; Tanggal: {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</p>
                         <button type="button" onclick="clearSignatureDokumen()" class="btn-signature-clear">
                             <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -671,8 +673,9 @@
                     <canvas id="signatureCanvasDokumen" class="signature-canvas"></canvas>
                     <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
                 </div>
+                <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                 <div class="signature-modal-actions">
-                    <p class="signature-meta">Tanggal &amp; waktu akan dicatat secara otomatis</p>
+                    <p class="signature-meta">Nama: {{ $asesi->nama }} &bull; Tanggal: {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</p>
                     <button type="button" onclick="clearSignatureDokumen()" class="btn-signature-clear">
                         <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -1069,12 +1072,35 @@ document.addEventListener('DOMContentLoaded', function() {
     if (openButton) {
         openButton.addEventListener('click', function(event) {
             event.preventDefault();
+            // Validate photo first
+            const pasFotoInput = document.getElementById('pas_foto');
+            if (!pasFotoInput.files || pasFotoInput.files.length === 0) {
+                alert('Pas foto wajib diunggah dan dikrop terlebih dahulu.');
+                const photoBox = document.getElementById('photo-box');
+                if (photoBox) {
+                    photoBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
             openSignatureModal();
         });
     }
 
     if (form) {
         form.addEventListener('submit', function(event) {
+            // Check if photo is uploaded
+            const pasFotoInput = document.getElementById('pas_foto');
+            if (!pasFotoInput.files || pasFotoInput.files.length === 0) {
+                event.preventDefault();
+                alert('Pas foto wajib diunggah dan dikrop terlebih dahulu.');
+                closeSignatureModal();
+                const photoBox = document.getElementById('photo-box');
+                if (photoBox) {
+                    photoBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
             const signatureInput = document.getElementById('signatureInputDokumen');
             const signatureError = document.getElementById('signatureErrorDokumen');
             if (!signatureInput.value) {

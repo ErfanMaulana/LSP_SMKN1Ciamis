@@ -559,9 +559,13 @@
     <div class="grid-2" style="margin-top:16px;">
         <div class="field full">
             <label>Rekomendasi Hasil Asesmen</label>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;border:1px solid #d1d5db;border-radius:8px;padding:10px 12px;">
-                <label><input type="radio" name="rekomendasi" value="kompeten" {{ old('rekomendasi', $value('rekomendasi', 'kompeten')) === 'kompeten' ? 'checked' : '' }}> Kompeten</label>
-                <label><input type="radio" name="rekomendasi" value="belum_kompeten" {{ old('rekomendasi', $value('rekomendasi', 'kompeten')) === 'belum_kompeten' ? 'checked' : '' }}> Belum Kompeten</label>
+            <div id="rekomendasiBox" style="display:flex;gap:12px;flex-wrap:wrap;border:1px solid #d1d5db;border-radius:8px;padding:10px 12px;">
+                <label id="labelKompeten"><input type="radio" id="radioKompeten" name="rekomendasi" value="kompeten" {{ old('rekomendasi', $value('rekomendasi', 'kompeten')) === 'kompeten' ? 'checked' : '' }}> Kompeten</label>
+                <label><input type="radio" id="radioBelumKompeten" name="rekomendasi" value="belum_kompeten" {{ old('rekomendasi', $value('rekomendasi', 'kompeten')) === 'belum_kompeten' ? 'checked' : '' }}> Belum Kompeten</label>
+            </div>
+            <div id="ceklisWarning" style="display:none;margin-top:6px;padding:8px 12px;background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;font-size:12px;color:#92400e;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <span id="ceklisWarningText">Rekomendasi <strong>Kompeten</strong> tidak dapat dipilih karena Ceklis Observasi asesi ini menunjukkan <strong>BELUM KOMPETEN</strong>.</span>
             </div>
             @error('rekomendasi')<div class="error-text">{{ $message }}</div>@enderror
         </div>
@@ -614,6 +618,7 @@
                     <div id="savedAsesorSigPreview" style="margin-bottom: 12px; text-align: center;">
                         <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
                             <img src="{{ str_starts_with($savedSignature, 'data:image') ? $savedSignature : asset('storage/' . ltrim($savedSignature, '/')) }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                            <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;">{{ $value('ttd_asesor_nama', $asesor->nama ?? '') }}, {{ ($record && $record->ttd_asesor_tanggal) ? $record->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                         </div>
                         <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
                     </div>
@@ -627,6 +632,7 @@
                                 <span>Tanda tangan di sini</span>
                             </div>
                         </div>
+                        <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $value('ttd_asesor_nama', $asesor->nama ?? '') }}, {{ ($record && $record->ttd_asesor_tanggal) ? $record->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                         <div class="signature-actions">
                             <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;width:100%;margin-top:12px;">
                                 <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;margin:0;">
@@ -651,6 +657,7 @@
                             <span>Tanda tangan di sini</span>
                         </div>
                     </div>
+                    <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $value('ttd_asesor_nama', $asesor->nama ?? '') }}, {{ ($record && $record->ttd_asesor_tanggal) ? $record->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                     <div class="signature-actions">
                         <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;width:100%;margin-top:12px;">
                             <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:#475569;cursor:pointer;margin:0;">
@@ -670,12 +677,6 @@
                 @error('ttd_asesor_nama')<div class="error-text">{{ $message }}</div>@enderror
                 @error('ttd_asesor_tanggal')<div class="error-text">{{ $message }}</div>@enderror
 
-                <div class="signature-actions" style="margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
-                    <div class="signature-date">
-                        <i class="bi bi-calendar3"></i>
-                        Tanggal: <strong id="signatureDateAsesor">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -700,7 +701,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const participantsUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.skema-participants') }}';
     const unitsUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.skema-units') }}';
-        const getAsesiDataUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.get-asesi-data') }}';
+    const getAsesiDataUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.get-asesi-data') }}';
+    const ceklisStatusUrl = '{{ route('asesor.rekaman-asesmen-kompetensi.ceklis-status') }}';
     const selectedAsesiNik = @json($selectedAsesiNik);
     const initialDetailMap = @json($initialDetailMap ?? []);
     const selectedAsesiInfo = @json($selectedAsesiInfo);
@@ -945,6 +947,50 @@ document.addEventListener('DOMContentLoaded', function () {
         const selesaiInput = document.querySelector('input[name="tanggal_selesai"]');
     };
 
+    const checkAndApplyCeklisRestriction = async (asesiNik, skemaId) => {
+        const radioKompeten = document.getElementById('radioKompeten');
+        const labelKompeten = document.getElementById('labelKompeten');
+        const ceklisWarning = document.getElementById('ceklisWarning');
+        if (!radioKompeten || !ceklisWarning) return;
+
+        if (!asesiNik || !skemaId) {
+            // Reset restriction
+            radioKompeten.disabled = false;
+            labelKompeten.style.opacity = '';
+            labelKompeten.style.cursor = '';
+            ceklisWarning.style.display = 'none';
+            return;
+        }
+
+        try {
+            const res = await fetch(`${ceklisStatusUrl}?asesi_nik=${encodeURIComponent(asesiNik)}&skema_id=${encodeURIComponent(skemaId)}`);
+            if (!res.ok) return;
+            const data = await res.json();
+
+            if (data.rekomendasi === 'belum_kompeten') {
+                // Lock the Kompeten radio
+                radioKompeten.disabled = true;
+                labelKompeten.style.opacity = '0.45';
+                labelKompeten.style.cursor = 'not-allowed';
+                ceklisWarning.style.display = 'block';
+                // Force select belum_kompeten
+                const radioBelum = document.getElementById('radioBelumKompeten');
+                if (radioBelum) {
+                    radioBelum.checked = true;
+                    radioKompeten.checked = false;
+                }
+            } else {
+                // Unlock
+                radioKompeten.disabled = false;
+                labelKompeten.style.opacity = '';
+                labelKompeten.style.cursor = '';
+                ceklisWarning.style.display = 'none';
+            }
+        } catch (e) {
+            // silently fail – backend validation will still catch it
+        }
+    };
+
     const applyAsesiDetail = (data) => {
         if (!data || !data.asesi) {
             return;
@@ -1098,6 +1144,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     console.error('Asesi detail not found for selected URL param');
                 }
+
+                // Check ceklis restriction after initial pre-fill
+                await checkAndApplyCeklisRestriction(selectedAsesiNik, skemaSelect.value || '');
             } else {
                 syncAsesiInfo(asesiSelect.value);
             }
@@ -1138,6 +1187,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (mulaiInput) mulaiInput.value = '';
                 if (selesaiInput) selesaiInput.value = '';
                 asesiSelect.classList.remove('locked');
+                await checkAndApplyCeklisRestriction('', '');
                 return;
             }
 
@@ -1164,6 +1214,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         await loadBySkema();
                     }
                 }
+
+                // Check ceklis status after asesi+skema are set
+                await checkAndApplyCeklisRestriction(asesiNik, skemaSelect.value || '');
             } catch (err) {
                 console.error('Error fetching asesi detail:', err);
             }

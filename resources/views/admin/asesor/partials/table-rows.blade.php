@@ -27,6 +27,18 @@
         <div style="font-size:13px;font-weight:600;color:#1e293b;">{{ $item->no_met ?? '—' }}</div>
     </td>
     <td>
+        @php
+            $globalMax = \App\Models\Setting::get('max_asesi_per_asesor');
+        @endphp
+        <div style="font-size:13px;font-weight:600;color:#334155;">
+            @if($globalMax)
+                {{ $globalMax }} asesi
+            @else
+                <span style="color:#94a3b8;font-weight:normal;">Tidak dibatasi</span>
+            @endif
+        </div>
+    </td>
+    <td>
         <span class="badge badge-active">AKTIF</span>
     </td>
     <td>
