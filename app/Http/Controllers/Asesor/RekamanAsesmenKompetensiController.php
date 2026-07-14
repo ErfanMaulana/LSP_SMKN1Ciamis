@@ -80,13 +80,14 @@ class RekamanAsesmenKompetensiController extends Controller
                 + ['pendingCount' => 0, 'completedCount' => 0]);
         }
 
-        // Fetch completed rekaman records
+        // Fetch completed rekaman records (only the latest attempt)
         $completedRows = RekamanAsesmenKompetensi::query()
             ->with([
                 'skema:id,nama_skema,nomor_skema',
                 'asesi:NIK,nama',
             ])
             ->where('asesor_id', $asesor->ID_asesor)
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM rekaman_asesmen_kompetensi b WHERE b.asesi_nik = rekaman_asesmen_kompetensi.asesi_nik AND b.skema_id = rekaman_asesmen_kompetensi.skema_id)')
             ->get();
 
         foreach ($completedRows as $c) {
@@ -99,6 +100,7 @@ class RekamanAsesmenKompetensiController extends Controller
         $ceklisPairs = CeklisObservasiAktivitasPraktik::query()
             ->where('asesor_id', $asesor->ID_asesor)
             ->whereIn('skema_id', $skemaIds)
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM ceklis_observasi_aktivitas_praktiks b WHERE b.asesi_nik = ceklis_observasi_aktivitas_praktiks.asesi_nik AND b.skema_id = ceklis_observasi_aktivitas_praktiks.skema_id)')
             ->get(['asesi_nik', 'skema_id']);
 
         $rekamanKeys = [];
@@ -292,9 +294,12 @@ class RekamanAsesmenKompetensiController extends Controller
                 }
             }
 
+            $currentAttempt = $asesiModel->currentAttempt((int) $defaults['skema_id']);
+
             $hasCeklis = CeklisObservasiAktivitasPraktik::query()
                 ->where('skema_id', (int) $defaults['skema_id'])
                 ->where('asesi_nik', $defaults['asesi_nik'])
+                ->where('attempt', $currentAttempt)
                 ->exists();
 
             if (!$hasCeklis) {
@@ -302,6 +307,18 @@ class RekamanAsesmenKompetensiController extends Controller
                     'asesi_nik' => $defaults['asesi_nik'],
                     'skema_id' => $defaults['skema_id'],
                 ])->with('info', 'Silakan isi Ceklis Observasi terlebih dahulu sebelum membuat Rekaman Asesmen.');
+            }
+
+            $existing = RekamanAsesmenKompetensi::query()
+                ->where('asesor_id', $asesor->ID_asesor)
+                ->where('asesi_nik', $defaults['asesi_nik'])
+                ->where('skema_id', (int) $defaults['skema_id'])
+                ->where('attempt', $currentAttempt)
+                ->latest('id')
+                ->first(['id']);
+
+            if ($existing) {
+                return redirect()->route('asesor.rekaman-asesmen-kompetensi.show', $existing->id);
             }
         }
 
@@ -739,6 +756,11 @@ class RekamanAsesmenKompetensiController extends Controller
             'detail.*.lainnya' => 'nullable|in:1',
         ]);
 
+        $asesiObj = Asesi::where('NIK', $data['asesi_nik'])->first();
+        if ($asesiObj) {
+            $data['attempt'] = $asesiObj->currentAttempt((int) $data['skema_id']);
+        }
+
         if (!$asesor->skemas->contains('id', (int) $data['skema_id'])) {
             throw ValidationException::withMessages([
                 'skema_id' => 'Skema tidak termasuk penugasan asesor Anda.',
@@ -754,10 +776,11 @@ class RekamanAsesmenKompetensiController extends Controller
         }
 
         // Validasi: jika Ceklis Observasi belum kompeten, Rekaman Asesmen tidak bisa dikompeten
-        if ($data['rekomendasi'] === 'kompeten') {
+        if ($data['rekomendasi'] === 'kompeten' && $asesiObj) {
             $ceklis = CeklisObservasiAktivitasPraktik::query()
                 ->where('skema_id', (int) $data['skema_id'])
                 ->where('asesi_nik', (string) $data['asesi_nik'])
+                ->where('attempt', $asesiObj->currentAttempt((int) $data['skema_id']))
                 ->whereNotNull('rekomendasi')
                 ->orderByDesc('id')
                 ->first(['rekomendasi']);

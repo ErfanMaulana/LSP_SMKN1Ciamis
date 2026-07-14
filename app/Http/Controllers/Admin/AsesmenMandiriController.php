@@ -18,6 +18,8 @@ class AsesmenMandiriController extends Controller
             ->join('asesi', 'asesi_skema.asesi_nik', '=', 'asesi.NIK')
             ->join('skemas', 'asesi_skema.skema_id', '=', 'skemas.id')
             ->leftJoin('jurusan', 'asesi.ID_jurusan', '=', 'jurusan.ID_jurusan')
+            // Only show the latest attempt per asesi+skema
+            ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->select(
                 'asesi_skema.*',
                 'asesi.NIK',
@@ -54,8 +56,9 @@ class AsesmenMandiriController extends Controller
 
         $data = $query->paginate(15)->withQueryString();
 
-        // Stats
+        // Stats — only count latest attempt rows
         $stats = DB::table('asesi_skema')
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->selectRaw("
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'belum_mulai' THEN 1 ELSE 0 END) as belum_mulai,
@@ -78,9 +81,11 @@ class AsesmenMandiriController extends Controller
         $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
         $skema = Skema::with('units.elemens.kriteria')->findOrFail($skemaId);
 
+        // Get latest attempt pivot
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
             ->where('skema_id', $skemaId)
+            ->orderByDesc('attempt')
             ->first();
 
         if (!$pivot) {
@@ -88,8 +93,12 @@ class AsesmenMandiriController extends Controller
                 ->with('error', 'Data asesmen tidak ditemukan.');
         }
 
+        $currentAttempt = $pivot->attempt ?? 1;
+
+        // Only show answers for current attempt
         $jawaban = JawabanElemen::where('asesi_nik', $asesiNik)
             ->whereIn('elemen_id', $skema->units->pluck('elemens')->flatten()->pluck('id'))
+            ->where('attempt', $currentAttempt)
             ->get()
             ->keyBy('elemen_id');
 

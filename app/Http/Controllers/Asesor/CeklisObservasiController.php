@@ -49,13 +49,14 @@ class CeklisObservasiController extends Controller
         $rekomendasi = (string) $request->get('rekomendasi');
         $viewMode = (string) $request->get('view', 'menunggu');
 
-        // Fetch completed ceklis records for this asesor
+        // Fetch completed ceklis records for this asesor (only the latest attempt)
         $completedRows = CeklisObservasiAktivitasPraktik::query()
             ->with([
                 'skema:id,nama_skema,nomor_skema',
                 'asesi:NIK,nama',
             ])
             ->where('asesor_id', $asesor->ID_asesor)
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM ceklis_observasi_aktivitas_praktiks b WHERE b.asesi_nik = ceklis_observasi_aktivitas_praktiks.asesi_nik AND b.skema_id = ceklis_observasi_aktivitas_praktiks.skema_id)')
             ->get();
 
         foreach ($completedRows as $c) {
@@ -83,12 +84,13 @@ class CeklisObservasiController extends Controller
             }
         }
 
-        // 2. Get registered asesis for these skemas
+        // 2. Get registered asesis for these skemas (only the latest attempt)
         $asesiSkemasForCeklis = DB::table('asesi_skema')
             ->whereIn('skema_id', $skemaIds)
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->get(['asesi_nik', 'skema_id']);
 
-        // 3. Existing ceklis map
+        // 3. Existing ceklis map (using latest attempt)
         $ceklisKeys = [];
         foreach ($completedRows as $cr) {
             $ceklisKeys["{$cr->asesi_nik}|{$cr->skema_id}"] = true;
@@ -234,9 +236,12 @@ class CeklisObservasiController extends Controller
                 ->first(['NIK', 'nama']);
 
             if ($asesi) {
+                $currentAttempt = $asesi->currentAttempt($activeSkema->id);
+
                 // Guard: pastikan persetujuan asesmen sudah ditandatangani oleh KEDUA pihak
                 $persetujuan = PersetujuanAsesmen::query()
                     ->where('nomor_skema', $activeSkema->nomor_skema)
+                    ->where('attempt', $currentAttempt)
                     ->where(function ($q) use ($asesi) {
                         $q->where('asesi_nik', $asesi->NIK)
                           ->orWhere('nama_asesi', $asesi->nama);
@@ -256,6 +261,7 @@ class CeklisObservasiController extends Controller
                     ->where('asesor_id', $asesor->ID_asesor)
                     ->where('asesi_nik', $asesi->NIK)
                     ->where('skema_id', $activeSkema->id)
+                    ->where('attempt', $currentAttempt)
                     ->latest('id')
                     ->first(['id']);
 
@@ -581,7 +587,8 @@ class CeklisObservasiController extends Controller
                 $query->select(DB::raw(1))
                     ->from('ceklis_observasi_aktivitas_praktiks')
                     ->whereColumn('ceklis_observasi_aktivitas_praktiks.asesi_nik', 'asesi.NIK')
-                    ->where('ceklis_observasi_aktivitas_praktiks.skema_id', $skemaId);
+                    ->where('ceklis_observasi_aktivitas_praktiks.skema_id', $skemaId)
+                    ->whereRaw('ceklis_observasi_aktivitas_praktiks.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi.NIK AND b.skema_id = ' . $skemaId . ')');
             })
             ->orderBy('nama')
             ->get(['NIK', 'nama'])
@@ -768,6 +775,11 @@ class CeklisObservasiController extends Controller
             'detail.*.pencapaian' => 'nullable|in:ya,tidak',
             'detail.*.penilaian_lanjut' => 'nullable|string',
         ]);
+
+        $asesiObj = Asesi::where('NIK', $data['asesi_nik'])->first();
+        if ($asesiObj) {
+            $data['attempt'] = $asesiObj->currentAttempt((int) $data['skema_id']);
+        }
 
         if (!$asesor->skemas->contains('id', (int) $data['skema_id'])) {
             throw ValidationException::withMessages([

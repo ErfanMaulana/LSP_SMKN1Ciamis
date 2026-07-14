@@ -46,7 +46,10 @@ class AsesmenMandiriController extends Controller
         }
 
         // Only load schemas that the asesi registered for (from pivot asesi_skema)
-        $asesiSkemas = $asesi->skemas()->withCount('units')->get();
+        $asesiSkemas = $asesi->skemas()
+            ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
+            ->withCount('units')
+            ->get();
         $skemas      = $asesiSkemas;
 
         // If there is exactly one schema, go straight to the form
@@ -74,10 +77,13 @@ class AsesmenMandiriController extends Controller
         
         $skema = Skema::with(['units.elemens.kriteria'])->findOrFail($skemaId);
 
+        $attempt = $asesi->currentAttempt($skemaId);
+
         // Make sure asesi is registered for this schema (via asesi_skema pivot)
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $attempt)
             ->first();
 
         if (!$pivot) {
@@ -90,6 +96,7 @@ class AsesmenMandiriController extends Controller
             DB::table('asesi_skema')
                 ->where('asesi_nik', $asesi->NIK)
                 ->where('skema_id', $skemaId)
+                ->where('attempt', $attempt)
                 ->update([
                     'status' => 'sedang_mengerjakan',
                     'tanggal_mulai' => now(),
@@ -99,6 +106,7 @@ class AsesmenMandiriController extends Controller
         
         // Get existing answers for this asesi and schema
         $existingAnswers = JawabanElemen::where('asesi_nik', $asesi->NIK)
+            ->where('attempt', $attempt)
             ->whereHas('elemen.unit', function($q) use ($skemaId) {
                 $q->where('skema_id', $skemaId);
             })
@@ -109,6 +117,7 @@ class AsesmenMandiriController extends Controller
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $attempt)
             ->first();
 
         // Load asesor data if recommendation exists
@@ -135,9 +144,12 @@ class AsesmenMandiriController extends Controller
         
         $skema = Skema::with(['units.elemens'])->findOrFail($skemaId);
 
+        $attempt = $asesi->currentAttempt($skemaId);
+
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $attempt)
             ->first();
 
         if (!$pivot) {
@@ -200,6 +212,7 @@ class AsesmenMandiriController extends Controller
             DB::table('asesi_skema')
                 ->where('asesi_nik', $asesi->NIK)
                 ->where('skema_id', $skemaId)
+                ->where('attempt', $attempt)
                 ->update([
                     'tanda_tangan' => $providedTandaTangan,
                     'tanggal_tanda_tangan' => now(),
@@ -215,6 +228,7 @@ class AsesmenMandiriController extends Controller
                 [
                     'asesi_nik' => $asesi->NIK,
                     'elemen_id' => $elemenId,
+                    'attempt' => $attempt,
                 ],
                 [
                     'status' => $data['status'],
@@ -230,6 +244,7 @@ class AsesmenMandiriController extends Controller
         }
         
         $answeredElements = JawabanElemen::where('asesi_nik', $asesi->NIK)
+            ->where('attempt', $attempt)
             ->whereHas('elemen.unit', function($q) use ($skemaId) {
                 $q->where('skema_id', $skemaId);
             })
@@ -247,6 +262,7 @@ class AsesmenMandiriController extends Controller
             DB::table('asesi_skema')
                 ->where('asesi_nik', $asesi->NIK)
                 ->where('skema_id', $skemaId)
+                ->where('attempt', $attempt)
                 ->update([
                     'status' => 'selesai',
                     'tanggal_selesai' => now(),
@@ -284,8 +300,11 @@ class AsesmenMandiriController extends Controller
         
         $skema = Skema::with(['units.elemens.kriteria'])->findOrFail($skemaId);
         
+        $attempt = $asesi->currentAttempt($skemaId);
+
         // Get answers
         $answers = JawabanElemen::where('asesi_nik', $asesi->NIK)
+            ->where('attempt', $attempt)
             ->whereHas('elemen.unit', function($q) use ($skemaId) {
                 $q->where('skema_id', $skemaId);
             })
@@ -296,6 +315,7 @@ class AsesmenMandiriController extends Controller
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $attempt)
             ->first();
         
         return view('asesi.asesmen-mandiri.result', compact('account', 'asesi', 'skema', 'answers', 'pivot'));
@@ -316,17 +336,21 @@ class AsesmenMandiriController extends Controller
 
                 $skema = Skema::with(['units.elemens.kriteria'])->findOrFail($skemaId);
 
+                $attempt = $asesi->currentAttempt($skemaId);
+
                 $pivot = DB::table('asesi_skema')
                     ->where('asesi_nik', $asesi->NIK)
                     ->where('skema_id', $skemaId)
+                    ->where('attempt', $attempt)
                     ->first();
-
+ 
                 if (!$pivot || $pivot->status !== 'selesai') {
                     return redirect()->route('asesi.asesmen-mandiri.result', $skemaId)
                         ->with('error', 'PDF hanya dapat dibuat setelah asesmen mandiri selesai.');
                 }
-
+ 
                 $answers = JawabanElemen::where('asesi_nik', $asesi->NIK)
+                    ->where('attempt', $attempt)
                     ->whereHas('elemen.unit', function ($q) use ($skemaId) {
                         $q->where('skema_id', $skemaId);
                     })

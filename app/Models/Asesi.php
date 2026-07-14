@@ -133,9 +133,20 @@ class Asesi extends Model
                     ->withTimestamps();
     }
 
+    public function currentAttempt(?int $skemaId = null): int
+    {
+        $query = \Illuminate\Support\Facades\DB::table('asesi_skema')
+            ->where('asesi_nik', $this->NIK);
+        if ($skemaId) {
+            $query->where('skema_id', $skemaId);
+        }
+        return (int) ($query->max('attempt') ?? 1);
+    }
+
     public function hasCompletedUjikom(): bool
     {
         return RekamanAsesmenKompetensi::where('asesi_nik', $this->NIK)
+            ->where('attempt', $this->currentAttempt())
             ->whereNotNull('tanggal_selesai')
             ->where(function($q) {
                 $q->where('tanggal_selesai', '<=', now())
@@ -151,6 +162,7 @@ class Asesi extends Model
     {
         return RekamanAsesmenKompetensi::where('asesi_nik', $this->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $this->currentAttempt($skemaId))
             ->whereNotNull('tanggal_selesai')
             ->where(function($q) {
                 $q->where('tanggal_selesai', '<=', now())
@@ -165,6 +177,7 @@ class Asesi extends Model
     public function hasRekomendasiLanjut(): bool
     {
         return $this->skemas()
+            ->wherePivot('attempt', $this->currentAttempt())
             ->wherePivot('rekomendasi', 'lanjut')
             ->exists();
     }
@@ -173,6 +186,7 @@ class Asesi extends Model
     {
         return $this->skemas()
             ->where('skemas.id', $skemaId)
+            ->wherePivot('attempt', $this->currentAttempt($skemaId))
             ->wherePivot('rekomendasi', 'lanjut')
             ->exists();
     }
@@ -185,6 +199,7 @@ class Asesi extends Model
     public function hasSignedPersetujuanAsesmen(): bool
     {
         return $this->persetujuanAsesmens()
+            ->where('attempt', $this->currentAttempt())
             ->whereNotNull('ttd_asesi_nama')
             ->whereNotNull('ttd_asesi_tanggal')
             ->exists();

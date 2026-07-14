@@ -52,10 +52,10 @@ class BandingAsesmenController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
+        $currentAttempt = $asesi->currentAttempt();
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesi->NIK)
-            ->whereNotNull('rekomendasi')
-            ->orderByDesc('updated_at')
+            ->where('attempt', $currentAttempt)
             ->first();
 
         if (!$pivot) {
@@ -68,6 +68,7 @@ class BandingAsesmenController extends Controller
         // Fetch final assessment result
         $rekaman = \App\Models\RekamanAsesmenKompetensi::where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skema->id)
+            ->where('attempt', $currentAttempt)
             ->first();
 
         if (!$rekaman || empty($rekaman->rekomendasi)) {
@@ -140,9 +141,12 @@ class BandingAsesmenController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
+        $currentAttempt = $asesi->currentAttempt($skemaId);
+
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $currentAttempt)
             ->first();
 
         if (!$pivot || empty($pivot->rekomendasi)) {
@@ -153,6 +157,7 @@ class BandingAsesmenController extends Controller
         // Fetch final assessment result and ensure they are NOT kompeten
         $rekaman = \App\Models\RekamanAsesmenKompetensi::where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $currentAttempt)
             ->first();
 
         if (!$rekaman || $rekaman->rekomendasi === 'kompeten') {
@@ -292,9 +297,12 @@ class BandingAsesmenController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
+        $currentAttempt = $asesi->currentAttempt($skemaId);
+
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $currentAttempt)
             ->first();
 
         if (!$pivot || empty($pivot->rekomendasi)) {
@@ -305,6 +313,7 @@ class BandingAsesmenController extends Controller
         // Fetch final assessment result and ensure they are NOT kompeten
         $rekaman = \App\Models\RekamanAsesmenKompetensi::where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $currentAttempt)
             ->first();
 
         if (!$rekaman || $rekaman->rekomendasi === 'kompeten') {

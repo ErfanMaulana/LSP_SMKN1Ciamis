@@ -10,6 +10,7 @@ class PersetujuanAsesmen extends Model
 
     protected $fillable = [
         'asesi_nik',
+        'attempt',
         'kode_form',
         'judul_form',
         'pengantar',

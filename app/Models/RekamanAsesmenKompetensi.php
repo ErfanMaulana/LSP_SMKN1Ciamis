@@ -17,6 +17,7 @@ class RekamanAsesmenKompetensi extends Model
         'tuk',
         'asesor_id',
         'asesi_nik',
+        'attempt',
         'tanggal_mulai',
         'tanggal_selesai',
         'rekomendasi',

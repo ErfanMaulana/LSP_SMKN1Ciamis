@@ -185,7 +185,7 @@ class JadwalUjikomController extends Controller
             ->all();
     }
 
-    private function syncJadwalPeserta(int $jadwalId, array $niks): void
+    private function syncJadwalPeserta(int $jadwalId, array $niks, ?int $skemaId = null): void
     {
         DB::table('jadwal_peserta')->where('jadwal_id', $jadwalId)->delete();
 
@@ -194,12 +194,24 @@ class JadwalUjikomController extends Controller
         }
 
         $now = now();
-        $rows = array_map(fn ($nik) => [
-            'jadwal_id' => $jadwalId,
-            'asesi_nik' => $nik,
-            'created_at' => $now,
-            'updated_at' => $now,
-        ], $niks);
+        $rows = array_map(function ($nik) use ($jadwalId, $skemaId, $now) {
+            // Determine the asesi's current attempt for this skema
+            $attempt = 1;
+            if ($skemaId) {
+                $attempt = (int) DB::table('asesi_skema')
+                    ->where('asesi_nik', $nik)
+                    ->where('skema_id', $skemaId)
+                    ->max('attempt') ?: 1;
+            }
+
+            return [
+                'jadwal_id'  => $jadwalId,
+                'asesi_nik'  => $nik,
+                'attempt'    => $attempt,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }, $niks);
 
         DB::table('jadwal_peserta')->insert($rows);
     }
@@ -221,13 +233,23 @@ class JadwalUjikomController extends Controller
         $now = now();
 
         foreach ($asesiList as $asesi) {
+            // Resolve current attempt for this asesi+skema
+            $currentAttempt = (int) DB::table('asesi_skema')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->max('attempt') ?: 1;
+
             $attributes = [
                 'nomor_skema' => $skema->nomor_skema,
-                'nama_asesi' => $asesi->nama,
+                'nama_asesi'  => $asesi->nama,
             ];
 
             if ($hasAsesiNikColumn) {
                 $attributes['asesi_nik'] = $asesi->NIK;
+            }
+
+            if (Schema::hasColumn('persetujuan_asesmen', 'attempt')) {
+                $attributes['attempt'] = $currentAttempt;
             }
 
             $defaultData = [
@@ -500,7 +522,8 @@ class JadwalUjikomController extends Controller
             $jadwal->kelompoks()->sync($kelompokIds);
         }
 
-        $this->syncJadwalPeserta($jadwal->id, $niks);
+        $skemaId = (int) ($kelompoks->first()?->skema?->id ?? 0) ?: null;
+        $this->syncJadwalPeserta($jadwal->id, $niks, $skemaId);
         $this->syncPersetujuanAsesmenForJadwal($jadwal, $kelompoks);
 
         return redirect()->route('admin.jadwal-ujikom.index')
@@ -703,7 +726,8 @@ class JadwalUjikomController extends Controller
             $jadwal->kelompoks()->sync($kelompokIds);
         }
 
-        $this->syncJadwalPeserta($jadwal->id, $niks);
+        $skemaId = (int) ($kelompoks->first()?->skema?->id ?? 0) ?: null;
+        $this->syncJadwalPeserta($jadwal->id, $niks, $skemaId);
         $this->syncPersetujuanAsesmenForJadwal($jadwal, $kelompoks);
 
         return redirect()->route('admin.jadwal-ujikom.index')
