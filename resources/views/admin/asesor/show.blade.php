@@ -89,6 +89,17 @@
                         @endif
                     </div>
                 </div>
+
+                <div class="detail-item">
+                    <label>Batas Maksimal Asesi</label>
+                    <div class="detail-value" style="font-weight: 600; color: #1e293b;">
+                        @if($asesor->max_asesi)
+                            {{ $asesor->max_asesi }} asesi
+                        @else
+                            <span class="text-muted" style="font-weight: normal;">Tidak dibatasi</span>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
 

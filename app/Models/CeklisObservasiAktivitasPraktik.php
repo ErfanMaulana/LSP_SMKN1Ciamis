@@ -14,6 +14,7 @@ class CeklisObservasiAktivitasPraktik extends Model
         'judul_form',
         'skema_id',
         'asesi_nik',
+        'attempt',
         'asesor_id',
         'tuk',
         'tanggal',

@@ -241,8 +241,10 @@ class PersetujuanAsesmenFrontController extends Controller
     private function createPlaceholderForAsesiSkema(Asesi $asesi, Skema $skema): ?PersetujuanAsesmen
     {
         $useNik = $this->hasAsesiNikColumn();
+        $attempt = $asesi->currentAttempt($skema->id);
 
         $record = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
+            ->where('attempt', $attempt)
             ->where(function ($q) use ($asesi, $useNik) {
                 $q->where('nama_asesi', $asesi->nama);
                 if ($useNik) {
@@ -303,6 +305,7 @@ class PersetujuanAsesmenFrontController extends Controller
             'hari_tanggal' => $hariTanggalStr,
             'waktu' => $waktuStr,
             'tuk_pelaksanaan' => $jadwal->tuk?->nama_tuk ?? '-',
+            'attempt' => $attempt,
         ]));
     }
 
@@ -522,6 +525,7 @@ class PersetujuanAsesmenFrontController extends Controller
         if ($asesor) {
             $records = PersetujuanAsesmen::query()
                 ->where('nama_asesor', $asesor->nama)
+                ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM persetujuan_asesmen b WHERE b.asesi_nik = persetujuan_asesmen.asesi_nik AND b.nomor_skema = persetujuan_asesmen.nomor_skema)')
                 ->when($search, function ($query) use ($search) {
                     $query->where(function ($q) use ($search) {
                         $q->where('judul_skema', 'like', "%{$search}%")
@@ -602,6 +606,7 @@ class PersetujuanAsesmenFrontController extends Controller
                 $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
                     ->where('asesi_nik', $item['asesi_nik'])
                     ->where('skema_id', $item['skema_id'])
+                    ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
                     ->first();
                 return $pivot && $pivot->rekomendasi === 'lanjut';
             })->values();
@@ -707,6 +712,7 @@ class PersetujuanAsesmenFrontController extends Controller
             $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
                 ->where('asesi_nik', $asesi->NIK)
                 ->where('skema_id', $skemaId)
+                ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
                 ->first();
 
             if (!$pivot || $pivot->rekomendasi !== 'lanjut') {
@@ -715,7 +721,10 @@ class PersetujuanAsesmenFrontController extends Controller
             }
         }
 
+        $currentAttempt = $asesi ? $asesi->currentAttempt($skemaId) : 1;
+
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
+            ->where('attempt', $currentAttempt)
             ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
                 if ($namaAsesi) {
                     $q->where('nama_asesi', $namaAsesi);
@@ -790,7 +799,7 @@ class PersetujuanAsesmenFrontController extends Controller
         $data = $request->validate([
             'ttd_asesor_nama' => 'required|string|max:255',
             'ttd_asesor_tanggal' => 'required|date',
-            'ttd_asesor_file' => 'required|string',
+            'ttd_asesor_file' => 'nullable|string',
             'simpan_tanda_tangan' => 'nullable|in:0,1',
             'bukti_verifikasi_portofolio' => 'nullable|boolean',
             'bukti_reviu_produk' => 'nullable|boolean',
@@ -825,12 +834,15 @@ class PersetujuanAsesmenFrontController extends Controller
                 }
             }
         } else {
-            return redirect()->back()->with('error', 'Tanda tangan asesor tidak tersimpan. Pastikan tanda tangan digambar di canvas sebelum menyimpan.');
+            if (empty($item->ttd_asesor_file)) {
+                return redirect()->back()->with('error', 'Tanda tangan asesor tidak tersimpan. Pastikan tanda tangan digambar di canvas sebelum menyimpan.');
+            }
+            unset($data['ttd_asesor_file']);
         }
 
         $item->update($data);
 
-        return redirect()->back()->with('success', 'Tanda tangan asesor tersimpan');
+        return redirect()->back()->with('success', 'Persetujuan asesmen berhasil disimpan');
     }
 
     /**
@@ -850,7 +862,10 @@ class PersetujuanAsesmenFrontController extends Controller
         $namaAsesi = $asesi ? $asesi->nama : null;
         $useNik = $this->hasAsesiNikColumn();
 
+        $currentAttempt = $asesi ? $asesi->currentAttempt($skemaId) : 1;
+
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
+            ->where('attempt', $currentAttempt)
             ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
                 if ($namaAsesi) {
                     $q->where('nama_asesi', $namaAsesi);

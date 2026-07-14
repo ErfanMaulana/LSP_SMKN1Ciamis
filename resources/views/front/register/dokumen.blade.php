@@ -1,4 +1,8 @@
 <!DOCTYPE html>
+@php
+    $nik = session('asesi_nik');
+    $asesi = \App\Models\Asesi::where('NIK', $nik)->first();
+@endphp
 <html lang="id">
 
 <head>
@@ -426,7 +430,7 @@
                                 <div class="signature-placeholder" style="pointer-events: none;">Tanda tangan Anda akan muncul di sini</div>
                             </div>
                             <div class="signature-modal-actions">
-                                <p class="text-xs text-gray-500 m-0">Tanggal & waktu akan dicatat secara otomatis</p>
+                                <p class="text-xs text-gray-500 m-0">Nama: {{ $asesi?->nama }} &bull; Tanggal: {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</p>
                                 <button type="button" onclick="clearSignatureDokumen()"
                                     class="inline-flex items-center px-4 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">
                                     <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -658,6 +662,16 @@
             if (openButton) {
                 openButton.addEventListener('click', function(event) {
                     event.preventDefault();
+                    // Validate photo first
+                    const pasFotoInput = document.getElementById('pas_foto');
+                    if (!pasFotoInput.files || pasFotoInput.files.length === 0) {
+                        alert('Pas foto wajib diunggah terlebih dahulu.');
+                        const photoCircle = document.getElementById('photo-circle');
+                        if (photoCircle) {
+                            photoCircle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                        return;
+                    }
                     openSignatureModal();
                 });
             }
@@ -669,6 +683,18 @@
             const canvas = document.getElementById('signatureCanvasDokumen');
 
             form.addEventListener('submit', (event) => {
+                const pasFotoInput = document.getElementById('pas_foto');
+                if (!pasFotoInput.files || pasFotoInput.files.length === 0) {
+                    event.preventDefault();
+                    alert('Pas foto wajib diunggah terlebih dahulu.');
+                    closeSignatureModal();
+                    const photoCircle = document.getElementById('photo-circle');
+                    if (photoCircle) {
+                        photoCircle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    return;
+                }
+
                 if (!signatureInput.value) {
                     event.preventDefault();
                     signatureError.style.display = 'block';

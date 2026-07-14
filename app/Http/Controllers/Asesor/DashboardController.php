@@ -42,7 +42,10 @@ class DashboardController extends Controller
 
         // Asesi yang terdaftar di skema asesor ini
         $totalAsesi = count($skemaIds)
-            ? DB::table('asesi_skema')->whereIn('skema_id', $skemaIds)->count()
+            ? DB::table('asesi_skema')
+                ->whereIn('skema_id', $skemaIds)
+                ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
+                ->count()
             : 0;
 
         $selesai = 0;
@@ -50,11 +53,15 @@ class DashboardController extends Controller
         $belum = 0;
 
         if (count($skemaIds)) {
-            $rows = DB::table('asesi_skema')->whereIn('skema_id', $skemaIds)->get();
+            $rows = DB::table('asesi_skema')
+                ->whereIn('skema_id', $skemaIds)
+                ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
+                ->get();
             $niks = $rows->pluck('asesi_nik')->unique()->values();
 
             $rekamanByAsesiSkema = DB::table('rekaman_asesmen_kompetensi')
                 ->where('asesor_id', $asesor->ID_asesor)
+                ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM rekaman_asesmen_kompetensi b WHERE b.asesi_nik = rekaman_asesmen_kompetensi.asesi_nik AND b.skema_id = rekaman_asesmen_kompetensi.skema_id)')
                 ->select('asesi_nik', 'skema_id', 'id')
                 ->get()
                 ->pluck('id', function($item) {
@@ -66,6 +73,7 @@ class DashboardController extends Controller
                 ->join('units as u', 'e.unit_id', '=', 'u.id')
                 ->whereIn('je.asesi_nik', $niks)
                 ->whereIn('u.skema_id', $skemaIds)
+                ->whereRaw('je.attempt = (SELECT MAX(b.attempt) FROM jawaban_elemens b WHERE b.asesi_nik = je.asesi_nik AND b.elemen_id = je.elemen_id)')
                 ->select('je.asesi_nik', 'u.skema_id', 'je.id')
                 ->get()
                 ->pluck('id', function($item) {
@@ -75,6 +83,7 @@ class DashboardController extends Controller
             $penilaianByAsesiSkema = DB::table('asesor_nilai_elemens')
                 ->where('asesor_id', $asesor->ID_asesor)
                 ->whereIn('asesi_nik', $niks)
+                ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesor_nilai_elemens b WHERE b.asesi_nik = asesor_nilai_elemens.asesi_nik AND b.skema_id = asesor_nilai_elemens.skema_id AND b.elemen_id = asesor_nilai_elemens.elemen_id AND b.asesor_id = asesor_nilai_elemens.asesor_id)')
                 ->select('asesi_nik', 'skema_id', 'id')
                 ->get()
                 ->pluck('id', function($item) {
@@ -437,7 +446,8 @@ class DashboardController extends Controller
         // Build base query with asesi join for filtering
         $query = DB::table('asesi_skema')
             ->join('asesi as a', 'asesi_skema.asesi_nik', '=', 'a.NIK')
-            ->whereIn('asesi_skema.skema_id', $skemaIds);
+            ->whereIn('asesi_skema.skema_id', $skemaIds)
+            ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)');
 
         // Filter by search (nama and NIK only)
         if ($request->filled('search')) {
@@ -470,9 +480,17 @@ class DashboardController extends Controller
 
         $rows = $query->select('asesi_skema.*')->orderByDesc('asesi_skema.updated_at')->get();
 
-        // Get rekaman, asesmen mandiri, and penilaian counts
+        // Get rekaman, asesmen mandiri, and penilaian counts — only for current attempt
         $rekamanByAsesiSkema = DB::table('rekaman_asesmen_kompetensi')
             ->where('asesor_id', $asesor->ID_asesor)
+            ->whereRaw('
+                attempt = COALESCE(
+                    (SELECT MAX(b.attempt) FROM asesi_skema b
+                     WHERE b.asesi_nik = rekaman_asesmen_kompetensi.asesi_nik
+                       AND b.skema_id  = rekaman_asesmen_kompetensi.skema_id),
+                    1
+                )
+            ')
             ->select('asesi_nik', 'skema_id', 'id')
             ->get()
             ->pluck('id', function($item) {
@@ -484,6 +502,14 @@ class DashboardController extends Controller
             ->join('units as u', 'e.unit_id', '=', 'u.id')
             ->whereIn('je.asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
             ->whereIn('u.skema_id', $skemaIds)
+            ->whereRaw('
+                je.attempt = COALESCE(
+                    (SELECT MAX(b.attempt) FROM asesi_skema b
+                     WHERE b.asesi_nik = je.asesi_nik
+                       AND b.skema_id  = u.skema_id),
+                    1
+                )
+            ')
             ->select('je.asesi_nik', 'u.skema_id', 'je.id')
             ->get()
             ->pluck('id', function($item) {
@@ -493,6 +519,14 @@ class DashboardController extends Controller
         $penilaianByAsesiSkema = DB::table('asesor_nilai_elemens')
             ->where('asesor_id', $asesor->ID_asesor)
             ->whereIn('asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
+            ->whereRaw('
+                attempt = COALESCE(
+                    (SELECT MAX(b.attempt) FROM asesi_skema b
+                     WHERE b.asesi_nik = asesor_nilai_elemens.asesi_nik
+                       AND b.skema_id  = asesor_nilai_elemens.skema_id),
+                    1
+                )
+            ')
             ->select('asesi_nik', 'skema_id', 'id')
             ->get()
             ->pluck('id', function($item) {
@@ -503,6 +537,14 @@ class DashboardController extends Controller
             ->where('asesor_id', $asesor->ID_asesor)
             ->whereIn('asesi_nik', $rows->pluck('asesi_nik')->unique()->values())
             ->whereIn('skema_id', $skemaIds)
+            ->whereRaw('
+                attempt = COALESCE(
+                    (SELECT MAX(b.attempt) FROM asesi_skema b
+                     WHERE b.asesi_nik = ceklis_observasi_aktivitas_praktiks.asesi_nik
+                       AND b.skema_id  = ceklis_observasi_aktivitas_praktiks.skema_id),
+                    1
+                )
+            ')
             ->select('id', 'asesi_nik', 'skema_id')
             ->get()
             ->groupBy(function($item) {
@@ -516,7 +558,18 @@ class DashboardController extends Controller
         $scheduledKelompokIds = DB::table('jadwal_kelompok')->pluck('kelompok_id')->unique()->toArray();
         $directScheduledKelompokIds = DB::table('jadwal_ujikom')->whereNotNull('kelompok_id')->pluck('kelompok_id')->unique()->toArray();
         $allScheduledKelompokIds = array_unique(array_merge($scheduledKelompokIds, $directScheduledKelompokIds));
-        $scheduledAsesiNiks = DB::table('jadwal_peserta')->pluck('asesi_nik')->unique()->toArray();
+        $scheduledAsesiNiks = DB::table('jadwal_peserta')
+            ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
+            ->whereRaw('
+                jadwal_peserta.attempt = COALESCE(
+                    (SELECT MAX(ase_sk.attempt)
+                     FROM asesi_skema ase_sk
+                     WHERE ase_sk.asesi_nik = jadwal_peserta.asesi_nik
+                       AND ase_sk.skema_id  = jadwal_ujikom.skema_id),
+                    1
+                )
+            ')
+            ->pluck('jadwal_peserta.asesi_nik')->unique()->toArray();
 
         // Attach asesi data
         $data = $rows->map(function ($row) use ($rekamanByAsesiSkema, $asesmenByAsesiSkema, $penilaianByAsesiSkema, $ceklisByAsesiSkema, $allScheduledKelompokIds, $scheduledAsesiNiks) {
@@ -539,6 +592,8 @@ class DashboardController extends Controller
             $row->persetujuan_signed_by_asesor = false;
             $row->persetujuan_signed_by_asesi = false;
             if ($row->skema) {
+                // scope persetujuan to current attempt of this asesi_skema row
+                $currentAttempt = $row->attempt ?? 1;
                 $p = PersetujuanAsesmen::where('nomor_skema', $row->skema->nomor_skema)
                     ->where(function ($q) use ($row) {
                         $q->where('nama_asesi', $row->asesi?->nama ?? '');
@@ -546,6 +601,7 @@ class DashboardController extends Controller
                             $q->orWhere('asesi_nik', $row->asesi_nik);
                         }
                     })
+                    ->where('attempt', $currentAttempt)
                     ->latest()
                     ->first();
 
@@ -786,6 +842,7 @@ class DashboardController extends Controller
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->first();
 
         abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
@@ -793,6 +850,7 @@ class DashboardController extends Controller
         $hasRekaman = DB::table('rekaman_asesmen_kompetensi')
             ->where('asesi_nik', $asesiNik)
             ->where('skema_id', $pivot->skema_id)
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM rekaman_asesmen_kompetensi b WHERE b.asesi_nik = rekaman_asesmen_kompetensi.asesi_nik AND b.skema_id = rekaman_asesmen_kompetensi.skema_id)')
             ->exists();
 
         if (!$hasRekaman) {
@@ -825,6 +883,7 @@ class DashboardController extends Controller
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->first();
 
         abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
@@ -832,6 +891,7 @@ class DashboardController extends Controller
         $hasRekaman = DB::table('rekaman_asesmen_kompetensi')
             ->where('asesi_nik', $asesiNik)
             ->where('skema_id', $pivot->skema_id)
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM rekaman_asesmen_kompetensi b WHERE b.asesi_nik = rekaman_asesmen_kompetensi.asesi_nik AND b.skema_id = rekaman_asesmen_kompetensi.skema_id)')
             ->exists();
 
         if (!$hasRekaman) {
@@ -886,10 +946,11 @@ class DashboardController extends Controller
 
         $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
 
-        // Cari pivot di semua skema asesor
+        // Cari pivot di semua skema asesor (attempt terbaru)
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->first();
 
         abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
@@ -935,7 +996,9 @@ class DashboardController extends Controller
             return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi'));
         }
 
-        $query = DB::table('asesi_skema')->whereIn('skema_id', $skemaIds);
+        $query = DB::table('asesi_skema')
+            ->whereIn('skema_id', $skemaIds)
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)');
 
         if ($search !== '') {
             $query
@@ -1066,6 +1129,7 @@ class DashboardController extends Controller
             ->where('asesi_nik', $asesiNik)
             ->where('skema_id', $skemaId)
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->first();
 
         abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
@@ -1074,6 +1138,7 @@ class DashboardController extends Controller
 
         $answers = JawabanElemen::where('asesi_nik', $asesiNik)
             ->whereHas('elemen.unit', fn ($q) => $q->where('skema_id', $skemaId))
+            ->where('attempt', $pivot->attempt)
             ->get()
             ->keyBy('elemen_id');
 
@@ -1105,6 +1170,7 @@ class DashboardController extends Controller
             ->where('asesi_nik', $asesiNik)
             ->where('skema_id', $skemaId)
             ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->first();
 
         abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
@@ -1117,6 +1183,7 @@ class DashboardController extends Controller
 
         $answers = JawabanElemen::where('asesi_nik', $asesiNik)
             ->whereHas('elemen.unit', fn ($q) => $q->where('skema_id', $skemaId))
+            ->where('attempt', $pivot->attempt)
             ->get()
             ->keyBy('elemen_id');
 
@@ -1168,10 +1235,11 @@ class DashboardController extends Controller
             return back()->withErrors(['tanda_tangan_asesor' => 'Format tanda tangan tidak valid.'])->withInput();
         }
 
-        // Pastikan asesi ini memang di skema asesor
+        // Pastikan asesi ini memang di skema asesor (attempt terbaru)
         $pivotQuery = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
-            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds));
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)');
 
         if ($skemaId) {
             $pivotQuery->where('skema_id', $skemaId);

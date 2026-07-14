@@ -120,11 +120,12 @@ class AuthController extends Controller
             return view('asesi.dashboard-pending', compact('account', 'asesi'));
         }
 
-        // Fetch all schemas registered for this candidate (via pivot asesi_skema)
+        // Fetch all schemas registered for this candidate (via pivot asesi_skema) - only the latest attempt
         $asesiSkemas = \DB::table('asesi_skema')
             ->join('skemas', 'asesi_skema.skema_id', '=', 'skemas.id')
             ->where('asesi_skema.asesi_nik', $asesi->NIK)
-            ->select('skemas.*', 'asesi_skema.status as status_mandiri', 'asesi_skema.tanggal_selesai as tgl_selesai_mandiri')
+            ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
+            ->select('skemas.*', 'asesi_skema.status as status_mandiri', 'asesi_skema.tanggal_selesai as tgl_selesai_mandiri', 'asesi_skema.attempt')
             ->get();
 
         $hasilUjikom = [];
@@ -156,6 +157,7 @@ class AuthController extends Controller
                 ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
                 ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
                 ->where('jadwal_ujikom.skema_id', $skema->id)
+                ->where('jadwal_peserta.attempt', $skema->attempt)
                 ->select('jadwal_ujikom.*')
                 ->first();
 
@@ -180,6 +182,7 @@ class AuthController extends Controller
             $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
             $persetujuan = \DB::table('persetujuan_asesmen')
                 ->where('nomor_skema', $skema->nomor_skema)
+                ->where('attempt', $skema->attempt)
                 ->where(function($q) use ($asesi, $useNik) {
                     $q->where('nama_asesi', $asesi->nama);
                     if ($useNik) {
@@ -219,6 +222,7 @@ class AuthController extends Controller
             $ceklis = \DB::table('ceklis_observasi_aktivitas_praktiks')
                 ->where('asesi_nik', $asesi->NIK)
                 ->where('skema_id', $skema->id)
+                ->where('attempt', $skema->attempt)
                 ->first();
 
             $isPenilaianSelesai = $ceklis && !empty($ceklis->ttd_asesi_file) && !empty($ceklis->ttd_asesor_file);
@@ -247,6 +251,7 @@ class AuthController extends Controller
             $rekaman = \DB::table('rekaman_asesmen_kompetensi')
                 ->where('asesi_nik', $asesi->NIK)
                 ->where('skema_id', $skema->id)
+                ->where('attempt', $skema->attempt)
                 ->first();
 
             $isRekamanSelesai = $rekaman && !empty($rekaman->ttd_asesi_file) && !empty($rekaman->ttd_asesor_file);

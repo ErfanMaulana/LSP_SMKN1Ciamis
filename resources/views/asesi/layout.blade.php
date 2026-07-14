@@ -707,8 +707,10 @@
                     $rekamanRecord = null;
                 if ($asesi) {
                     try {
+                        $currentAttempt = $asesi->currentAttempt();
                         $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
                         $pq = \App\Models\PersetujuanAsesmen::query()
+                            ->where('attempt', $currentAttempt)
                             ->where(function($q) use ($asesi, $useNik) {
                                 $q->where('nama_asesi', $asesi->nama);
                                 if ($useNik) {
@@ -733,6 +735,7 @@
 
                         $ceklisRecord = \App\Models\CeklisObservasiAktivitasPraktik::query()
                             ->where('asesi_nik', $asesi->NIK)
+                            ->where('attempt', $currentAttempt)
                             ->where(function($q) {
                                 $q->whereNotNull('ttd_asesor_nama')
                                   ->where('ttd_asesor_nama', '!=', '');
@@ -747,6 +750,7 @@
 
                         $rekamanRecord = \App\Models\RekamanAsesmenKompetensi::query()
                             ->where('asesi_nik', $asesi->NIK)
+                            ->where('attempt', $currentAttempt)
                             ->where(function($q) {
                                 $q->whereNotNull('ttd_asesor_nama')
                                   ->where('ttd_asesor_nama', '!=', '');

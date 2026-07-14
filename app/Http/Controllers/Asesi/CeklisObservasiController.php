@@ -20,7 +20,7 @@ class CeklisObservasiController extends Controller
         abort_unless($account !== null, 403);
 
         $ceklis = CeklisObservasiAktivitasPraktik::with([
-            'asesi:NIK,nama',
+            'asesi',
             'skema:id,nama_skema,nomor_skema',
             'details.unit:id,kode_unit,judul_unit',
             'details.elemen:id,nama_elemen',
@@ -54,7 +54,9 @@ class CeklisObservasiController extends Controller
             $savedSignature = $this->formatSignatureUrl($raw);
         }
 
-        return view('asesi.ceklis-observasi.view-and-sign', compact('ceklis', 'detailsByUnit', 'account', 'savedSignature'));
+        $asesi = $ceklis->asesi;
+
+        return view('asesi.ceklis-observasi.view-and-sign', compact('ceklis', 'detailsByUnit', 'account', 'savedSignature', 'asesi'));
     }
 
     private function formatSignatureUrl(?string $sig): ?string

@@ -11,6 +11,7 @@ class UmpanBalikHasil extends Model
     protected $fillable = [
         'asesi_nik',
         'skema_id',
+        'attempt',
         'komponen_id',
         'jawaban',
         'catatan',

@@ -142,7 +142,7 @@
                         <i class="bi bi-chevron-down chevron"></i>
                     </button>
                     <div class="dd-panel" id="asesorPanel">
-                        <div class="dd-search"><input type="text" placeholder="Cari asesor..." oninput="filterDd('asesor',this.value)"></div>
+                        <div class="dd-search"><input type="text" placeholder="Cari berdasarkan nama dan No MET..." oninput="filterDd('asesor',this.value)"></div>
                         <div class="dd-list" id="asesorList"></div>
                     </div>
                     <input type="hidden" name="asesor_id" id="asesorIdInput"
@@ -168,7 +168,7 @@
                 <div class="badge-list" id="asesiBadges" style="margin-bottom:10px;"></div>
                 <div class="asesi-checklist">
                     <div class="asesi-checklist-search">
-                        <input type="text" placeholder="Cari asesi berdasarkan nama..." oninput="filterAsesiList(this.value)">
+                        <input type="text" placeholder="Cari berdasarkan nama dan NIK..." oninput="filterAsesiList(this.value)">
                     </div>
                     <div class="asesi-checklist-body" id="asesiChecklist"></div>
                 </div>
@@ -213,7 +213,9 @@ function toggleDd(key) {
 function filterDd(key, q) {
     q = q.toLowerCase();
     document.querySelectorAll('#'+key+'List .dd-item').forEach(el => {
-        el.style.display = (el.dataset.nama||'').toLowerCase().includes(q) ? '' : 'none';
+        const nama = (el.dataset.nama || '').toLowerCase();
+        const nomet = (el.dataset.nomet || '').toLowerCase();
+        el.style.display = (nama.includes(q) || nomet.includes(q)) ? '' : 'none';
     });
 }
 
@@ -242,7 +244,7 @@ function rebuildAsesorList(skemaId) {
     const filtered = ASESORS.filter(a => a.skema_ids.includes(skemaId));
     document.getElementById('asesorList').innerHTML = filtered.length
         ? filtered.map(a => `<div class="dd-item${selAsesorId===a.id?' selected':''}"
-              data-id="${a.id}" data-nama="${escHtml(a.nama)}"
+              data-id="${a.id}" data-nama="${escHtml(a.nama)}" data-nomet="${escHtml(a.no_met || '')}"
               onclick="selectAsesor(${a.id},${escHtml(JSON.stringify(a.nama))},${escHtml(JSON.stringify(a.no_met || '-'))})">
               <div style="line-height:1.3"><span style="font-weight:600">${escHtml(a.nama)}</span><br><span style="font-size:11px;color:#64748b">No MET: ${escHtml(a.no_met || '-')}</span></div>
             </div>`).join('')
@@ -352,7 +354,8 @@ function filterAsesiList(q) {
     q = q.toLowerCase();
     document.querySelectorAll('.asesi-check-row').forEach(row => {
         const name = row.querySelector('.name')?.textContent.toLowerCase() || '';
-        row.style.display = name.includes(q) ? '' : 'none';
+        const nik = row.dataset.nik ? row.dataset.nik.toLowerCase() : '';
+        row.style.display = (name.includes(q) || nik.includes(q)) ? '' : 'none';
     });
 }
 

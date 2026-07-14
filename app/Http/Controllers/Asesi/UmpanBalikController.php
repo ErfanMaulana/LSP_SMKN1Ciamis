@@ -30,7 +30,10 @@ class UmpanBalikController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
-        $skema = $asesi->skemas()->first();
+        $currentAttempt = $asesi->currentAttempt();
+        $skema = $asesi->skemas()
+            ->wherePivot('attempt', $currentAttempt)
+            ->first();
 
         if (!$skema) {
             return redirect()->route('asesi.dashboard')
@@ -50,7 +53,11 @@ class UmpanBalikController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
-        $skema = $asesi->skemas()->where('skemas.id', $skemaId)->first();
+        $currentAttempt = $asesi->currentAttempt($skemaId);
+        $skema = $asesi->skemas()
+            ->where('skemas.id', $skemaId)
+            ->wherePivot('attempt', $currentAttempt)
+            ->first();
 
         if (!$skema) {
             return redirect()->route('asesi.dashboard')
@@ -64,6 +71,7 @@ class UmpanBalikController extends Controller
 
         $existing = UmpanBalikHasil::where('asesi_nik', $asesi->NIK)
             ->where('skema_id', $skemaId)
+            ->where('attempt', $currentAttempt)
             ->get()
             ->keyBy('komponen_id');
 
@@ -90,7 +98,11 @@ class UmpanBalikController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
-        $skema = $asesi->skemas()->where('skemas.id', $skemaId)->first();
+        $currentAttempt = $asesi->currentAttempt($skemaId);
+        $skema = $asesi->skemas()
+            ->where('skemas.id', $skemaId)
+            ->wherePivot('attempt', $currentAttempt)
+            ->first();
 
         if (!$skema) {
             return redirect()->route('asesi.dashboard')
@@ -166,6 +178,7 @@ class UmpanBalikController extends Controller
                     'asesi_nik' => $asesi->NIK,
                     'skema_id' => $skemaId,
                     'komponen_id' => $komponenId,
+                    'attempt' => $currentAttempt,
                 ],
                 [
                     'jawaban' => $hasil,

@@ -11,6 +11,7 @@ class JawabanElemen extends Model
     protected $fillable = [
         'asesi_nik',
         'elemen_id',
+        'attempt',
         'status',
         'bukti',
     ];

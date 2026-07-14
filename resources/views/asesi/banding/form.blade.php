@@ -442,7 +442,7 @@
         'tidak_banding' => 'Tidak Banding',
     ][$bandingStatus] ?? ucfirst($bandingStatus);
 
-    $isLocked = in_array($bandingStatus, ['diajukan', 'ditinjau', 'diterima', 'ditolak', 'asesmen_ulang'], true);
+    $isLocked = $isKompeten || in_array($bandingStatus, ['diajukan', 'ditinjau', 'diterima', 'ditolak', 'asesmen_ulang'], true);
     
     $statusIconClass = [
         'draft' => 'bi-pencil-square',
@@ -454,6 +454,16 @@
         'tidak_banding' => 'bi-x-octagon-fill',
     ][$bandingStatus] ?? 'bi-info-circle-fill';
 @endphp
+
+@if($isKompeten)
+<div style="margin-bottom:20px;padding:16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;display:flex;align-items:center;gap:12px;font-size:14px;color:#166534;">
+    <i class="bi bi-check-circle-fill" style="font-size:20px;color:#16a34a;"></i>
+    <div>
+        <strong>Informasi:</strong> Anda telah dinyatakan <strong>KOMPETEN</strong> pada Uji Kompetensi ini. 
+        Formulir banding dinonaktifkan (hanya dapat dilihat) karena banding hanya diperuntukkan bagi asesi yang belum kompeten.
+    </div>
+</div>
+@endif
 
 <div class="status-banner">
     <div class="status-info">
@@ -588,18 +598,66 @@
                     </div>
                 </div>
 
-                <div class="signature-canvas-container">
-                    <div class="signature-canvas-wrapper {{ $banding && $banding->ttd_asesi_file ? 'has-signature readonly' : '' }}" id="signatureWrapper">
-                        @if($banding && $banding->ttd_asesi_file)
+                <div class="signature-canvas-container" style="width: 100%; max-width: 320px; margin: 0 auto;">
+                    @if($banding && $banding->ttd_asesi_file)
+                        {{-- Sudah bertanda tangan --}}
+                        <div class="signature-canvas-wrapper has-signature readonly" id="signatureWrapper">
                             <img src="{{ asset('storage/' . ltrim($banding->ttd_asesi_file, '/')) }}" class="signature-saved-img" id="savedSignatureImgAsesi" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; pointer-events:none;">
-                        @else
+                        </div>
+                    @elseif($isKompeten)
+                        <div class="signature-canvas-wrapper readonly" id="signatureWrapper">
+                            <div class="signature-placeholder" style="opacity: 1;">
+                                <i class="bi bi-shield-fill-check" style="font-size:32px;color:#16a34a;"></i>
+                                <span style="font-size:11px; font-weight: 600; color: #16a34a;">Tidak Memerlukan Otorisasi</span>
+                            </div>
+                        </div>
+                    @elseif(isset($savedSignature) && $savedSignature)
+                        {{-- Belum TTD & ada TTD tersimpan: tampilkan pilihan --}}
+                        <div id="sigChoiceWrapAsesi" style="margin-bottom:14px; text-align:left; width: 100%;">
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="optSavedAsesiLabel">
+                                <input type="radio" name="sig_choice_asesi" value="saved" checked id="optSavedAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#10b981;">
+                                <div>
+                                    <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
+                                    <div style="font-size:12px;color:#64748b;">Menggunakan TTD yang sudah disimpan di profil Anda</div>
+                                </div>
+                            </label>
+                            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="optNewAsesiLabel">
+                                <input type="radio" name="sig_choice_asesi" value="new" id="optNewAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#0073bd;">
+                                <div>
+                                    <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pencil" style="color:#0073bd;"></i> Tanda tangan baru</div>
+                                    <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk banding ini</div>
+                                </div>
+                            </label>
+                        </div>
+
+                        {{-- Preview TTD tersimpan --}}
+                        <div id="savedAsesiSigPreview" style="margin-bottom:12px; text-align:center; width: 100%;">
+                            <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px; width: 100%; max-width: 280px; aspect-ratio: 1.2/1; position: relative;">
+                                <img src="{{ $savedSignature }}" alt="TTD Tersimpan" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; padding: 10px;">
+                            </div>
+                            <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
+                        </div>
+
+                        {{-- Canvas tanda tangan baru (tersembunyi) --}}
+                        <div id="newAsesiSigDraw" style="display:none; width: 100%;">
+                            <div class="signature-canvas-wrapper" id="signatureWrapper" style="margin: 0 auto;">
+                                <canvas class="signature-canvas" id="signatureCanvas"></canvas>
+                                <div class="signature-placeholder">
+                                    <i class="bi bi-pencil" style="font-size:20px;"></i>
+                                    <span style="font-size:11px; font-weight: 600;">Gores Tanda Tangan</span>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        {{-- Canvas tanda tangan baru secara langsung --}}
+                        <div class="signature-canvas-wrapper" id="signatureWrapper">
                             <canvas class="signature-canvas" id="signatureCanvas"></canvas>
                             <div class="signature-placeholder">
                                 <i class="bi bi-pencil" style="font-size:20px;"></i>
                                 <span style="font-size:11px; font-weight: 600;">Gores Tanda Tangan</span>
                             </div>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
 
                     <input type="hidden" name="ttd_asesi_nama" id="ttdAsesiNamaInput" value="{{ $banding->ttd_asesi_nama ?? '' }}">
                     <input type="hidden" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ $banding && $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->format('Y-m-d') : '' }}">
@@ -610,7 +668,7 @@
                             <i class="bi bi-calendar3"></i> Tanggal: <strong id="signatureDate">{{ $banding && $banding->ttd_asesi_tanggal ? $banding->ttd_asesi_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
                         </div>
                         @if(!$isLocked && (!$banding || empty($banding->ttd_asesi_file)))
-                            <button type="button" class="btn-clear-signature" id="clearSignature">
+                            <button type="button" class="btn-clear-signature" id="clearSignature" style="display: none;">
                                 <i class="bi bi-eraser"></i> Bersihkan Canvas
                             </button>
                         @endif
@@ -654,6 +712,65 @@ document.addEventListener('DOMContentLoaded', function () {
     const ttdAsesiTanggalInput = document.getElementById('ttdAsesiTanggalInput');
     const signForm = document.querySelector('form');
 
+    const savedSignatureUrl = @json($savedSignature ?? null);
+    const asesiNama = '{{ $asesi->nama }}';
+
+    // Toggle between saved and new signature modes
+    window.toggleAsesiSigChoice = function() {
+        const optSaved = document.getElementById('optSavedAsesi');
+        const savedPreview = document.getElementById('savedAsesiSigPreview');
+        const newDraw = document.getElementById('newAsesiSigDraw');
+        const optSavedLabel = document.getElementById('optSavedAsesiLabel');
+        const optNewLabel = document.getElementById('optNewAsesiLabel');
+        const hiddenInput = document.getElementById('ttdAsesiFileInput');
+        const ttdNama = document.getElementById('ttdAsesiNamaInput');
+        const ttdTanggal = document.getElementById('ttdAsesiTanggalInput');
+        const clearBtn = document.getElementById('clearSignature');
+
+        if (!optSaved) return;
+
+        if (optSaved.checked) {
+            if (savedPreview) savedPreview.style.display = '';
+            if (newDraw) newDraw.style.display = 'none';
+            if (clearBtn) clearBtn.style.display = 'none';
+            if (optSavedLabel) { optSavedLabel.style.borderColor = '#d1fae5'; optSavedLabel.style.background = '#f0fdf4'; }
+            if (optNewLabel) { optNewLabel.style.borderColor = '#e2e8f0'; optNewLabel.style.background = '#f8fafc'; }
+            if (hiddenInput && savedSignatureUrl) hiddenInput.value = savedSignatureUrl;
+            if (ttdNama) ttdNama.value = asesiNama;
+            if (ttdTanggal) {
+                const now = new Date();
+                ttdTanggal.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            }
+        } else {
+            if (savedPreview) savedPreview.style.display = 'none';
+            if (newDraw) newDraw.style.display = 'block';
+            if (clearBtn) clearBtn.style.display = 'inline-flex';
+            if (optSavedLabel) { optSavedLabel.style.borderColor = '#e2e8f0'; optSavedLabel.style.background = '#f8fafc'; }
+            if (optNewLabel) { optNewLabel.style.borderColor = '#bfdbfe'; optNewLabel.style.background = '#eff6ff'; }
+            if (hiddenInput) hiddenInput.value = '';
+            if (ttdNama) ttdNama.value = '';
+            if (ttdTanggal) ttdTanggal.value = '';
+            setTimeout(function() { window.dispatchEvent(new Event('resize')); }, 50);
+        }
+    };
+
+    // Initialize saved choice if active
+    const optSaved = document.getElementById('optSavedAsesi');
+    if (optSaved && optSaved.checked && savedSignatureUrl) {
+        const fileInput = document.getElementById('ttdAsesiFileInput');
+        if (fileInput && !fileInput.value) fileInput.value = savedSignatureUrl;
+        if (ttdAsesiNamaInput && !ttdAsesiNamaInput.value) ttdAsesiNamaInput.value = asesiNama;
+        if (ttdAsesiTanggalInput && !ttdAsesiTanggalInput.value) {
+            const now = new Date();
+            ttdAsesiTanggalInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        }
+        if (clearBtn) clearBtn.style.display = 'none';
+    } else {
+        if (clearBtn && !document.getElementById('signatureWrapper')?.classList.contains('readonly')) {
+            clearBtn.style.display = 'inline-flex';
+        }
+    }
+
     if (canvas) {
         const ctx = canvas.getContext('2d');
         let isDrawing = false;
@@ -662,9 +779,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let lastY = 0;
 
         const updateCanvasSize = () => {
-            // Simpan gambar sebelum resize agar tidak terhapus
             const prevDataUrl = hasSignature ? canvas.toDataURL('image/png') : null;
-
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
             const rect = canvas.getBoundingClientRect();
             canvas.width = rect.width * ratio;
@@ -676,7 +791,6 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.strokeStyle = '#0f172a';
             ctx.lineWidth = 2;
 
-            // Kembalikan gambar yang sudah digambar setelah resize
             if (prevDataUrl) {
                 const img = new Image();
                 img.onload = () => {
@@ -697,9 +811,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const fillSignatureMeta = () => {
             if (!ttdAsesiNamaInput.value) {
-                ttdAsesiNamaInput.value = '{{ $asesi->nama }}';
+                ttdAsesiNamaInput.value = asesiNama;
             }
-
             if (!ttdAsesiTanggalInput.value) {
                 const now = new Date();
                 const yyyy = now.getFullYear();
@@ -715,7 +828,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const pos = getPos(event);
             lastX = pos.x;
             lastY = pos.y;
-            wrapper.classList.add('active');
+            const wrap = document.getElementById('signatureWrapper');
+            if (wrap) wrap.classList.add('active');
         };
 
         const draw = (event) => {
@@ -730,9 +844,10 @@ document.addEventListener('DOMContentLoaded', function () {
             lastX = pos.x;
             lastY = pos.y;
 
-            if (!hasSignature) {
+            const wrap = document.getElementById('signatureWrapper');
+            if (wrap && !hasSignature) {
                 hasSignature = true;
-                wrapper.classList.add('has-signature');
+                wrap.classList.add('has-signature');
             }
 
             fillSignatureMeta();
@@ -740,10 +855,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const stopDrawing = () => {
             isDrawing = false;
-            wrapper.classList.remove('active');
+            const wrap = document.getElementById('signatureWrapper');
+            if (wrap) wrap.classList.remove('active');
 
-            // Langsung simpan data canvas ke hidden input setiap kali user selesai menggambar
-            // Ini jauh lebih andal daripada menunggu hingga form di-submit
             if (hasSignature) {
                 const fileInput = document.getElementById('ttdAsesiFileInput');
                 if (fileInput) {
@@ -759,7 +873,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 hasSignature = false;
                 ttdAsesiNamaInput.value = '';
                 ttdAsesiTanggalInput.value = '';
-                wrapper.classList.remove('has-signature');
+                const wrap = document.getElementById('signatureWrapper');
+                if (wrap) wrap.classList.remove('has-signature');
                 const fileInput = document.getElementById('ttdAsesiFileInput');
                 if (fileInput) {
                     fileInput.value = '';
@@ -780,31 +895,36 @@ document.addEventListener('DOMContentLoaded', function () {
         canvas.addEventListener('touchmove', draw, { passive: false });
         canvas.addEventListener('touchend', stopDrawing);
 
-        if (signForm) {
-            signForm.addEventListener('submit', function (e) {
-                if (e.submitter && e.submitter.hasAttribute('formaction')) {
-                    return; // skip validation for Pilih Tidak Banding
-                }
+        window.addEventListener('resize', updateCanvasSize);
+        updateCanvasSize();
 
-                // Cek apakah hidden input sudah terisi (diisi oleh stopDrawing)
-                const fileInput = document.getElementById('ttdAsesiFileInput');
-                const hasValue = fileInput && fileInput.value && fileInput.value.length > 0;
+        if (ttdAsesiNamaInput.value || ttdAsesiTanggalInput.value) {
+            const wrap = document.getElementById('signatureWrapper');
+            if (wrap) wrap.classList.add('has-signature');
+            hasSignature = true;
+        }
+    }
 
+    if (signForm) {
+        signForm.addEventListener('submit', function (e) {
+            if (e.submitter && e.submitter.hasAttribute('formaction')) {
+                return;
+            }
+
+            const optSaved = document.getElementById('optSavedAsesi');
+            const fileInput = document.getElementById('ttdAsesiFileInput');
+            const hasValue = fileInput && fileInput.value && fileInput.value.length > 0;
+
+            if (optSaved && optSaved.checked && savedSignatureUrl) {
+                if (fileInput) fileInput.value = savedSignatureUrl;
+            } else {
                 if (!hasSignature || !hasValue) {
                     e.preventDefault();
                     alert('Silakan tanda tangani terlebih dahulu sebelum mengirim pengajuan banding.');
                     return;
                 }
-            });
-        }
-
-        window.addEventListener('resize', updateCanvasSize);
-        updateCanvasSize();
-
-        if (ttdAsesiNamaInput.value || ttdAsesiTanggalInput.value) {
-            wrapper.classList.add('has-signature');
-            hasSignature = true;
-        }
+            }
+        });
     }
 });
 </script>

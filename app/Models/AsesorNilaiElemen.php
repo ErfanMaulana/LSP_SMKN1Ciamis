@@ -12,6 +12,7 @@ class AsesorNilaiElemen extends Model
         'asesi_nik',
         'skema_id',
         'elemen_id',
+        'attempt',
         'asesor_id',
         'nilai',
         'status',

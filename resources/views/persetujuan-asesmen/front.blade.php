@@ -22,6 +22,23 @@
 
 @section('styles')
 <style>
+    .form-control-custom {
+        width: 100%;
+        max-width: 320px;
+        padding: 6px 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #0f172a;
+        background: #ffffff;
+        outline: none;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+    .form-control-custom:focus {
+        border-color: #0073bd;
+        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    }
+
     .top-actions {
         display: flex;
         gap: 10px;
@@ -609,7 +626,7 @@
             </div>
             <!-- @if(!empty($item->ttd_asesi_file))
                 <a href="{{ route('asesor.persetujuan.front.asesor.export', ['asesiNik' => $asesiNik, 'skemaId' => $skema->id]) }}" class="btn btn-primary" target="_blank">
-                    <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
+                     <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
                 </a>
             @else
                 <button class="btn btn-primary" disabled title="Asesi belum menandatangani, tidak dapat mengekspor">
@@ -641,7 +658,9 @@
         <table class="summary-card-table">
             <tr>
                 <td>Skema</td>
-    
+                <td>{{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</td>
+            </tr>
+            <tr>
                 <td>TUK</td>
                 <td>{{ $item->tuk }}</td>
             </tr>
@@ -668,24 +687,24 @@
         </table>
     </div>
 
+    @if(empty($item->ttd_asesi_file))
+    <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" id="formTandaTanganAsesor">
+        @csrf
+    @endif
     <div class="card" style="margin-bottom:16px;">
         <div class="card-header"><i class="bi bi-clipboard-check"></i> Ceklis Bukti yang Sudah Dikumpulkan</div>
         <div class="card-body">
-            @if(!$item->ttd_asesor_file)
-            <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" id="formTandaTanganAsesor">
-                @csrf
-            @endif
             <div class="checklist-grid" style="margin-top:12px;">
-                <label class="checklist-item"><input type="checkbox" name="bukti_verifikasi_portofolio" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_verifikasi_portofolio ? 'checked' : '' }}><span>Hasil Verifikasi Portofolio</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_reviu_produk" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_reviu_produk ? 'checked' : '' }}><span>Hasil Reviu Produk</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_observasi_langsung" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_observasi_langsung ? 'checked' : '' }}><span>Hasil Observasi Langsung</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_kegiatan_terstruktur" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_kegiatan_terstruktur ? 'checked' : '' }}><span>Hasil Kegiatan Terstruktur</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_lisan" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_lisan ? 'checked' : '' }}><span>Hasil Pertanyaan Lisan</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_tertulis" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_tertulis ? 'checked' : '' }}><span>Hasil Pertanyaan Tertulis</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_wawancara" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_wawancara ? 'checked' : '' }}><span>Hasil Pertanyaan Wawancara</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_lainnya" value="1" {{ $item->ttd_asesor_file ? 'disabled' : '' }} {{ $item->bukti_lainnya ? 'checked' : '' }} id="buktiLainnyaCheckbox"><span>Lainnya {{ $item->bukti_lainnya_keterangan ? ': ' . $item->bukti_lainnya_keterangan : '' }}</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_verifikasi_portofolio" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_verifikasi_portofolio ? 'checked' : '' }}><span>Hasil Verifikasi Portofolio</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_reviu_produk" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_reviu_produk ? 'checked' : '' }}><span>Hasil Reviu Produk</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_observasi_langsung" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_observasi_langsung ? 'checked' : '' }}><span>Hasil Observasi Langsung</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_kegiatan_terstruktur" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_kegiatan_terstruktur ? 'checked' : '' }}><span>Hasil Kegiatan Terstruktur</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_lisan" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_lisan ? 'checked' : '' }}><span>Hasil Pertanyaan Lisan</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_tertulis" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_tertulis ? 'checked' : '' }}><span>Hasil Pertanyaan Tertulis</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_wawancara" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_wawancara ? 'checked' : '' }}><span>Hasil Pertanyaan Wawancara</span></label>
+                <label class="checklist-item"><input type="checkbox" name="bukti_lainnya" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_lainnya ? 'checked' : '' }} id="buktiLainnyaCheckbox"><span>Lainnya {{ $item->bukti_lainnya_keterangan ? ': ' . $item->bukti_lainnya_keterangan : '' }}</span></label>
             </div>
-            @if(!$item->ttd_asesor_file)
+            @if(empty($item->ttd_asesi_file))
                 <div id="buktiLainnyaKeteranganDiv" style="margin-top:12px; display:{{ $item->bukti_lainnya ? 'block' : 'none' }};">
                     <label style="display:block; margin-bottom:6px; font-size:13px; color:#475569; font-weight:600;">Keterangan Lainnya</label>
                     <input type="text" name="bukti_lainnya_keterangan" placeholder="Jelaskan bukti lainnya" value="{{ $item->bukti_lainnya_keterangan }}" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; background:#fff;">
@@ -756,62 +775,49 @@
                             <p class="meta" style="color:#94a3b8;">Belum ditandatangani</p>
                         </div>
                     </div>
+
+                    <input type="hidden" name="ttd_asesor_nama" value="{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}">
+                    <input type="hidden" name="ttd_asesor_tanggal" value="{{ $item->ttd_asesor_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
+                    <div style="margin-top:20px; text-align:right;">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check2-circle"></i> Simpan Perubahan
+                        </button>
+                    </div>
                 @endif
             @else
                 {{-- Asesor belum TTD, tampilkan form canvas atau pilihan TTD tersimpan --}}
                 <div class="signature-form-layout">
                     <div class="signature-spot">
-                        <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" id="formTandaTanganAsesor">
-                            @csrf
-                            @if(isset($savedSignature) && $savedSignature)
-                                {{-- Ada TTD tersimpan di profil: tampilkan pilihan --}}
-                                <div id="sigChoiceWrapAsesor" style="margin-bottom:14px; text-align: left;">
-                                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="optSavedAsesorLabel">
-                                        <input type="radio" name="sig_choice_asesor" value="saved" checked id="optSavedAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#10b981;">
-                                        <div>
-                                            <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
-                                            <div style="font-size:12px;color:#64748b;">Menggunakan TTD yang sudah disimpan di profil Anda</div>
-                                        </div>
-                                    </label>
-                                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="optNewAsesorLabel">
-                                        <input type="radio" name="sig_choice_asesor" value="new" id="optNewAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#0073bd;">
-                                        <div>
-                                            <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda tangan baru</div>
-                                            <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk persetujuan ini</div>
-                                        </div>
-                                    </label>
-                                </div>
+                        @if(isset($savedSignature) && $savedSignature)
+                            {{-- Ada TTD tersimpan di profil: tampilkan pilihan --}}
+                            <div id="sigChoiceWrapAsesor" style="margin-bottom:14px; text-align: left;">
+                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="optSavedAsesorLabel">
+                                    <input type="radio" name="sig_choice_asesor" value="saved" checked id="optSavedAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#10b981;">
+                                    <div>
+                                        <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
+                                        <div style="font-size:12px;color:#64748b;">Menggunakan TTD yang sudah disimpan di profil Anda</div>
+                                    </div>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="optNewAsesorLabel">
+                                    <input type="radio" name="sig_choice_asesor" value="new" id="optNewAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#0073bd;">
+                                    <div>
+                                        <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda tangan baru</div>
+                                        <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk persetujuan ini</div>
+                                    </div>
+                                </label>
+                            </div>
 
-                                {{-- Preview TTD tersimpan --}}
-                                <div id="savedAsesorSigPreview" style="margin-bottom: 12px; text-align: center;">
-                                    <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
-                                        <img src="{{ $savedSignature }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
-                                    </div>
-                                    <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
+                            {{-- Preview TTD tersimpan --}}
+                            <div id="savedAsesorSigPreview" style="margin-bottom: 12px; text-align: center;">
+                                <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
+                                    <img src="{{ $savedSignature }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                                    <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;">{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}, {{ $item->ttd_asesor_tanggal ? $item->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                                 </div>
+                                <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
+                            </div>
 
-                                {{-- Canvas tanda tangan baru (tersembunyi) --}}
-                                <div id="newAsesorSigDraw" style="display:none;">
-                                    <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
-                                        <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
-                                        <div class="signature-placeholder">
-                                            <i class="bi bi-pen"></i>
-                                            <span>Tanda tangan di sini</span>
-                                        </div>
-                                    </div>
-                                    <div class="signature-actions">
-                                        <div style="display:flex;align-items:center;gap:8px;">
-                                            <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesorSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
-                                            <label for="saveAsesorSigCheck" style="font-size:12px;color:#475569;cursor:pointer;margin:0;">Simpan sebagai tanda tangan saya</label>
-                                        </div>
-                                        <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
-                                            <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-                                        </button>
-                                    </div>
-                                </div>
-                            @else
-                                {{-- Langsung canvas --}}
-                                <div class="signature-title">Gambar tanda tangan di bawah</div>
+                            {{-- Canvas tanda tangan baru (tersembunyi) --}}
+                            <div id="newAsesorSigDraw" style="display:none;">
                                 <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
                                     <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
                                     <div class="signature-placeholder">
@@ -819,6 +825,7 @@
                                         <span>Tanda tangan di sini</span>
                                     </div>
                                 </div>
+                                <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}, {{ $item->ttd_asesor_tanggal ? $item->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                                 <div class="signature-actions">
                                     <div style="display:flex;align-items:center;gap:8px;">
                                         <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesorSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
@@ -828,24 +835,41 @@
                                         <i class="bi bi-eraser"></i> Hapus Tanda Tangan
                                     </button>
                                 </div>
-                            @endif
-
-                            <div class="signature-actions" style="margin-top:12px;">
-                                <div class="signature-date">
-                                    <i class="bi bi-calendar3"></i>
-                                    Tanggal: <strong id="signatureDateAsesor">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
+                            </div>
+                        @else
+                            {{-- Langsung canvas --}}
+                            <div class="signature-title">Gambar tanda tangan di bawah</div>
+                            <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
+                                <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
+                                <div class="signature-placeholder">
+                                    <i class="bi bi-pen"></i>
+                                    <span>Tanda tangan di sini</span>
                                 </div>
                             </div>
-                            <input type="hidden" name="ttd_asesor_nama" value="{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}">
-                            <input type="hidden" name="ttd_asesor_tanggal" value="{{ $item->ttd_asesor_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
-                            <input type="hidden" name="ttd_asesor_file" id="ttdAsesorFileInput">
-                            <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesor</button>
-                        </form>
+                            <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}, {{ $item->ttd_asesor_tanggal ? $item->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
+                            <div class="signature-actions">
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesorSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
+                                    <label for="saveAsesorSigCheck" style="font-size:12px;color:#475569;cursor:pointer;margin:0;">Simpan sebagai tanda tangan saya</label>
+                                </div>
+                                <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
+                                    <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                                </button>
+                            </div>
+                        @endif
+
+                        <input type="hidden" name="ttd_asesor_nama" value="{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}">
+                        <input type="hidden" name="ttd_asesor_tanggal" value="{{ $item->ttd_asesor_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
+                        <input type="hidden" name="ttd_asesor_file" id="ttdAsesorFileInput">
+                        <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesor</button>
                     </div>
                 </div>
             @endif
         </div>
     </div>
+    @if(empty($item->ttd_asesi_file))
+    </form>
+    @endif
 
 @else
     <div class="doc-wrap">
@@ -1034,6 +1058,7 @@
                             <div id="savedAsesiSigPreview" style="margin-bottom: 12px; text-align: center;">
                                 <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
                                     <img src="{{ $savedSignature }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                                    <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;">{{ $item->nama_asesi }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                                 </div>
                                 <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
                             </div>
@@ -1047,6 +1072,7 @@
                                         <span>Tanda tangan di sini</span>
                                     </div>
                                 </div>
+                                <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $item->nama_asesi }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                                 <div class="signature-actions" style="margin-top:8px;">
                                     <button type="button" class="btn-clear-signature" id="clearSignatureAsesi">
                                         <i class="bi bi-eraser"></i> Hapus Tanda Tangan
@@ -1062,6 +1088,7 @@
                                     <span>Tanda tangan di sini</span>
                                 </div>
                             </div>
+                            <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $item->nama_asesi }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                             <div class="signature-actions">
                                 <div style="display:flex;align-items:center;gap:8px;">
                                     <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesiSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">

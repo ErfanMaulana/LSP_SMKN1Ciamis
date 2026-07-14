@@ -20,11 +20,21 @@ class JadwalController extends Controller
         }
 
         // Jadwal yang asesi sudah terdaftar (via jadwal_peserta)
+        // Only show jadwal whose attempt matches the asesi's current attempt for that skema
         $jadwalTerdaftar = DB::table('jadwal_peserta')
             ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
             ->leftJoin('tuk', 'tuk.id', '=', 'jadwal_ujikom.tuk_id')
             ->leftJoin('skemas', 'skemas.id', '=', 'jadwal_ujikom.skema_id')
             ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
+            ->whereRaw('
+                jadwal_peserta.attempt = COALESCE(
+                    (SELECT MAX(ase_sk.attempt)
+                     FROM asesi_skema ase_sk
+                     WHERE ase_sk.asesi_nik = jadwal_peserta.asesi_nik
+                       AND ase_sk.skema_id  = jadwal_ujikom.skema_id),
+                    1
+                )
+            ')
             ->select(
                 'jadwal_ujikom.id',
                 'jadwal_ujikom.judul_jadwal',

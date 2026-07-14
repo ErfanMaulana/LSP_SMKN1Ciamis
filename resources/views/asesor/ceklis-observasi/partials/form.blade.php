@@ -699,6 +699,7 @@
                     <div id="savedAsesorSigPreview" style="margin-bottom: 12px; text-align: center;">
                         <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
                             <img src="{{ $savedSignature }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                            <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;">{{ $value('ttd_asesor_nama', $asesor->nama ?? '') }}, {{ ($record && $record->ttd_asesor_tanggal) ? $record->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                         </div>
                         <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
                     </div>
@@ -715,6 +716,7 @@
                                 <span>Tanda tangan di sini</span>
                             </div>
                         </div>
+                        <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $value('ttd_asesor_nama', $asesor->nama ?? '') }}, {{ ($record && $record->ttd_asesor_tanggal) ? $record->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                         <div class="signature-actions" style="margin-top:8px;">
                             <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
                                 <i class="bi bi-eraser"></i> Hapus Tanda Tangan
@@ -732,16 +734,14 @@
                             <span>Tanda tangan di sini</span>
                         </div>
                     </div>
+                    <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $value('ttd_asesor_nama', $asesor->nama ?? '') }}, {{ ($record && $record->ttd_asesor_tanggal) ? $record->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
 
                     <div class="signature-actions">
                         <div style="display:flex;align-items:center;gap:8px;">
                             <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesorSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
                             <label for="saveAsesorSigCheck" style="font-size:12px;color:#475569;cursor:pointer;margin:0;">Simpan sebagai tanda tangan saya</label>
                         </div>
-                        <div class="signature-date">
-                            <i class="bi bi-calendar3"></i>
-                            Tanggal: <strong id="signatureDateAsesor">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
-                        </div>
+
                         <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
                             <i class="bi bi-eraser"></i> Hapus Tanda Tangan
                         </button>

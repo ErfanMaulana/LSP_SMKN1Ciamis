@@ -7,6 +7,7 @@ use App\Models\Kelompok;
 use App\Models\Asesor;
 use App\Models\Asesi;
 use App\Models\Skema;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class KelompokController extends Controller
@@ -100,6 +101,24 @@ class KelompokController extends Controller
             'asesi_niks'    => 'nullable|array',
             'asesi_niks.*'  => 'exists:asesi,NIK',
         ]);
+
+        $asesorId = $validated['asesor_id'] ?? null;
+        $asesiNiks = $validated['asesi_niks'] ?? [];
+
+        if ($asesorId && count($asesiNiks) > 0) {
+            $asesor = Asesor::find($asesorId);
+            // Effective limit: global setting only
+            $effectiveMax = Setting::get('max_asesi_per_asesor');
+            if ($asesor && $effectiveMax !== null) {
+                $incomingCount = count($asesiNiks);
+
+                if ($incomingCount > (int) $effectiveMax) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', "Gagal membuat kelompok: Setiap kelompok hanya dapat menampung maksimal {$effectiveMax} asesi. Anda mencoba menambahkan {$incomingCount} asesi baru.");
+                }
+            }
+        }
 
         $kelompok = Kelompok::create([
             'nama_kelompok' => $validated['nama_kelompok'],
@@ -196,6 +215,24 @@ class KelompokController extends Controller
             'asesi_niks.*'  => 'exists:asesi,NIK',
         ]);
 
+        $asesorId = $validated['asesor_id'] ?? null;
+        $asesiNiks = $validated['asesi_niks'] ?? [];
+
+        if ($asesorId && count($asesiNiks) > 0) {
+            $asesor = Asesor::find($asesorId);
+            // Effective limit: global setting only
+            $effectiveMax = Setting::get('max_asesi_per_asesor');
+            if ($asesor && $effectiveMax !== null) {
+                $incomingCount = count($asesiNiks);
+
+                if ($incomingCount > (int) $effectiveMax) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('error', "Gagal memperbarui kelompok: Setiap kelompok hanya dapat menampung maksimal {$effectiveMax} asesi. Anda mencoba memasukkan {$incomingCount} asesi.");
+                }
+            }
+        }
+
         $kelompok->update([
             'nama_kelompok' => $validated['nama_kelompok'],
             'skema_id'      => $validated['skema_id'],
@@ -245,6 +282,19 @@ class KelompokController extends Controller
         $kelompok = Kelompok::findOrFail($id);
         $asesi    = Asesi::findOrFail($request->NIK);
 
+        // Check limit if kelompok has an asesor
+        $asesor = $kelompok->asesors->first();
+        // Effective limit: global setting only
+        $effectiveMax = Setting::get('max_asesi_per_asesor');
+        if ($asesor && $effectiveMax !== null) {
+            $currentGroupCount = $kelompok->asesis()->count();
+            
+            $isAlreadyInGroup = ($asesi->kelompok_id === $kelompok->id);
+            if (!$isAlreadyInGroup && $currentGroupCount >= (int) $effectiveMax) {
+                return redirect()->back()->with('error', "Gagal menugaskan: Kelompok <strong>{$kelompok->nama_kelompok}</strong> sudah mencapai batas maksimal asesi ({$effectiveMax} asesi).");
+            }
+        }
+
         $asesi->update(['kelompok_id' => $kelompok->id]);
 
         return redirect()->route('admin.kelompok.show', $id)
@@ -262,6 +312,22 @@ class KelompokController extends Controller
         ]);
 
         $kelompok = Kelompok::findOrFail($id);
+
+        // Check limit if kelompok has an asesor
+        $asesor = $kelompok->asesors->first();
+        // Effective limit: global setting only
+        $effectiveMax = Setting::get('max_asesi_per_asesor');
+        if ($asesor && $effectiveMax !== null) {
+            $currentGroupCount = $kelompok->asesis()->count();
+            
+            $incomingNiks = $request->niks;
+            $alreadyInGroupCount = Asesi::whereIn('NIK', $incomingNiks)->where('kelompok_id', $kelompok->id)->count();
+            $newAssignmentsCount = count($incomingNiks) - $alreadyInGroupCount;
+
+            if ($currentGroupCount + $newAssignmentsCount > (int) $effectiveMax) {
+                return redirect()->back()->with('error', "Gagal menugaskan: Kelompok <strong>{$kelompok->nama_kelompok}</strong> hanya dapat menampung maksimal {$effectiveMax} asesi. Saat ini kelompok memiliki {$currentGroupCount} asesi, dan Anda mencoba menambahkan {$newAssignmentsCount} asesi baru.");
+            }
+        }
 
         Asesi::whereIn('NIK', $request->niks)
              ->update(['kelompok_id' => $kelompok->id]);

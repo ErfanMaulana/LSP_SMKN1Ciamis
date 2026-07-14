@@ -354,9 +354,10 @@
 
             @if($item->ttd_asesi_file)
                 {{-- Sudah ditandatangani --}}
-                <div class="signature-canvas-wrapper has-signature" id="signatureWrapper" style="border-style: solid; border-color: #cbd5e1; background: #fff;">
+                <div class="signature-canvas-wrapper has-signature" id="signatureWrapper" style="border-style: solid; border-color: #cbd5e1; background: #fff; position: relative;">
                     <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" class="signature-saved-img" id="savedSignatureImgAsesi" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; background:#fff; pointer-events:none;">
                 </div>
+                <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $asesi->nama }}, {{ $item->ttd_asesi_tanggal ? $item->ttd_asesi_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                 <input type="hidden" name="ttd_asesi_nama" id="ttdAsesiNamaInput" value="{{ $item->ttd_asesi_nama ?? '' }}">
                 <input type="hidden" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ $item->ttd_asesi_tanggal ? $item->ttd_asesi_tanggal->format('Y-m-d') : '' }}">
                 <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput" value="{{ $item->ttd_asesi_file ?? '' }}">
@@ -389,6 +390,7 @@
                 <div id="savedAsesiSigPreview" style="margin-bottom:12px; text-align:center;">
                     <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
                         <img src="{{ $savedSignature }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
+                        <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                     </div>
                     <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
                 </div>
@@ -402,6 +404,7 @@
                             <span>Tanda tangan di sini</span>
                         </div>
                     </div>
+                    <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                     <div class="signature-actions" style="margin-top:8px;">
                         <button type="button" class="btn-clear-signature" id="clearSignature">
                             <i class="bi bi-eraser"></i> Hapus Tanda Tangan
@@ -428,6 +431,7 @@
                         <span>Tanda tangan di sini</span>
                     </div>
                 </div>
+                <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
 
                 <input type="hidden" name="ttd_asesi_nama" id="ttdAsesiNamaInput" value="">
                 <input type="hidden" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="">

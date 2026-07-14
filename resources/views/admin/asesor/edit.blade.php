@@ -39,7 +39,7 @@
                     @if($asesor->no_met)
                         <small class="form-text" style="color:#059669;">
                             <i class="bi bi-check-circle-fill"></i>
-                            Akun aktif dengan NO MET <strong>{{ $asesor->no_met }}</strong>.
+                            Akun aktif with NO MET <strong>{{ $asesor->no_met }}</strong>.
                             Kosongkan untuk tidak mengubah.
                         </small>
                     @else

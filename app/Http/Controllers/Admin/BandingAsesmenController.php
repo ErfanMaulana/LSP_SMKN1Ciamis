@@ -142,18 +142,137 @@ class BandingAsesmenController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:ditinjau,diterima,ditolak,asesmen_ulang',
+            'status' => 'required|in:diterima,ditolak,asesmen_ulang',
             'catatan_admin' => 'nullable|string|max:2000',
         ]);
 
         $admin = auth()->guard('admin')->user();
 
-        $banding->update([
-            'status' => $validated['status'],
-            'catatan_admin' => trim((string) ($validated['catatan_admin'] ?? '')) ?: null,
-            'checked_by' => $admin?->id,
-            'checked_at' => now(),
-        ]);
+        DB::transaction(function () use ($banding, $validated, $admin) {
+            $banding->update([
+                'status' => $validated['status'],
+                'catatan_admin' => trim((string) ($validated['catatan_admin'] ?? '')) ?: null,
+                'checked_by' => $admin?->id,
+                'checked_at' => now(),
+            ]);
+
+            if ($validated['status'] === 'asesmen_ulang') {
+                // Determine new attempt
+                $currentMaxAttempt = (int) DB::table('asesi_skema')
+                    ->where('asesi_nik', $banding->asesi_nik)
+                    ->where('skema_id', $banding->skema_id)
+                    ->max('attempt');
+
+                $newAttempt = $currentMaxAttempt + 1;
+
+                // 1. Duplicate asesi_skema
+                DB::table('asesi_skema')->insert([
+                    'asesi_nik' => $banding->asesi_nik,
+                    'skema_id' => $banding->skema_id,
+                    'attempt' => $newAttempt,
+                    'status' => 'belum_mulai',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // 2. Duplicate persetujuan_asesmen
+                $prevPersetujuan = \App\Models\PersetujuanAsesmen::where('asesi_nik', $banding->asesi_nik)
+                    ->latest('id')
+                    ->first();
+                if ($prevPersetujuan) {
+                    $newPersetujuan = $prevPersetujuan->replicate();
+                    $newPersetujuan->attempt = $newAttempt;
+                    $newPersetujuan->ttd_asesor_nama = null;
+                    $newPersetujuan->ttd_asesor_tanggal = null;
+                    $newPersetujuan->ttd_asesor_file = null;
+                    $newPersetujuan->ttd_asesi_nama = null;
+                    $newPersetujuan->ttd_asesi_tanggal = null;
+                    $newPersetujuan->ttd_asesi_file = null;
+                    
+                    // Reset reviu checklist
+                    $newPersetujuan->bukti_verifikasi_portofolio = false;
+                    $newPersetujuan->bukti_reviu_produk = false;
+                    $newPersetujuan->bukti_observasi_langsung = false;
+                    $newPersetujuan->bukti_kegiatan_terstruktur = false;
+                    $newPersetujuan->bukti_pertanyaan_lisan = false;
+                    $newPersetujuan->bukti_pertanyaan_tertulis = false;
+                    $newPersetujuan->bukti_pertanyaan_wawancara = false;
+                    $newPersetujuan->bukti_lainnya = false;
+                    $newPersetujuan->bukti_lainnya_keterangan = null;
+                    
+                    $newPersetujuan->save();
+                }
+
+                // 3. Duplicate ceklis_observasi_aktivitas_praktiks & details
+                $prevCeklis = \App\Models\CeklisObservasiAktivitasPraktik::where('asesi_nik', $banding->asesi_nik)
+                    ->where('skema_id', $banding->skema_id)
+                    ->latest('id')
+                    ->first();
+                if ($prevCeklis) {
+                    $newCeklis = $prevCeklis->replicate();
+                    $newCeklis->attempt = $newAttempt;
+                    $newCeklis->rekomendasi = 'belum_kompeten';
+                    $newCeklis->belum_kompeten_kelompok_pekerjaan = null;
+                    $newCeklis->belum_kompeten_unit = null;
+                    $newCeklis->belum_kompeten_elemen = null;
+                    $newCeklis->belum_kompeten_kuk = null;
+                    $newCeklis->ttd_asesi_nama = null;
+                    $newCeklis->ttd_asesi_tanggal = null;
+                    $newCeklis->ttd_asesi_file = null;
+                    $newCeklis->ttd_asesor_nama = null;
+                    $newCeklis->ttd_asesor_no_reg = null;
+                    $newCeklis->ttd_asesor_tanggal = null;
+                    $newCeklis->ttd_asesor_file = null;
+                    $newCeklis->save();
+
+                    $prevDetails = \App\Models\CeklisObservasiAktivitasPraktikDetail::where('ceklis_observasi_id', $prevCeklis->id)->get();
+                    foreach ($prevDetails as $detail) {
+                        $newDetail = $detail->replicate();
+                        $newDetail->ceklis_observasi_id = $newCeklis->id;
+                        $newDetail->pencapaian = null;
+                        $newDetail->penilaian_lanjut = null;
+                        $newDetail->save();
+                    }
+                }
+
+                // 4. Duplicate rekaman_asesmen_kompetensi & details
+                $prevRekaman = \App\Models\RekamanAsesmenKompetensi::where('asesi_nik', $banding->asesi_nik)
+                    ->where('skema_id', $banding->skema_id)
+                    ->latest('id')
+                    ->first();
+                if ($prevRekaman) {
+                    $newRekaman = $prevRekaman->replicate();
+                    $newRekaman->attempt = $newAttempt;
+                    $newRekaman->tanggal_mulai = null;
+                    $newRekaman->tanggal_selesai = null;
+                    $newRekaman->rekomendasi = 'belum_kompeten';
+                    $newRekaman->tindak_lanjut = null;
+                    $newRekaman->komentar_observasi = null;
+                    $newRekaman->ttd_asesor_nama = null;
+                    $newRekaman->ttd_asesor_no_reg = null;
+                    $newRekaman->ttd_asesor_tanggal = null;
+                    $newRekaman->ttd_asesor_file = null;
+                    $newRekaman->ttd_asesi_nama = null;
+                    $newRekaman->ttd_asesi_tanggal = null;
+                    $newRekaman->ttd_asesi_file = null;
+                    $newRekaman->save();
+
+                    $prevRakDetails = \App\Models\RekamanAsesmenKompetensiDetail::where('rekaman_id', $prevRekaman->id)->get();
+                    foreach ($prevRakDetails as $rakDetail) {
+                        $newRakDetail = $rakDetail->replicate();
+                        $newRakDetail->rekaman_id = $newRekaman->id;
+                        $newRakDetail->observasi_demonstrasi = false;
+                        $newRakDetail->portofolio = false;
+                        $newRakDetail->pernyataan_pihak_ketiga = false;
+                        $newRakDetail->pertanyaan_lisan = false;
+                        $newRakDetail->pertanyaan_tertulis = false;
+                        $newRakDetail->proyek_kerja = false;
+                        $newRakDetail->lainnya = false;
+                        $newRakDetail->save();
+                    }
+                }
+            }
+        });
 
         return redirect()->route('admin.banding-asesmen.show', $banding->id)
             ->with('success', 'Status banding asesmen berhasil diperbarui.');
