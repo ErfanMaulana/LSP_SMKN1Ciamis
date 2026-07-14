@@ -42,7 +42,7 @@ class JadwalController extends Controller
                 'tuk.tipe_tuk',
                 'skemas.nama_skema'
             )
-            ->orderByRaw("FIELD(jadwal_ujikom.status, 'berlangsung', 'dijadwalkan', 'selesai', 'dibatalkan')")
+            ->orderByRaw("CASE jadwal_ujikom.status WHEN 'berlangsung' THEN 1 WHEN 'dijadwalkan' THEN 2 WHEN 'selesai' THEN 3 WHEN 'dibatalkan' THEN 4 ELSE 5 END")
             ->orderBy('jadwal_ujikom.tanggal_mulai')
             ->get();
 

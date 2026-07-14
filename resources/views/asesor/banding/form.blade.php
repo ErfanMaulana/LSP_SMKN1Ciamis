@@ -86,10 +86,10 @@
     <div class="panel-head">FR.AK.04. BANDING ASESMEN</div>
 
     <table class="meta-table">
-        <tr>
+        <!-- <tr>
             <td>Nama Asesi</td>
             <td>{{ $asesi->nama }}</td>
-        </tr>
+        </tr> -->
         <tr>
             <td>Nama Asesor</td>
             <td>{{ $asesor->nama }}</td>
@@ -167,7 +167,7 @@
             </div>
         @endif
 
-        <div class="section" style="border-top:1px solid #111827; padding:10px; margin-top:10px;">
+        <!-- <div class="section" style="border-top:1px solid #111827; padding:10px; margin-top:10px;">
             <h4 style="margin:0 0 12px;font-size:14px;font-weight:700;">Tanda Tangan</h4>
             <div class="signature-grid" style="display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; max-width: 500px;">
                 <div class="signature-box" style="border:1px solid #cbd5e1; border-radius:10px; padding:12px; background:#f8fafc;">
@@ -185,7 +185,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div class="section">
             <p>Anda mempunyai hak mengajukan banding jika menilai Proses Asesmen tidak sesuai SOP dan tidak memenuhi Prinsip Asesmen.</p>

@@ -40,7 +40,7 @@ class KompetensiController extends Controller
      */
     public function detail($slug)
     {
-        $jurusan = Jurusan::with(['skemas.units'])->where('kode_jurusan', strtoupper($slug))->first();
+        $jurusan = Jurusan::with(['skemas.units', 'skemas.asesors'])->where('kode_jurusan', strtoupper($slug))->first();
 
         if (!$jurusan) {
             abort(404, 'Kompetensi tidak ditemukan');
@@ -53,6 +53,14 @@ class KompetensiController extends Controller
             return $skema->units->count();
         });
 
+        // Hitung total asesor unik yang mengampu skema di jurusan ini
+        $totalAsesor = $jurusan->skemas->flatMap(function ($skema) {
+            return $skema->asesors->pluck('ID_asesor');
+        })->unique()->count();
+
+        // Total skema di jurusan ini
+        $totalSkema = $jurusan->skemas->count();
+
         $data = [
             'id' => $jurusan->id_jurusan,
             'kode' => $jurusan->kode_jurusan,
@@ -60,6 +68,9 @@ class KompetensiController extends Controller
             'nama' => $jurusan->nama_jurusan,
             'unit_kompetensi' => $totalUnits,
             'jumlah_asesi' => $jumlah_asesi,
+            'total_asesor' => $totalAsesor,
+            'total_asesi' => $jumlah_asesi,
+            'total_skema' => $totalSkema,
             'visi' => $jurusan->visi ?? '',
             'misi' => $this->parseMisi($jurusan->misi),
             'standar_kompetensi' => 'SKKNI Industri 4.0',

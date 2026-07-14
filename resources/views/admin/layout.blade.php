@@ -1201,7 +1201,7 @@
                             @if(Auth::guard('admin')->user()->hasPermission('kelompok.view'))
                                 <a href="{{ route('admin.kelompok.index') }}"
                                     class="menu-item {{ request()->routeIs('admin.kelompok.*') ? 'active' : '' }}">
-                                    <i class="bi bi-diagram-3-fill"></i>
+                                    <i class="bi bi-people-fill"></i>
                                     <span>Kelompok</span>
                                     @php
                                         $ungroupedCount = \App\Models\Asesi::where('status', 'approved')->whereNull('kelompok_id')->count();
@@ -1216,7 +1216,7 @@
                             @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view'))
                                 <a href="{{ route('admin.jadwal-ujikom.index') }}"
                                     class="menu-item {{ request()->routeIs('admin.jadwal-ujikom.*') ? 'active' : '' }}">
-                                    <i class="bi bi-calendar-event"></i>
+                                    <i class="bi bi-calendar3"></i>
                                     <span>Jadwal Ujikom</span>
                                     @php
                                         $unscheduledCount = \App\Models\Kelompok::whereDoesntHave('jadwals')->count();
@@ -1231,7 +1231,7 @@
                             @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view'))
                                 <a href="{{ route('admin.asesmen-mandiri.index') }}"
                                     class="menu-item {{ request()->routeIs('admin.asesmen-mandiri.*') ? 'active' : '' }}">
-                                    <i class="bi bi-journal-check"></i>
+                                    <i class="bi bi-clipboard-check"></i>
                                     <span>Asesmen Mandiri</span>
                                 </a>
                             @endif
@@ -1247,7 +1247,7 @@
                             @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.view'))
                                 <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.index') }}"
                                     class="menu-item {{ request()->routeIs('admin.ceklis-observasi-aktivitas-praktik.*') ? 'active' : '' }}">
-                                    <i class="bi bi-card-checklist"></i>
+                                    <i class="bi bi-check2-square"></i>
                                     <span>Ceklis Observasi Aktivitas Praktik</span>
                                 </a>
                             @endif
@@ -1255,7 +1255,7 @@
                             @if(Auth::guard('admin')->user()->hasPermission('rekaman-asesmen-kompetensi.view'))
                                 <a href="{{ route('admin.rekaman-asesmen-kompetensi.index') }}"
                                     class="menu-item {{ request()->routeIs('admin.rekaman-asesmen-kompetensi.*') ? 'active' : '' }}">
-                                    <i class="bi bi-record-circle"></i>
+                                    <i class="bi bi-file-earmark-text"></i>
                                     <span>Rekaman Asesmen Kompetensi</span>
                                 </a>
                             @endif
@@ -1284,7 +1284,7 @@
                             @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view'))
                                 <a href="{{ route('admin.umpan-balik-hasil.index') }}"
                                     class="menu-item {{ request()->routeIs('admin.umpan-balik-hasil.*') ? 'active' : '' }}">
-                                    <i class="bi bi-clipboard-data"></i>
+                                    <i class="bi bi-chat-square-quote"></i>
                                     <span>Hasil Umpan Balik Asesi</span>
                                 </a>
                             @endif

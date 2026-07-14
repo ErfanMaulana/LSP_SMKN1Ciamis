@@ -187,13 +187,14 @@
 <body>
     <table style="margin-bottom:12px; table-layout:fixed; width:100%;">
         <tr>
-            <td class="no-border" style="width:56px; padding:0; vertical-align:middle;">
+            <!-- <td class="no-border" style="width:56px; padding:0; vertical-align:middle;">
                 @if(!empty($logoDataUri) || (!empty($logoPath) && file_exists($logoPath)))
                     <img src="{{ $logoDataUri ?? $logoPath }}" alt="Logo" width="44" height="44"
                         style="width:44px; height:44px; object-fit:contain; display:block; margin:0 auto;">
                 @endif
             </td>
-            <td class="no-border" style="padding:0 0 0 8px; vertical-align:middle;">
+            <td class="no-border" style="padding:0 0 0 8px; vertical-align:middle;"> -->
+            <td class="no-border" style="padding:0; vertical-align:middle;">
                 <div
                     style="font-family: Calibri, Arial, sans-serif; font-size: 12pt; font-weight: bold; text-transform: uppercase; margin:0; line-height:1.25;">
                     FR.AK.04. &nbsp;&nbsp; BANDING ASESMEN
@@ -211,7 +212,7 @@
         </colgroup>
         <tbody>
             <!-- Nama Asesi -->
-            <tr>
+            <!-- <tr>
                 <td colspan="3" style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">
                     <table style="width: 100%; border-collapse: collapse; border: none;">
                         <tr>
@@ -228,7 +229,7 @@
                         </tr>
                     </table>
                 </td>
-            </tr>
+            </tr> -->
             <!-- Nama Asesor -->
             <tr>
                 <td colspan="3" style="border: 1px solid #000; padding: 4px 6px; vertical-align: top;">
@@ -331,14 +332,14 @@
                 </td>
             </tr>
             <!-- Pemohon Banding (Asesi) Header -->
-            <tr>
+            <!-- <tr>
                 <td colspan="3"
                     style="border: 1px solid #000; border-top: 2px solid #000; font-weight: normal; padding: 4px 8px; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
                     Pemohon Banding (Asesi) :
                 </td>
-            </tr>
+            </tr> -->
             <!-- Pemohon Banding Details & Signature -->
-            <tr>
+            <!-- <tr>
                 <td colspan="3" style="border: 1px solid #000; padding: 0; vertical-align: top;">
                     <table
                         style="width: 100%; border-collapse: collapse; border: none; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
@@ -346,8 +347,8 @@
                             <col style="width: 32.70%;">
                             <col style="width: 1.37%;">
                             <col style="width: 65.93%;">
-                        </colgroup>
-                        <tr>
+                        </colgroup> -->
+                        <!-- <tr>
                             <td
                                 style="padding: 4px 8px; border: none; border-bottom: 1px solid #000; font-weight: normal; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
                                 Nama</td>
@@ -358,8 +359,8 @@
                                 style="padding: 4px 8px; border: none; border-bottom: 1px solid #000; font-family: Calibri, Arial, sans-serif; font-size: 11pt; vertical-align: top;">
                                 {{ $banding->ttd_asesi_nama ?? $asesi->nama ?? '' }}
                             </td>
-                        </tr>
-                        <tr>
+                        </tr> -->
+                        <!-- <tr>
                             <td
                                 style="padding: 6px 8px; border: none; vertical-align: middle; font-family: Calibri, Arial, sans-serif; font-size: 11pt;">
                                 Tanda tangan dan Tanggal</td>
@@ -391,7 +392,7 @@
                                     </tr>
                                 </table>
                             </td>
-                        </tr>
+                        </tr> -->
                     </table>
                 </td>
             </tr>

@@ -1,4 +1,4 @@
-﻿@extends('admin.layout')
+@extends('admin.layout')
 
 @section('title', 'Manajemen Jurusan')
 @section('page-title', 'Manajemen Jurusan')
@@ -284,7 +284,7 @@
         padding: 8px 16px;
         background: #0073bd;
         color: #ffffff;
-        border: 1px solid #0073bd;
+        border: 1px solid #004e82;
         border-radius: 8px;
         font-size: 14px;
         font-weight: 600;

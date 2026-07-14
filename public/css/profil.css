@@ -70,6 +70,8 @@
 .scope-card h6 { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: .4rem; }
 .scope-card p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .8rem; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .skema-badge { background: var(--blue-light); color: var(--blue-accent); font-size: 0.8125rem; font-weight: 600; padding: .22rem .7rem; border-radius: 20px; display: inline-block; margin-top: auto; }
+.skema-badge-link { text-decoration: none; cursor: pointer; transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease; border: 1.5px solid transparent; }
+.skema-badge-link:hover { background: var(--blue-accent); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); border-color: var(--blue-accent); }
 
  .hero-section,
  .vm-section,

@@ -312,8 +312,8 @@ class JadwalUjikomController extends Controller
 
         if ($bulan) {
             $query->where(function ($q) use ($bulan) {
-                $q->whereRaw("DATE_FORMAT(tanggal_mulai, '%Y-%m') = ?", [$bulan])
-                  ->orWhereRaw("DATE_FORMAT(tanggal_selesai, '%Y-%m') = ?", [$bulan]);
+                $q->whereRaw("strftime('%Y-%m', tanggal_mulai) = ?", [$bulan])
+                  ->orWhereRaw("strftime('%Y-%m', tanggal_selesai) = ?", [$bulan]);
             });
         }
 
@@ -326,8 +326,8 @@ class JadwalUjikomController extends Controller
             'selesai'     => JadwalUjikom::where('status', 'selesai')->count(),
             'bulan_ini'   => JadwalUjikom::where(function ($q) {
                 $bulan = now()->format('Y-m');
-                $q->whereRaw("DATE_FORMAT(tanggal_mulai, '%Y-%m') = ?", [$bulan])
-                  ->orWhereRaw("DATE_FORMAT(tanggal_selesai, '%Y-%m') = ?", [$bulan]);
+                $q->whereRaw("strftime('%Y-%m', tanggal_mulai) = ?", [$bulan])
+                  ->orWhereRaw("strftime('%Y-%m', tanggal_selesai) = ?", [$bulan]);
             })->count(),
         ];
 

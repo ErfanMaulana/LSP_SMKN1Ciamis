@@ -152,6 +152,13 @@ class AsesiActivatedImport implements ToCollection, WithChunkReading
         }
 
         try {
+            if (strpos($value, '/') !== false) {
+                try {
+                    return Carbon::createFromFormat('d/m/Y', trim($value))->format('Y-m-d');
+                } catch (\Throwable $e) {
+                    // Fall back
+                }
+            }
             return Carbon::parse($value)->format('Y-m-d');
         } catch (\Throwable $e) {
             return null;

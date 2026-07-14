@@ -18,11 +18,11 @@
         <td>
             @if(!empty($item['asesi_nik']) && !empty($item['skema_id']))
                 <a href="{{ route('asesor.persetujuan.front.asesor.show', [$item['asesi_nik'], $item['skema_id']]) }}" class="btn-review">
-                    <i class="bi bi-eye"></i> Review
+                    <i class="bi bi-eye"></i> Detail
                 </a>
             @else
                 <span class="btn-review disabled">
-                    <i class="bi bi-eye"></i> Review
+                    <i class="bi bi-eye"></i> Detail
                 </span>
             @endif
         </td>

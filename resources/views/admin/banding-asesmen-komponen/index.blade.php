@@ -117,6 +117,102 @@
         .card { overflow-x: auto; }
         table { min-width: 760px; }
     }
+
+    .banding-komponen-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .banding-komponen-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .banding-komponen-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .banding-komponen-delete-confirm-overlay.show .banding-komponen-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .banding-komponen-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .banding-komponen-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .banding-komponen-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .banding-komponen-delete-btn-cancel,
+    .banding-komponen-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .banding-komponen-delete-btn-cancel {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .banding-komponen-delete-btn-cancel:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    .banding-komponen-delete-btn-submit {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .banding-komponen-delete-btn-submit:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .banding-komponen-delete-confirm-overlay,
+        .banding-komponen-delete-confirm-modal {
+            transition: none;
+        }
+    }
 </style>
 @endsection
 
@@ -205,7 +301,8 @@
                                         </a>
                                     @endif
                                     @if(Auth::guard('admin')->user()->hasPermission('banding-asesmen-komponen.delete'))
-                                        <form action="{{ route('admin.banding-asesmen-komponen.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus komponen ceklis ini?')">
+                                        <form action="{{ route('admin.banding-asesmen-komponen.destroy', $item->id) }}" method="POST"
+                                              onsubmit="return openBandingKomponenDeleteModal(event, this, @js('Apakah Anda yakin menghapus komponen ceklis banding \'' . $item->pernyataan . '\' ini?'))">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit">
@@ -227,6 +324,17 @@
             <div>Belum ada komponen ceklis banding.</div>
         </div>
     @endif
+</div>
+
+<div id="banding-komponen-delete-confirm-overlay" class="banding-komponen-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="bandingKomponenDeleteConfirmTitle" aria-hidden="true">
+    <div class="banding-komponen-delete-confirm-modal">
+        <h3 id="bandingKomponenDeleteConfirmTitle" class="banding-komponen-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="bandingKomponenDeleteConfirmText" class="banding-komponen-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="banding-komponen-delete-confirm-actions">
+            <button type="button" id="bandingKomponenDeleteConfirmCancel" class="banding-komponen-delete-btn-cancel">Batal</button>
+            <button type="button" id="bandingKomponenDeleteConfirmSubmit" class="banding-komponen-delete-btn-submit">Hapus</button>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -349,5 +457,61 @@
             fetchAndReplaceCard(pageLink.href);
         });
     })();
+
+    let pendingBandingKomponenDeleteForm = null;
+
+    window.openBandingKomponenDeleteModal = function(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingBandingKomponenDeleteForm = form;
+
+        const overlay = document.getElementById('banding-komponen-delete-confirm-overlay');
+        const text = document.getElementById('bandingKomponenDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    };
+
+    window.closeBandingKomponenDeleteModal = function() {
+        const overlay = document.getElementById('banding-komponen-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingBandingKomponenDeleteForm = null;
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const bandingKomponenDeleteOverlay = document.getElementById('banding-komponen-delete-confirm-overlay');
+        const bandingKomponenDeleteCancelBtn = document.getElementById('bandingKomponenDeleteConfirmCancel');
+        const bandingKomponenDeleteSubmitBtn = document.getElementById('bandingKomponenDeleteConfirmSubmit');
+
+        bandingKomponenDeleteCancelBtn?.addEventListener('click', closeBandingKomponenDeleteModal);
+
+        bandingKomponenDeleteOverlay?.addEventListener('click', function(event) {
+            if (event.target === bandingKomponenDeleteOverlay) {
+                closeBandingKomponenDeleteModal();
+            }
+        });
+
+        bandingKomponenDeleteSubmitBtn?.addEventListener('click', function() {
+            if (!pendingBandingKomponenDeleteForm) return;
+            const formToSubmit = pendingBandingKomponenDeleteForm;
+            closeBandingKomponenDeleteModal();
+            formToSubmit.submit();
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeBandingKomponenDeleteModal();
+            }
+        });
+    });
 </script>
 @endsection

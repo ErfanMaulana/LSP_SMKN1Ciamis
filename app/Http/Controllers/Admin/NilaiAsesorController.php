@@ -46,7 +46,7 @@ class NilaiAsesorController extends Controller
             ->withQueryString();
 
         $stats = DB::table('asesor_nilai_elemens')
-            ->selectRaw('COUNT(DISTINCT CONCAT(asesi_nik, "-", skema_id)) as total_form, COUNT(*) as total_elemen_dinilai, ROUND(AVG(nilai), 2) as rata_global')
+            ->selectRaw('COUNT(DISTINCT asesi_nik || "-" || skema_id) as total_form, COUNT(*) as total_elemen_dinilai, ROUND(AVG(nilai), 2) as rata_global')
             ->first();
 
         $skemas = Skema::orderBy('nama_skema')->get(['id', 'nama_skema', 'nomor_skema', 'kkm']);
@@ -91,6 +91,78 @@ class NilaiAsesorController extends Controller
         ];
 
         return view('admin.nilai-asesor.show', compact('asesi', 'skema', 'rows', 'summary'));
+    }
+
+    public function export($asesiNik, $skemaId)
+    {
+        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+        $skema = Skema::with([
+            'units' => fn($q) => $q->orderBy('id'),
+            'units.elemens' => fn($q) => $q->orderBy('id'),
+        ])->findOrFail($skemaId);
+
+        $nilaiRows = DB::table('asesor_nilai_elemens as ane')
+            ->join('elemens as e', 'ane.elemen_id', '=', 'e.id')
+            ->join('units as u', 'e.unit_id', '=', 'u.id')
+            ->leftJoin('asesor as ar', 'ane.asesor_id', '=', 'ar.ID_asesor')
+            ->where('ane.asesi_nik', $asesiNik)
+            ->where('ane.skema_id', $skemaId)
+            ->select([
+                'ane.id',
+                'ane.nilai',
+                'ane.status',
+                'ane.updated_at',
+                'e.id as elemen_id',
+                'e.nama_elemen',
+                'u.id as unit_id',
+                'u.kode_unit',
+                'u.judul_unit',
+                'ar.nama as nama_asesor',
+            ])
+            ->orderBy('u.id')
+            ->orderBy('e.id')
+            ->get();
+
+        // Key nilai by elemen_id for fast lookup
+        $nilaiByElemen = $nilaiRows->keyBy('elemen_id');
+
+        // Get first asesor name
+        $namaAsesor = $nilaiRows->first()?->nama_asesor ?? '-';
+
+        // Get TUK from rekaman_asesmen_kompetensi if available
+        $rekaman = DB::table('rekaman_asesmen_kompetensi')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $skemaId)
+            ->first();
+
+        $tuk = $rekaman?->tuk ?? '-';
+        $tanggal = $nilaiRows->count()
+            ? \Carbon\Carbon::parse($nilaiRows->max('updated_at'))->translatedFormat('d F Y')
+            : now()->translatedFormat('d F Y');
+
+        $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+
+        $html = view('admin.nilai-asesor.export-doc', [
+            'asesi'         => $asesi,
+            'skema'         => $skema,
+            'nilaiByElemen' => $nilaiByElemen,
+            'namaAsesor'    => $namaAsesor,
+            'tuk'           => $tuk,
+            'tanggal'       => $tanggal,
+            'logoDataUri'   => $logoDataUri,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
+        $fileName = 'Nilai-Asesmen-' . $asesi->NIK . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type'        => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control'       => 'max-age=0',
+        ]);
     }
 
     public function updateKkm(Request $request, $skemaId)

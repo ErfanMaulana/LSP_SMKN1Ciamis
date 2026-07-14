@@ -30,15 +30,28 @@
     tr:last-child td { border-bottom:none; }
 
     .badge { padding:4px 10px; border-radius:999px; font-size:11px; font-weight:700; }
-    .badge.diajukan { background:#dbeafe; color:#1e40af; }
+    .badge.diajukan { background:#dbeafe; color:#0073bd; }
     .badge.ditinjau { background:#fef3c7; color:#92400e; }
     .badge.diterima { background:#dcfce7; color:#166534; }
     .badge.ditolak { background:#fee2e2; color:#991b1b; }
     .badge.asesmen_ulang { background:#fef3c7; color:#92400e; }
     .badge.tidak_banding { background:#e5e7eb; color:#374151; }
 
-    .btn-detail { background:#e0f2fe; color:#0c4a6e; border-radius:6px; padding:7px 10px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
-
+.btn-detail {
+        padding: 5px 10px;
+        background: #f0f7ff;
+        color: #0073bd;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    
     .empty { padding:52px 18px; text-align:center; color:#94a3b8; }
     .empty i { font-size:42px; display:block; margin-bottom:8px; }
 

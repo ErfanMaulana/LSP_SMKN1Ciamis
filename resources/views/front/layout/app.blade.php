@@ -28,5 +28,20 @@
 
 @stack('scripts')
 
+<script>
+    // Jika ada hash #ruang-lingkup: scroll ke section, lalu hapus hash dari URL
+    (function () {
+        if (window.location.hash === '#ruang-lingkup') {
+            history.replaceState(null, '', window.location.pathname);
+            var el = document.getElementById('ruang-lingkup');
+            if (el) {
+                setTimeout(function () {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+        }
+    })();
+</script>
+
 </body>
 </html>

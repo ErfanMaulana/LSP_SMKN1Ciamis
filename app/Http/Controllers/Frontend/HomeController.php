@@ -50,9 +50,9 @@ class HomeController extends Controller
             ->get();
 
         $jurusanList = Jurusan::withCount('skemas')
-            ->having('skemas_count', '>', 0)
-            ->orderBy('skemas_count', 'desc')
+            ->whereHas('skemas')
             ->get()
+            ->sortByDesc('skemas_count')
             ->map(function ($jurusan) {
                 $iconMap = [
                     'PPLG' => ['icon' => 'bi-pc-display-horizontal', 'color' => 'ic-blue'],

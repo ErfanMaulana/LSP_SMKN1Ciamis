@@ -39,6 +39,32 @@
         background: #fff;
     }
 
+    .btn-export {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 14px;
+        border: none;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        background: #0073bd;
+        box-shadow: 0 2px 6px rgba(37,99,235,.35);
+        transition: opacity .15s;
+    }
+
+    .btn-export:hover { 
+        background: #005f99;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
     .summary-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -138,15 +164,21 @@
 @section('content')
 <div class="page-header">
     <div>
-        <h2><i class="bi bi-list-ul" style="color:#0061a5"></i> Detail Nilai Asesor</h2>
+        <h2>Detail Penilaian Asesor</h2>
         <div class="meta">
             <strong>{{ $asesi->nama }}</strong> ({{ $asesi->NIK }})
             - {{ $skema->nama_skema }}
         </div>
     </div>
-    <a href="{{ route('admin.nilai-asesor.index') }}" class="btn-back">
-        <i class="bi bi-arrow-left"></i> Kembali
-    </a>
+    <div class="header-actions">
+        <a href="{{ route('admin.nilai-asesor.export', [$asesi->NIK, $skema->id]) }}"
+           class="btn-export" title="Download sebagai dokumen Word (.doc)">
+            <i class="bi bi-download"></i> Export Nilai Asesmen
+        </a>
+        <a href="{{ route('admin.nilai-asesor.index') }}" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Kembali
+        </a>
+    </div>
 </div>
 
 <div class="summary-grid">

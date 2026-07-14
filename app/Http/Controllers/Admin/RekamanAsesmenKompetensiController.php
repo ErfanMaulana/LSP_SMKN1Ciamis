@@ -283,4 +283,78 @@ class RekamanAsesmenKompetensiController extends Controller
 
         return [$data, $details];
     }
+
+    public function export($id)
+    {
+        $item = RekamanAsesmenKompetensi::query()
+            ->with([
+                'skema:id,nama_skema,nomor_skema,jenis_skema',
+                'asesi:NIK,nama',
+                'details.unit:id,kode_unit,judul_unit',
+            ])
+            ->findOrFail($id);
+
+        if (empty($item->ttd_asesi_file) || empty($item->ttd_asesor_file)) {
+            return redirect()->back()->with('error', 'Form FR.AK.02 belum dapat diexport karena asesi atau asesor belum menandatangani rekaman asesmen.');
+        }
+
+        $ceklis = \App\Models\CeklisObservasiAktivitasPraktik::query()
+            ->where('skema_id', $item->skema_id)
+            ->where('asesi_nik', $item->asesi_nik)
+            ->first();
+
+        $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+
+        $ttdAsesiDataUri = null;
+        if (!empty($item->ttd_asesi_file)) {
+            if (str_starts_with($item->ttd_asesi_file, 'data:image')) {
+                $ttdAsesiDataUri = $item->ttd_asesi_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesi_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesiDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $ttdAsesorDataUri = null;
+        if (!empty($item->ttd_asesor_file)) {
+            if (str_starts_with($item->ttd_asesor_file, 'data:image')) {
+                $ttdAsesorDataUri = $item->ttd_asesor_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesor_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesorDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $details = $item->details->sortBy([
+            ['unit.id', 'asc'],
+        ])->values();
+
+        $html = view('asesor.rekaman-asesmen-kompetensi.export-docx', [
+            'item' => $item,
+            'ceklis' => $ceklis,
+            'details' => $details,
+            'logoPath' => $logoPath,
+            'logoDataUri' => $logoDataUri,
+            'ttdAsesiDataUri' => $ttdAsesiDataUri,
+            'ttdAsesorDataUri' => $ttdAsesorDataUri,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($item->skema?->nomor_skema ?? $item->skema_id));
+        $fileName = 'FR.AK.02-' . ($item->asesi_nik ?? 'asesi') . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
 }

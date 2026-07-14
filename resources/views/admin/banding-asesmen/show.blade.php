@@ -125,7 +125,7 @@
 <div class="top">
     <h2>Detail Pengajuan Banding</h2>
     <div class="top-actions">
-        <a href="{{ route('admin.banding-asesmen.pdf', $banding->id) }}" class="btn-download"><i class="bi bi-file-earmark-pdf"></i> Unduh PDF FR.AK.04</a>
+        <a href="{{ route('admin.banding-asesmen.export', $banding->id) }}" class="btn-download"><i class="bi bi-download"></i> Export FR.AK.04 (.doc)</a>
         <a href="{{ route('admin.banding-asesmen.index') }}" class="btn-back"><i class="bi bi-arrow-left"></i> Kembali</a>
     </div>
 </div>

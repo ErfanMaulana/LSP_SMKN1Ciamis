@@ -20,6 +20,9 @@
                         <a href="{{ route('admin.persetujuan-asesmen.show', $item->id) }}">
                             <i class="bi bi-eye"></i> Lihat Detail
                         </a>
+                        <a href="{{ route('admin.persetujuan-asesmen.export', $item->id) }}">
+                            <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
+                        </a>
 
                         <!-- @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.edit'))
                             <a href="{{ route('admin.persetujuan-asesmen.edit', $item->id) }}">
@@ -28,7 +31,8 @@
                         @endif -->
 
                         @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.delete'))
-                            <form method="POST" action="{{ route('admin.persetujuan-asesmen.destroy', $item->id) }}" onsubmit="return confirm('Yakin ingin menghapus data ini?');" style="margin:0;">
+                            <form method="POST" action="{{ route('admin.persetujuan-asesmen.destroy', $item->id) }}"
+                                  onsubmit="return openPersetujuanDeleteModal(event, this, @js('Apakah Anda yakin menghapus data persetujuan asesmen asesi \'' . $item->nama_asesi . '\' ini?'))" style="margin:0;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="danger">

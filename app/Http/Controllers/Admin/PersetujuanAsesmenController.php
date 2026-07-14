@@ -219,4 +219,68 @@ class PersetujuanAsesmenController extends Controller
             'catatan_footer' => '* Coret yang tidak perlu',
         ];
     }
+
+    public function export($id)
+    {
+        $item = PersetujuanAsesmen::findOrFail($id);
+        $skema = Skema::where('nomor_skema', $item->nomor_skema)->first();
+
+        $logoPath = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+
+        $ttdAsesiDataUri = null;
+        if (!empty($item->ttd_asesi_file)) {
+            if (str_starts_with($item->ttd_asesi_file, 'data:image')) {
+                $ttdAsesiDataUri = $item->ttd_asesi_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesi_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesiDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $ttdAsesorDataUri = null;
+        if (!empty($item->ttd_asesor_file)) {
+            if (str_starts_with($item->ttd_asesor_file, 'data:image')) {
+                $ttdAsesorDataUri = $item->ttd_asesor_file;
+            } else {
+                $filePath = storage_path('app/public/' . ltrim($item->ttd_asesor_file, '/'));
+                if (file_exists($filePath)) {
+                    $mime = mime_content_type($filePath) ?: 'image/png';
+                    $ttdAsesorDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($filePath));
+                }
+            }
+        }
+
+        $asesor = null;
+        if (!empty($item->nama_asesor)) {
+            $asesor = Asesor::where('nama', $item->nama_asesor)->first();
+        }
+        if (!$asesor && !empty($item->reviewed_by)) {
+            $asesor = Asesor::where('no_met', (string) $item->reviewed_by)->first();
+        }
+
+        $html = view('persetujuan-asesmen.export-docx', [
+            'item' => $item,
+            'skema' => $skema,
+            'asesor' => $asesor,
+            'logoPath' => $logoPath,
+            'logoDataUri' => $logoDataUri,
+            'ttdAsesiDataUri' => $ttdAsesiDataUri,
+            'ttdAsesorDataUri' => $ttdAsesorDataUri,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema?->nomor_skema ?? $item->nomor_skema));
+        $fileName = 'FR.AK.01-' . ($item->asesi_nik ?: 'persetujuan') . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type' => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
 }

@@ -248,6 +248,102 @@
             grid-template-columns: 1fr;
         }
     }
+
+    .mandiri-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .mandiri-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .mandiri-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .mandiri-delete-confirm-overlay.show .mandiri-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .mandiri-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .mandiri-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .mandiri-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .mandiri-delete-btn-cancel,
+    .mandiri-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .mandiri-delete-btn-cancel {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .mandiri-delete-btn-cancel:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    .mandiri-delete-btn-submit {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .mandiri-delete-btn-submit:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .mandiri-delete-confirm-overlay,
+        .mandiri-delete-confirm-modal {
+            transition: none;
+        }
+    }
 </style>
 @endsection
 
@@ -321,6 +417,17 @@
 <!-- Table -->
 <div class="card" id="tableContainer">
     @include('admin.asesmen-mandiri._table')
+</div>
+
+<div id="mandiri-delete-confirm-overlay" class="mandiri-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="mandiriDeleteConfirmTitle" aria-hidden="true">
+    <div class="mandiri-delete-confirm-modal">
+        <h3 id="mandiriDeleteConfirmTitle" class="mandiri-delete-confirm-title">Konfirmasi Hapus / Reset</h3>
+        <p id="mandiriDeleteConfirmText" class="mandiri-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="mandiri-delete-confirm-actions">
+            <button type="button" id="mandiriDeleteConfirmCancel" class="mandiri-delete-btn-cancel">Batal</button>
+            <button type="button" id="mandiriDeleteConfirmSubmit" class="mandiri-delete-btn-submit">Hapus / Reset</button>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -417,5 +524,59 @@
 
         performAjaxSearch();
     }
+
+    let pendingMandiriDeleteForm = null;
+
+    window.openMandiriDeleteModal = function(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingMandiriDeleteForm = form;
+
+        const overlay = document.getElementById('mandiri-delete-confirm-overlay');
+        const text = document.getElementById('mandiriDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    };
+
+    window.closeMandiriDeleteModal = function() {
+        const overlay = document.getElementById('mandiri-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingMandiriDeleteForm = null;
+    };
+
+    const mandiriDeleteOverlay = document.getElementById('mandiri-delete-confirm-overlay');
+    const mandiriDeleteCancelBtn = document.getElementById('mandiriDeleteConfirmCancel');
+    const mandiriDeleteSubmitBtn = document.getElementById('mandiriDeleteConfirmSubmit');
+
+    mandiriDeleteCancelBtn?.addEventListener('click', closeMandiriDeleteModal);
+
+    mandiriDeleteOverlay?.addEventListener('click', function(event) {
+        if (event.target === mandiriDeleteOverlay) {
+            closeMandiriDeleteModal();
+        }
+    });
+
+    mandiriDeleteSubmitBtn?.addEventListener('click', function() {
+        if (!pendingMandiriDeleteForm) return;
+        const formToSubmit = pendingMandiriDeleteForm;
+        closeMandiriDeleteModal();
+        formToSubmit.submit();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeMandiriDeleteModal();
+        }
+    });
 </script>
 @endsection

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\BuktiPersyaratanDasarPemohon;
+use App\Models\Asesor;
 
 class Skema extends Model
 {
@@ -40,5 +41,9 @@ class Skema extends Model
         return $this->belongsToMany(Asesi::class, 'asesi_skema', 'skema_id', 'asesi_nik')
                     ->withPivot('status', 'tanggal_mulai', 'tanggal_selesai')
                     ->withTimestamps();
+    }
+    public function asesors()
+    {
+        return $this->belongsToMany(Asesor::class, 'asesor_skema', 'skema_id', 'asesor_id');
     }
 }

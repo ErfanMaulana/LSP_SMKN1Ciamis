@@ -106,11 +106,15 @@ class AsesiController extends Controller
             return view('admin.asesi.partials.table-rows', compact('asesi'))->render();
         }
 
+        $perPageAkun = (int) $request->query('per_page_akun', 10);
+        $perPageAkun = max(5, min(100, $perPageAkun));
+
         // Akun role=asesi yang tidak punya data di tabel asesi
         $akunTanpaAsesi = Account::where('role', 'asesi')
             ->whereNotIn('NIK', Asesi::pluck('NIK')->filter())
             ->orderBy('nama')
-            ->get();
+            ->paginate($perPageAkun, ['*'], 'page_akun')
+            ->appends($request->except('page_akun'));
         
         return view('admin.asesi.index', compact(
             'asesi', 
@@ -967,7 +971,7 @@ class AsesiController extends Controller
             'Budi Santoso',
             '3204010101010001',
             'Bandung',
-            '2007-05-12',
+            '12/05/2007',
             'L',
             'Jl. Melati No. 1',
             '081234567890',
@@ -1153,7 +1157,7 @@ class AsesiController extends Controller
 
         foreach ($asesiRows as $i => $row) {
             $r = $i + 2;
-            $tanggalLahir = $row->tanggal_lahir ? \Carbon\Carbon::parse($row->tanggal_lahir)->format('Y-m-d') : '';
+            $tanggalLahir = $row->tanggal_lahir ? \Carbon\Carbon::parse($row->tanggal_lahir)->format('d/m/Y') : '';
 
             $values = [
                 (string) ($i + 1),

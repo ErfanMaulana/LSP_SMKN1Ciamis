@@ -61,7 +61,7 @@
     .group-name {
         font-size: 16px;
         font-weight: 700;
-        color: #1e3a5f;
+        color: #0f172a;
         margin: 0 0 6px;
     }
 

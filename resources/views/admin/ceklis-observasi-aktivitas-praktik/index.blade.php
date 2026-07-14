@@ -276,6 +276,187 @@
         text-align: center;
         color: #64748b;
     }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .stat-card {
+        background: #ffffff;
+        padding: 16px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease-in-out;
+    }
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #ffffff;
+        flex-shrink: 0;
+    }
+    .stat-icon.blue { background: linear-gradient(135deg, #0073bd, #0073bd); }
+    .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+    .stat-icon.teal { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+    .stat-icon.green { background: linear-gradient(135deg, #10b981, #047857); }
+    .stat-icon.red { background: linear-gradient(135deg, #f43f5e, #be123c); }
+    
+    .stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+    .stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+        margin-top: 2px;
+    }
+
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        }
+    }
+    @media (max-width: 640px) {
+        .stats-grid {
+            gap: 12px;
+        }
+        .stat-card {
+            padding: 12px;
+            gap: 10px;
+        }
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+        .stat-label {
+            font-size: 10px;
+        }
+        .stat-value {
+            font-size: 18px;
+        }
+    }
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .ceklis-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .ceklis-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .ceklis-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .ceklis-delete-confirm-overlay.show .ceklis-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .ceklis-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .ceklis-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .ceklis-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .ceklis-delete-btn-cancel,
+    .ceklis-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .ceklis-delete-btn-cancel {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .ceklis-delete-btn-cancel:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    .ceklis-delete-btn-submit {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .ceklis-delete-btn-submit:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .ceklis-delete-confirm-overlay,
+        .ceklis-delete-confirm-modal {
+            transition: none;
+        }
+    }
 </style>
 @endsection
 
@@ -291,6 +472,45 @@
             <i class="bi bi-plus-circle"></i> Tambah Data
         </a>
     @endif
+</div>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="bi bi-journal-text"></i></div>
+        <div>
+            <div class="stat-label">Skema</div>
+            <div class="stat-value" id="stat-skema">{{ $stats['skema'] ?? 0 }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="bi bi-people"></i></div>
+        <div>
+            <div class="stat-label">Asesi</div>
+            <div class="stat-value" id="stat-asesi">{{ $stats['asesi'] ?? 0 }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="bi bi-person-badge"></i></div>
+        <div>
+            <div class="stat-label">Asesor</div>
+            <div class="stat-value" id="stat-asesor">{{ $stats['asesor'] ?? 0 }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="bi bi-check-circle"></i></div>
+        <div>
+            <div class="stat-label">Kompeten</div>
+            <div class="stat-value" id="stat-kompeten">{{ $stats['kompeten'] ?? 0 }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue"><i class="bi bi-x-circle"></i></div>
+        <div>
+            <div class="stat-label">Tidak Kompeten</div>
+            <div class="stat-value" id="stat-tidak-kompeten">{{ $stats['tidak_kompeten'] ?? 0 }}</div>
+        </div>
+    </div>
 </div>
 
 <div class="toolbar">
@@ -339,6 +559,17 @@
         @if($isPaginator && $items->hasPages())
             {{ $items->links() }}
         @endif
+    </div>
+</div>
+
+<div id="ceklis-delete-confirm-overlay" class="ceklis-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="ceklisDeleteConfirmTitle" aria-hidden="true">
+    <div class="ceklis-delete-confirm-modal">
+        <h3 id="ceklisDeleteConfirmTitle" class="ceklis-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="ceklisDeleteConfirmText" class="ceklis-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="ceklis-delete-confirm-actions">
+            <button type="button" id="ceklisDeleteConfirmCancel" class="ceklis-delete-btn-cancel">Batal</button>
+            <button type="button" id="ceklisDeleteConfirmSubmit" class="ceklis-delete-btn-submit">Hapus</button>
+        </div>
     </div>
 </div>
 
@@ -396,6 +627,21 @@
         .then(data => {
             tableBody.innerHTML = data.rows || '';
             paginationWrap.innerHTML = data.pagination || '';
+            
+            if (data.stats) {
+                const statSkema = document.getElementById('stat-skema');
+                const statAsesi = document.getElementById('stat-asesi');
+                const statAsesor = document.getElementById('stat-asesor');
+                const statKompeten = document.getElementById('stat-kompeten');
+                const statTidakKompeten = document.getElementById('stat-tidak-kompeten');
+
+                if (statSkema) statSkema.textContent = data.stats.skema ?? 0;
+                if (statAsesi) statAsesi.textContent = data.stats.asesi ?? 0;
+                if (statAsesor) statAsesor.textContent = data.stats.asesor ?? 0;
+                if (statKompeten) statKompeten.textContent = data.stats.kompeten ?? 0;
+                if (statTidakKompeten) statTidakKompeten.textContent = data.stats.tidak_kompeten ?? 0;
+            }
+            
             window.history.replaceState({}, '', url);
         })
         .catch(error => console.error('Search error:', error));
@@ -439,6 +685,60 @@
 
         event.preventDefault();
         performAjaxSearch(link.href);
+    });
+
+    let pendingCeklisDeleteForm = null;
+
+    window.openCeklisDeleteModal = function(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingCeklisDeleteForm = form;
+
+        const overlay = document.getElementById('ceklis-delete-confirm-overlay');
+        const text = document.getElementById('ceklisDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    };
+
+    window.closeCeklisDeleteModal = function() {
+        const overlay = document.getElementById('ceklis-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingCeklisDeleteForm = null;
+    };
+
+    const ceklisDeleteOverlay = document.getElementById('ceklis-delete-confirm-overlay');
+    const ceklisDeleteCancelBtn = document.getElementById('ceklisDeleteConfirmCancel');
+    const ceklisDeleteSubmitBtn = document.getElementById('ceklisDeleteConfirmSubmit');
+
+    ceklisDeleteCancelBtn?.addEventListener('click', closeCeklisDeleteModal);
+
+    ceklisDeleteOverlay?.addEventListener('click', function(event) {
+        if (event.target === ceklisDeleteOverlay) {
+            closeCeklisDeleteModal();
+        }
+    });
+
+    ceklisDeleteSubmitBtn?.addEventListener('click', function() {
+        if (!pendingCeklisDeleteForm) return;
+        const formToSubmit = pendingCeklisDeleteForm;
+        closeCeklisDeleteModal();
+        formToSubmit.submit();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeCeklisDeleteModal();
+        }
     });
 </script>
 @endsection

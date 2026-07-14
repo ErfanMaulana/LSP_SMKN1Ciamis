@@ -271,6 +271,102 @@
         text-align: center;
         color: #64748b;
     }
+
+    .persetujuan-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .persetujuan-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .persetujuan-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .persetujuan-delete-confirm-overlay.show .persetujuan-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .persetujuan-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .persetujuan-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .persetujuan-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .persetujuan-delete-btn-cancel,
+    .persetujuan-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .persetujuan-delete-btn-cancel {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .persetujuan-delete-btn-cancel:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    .persetujuan-delete-btn-submit {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .persetujuan-delete-btn-submit:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .persetujuan-delete-confirm-overlay,
+        .persetujuan-delete-confirm-modal {
+            transition: none;
+        }
+    }
 </style>
 @endsection
 
@@ -353,6 +449,17 @@
         @if($isPaginator && $items->hasPages())
             {{ $items->links() }}
         @endif
+    </div>
+</div>
+
+<div id="persetujuan-delete-confirm-overlay" class="persetujuan-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="persetujuanDeleteConfirmTitle" aria-hidden="true">
+    <div class="persetujuan-delete-confirm-modal">
+        <h3 id="persetujuanDeleteConfirmTitle" class="persetujuan-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="persetujuanDeleteConfirmText" class="persetujuan-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="persetujuan-delete-confirm-actions">
+            <button type="button" id="persetujuanDeleteConfirmCancel" class="persetujuan-delete-btn-cancel">Batal</button>
+            <button type="button" id="persetujuanDeleteConfirmSubmit" class="persetujuan-delete-btn-submit">Hapus</button>
+        </div>
     </div>
 </div>
 @endsection
@@ -455,6 +562,60 @@
 
         event.preventDefault();
         performAjaxSearch(link.href);
+    });
+
+    let pendingPersetujuanDeleteForm = null;
+
+    window.openPersetujuanDeleteModal = function(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingPersetujuanDeleteForm = form;
+
+        const overlay = document.getElementById('persetujuan-delete-confirm-overlay');
+        const text = document.getElementById('persetujuanDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    };
+
+    window.closePersetujuanDeleteModal = function() {
+        const overlay = document.getElementById('persetujuan-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingPersetujuanDeleteForm = null;
+    };
+
+    const persetujuanDeleteOverlay = document.getElementById('persetujuan-delete-confirm-overlay');
+    const persetujuanDeleteCancelBtn = document.getElementById('persetujuanDeleteConfirmCancel');
+    const persetujuanDeleteSubmitBtn = document.getElementById('persetujuanDeleteConfirmSubmit');
+
+    persetujuanDeleteCancelBtn?.addEventListener('click', closePersetujuanDeleteModal);
+
+    persetujuanDeleteOverlay?.addEventListener('click', function(event) {
+        if (event.target === persetujuanDeleteOverlay) {
+            closePersetujuanDeleteModal();
+        }
+    });
+
+    persetujuanDeleteSubmitBtn?.addEventListener('click', function() {
+        if (!pendingPersetujuanDeleteForm) return;
+        const formToSubmit = pendingPersetujuanDeleteForm;
+        closePersetujuanDeleteModal();
+        formToSubmit.submit();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closePersetujuanDeleteModal();
+        }
     });
 </script>
 @endsection

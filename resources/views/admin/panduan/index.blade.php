@@ -138,7 +138,8 @@
                                             </a>
                                         @endif
                                         @if($canDelete)
-                                            <form action="{{ route('admin.panduan.destroy', [$section, $item->id]) }}" method="POST" onsubmit="return confirm('Hapus poin ini?')">
+                                            <form action="{{ route('admin.panduan.destroy', [$section, $item->id]) }}" method="POST"
+                                                  onsubmit="return openPanduanDeleteModal(event, this, @js('Apakah Anda yakin menghapus panduan \'' . $item->title . '\' ini?'))" style="margin: 0;">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="dropdown-item danger">
@@ -158,6 +159,17 @@
         </table>
     </div>
 @endif
+
+<div id="panduan-delete-confirm-overlay" class="panduan-delete-confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="panduanDeleteConfirmTitle" aria-hidden="true">
+    <div class="panduan-delete-confirm-modal">
+        <h3 id="panduanDeleteConfirmTitle" class="panduan-delete-confirm-title">Konfirmasi Hapus</h3>
+        <p id="panduanDeleteConfirmText" class="panduan-delete-confirm-text">Apakah Anda yakin?</p>
+        <div class="panduan-delete-confirm-actions">
+            <button type="button" id="panduanDeleteConfirmCancel" class="panduan-delete-btn-cancel">Batal</button>
+            <button type="button" id="panduanDeleteConfirmSubmit" class="panduan-delete-btn-submit">Hapus</button>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('styles')
@@ -218,7 +230,7 @@
 
     #bulk-mode-btn.bulk-on {
         background: #dbeafe;
-        color: #1d4ed8;
+        color: #0073bd;
         box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
     }
 
@@ -237,13 +249,13 @@
     .status-badge.active { background:#dcfce7; color:#166534; }
     .status-badge.inactive { background:#fee2e2; color:#991b1b; }
 
-    .action-menu { position:relative; display:inline-block; }
+    .action-menu { display:inline-block; }
     .action-btn { border:none; background:#f1f5f9; width:34px; height:34px; border-radius:8px; cursor:pointer; }
     .action-dropdown {
-        position:absolute; right:0; top:40px; min-width:140px; background:#fff; border:1px solid #e2e8f0;
-        border-radius:10px; box-shadow:0 8px 20px rgba(15,23,42,.14); display:none; z-index:10;
+        position:fixed; min-width:140px; background:#fff; border:1px solid #e2e8f0;
+        border-radius:10px; box-shadow:0 8px 20px rgba(15,23,42,.14); display:none; z-index:9990;
     }
-    .action-menu.open .action-dropdown { display:block; }
+    .action-dropdown.show { display:block; }
     .dropdown-item { display:flex; align-items:center; gap:8px; width:100%; border:none; background:none; text-decoration:none; color:#334155; font-size:13px; padding:10px 12px; cursor:pointer; text-align:left; }
     .dropdown-item:hover { background:#f8fafc; }
     .dropdown-item.danger { color:#b91c1c; }
@@ -289,25 +301,147 @@
         .bulk-actions { width: 100%; }
         .bulk-selection-text { width: 100%; text-align: center; }
     }
+
+    .panduan-delete-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 10000;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .panduan-delete-confirm-overlay.show {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .panduan-delete-confirm-modal {
+        width: 100%;
+        max-width: 420px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3);
+        transform: translateY(10px) scale(0.96);
+        opacity: 0.92;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+    }
+
+    .panduan-delete-confirm-overlay.show .panduan-delete-confirm-modal {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    .panduan-delete-confirm-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .panduan-delete-confirm-text {
+        margin: 8px 0 0;
+        font-size: 14px;
+        color: #0f172a;
+    }
+
+    .panduan-delete-confirm-actions {
+        margin-top: 18px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .panduan-delete-btn-cancel,
+    .panduan-delete-btn-submit {
+        border: 1px solid #0073bd;
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .panduan-delete-btn-cancel {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .panduan-delete-btn-cancel:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    .panduan-delete-btn-submit {
+        background: #0073bd;
+        border-color: #0073bd;
+    }
+    .panduan-delete-btn-submit:hover {
+        background: #005f99;
+        border-color: #005f99;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .panduan-delete-confirm-overlay,
+        .panduan-delete-confirm-modal {
+            transition: none;
+        }
+    }
 </style>
 @endsection
 
 @section('scripts')
 <script>
     function toggleMenu(button) {
-        document.querySelectorAll('.action-menu').forEach(function (menu) {
-            if (!menu.contains(button)) menu.classList.remove('open');
+        const dropdown = button.nextElementSibling;
+        const isOpen = dropdown.classList.contains('show');
+
+        document.querySelectorAll('.action-dropdown.show').forEach(function (d) {
+            d.classList.remove('show');
+            d.style.top = '';
+            d.style.left = '';
         });
-        button.closest('.action-menu').classList.toggle('open');
+
+        if (!isOpen) {
+            const rect = button.getBoundingClientRect();
+            dropdown.classList.add('show');
+            
+            const dropW = 140;
+            let left = rect.right - dropW;
+            if (left < 8) left = 8;
+            
+            dropdown.style.top = (rect.bottom + 4) + 'px';
+            dropdown.style.left = left + 'px';
+        }
     }
 
     document.addEventListener('click', function (e) {
         if (!e.target.closest('.action-menu')) {
-            document.querySelectorAll('.action-menu').forEach(function (menu) {
-                menu.classList.remove('open');
+            document.querySelectorAll('.action-dropdown.show').forEach(function (d) {
+                d.classList.remove('show');
+                d.style.top = '';
+                d.style.left = '';
             });
         }
     });
+
+    window.addEventListener('scroll', function () {
+        document.querySelectorAll('.action-dropdown.show').forEach(function (d) {
+            d.classList.remove('show');
+            d.style.top = '';
+            d.style.left = '';
+        });
+    }, true);
 
     function getSelectedItems() {
         return Array.from(document.querySelectorAll('.bulk-item-checkbox:checked')).map(function (checkbox) {
@@ -505,5 +639,59 @@
 
     setBulkMode(false);
     updateBulkState();
+
+    let pendingPanduanDeleteForm = null;
+
+    window.openPanduanDeleteModal = function(event, form, message) {
+        if (event) {
+            event.preventDefault();
+        }
+
+        pendingPanduanDeleteForm = form;
+
+        const overlay = document.getElementById('panduan-delete-confirm-overlay');
+        const text = document.getElementById('panduanDeleteConfirmText');
+        if (!overlay || !text) return false;
+
+        text.textContent = message || 'Apakah Anda yakin?';
+        overlay.classList.add('show');
+        overlay.setAttribute('aria-hidden', 'false');
+
+        return false;
+    };
+
+    window.closePanduanDeleteModal = function() {
+        const overlay = document.getElementById('panduan-delete-confirm-overlay');
+        if (!overlay) return;
+
+        overlay.classList.remove('show');
+        overlay.setAttribute('aria-hidden', 'true');
+        pendingPanduanDeleteForm = null;
+    };
+
+    const panduanDeleteOverlay = document.getElementById('panduan-delete-confirm-overlay');
+    const panduanDeleteCancelBtn = document.getElementById('panduanDeleteConfirmCancel');
+    const panduanDeleteSubmitBtn = document.getElementById('panduanDeleteConfirmSubmit');
+
+    panduanDeleteCancelBtn?.addEventListener('click', closePanduanDeleteModal);
+
+    panduanDeleteOverlay?.addEventListener('click', function(event) {
+        if (event.target === panduanDeleteOverlay) {
+            closePanduanDeleteModal();
+        }
+    });
+
+    panduanDeleteSubmitBtn?.addEventListener('click', function() {
+        if (!pendingPanduanDeleteForm) return;
+        const formToSubmit = pendingPanduanDeleteForm;
+        closePanduanDeleteModal();
+        formToSubmit.submit();
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closePanduanDeleteModal();
+        }
+    });
 </script>
 @endsection
