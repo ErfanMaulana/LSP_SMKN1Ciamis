@@ -37,8 +37,21 @@
     .badge.asesmen_ulang { background:#fef3c7; color:#92400e; }
     .badge.tidak_banding { background:#e5e7eb; color:#374151; }
 
-    .btn-detail { background:#e0f2fe; color:#0073bd; border-radius:6px; padding:7px 10px; font-size:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
-
+.btn-detail {
+        padding: 5px 10px;
+        background: #f0f7ff;
+        color: #0073bd;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+    }
+    
     .empty { padding:52px 18px; text-align:center; color:#94a3b8; }
     .empty i { font-size:42px; display:block; margin-bottom:8px; }
 

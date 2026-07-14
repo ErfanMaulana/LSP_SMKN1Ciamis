@@ -120,20 +120,20 @@
     tr:last-child td { border-bottom: none; }
 
     .btn-detail {
+        padding: 5px 10px;
+        background: #f0f7ff;
+        color: #0073bd;
+        border: 1px solid #bfdbfe;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        background: #e0f2fe;
-        color: #0c4a6e;
-        border-radius: 6px;
-        padding: 6px 12px;
-        font-size: 12px;
-        font-weight: 700;
-        text-decoration: none;
-        transition: background 0.2s;
+        gap: 4px;
+        white-space: nowrap;
     }
-    .btn-detail:hover { background: #bae6fd; }
-
+    
     .empty-state {
         text-align: center;
         padding: 48px 20px;

@@ -207,11 +207,6 @@
         white-space: nowrap;
     }
 
-    .btn-detail:hover {
-        background: #005f99;
-        color: #fff;
-    }
-
     .empty-state {
         text-align: center;
         padding: 56px 20px;

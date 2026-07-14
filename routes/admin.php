@@ -420,6 +420,7 @@ Route::prefix('admin')->group(function () {
         Route::middleware('permission:nilai-asesor.view')->group(function () {
             Route::get('/nilai-asesor', [NilaiAsesorController::class, 'index'])->name('admin.nilai-asesor.index');
             Route::get('/nilai-asesor/{asesiNik}/{skemaId}', [NilaiAsesorController::class, 'show'])->name('admin.nilai-asesor.show');
+            Route::get('/nilai-asesor/{asesiNik}/{skemaId}/export', [NilaiAsesorController::class, 'export'])->name('admin.nilai-asesor.export');
             Route::post('/nilai-asesor/{skemaId}/update-kkm', [NilaiAsesorController::class, 'updateKkm'])->name('admin.nilai-asesor.update-kkm');
         });
 
