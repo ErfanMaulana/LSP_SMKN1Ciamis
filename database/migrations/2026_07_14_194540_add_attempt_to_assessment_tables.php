@@ -11,17 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $isSqlite = Schema::getConnection()->getDriverName() === 'sqlite';
+
         // 1. asesi_skema
-        Schema::table('asesi_skema', function (Blueprint $table) {
-            $table->dropForeign('asesi_skema_asesi_nik_foreign');
-            $table->dropForeign('asesi_skema_skema_id_foreign');
+        Schema::table('asesi_skema', function (Blueprint $table) use ($isSqlite) {
+            if (!$isSqlite) {
+                $table->dropForeign('asesi_skema_asesi_nik_foreign');
+                $table->dropForeign('asesi_skema_skema_id_foreign');
+            }
             $table->dropUnique('asesi_skema_asesi_nik_skema_id_unique');
         });
-        Schema::table('asesi_skema', function (Blueprint $table) {
+        Schema::table('asesi_skema', function (Blueprint $table) use ($isSqlite) {
             $table->unsignedTinyInteger('attempt')->default(1)->after('skema_id');
             $table->unique(['asesi_nik', 'skema_id', 'attempt'], 'uniq_asesi_skema_attempt');
-            $table->foreign('asesi_nik')->references('NIK')->on('asesi')->onDelete('cascade');
-            $table->foreign('skema_id')->references('id')->on('skemas')->onDelete('cascade');
+            if (!$isSqlite) {
+                $table->foreign('asesi_nik')->references('NIK')->on('asesi')->onDelete('cascade');
+                $table->foreign('skema_id')->references('id')->on('skemas')->onDelete('cascade');
+            }
         });
 
         // 2. jawaban_elemens
@@ -30,20 +36,24 @@ return new class extends Migration
         });
 
         // 3. asesor_nilai_elemens
-        Schema::table('asesor_nilai_elemens', function (Blueprint $table) {
-            $table->dropForeign('asesor_nilai_elemens_asesi_nik_foreign');
-            $table->dropForeign('asesor_nilai_elemens_skema_id_foreign');
-            $table->dropForeign('asesor_nilai_elemens_elemen_id_foreign');
-            $table->dropForeign('asesor_nilai_elemens_asesor_id_foreign');
+        Schema::table('asesor_nilai_elemens', function (Blueprint $table) use ($isSqlite) {
+            if (!$isSqlite) {
+                $table->dropForeign('asesor_nilai_elemens_asesi_nik_foreign');
+                $table->dropForeign('asesor_nilai_elemens_skema_id_foreign');
+                $table->dropForeign('asesor_nilai_elemens_elemen_id_foreign');
+                $table->dropForeign('asesor_nilai_elemens_asesor_id_foreign');
+            }
             $table->dropUnique('uniq_asesor_nilai_elemen');
         });
-        Schema::table('asesor_nilai_elemens', function (Blueprint $table) {
+        Schema::table('asesor_nilai_elemens', function (Blueprint $table) use ($isSqlite) {
             $table->unsignedTinyInteger('attempt')->default(1)->after('elemen_id');
             $table->unique(['asesi_nik', 'skema_id', 'elemen_id', 'asesor_id', 'attempt'], 'uniq_asesor_nilai_elemen_attempt');
-            $table->foreign('asesi_nik')->references('NIK')->on('asesi')->onDelete('cascade');
-            $table->foreign('skema_id')->references('id')->on('skemas')->onDelete('cascade');
-            $table->foreign('elemen_id')->references('id')->on('elemens')->onDelete('cascade');
-            $table->foreign('asesor_id')->references('ID_asesor')->on('asesor')->nullOnDelete();
+            if (!$isSqlite) {
+                $table->foreign('asesi_nik')->references('NIK')->on('asesi')->onDelete('cascade');
+                $table->foreign('skema_id')->references('id')->on('skemas')->onDelete('cascade');
+                $table->foreign('elemen_id')->references('id')->on('elemens')->onDelete('cascade');
+                $table->foreign('asesor_id')->references('ID_asesor')->on('asesor')->nullOnDelete();
+            }
         });
 
         // 4. persetujuan_asesmen
@@ -72,17 +82,23 @@ return new class extends Migration
      */
     public function down(): void
     {
+        $isSqlite = Schema::getConnection()->getDriverName() === 'sqlite';
+
         // 1. asesi_skema
-        Schema::table('asesi_skema', function (Blueprint $table) {
-            $table->dropForeign('asesi_skema_asesi_nik_foreign');
-            $table->dropForeign('asesi_skema_skema_id_foreign');
+        Schema::table('asesi_skema', function (Blueprint $table) use ($isSqlite) {
+            if (!$isSqlite) {
+                $table->dropForeign('asesi_skema_asesi_nik_foreign');
+                $table->dropForeign('asesi_skema_skema_id_foreign');
+            }
             $table->dropUnique('uniq_asesi_skema_attempt');
         });
-        Schema::table('asesi_skema', function (Blueprint $table) {
+        Schema::table('asesi_skema', function (Blueprint $table) use ($isSqlite) {
             $table->dropColumn('attempt');
             $table->unique(['asesi_nik', 'skema_id'], 'asesi_skema_asesi_nik_skema_id_unique');
-            $table->foreign('asesi_nik')->references('NIK')->on('asesi')->onDelete('cascade');
-            $table->foreign('skema_id')->references('id')->on('skemas')->onDelete('cascade');
+            if (!$isSqlite) {
+                $table->foreign('asesi_nik')->references('NIK')->on('asesi')->onDelete('cascade');
+                $table->foreign('skema_id')->references('id')->on('skemas')->onDelete('cascade');
+            }
         });
 
         // 2. jawaban_elemens
@@ -91,20 +107,24 @@ return new class extends Migration
         });
 
         // 3. asesor_nilai_elemens
-        Schema::table('asesor_nilai_elemens', function (Blueprint $table) {
-            $table->dropForeign('asesor_nilai_elemens_asesi_nik_foreign');
-            $table->dropForeign('asesor_nilai_elemens_skema_id_foreign');
-            $table->dropForeign('asesor_nilai_elemens_elemen_id_foreign');
-            $table->dropForeign('asesor_nilai_elemens_asesor_id_foreign');
+        Schema::table('asesor_nilai_elemens', function (Blueprint $table) use ($isSqlite) {
+            if (!$isSqlite) {
+                $table->dropForeign('asesor_nilai_elemens_asesi_nik_foreign');
+                $table->dropForeign('asesor_nilai_elemens_skema_id_foreign');
+                $table->dropForeign('asesor_nilai_elemens_elemen_id_foreign');
+                $table->dropForeign('asesor_nilai_elemens_asesor_id_foreign');
+            }
             $table->dropUnique('uniq_asesor_nilai_elemen_attempt');
         });
-        Schema::table('asesor_nilai_elemens', function (Blueprint $table) {
+        Schema::table('asesor_nilai_elemens', function (Blueprint $table) use ($isSqlite) {
             $table->dropColumn('attempt');
             $table->unique(['asesi_nik', 'skema_id', 'elemen_id', 'asesor_id'], 'uniq_asesor_nilai_elemen');
-            $table->foreign('asesi_nik')->references('NIK')->on('asesi')->onDelete('cascade');
-            $table->foreign('skema_id')->references('id')->on('skemas')->onDelete('cascade');
-            $table->foreign('elemen_id')->references('id')->on('elemens')->onDelete('cascade');
-            $table->foreign('asesor_id')->references('ID_asesor')->on('asesor')->nullOnDelete();
+            if (!$isSqlite) {
+                $table->foreign('asesi_nik')->references('NIK')->on('asesi')->onDelete('cascade');
+                $table->foreign('skema_id')->references('id')->on('skemas')->onDelete('cascade');
+                $table->foreign('elemen_id')->references('id')->on('elemens')->onDelete('cascade');
+                $table->foreign('asesor_id')->references('ID_asesor')->on('asesor')->nullOnDelete();
+            }
         });
 
         // 4. persetujuan_asesmen
