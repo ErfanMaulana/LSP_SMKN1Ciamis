@@ -52,7 +52,7 @@
         margin-top: 6px;
         font-size: 24px;
         font-weight: 700;
-        color: #0f172a;
+        color: #0073bd;
     }
 
     .filter-section {

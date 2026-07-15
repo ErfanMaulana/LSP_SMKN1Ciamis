@@ -12,7 +12,7 @@
     .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:14px; }
     .stat { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 14px; }
     .stat small { font-size:11px; text-transform:uppercase; color:#64748b; font-weight:700; }
-    .stat strong { display:block; margin-top:5px; font-size:24px; color:#0f172a; }
+    .stat strong { display:block; margin-top:5px; font-size:24px; color:#0073bd; }
 
     .toolbar { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px; margin-bottom:12px; }
     .toolbar form { display:flex; gap:10px; flex-wrap:wrap; }
