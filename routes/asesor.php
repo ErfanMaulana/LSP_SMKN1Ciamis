@@ -29,6 +29,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         Route::get('/entry-penilaian/create', [DashboardController::class, 'entryPenilaianCreate'])->name('entry-penilaian.create');
         Route::get('/entry-penilaian/{asesiNik}/input', [DashboardController::class, 'entryPenilaianForm'])->name('entry-penilaian.form');
         Route::post('/entry-penilaian/{asesiNik}/input', [DashboardController::class, 'entryPenilaianStore'])->name('entry-penilaian.store');
+        Route::get('/entry-penilaian/{asesiNik}/export', [DashboardController::class, 'entryPenilaianExport'])->name('entry-penilaian.export');
         Route::get('/asesmen-mandiri', [DashboardController::class, 'asesmenMandiriIndex'])->name('asesmen-mandiri.index');
         Route::get('/asesmen-mandiri/{asesiNik}/{skemaId}/export', [DashboardController::class, 'asesmenMandiriExport'])->name('asesmen-mandiri.export');
         Route::get('/asesmen-mandiri/{asesiNik}/{skemaId}', [DashboardController::class, 'asesmenMandiriShow'])->name('asesmen-mandiri.show');

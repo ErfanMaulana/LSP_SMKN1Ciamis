@@ -936,6 +936,88 @@ class DashboardController extends Controller
     }
 
     /**
+     * Export nilai asesmen asesi sebagai dokumen Word.
+     */
+    public function entryPenilaianExport($asesiNik)
+    {
+        $asesor  = $this->getAsesor();
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+
+        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+
+        $pivot = DB::table('asesi_skema')
+            ->where('asesi_nik', $asesiNik)
+            ->when(count($skemaIds), fn($q) => $q->whereIn('skema_id', $skemaIds))
+            ->first();
+
+        abort_unless((bool) $pivot, 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
+        $skema = Skema::with([
+            'units'          => fn($q) => $q->orderBy('id'),
+            'units.elemens'  => fn($q) => $q->orderBy('id'),
+        ])->findOrFail($pivot->skema_id);
+
+        $nilaiRows = DB::table('asesor_nilai_elemens as ane')
+            ->join('elemens as e', 'ane.elemen_id', '=', 'e.id')
+            ->join('units as u', 'e.unit_id', '=', 'u.id')
+            ->leftJoin('asesor as ar', 'ane.asesor_id', '=', 'ar.ID_asesor')
+            ->where('ane.asesi_nik', $asesiNik)
+            ->where('ane.skema_id', $pivot->skema_id)
+            ->select([
+                'ane.id',
+                'ane.nilai',
+                'ane.status',
+                'ane.updated_at',
+                'e.id as elemen_id',
+                'e.nama_elemen',
+                'u.id as unit_id',
+                'u.kode_unit',
+                'u.judul_unit',
+                'ar.nama as nama_asesor',
+            ])
+            ->orderBy('u.id')
+            ->orderBy('e.id')
+            ->get();
+
+        $nilaiByElemen = $nilaiRows->keyBy('elemen_id');
+        $namaAsesor    = $asesor?->nama ?? ($nilaiRows->first()?->nama_asesor ?? '-');
+
+        $rekaman = DB::table('rekaman_asesmen_kompetensi')
+            ->where('asesi_nik', $asesiNik)
+            ->where('skema_id', $pivot->skema_id)
+            ->first();
+
+        $tuk     = $rekaman?->tuk ?? '-';
+        $tanggal = $nilaiRows->count()
+            ? \Carbon\Carbon::parse($nilaiRows->max('updated_at'))->translatedFormat('d F Y')
+            : now()->translatedFormat('d F Y');
+
+        $logoPath    = public_path('images/lsp.png');
+        $logoDataUri = file_exists($logoPath)
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
+            : null;
+
+        $html = view('admin.nilai-asesor.export-doc', [
+            'asesi'         => $asesi,
+            'skema'         => $skema,
+            'nilaiByElemen' => $nilaiByElemen,
+            'namaAsesor'    => $namaAsesor,
+            'tuk'           => $tuk,
+            'tanggal'       => $tanggal,
+            'logoDataUri'   => $logoDataUri,
+        ])->render();
+
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
+        $fileName  = 'Nilai-Asesmen-' . $asesi->NIK . '-' . trim($fileSkema, '-') . '.doc';
+
+        return response($html, 200, [
+            'Content-Type'        => 'application/msword; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+            'Cache-Control'       => 'max-age=0',
+        ]);
+    }
+
+    /**
      * Review hasil asesmen mandiri seorang asesi
      */
     public function asesiReview($asesiNik)

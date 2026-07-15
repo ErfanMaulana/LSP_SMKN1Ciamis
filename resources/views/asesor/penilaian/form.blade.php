@@ -31,6 +31,25 @@
         font-size: 12px;
         font-weight: 700;
     }
+    .btn-export {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 14px;
+        background: #ffffffff;
+        color: #1e3a5f;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .btn-export:hover { background: #005a9f; color: #ffffffff; }
+    .top-info-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
 
     .panel-card {
         background: white;
@@ -153,7 +172,7 @@
             gap: 3px;
         }
 
-        .btn-back {
+        .btn-back, .btn-export {
             width: 100%;
             justify-content: center;
         }
@@ -192,16 +211,21 @@
 @section('content')
 <div class="top-info">
     <div>
-        <h3><i class="bi bi-pencil-square"></i> Input Nilai Asesi</h3>
+        <h3>Input Nilai Asesi</h3>
         <div class="meta">
             <span><i class="bi bi-person"></i> {{ $asesi->nama }}</span>
             <span><i class="bi bi-credit-card"></i> {{ $asesi->NIK }}</span>
             <span><i class="bi bi-award"></i> {{ $skema->nama_skema }}</span>
         </div>
     </div>
-    <a href="{{ route('asesor.entry-penilaian') }}" class="btn-back">
-        <i class="bi bi-arrow-left"></i> Kembali ke Daftar Nilai
-    </a>
+    <div class="top-info-actions">
+        <a href="{{ route('asesor.entry-penilaian.export', $asesi->NIK) }}" class="btn-export" target="_blank">
+            <i class="bi bi-download"></i> Export Nilai Asesmen
+        </a>
+        <a href="{{ route('asesor.entry-penilaian') }}" class="btn-back">
+            <i class="bi bi-arrow-left"></i> Kembali ke Daftar Nilai
+        </a>
+    </div>
 </div>
 
 <form method="POST" action="{{ route('asesor.entry-penilaian.store', $asesi->NIK) }}">
