@@ -597,12 +597,10 @@
 <div class="top-actions">
     @if($role === 'asesor')
         <a href="{{ route('asesor.persetujuan-asesmen.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
-        @if(!empty($item->ttd_asesi_file))
+        @if(!empty($item->ttd_asesi_file) && !empty($item->ttd_asesor_file))
             <a href="{{ route('asesor.persetujuan.front.asesor.export', ['asesiNik' => $asesiNik, 'skemaId' => $skema->id]) }}" class="btn btn-primary" target="_blank">
                 <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
             </a>
-        @else
-            <button class="btn btn-primary" disabled title="Asesi belum menandatangani, tidak dapat mengekspor"><i class="bi bi-download"></i> Export FR.AK.01 (.doc)</button>
         @endif
     @else
         <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>

@@ -165,6 +165,11 @@ class BandingAsesmenController extends Controller
 
                 $newAttempt = $currentMaxAttempt + 1;
 
+                // 0. Reset kelompok_id on asesi table so admin has to re-assign a kelompok
+                DB::table('asesi')
+                    ->where('NIK', $banding->asesi_nik)
+                    ->update(['kelompok_id' => null]);
+
                 // 1. Duplicate asesi_skema
                 DB::table('asesi_skema')->insert([
                     'asesi_nik' => $banding->asesi_nik,

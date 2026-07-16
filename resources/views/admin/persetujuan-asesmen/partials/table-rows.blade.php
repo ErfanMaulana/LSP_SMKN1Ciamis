@@ -4,11 +4,10 @@
 
 @forelse($items as $item)
     <tr>
-        <td>{{ $isPaginator ? $items->firstItem() + $loop->index : $loop->iteration }}</td>
+        <td>{{ $item->nama_asesi }}</td>
+        <td>{{ $item->nama_asesor }}</td>
         <td>{{ $item->judul_skema }}</td>
         <td>{{ $item->nomor_skema }}</td>
-        <td>{{ $item->nama_asesor }}</td>
-        <td>{{ $item->nama_asesi }}</td>
         <td>{{ $item->created_at?->locale('id')->translatedFormat('d M Y H:i') }}</td>
         <td class="action-cell">
             <div class="action-wrap">
@@ -47,7 +46,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="7">
+        <td colspan="6">
             <div class="empty">
                 <i class="bi bi-inboxes" style="font-size: 28px;"></i>
                 <div>Belum ada data persetujuan asesmen.</div>

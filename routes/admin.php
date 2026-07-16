@@ -72,6 +72,7 @@ Route::prefix('admin')->group(function () {
             Route::post('/asesi/import-activated', [AsesiController::class, 'importActivated'])->name('admin.asesi.import-activated')->middleware('permission:asesi.create');
             Route::get('/asesi/template-activated', [AsesiController::class, 'downloadActivatedTemplate'])->name('admin.asesi.template-activated')->middleware('permission:asesi.view');
             Route::get('/asesi/export-activated', [AsesiController::class, 'exportActivated'])->name('admin.asesi.export-activated')->middleware('permission:asesi.view');
+            Route::get('/asesi/{nik}', [AsesiController::class, 'show'])->name('admin.asesi.show');
             Route::get('/asesi/{nik}/edit', [AsesiController::class, 'edit'])->name('admin.asesi.edit')->middleware('permission:asesi.edit');
             Route::put('/asesi/{nik}', [AsesiController::class, 'update'])->name('admin.asesi.update')->middleware('permission:asesi.edit');
             Route::delete('/asesi/{nik}', [AsesiController::class, 'destroy'])->name('admin.asesi.destroy')->middleware('permission:asesi.delete');

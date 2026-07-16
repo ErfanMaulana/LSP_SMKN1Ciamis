@@ -304,27 +304,183 @@
             </div>
         </div>
 
-        @if($asesi->skemas && $asesi->skemas->count() > 0)
-        <div class="detail-section">
-            <h3>Skema Sertifikasi</h3>
-            
-            <div class="skema-list">
-                @foreach($asesi->skemas as $skema)
-                <div class="skema-card">
-                    <div class="skema-header">
-                        <div class="skema-title">{{ $skema->nama_skema }}</div>
-                        <span class="badge badge-info">{{ $skema->pivot->status ?? 'Belum dimulai' }}</span>
+        {{-- Status & Perkembangan Asesmen --}}
+        @if(isset($hasilUjikom) && $hasilUjikom->count())
+            <div class="detail-section">
+                <h3>Perkembangan Asesmen Kompetensi</h3>
+                
+                @foreach($hasilUjikom as $row)
+                    <div class="skema-section" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 20px; background: #fff;">
+                        <div class="skema-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <h4 class="skema-title" style="font-size: 16px; font-weight: 600; color: #0f172a; margin: 0;">{{ $row->nama_skema }}</h4>
+                                <span class="skema-code" style="font-size: 13px; color: #64748b; font-weight: 500;">{{ $row->nomor_skema }}</span>
+                            </div>
+                            <span class="overall-badge {{ $row->all_completed ? 'completed' : 'progressing' }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 9999px; font-size: 13px; font-weight: 600; background: {{ $row->all_completed ? '#d1fae5' : '#e0f2fe' }}; color: {{ $row->all_completed ? '#065f46' : '#0369a1' }};">
+                                <i class="bi {{ $row->all_completed ? 'bi-check-circle-fill' : 'bi-hourglass-split' }}"></i>
+                                {{ $row->all_completed ? 'Tahapan Selesai' : 'Sedang Berlangsung' }}
+                            </span>
+                        </div>
+
+                        {{-- 1. Final Result Banner if completed --}}
+                        @if($row->all_completed)
+                            @if($row->rekomendasi === 'kompeten')
+                                <div class="result-banner kompeten" style="display: flex; gap: 16px; padding: 18px; border-radius: 8px; margin-bottom: 20px; align-items: flex-start; background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46;">
+                                    <div class="result-icon" style="font-size: 24px; flex-shrink: 0; line-height: 1;"><i class="bi bi-patch-check-fill"></i></div>
+                                    <div class="result-info">
+                                        <h4 class="result-status-title" style="font-size: 15px; font-weight: 700; margin: 0 0 4px; letter-spacing: 0.5px;">KOMPETEN</h4>
+                                        <p class="result-status-desc" style="font-size: 13px; margin: 0 0 10px; line-height: 1.4; opacity: 0.9;">
+                                            Berdasarkan evaluasi akhir dan bukti observasi langsung, tim asesor menyatakan bahwa kompetensi asesi pada skema sertifikasi ini memenuhi standar kompetensi kerja nasional.
+                                        </p>
+                                        <div class="result-meta" style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px;">
+                                            <div>Asesor Penilai: <strong>{{ $row->asesor_nama ?? '-' }}</strong></div>
+                                            <div>Tanggal Keputusan: <strong>{{ $row->tanggal_ceklis ?? '-' }}</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="result-banner belum-kompeten" style="display: flex; gap: 16px; padding: 18px; border-radius: 8px; margin-bottom: 20px; align-items: flex-start; background: #fffbeb; border: 1px solid #fde68a; color: #92400e;">
+                                    <div class="result-icon" style="font-size: 24px; flex-shrink: 0; line-height: 1;"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                                    <div class="result-info">
+                                        <h4 class="result-status-title" style="font-size: 15px; font-weight: 700; margin: 0 0 4px; letter-spacing: 0.5px;">BELUM KOMPETEN</h4>
+                                        <p class="result-status-desc" style="font-size: 13px; margin: 0 0 10px; line-height: 1.4; opacity: 0.9;">
+                                            Berdasarkan penilaian observasi langsung, terdapat kriteria unjuk kerja yang masih memerlukan pengembangan lebih lanjut untuk mencapai kualifikasi kompetensi penuh.
+                                        </p>
+                                        <div class="result-meta" style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px;">
+                                            <div>Asesor Penilai: <strong>{{ $row->asesor_nama ?? '-' }}</strong></div>
+                                            <div>Tanggal Keputusan: <strong>{{ $row->tanggal_ceklis ?? '-' }}</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        @else
+                            {{-- Show progress bar based on steps completed --}}
+                            @php
+                                $completedSteps = collect($row->steps)->where('status', 'completed')->count();
+                                $totalSteps = count($row->steps);
+                                $progressPercentage = ($completedSteps / $totalSteps) * 100;
+                            @endphp
+                            <div class="progress-bar-container" style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 9999px; margin-bottom: 20px; overflow: hidden;">
+                                <div class="progress-bar-fill" style="height: 100%; background: #0073bd; border-radius: 9999px; width: {{ $progressPercentage }}%; transition: width 0.5s;"></div>
+                            </div>
+                        @endif
+
+                        {{-- 2. Step Progression Timeline --}}
+                        <h4 style="font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Tahapan Sertifikasi
+                        </h4>
+                        
+                        <div class="timeline-container" style="position: relative; display: flex; flex-direction: column; gap: 20px; padding-left: 20px;">
+                            <div class="timeline-line" style="position: absolute; left: 9px; top: 15px; bottom: 15px; width: 2px; background: #e2e8f0; z-index: 1;"></div>
+                            
+                            @foreach($row->steps as $index => $step)
+                                <div class="timeline-step {{ $step['status'] === 'completed' ? 'completed' : 'pending' }}" style="position: relative; display: flex; gap: 16px; z-index: 2;">
+                                    <div class="step-marker" style="width: 20px; height: 20px; border-radius: 50%; background: {{ $step['status'] === 'completed' ? '#10b981' : '#ffffff' }}; border: 2px solid {{ $step['status'] === 'completed' ? '#10b981' : '#cbd5e1' }}; color: {{ $step['status'] === 'completed' ? '#ffffff' : '#64748b' }}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; box-shadow: 0 0 0 4px #ffffff; transition: all 0.3s;">
+                                        @if($step['status'] === 'completed')
+                                            <i class="bi bi-check-lg"></i>
+                                        @else
+                                            {{ $index + 1 }}
+                                        @endif
+                                    </div>
+                                    <div class="step-content" style="flex: 1; display: flex; justify-content: space-between; align-items: flex-start; background: {{ $step['status'] === 'completed' ? '#ffffff' : '#f8fafc' }}; border: 1px solid {{ $step['status'] === 'completed' ? '#cbd5e1' : '#f1f5f9' }}; border-radius: 8px; padding: 12px 16px; transition: all 0.3s; flex-wrap: wrap; gap: 12px;">
+                                        <div class="step-text" style="flex: 1; min-width: 200px;">
+                                            <h5 class="step-name" style="font-size: 14px; font-weight: 700; color: {{ $step['status'] === 'completed' ? '#0f172a' : '#334155' }}; margin: 0 0 4px;">{{ $step['name'] }}</h5>
+                                            <p class="step-desc" style="font-size: 12.5px; color: #64748b; margin: 0; line-height: 1.4;">{{ $step['description'] }}</p>
+                                            
+                                            {{-- View & Export links for the admin --}}
+                                            @if($step['status'] === 'completed')
+                                                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
+                                                @if($index === 0) {{-- Pendaftaran & Verifikasi (FR.APL.01) --}}
+                                                    @if(Auth::guard('admin')->user()->hasPermission('verifikasi-asesi.view') && Route::has('admin.asesi.verifikasi.apl1'))
+                                                        <a href="{{ route('admin.asesi.verifikasi.apl1', $asesi->NIK) }}" class="btn-action btn-export" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #10b981; color: #10b981; background: transparent;">
+                                                            <i class="bi bi-download"></i> Export FR.APL.01
+                                                        </a>
+                                                    @endif
+                                                @elseif($index === 1) {{-- Asesmen Mandiri (FR.APL.02) --}}
+                                                    @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view') && Route::has('admin.asesmen-mandiri.show'))
+                                                        <a href="{{ route('admin.asesmen-mandiri.show', [$asesi->NIK, $row->skema_id]) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
+                                                            <i class="bi bi-eye"></i> Lihat
+                                                        </a>
+                                                    @endif
+                                                    @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view') && Route::has('admin.asesmen-mandiri.export'))
+                                                        <a href="{{ route('admin.asesmen-mandiri.export', [$asesi->NIK, $row->skema_id]) }}" class="btn-action btn-export" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #10b981; color: #10b981; background: transparent;">
+                                                            <i class="bi bi-download"></i> Export FR.APL.02
+                                                        </a>
+                                                    @endif
+                                                @elseif($index === 2) {{-- Jadwal Uji Kompetensi --}}
+                                                    @if(!empty($row->is_jadwal_selesai) && !empty($row->jadwal->id))
+                                                        @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view') && Route::has('admin.jadwal-ujikom.show'))
+                                                            <a href="{{ route('admin.jadwal-ujikom.show', $row->jadwal->id) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
+                                                                <i class="bi bi-eye"></i> Lihat
+                                                            </a>
+                                                        @endif
+                                                    @endif
+                                                @elseif($index === 3) {{-- Persetujuan Asesmen (FR.APL.03) --}}
+                                                    @if(!empty($row->is_persetujuan_selesai) && !empty($row->persetujuan->id))
+                                                        @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.view') && Route::has('admin.persetujuan-asesmen.show'))
+                                                            <a href="{{ route('admin.persetujuan-asesmen.show', $row->persetujuan->id) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
+                                                                <i class="bi bi-eye"></i> Lihat
+                                                            </a>
+                                                        @endif
+                                                        @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.view') && Route::has('admin.persetujuan-asesmen.export'))
+                                                            <a href="{{ route('admin.persetujuan-asesmen.export', $row->persetujuan->id) }}" class="btn-action btn-export" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #10b981; color: #10b981; background: transparent;">
+                                                                <i class="bi bi-download"></i> Export FR.APL.03
+                                                            </a>
+                                                        @endif
+                                                    @endif
+                                                @elseif($index === 4) {{-- Penilaian & Ceklis Observasi (FR.IA.01) --}}
+                                                    @if($row->ceklis && !empty($row->ceklis->id))
+                                                        @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.view') && Route::has('admin.ceklis-observasi-aktivitas-praktik.show'))
+                                                            <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.show', $row->ceklis->id) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
+                                                                <i class="bi bi-eye"></i> Lihat
+                                                            </a>
+                                                        @endif
+                                                        @if(Auth::guard('admin')->user()->hasPermission('ceklis-observasi-aktivitas-praktik.view') && Route::has('admin.ceklis-observasi-aktivitas-praktik.export'))
+                                                            <a href="{{ route('admin.ceklis-observasi-aktivitas-praktik.export', $row->ceklis->id) }}" class="btn-action btn-export" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #10b981; color: #10b981; background: transparent;">
+                                                                <i class="bi bi-download"></i> Export FR.IA.01
+                                                            </a>
+                                                        @endif
+                                                    @endif
+                                                @elseif($index === 5) {{-- Rekaman Asesmen (FR.AK.02) --}}
+                                                    @if($row->rekaman && !empty($row->rekaman->id))
+                                                        @if(Auth::guard('admin')->user()->hasPermission('rekaman-asesmen-kompetensi.view') && Route::has('admin.rekaman-asesmen-kompetensi.show'))
+                                                            <a href="{{ route('admin.rekaman-asesmen-kompetensi.show', $row->rekaman->id) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
+                                                                <i class="bi bi-eye"></i> Lihat
+                                                            </a>
+                                                        @endif
+                                                        @if(Auth::guard('admin')->user()->hasPermission('rekaman-asesmen-kompetensi.view') && Route::has('admin.rekaman-asesmen-kompetensi.export'))
+                                                            <a href="{{ route('admin.rekaman-asesmen-kompetensi.export', $row->rekaman->id) }}" class="btn-action btn-export" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #10b981; color: #10b981; background: transparent;">
+                                                                <i class="bi bi-download"></i> Export FR.AK.02
+                                                            </a>
+                                                        @endif
+                                                    @endif
+                                                @elseif($index === 6) {{-- Nilai Asesor --}}
+                                                    @if(!empty($row->is_nilai_selesai))
+                                                        @if(Auth::guard('admin')->user()->hasPermission('nilai-asesor.view') && Route::has('admin.nilai-asesor.show'))
+                                                            <a href="{{ route('admin.nilai-asesor.show', [$asesi->NIK, $row->skema_id]) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
+                                                                <i class="bi bi-eye"></i> Lihat
+                                                            </a>
+                                                        @endif
+                                                        @if(Auth::guard('admin')->user()->hasPermission('nilai-asesor.view') && Route::has('admin.nilai-asesor.export'))
+                                                            <a href="{{ route('admin.nilai-asesor.export', [$asesi->NIK, $row->skema_id]) }}" class="btn-action btn-export" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #10b981; color: #10b981; background: transparent;">
+                                                                <i class="bi bi-download"></i> Export Nilai
+                                                            </a>
+                                                        @endif
+                                                    @endif
+                                                @endif
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <span class="step-badge {{ $step['status'] === 'completed' ? 'completed' : 'pending' }}" style="font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px; background: {{ $step['status'] === 'completed' ? '#e6fcf5' : '#f1f3f5' }}; color: {{ $step['status'] === 'completed' ? '#0ca678' : '#868e96' }}; align-self: flex-start;">
+                                            {{ $step['label'] }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                    <div class="skema-number">{{ $skema->nomor_skema }}</div>
-                    @if($skema->pivot->rekomendasi)
-                    <div class="skema-rekomendasi">
-                        Rekomendasi: <strong>{{ ucfirst($skema->pivot->rekomendasi) }}</strong>
-                    </div>
-                    @endif
-                </div>
                 @endforeach
             </div>
-        </div>
         @endif
 
         <div class="detail-section">

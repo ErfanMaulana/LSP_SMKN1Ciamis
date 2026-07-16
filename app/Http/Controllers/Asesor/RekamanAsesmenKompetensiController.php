@@ -91,7 +91,11 @@ class RekamanAsesmenKompetensiController extends Controller
             ->get();
 
         foreach ($completedRows as $c) {
-            $c->is_pending = false;
+            if (empty($c->ttd_asesor_nama) || empty($c->ttd_asesor_file)) {
+                $c->is_pending = true;
+            } else {
+                $c->is_pending = false;
+            }
         }
 
         // Fetch pending rekaman records (ceklis exists but rekaman doesn't)
@@ -318,6 +322,10 @@ class RekamanAsesmenKompetensiController extends Controller
                 ->first(['id']);
 
             if ($existing) {
+                $rekamanObj = RekamanAsesmenKompetensi::find($existing->id);
+                if ($rekamanObj && (empty($rekamanObj->ttd_asesor_nama) || empty($rekamanObj->ttd_asesor_file))) {
+                    return redirect()->route('asesor.rekaman-asesmen-kompetensi.edit', $existing->id);
+                }
                 return redirect()->route('asesor.rekaman-asesmen-kompetensi.show', $existing->id);
             }
         }
@@ -530,7 +538,10 @@ class RekamanAsesmenKompetensiController extends Controller
                 $query->select(DB::raw(1))
                     ->from('rekaman_asesmen_kompetensi')
                     ->whereColumn('rekaman_asesmen_kompetensi.asesi_nik', 'asesi.NIK')
-                    ->where('rekaman_asesmen_kompetensi.skema_id', $skemaId);
+                    ->where('rekaman_asesmen_kompetensi.skema_id', $skemaId)
+                    ->whereNotNull('rekaman_asesmen_kompetensi.ttd_asesor_file')
+                    ->where('rekaman_asesmen_kompetensi.ttd_asesor_file', '!=', '')
+                    ->whereRaw('rekaman_asesmen_kompetensi.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi.NIK AND b.skema_id = ' . $skemaId . ')');
             })
             ->with(['jurusan:ID_jurusan,kode_jurusan,nama_jurusan'])
             ->get(['NIK', 'nama', 'email', 'telepon_hp', 'ID_jurusan']);
@@ -543,7 +554,10 @@ class RekamanAsesmenKompetensiController extends Controller
                 $query->select(DB::raw(1))
                     ->from('rekaman_asesmen_kompetensi')
                     ->whereColumn('rekaman_asesmen_kompetensi.asesi_nik', 'asesi.NIK')
-                    ->where('rekaman_asesmen_kompetensi.skema_id', $skemaId);
+                    ->where('rekaman_asesmen_kompetensi.skema_id', $skemaId)
+                    ->whereNotNull('rekaman_asesmen_kompetensi.ttd_asesor_file')
+                    ->where('rekaman_asesmen_kompetensi.ttd_asesor_file', '!=', '')
+                    ->whereRaw('rekaman_asesmen_kompetensi.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi.NIK AND b.skema_id = ' . $skemaId . ')');
             })
             ->with(['jurusan:ID_jurusan,kode_jurusan,nama_jurusan'])
             ->get(['NIK', 'nama', 'email', 'telepon_hp', 'ID_jurusan']);

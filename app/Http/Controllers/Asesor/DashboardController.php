@@ -756,12 +756,13 @@ class DashboardController extends Controller
             ->leftJoinSub(
                 DB::table('asesor_nilai_elemens')
                     ->where('asesor_id', $asesor->ID_asesor)
-                    ->selectRaw('asesi_nik, skema_id, COUNT(*) as total_elemen, AVG(nilai) as rata_rata, SUM(CASE WHEN status = "K" THEN 1 ELSE 0 END) as total_k, MAX(updated_at) as terakhir_dinilai')
-                    ->groupBy('asesi_nik', 'skema_id'),
+                    ->selectRaw('asesi_nik, skema_id, attempt, COUNT(*) as total_elemen, AVG(nilai) as rata_rata, SUM(CASE WHEN status = "K" THEN 1 ELSE 0 END) as total_k, MAX(updated_at) as terakhir_dinilai')
+                    ->groupBy('asesi_nik', 'skema_id', 'attempt'),
                 'nilai',
                 function ($join) {
                     $join->on('aks.asesi_nik', '=', 'nilai.asesi_nik')
-                         ->on('aks.skema_id', '=', 'nilai.skema_id');
+                         ->on('aks.skema_id', '=', 'nilai.skema_id')
+                         ->on('aks.attempt', '=', 'nilai.attempt');
                 }
             )
             ->select([
@@ -865,6 +866,7 @@ class DashboardController extends Controller
             ->where('asesor_id', $asesor?->ID_asesor)
             ->where('asesi_nik', $asesiNik)
             ->where('skema_id', $pivot->skema_id)
+            ->where('attempt', $pivot->attempt)
             ->whereIn('elemen_id', $elemenIds)
             ->get()
             ->keyBy('elemen_id');
@@ -923,6 +925,7 @@ class DashboardController extends Controller
                     'skema_id'  => $pivot->skema_id,
                     'elemen_id' => $elemen->id,
                     'asesor_id' => $asesor?->ID_asesor,
+                    'attempt'   => $pivot->attempt,
                 ],
                 [
                     'nilai'  => (int) round($nilai),
