@@ -332,10 +332,18 @@ class JadwalUjikomController extends Controller
             $query->where('status', $status);
         }
 
-        if ($bulan) {
+        if ($bulan && strpos($bulan, '-') !== false) {
             $query->where(function ($q) use ($bulan) {
-                $q->whereRaw("strftime('%Y-%m', tanggal_mulai) = ?", [$bulan])
-                  ->orWhereRaw("strftime('%Y-%m', tanggal_selesai) = ?", [$bulan]);
+                $parts = explode('-', $bulan);
+                $year = $parts[0];
+                $month = $parts[1];
+                $q->where(function ($sub) use ($year, $month) {
+                    $sub->whereYear('tanggal_mulai', $year)
+                        ->whereMonth('tanggal_mulai', $month);
+                })->orWhere(function ($sub) use ($year, $month) {
+                    $sub->whereYear('tanggal_selesai', $year)
+                        ->whereMonth('tanggal_selesai', $month);
+                });
             });
         }
 
@@ -347,9 +355,14 @@ class JadwalUjikomController extends Controller
             'berlangsung' => JadwalUjikom::where('status', 'berlangsung')->count(),
             'selesai'     => JadwalUjikom::where('status', 'selesai')->count(),
             'bulan_ini'   => JadwalUjikom::where(function ($q) {
-                $bulan = now()->format('Y-m');
-                $q->whereRaw("strftime('%Y-%m', tanggal_mulai) = ?", [$bulan])
-                  ->orWhereRaw("strftime('%Y-%m', tanggal_selesai) = ?", [$bulan]);
+                $now = now();
+                $q->where(function ($sub) use ($now) {
+                    $sub->whereYear('tanggal_mulai', $now->year)
+                        ->whereMonth('tanggal_mulai', $now->month);
+                })->orWhere(function ($sub) use ($now) {
+                    $sub->whereYear('tanggal_selesai', $now->year)
+                        ->whereMonth('tanggal_selesai', $now->month);
+                });
             })->count(),
         ];
 

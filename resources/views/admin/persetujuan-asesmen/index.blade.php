@@ -430,11 +430,10 @@
         <table>
             <thead>
                 <tr>
-                    <th style="width: 45px;">No</th>
+                    <th>Asesi</th>
+                    <th>Asesor</th>
                     <th>Skema</th>
                     <th>Nomor Skema</th>
-                    <th>Asesor</th>
-                    <th>Asesi</th>
                     <th>Dibuat</th>
                     <th class="action-cell">Aksi</th>
                 </tr>

@@ -75,22 +75,23 @@ class PersetujuanAsesmenFrontController extends Controller
         return $payload;
     }
 
-    private function resolveJadwalForAsesiSkema(Asesi $asesi, Skema $skema): ?JadwalUjikom
+    private function resolveJadwalForAsesiSkema(Asesi $asesi, Skema $skema, ?int $attempt = null): ?JadwalUjikom
     {
-        // 1. Direct participant or kelompok match
+        // Determine current attempt if not provided
+        if ($attempt === null) {
+            $attempt = $asesi->currentAttempt($skema->id);
+        }
+
+        $hasAttemptCol = Schema::hasColumn('jadwal_peserta', 'attempt');
+
+        // 1. Direct participant match — filter by attempt when column exists
         $jadwal = JadwalUjikom::query()
             ->with(['tuk', 'skema', 'kelompoks.asesors', 'asesor'])
             ->where('skema_id', $skema->id)
-            ->where(function ($query) use ($asesi) {
-                $query->whereHas('peserta', function ($q) use ($asesi) {
-                    $q->where('NIK', $asesi->NIK);
-                });
-
-                if (!empty($asesi->kelompok_id)) {
-                    $query->orWhere('kelompok_id', $asesi->kelompok_id)
-                          ->orWhereHas('kelompoks', function ($q) use ($asesi) {
-                              $q->where('kelompok.id', $asesi->kelompok_id);
-                          });
+            ->whereHas('peserta', function ($q) use ($asesi, $hasAttemptCol, $attempt) {
+                $q->where('asesi.NIK', $asesi->NIK);
+                if ($hasAttemptCol) {
+                    $q->where('jadwal_peserta.attempt', $attempt);
                 }
             })
             ->orderByDesc('tanggal_mulai')
@@ -100,7 +101,14 @@ class PersetujuanAsesmenFrontController extends Controller
             return $jadwal;
         }
 
-        // 2. Check if asesi has an assigned asesor or kelompok with a schedule
+        // 2. For attempt > 1 (re-assessment), only allow jadwal that explicitly has this asesi
+        //    registered for the current attempt. Do NOT fall through to asesor/skema fallbacks
+        //    because that would pick up the old jadwal from a previous attempt.
+        if ($attempt > 1) {
+            return null;
+        }
+
+        // 3. (First attempt only) Check if asesi has an assigned asesor or kelompok with a schedule
         if (!empty($asesi->ID_asesor)) {
             $jadwalByAsesor = JadwalUjikom::query()
                 ->with(['tuk', 'skema', 'kelompoks.asesors', 'asesor'])
@@ -119,7 +127,7 @@ class PersetujuanAsesmenFrontController extends Controller
             }
         }
 
-        // 3. Fallback: Any schedule created for this skema
+        // 4. (First attempt only) Fallback: Any schedule created for this skema
         return JadwalUjikom::query()
             ->with(['tuk', 'skema', 'kelompoks.asesors', 'asesor'])
             ->where('skema_id', $skema->id)
@@ -127,13 +135,13 @@ class PersetujuanAsesmenFrontController extends Controller
             ->first();
     }
 
-    private function autoFillScheduleDetails(PersetujuanAsesmen $item, ?Asesi $asesi, ?Skema $skema): PersetujuanAsesmen
+    private function autoFillScheduleDetails(PersetujuanAsesmen $item, ?Asesi $asesi, ?Skema $skema, ?int $attempt = null): PersetujuanAsesmen
     {
         if (!$asesi || !$skema) {
             return $item;
         }
 
-        $jadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema);
+        $jadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema, $attempt);
         if (!$jadwal) {
             return $item;
         }
@@ -608,7 +616,23 @@ class PersetujuanAsesmenFrontController extends Controller
                     ->where('skema_id', $item['skema_id'])
                     ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
                     ->first();
-                return $pivot && $pivot->rekomendasi === 'lanjut';
+                
+                if (!$pivot || $pivot->rekomendasi !== 'lanjut') {
+                    return false;
+                }
+
+                // Hide item if no schedule is created for the current attempt
+                $asesi = Asesi::where('NIK', $item['asesi_nik'])->first();
+                $skema = Skema::find($item['skema_id']);
+                if ($asesi && $skema) {
+                    $currentAttempt = $asesi->currentAttempt($skema->id);
+                    $hasJadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema, $currentAttempt) !== null;
+                    if (!$hasJadwal) {
+                        return false;
+                    }
+                }
+
+                return true;
             })->values();
 
             // Count totals before filtering by view
@@ -697,15 +721,18 @@ class PersetujuanAsesmenFrontController extends Controller
         $namaAsesi = $asesi ? $asesi->nama : null;
         $useNik = $this->hasAsesiNikColumn();
 
-        // Persetujuan Asesmen hanya bisa diakses asesor jika asesi sudah memiliki jadwal ujikon dari admin
+        // Resolve current attempt first, then check jadwal ketersediaan for THAT attempt
+        $currentAttempt = $asesi ? $asesi->currentAttempt((int) $skemaId) : 1;
+
+        // Persetujuan Asesmen hanya bisa diakses asesor jika asesi sudah memiliki jadwal dari admin
+        // Untuk asesmen ulang (attempt > 1), jadwal BARU harus sudah dibuat admin; jadwal lama tidak berlaku.
         $hasJadwal = false;
         if ($asesi && $skema) {
-            $hasJadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema) !== null;
+            $hasJadwal = $this->resolveJadwalForAsesiSkema($asesi, $skema, $currentAttempt) !== null;
         }
 
         if (!$hasJadwal) {
-            return redirect()->route('asesor.persetujuan-asesmen.index')
-                ->with('error', 'Asesi belum memiliki jadwal ujikon dari admin; persetujuan asesmen belum dapat diakses.');
+            return redirect()->route('asesor.persetujuan-asesmen.index');
         }
 
         if ($asesi) {
@@ -720,8 +747,6 @@ class PersetujuanAsesmenFrontController extends Controller
                     ->with('error', 'Persetujuan Asesmen hanya dapat diakses setelah Asesi direkomendasikan "Dapat Lanjut" pada Asesmen Mandiri.');
             }
         }
-
-        $currentAttempt = $asesi ? $asesi->currentAttempt($skemaId) : 1;
 
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
             ->where('attempt', $currentAttempt)
@@ -742,11 +767,12 @@ class PersetujuanAsesmenFrontController extends Controller
                 'nama_asesi' => $namaAsesi ?? '',
                 'asesi_nik' => $asesiNik,
                 'nama_asesor' => $asesor?->nama ?? '-',
+                'attempt' => $currentAttempt,
             ]));
         }
 
         if ($item && $asesi && $skema) {
-            $item = $this->autoFillScheduleDetails($item, $asesi, $skema);
+            $item = $this->autoFillScheduleDetails($item, $asesi, $skema, $currentAttempt);
         }
 
         $tukList = Tuk::orderBy('nama_tuk')->get(['id','nama_tuk','tipe_tuk','kota']);
@@ -781,9 +807,13 @@ class PersetujuanAsesmenFrontController extends Controller
 
         $skemaForCheck = Skema::where('nomor_skema', $item->nomor_skema)->first();
         if ($asesiForCheck && $skemaForCheck) {
-            $hasJadwal = $this->resolveJadwalForAsesiSkema($asesiForCheck, $skemaForCheck) !== null;
+            $itemAttempt = (int) ($item->attempt ?? $asesiForCheck->currentAttempt($skemaForCheck->id));
+            $hasJadwal = $this->resolveJadwalForAsesiSkema($asesiForCheck, $skemaForCheck, $itemAttempt) !== null;
             if (!$hasJadwal) {
-                return redirect()->back()->with('error', 'Asesi belum memiliki jadwal ujikon dari admin; persetujuan asesmen belum dapat ditandatangani.');
+                $attemptMsg = $itemAttempt > 1
+                    ? "Ini adalah asesmen ulang (attempt ke-{$itemAttempt}). Admin harus membuat jadwal baru untuk attempt ini sebelum persetujuan asesmen dapat ditandatangani."
+                    : 'Asesi belum memiliki jadwal ujikom dari admin; persetujuan asesmen belum dapat ditandatangani.';
+                return redirect()->back()->with('error', $attemptMsg);
             }
 
             $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
@@ -879,6 +909,14 @@ class PersetujuanAsesmenFrontController extends Controller
 
         if (!$item) {
             abort(404, 'Persetujuan asesmen tidak ditemukan.');
+        }
+
+        if (empty($item->ttd_asesi_file)) {
+            abort(403, 'Asesi belum menandatangani persetujuan asesmen. Ekspor tidak diperbolehkan.');
+        }
+
+        if (empty($item->ttd_asesor_file)) {
+            abort(403, 'Asesor belum menandatangani persetujuan asesmen. Ekspor tidak diperbolehkan.');
         }
 
         $logoPath = public_path('images/lsp.png');

@@ -814,6 +814,305 @@
             grid-template-columns: 1fr;
         }
     }
+
+    /* Steps Timeline & Stepper Styles */
+    .skema-section {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        padding: 24px;
+        margin-bottom: 20px;
+    }
+
+    .skema-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+        gap: 16px;
+    }
+
+    .skema-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    .skema-code {
+        display: inline-block;
+        font-family: monospace;
+        font-size: 11px;
+        font-weight: 600;
+        color: #0073bd;
+        background: rgba(0, 115, 189, 0.08);
+        padding: 3px 8px;
+        border-radius: 6px;
+        margin-top: 4px;
+    }
+
+    .overall-badge {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 30px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .overall-badge.completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .overall-badge.progressing {
+        background: #eff6ff;
+        color: #0073bd;
+    }
+
+    /* Result Card Styles */
+    .result-banner {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .result-banner.kompeten {
+        background: #ecfdf5;
+        border: 1px solid #10b981;
+        color: #065f46;
+    }
+
+    .result-banner.belum-kompeten {
+        background: #fef2f2;
+        border: 1px solid #ef4444;
+        color: #991b1b;
+    }
+
+    .result-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        flex-shrink: 0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .result-banner.kompeten .result-icon {
+        background: #10b981;
+        color: #ffffff;
+    }
+
+    .result-banner.belum-kompeten .result-icon {
+        background: #ef4444;
+        color: #ffffff;
+    }
+
+    .result-info {
+        flex: 1;
+    }
+
+    .result-status-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+    }
+
+    .result-status-desc {
+        font-size: 12.5px;
+        line-height: 1.5;
+        opacity: 0.95;
+        margin: 0;
+    }
+
+    .result-meta {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed rgba(0, 0, 0, 0.08);
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        font-size: 12px;
+    }
+
+    .result-meta-item strong {
+        font-weight: 700;
+    }
+
+    /* Progress bar */
+    .progress-bar-container {
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 16px;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: #0073bd;
+        border-radius: 3px;
+        transition: width 0.3s ease;
+    }
+
+    /* Steps Timeline Styles */
+    .timeline-container {
+        position: relative;
+        padding-left: 28px;
+        margin-top: 10px;
+    }
+
+    .timeline-line {
+        position: absolute;
+        left: 10px;
+        top: 8px;
+        bottom: 8px;
+        width: 2px;
+        background: #e2e8f0;
+        z-index: 1;
+    }
+
+    .timeline-step {
+        position: relative;
+        margin-bottom: 20px;
+        z-index: 2;
+    }
+
+    .timeline-step:last-child {
+        margin-bottom: 0;
+    }
+
+    .step-marker {
+        position: absolute;
+        left: -28px;
+        top: 2px;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        transition: all 0.25s ease;
+        border: 2px solid #e2e8f0;
+        background: #ffffff;
+        color: #94a3b8;
+    }
+
+    .timeline-step.completed .step-marker {
+        background: #10b981;
+        border-color: #10b981;
+        color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .timeline-step.pending .step-marker {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #64748b;
+    }
+
+    .step-content {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        border-radius: 8px;
+        padding: 12px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        transition: all 0.2s ease;
+    }
+
+    .step-content:hover {
+        background: #f1f5f9;
+        border-color: #e2e8f0;
+    }
+
+    .step-text {
+        flex: 1;
+    }
+
+    .step-name {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 2px 0;
+    }
+
+    .step-desc {
+        font-size: 12px;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .step-badge {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 30px;
+        white-space: nowrap;
+    }
+
+    .step-badge.completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .step-badge.pending {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #cbd5e1;
+    }
+
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .btn-outline-primary {
+        border: 1px solid #0073bd;
+        color: #0073bd;
+        background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background: #0073bd;
+        color: #ffffff;
+    }
+
+    .btn-export {
+        border: 1px solid #10b981;
+        color: #10b981;
+        background: transparent;
+    }
+
+    .btn-export:hover {
+        background: #10b981;
+        color: #ffffff;
+    }
 </style>
 @endsection
 

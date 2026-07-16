@@ -247,9 +247,191 @@ class AsesiController extends Controller
      */
     public function show($nik)
     {
-        $asesi = Asesi::with(['jurusan', 'skemas'])->findOrFail($nik);
+        $asesi = Asesi::with(['jurusan', 'buktiPendukung', 'verifiedBy', 'skemas.buktiPersyaratanDasarPemohon'])
+            ->findOrFail($nik);
         
-        return view('admin.asesi.show', compact('asesi'));
+        $asesiSkemas = \DB::table('asesi_skema')
+            ->join('skemas', 'asesi_skema.skema_id', '=', 'skemas.id')
+            ->where('asesi_skema.asesi_nik', $asesi->NIK)
+            ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
+            ->select('skemas.*', 'asesi_skema.status as status_mandiri', 'asesi_skema.tanggal_selesai as tgl_selesai_mandiri', 'asesi_skema.attempt')
+            ->get();
+
+        $hasilUjikom = [];
+
+        foreach ($asesiSkemas as $skema) {
+            // 1. Pendaftaran & Verifikasi
+            $isStep1Completed = ($asesi->status === 'approved');
+            $stepPendaftaran = [
+                'name' => 'Pendaftaran & Verifikasi',
+                'status' => $isStep1Completed ? 'completed' : 'pending',
+                'label' => $isStep1Completed ? 'Terverifikasi' : 'Menunggu Verifikasi',
+                'description' => $isStep1Completed
+                    ? 'Berkas pendaftaran telah diverifikasi oleh admin.'
+                    : 'Berkas pendaftaran sedang dalam proses verifikasi oleh admin.'
+            ];
+
+            // 2. Asesmen Mandiri
+            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
+            $isStep2Completed = $isMandiriSelesai;
+            $stepMandiri = [
+                'name' => 'Asesmen Mandiri (FR.APL.02)',
+                'status' => $isStep2Completed ? 'completed' : 'pending',
+                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
+                'description' => $isMandiriSelesai
+                    ? 'Asesi telah menyelesaikan pengisian form asesmen mandiri.'
+                    : 'Asesi belum mengisi form asesmen mandiri.'
+            ];
+
+            // 3. Jadwal Ujikom
+            $jadwal = \DB::table('jadwal_peserta')
+                ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
+                ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
+                ->where('jadwal_ujikom.skema_id', $skema->id)
+                ->where('jadwal_peserta.attempt', $skema->attempt)
+                ->select('jadwal_ujikom.*')
+                ->first();
+
+            $isJadwalSelesai = (bool)$jadwal;
+            $isStep3Completed = $isJadwalSelesai && $isStep2Completed;
+            
+            $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
+            if ($isJadwalSelesai) {
+                $tukName = \DB::table('tuk')->where('id', $jadwal->tuk_id)->value('nama_tuk') ?? 'TUK';
+                $tglMulai = $jadwal->tanggal_mulai ? \Carbon\Carbon::parse($jadwal->tanggal_mulai)->locale('id')->isoFormat('D MMMM YYYY') : '-';
+                $jadwalDesc = 'Jadwal: ' . $tglMulai . ' di ' . $tukName;
+            }
+
+            $stepJadwal = [
+                'name' => 'Jadwal Uji Kompetensi',
+                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
+                'description' => $jadwalDesc
+            ];
+
+            // 4. Persetujuan Asesmen
+            $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
+            $persetujuan = \DB::table('persetujuan_asesmen')
+                ->where('nomor_skema', $skema->nomor_skema)
+                ->where('attempt', $skema->attempt)
+                ->where(function($q) use ($asesi, $useNik) {
+                    $q->where('nama_asesi', $asesi->nama);
+                    if ($useNik) {
+                        $q->orWhere('asesi_nik', $asesi->NIK);
+                    }
+                })
+                ->first();
+
+            $isPersetujuanSelesai = $persetujuan && !empty($persetujuan->ttd_asesi_nama) && !empty($persetujuan->ttd_asesor_nama);
+            $isStep4Completed = $isPersetujuanSelesai && $isStep3Completed;
+            
+            $stepPersetujuan = [
+                'name' => 'Persetujuan Asesmen (FR.APL.03)',
+                'status' => $isStep4Completed ? 'completed' : 'pending',
+                'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
+                'description' => $isPersetujuanSelesai
+                    ? 'Persetujuan asesmen telah disepakati dan ditandatangani oleh Asesi dan Asesor.'
+                    : 'Dokumen persetujuan asesmen belum selesai ditandatangani.'
+            ];
+
+            // 5. Penilaian / Ceklis Observasi
+            $ceklis = \DB::table('ceklis_observasi_aktivitas_praktiks')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->where('attempt', $skema->attempt)
+                ->first();
+
+            $isPenilaianSelesai = $ceklis && !empty($ceklis->ttd_asesi_file) && !empty($ceklis->ttd_asesor_file);
+            $isStep5Completed = $isPenilaianSelesai && $isStep4Completed;
+            
+            $penilaianLabel = 'Belum Dinilai';
+            $penilaianDesc = 'Menunggu penilaian observasi praktik dari Asesor.';
+            if ($ceklis) {
+                if ($isPenilaianSelesai) {
+                    $penilaianLabel = 'Selesai & Ditandatangani';
+                    $penilaianDesc = 'Proses observasi praktik telah dinilai dan disetujui kedua belah pihak.';
+                } elseif (!empty($ceklis->ttd_asesor_file)) {
+                    $penilaianLabel = 'Menunggu Tanda Tangan Asesi';
+                    $penilaianDesc = 'Asesor telah menilai. Menunggu tanda tangan Asesi.';
+                }
+            }
+
+            $stepPenilaian = [
+                'name' => 'Penilaian & Ceklis Observasi (FR.IA.01)',
+                'status' => $isStep5Completed ? 'completed' : 'pending',
+                'label' => $penilaianLabel,
+                'description' => $penilaianDesc
+            ];
+
+            // 6. Rekaman Asesmen
+            $rekaman = \DB::table('rekaman_asesmen_kompetensi')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->where('attempt', $skema->attempt)
+                ->first();
+
+            $isRekamanSelesai = $rekaman && !empty($rekaman->ttd_asesi_file) && !empty($rekaman->ttd_asesor_file);
+            $isStep6Completed = $isRekamanSelesai && $isStep5Completed;
+
+            $rekamanLabel = 'Belum Diisi';
+            $rekamanDesc = 'Menunggu pengisian rekaman asesmen dari Asesor.';
+            if ($rekaman) {
+                if ($isRekamanSelesai) {
+                    $rekamanLabel = 'Selesai & Ditandatangani';
+                    $rekamanDesc = 'Rekaman asesmen kompetensi telah ditandatangani oleh kedua belah pihak.';
+                } elseif (!empty($rekaman->ttd_asesor_file)) {
+                    $rekamanLabel = 'Menunggu Tanda Tangan Asesi';
+                    $rekamanDesc = 'Asesor telah mengisi rekaman asesmen. Menunggu tanda tangan Asesi.';
+                }
+            }
+
+            $stepRekaman = [
+                'name' => 'Rekaman Asesmen (FR.AK.02)',
+                'status' => $isStep6Completed ? 'completed' : 'pending',
+                'label' => $rekamanLabel,
+                'description' => $rekamanDesc
+            ];
+
+            // 7. Nilai Asesor
+            $nilaiExists = \DB::table('asesor_nilai_elemens')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->exists();
+            $isStep7Completed = $nilaiExists && $isStep6Completed;
+            
+            $stepNilai = [
+                'name' => 'Nilai Asesor',
+                'status' => $isStep7Completed ? 'completed' : 'pending',
+                'label' => $nilaiExists ? 'Selesai' : 'Belum Dinilai',
+                'description' => $nilaiExists
+                    ? 'Asesor telah menginput nilai kompetensi.'
+                    : 'Asesor belum menginput nilai kompetensi.'
+            ];
+
+            $allCompleted = $isStep7Completed;
+
+            $hasilUjikom[] = (object)[
+                'skema_id' => $skema->id,
+                'nama_skema' => $skema->nama_skema,
+                'nomor_skema' => $skema->nomor_skema,
+                'steps' => [$stepPendaftaran, $stepMandiri, $stepJadwal, $stepPersetujuan, $stepPenilaian, $stepRekaman, $stepNilai],
+                'all_completed' => $allCompleted,
+                'ceklis' => $ceklis,
+                'rekaman' => $rekaman,
+                'jadwal' => $jadwal,
+                'persetujuan' => $persetujuan,
+                'is_jadwal_selesai' => $isJadwalSelesai,
+                'is_persetujuan_selesai' => $isPersetujuanSelesai,
+                'is_nilai_selesai' => $nilaiExists,
+                'rekomendasi' => $ceklis ? $ceklis->rekomendasi : null,
+                'tanggal_ceklis' => $ceklis && $ceklis->ttd_asesi_tanggal ? \Carbon\Carbon::parse($ceklis->ttd_asesi_tanggal)->locale('id')->isoFormat('D MMMM YYYY') : null,
+                'asesor_nama' => $ceklis && $ceklis->ttd_asesor_nama ? $ceklis->ttd_asesor_nama : null,
+            ];
+        }
+
+        $hasilUjikom = collect($hasilUjikom);
+        
+        return view('admin.asesi.show', compact('asesi', 'hasilUjikom'));
     }
 
     /**
@@ -571,10 +753,10 @@ class AsesiController extends Controller
                 return (string) $value;
             };
 
-            $fontTitle = ['name' => 'Times New Roman', 'size' => 12, 'bold' => true];
-            $fontBody = ['name' => 'Calibri', 'size' => 10.5];
-            $fontSmall = ['name' => 'Calibri', 'size' => 9];
-            $fontBold = ['name' => 'Calibri', 'size' => 10.5, 'bold' => true];
+            $fontTitle = ['name' => 'Calibri', 'size' => 12, 'bold' => true];
+            $fontBody = ['name' => 'Calibri', 'size' => 11];
+            $fontSmall = ['name' => 'Calibri', 'size' => 11];
+            $fontBold = ['name' => 'Calibri', 'size' => 11, 'bold' => true];
 
             $skema = $data['skema'] ?? null;
             $unitList = $skema ? ($skema->units ?? collect()) : collect();
@@ -585,89 +767,289 @@ class AsesiController extends Controller
             $isLaki = str_contains(strtolower((string) ($asesi->jenis_kelamin ?? '')), 'laki');
             $isPerempuan = str_contains(strtolower((string) ($asesi->jenis_kelamin ?? '')), 'perempuan') || strtolower((string) ($asesi->jenis_kelamin ?? '')) === 'p';
 
-            $section->addText('FR.APL.01. permohonan sertifkasi', $fontTitle, ['alignment' => 'center']);
-            $section->addText('Bagian 1 : Rincian Data Pemohon Sertifikasi', $fontBold, ['alignment' => 'center']);
-            $section->addText('Pada bagian ini, cantumkan data pribadi, data pendidikan formal serta data pekerjaan anda pada saat ini.', $fontSmall, ['alignment' => 'center']);
-            $section->addTextBreak(1);
+            // Helper: build a paragraph style with tab stops for form rows
+            // leftIndent = col1 end, colonPos = colon pos, valueStart = value starts, valueEnd = line end
+            // We use underline on spaces to simulate underline blanks
 
-            $makeLineTable = function (array $rows) use ($section, $fontBody) {
-                $table = $section->addTable([
-                    'borderSize' => 0,
-                    'cellMargin' => 0,
-                    'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-                    'width' => 100,
-                    'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
-                ]);
+            // Page width in twips (A4 = 11906, margins 680 each = 10546 usable)
+            // We'll use paragraph with indent approach:
+            // Col1 label: 0–2750, colon: 2800, value: 2850–9500
 
-                foreach ($rows as $row) {
-                    $table->addRow();
-                    $table->addCell(3000, ['valign' => 'top'])->addText($row[0], $fontBody);
-                    $table->addCell(300, ['valign' => 'top'])->addText(':', $fontBody, ['alignment' => 'center']);
-                    $table->addCell(7800, ['valign' => 'top', 'borderBottomSize' => 6, 'borderBottomColor' => '000000'])->addText($row[1], $fontBody);
+            $addFormRow = function (string $label, string $value) use ($section, $fontBody) {
+                $pf = [
+                    'tabs' => [
+                        new \PhpOffice\PhpWord\Style\Tab('left', 2800),
+                        new \PhpOffice\PhpWord\Style\Tab('left', 3000),
+                    ],
+                    'indentation' => ['left' => 0],
+                ];
+                $p = $section->addTextRun($pf);
+                $p->addText($label, $fontBody);
+                $p->addText("\t:\t", $fontBody);
+                // Underline the value field using a long underline-space if empty, or the value itself
+                if ($value !== '') {
+                    $p->addText($value, array_merge($fontBody, ['underline' => 'single']));
+                } else {
+                    // draw a long underline as a string of underscores spanning to right margin
+                    $p->addText(str_repeat('_', 55), $fontBody);
                 }
             };
 
-            $makeLineTable([
-                ['Nama lengkap', $safeText($asesi->nama ?? '')],
-                ['No. KTP/NIK/Paspor', $safeText($asesi->NIK ?? '')],
-                ['Tempat / tgl. Lahir', trim($safeText($asesi->tempat_lahir ?? '') . ' / ' . optional($asesi->tanggal_lahir)->format('d-m-Y'))],
-                ['Jenis kelamin', ($isLaki ? '☑' : '☐') . ' Laki-laki    ' . ($isPerempuan ? '☑' : '☐') . ' Wanita *)'],
-                ['Kebangsaan', $safeText($asesi->kebangsaan ?? '')],
-                ['Alamat rumah', $safeText($asesi->alamat ?? '')],
-                ['Kode pos', $safeText($asesi->kode_pos ?? '')],
-                ['No. Telepon/E-mail', 'Rumah: ' . $safeText($asesi->telepon_rumah ?? '') . '    Kantor: ' . $safeText($asesi->no_fax_lembaga ?? '') . '    HP: ' . $safeText($asesi->telepon_hp ?? '') . '    E-mail: ' . $safeText($asesi->email ?? '')],
-                ['Kualifikasi Pendidikan', $safeText($asesi->pendidikan_terakhir ?? '')],
-            ]);
+            // For complex rows we need a different helper
+            $addLabelOnly = function (string $label) use ($section, $fontBody) {
+                $section->addText($label, $fontBody);
+            };
+
+            // ---- Data Pribadi ----
+            $section->addText('FR.APL.01. PERMOHONAN SERTIFIKASI KOMPETENSI', $fontTitle);
+            $section->addTextBreak(1);
+            $section->addText('Bagian 1 :  Rincian Data Pemohon Sertifikasi', $fontBold);
+            $section->addText('Pada bagian ini, cantumkan data pribadi, data pendidikan formal serta data pekerjaan anda pada saat ini.', $fontSmall);
+            $section->addTextBreak(1);
+            $section->addText('a. Data Pribadi', $fontBold);
+
+
+            // Standard tab positions (twips): label col end=2750, colon=2800, value start=3000
+            $tabStops = [
+                new \PhpOffice\PhpWord\Style\Tab('left', 2800),
+                new \PhpOffice\PhpWord\Style\Tab('left', 3000),
+            ];
+            $pStyle = ['tabs' => $tabStops];
+
+            // Helper to add underline fill (actual underline on blank spaces)
+            $ul = function (string $val, int $chars = 55) use ($fontBody): array {
+                // returns [text, fontStyle]
+                if ($val !== '') {
+                    return [$val, array_merge($fontBody, ['underline' => 'single'])];
+                }
+                return [str_repeat(' ', $chars), array_merge($fontBody, ['underline' => 'single'])];
+            };
+
+            // Row: Nama lengkap
+            $p = $section->addTextRun($pStyle);
+            $p->addText('Nama lengkap', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->nama ?? ''));
+            $p->addText($t, $f);
+
+            // Row: No. KTP/NIK/Paspor
+            $p = $section->addTextRun($pStyle);
+            $p->addText('No. KTP/NIK/Paspor', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->NIK ?? ''));
+            $p->addText($t, $f);
+
+            // Row: Tempat / tgl. Lahir
+            $p = $section->addTextRun($pStyle);
+            $p->addText('Tempat / tgl. Lahir', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            $ttl = trim($safeText($asesi->tempat_lahir ?? '') . ' / ' . ($asesi->tanggal_lahir ? \Carbon\Carbon::parse($asesi->tanggal_lahir)->format('d-m-Y') : ''));
+            [$t, $f] = $ul($ttl);
+            $p->addText($t, $f);
+
+            // Row: Jenis kelamin (no underline – just text)
+            $p = $section->addTextRun($pStyle);
+            $p->addText('Jenis kelamin', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            if ($isLaki) {
+                $p->addText('Laki-laki', array_merge($fontBody, ['bold' => true, 'underline' => 'single']));
+                $p->addText(' / Wanita *)', $fontBody);
+            } elseif ($isPerempuan) {
+                $p->addText('Laki-laki / ', $fontBody);
+                $p->addText('Wanita *)', array_merge($fontBody, ['bold' => true, 'underline' => 'single']));
+            } else {
+                $p->addText('Laki-laki / Wanita *)', $fontBody);
+            }
+
+            // Row: Kebangsaan
+            $p = $section->addTextRun($pStyle);
+            $p->addText('Kebangsaan', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->kebangsaan ?? ''));
+            $p->addText($t, $f);
+
+            // Row: Alamat rumah
+            $p = $section->addTextRun($pStyle);
+            $p->addText('Alamat rumah', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->alamat ?? ''));
+            $p->addText($t, $f);
+
+            // Row: (Kode pos – indented sub-row)
+            $tabsKodepos = [
+                new \PhpOffice\PhpWord\Style\Tab('left', 5200),
+                new \PhpOffice\PhpWord\Style\Tab('left', 5800),
+            ];
+            $p = $section->addTextRun(['tabs' => $tabsKodepos]);
+            $p->addText("\t", $fontBody);
+            $p->addText('Kode pos :', $fontBody);
+            $p->addText("\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->kode_pos ?? ''), 20);
+            $p->addText($t, $f);
+
+            // Row: No. Telepon/E-mail – 2 sub-rows (Rumah/Kantor, HP/Email)
+            $tabsTelp = [
+                new \PhpOffice\PhpWord\Style\Tab('left', 2800),
+                new \PhpOffice\PhpWord\Style\Tab('left', 3000),
+                new \PhpOffice\PhpWord\Style\Tab('left', 5500),
+                new \PhpOffice\PhpWord\Style\Tab('left', 5700),
+            ];
+            $p = $section->addTextRun(['tabs' => $tabsTelp]);
+            $p->addText('No. Telepon/E-mail', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            $p->addText('Rumah : ', $fontBody);
+            [$t, $f] = $ul($safeText($asesi->telepon_rumah ?? ''), 18);
+            $p->addText($t, $f);
+            $p->addText("\t", $fontBody);
+            $p->addText('Kantor : ', $fontBody);
+            [$t, $f] = $ul($safeText($asesi->no_fax_lembaga ?? ''), 16);
+            $p->addText($t, $f);
+
+            // Sub-row HP / Email
+            $p = $section->addTextRun(['tabs' => $tabsTelp]);
+            $p->addText("\t\t", $fontBody);
+            $p->addText('HP : ', $fontBody);
+            [$t, $f] = $ul($safeText($asesi->telepon_hp ?? ''), 21);
+            $p->addText($t, $f);
+            $p->addText("\t", $fontBody);
+            $p->addText('E-mail : ', $fontBody);
+            [$t, $f] = $ul($safeText($asesi->email ?? ''), 16);
+            $p->addText($t, $f);
+
+            // Row: Kualifikasi Pendidikan
+            $p = $section->addTextRun($pStyle);
+            $p->addText('Kualifikasi Pendidikan', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->pendidikan_terakhir ?? ''));
+            $p->addText($t, $f);
 
             $section->addText('*Coret yang tidak perlu', $fontSmall);
             $section->addTextBreak(1);
 
+            // ---- Data Pekerjaan Sekarang ----
             $section->addText('b. Data Pekerjaan Sekarang', $fontBold);
-            $makeLineTable([
-                ['Nama Institusi / Perusahaan', $safeText($asesi->nama_lembaga ?? '')],
-                ['Jabatan', $safeText($asesi->jabatan ?? '')],
-                ['Alamat Kantor', $safeText($asesi->alamat_lembaga ?? '')],
-                ['Kode pos', $safeText($asesi->unit_lembaga ?? '')],
-                ['No. Telp/Fax/E-mail', 'Telp: ' . $safeText($asesi->telepon_rumah ?? '') . '    Fax: ' . $safeText($asesi->no_fax_lembaga ?? '') . '    E-mail: ' . $safeText($asesi->email_lembaga ?? '')],
-            ]);
+
+            // Row: Nama Institusi / Perusahaan
+            $p = $section->addTextRun($pStyle);
+            $p->addText('Nama Institusi / Perusahaan', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->nama_lembaga ?? ''));
+            $p->addText($t, $f);
+
+            // Row: Jabatan
+            $p = $section->addTextRun($pStyle);
+            $p->addText('Jabatan', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->jabatan ?? ''));
+            $p->addText($t, $f);
+
+            // Row: Alamat Kantor
+            $p = $section->addTextRun($pStyle);
+            $p->addText('Alamat Kantor', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->alamat_lembaga ?? ''));
+            $p->addText($t, $f);
+
+            // Row: Kode pos (sub-row)
+            $p = $section->addTextRun(['tabs' => $tabsKodepos]);
+            $p->addText("\t", $fontBody);
+            $p->addText('Kode pos :', $fontBody);
+            $p->addText("\t", $fontBody);
+            [$t, $f] = $ul($safeText($asesi->unit_lembaga ?? ''), 20);
+            $p->addText($t, $f);
+
+            // Row: No. Telp/Fax/E-mail
+            $p = $section->addTextRun(['tabs' => $tabsTelp]);
+            $p->addText('No. Telp/Fax/E-mail', $fontBody);
+            $p->addText("\t:\t", $fontBody);
+            $p->addText('Telp : ', $fontBody);
+            [$t, $f] = $ul($safeText($asesi->telepon_rumah ?? ''), 18);
+            $p->addText($t, $f);
+            $p->addText("\t", $fontBody);
+            $p->addText('Fax : ', $fontBody);
+            [$t, $f] = $ul($safeText($asesi->no_fax_lembaga ?? ''), 16);
+            $p->addText($t, $f);
+
+            // Sub-row E-mail
+            $tabsEmailKantor = [
+                new \PhpOffice\PhpWord\Style\Tab('left', 3000),
+            ];
+            $p = $section->addTextRun(['tabs' => $tabsEmailKantor]);
+            $p->addText('E-mail : ', $fontBody);
+            [$t, $f] = $ul($safeText($asesi->email_lembaga ?? ''), 50);
+            $p->addText($t, $f);
 
             $section->addTextBreak(1);
             $section->addText('Bagian 2 : Data Sertifikasi', $fontBold);
             $section->addText('Tuliskan Judul dan Nomor Skema Sertifikasi yang anda ajukan berikut Daftar Unit Kompetensi sesuai kemasan pada skema sertifikasi untuk mendapatkan pengakuan sesuai dengan latar belakang pendidikan, pelatihan serta pengalaman kerja yang anda miliki.', $fontSmall);
 
             $section->addTextBreak(1);
-            $section->addTable([
-                'borderSize' => 6,
-                'borderColor' => '000000',
-                'cellMargin' => 60,
-                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-                'width' => 100,
-                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
-            ])->addRow();
-
             $dataTable = $section->addTable([
                 'borderSize' => 6,
                 'borderColor' => '000000',
                 'cellMargin' => 60,
-                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-                'width' => 100,
-                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+                'width' => 10546,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::TWIP,
             ]);
-            $dataTable->addRow();
-            $dataTable->addCell(2800, ['valign' => 'center'])->addText('Skema Sertifikasi', $fontBody, ['alignment' => 'center']);
-            $dataTable->addCell(9200, ['valign' => 'center'])->addText('( ' . ($selectedSkemaType === 'kkni' ? '☑' : '☐') . ' KKNI / ' . ($selectedSkemaType === 'okupasi' ? '☑' : '☐') . ' Okupasi / ' . ($selectedSkemaType === 'klaster' ? '☑' : '☐') . ' Klaster )', $fontBody);
-            $dataTable->addRow();
-            $dataTable->addCell(2800, ['valign' => 'center'])->addText('Judul', $fontBody, ['alignment' => 'center']);
-            $dataTable->addCell(9200, ['valign' => 'center'])->addText($safeText($skema->nama_skema ?? '-'), $fontBody);
-            $dataTable->addRow();
-            $dataTable->addCell(2800, ['valign' => 'center'])->addText('Nomor', $fontBody, ['alignment' => 'center']);
-            $dataTable->addCell(9200, ['valign' => 'center'])->addText($safeText($skema->nomor_skema ?? '-'), $fontBody);
-            $dataTable->addRow();
-            $dataTable->addCell(2800, ['valign' => 'center'])->addText('Tujuan Asesmen', $fontBody, ['alignment' => 'center']);
-            $dataTable->addCell(9200, ['valign' => 'center'])->addText('☑ Sertifikasi    ☐ Pengakuan Kompetensi Terkini (PKT)    ☐ Rekognisi Pembelajaran Lampau (RPL)    ☐ Lainnya', $fontBody);
 
-            $section->addTextBreak(1);
-            $section->addText('Skema yang dipakai: ' . ($selectedSkemaType === 'kkni' ? '☑ KKNI' : '☐ KKNI') . ' / ' . ($selectedSkemaType === 'okupasi' ? '☑ Okupasi' : '☐ Okupasi') . ' / ' . ($selectedSkemaType === 'klaster' ? '☑ Klaster' : '☐ Klaster'), $fontSmall);
+            // Row 1: Skema Sertifikasi, Judul, Name
+            $dataTable->addRow();
+            $cell1 = $dataTable->addCell(3400, ['vMerge' => 'restart', 'valign' => 'center']);
+            $cell1->addText('Skema Sertifikasi', $fontBody);
+            $textRun = $cell1->addTextRun();
+            $textRun->addText('(', $fontBody);
+            $textRun->addText('KKNI', array_merge($fontBody, $selectedSkemaType === 'kkni' ? [] : ['strikethrough' => true]));
+            $textRun->addText('/', $fontBody);
+            $textRun->addText('Okupasi', array_merge($fontBody, $selectedSkemaType === 'okupasi' ? [] : ['strikethrough' => true]));
+            $textRun->addText('/', $fontBody);
+            $textRun->addText('Klaster', array_merge($fontBody, $selectedSkemaType === 'klaster' ? [] : ['strikethrough' => true]));
+            $textRun->addText(')', $fontBody);
+
+            $dataTable->addCell(1400, ['valign' => 'center'])->addText('Judul', $fontBody);
+            $dataTable->addCell(300, ['valign' => 'center'])->addText(':', $fontBody, ['alignment' => 'center']);
+            $dataTable->addCell(5446, ['gridSpan' => 2, 'valign' => 'center'])->addText($safeText($skema->nama_skema ?? '-'), $fontBody);
+
+            // Row 2: Skema Sertifikasi (Merge), Nomor, Number
+            $dataTable->addRow();
+            $dataTable->addCell(3400, ['vMerge' => 'continue']);
+            $dataTable->addCell(1400, ['valign' => 'center'])->addText('Nomor', $fontBody);
+            $dataTable->addCell(300, ['valign' => 'center'])->addText(':', $fontBody, ['alignment' => 'center']);
+            $dataTable->addCell(5446, ['gridSpan' => 2, 'valign' => 'center'])->addText($safeText($skema->nomor_skema ?? '-'), $fontBody);
+
+            // Row 3: Tujuan Asesmen, (Empty), :, Box, Sertifikasi
+            $dataTable->addRow();
+            $cellTujuan = $dataTable->addCell(3400, ['vMerge' => 'restart', 'valign' => 'center']);
+            $cellTujuan->addText('Tujuan Asesmen', $fontBody);
+
+            $dataTable->addCell(1400, ['valign' => 'center']);
+            $dataTable->addCell(300, ['valign' => 'center'])->addText(':', $fontBody, ['alignment' => 'center']);
+            $dataTable->addCell(500, ['valign' => 'center'])->addText('☑', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
+            $dataTable->addCell(4946, ['valign' => 'center'])->addText('Sertifikasi', $fontBody);
+
+            // Row 4: Tujuan Asesmen (Merge), (Empty), (Empty), Box, PKT
+            $dataTable->addRow();
+            $dataTable->addCell(3400, ['vMerge' => 'continue']);
+            $dataTable->addCell(1400, ['valign' => 'center']);
+            $dataTable->addCell(300, ['valign' => 'center']);
+            $dataTable->addCell(500, ['valign' => 'center'])->addText('☐', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
+            $dataTable->addCell(4946, ['valign' => 'center'])->addText('Pengakuan Kompetensi Terkini (PKT)', $fontBody);
+
+            // Row 5: Tujuan Asesmen (Merge), (Empty), (Empty), Box, RPL
+            $dataTable->addRow();
+            $dataTable->addCell(3400, ['vMerge' => 'continue']);
+            $dataTable->addCell(1400, ['valign' => 'center']);
+            $dataTable->addCell(300, ['valign' => 'center']);
+            $dataTable->addCell(500, ['valign' => 'center'])->addText('☐', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
+            $dataTable->addCell(4946, ['valign' => 'center'])->addText('Rekognisi Pembelajaran Lampau (RPL)', $fontBody);
+
+            // Row 6: Tujuan Asesmen (Merge), (Empty), (Empty), Box, Lainnya
+            $dataTable->addRow();
+            $dataTable->addCell(3400, ['vMerge' => 'continue']);
+            $dataTable->addCell(1400, ['valign' => 'center']);
+            $dataTable->addCell(300, ['valign' => 'center']);
+            $dataTable->addCell(500, ['valign' => 'center'])->addText('☐', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
+            $dataTable->addCell(4946, ['valign' => 'center'])->addText('Lainnya', $fontBody);
+
             $section->addTextBreak(1);
 
             $section->addText('Daftar Unit Kompetensi sesuai kemasan:', $fontSmall);
@@ -675,30 +1057,29 @@ class AsesiController extends Controller
                 'borderSize' => 6,
                 'borderColor' => '000000',
                 'cellMargin' => 60,
-                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-                'width' => 100,
-                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+                'width' => 10546,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::TWIP,
             ]);
             $unitTable->addRow();
             $unitTable->addCell(600, ['valign' => 'center'])->addText('No.', $fontBody, ['alignment' => 'center']);
             $unitTable->addCell(2200, ['valign' => 'center'])->addText('Kode Unit', $fontBody, ['alignment' => 'center']);
-            $unitTable->addCell(5000, ['valign' => 'center'])->addText('Judul Unit', $fontBody, ['alignment' => 'center']);
-            $unitTable->addCell(3400, ['valign' => 'center'])->addText('Standar Kompetensi Kerja', $fontBody, ['alignment' => 'center']);
+            $unitTable->addCell(4746, ['valign' => 'center'])->addText('Judul Unit', $fontBody, ['alignment' => 'center']);
+            $unitTable->addCell(3000, ['valign' => 'center'])->addText('Standar Kompetensi Kerja', $fontBody, ['alignment' => 'center']);
 
             if ($unitList instanceof \Illuminate\Support\Collection && $unitList->isNotEmpty()) {
                 foreach ($unitList as $index => $unit) {
                     $unitTable->addRow();
                     $unitTable->addCell(600)->addText((string) ($index + 1), $fontBody, ['alignment' => 'center']);
                     $unitTable->addCell(2200)->addText($safeText($unit->kode_unit ?? $unit->kode ?? '-'), $fontBody);
-                    $unitTable->addCell(5000)->addText($safeText($unit->judul_unit ?? $unit->nama_unit ?? $unit->judul ?? '-'), $fontBody);
-                    $unitTable->addCell(3400)->addText($safeText($unit->standar_kompetensi ?? 'SKKNI'), $fontBody);
+                    $unitTable->addCell(4746)->addText($safeText($unit->judul_unit ?? $unit->nama_unit ?? $unit->judul ?? '-'), $fontBody);
+                    $unitTable->addCell(3000)->addText($safeText($unit->standar_kompetensi ?? 'SKKNI'), $fontBody);
                 }
             } else {
                 $unitTable->addRow();
                 $unitTable->addCell(600)->addText('1', $fontBody, ['alignment' => 'center']);
                 $unitTable->addCell(2200)->addText('...', $fontBody);
-                $unitTable->addCell(5000)->addText('...', $fontBody);
-                $unitTable->addCell(3400)->addText('...', $fontBody);
+                $unitTable->addCell(4746)->addText('...', $fontBody);
+                $unitTable->addCell(3000)->addText('...', $fontBody);
             }
 
             $section->addTextBreak(1);
@@ -709,13 +1090,12 @@ class AsesiController extends Controller
                 'borderSize' => 6,
                 'borderColor' => '000000',
                 'cellMargin' => 60,
-                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-                'width' => 100,
-                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+                'width' => 10546,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::TWIP,
             ]);
             $docTable->addRow();
             $docTable->addCell(600, ['valign' => 'center'])->addText('No.', $fontBody, ['alignment' => 'center']);
-            $docTable->addCell(6500, ['valign' => 'center'])->addText('Bukti Persyaratan Dasar', $fontBody, ['alignment' => 'center']);
+            $docTable->addCell(6346, ['valign' => 'center'])->addText('Bukti Persyaratan Dasar', $fontBody, ['alignment' => 'center']);
             $docTable->addCell(1200, ['valign' => 'center'])->addText('Ada Memenuhi Syarat', $fontBody, ['alignment' => 'center']);
             $docTable->addCell(1200, ['valign' => 'center'])->addText('Tidak Memenuhi Syarat', $fontBody, ['alignment' => 'center']);
             $docTable->addCell(1200, ['valign' => 'center'])->addText('Tidak Ada', $fontBody, ['alignment' => 'center']);
@@ -731,10 +1111,10 @@ class AsesiController extends Controller
                 $state = is_array($row) ? ($row['status'] ?? '') : '';
                 $docTable->addRow();
                 $docTable->addCell(600)->addText((string) ($index + 1), $fontBody, ['alignment' => 'center']);
-                $docTable->addCell(6500)->addText($safeText($label), $fontBody);
-                $docTable->addCell(1200)->addText($state === 'memenuhi' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
-                $docTable->addCell(1200)->addText($state === 'tidak_memenuhi' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
-                $docTable->addCell(1200)->addText($state === 'tidak_ada' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
+                $docTable->addCell(6346)->addText($safeText($label), $fontBody);
+                $docTable->addCell(1200)->addText($state === 'memenuhi' ? '☑' : '☐', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
+                $docTable->addCell(1200)->addText($state === 'tidak_memenuhi' ? '☑' : '☐', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
+                $docTable->addCell(1200)->addText($state === 'tidak_ada' ? '☑' : '☐', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
             }
 
             $section->addTextBreak(1);
@@ -743,13 +1123,12 @@ class AsesiController extends Controller
                 'borderSize' => 6,
                 'borderColor' => '000000',
                 'cellMargin' => 60,
-                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-                'width' => 100,
-                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+                'width' => 10546,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::TWIP,
             ]);
             $adminTable->addRow();
             $adminTable->addCell(600, ['valign' => 'center'])->addText('No.', $fontBody, ['alignment' => 'center']);
-            $adminTable->addCell(6500, ['valign' => 'center'])->addText('Bukti Administratif', $fontBody, ['alignment' => 'center']);
+            $adminTable->addCell(6346, ['valign' => 'center'])->addText('Bukti Administratif', $fontBody, ['alignment' => 'center']);
             $adminTable->addCell(1200, ['valign' => 'center'])->addText('Ada Memenuhi Syarat', $fontBody, ['alignment' => 'center']);
             $adminTable->addCell(1200, ['valign' => 'center'])->addText('Tidak Memenuhi Syarat', $fontBody, ['alignment' => 'center']);
             $adminTable->addCell(1200, ['valign' => 'center'])->addText('Tidak Ada', $fontBody, ['alignment' => 'center']);
@@ -765,26 +1144,25 @@ class AsesiController extends Controller
                 $state = is_array($row) ? ($row['status'] ?? '') : '';
                 $adminTable->addRow();
                 $adminTable->addCell(600)->addText((string) ($index + 1), $fontBody, ['alignment' => 'center']);
-                $adminTable->addCell(6500)->addText($safeText($label), $fontBody);
-                $adminTable->addCell(1200)->addText($state === 'memenuhi' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
-                $adminTable->addCell(1200)->addText($state === 'tidak_memenuhi' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
-                $adminTable->addCell(1200)->addText($state === 'tidak_ada' ? '☑' : '☐', ['name' => 'DejaVu Sans', 'size' => 10], ['alignment' => 'center']);
+                $adminTable->addCell(6346)->addText($safeText($label), $fontBody);
+                $adminTable->addCell(1200)->addText($state === 'memenuhi' ? '☑' : '☐', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
+                $adminTable->addCell(1200)->addText($state === 'tidak_memenuhi' ? '☑' : '☐', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
+                $adminTable->addCell(1200)->addText($state === 'tidak_ada' ? '☑' : '☐', ['name' => 'Calibri', 'size' => 11], ['alignment' => 'center']);
             }
 
             $section->addTextBreak(1);
             $signTable = $section->addTable([
                 'borderSize' => 0,
                 'cellMargin' => 0,
-                'layout' => \PhpOffice\PhpWord\Style\Table::LAYOUT_FIXED,
-                'width' => 100,
-                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
+                'width' => 10546,
+                'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::TWIP,
             ]);
             $signTable->addRow();
-            $signTable->addCell(6200, ['valign' => 'top'])->addText('Rekomendasi (diisi oleh LSP):', $fontBold);
-            $signTable->addCell(5200, ['valign' => 'top'])->addText('Pemohon/ Kandidat :', $fontBold, ['alignment' => 'center']);
+            $signTable->addCell(5546, ['valign' => 'top'])->addText('Rekomendasi (diisi oleh LSP):', $fontBold);
+            $signTable->addCell(5000, ['valign' => 'top'])->addText('Pemohon/ Kandidat :', $fontBold, ['alignment' => 'center']);
             $signTable->addRow();
-            $signTable->addCell(6200, ['valign' => 'top'])->addText('Berdasarkan ketentuan persyaratan dasar, maka pemohon: ' . ((strtolower(trim((string) ($data['rekomendasiText'] ?? 'Diterima'))) === 'diterima') ? 'Diterima' : 'Tidak diterima') . ' sebagai peserta sertifikasi', $fontBody);
-            $candidateCell = $signTable->addCell(5200, ['valign' => 'top']);
+            $signTable->addCell(5546, ['valign' => 'top'])->addText('Berdasarkan ketentuan persyaratan dasar, maka pemohon: ' . ((strtolower(trim((string) ($data['rekomendasiText'] ?? 'Diterima'))) === 'diterima') ? 'Diterima' : 'Tidak diterima') . ' sebagai peserta sertifikasi', $fontBody);
+            $candidateCell = $signTable->addCell(5000, ['valign' => 'top']);
             $candidateCell->addText('Nama : ' . $safeText($asesi->nama ?? '-'), $fontBody);
             $candidateCell->addTextBreak(2);
 
@@ -828,8 +1206,8 @@ class AsesiController extends Controller
 
             $candidateCell->addText($safeText($data['pendaftarSignedAt'] ?? '-'), $fontBody, ['alignment' => 'center']);
             $signTable->addRow();
-            $signTable->addCell(6200, ['valign' => 'top'])->addText('* coret yang tidak sesuai', $fontSmall);
-            $adminCell = $signTable->addCell(5200, ['valign' => 'top']);
+            $signTable->addCell(5546, ['valign' => 'top'])->addText('* coret yang tidak sesuai', $fontSmall);
+            $adminCell = $signTable->addCell(5000, ['valign' => 'top']);
             $adminCell->addText('Admin LSP :', $fontBold);
             $adminCell->addText('Nama : ' . $safeText($data['adminSignerName'] ?? '-'), $fontBody);
             $adminCell->addTextBreak(2);
@@ -1382,7 +1760,188 @@ class AsesiController extends Controller
         $asesi = Asesi::with(['jurusan', 'buktiPendukung', 'verifiedBy', 'skemas.buktiPersyaratanDasarPemohon'])
             ->findOrFail($nik);
         
-        return view('admin.asesi.verifikasi-detail', compact('asesi'));
+        $asesiSkemas = \DB::table('asesi_skema')
+            ->join('skemas', 'asesi_skema.skema_id', '=', 'skemas.id')
+            ->where('asesi_skema.asesi_nik', $asesi->NIK)
+            ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
+            ->select('skemas.*', 'asesi_skema.status as status_mandiri', 'asesi_skema.tanggal_selesai as tgl_selesai_mandiri', 'asesi_skema.attempt')
+            ->get();
+
+        $hasilUjikom = [];
+
+        foreach ($asesiSkemas as $skema) {
+            // 1. Pendaftaran & Verifikasi
+            $isStep1Completed = ($asesi->status === 'approved');
+            $stepPendaftaran = [
+                'name' => 'Pendaftaran & Verifikasi',
+                'status' => $isStep1Completed ? 'completed' : 'pending',
+                'label' => $isStep1Completed ? 'Terverifikasi' : 'Menunggu Verifikasi',
+                'description' => $isStep1Completed 
+                    ? 'Berkas pendaftaran telah diverifikasi oleh admin.'
+                    : 'Berkas pendaftaran sedang dalam proses verifikasi oleh admin.'
+            ];
+
+            // 2. Asesmen Mandiri
+            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
+            $isStep2Completed = $isMandiriSelesai;
+            $stepMandiri = [
+                'name' => 'Asesmen Mandiri (FR.APL.02)',
+                'status' => $isStep2Completed ? 'completed' : 'pending',
+                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
+                'description' => $isMandiriSelesai 
+                    ? 'Asesi telah menyelesaikan pengisian form asesmen mandiri.'
+                    : 'Asesi belum mengisi form asesmen mandiri.'
+            ];
+
+            // 3. Jadwal Ujikom
+            $jadwal = \DB::table('jadwal_peserta')
+                ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
+                ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
+                ->where('jadwal_ujikom.skema_id', $skema->id)
+                ->where('jadwal_peserta.attempt', $skema->attempt)
+                ->select('jadwal_ujikom.*')
+                ->first();
+
+            $isJadwalSelesai = (bool)$jadwal;
+            $isStep3Completed = $isJadwalSelesai && $isStep2Completed;
+            
+            $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
+            if ($isJadwalSelesai) {
+                $tukName = \DB::table('tuk')->where('id', $jadwal->tuk_id)->value('nama_tuk') ?? 'TUK';
+                $tglMulai = $jadwal->tanggal_mulai ? \Carbon\Carbon::parse($jadwal->tanggal_mulai)->locale('id')->isoFormat('D MMMM YYYY') : '-';
+                $jadwalDesc = 'Jadwal: ' . $tglMulai . ' di ' . $tukName;
+            }
+
+            $stepJadwal = [
+                'name' => 'Jadwal Uji Kompetensi',
+                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
+                'description' => $jadwalDesc
+            ];
+
+            // 4. Persetujuan Asesmen
+            $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
+            $persetujuan = \DB::table('persetujuan_asesmen')
+                ->where('nomor_skema', $skema->nomor_skema)
+                ->where('attempt', $skema->attempt)
+                ->where(function($q) use ($asesi, $useNik) {
+                    $q->where('nama_asesi', $asesi->nama);
+                    if ($useNik) {
+                        $q->orWhere('asesi_nik', $asesi->NIK);
+                    }
+                })
+                ->first();
+
+            $isPersetujuanSelesai = $persetujuan && !empty($persetujuan->ttd_asesi_nama) && !empty($persetujuan->ttd_asesor_nama);
+            $isStep4Completed = $isPersetujuanSelesai && $isStep3Completed;
+            
+            $stepPersetujuan = [
+                'name' => 'Persetujuan Asesmen (FR.APL.03)',
+                'status' => $isStep4Completed ? 'completed' : 'pending',
+                'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
+                'description' => $isPersetujuanSelesai 
+                    ? 'Persetujuan asesmen telah disepakati dan ditandatangani oleh Asesi dan Asesor.'
+                    : 'Dokumen persetujuan asesmen belum selesai ditandatangani.'
+            ];
+
+            // 5. Penilaian / Ceklis Observasi
+            $ceklis = \DB::table('ceklis_observasi_aktivitas_praktiks')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->where('attempt', $skema->attempt)
+                ->first();
+
+            $isPenilaianSelesai = $ceklis && !empty($ceklis->ttd_asesi_file) && !empty($ceklis->ttd_asesor_file);
+            $isStep5Completed = $isPenilaianSelesai && $isStep4Completed;
+            
+            $penilaianLabel = 'Belum Dinilai';
+            $penilaianDesc = 'Menunggu penilaian observasi praktik dari Asesor.';
+            if ($ceklis) {
+                if ($isPenilaianSelesai) {
+                    $penilaianLabel = 'Selesai & Ditandatangani';
+                    $penilaianDesc = 'Proses observasi praktik telah dinilai dan disetujui kedua belah pihak.';
+                } elseif (!empty($ceklis->ttd_asesor_file)) {
+                    $penilaianLabel = 'Menunggu Tanda Tangan Asesi';
+                    $penilaianDesc = 'Asesor telah menilai. Menunggu tanda tangan Asesi.';
+                }
+            }
+
+            $stepPenilaian = [
+                'name' => 'Penilaian & Ceklis Observasi (FR.IA.01)',
+                'status' => $isStep5Completed ? 'completed' : 'pending',
+                'label' => $penilaianLabel,
+                'description' => $penilaianDesc
+            ];
+
+            // 6. Rekaman Asesmen
+            $rekaman = \DB::table('rekaman_asesmen_kompetensi')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->where('attempt', $skema->attempt)
+                ->first();
+
+            $isRekamanSelesai = $rekaman && !empty($rekaman->ttd_asesi_file) && !empty($rekaman->ttd_asesor_file);
+            $isStep6Completed = $isRekamanSelesai && $isStep5Completed;
+
+            $rekamanLabel = 'Belum Diisi';
+            $rekamanDesc = 'Menunggu pengisian rekaman asesmen dari Asesor.';
+            if ($rekaman) {
+                if ($isRekamanSelesai) {
+                    $rekamanLabel = 'Selesai & Ditandatangani';
+                    $rekamanDesc = 'Rekaman asesmen kompetensi telah ditandatangani oleh kedua belah pihak.';
+                } elseif (!empty($rekaman->ttd_asesor_file)) {
+                    $rekamanLabel = 'Menunggu Tanda Tangan Asesi';
+                    $rekamanDesc = 'Asesor telah mengisi rekaman asesmen. Menunggu tanda tangan Asesi.';
+                }
+            }
+
+            $stepRekaman = [
+                'name' => 'Rekaman Asesmen (FR.AK.02)',
+                'status' => $isStep6Completed ? 'completed' : 'pending',
+                'label' => $rekamanLabel,
+                'description' => $rekamanDesc
+            ];
+
+            // 7. Nilai Asesor
+            $nilaiExists = \DB::table('asesor_nilai_elemens')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->exists();
+            $isStep7Completed = $nilaiExists && $isStep6Completed;
+            
+            $stepNilai = [
+                'name' => 'Nilai Asesor',
+                'status' => $isStep7Completed ? 'completed' : 'pending',
+                'label' => $nilaiExists ? 'Selesai' : 'Belum Dinilai',
+                'description' => $nilaiExists
+                    ? 'Asesor telah menginput nilai kompetensi.'
+                    : 'Asesor belum menginput nilai kompetensi.'
+            ];
+
+            $allCompleted = $isStep7Completed;
+
+            $hasilUjikom[] = (object)[
+                'skema_id' => $skema->id,
+                'nama_skema' => $skema->nama_skema,
+                'nomor_skema' => $skema->nomor_skema,
+                'steps' => [$stepPendaftaran, $stepMandiri, $stepJadwal, $stepPersetujuan, $stepPenilaian, $stepRekaman, $stepNilai],
+                'all_completed' => $allCompleted,
+                'ceklis' => $ceklis,
+                'rekaman' => $rekaman,
+                'jadwal' => $jadwal,
+                'persetujuan' => $persetujuan,
+                'is_jadwal_selesai' => $isJadwalSelesai,
+                'is_persetujuan_selesai' => $isPersetujuanSelesai,
+                'is_nilai_selesai' => $nilaiExists,
+                'rekomendasi' => $ceklis ? $ceklis->rekomendasi : null,
+                'tanggal_ceklis' => $ceklis && $ceklis->ttd_asesi_tanggal ? \Carbon\Carbon::parse($ceklis->ttd_asesi_tanggal)->locale('id')->isoFormat('D MMMM YYYY') : null,
+                'asesor_nama' => $ceklis && $ceklis->ttd_asesor_nama ? $ceklis->ttd_asesor_nama : null,
+            ];
+        }
+
+        $hasilUjikom = collect($hasilUjikom);
+        
+        return view('admin.asesi.verifikasi-detail', compact('asesi', 'hasilUjikom'));
     }
 
     /**

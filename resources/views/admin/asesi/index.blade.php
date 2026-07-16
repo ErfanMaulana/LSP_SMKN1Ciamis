@@ -210,7 +210,7 @@
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
                                     <div class="action-dropdown">
-                                        <a href="{{ route('admin.asesi.verifikasi.show', $item->NIK) }}">
+                                        <a href="{{ route('admin.asesi.show', $item->NIK) }}">
                                             <i class="bi bi-eye"></i> Lihat Detail
                                         </a>
                                         <a href="{{ route('admin.asesi.edit', $item->NIK) }}">

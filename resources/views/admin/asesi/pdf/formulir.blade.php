@@ -15,7 +15,7 @@
 
         body {
             font-family: Calibri, sans-serif;
-            font-size: 10pt;
+            font-size: 11pt;
             line-height: 1.15;
             color: #000;
         }
@@ -38,25 +38,27 @@
         }
 
         .title {
+            font-family: Calibri, sans-serif;
             font-size: 12pt;
             font-weight: bold;
             margin-bottom: 2mm;
         }
 
         .section-title {
-            font-size: 10pt;
+            font-family: Calibri, sans-serif;
+            font-size: 11pt;
             font-weight: bold;
             margin-top: 3mm;
             margin-bottom: 1.5mm;
         }
 
         .section-subtitle {
-            font-size: 9pt;
+            font-size: 11pt;
             margin-bottom: 2mm;
         }
 
         .small {
-            font-size: 8.5pt;
+            font-size: 11pt;
         }
 
         .label {
@@ -92,7 +94,7 @@
         .grid-table th,
         .grid-table td {
             border: 0.7pt solid #000;
-            font-size: 8.8pt;
+            font-size: 11pt;
         }
 
         .grid-table th {
@@ -147,9 +149,9 @@
 
             border: 1px solid #000;
 
-            font-size: 8pt;
+            font-size: 11pt;
             font-weight: bold;
-            font-family: DejaVu Sans, sans-serif;
+            font-family: Calibri, DejaVu Sans, sans-serif;
 
             line-height: 1;
 
@@ -187,7 +189,7 @@
 
         .closing-table td {
             border: 1px solid #000;
-            font-size: 9pt;
+            font-size: 11pt;
             padding: 2mm;
             vertical-align: top;
         }
@@ -232,7 +234,7 @@
         .sig-table td {
             border: 1px solid #000;
             padding: 1.5mm;
-            font-size: 9pt;
+            font-size: 11pt;
             vertical-align: top;
         }
 
@@ -563,66 +565,59 @@
         </div>
 
         <table class="grid-table mt2">
-
             <tr>
-
-                <td rowspan="2" style="width:22%;">
+                <td rowspan="2" style="width: 30%;">
                     Skema Sertifikasi<br>
                     ({!! $renderChoice('KKNI', $selectedSkemaType === 'kkni') !!}/{!! $renderChoice('Okupasi', $selectedSkemaType === 'okupasi') !!}/{!! $renderChoice('Klaster', $selectedSkemaType === 'klaster') !!})
                 </td>
-
-                <td style="width:18%;">
-                    Judul
-                </td>
-
-                <td>
+                <td style="width: 12%;">Judul</td>
+                <td style="width: 3%; text-align: center;">:</td>
+                <td colspan="2" style="width: 55%;">
                     {{ $skema->nama_skema ?? '-' }}
                 </td>
-
             </tr>
-
             <tr>
-
-                <td>
-                    Nomor
-                </td>
-
-                <td>
+                <td>Nomor</td>
+                <td style="text-align: center;">:</td>
+                <td colspan="2">
                     {{ $skema->nomor_skema ?? '-' }}
                 </td>
-
             </tr>
-
             <tr>
-
                 <td rowspan="4">
                     Tujuan Asesmen
                 </td>
-
-                <td colspan="2">
-                    {!! $renderBox(true) !!} Sertifikasi
+                <td></td>
+                <td style="text-align: center;">:</td>
+                <td style="width: 5%; text-align: center; vertical-align: middle;">
+                    {!! $renderBox(true) !!}
                 </td>
-
+                <td>Sertifikasi</td>
             </tr>
-
             <tr>
-                <td colspan="2">
-                    {!! $renderBox(false) !!} Pengakuan Kompetensi Terkini (PKT)
+                <td></td>
+                <td></td>
+                <td style="text-align: center; vertical-align: middle;">
+                    {!! $renderBox(false) !!}
                 </td>
+                <td>Pengakuan Kompetensi Terkini (PKT)</td>
             </tr>
-
             <tr>
-                <td colspan="2">
-                    {!! $renderBox(false) !!} Rekognisi Pembelajaran Lampau (RPL)
+                <td></td>
+                <td></td>
+                <td style="text-align: center; vertical-align: middle;">
+                    {!! $renderBox(false) !!}
                 </td>
+                <td>Rekognisi Pembelajaran Lampau (RPL)</td>
             </tr>
-
             <tr>
-                <td colspan="2">
-                    {!! $renderBox(false) !!} Lainnya
+                <td></td>
+                <td></td>
+                <td style="text-align: center; vertical-align: middle;">
+                    {!! $renderBox(false) !!}
                 </td>
+                <td>Lainnya</td>
             </tr>
-
         </table>
 
         <div class="small mt2 choice-inline">

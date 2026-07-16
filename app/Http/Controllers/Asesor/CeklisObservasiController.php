@@ -60,7 +60,11 @@ class CeklisObservasiController extends Controller
             ->get();
 
         foreach ($completedRows as $c) {
-            $c->is_pending = false;
+            if (empty($c->ttd_asesor_nama) || empty($c->ttd_asesor_file)) {
+                $c->is_pending = true;
+            } else {
+                $c->is_pending = false;
+            }
         }
 
         // Fetch pending ceklis records
@@ -266,6 +270,10 @@ class CeklisObservasiController extends Controller
                     ->first(['id']);
 
                 if ($existing) {
+                    $ceklisObj = CeklisObservasiAktivitasPraktik::find($existing->id);
+                    if ($ceklisObj && (empty($ceklisObj->ttd_asesor_nama) || empty($ceklisObj->ttd_asesor_file))) {
+                        return redirect()->route('asesor.ceklis-observasi.edit', $existing->id);
+                    }
                     return redirect()->route('asesor.ceklis-observasi.show', $existing->id);
                 }
 
@@ -588,6 +596,8 @@ class CeklisObservasiController extends Controller
                     ->from('ceklis_observasi_aktivitas_praktiks')
                     ->whereColumn('ceklis_observasi_aktivitas_praktiks.asesi_nik', 'asesi.NIK')
                     ->where('ceklis_observasi_aktivitas_praktiks.skema_id', $skemaId)
+                    ->whereNotNull('ceklis_observasi_aktivitas_praktiks.ttd_asesor_file')
+                    ->where('ceklis_observasi_aktivitas_praktiks.ttd_asesor_file', '!=', '')
                     ->whereRaw('ceklis_observasi_aktivitas_praktiks.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi.NIK AND b.skema_id = ' . $skemaId . ')');
             })
             ->orderBy('nama')
