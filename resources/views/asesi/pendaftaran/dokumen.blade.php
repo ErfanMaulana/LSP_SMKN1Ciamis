@@ -207,7 +207,7 @@
     .signature-modal-header p { margin: 8px 0 0; color: #64748b; font-size: 13px; }
 
     .signature-modal-body { padding: 18px 24px 24px; }
-    .signature-modal-actions { display:flex; gap:10px; justify-content:space-between; align-items:center; margin-top:12px; }
+    .signature-modal-actions { display:flex; gap:10px; justify-content:flex-end; align-items:center; margin-top:12px; }
     .signature-modal-footer { padding: 16px 24px 24px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #e5e7eb; }
 
     .signature-meta {
@@ -723,7 +723,6 @@
                     </div>
                     <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                     <div class="signature-modal-actions">
-                        <p class="signature-meta">Nama: {{ $asesi->nama }} &bull; Tanggal: {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</p>
                         <button type="button" onclick="clearSignatureDokumen()" class="btn-signature-clear">
                             <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
@@ -740,7 +739,6 @@
                 </div>
                 <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $asesi->nama }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                 <div class="signature-modal-actions">
-                    <p class="signature-meta">Nama: {{ $asesi->nama }} &bull; Tanggal: {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</p>
                     <button type="button" onclick="clearSignatureDokumen()" class="btn-signature-clear">
                         <svg class="signature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
