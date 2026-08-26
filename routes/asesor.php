@@ -35,6 +35,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         Route::post('/asesmen-mandiri/{asesiNik}/{skemaId}/recommend', [DashboardController::class, 'recommend'])->name('asesmen-mandiri.recommend');
         Route::get('/data-asesi', [DashboardController::class, 'asesiIndex'])->name('asesi.terkait');
         Route::get('/asesi',     [DashboardController::class, 'asesiIndex'])->name('asesi.index');
+        Route::get('/asesi/{nik}', [DashboardController::class, 'asesiShow'])->name('asesi.show');
         Route::get('/asesi/{asesiNik}/review',  [DashboardController::class, 'asesiReview'])->name('asesi.review');
         Route::post('/asesi/{asesiNik}/review', [DashboardController::class, 'recommend'])->name('asesi.recommend');
         Route::get('/persetujuan-asesmen', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorIndex'])->name('persetujuan-asesmen.index');

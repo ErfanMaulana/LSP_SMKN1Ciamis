@@ -29,6 +29,11 @@ class EnsureAsesiApproved
             return $next($request);
         }
 
+        // Draft users trying to access dashboard should be redirected to step 2 document upload
+        if ($asesi && $asesi->status === 'draft' && $request->routeIs('asesi.dashboard')) {
+            return redirect()->route('asesi.pendaftaran.dokumen');
+        }
+
         // Belum mendaftar atau belum diverifikasi
         if (!$asesi || $asesi->status !== 'approved') {
             return redirect()->route('asesi.pendaftaran.formulir');

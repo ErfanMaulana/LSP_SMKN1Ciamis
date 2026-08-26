@@ -1130,7 +1130,7 @@
                                 <i class="bi bi-three-dots-vertical"></i>
                             </button>
                             <div class="dropdown-menu">
-                                <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Lihat detail asesmen mandiri">
+                                <a href="{{ route('asesor.asesi.show', $row->asesi_nik) }}" title="Lihat detail data asesi & perkembangan">
                                     <i class="bi bi-eye"></i>
                                     <span class="menu-entry-label">Lihat Detail</span>
                                 </a>
@@ -1335,7 +1335,7 @@
                         <span>Menu Aksi</span>
                     </button>
                     <div class="dropdown-menu" style="right: auto; left: 0; min-width: 180px;">
-                        <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $row->asesi_nik, 'skemaId' => $row->skema_id]) }}" title="Lihat detail asesmen mandiri">
+                        <a href="{{ route('asesor.asesi.show', $row->asesi_nik) }}" title="Lihat detail data asesi & perkembangan">
                             <i class="bi bi-eye"></i>
                             <span class="menu-entry-label">Lihat Detail</span>
                         </a>

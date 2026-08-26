@@ -596,7 +596,14 @@
 @section('content')
 <div class="top-actions">
     @if($role === 'asesor')
-        <a href="{{ route('asesor.persetujuan-asesmen.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+        @php
+            $backToVal = $backTo ?? request()->get('back_to', '');
+            $backUrl = ($backToVal && str_starts_with($backToVal, 'asesi:'))
+                ? route('asesor.asesi.show', substr($backToVal, 6))
+                : route('asesor.persetujuan-asesmen.index');
+            $backLabel = ($backToVal && str_starts_with($backToVal, 'asesi:')) ? 'Kembali ke Detail Asesi' : 'Kembali';
+        @endphp
+        <a href="{{ $backUrl }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> {{ $backLabel }}</a>
         @if(!empty($item->ttd_asesi_file) && !empty($item->ttd_asesor_file))
             <a href="{{ route('asesor.persetujuan.front.asesor.export', ['asesiNik' => $asesiNik, 'skemaId' => $skema->id]) }}" class="btn btn-primary" target="_blank">
                 <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
@@ -688,6 +695,9 @@
     @if(empty($item->ttd_asesi_file))
     <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" id="formTandaTanganAsesor">
         @csrf
+        @if(!empty($backTo))
+            <input type="hidden" name="back_to" value="{{ $backTo }}">
+        @endif
     @endif
     <div class="card" style="margin-bottom:16px;">
         <div class="card-header"><i class="bi bi-clipboard-check"></i> Ceklis Bukti yang Sudah Dikumpulkan</div>

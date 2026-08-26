@@ -16,15 +16,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Single atomic ALTER TABLE: drop old unique index, add attempt column,
-        // add new composite unique index, and recreate the supporting index for the FK.
-        DB::statement('
-            ALTER TABLE `jadwal_peserta`
-                DROP INDEX `jadwal_peserta_jadwal_id_asesi_nik_unique`,
-                ADD COLUMN `attempt` TINYINT UNSIGNED NOT NULL DEFAULT 1 AFTER `asesi_nik`,
-                ADD UNIQUE INDEX `uniq_jadwal_peserta_attempt` (`jadwal_id`, `asesi_nik`, `attempt`),
-                ADD INDEX `jadwal_peserta_asesi_nik_index` (`asesi_nik`)
-        ');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('
+                ALTER TABLE `jadwal_peserta`
+                    DROP INDEX `jadwal_peserta_jadwal_id_asesi_nik_unique`,
+                    ADD COLUMN `attempt` TINYINT UNSIGNED NOT NULL DEFAULT 1 AFTER `asesi_nik`,
+                    ADD UNIQUE INDEX `uniq_jadwal_peserta_attempt` (`jadwal_id`, `asesi_nik`, `attempt`),
+                    ADD INDEX `jadwal_peserta_asesi_nik_index` (`asesi_nik`)
+            ');
+        } else {
+            Schema::table('jadwal_peserta', function (Blueprint $table) {
+                $table->unsignedTinyInteger('attempt')->default(1)->after('asesi_nik');
+            });
+        }
     }
 
     /**
@@ -32,13 +36,19 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement('
-            ALTER TABLE `jadwal_peserta`
-                DROP INDEX `uniq_jadwal_peserta_attempt`,
-                DROP INDEX `jadwal_peserta_asesi_nik_index`,
-                DROP COLUMN `attempt`,
-                ADD UNIQUE INDEX `jadwal_peserta_jadwal_id_asesi_nik_unique` (`jadwal_id`, `asesi_nik`),
-                ADD INDEX `jadwal_peserta_asesi_nik_foreign` (`asesi_nik`)
-        ');
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement('
+                ALTER TABLE `jadwal_peserta`
+                    DROP INDEX `uniq_jadwal_peserta_attempt`,
+                    DROP INDEX `jadwal_peserta_asesi_nik_index`,
+                    DROP COLUMN `attempt`,
+                    ADD UNIQUE INDEX `jadwal_peserta_jadwal_id_asesi_nik_unique` (`jadwal_id`, `asesi_nik`),
+                    ADD INDEX `jadwal_peserta_asesi_nik_foreign` (`asesi_nik`)
+            ');
+        } else {
+            Schema::table('jadwal_peserta', function (Blueprint $table) {
+                $table->dropColumn('attempt');
+            });
+        }
     }
 };

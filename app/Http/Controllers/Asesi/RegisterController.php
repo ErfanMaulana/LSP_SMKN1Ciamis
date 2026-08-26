@@ -39,10 +39,6 @@ class RegisterController extends Controller
         $skemaList   = Skema::orderBy('jurusan_id')->orderBy('nama_skema')->get();
 
         // Parse NIK to auto-fill tanggal_lahir and jenis_kelamin
-        // NIK Format: PP KK CC DD MM YY SSSS
-        // Digit 7-8  : Tanggal (perempuan = tanggal + 40)
-        // Digit 9-10 : Bulan
-        // Digit 11-12: Tahun (2 digit)
         $nikData = null;
         $nikAutofill = false;
         $nikAutofillMessage = null;
@@ -57,7 +53,6 @@ class RegisterController extends Controller
             $isFemale = $dd > 40;
             $day      = $isFemale ? $dd - 40 : $dd;
 
-            // 2-digit year heuristic: <= current 2-digit year → 2000s, else → 1900s
             $currentYY = (int) date('y');
             $year = ($yy <= $currentYY) ? (2000 + $yy) : (1900 + $yy);
 
@@ -109,27 +104,31 @@ class RegisterController extends Controller
                 ->with('error', 'Akun Anda telah diblokir secara permanen dan tidak dapat mendaftar.');
         }
 
+        // Both 'draft' and 'next' use lenient validation — Form 1 can always proceed.
+        // Required-field completeness is checked in storeDokumen() at submission time.
+        $isDraft = $request->input('action') === 'draft';
+
         $validator = Validator::make($request->all(), [
-            'nama'                  => 'required|string|max:255',
-            'tempat_lahir'          => 'required|string|max:255',
-            'tanggal_lahir'         => 'required|date',
-            'jenis_kelamin'         => 'required|in:Laki-laki,Perempuan',
-            'kewarganegaraan'       => 'required|string|max:255',
-            'alamat'                => 'required|string',
-            'kode_pos'              => 'required|string|max:10',
-            'telepon_hp'            => 'required|string|max:20',
-            'email'                 => 'required|email|max:255',
-            'pekerjaan'             => 'required|string|max:255',
-            'pendidikan_terakhir'   => 'required|string|max:255',
-            'ID_jurusan'            => 'required|exists:jurusan,ID_jurusan',
+            'nama'                  => 'nullable|string|max:255',
+            'tempat_lahir'          => 'nullable|string|max:255',
+            'tanggal_lahir'         => 'nullable|date',
+            'jenis_kelamin'         => 'nullable|in:Laki-laki,Perempuan',
+            'kewarganegaraan'       => 'nullable|string|max:255',
+            'alamat'                => 'nullable|string',
+            'kode_pos'              => 'nullable|string|max:10',
+            'telepon_hp'            => 'nullable|string|max:20',
+            'email'                 => 'nullable|email|max:255',
+            'pekerjaan'             => 'nullable|string|max:255',
+            'pendidikan_terakhir'   => 'nullable|string|max:255',
+            'ID_jurusan'            => 'nullable|exists:jurusan,ID_jurusan',
             'kelas'                 => 'nullable|string|max:50',
-            'skema_id'              => 'required|exists:skemas,id',
-            'nama_lembaga'          => 'required|string|max:255',
-            'alamat_lembaga'        => 'required|string',
-            'jabatan'               => 'required|string|max:255',
+            'skema_id'              => 'nullable|exists:skemas,id',
+            'nama_lembaga'          => 'nullable|string|max:255',
+            'alamat_lembaga'        => 'nullable|string',
+            'jabatan'               => 'nullable|string|max:255',
             'no_fax_lembaga'        => 'nullable|string|max:20',
             'telepon_rumah'         => 'nullable|string|max:20',
-            'email_lembaga'         => 'required|email|max:255',
+            'email_lembaga'         => 'nullable|email|max:255',
             'unit_lembaga'          => 'nullable|string|max:255',
         ]);
 
@@ -139,19 +138,21 @@ class RegisterController extends Controller
                 ->withInput();
         }
 
-        $data = $request->except('skema_id');
+        // For draft: include all fields (even null = cleared) so erased values are saved.
+        // For 'next': validation already passed so nulls won't appear on required fields.
+        $data = $request->except('skema_id', 'action');
         $data['NIK']    = $account->NIK;
-        $data['status'] = 'pending';   // reset to pending on new/resubmit
+        $data['status'] = 'draft';
         $data['verified_at'] = null;
         $data['verified_by'] = null;
         $data['catatan_admin'] = null;
 
         $asesiRecord = Asesi::updateOrCreate(['NIK' => $account->NIK], $data);
 
-        // Sync selected skema to pivot table
-        $asesiRecord->skemas()->sync([$request->skema_id => ['status' => 'belum_mulai']]);
+        if ($request->filled('skema_id')) {
+            $asesiRecord->skemas()->sync([$request->skema_id => ['status' => 'belum_mulai']]);
+        }
 
-        // Store flow markers for step 2.
         session([
             'pendaftaran_nik' => $account->NIK,
             'pendaftaran_step1_completed' => true,
@@ -161,10 +162,15 @@ class RegisterController extends Controller
             (string) $account->NIK,
             $request->input('nama') ?: ($account->nama ?? (string) $account->NIK),
             'Mengisi APL 1',
-            'User menyimpan formulir APL 1 (data diri).',
+            $isDraft ? 'User menyimpan draft formulir APL 1.' : 'User menyimpan formulir APL 1 (data diri).',
             $request,
             ['skema_id' => (int) $request->skema_id]
         );
+
+        if ($isDraft) {
+            return redirect()->route('asesi.pendaftaran.formulir')
+                ->with('success', 'Draft formulir berhasil disimpan.');
+        }
 
         return redirect()->route('asesi.pendaftaran.dokumen');
     }
@@ -176,25 +182,20 @@ class RegisterController extends Controller
     {
         $account = Auth::guard('account')->user();
         $nik     = session('pendaftaran_nik', $account->NIK);
-        $asesi   = Asesi::where('NIK', $nik)->first();
+        $asesi   = Asesi::with('buktiPendukung')->where('NIK', $nik)->first();
 
         if (!$asesi) {
             return redirect()->route('asesi.pendaftaran.formulir')
                 ->with('error', 'Silakan isi formulir data diri terlebih dahulu.');
         }
 
-        // If the step-1 flow was just completed, always continue to the document step.
-        if (session('pendaftaran_step1_completed')) {
-            return view('asesi.pendaftaran.dokumen', compact('account', 'asesi'));
-        }
-
-        // If already has documents and is approved, go to dashboard
+        // If already approved
         if ($asesi->status === 'approved') {
             return redirect()->route('asesi.dashboard')
                 ->with('info', 'Pendaftaran Anda sudah disetujui.');
         }
 
-        // If pending (submitted), redirect to dashboard
+        // If pending (submitted Step 2), redirect to dashboard
         if ($asesi->status === 'pending') {
             return redirect()->route('asesi.dashboard')
                 ->with('info', 'Formulir Anda sedang menunggu verifikasi admin.');
@@ -210,23 +211,55 @@ class RegisterController extends Controller
     {
         $account = Auth::guard('account')->user();
         $nik     = session('pendaftaran_nik', $account->NIK);
-        $asesi   = Asesi::where('NIK', $nik)->first();
+        $asesi   = Asesi::with('buktiPendukung')->where('NIK', $nik)->first();
 
         if (!$asesi) {
             return redirect()->route('asesi.pendaftaran.formulir')
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
-        $validator = Validator::make($request->all(), [
-            'pas_foto'              => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'transkrip_nilai'       => 'required|array|min:1',
-            'transkrip_nilai.*'     => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-            'identitas_pribadi'     => 'required|array|min:1',
-            'identitas_pribadi.*'   => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-            'bukti_kompetensi'      => 'required|array|min:1',
-            'bukti_kompetensi.*'    => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-            'tanda_tangan_pendaftar' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
-        ], [
+        $isDraft = $request->input('action') === 'draft';
+
+        // On final submit, validate that Form 1 required fields are all filled in the DB
+        if (!$isDraft) {
+            $step1Errors = $this->validateStep1Completeness($asesi);
+            if (!empty($step1Errors)) {
+                return redirect()->route('asesi.pendaftaran.formulir')
+                    ->withErrors($step1Errors)
+                    ->with('step1_incomplete', true);
+            }
+        }
+
+        $hasPasFoto = !empty($asesi->pas_foto);
+        $hasTranskrip = $asesi->buktiPendukung->where('jenis_dokumen', 'transkrip_nilai')->count() > 0;
+        $hasIdentitas = $asesi->buktiPendukung->where('jenis_dokumen', 'identitas_pribadi')->count() > 0;
+
+        if ($isDraft) {
+            $rules = [
+                'pas_foto'              => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+                'transkrip_nilai'       => 'nullable|array',
+                'transkrip_nilai.*'     => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+                'identitas_pribadi'     => 'nullable|array',
+                'identitas_pribadi.*'   => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+                'bukti_kompetensi'      => 'nullable|array',
+                'bukti_kompetensi.*'    => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+                'tanda_tangan_pendaftar' => 'nullable|string',
+            ];
+        } else {
+            // Submit to admin: Pas Foto, Transkrip, and Identitas are required (unless draft files exist), Bukti Kompetensi is optional.
+            $rules = [
+                'pas_foto'              => $hasPasFoto ? 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048' : 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+                'transkrip_nilai'       => $hasTranskrip ? 'nullable|array' : 'required|array|min:1',
+                'transkrip_nilai.*'     => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+                'identitas_pribadi'     => $hasIdentitas ? 'nullable|array' : 'required|array|min:1',
+                'identitas_pribadi.*'   => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+                'bukti_kompetensi'      => 'nullable|array',
+                'bukti_kompetensi.*'    => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+                'tanda_tangan_pendaftar' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
+            ];
+        }
+
+        $validator = Validator::make($request->all(), $rules, [
             'pas_foto.required'             => 'Pas foto wajib diupload.',
             'pas_foto.image'                => 'Pas foto harus berupa file gambar.',
             'pas_foto.mimes'                => 'Format pas foto harus JPG, JPEG, PNG, atau WEBP.',
@@ -239,7 +272,6 @@ class RegisterController extends Controller
             'identitas_pribadi.*.file'      => 'File identitas pribadi tidak valid.',
             'identitas_pribadi.*.mimes'     => 'Format file identitas pribadi harus JPG, JPEG, PNG, WEBP, atau PDF.',
             'identitas_pribadi.*.max'       => 'Ukuran file identitas pribadi maksimal 2MB per file.',
-            'bukti_kompetensi.required'     => 'Minimal 1 file bukti kompetensi wajib diupload.',
             'bukti_kompetensi.*.file'       => 'File bukti kompetensi tidak valid.',
             'bukti_kompetensi.*.mimes'      => 'Format file bukti kompetensi harus JPG, JPEG, PNG, WEBP, atau PDF.',
             'bukti_kompetensi.*.max'        => 'Ukuran file bukti kompetensi maksimal 2MB per file.',
@@ -256,6 +288,9 @@ class RegisterController extends Controller
 
         // Upload pas foto
         if ($request->hasFile('pas_foto')) {
+            if ($asesi->pas_foto) {
+                Storage::disk('public')->delete($asesi->pas_foto);
+            }
             $pasFotoPath = $request->file('pas_foto')->store($folder, 'public');
             $asesi->pas_foto = $pasFotoPath;
             $asesi->save();
@@ -300,6 +335,26 @@ class RegisterController extends Controller
             }
         }
 
+        if ($isDraft) {
+            if ($request->filled('tanda_tangan_pendaftar')) {
+                $asesi->tanda_tangan_pendaftar = $request->input('tanda_tangan_pendaftar');
+                $asesi->tanggal_tanda_tangan_pendaftar = now();
+            }
+            $asesi->status = 'draft';
+            $asesi->save();
+
+            ActivityLogger::logUser(
+                (string) $account->NIK,
+                $asesi->nama ?? ($account->nama ?? (string) $account->NIK),
+                'Mengisi APL 1',
+                'User menyimpan draft dokumen pendukung APL 1.',
+                $request
+            );
+
+            return redirect()->route('asesi.pendaftaran.dokumen')
+                ->with('success', 'Draft dokumen berhasil disimpan.');
+        }
+
         $asesi->status = 'pending';
         $asesi->tanda_tangan_pendaftar = $request->input('tanda_tangan_pendaftar');
         $asesi->tanggal_tanda_tangan_pendaftar = now();
@@ -318,5 +373,63 @@ class RegisterController extends Controller
 
         return redirect()->route('asesi.dashboard')
             ->with('success', 'Pendaftaran berhasil! Silakan tunggu konfirmasi dari admin.');
+    }
+
+    /**
+     * Delete a draft supporting document file
+     */
+    public function deleteDokumen($id)
+    {
+        $account = Auth::guard('account')->user();
+        $dokumen = BuktiPendukung::where('id', $id)->where('NIK', $account->NIK)->firstOrFail();
+
+        if ($dokumen->file_path) {
+            Storage::disk('public')->delete($dokumen->file_path);
+        }
+
+        $dokumen->delete();
+
+        return redirect()->back()->with('success', 'File dokumen berhasil dihapus.');
+    }
+
+    /**
+     * Validate that all required Form 1 fields are filled in the Asesi record.
+     * Returns an array of validation errors keyed by field name, or empty array if complete.
+     */
+    protected function validateStep1Completeness(Asesi $asesi): array
+    {
+        $errors = [];
+
+        $required = [
+            'nama'                => 'Nama Lengkap',
+            'tempat_lahir'        => 'Tempat Lahir',
+            'tanggal_lahir'       => 'Tanggal Lahir',
+            'jenis_kelamin'       => 'Jenis Kelamin',
+            'kewarganegaraan'     => 'Kewarganegaraan',
+            'alamat'              => 'Alamat Lengkap',
+            'kode_pos'            => 'Kode POS',
+            'telepon_hp'          => 'Telepon / HP',
+            'email'               => 'Email',
+            'pekerjaan'           => 'Pekerjaan',
+            'pendidikan_terakhir' => 'Pendidikan Terakhir',
+            'ID_jurusan'          => 'Jurusan',
+            'nama_lembaga'        => 'Nama Lembaga / Perusahaan',
+            'alamat_lembaga'      => 'Alamat Lembaga',
+            'jabatan'             => 'Jabatan',
+            'email_lembaga'       => 'Email Lembaga',
+        ];
+
+        foreach ($required as $field => $label) {
+            if (empty($asesi->$field)) {
+                $errors[$field] = "Field \"{$label}\" pada Formulir Data Diri wajib diisi.";
+            }
+        }
+
+        // Check skema selection via pivot
+        if ($asesi->skemas()->count() === 0) {
+            $errors['skema_id'] = 'Skema Sertifikasi pada Formulir Data Diri wajib dipilih.';
+        }
+
+        return $errors;
     }
 }

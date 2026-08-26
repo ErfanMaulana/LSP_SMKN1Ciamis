@@ -349,6 +349,10 @@
     }
     .btn-reg-success { background: var(--brand-500); color: white; flex: 1; justify-content: center; }
     .btn-reg-success:hover { background: var(--brand-600); }
+    .btn-reg-primary { background: var(--brand-500); color: white; justify-content: center; }
+    .btn-reg-primary:hover { background: var(--brand-600); }
+    .btn-reg-secondary { background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; justify-content: center; }
+    .btn-reg-secondary:hover { background: #e2e8f0; color: #0f172a; }
 
     @media (max-width: 768px) {
         .reg-card {
@@ -500,22 +504,22 @@
         <!-- Pas Foto -->
         <div class="photo-upload">
             <div class="photo-box" id="photo-box" onclick="handlePhotoBoxClick()">
-                <i class="bi bi-person-fill" id="photo-placeholder"></i>
-                <img id="photo-preview" src="" alt="Preview" style="display:none;">
-                <div class="photo-badge" id="photo-badge"><i class="bi bi-crop"></i></div>
+                <i class="bi bi-person-fill" id="photo-placeholder" style="{{ !empty($asesi->pas_foto) ? 'display:none;' : '' }}"></i>
+                <img id="photo-preview" src="{{ !empty($asesi->pas_foto) ? asset('storage/' . $asesi->pas_foto) : '' }}" alt="Preview" style="{{ !empty($asesi->pas_foto) ? 'display:block;' : 'display:none;' }}">
+                <div class="photo-badge" id="photo-badge" style="{{ !empty($asesi->pas_foto) ? 'display:none;' : '' }}"><i class="bi bi-crop"></i></div>
                 <div class="photo-ratio-badge">3×4</div>
-                <div class="photo-edit-overlay" id="photo-edit-overlay">
+                <div class="photo-edit-overlay {{ !empty($asesi->pas_foto) ? 'visible' : '' }}" id="photo-edit-overlay">
                     <i class="bi bi-crop"></i>
                     <span>Edit Crop</span>
                 </div>
             </div>
             <span class="photo-label">Pas Foto <span style="color:#ef4444;">*</span></span>
             {{-- shown when no photo --}}
-            <label class="photo-btn" id="photo-btn-pick" onclick="event.stopPropagation(); document.getElementById('pas_foto_raw').click()">
+            <label class="photo-btn" id="photo-btn-pick" style="{{ !empty($asesi->pas_foto) ? 'display:none;' : '' }}" onclick="event.stopPropagation(); document.getElementById('pas_foto_raw').click()">
                 <i class="bi bi-paperclip"></i> Pilih & Crop Foto
             </label>
-            {{-- shown after crop --}}
-            <div class="photo-actions" id="photo-actions">
+            {{-- shown after crop or when photo exists --}}
+            <div class="photo-actions {{ !empty($asesi->pas_foto) ? 'visible' : '' }}" id="photo-actions">
                 <button type="button" class="photo-action-btn edit" onclick="editCrop()">
                     <i class="bi bi-crop"></i> Edit Crop
                 </button>
@@ -526,7 +530,7 @@
             {{-- raw input triggers cropper, hidden cropped input is submitted --}}
             <input type="file" id="pas_foto_raw" accept="image/*" style="display:none;" onchange="openCropper(this)">
             <input type="file" name="pas_foto" id="pas_foto" style="display:none;">
-            <span class="photo-name" id="pas_foto_name">Belum ada foto dipilih</span>
+            <span class="photo-name" id="pas_foto_name" style="{{ !empty($asesi->pas_foto) ? 'color:#1e293b;' : '' }}">{{ !empty($asesi->pas_foto) ? 'Foto tersimpan' : 'Belum ada foto dipilih' }}</span>
         </div>
 
         <!-- Cropper Modal -->
@@ -555,6 +559,23 @@
                 <div style="flex:1;">
                     <h4>Transkrip Nilai <span style="color:#ef4444;">*</span></h4>
                     <p>Scan/foto transkrip nilai akademik. Format: JPG, PNG, WebP, PDF. Maks: 2MB per file</p>
+                    
+                    @if(isset($asesi->buktiPendukung) && $asesi->buktiPendukung->where('jenis_dokumen', 'transkrip_nilai')->count() > 0)
+                        <div style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #475569;">File Terunggah:</span>
+                            @foreach($asesi->buktiPendukung->where('jenis_dokumen', 'transkrip_nilai') as $doc)
+                                <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 12px;">
+                                    <span style="display: flex; align-items: center; gap: 6px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <i class="bi bi-file-earmark-check" style="color: #0073bd;"></i> {{ $doc->nama_file }}
+                                    </span>
+                                    <button type="button" onclick="confirmDeleteDokumen({{ $doc->id }}, '{{ addslashes($doc->nama_file) }}')" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px 6px; font-size: 12px;" title="Hapus File">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <div class="file-list" id="transkrip_nilai_list"></div>
                     <button type="button" class="add-file-btn" onclick="addFileInput('transkrip_nilai')">
                         <i class="bi bi-plus-lg"></i> Tambah File
@@ -570,6 +591,23 @@
                 <div style="flex:1;">
                     <h4>Identitas Pribadi (KTP / Kartu Pelajar / KK) <span style="color:#ef4444;">*</span></h4>
                     <p>Format: JPG, PNG, WebP, PDF. Maks: 2MB per file</p>
+                    
+                    @if(isset($asesi->buktiPendukung) && $asesi->buktiPendukung->where('jenis_dokumen', 'identitas_pribadi')->count() > 0)
+                        <div style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #475569;">File Terunggah:</span>
+                            @foreach($asesi->buktiPendukung->where('jenis_dokumen', 'identitas_pribadi') as $doc)
+                                <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 12px;">
+                                    <span style="display: flex; align-items: center; gap: 6px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <i class="bi bi-file-earmark-check" style="color: #0073bd;"></i> {{ $doc->nama_file }}
+                                    </span>
+                                    <button type="button" onclick="confirmDeleteDokumen({{ $doc->id }}, '{{ addslashes($doc->nama_file) }}')" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px 6px; font-size: 12px;" title="Hapus File">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <div class="file-list" id="identitas_pribadi_list"></div>
                     <button type="button" class="add-file-btn" onclick="addFileInput('identitas_pribadi')">
                         <i class="bi bi-plus-lg"></i> Tambah File
@@ -583,8 +621,25 @@
             <div class="upload-card-header">
                 <div class="upload-icon"><i class="bi bi-award"></i></div>
                 <div style="flex:1;">
-                    <h4>Bukti Kompetensi (Sertifikat, Basic Skill Report) <span style="color:#ef4444;">*</span></h4>
+                    <h4>Bukti Kompetensi (Sertifikat, Basic Skill Report)</h4>
                     <p>Format: JPG, PNG, WebP, PDF. Maks: 2MB per file</p>
+                    
+                    @if(isset($asesi->buktiPendukung) && $asesi->buktiPendukung->where('jenis_dokumen', 'bukti_kompetensi')->count() > 0)
+                        <div style="margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #475569;">File Terunggah:</span>
+                            @foreach($asesi->buktiPendukung->where('jenis_dokumen', 'bukti_kompetensi') as $doc)
+                                <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px; font-size: 12px;">
+                                    <span style="display: flex; align-items: center; gap: 6px; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        <i class="bi bi-file-earmark-check" style="color: #0073bd;"></i> {{ $doc->nama_file }}
+                                    </span>
+                                    <button type="button" onclick="confirmDeleteDokumen({{ $doc->id }}, '{{ addslashes($doc->nama_file) }}')" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 2px 6px; font-size: 12px;" title="Hapus File">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
                     <div class="file-list" id="bukti_kompetensi_list"></div>
                     <button type="button" class="add-file-btn" onclick="addFileInput('bukti_kompetensi')">
                         <i class="bi bi-plus-lg"></i> Tambah File
@@ -594,11 +649,21 @@
         </div>
 
         <!-- Submit -->
-        <div class="reg-actions">
-            <button type="button" class="btn-reg btn-reg-success" id="openSignatureDokumenBtn">
-                <i class="bi bi-check-circle"></i>
-                <span>Selesaikan Pendaftaran & Kirim ke Admin</span>
-            </button>
+        <div class="reg-actions" style="display: flex; gap: 12px; justify-content: space-between; flex-wrap: wrap;">
+            <a href="{{ route('asesi.pendaftaran.formulir') }}" class="btn-reg btn-reg-secondary" style="text-decoration: none;">
+                <i class="bi bi-arrow-left"></i>
+                <span>Kembali ke Formulir</span>
+            </a>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button type="submit" name="action" value="draft" class="btn-reg btn-reg-secondary" formnovalidate>
+                    <i class="bi bi-bookmark-fill" style="color:#64748b;"></i>
+                    <span>Simpan Draft</span>
+                </button>
+                <button type="button" class="btn-reg btn-reg-success" id="openSignatureDokumenBtn">
+                    <i class="bi bi-check-circle"></i>
+                    <span>Selesaikan Pendaftaran & Kirim ke Admin</span>
+                </button>
+            </div>
         </div>
 
         <input type="hidden" name="tanda_tangan_pendaftar" id="signatureInputDokumen" value="">
@@ -697,11 +762,66 @@
         </div>
     </div>
 </div>
+
+<!-- Custom Delete Confirmation Modal -->
+<div class="cropper-modal-overlay" id="deleteDokumenModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(15,23,42,0.6); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#ffffff; border-radius:16px; width:100%; max-width:440px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); overflow:hidden;">
+        <div style="padding:24px 24px 16px 24px; text-align:center;">
+            <div style="width:56px; height:56px; background:#fee2e2; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px; color:#ef4444;">
+                <i class="bi bi-trash3-fill" style="font-size:26px;"></i>
+            </div>
+            <h4 style="margin:0 0 8px 0; font-size:18px; font-weight:700; color:#0f172a;">Konfirmasi Hapus File</h4>
+            <p style="margin:0; font-size:14px; color:#64748b; line-height:1.5;">
+                Apakah Anda yakin ingin menghapus file <strong id="deleteFileName" style="color:#0f172a; background:#f1f5f9; padding:2px 8px; border-radius:6px; word-break:break-all;"></strong>? File yang dihapus tidak dapat dikembalikan.
+            </p>
+        </div>
+        <div style="padding:16px 24px 24px 24px; display:flex; gap:12px; justify-content:flex-end;">
+            <button type="button" onclick="closeDeleteModal()" style="flex:1; padding:10px 16px; border-radius:8px; border:1px solid #cbd5e1; background:#f8fafc; color:#334155; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s;">
+                Batal
+            </button>
+            <button type="button" onclick="submitDeleteDoc()" style="flex:1; padding:10px 16px; border-radius:8px; border:none; background:#ef4444; color:#ffffff; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+                <i class="bi bi-trash"></i> Ya, Hapus File
+            </button>
+        </div>
+    </div>
+</div>
+
+@if(isset($asesi->buktiPendukung) && $asesi->buktiPendukung->count() > 0)
+    @foreach($asesi->buktiPendukung as $doc)
+        <form id="delete-doc-{{ $doc->id }}" action="{{ route('asesi.pendaftaran.dokumen.delete', $doc->id) }}" method="POST" style="display:none;">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endforeach
+@endif
 @endsection
 
 @section('scripts')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
+let targetDeleteFormId = null;
+
+function confirmDeleteDokumen(id, fileName) {
+    targetDeleteFormId = 'delete-doc-' + id;
+    const modal = document.getElementById('deleteDokumenModal');
+    const nameEl = document.getElementById('deleteFileName');
+    if (nameEl) nameEl.textContent = fileName;
+    if (modal) modal.style.display = 'flex';
+}
+
+function closeDeleteModal() {
+    targetDeleteFormId = null;
+    const modal = document.getElementById('deleteDokumenModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function submitDeleteDoc() {
+    if (targetDeleteFormId) {
+        const form = document.getElementById(targetDeleteFormId);
+        if (form) form.submit();
+    }
+    closeDeleteModal();
+}
 let cropperInstance = null;
 let originalImageSrc = null; // stores the raw (pre-crop) image for re-editing
 const DOKUMEN_DRAFT_KEY = 'asesi_dokumen_draft_v1';
@@ -1072,9 +1192,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (openButton) {
         openButton.addEventListener('click', function(event) {
             event.preventDefault();
-            // Validate photo first
+            // Validate photo first (check new file or existing saved photo)
             const pasFotoInput = document.getElementById('pas_foto');
-            if (!pasFotoInput.files || pasFotoInput.files.length === 0) {
+            const hasExistingPhoto = Boolean(document.getElementById('photo-preview')?.src && !document.getElementById('photo-preview').src.endsWith('#'));
+            if ((!pasFotoInput.files || pasFotoInput.files.length === 0) && !hasExistingPhoto) {
                 alert('Pas foto wajib diunggah dan dikrop terlebih dahulu.');
                 const photoBox = document.getElementById('photo-box');
                 if (photoBox) {
@@ -1088,9 +1209,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (form) {
         form.addEventListener('submit', function(event) {
-            // Check if photo is uploaded
+            const submitter = event.submitter;
+            const isDraft = submitter && submitter.name === 'action' && submitter.value === 'draft';
+
+            if (isDraft) {
+                // Bypass signature modal and photo requirements when saving draft
+                clearDokumenDraft();
+                return;
+            }
+
+            // Check if photo is uploaded or already saved
             const pasFotoInput = document.getElementById('pas_foto');
-            if (!pasFotoInput.files || pasFotoInput.files.length === 0) {
+            const hasExistingPhoto = Boolean(document.getElementById('photo-preview')?.src && !document.getElementById('photo-preview').src.endsWith('#'));
+            if ((!pasFotoInput.files || pasFotoInput.files.length === 0) && !hasExistingPhoto) {
                 event.preventDefault();
                 alert('Pas foto wajib diunggah dan dikrop terlebih dahulu.');
                 closeSignatureModal();
@@ -1107,7 +1238,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 event.preventDefault();
                 signatureError.style.display = 'block';
                 openSignatureModal();
-                canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (canvas) canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
 
@@ -1124,9 +1255,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    const deleteModal = document.getElementById('deleteDokumenModal');
+    if (deleteModal) {
+        deleteModal.addEventListener('click', function(event) {
+            if (event.target === deleteModal) {
+                closeDeleteModal();
+            }
+        });
+    }
+
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             closeSignatureModal();
+            closeDeleteModal();
         }
     });
 

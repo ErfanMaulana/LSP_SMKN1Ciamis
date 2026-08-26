@@ -10,7 +10,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE banding_asesmen MODIFY COLUMN status ENUM('diajukan','ditinjau','diterima','ditolak','tidak_banding','asesmen_ulang') NOT NULL DEFAULT 'diajukan'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE banding_asesmen MODIFY COLUMN status ENUM('diajukan','ditinjau','diterima','ditolak','tidak_banding','asesmen_ulang') NOT NULL DEFAULT 'diajukan'");
+        }
     }
 
     /**
@@ -18,6 +20,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE banding_asesmen MODIFY COLUMN status ENUM('diajukan','ditinjau','diterima','ditolak','tidak_banding') NOT NULL DEFAULT 'diajukan'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE banding_asesmen MODIFY COLUMN status ENUM('diajukan','ditinjau','diterima','ditolak','tidak_banding') NOT NULL DEFAULT 'diajukan'");
+        }
     }
 };

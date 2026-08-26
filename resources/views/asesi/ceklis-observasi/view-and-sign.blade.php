@@ -361,12 +361,7 @@
                 <input type="hidden" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ $ceklis->ttd_asesi_tanggal ? $ceklis->ttd_asesi_tanggal->format('Y-m-d') : '' }}">
                 <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput" value="{{ $ceklis->ttd_asesi_file ?? '' }}">
 
-                <div class="signature-actions">
-                    <div class="signature-date">
-                        <i class="bi bi-calendar3"></i>
-                        Tanggal: <strong id="signatureDate">{{ $ceklis->ttd_asesi_tanggal ? $ceklis->ttd_asesi_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
-                    </div>
-                </div>
+
             @elseif(isset($savedSignature) && $savedSignature)
                 {{-- Belum TTD & ada TTD tersimpan: tampilkan pilihan --}}
                 <div id="sigChoiceWrapAsesi" style="margin-bottom:14px; text-align:left;">
@@ -416,12 +411,7 @@
                 <input type="hidden" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="">
                 <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput" value="{{ $savedSignature }}">
 
-                <div class="signature-actions" style="margin-top:8px;">
-                    <div class="signature-date">
-                        <i class="bi bi-calendar3"></i>
-                        Tanggal: <strong id="signatureDate">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
-                    </div>
-                </div>
+
             @else
                 {{-- Belum TTD & tidak ada TTD tersimpan: tampilkan canvas saja --}}
                 <div class="signature-canvas-wrapper" id="signatureWrapper">
@@ -438,10 +428,6 @@
                 <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput" value="">
 
                 <div class="signature-actions">
-                    <div class="signature-date">
-                        <i class="bi bi-calendar3"></i>
-                        Tanggal: <strong id="signatureDate">{{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</strong>
-                    </div>
                     <button type="button" class="btn-clear-signature" id="clearSignature">
                         <i class="bi bi-eraser"></i> Hapus Tanda Tangan
                     </button>

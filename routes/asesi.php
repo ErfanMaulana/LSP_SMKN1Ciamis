@@ -31,6 +31,7 @@ Route::prefix('asesi')->name('asesi.')->group(function () {
         Route::post('/pendaftaran', [RegisterController::class, 'storeForm'])->name('pendaftaran.formulir.store');
         Route::get('/pendaftaran/dokumen', [RegisterController::class, 'showDokumen'])->name('pendaftaran.dokumen');
         Route::post('/pendaftaran/dokumen', [RegisterController::class, 'storeDokumen'])->name('pendaftaran.dokumen.store');
+        Route::delete('/pendaftaran/dokumen/{id}', [RegisterController::class, 'deleteDokumen'])->name('pendaftaran.dokumen.delete');
 
         // Routes that require admin approval
         Route::middleware('asesi.approved')->group(function () {
