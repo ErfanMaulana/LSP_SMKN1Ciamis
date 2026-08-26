@@ -321,16 +321,27 @@ class RekamanAsesmenKompetensiController extends Controller
                 ->latest('id')
                 ->first(['id']);
 
+            $backTo = trim((string) $request->get('back_to'));
             if ($existing) {
                 $rekamanObj = RekamanAsesmenKompetensi::find($existing->id);
                 if ($rekamanObj && (empty($rekamanObj->ttd_asesor_nama) || empty($rekamanObj->ttd_asesor_file))) {
-                    return redirect()->route('asesor.rekaman-asesmen-kompetensi.edit', $existing->id);
+                    $editUrl = route('asesor.rekaman-asesmen-kompetensi.edit', $existing->id);
+                    if ($backTo) {
+                        $editUrl .= '?back_to=' . urlencode($backTo);
+                    }
+                    return redirect($editUrl);
                 }
-                return redirect()->route('asesor.rekaman-asesmen-kompetensi.show', $existing->id);
+                $showUrl = route('asesor.rekaman-asesmen-kompetensi.show', $existing->id);
+                if ($backTo) {
+                    $showUrl .= '?back_to=' . urlencode($backTo);
+                }
+                return redirect($showUrl);
             }
         }
 
-        return view('asesor.rekaman-asesmen-kompetensi.create', compact('account', 'asesor', 'skemaList', 'defaults'));
+        $backTo = trim((string) $request->get('back_to'));
+
+        return view('asesor.rekaman-asesmen-kompetensi.create', compact('account', 'asesor', 'skemaList', 'defaults', 'backTo'));
     }
 
     public function store(Request $request)
@@ -359,6 +370,16 @@ class RekamanAsesmenKompetensiController extends Controller
             $item->details()->createMany($details);
         });
 
+        // Redirect kembali ke halaman detail asesi jika asesor datang dari sana
+        $backTo = trim((string) $request->input('back_to'));
+        if ($backTo && str_starts_with($backTo, 'asesi:')) {
+            $asesiNik = substr($backTo, strlen('asesi:'));
+            if ($asesiNik) {
+                return redirect()->route('asesor.asesi.show', $asesiNik)
+                    ->with('success', 'Rekaman asesmen kompetensi berhasil disimpan.');
+            }
+        }
+
         return redirect()->route('asesor.rekaman-asesmen-kompetensi.index')
             ->with('success', 'Rekaman asesmen kompetensi berhasil disimpan.');
     }
@@ -383,7 +404,9 @@ class RekamanAsesmenKompetensiController extends Controller
             ['unit.id', 'asc'],
         ])->values();
 
-        return view('asesor.rekaman-asesmen-kompetensi.show', compact('account', 'asesor', 'item', 'details'));
+        $backTo = trim((string) request()->get('back_to'));
+
+        return view('asesor.rekaman-asesmen-kompetensi.show', compact('account', 'asesor', 'item', 'details', 'backTo'));
     }
 
     public function export($id)
@@ -479,7 +502,9 @@ class RekamanAsesmenKompetensiController extends Controller
             ->orderBy('nama_skema')
             ->get(['skemas.id', 'nama_skema', 'nomor_skema', 'jenis_skema']);
 
-        return view('asesor.rekaman-asesmen-kompetensi.edit', compact('account', 'asesor', 'item', 'skemaList'));
+        $backTo = trim((string) request()->get('back_to'));
+
+        return view('asesor.rekaman-asesmen-kompetensi.edit', compact('account', 'asesor', 'item', 'skemaList', 'backTo'));
     }
 
     public function update(Request $request, $id)
@@ -498,6 +523,16 @@ class RekamanAsesmenKompetensiController extends Controller
             $item->details()->delete();
             $item->details()->createMany($details);
         });
+
+        // Redirect kembali ke halaman detail asesi jika asesor datang dari sana
+        $backTo = trim((string) $request->input('back_to'));
+        if ($backTo && str_starts_with($backTo, 'asesi:')) {
+            $asesiNik = substr($backTo, strlen('asesi:'));
+            if ($asesiNik) {
+                return redirect()->route('asesor.asesi.show', $asesiNik)
+                    ->with('success', 'Rekaman asesmen kompetensi berhasil diperbarui.');
+            }
+        }
 
         return redirect()->route('asesor.rekaman-asesmen-kompetensi.index')
             ->with('success', 'Rekaman asesmen kompetensi berhasil diperbarui.');

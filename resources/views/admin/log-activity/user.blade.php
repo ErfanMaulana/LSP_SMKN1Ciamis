@@ -10,10 +10,10 @@
     </div>
 </div>
 
-<form method="GET" class="toolbar" style="margin-bottom:16px; display:flex; gap:10px; align-items:center;">
+<form method="GET" class="toolbar">
     <input type="text" name="q" value="{{ $search }}" placeholder="Cari nama, ID, atau aktivitas..." class="input-search">
 
-    <select name="module" style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; background:#fff;">
+    <select name="module" class="select-filter">
         <option value="">Semua Modul</option>
         @if(!empty($modules))
             @foreach($modules as $m)
@@ -22,7 +22,7 @@
         @endif
     </select>
 
-    <select name="action" style="padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; background:#fff;">
+    <select name="action" class="select-filter">
         <option value="">Semua Aksi</option>
         <option value="create" @if(isset($action) && $action === 'create') selected @endif>Menambah</option>
         <option value="update" @if(isset($action) && $action === 'update') selected @endif>Memperbarui</option>
@@ -43,28 +43,36 @@
     <table class="log-table">
         <thead>
             <tr>
-                <th>Waktu</th>
-                <th>Nama User</th>
-                <th>ID User</th>
-                <th>Aktivitas</th>
-                <th>Route</th>
-                <th>Method</th>
-                <th>Deskripsi</th>
-                <th>IP</th>
+                <th class="col-waktu">Waktu</th>
+                <th class="col-nama">Nama User</th>
+                <th class="col-id">ID User</th>
+                <th class="col-aktivitas">Aktivitas</th>
+                <th class="col-route">Route</th>
+                <th class="col-method">Method</th>
+                <th class="col-deskripsi">Deskripsi</th>
+                <th class="col-ip">IP</th>
             </tr>
         </thead>
         <tbody>
             @forelse($logs as $log)
                 @php($meta = is_array($log->meta) ? $log->meta : [])
                 <tr>
-                    <td>{{ $log->created_at?->format('d/m/Y H:i:s') ?? '-' }}</td>
-                    <td>{{ $log->actor_name ?? '-' }}</td>
-                    <td>{{ $log->actor_id ?? '-' }}</td>
-                    <td>{{ $log->activity }}</td>
-                    <td>{{ $meta['route'] ?? '-' }}</td>
-                    <td>{{ $meta['method'] ?? '-' }}</td>
-                    <td>{{ $log->description ?? '-' }}</td>
-                    <td>{{ $log->ip_address ?? '-' }}</td>
+                    <td class="col-waktu">{{ $log->created_at?->format('d/m/Y H:i:s') ?? '-' }}</td>
+                    <td class="col-nama">{{ $log->actor_name ?? '-' }}</td>
+                    <td class="col-id">{{ $log->actor_id ?? '-' }}</td>
+                    <td class="col-aktivitas">
+                        <span class="activity-badge">{{ $log->activity }}</span>
+                    </td>
+                    <td class="col-route">{{ $meta['route'] ?? '-' }}</td>
+                    <td class="col-method">
+                        @if(!empty($meta['method']) && $meta['method'] !== '-')
+                            <span class="method-badge method-{{ strtolower($meta['method']) }}">{{ strtoupper($meta['method']) }}</span>
+                        @else
+                            <span class="text-muted">-</span>
+                        @endif
+                    </td>
+                    <td class="col-deskripsi">{{ $log->description ?? '-' }}</td>
+                    <td class="col-ip">{{ $log->ip_address ?? '-' }}</td>
                 </tr>
             @empty
                 <tr>
@@ -103,24 +111,42 @@
     color: #64748b;
     margin: 0 0 18px;
 }
+.toolbar {
+    margin-bottom: 16px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
 .input-search {
-    min-width: 320px;
-    max-width: 520px;
-    width: 100%;
+    min-width: 240px;
+    max-width: 480px;
+    flex: 1;
     border: 1px solid #cbd5e1;
     border-radius: 10px;
     padding: 10px 12px;
+    font-size: 14px;
+}
+.select-filter {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #334155;
+    font-size: 14px;
 }
 .table-card {
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     overflow-x: auto;
+    width: 100%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .log-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 920px;
+    min-width: 850px;
 }
 .log-table th,
 .log-table td {
@@ -128,16 +154,81 @@
     border-bottom: 1px solid #f1f5f9;
     text-align: left;
     font-size: 13px;
-    vertical-align: top;
+    vertical-align: middle;
 }
 .log-table th {
     background: #f8fafc;
     color: #334155;
     font-weight: 700;
+    white-space: nowrap;
 }
+.col-waktu {
+    white-space: nowrap;
+    width: 140px;
+}
+.col-nama {
+    min-width: 110px;
+    max-width: 180px;
+    word-break: break-word;
+}
+.col-id {
+    min-width: 110px;
+    max-width: 180px;
+    word-break: break-all;
+    font-family: monospace;
+    font-size: 12px;
+}
+.col-aktivitas {
+    min-width: 110px;
+}
+.col-route {
+    min-width: 90px;
+    max-width: 180px;
+    word-break: break-all;
+    font-family: monospace;
+    font-size: 12px;
+    color: #475569;
+}
+.col-method {
+    width: 75px;
+    text-align: center;
+}
+.col-deskripsi {
+    min-width: 180px;
+    word-break: break-word;
+}
+.col-ip {
+    white-space: nowrap;
+    width: 110px;
+    font-family: monospace;
+    font-size: 12px;
+}
+.activity-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #1e40af;
+}
+.method-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: monospace;
+}
+.method-get { background: #dbeafe; color: #1e40af; }
+.method-post { background: #dcfce7; color: #166534; }
+.method-put, .method-patch { background: #fef3c7; color: #92400e; }
+.method-delete { background: #fee2e2; color: #991b1b; }
+.text-muted { color: #94a3b8; }
 .empty-row {
     text-align: center;
     color: #64748b;
+    padding: 24px 14px;
 }
 .pagination-wrap {
     display: flex;

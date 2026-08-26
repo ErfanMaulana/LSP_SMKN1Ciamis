@@ -142,11 +142,20 @@
     }
 </style>
 
+@php
+    $backTo = $backTo ?? '';
+    $backUrl = ($backTo && str_starts_with($backTo, 'asesi:'))
+        ? route('asesor.asesi.show', substr($backTo, 6))
+        : route('asesor.ceklis-observasi.index');
+    $backLabel = ($backTo && str_starts_with($backTo, 'asesi:')) ? 'Kembali ke Detail Asesi' : 'Kembali';
+    $editUrl = route('asesor.ceklis-observasi.edit', $item->id) . ($backTo ? '?back_to=' . urlencode($backTo) : '');
+    $rekamanCreateUrl = route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $item->asesi_nik, 'skema_id' => $item->skema_id]) . ($backTo ? '&back_to=' . urlencode($backTo) : '');
+@endphp
 <div class="top-actions">
     <h2>Detail Ceklis Observasi Aktivitas Praktik</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="{{ route('asesor.ceklis-observasi.index') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Kembali
+        <a href="{{ $backUrl }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> {{ $backLabel }}
         </a>
         @if(empty($item->ttd_asesi_file))
             <button class="btn btn-secondary" style="opacity: 0.6; cursor: not-allowed;" onclick="alert('Form FR.IA.01 belum dapat diexport karena asesi belum menandatangani ceklis observasi.')">
@@ -157,10 +166,10 @@
                 <i class="bi bi-download"></i> Export FR.IA.01 (.doc)
             </a>
         @endif
-        <a href="{{ route('asesor.ceklis-observasi.edit', $item->id) }}" class="btn btn-primary">
+        <a href="{{ $editUrl }}" class="btn btn-primary">
             <i class="bi bi-pencil-square"></i> Edit
         </a>
-        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.create', ['asesi_nik' => $item->asesi_nik, 'skema_id' => $item->skema_id]) }}" class="btn btn-primary">
+        <a href="{{ $rekamanCreateUrl }}" class="btn btn-primary">
             <i class="bi bi-journal-plus"></i> Buat Rekaman Asesmen
         </a>
     </div>

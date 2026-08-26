@@ -124,12 +124,14 @@
         margin-top: 28px; padding-top: 20px; border-top: 1px solid #e2e8f0;
     }
     .btn-reg {
-        padding: 10px 28px; border-radius: 8px; font-size: 14px; font-weight: 600;
+        padding: 12px 32px; border-radius: 8px; font-size: 14px; font-weight: 600;
         cursor: pointer; border: none; display: inline-flex;
         align-items: center; gap: 8px; transition: all .2s;
     }
-    .btn-reg-primary { background: var(--brand-500); color: white; flex: 1; justify-content: center; }
+    .btn-reg-primary { background: var(--brand-500); color: white; justify-content: center; }
     .btn-reg-primary:hover { background: var(--brand-600); }
+    .btn-reg-secondary { background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; justify-content: center; }
+    .btn-reg-secondary:hover { background: #e2e8f0; color: #0f172a; }
 
     /* NIK validation */
     .nik-feedback { font-size: 12px; margin-top: 4px; display: none; align-items: center; gap: 6px; }
@@ -312,17 +314,32 @@
     <p class="subtitle">Lengkapi formulir pendaftaran asesi berikut ini. NIK Anda sudah terisi otomatis dari akun.</p>
 
     @if ($errors->any())
-        <div class="alert-box alert-error">
-            <i class="bi bi-exclamation-circle"></i>
-            <div>
-                <strong>Terdapat kesalahan:</strong>
-                <ul class="error-list">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+        @if(session('step1_incomplete'))
+            <div class="alert-box alert-error" id="step1ErrorBanner" style="border-left: 4px solid #ef4444;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>
+                    <strong>Formulir Data Diri belum lengkap!</strong>
+                    <p style="margin: 4px 0 0; font-size: 12.5px; color: #475569;">Selesaikan pengisian field berikut sebelum mengirim pendaftaran ke admin:</p>
+                    <ul class="error-list">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
-        </div>
+        @else
+            <div class="alert-box alert-error">
+                <i class="bi bi-exclamation-circle"></i>
+                <div>
+                    <strong>Terdapat kesalahan:</strong>
+                    <ul class="error-list">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
     @endif
 
     <div class="alert-box alert-info">
@@ -357,14 +374,24 @@
 
             <div class="reg-group">
                 <label>Tempat Lahir <span class="required">*</span></label>
-                <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir') }}" required
+                <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir', $asesi->tempat_lahir ?? '') }}" required
                        class="reg-control {{ $errors->has('tempat_lahir') ? 'is-invalid' : '' }}" placeholder="Masukkan tempat lahir">
                 @error('tempat_lahir')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
             <div class="reg-group">
                 <label>Tanggal Lahir <span class="required">*</span></label>
-                <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $nikData['tanggal_lahir'] ?? '') }}" required {{ !empty($nikAutofill) ? 'readonly' : '' }}
+                @php
+                    $tglLahirVal = old('tanggal_lahir');
+                    if (!$tglLahirVal) {
+                        if (!empty($asesi->tanggal_lahir)) {
+                            $tglLahirVal = \Carbon\Carbon::parse($asesi->tanggal_lahir)->format('Y-m-d');
+                        } elseif (!empty($nikData['tanggal_lahir'])) {
+                            $tglLahirVal = $nikData['tanggal_lahir'];
+                        }
+                    }
+                @endphp
+                <input type="date" name="tanggal_lahir" value="{{ $tglLahirVal }}" required {{ !empty($nikAutofill) ? 'readonly' : '' }}
                        class="reg-control {{ $errors->has('tanggal_lahir') ? 'is-invalid' : '' }}" style="{{ !empty($nikAutofill) ? 'background:#f1f5f9;color:#475569;cursor:default;' : '' }}">
                 <small style="font-size:11px;color:{{ !empty($nikAutofill) ? '#0073bd' : '#f59e0b' }};margin-top:4px;display:flex;align-items:center;gap:4px;">
                     <i class="bi {{ !empty($nikAutofill) ? 'bi-magic' : 'bi-exclamation-triangle' }}"></i>
@@ -378,18 +405,18 @@
                 <div class="radio-group">
                     <label class="radio-label" style="{{ !empty($nikAutofill) ? 'background:#f1f5f9;cursor:default;opacity:0.85;' : '' }}">
                         <input type="radio" name="jenis_kelamin" value="Laki-laki"
-                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Laki-laki' ? 'checked' : '' }} required {{ !empty($nikAutofill) ? 'disabled' : '' }}>
+                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? ($asesi->jenis_kelamin ?? '')) == 'Laki-laki' ? 'checked' : '' }} required {{ !empty($nikAutofill) ? 'disabled' : '' }}>
                         <span>Laki-laki</span>
                     </label>
                     <label class="radio-label" style="{{ !empty($nikAutofill) ? 'background:#f1f5f9;cursor:default;opacity:0.85;' : '' }}">
                         <input type="radio" name="jenis_kelamin" value="Perempuan"
-                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') == 'Perempuan' ? 'checked' : '' }} {{ !empty($nikAutofill) ? 'disabled' : '' }}>
+                            {{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? ($asesi->jenis_kelamin ?? '')) == 'Perempuan' ? 'checked' : '' }} {{ !empty($nikAutofill) ? 'disabled' : '' }}>
                         <span>Perempuan</span>
                     </label>
                 </div>
                 @if(!empty($nikAutofill))
                     {{-- Hidden input so value still submits when disabled --}}
-                    <input type="hidden" name="jenis_kelamin" value="{{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? '') }}">
+                    <input type="hidden" name="jenis_kelamin" value="{{ old('jenis_kelamin', $nikData['jenis_kelamin'] ?? ($asesi->jenis_kelamin ?? '')) }}">
                 @endif
                 <small style="font-size:11px;color:{{ !empty($nikAutofill) ? '#0073bd' : '#f59e0b' }};margin-top:4px;display:flex;align-items:center;gap:4px;">
                     <i class="bi {{ !empty($nikAutofill) ? 'bi-magic' : 'bi-exclamation-triangle' }}"></i>
@@ -399,32 +426,32 @@
 
             <div class="reg-group">
                 <label>Kewarganegaraan <span class="required">*</span></label>
-                <input type="text" name="kewarganegaraan" value="{{ old('kewarganegaraan', 'Indonesia') }}" required
+                <input type="text" name="kewarganegaraan" value="{{ old('kewarganegaraan', $asesi->kewarganegaraan ?? 'Indonesia') }}" required
                        class="reg-control" placeholder="Indonesia">
             </div>
 
             <div class="reg-group reg-full">
                 <label>Alamat Lengkap <span class="required">*</span></label>
                 <textarea name="alamat" rows="3" required class="reg-control {{ $errors->has('alamat') ? 'is-invalid' : '' }}"
-                          placeholder="Jl. Nama jalan RT/RW - Desa - Kecamatan">{{ old('alamat') }}</textarea>
+                          placeholder="Jl. Nama jalan RT/RW - Desa - Kecamatan">{{ old('alamat', $asesi->alamat ?? '') }}</textarea>
                 @error('alamat')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
             <div class="reg-group">
                 <label>Kode POS <span class="required">*</span></label>
-                <input type="text" name="kode_pos" value="{{ old('kode_pos') }}" required
+                <input type="text" name="kode_pos" value="{{ old('kode_pos', $asesi->kode_pos ?? '') }}" required
                        class="reg-control" placeholder="XXXXX">
             </div>
 
             <div class="reg-group">
                 <label>No Telepon/HP <span class="required">*</span></label>
-                <input type="text" name="telepon_hp" value="{{ old('telepon_hp') }}" required
+                <input type="text" name="telepon_hp" value="{{ old('telepon_hp', $asesi->telepon_hp ?? '') }}" required
                        class="reg-control" placeholder="0812XXXXXXXX">
             </div>
 
             <div class="reg-group">
                 <label>Email <span class="required">*</span></label>
-                <input type="email" name="email" value="{{ old('email') }}" required
+                <input type="email" name="email" value="{{ old('email', $asesi->email ?? '') }}" required
                        class="reg-control {{ $errors->has('email') ? 'is-invalid' : '' }}" placeholder="nama@gmail.com">
                 @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
@@ -434,7 +461,7 @@
                 <select name="pekerjaan" required class="reg-control">
                     <option value="">Pilih</option>
                     @foreach(['Pelajar', 'Mahasiswa', 'Karyawan Swasta', 'PNS', 'Wiraswasta', 'Lainnya'] as $p)
-                        <option value="{{ $p }}" {{ old('pekerjaan') == $p ? 'selected' : '' }}>{{ $p }}</option>
+                        <option value="{{ $p }}" {{ old('pekerjaan', $asesi->pekerjaan ?? '') == $p ? 'selected' : '' }}>{{ $p }}</option>
                     @endforeach
                 </select>
             </div>
@@ -444,7 +471,7 @@
                 <select name="pendidikan_terakhir" required class="reg-control">
                     <option value="">Pilih</option>
                     @foreach(['SD', 'SMP', 'SMA/SMK', 'D3', 'S1', 'S2', 'S3'] as $p)
-                        <option value="{{ $p }}" {{ old('pendidikan_terakhir') == $p ? 'selected' : '' }}>{{ $p }}</option>
+                        <option value="{{ $p }}" {{ old('pendidikan_terakhir', $asesi->pendidikan_terakhir ?? '') == $p ? 'selected' : '' }}>{{ $p }}</option>
                     @endforeach
                 </select>
             </div>
@@ -493,51 +520,55 @@
         <div class="reg-grid">
             <div class="reg-group">
                 <label>Nama Lembaga / Perusahaan <span class="required">*</span></label>
-                <input type="text" name="nama_lembaga" value="{{ old('nama_lembaga', 'SMKN 1 Ciamis') }}" required
+                <input type="text" name="nama_lembaga" value="{{ old('nama_lembaga', $asesi->nama_lembaga ?? 'SMKN 1 Ciamis') }}" required
                        class="reg-control" placeholder="SMKN 1 Ciamis">
             </div>
 
             <div class="reg-group">
                 <label>Jabatan <span class="required">*</span></label>
-                <input type="text" name="jabatan" value="{{ old('jabatan') }}" required
+                <input type="text" name="jabatan" value="{{ old('jabatan', $asesi->jabatan ?? '') }}" required
                        class="reg-control" placeholder="Siswa / Staff">
             </div>
 
             <div class="reg-group reg-full">
                 <label>Alamat Lembaga <span class="required">*</span></label>
                 <textarea name="alamat_lembaga" rows="3" required class="reg-control"
-                          placeholder="Jl. Lembaga No. 123...">{{ old('alamat_lembaga') }}</textarea>
+                          placeholder="Jl. Lembaga No. 123...">{{ old('alamat_lembaga', $asesi->alamat_lembaga ?? '') }}</textarea>
             </div>
 
             <div class="reg-group">
                 <label>No. Telepon Lembaga</label>
-                <input type="text" name="no_fax_lembaga" value="{{ old('no_fax_lembaga') }}"
+                <input type="text" name="no_fax_lembaga" value="{{ old('no_fax_lembaga', $asesi->no_fax_lembaga ?? '') }}"
                        class="reg-control" placeholder="[0xxx] ...">
             </div>
 
             <div class="reg-group">
                 <label>No. Fax Lembaga</label>
-                <input type="text" name="telepon_rumah" value="{{ old('telepon_rumah') }}"
+                <input type="text" name="telepon_rumah" value="{{ old('telepon_rumah', $asesi->telepon_rumah ?? '') }}"
                        class="reg-control" placeholder="[0xxx] ...">
             </div>
 
             <div class="reg-group">
                 <label>Email Lembaga <span class="required">*</span></label>
-                <input type="email" name="email_lembaga" value="{{ old('email_lembaga') }}" required
+                <input type="email" name="email_lembaga" value="{{ old('email_lembaga', $asesi->email_lembaga ?? '') }}" required
                        class="reg-control {{ $errors->has('email_lembaga') ? 'is-invalid' : '' }}" placeholder="nama@lembaga.sch.id">
                 @error('email_lembaga')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
 
             <div class="reg-group">
                 <label>Kode POS Lembaga</label>
-                <input type="text" name="unit_lembaga" value="{{ old('unit_lembaga') }}"
+                <input type="text" name="unit_lembaga" value="{{ old('unit_lembaga', $asesi->unit_lembaga ?? '') }}"
                        class="reg-control" placeholder="XXXXX">
             </div>
         </div>
 
         <!-- Actions -->
         <div class="reg-actions">
-            <button type="submit" class="btn-reg btn-reg-primary">
+            <button type="submit" name="action" value="draft" class="btn-reg btn-reg-secondary" formnovalidate>
+                <i class="bi bi-bookmark-fill" style="color:#64748b;"></i>
+                <span>Simpan Draft</span>
+            </button>
+            <button type="submit" name="action" value="next" class="btn-reg btn-reg-primary" formnovalidate>
                 <span>Selanjutnya</span>
                 <i class="bi bi-arrow-right"></i>
             </button>
@@ -617,4 +648,58 @@
     });
 })();
 </script>
+
+@if($errors->any())
+<script>
+(function () {
+    // Map of field name → input element id / selector
+    const fieldMap = {
+        'nama':               '[name="nama"]',
+        'tempat_lahir':       '[name="tempat_lahir"]',
+        'tanggal_lahir':      '[name="tanggal_lahir"]',
+        'jenis_kelamin':      '[name="jenis_kelamin"]',
+        'kewarganegaraan':    '[name="kewarganegaraan"]',
+        'alamat':             '[name="alamat"]',
+        'kode_pos':           '[name="kode_pos"]',
+        'telepon_hp':         '[name="telepon_hp"]',
+        'email':              '[name="email"]',
+        'pekerjaan':          '[name="pekerjaan"]',
+        'pendidikan_terakhir':'[name="pendidikan_terakhir"]',
+        'ID_jurusan':         '#jurusan-select',
+        'skema_id':           '#skema-select',
+        'nama_lembaga':       '[name="nama_lembaga"]',
+        'alamat_lembaga':     '[name="alamat_lembaga"]',
+        'jabatan':            '[name="jabatan"]',
+        'email_lembaga':      '[name="email_lembaga"]',
+    };
+
+    const errorFields = @json(array_keys($errors->toArray()));
+
+    window.addEventListener('DOMContentLoaded', function () {
+        // Find the first error field that exists in the DOM
+        for (const field of errorFields) {
+            const selector = fieldMap[field];
+            if (!selector) continue;
+            const el = document.querySelector(selector);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    el.focus();
+                    el.classList.add('is-invalid');
+                }, 400);
+                break;
+            }
+        }
+
+        // Also highlight all error fields
+        errorFields.forEach(field => {
+            const selector = fieldMap[field];
+            if (!selector) return;
+            const el = document.querySelector(selector);
+            if (el) el.classList.add('is-invalid');
+        });
+    });
+})();
+</script>
+@endif
 @endsection

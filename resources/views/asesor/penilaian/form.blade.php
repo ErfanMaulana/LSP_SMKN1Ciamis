@@ -209,6 +209,14 @@
 @endsection
 
 @section('content')
+@php
+    $backToVal = $backTo ?? request()->get('back_to', '');
+    $backUrl = ($backToVal && str_starts_with($backToVal, 'asesi:'))
+        ? route('asesor.asesi.show', substr($backToVal, 6))
+        : route('asesor.entry-penilaian');
+    $backLabel = ($backToVal && str_starts_with($backToVal, 'asesi:')) ? 'Kembali ke Detail Asesi' : 'Kembali ke Daftar Nilai';
+@endphp
+
 <div class="top-info">
     <div>
         <h3>Input Nilai Asesi</h3>
@@ -222,14 +230,17 @@
         <a href="{{ route('asesor.entry-penilaian.export', $asesi->NIK) }}" class="btn-export" target="_blank">
             <i class="bi bi-download"></i> Export Nilai Asesmen
         </a>
-        <a href="{{ route('asesor.entry-penilaian') }}" class="btn-back">
-            <i class="bi bi-arrow-left"></i> Kembali ke Daftar Nilai
+        <a href="{{ $backUrl }}" class="btn-back">
+            <i class="bi bi-arrow-left"></i> {{ $backLabel }}
         </a>
     </div>
 </div>
 
 <form method="POST" action="{{ route('asesor.entry-penilaian.store', $asesi->NIK) }}">
     @csrf
+    @if(!empty($backToVal))
+        <input type="hidden" name="back_to" value="{{ $backToVal }}">
+    @endif
     <div class="panel-card">
         <div class="panel-head">
             <h4>Nilai Per Elemen (0 - 100)</h4>

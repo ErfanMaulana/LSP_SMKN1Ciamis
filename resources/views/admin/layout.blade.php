@@ -249,6 +249,8 @@
         .main-content {
             flex: 1;
             margin-left: 260px;
+            min-width: 0;
+            width: calc(100% - 260px);
             transition: all 0.3s ease;
         }
 
@@ -713,6 +715,8 @@
         .content-wrapper {
             padding: 30px;
             max-width: 100%;
+            width: 100%;
+            min-width: 0;
         }
 
         .admin-table-scroll {
@@ -1095,7 +1099,7 @@
                 @endif
 
                 <!-- DATA MASTER Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view', 'bukti-persyaratan-dasar-pemohon.view', 'jadwal-ujikom.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['asesor.view', 'asesi.view', 'akun-asesi.view', 'jurusan.view', 'tuk.view', 'skema.view', 'bukti-persyaratan-dasar-pemohon.view', 'jadwal-ujikom.view', 'banding-asesmen-komponen.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>DATA MASTER</span>
@@ -1178,7 +1182,7 @@
                 @endif
 
                 <!-- PROGRAM SERTIFIKASI Section -->
-                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view', 'nilai-asesor.view', 'banding-asesmen.view']))
+                @if(Auth::guard('admin')->user()->hasAnyPermission(['verifikasi-asesi.view', 'kelompok.view', 'jadwal-ujikom.view', 'asesmen-mandiri.view', 'persetujuan-asesmen.view', 'ceklis-observasi-aktivitas-praktik.view', 'rekaman-asesmen-kompetensi.view', 'nilai-asesor.view', 'banding-asesmen.view']))
                     <div class="menu-section">
                         <div class="menu-section-title" onclick="toggleMenuSection(this)">
                             <span>PROGRAM SERTIFIKASI</span>

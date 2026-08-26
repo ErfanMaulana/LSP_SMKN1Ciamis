@@ -871,7 +871,9 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('elemen_id');
 
-        return view('asesor.penilaian.form', compact('account', 'asesor', 'asesi', 'skema', 'pivot', 'existingNilai'));
+        $backTo = trim((string) request()->get('back_to'));
+
+        return view('asesor.penilaian.form', compact('account', 'asesor', 'asesi', 'skema', 'pivot', 'existingNilai', 'backTo'));
     }
 
     /**
@@ -932,6 +934,16 @@ class DashboardController extends Controller
                     'status' => $status,
                 ]
             );
+        }
+
+        // Redirect kembali ke halaman detail asesi jika asesor datang dari sana
+        $backTo = trim((string) $request->input('back_to'));
+        if ($backTo && str_starts_with($backTo, 'asesi:')) {
+            $asesiNik = substr($backTo, strlen('asesi:'));
+            if ($asesiNik) {
+                return redirect()->route('asesor.asesi.show', $asesiNik)
+                    ->with('success', 'Nilai per elemen berhasil disimpan.');
+            }
         }
 
         return redirect()->route('asesor.entry-penilaian')
@@ -1369,5 +1381,210 @@ class DashboardController extends Controller
 
         return redirect()->route('asesor.asesi.review', $asesiNik)
             ->with('success', 'Rekomendasi berhasil disimpan: ' . $label . '.');
+    }
+
+    /**
+     * Tampilkan detail data asesi dan perkembangan asesmen kompetensi untuk asesor
+     */
+    public function asesiShow($nik)
+    {
+        $account = Auth::guard('account')->user();
+        $asesor  = $this->getAsesor();
+        $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+
+        $asesi = Asesi::with(['jurusan', 'buktiPendukung', 'verifiedBy', 'skemas.buktiPersyaratanDasarPemohon'])
+            ->where('NIK', $nik)
+            ->firstOrFail();
+
+        // Query pivot skema yang diikuti asesi
+        $asesiSkemasQuery = DB::table('asesi_skema')
+            ->join('skemas', 'asesi_skema.skema_id', '=', 'skemas.id')
+            ->where('asesi_skema.asesi_nik', $asesi->NIK)
+            ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)');
+
+        if (count($skemaIds) > 0) {
+            $asesiSkemasQuery->whereIn('asesi_skema.skema_id', $skemaIds);
+        }
+
+        $asesiSkemas = $asesiSkemasQuery->select('skemas.*', 'asesi_skema.status as status_mandiri', 'asesi_skema.tanggal_selesai as tgl_selesai_mandiri', 'asesi_skema.attempt')
+            ->get();
+
+        abort_if(count($skemaIds) > 0 && $asesiSkemas->isEmpty(), 403, 'Asesi ini tidak terdaftar di skema Anda.');
+
+        $hasilUjikom = [];
+
+        foreach ($asesiSkemas as $skema) {
+            // 1. Pendaftaran & Verifikasi
+            $isStep1Completed = ($asesi->status === 'approved');
+            $stepPendaftaran = [
+                'name' => 'Pendaftaran & Verifikasi',
+                'status' => $isStep1Completed ? 'completed' : 'pending',
+                'label' => $isStep1Completed ? 'Terverifikasi' : 'Menunggu Verifikasi',
+                'description' => $isStep1Completed
+                    ? 'Berkas pendaftaran telah diverifikasi oleh admin.'
+                    : 'Berkas pendaftaran sedang dalam proses verifikasi oleh admin.'
+            ];
+
+            // 2. Asesmen Mandiri (FR.APL.02)
+            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
+            $isStep2Completed = $isMandiriSelesai;
+            $stepMandiri = [
+                'name' => 'Asesmen Mandiri (FR.APL.02)',
+                'status' => $isStep2Completed ? 'completed' : 'pending',
+                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
+                'description' => $isMandiriSelesai
+                    ? 'Asesi telah menyelesaikan pengisian form asesmen mandiri.'
+                    : 'Asesi belum mengisi form asesmen mandiri.'
+            ];
+
+            // 3. Jadwal Uji Kompetensi
+            $jadwal = DB::table('jadwal_peserta')
+                ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
+                ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
+                ->where('jadwal_ujikom.skema_id', $skema->id)
+                ->where('jadwal_peserta.attempt', $skema->attempt)
+                ->select('jadwal_ujikom.*')
+                ->first();
+
+            $isJadwalSelesai = (bool)$jadwal;
+            $isStep3Completed = $isJadwalSelesai && $isStep2Completed;
+            
+            $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
+            if ($isJadwalSelesai) {
+                $tukName = DB::table('tuk')->where('id', $jadwal->tuk_id)->value('nama_tuk') ?? 'TUK';
+                $tglMulai = $jadwal->tanggal_mulai ? \Carbon\Carbon::parse($jadwal->tanggal_mulai)->locale('id')->isoFormat('D MMMM YYYY') : '-';
+                $jadwalDesc = 'Jadwal: ' . $tglMulai . ' di ' . $tukName;
+            }
+
+            $stepJadwal = [
+                'name' => 'Jadwal Uji Kompetensi',
+                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
+                'description' => $jadwalDesc
+            ];
+
+            // 4. Persetujuan Asesmen (FR.APL.03)
+            $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
+            $persetujuan = DB::table('persetujuan_asesmen')
+                ->where('nomor_skema', $skema->nomor_skema)
+                ->where('attempt', $skema->attempt)
+                ->where(function($q) use ($asesi, $useNik) {
+                    $q->where('nama_asesi', $asesi->nama);
+                    if ($useNik) {
+                        $q->orWhere('asesi_nik', $asesi->NIK);
+                    }
+                })
+                ->first();
+
+            $isPersetujuanSelesai = $persetujuan && !empty($persetujuan->ttd_asesi_nama) && !empty($persetujuan->ttd_asesor_nama);
+            $isStep4Completed = $isPersetujuanSelesai && $isStep3Completed;
+            
+            $stepPersetujuan = [
+                'name' => 'Persetujuan Asesmen (FR.APL.03)',
+                'status' => $isStep4Completed ? 'completed' : 'pending',
+                'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
+                'description' => $isPersetujuanSelesai
+                    ? 'Persetujuan asesmen telah disepakati dan ditandatangani oleh Asesi dan Asesor.'
+                    : 'Dokumen persetujuan asesmen belum selesai ditandatangani.'
+            ];
+
+            // 5. Penilaian / Ceklis Observasi (FR.IA.01)
+            $ceklis = DB::table('ceklis_observasi_aktivitas_praktiks')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->where('attempt', $skema->attempt)
+                ->first();
+
+            $isPenilaianSelesai = $ceklis && !empty($ceklis->ttd_asesi_file) && !empty($ceklis->ttd_asesor_file);
+            $isStep5Completed = $isPenilaianSelesai && $isStep4Completed;
+            
+            $penilaianLabel = 'Belum Dinilai';
+            $penilaianDesc = 'Menunggu penilaian observasi praktik dari Asesor.';
+            if ($ceklis) {
+                if ($isPenilaianSelesai) {
+                    $penilaianLabel = 'Selesai & Ditandatangani';
+                    $penilaianDesc = 'Proses observasi praktik telah dinilai dan disetujui kedua belah pihak.';
+                } elseif (!empty($ceklis->ttd_asesor_file)) {
+                    $penilaianLabel = 'Menunggu Tanda Tangan Asesi';
+                    $penilaianDesc = 'Asesor telah menilai. Menunggu tanda tangan Asesi.';
+                }
+            }
+
+            $stepPenilaian = [
+                'name' => 'Penilaian & Ceklis Observasi (FR.IA.01)',
+                'status' => $isStep5Completed ? 'completed' : 'pending',
+                'label' => $penilaianLabel,
+                'description' => $penilaianDesc
+            ];
+
+            // 6. Rekaman Asesmen (FR.AK.02)
+            $rekaman = DB::table('rekaman_asesmen_kompetensi')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->where('attempt', $skema->attempt)
+                ->first();
+
+            $isRekamanSelesai = $rekaman && !empty($rekaman->ttd_asesi_file) && !empty($rekaman->ttd_asesor_file);
+            $isStep6Completed = $isRekamanSelesai && $isStep5Completed;
+
+            $rekamanLabel = 'Belum Diisi';
+            $rekamanDesc = 'Menunggu pengisian rekaman asesmen dari Asesor.';
+            if ($rekaman) {
+                if ($isRekamanSelesai) {
+                    $rekamanLabel = 'Selesai & Ditandatangani';
+                    $rekamanDesc = 'Rekaman asesmen kompetensi telah ditandatangani oleh kedua belah pihak.';
+                } elseif (!empty($rekaman->ttd_asesor_file)) {
+                    $rekamanLabel = 'Menunggu Tanda Tangan Asesi';
+                    $rekamanDesc = 'Asesor telah mengisi rekaman asesmen. Menunggu tanda tangan Asesi.';
+                }
+            }
+
+            $stepRekaman = [
+                'name' => 'Rekaman Asesmen (FR.AK.02)',
+                'status' => $isStep6Completed ? 'completed' : 'pending',
+                'label' => $rekamanLabel,
+                'description' => $rekamanDesc
+            ];
+
+            // 7. Nilai Asesor
+            $nilaiExists = DB::table('asesor_nilai_elemens')
+                ->where('asesi_nik', $asesi->NIK)
+                ->where('skema_id', $skema->id)
+                ->exists();
+            $isStep7Completed = $nilaiExists && $isStep6Completed;
+            
+            $stepNilai = [
+                'name' => 'Nilai Asesor',
+                'status' => $isStep7Completed ? 'completed' : 'pending',
+                'label' => $nilaiExists ? 'Selesai' : 'Belum Dinilai',
+                'description' => $nilaiExists
+                    ? 'Asesor telah menginput nilai kompetensi.'
+                    : 'Asesor belum menginput nilai kompetensi.'
+            ];
+
+            $allCompleted = $isStep7Completed;
+
+            $hasilUjikom[] = (object)[
+                'skema_id' => $skema->id,
+                'nama_skema' => $skema->nama_skema,
+                'nomor_skema' => $skema->nomor_skema,
+                'steps' => [$stepPendaftaran, $stepMandiri, $stepJadwal, $stepPersetujuan, $stepPenilaian, $stepRekaman, $stepNilai],
+                'all_completed' => $allCompleted,
+                'ceklis' => $ceklis,
+                'rekaman' => $rekaman,
+                'jadwal' => $jadwal,
+                'persetujuan' => $persetujuan,
+                'is_jadwal_selesai' => $isJadwalSelesai,
+                'is_persetujuan_selesai' => $isPersetujuanSelesai,
+                'is_nilai_selesai' => $nilaiExists,
+                'rekomendasi' => $ceklis ? $ceklis->rekomendasi : null,
+                'tanggal_ceklis' => $ceklis && $ceklis->ttd_asesi_tanggal ? \Carbon\Carbon::parse($ceklis->ttd_asesi_tanggal)->locale('id')->isoFormat('D MMMM YYYY') : null,
+                'asesor_nama' => $ceklis && $ceklis->ttd_asesor_nama ? $ceklis->ttd_asesor_nama : null,
+            ];
+        }
+
+        $hasilUjikom = collect($hasilUjikom);
+
+        return view('asesor.asesi.show', compact('account', 'asesor', 'asesi', 'hasilUjikom'));
     }
 }

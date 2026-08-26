@@ -60,11 +60,19 @@
     }
 </style>
 
+@php
+    $backTo = $backTo ?? '';
+    $backUrl = ($backTo && str_starts_with($backTo, 'asesi:'))
+        ? route('asesor.asesi.show', substr($backTo, 6))
+        : route('asesor.rekaman-asesmen-kompetensi.index');
+    $backLabel = ($backTo && str_starts_with($backTo, 'asesi:')) ? 'Kembali ke Detail Asesi' : 'Kembali';
+    $editUrl = route('asesor.rekaman-asesmen-kompetensi.edit', $item->id) . ($backTo ? '?back_to=' . urlencode($backTo) : '');
+@endphp
 <div class="top-actions">
     <h2>Detail Rekaman Asesmen Kompetensi</h2>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
-        <a href="{{ route('asesor.rekaman-asesmen-kompetensi.edit', $item->id) }}" class="btn btn-primary"><i class="bi bi-pencil-square"></i> Edit</a>
+        <a href="{{ $backUrl }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> {{ $backLabel }}</a>
+        <a href="{{ $editUrl }}" class="btn btn-primary"><i class="bi bi-pencil-square"></i> Edit</a>
         @if(empty($item->ttd_asesi_file) || empty($item->ttd_asesor_file))
             <button class="btn" style="background:#cbd5e1; color:#94a3b8; cursor:not-allowed;" onclick="alert('Form belum ditandatangani secara lengkap oleh asesi dan asesor.')" title="Belum ditandatangani lengkap">
                 <i class="bi bi-download"></i> Export FR.AK.02 (.doc)

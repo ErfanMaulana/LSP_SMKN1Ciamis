@@ -12,8 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Modify enum to add 'banned' value
-        DB::statement("ALTER TABLE asesi MODIFY COLUMN status ENUM('pending', 'approved', 'rejected', 'banned') NOT NULL DEFAULT 'pending' COMMENT 'Status verifikasi: pending=menunggu, approved=disetujui, rejected=ditolak sementara, banned=ditolak permanen'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE asesi MODIFY COLUMN status ENUM('pending', 'approved', 'rejected', 'banned') NOT NULL DEFAULT 'pending' COMMENT 'Status verifikasi: pending=menunggu, approved=disetujui, rejected=ditolak sementara, banned=ditolak permanen'");
+        }
     }
 
     /**
@@ -23,6 +24,8 @@ return new class extends Migration
     {
         // First update any 'banned' back to 'rejected' before removing the value
         DB::statement("UPDATE asesi SET status = 'rejected' WHERE status = 'banned'");
-        DB::statement("ALTER TABLE asesi MODIFY COLUMN status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending' COMMENT 'Status verifikasi: pending=menunggu, approved=disetujui, rejected=ditolak'");
+        if (DB::getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE asesi MODIFY COLUMN status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending' COMMENT 'Status verifikasi: pending=menunggu, approved=disetujui, rejected=ditolak'");
+        }
     }
 };

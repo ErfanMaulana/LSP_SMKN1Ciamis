@@ -116,6 +116,11 @@ class AuthController extends Controller
             return redirect()->route('asesi.pendaftaran.formulir');
         }
 
+        // If draft, redirect to document upload (Step 2)
+        if ($asesi->status === 'draft') {
+            return redirect()->route('asesi.pendaftaran.dokumen');
+        }
+
         if ($asesi->status !== 'approved') {
             return view('asesi.dashboard-pending', compact('account', 'asesi'));
         }

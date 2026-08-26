@@ -779,6 +779,8 @@ class PersetujuanAsesmenFrontController extends Controller
 
         $savedSignature = $asesor ? $asesor->saved_tanda_tangan : null;
 
+        $backTo = trim((string) $request->get('back_to'));
+
         return view('persetujuan-asesmen.front', [
             'item' => $item,
             'role' => 'asesor',
@@ -786,6 +788,7 @@ class PersetujuanAsesmenFrontController extends Controller
             'tukList' => $tukList,
             'asesiNik' => $asesiNik,
             'savedSignature' => $savedSignature,
+            'backTo' => $backTo,
         ]);
     }
 
@@ -871,6 +874,16 @@ class PersetujuanAsesmenFrontController extends Controller
         }
 
         $item->update($data);
+
+        // Redirect kembali ke halaman detail asesi jika asesor datang dari sana
+        $backTo = trim((string) $request->input('back_to'));
+        if ($backTo && str_starts_with($backTo, 'asesi:')) {
+            $asesiNik = substr($backTo, strlen('asesi:'));
+            if ($asesiNik) {
+                return redirect()->route('asesor.asesi.show', $asesiNik)
+                    ->with('success', 'Persetujuan asesmen berhasil disimpan');
+            }
+        }
 
         return redirect()->back()->with('success', 'Persetujuan asesmen berhasil disimpan');
     }

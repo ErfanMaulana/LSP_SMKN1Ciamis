@@ -231,6 +231,7 @@ class CeklisObservasiController extends Controller
         }
 
         $requestedAsesiNik = trim((string) $request->get('asesi_nik'));
+        $backTo = trim((string) $request->get('back_to'));
         if ($requestedAsesiNik !== '') {
             $asesi = Asesi::query()
                 ->where('NIK', $requestedAsesiNik)
@@ -272,9 +273,17 @@ class CeklisObservasiController extends Controller
                 if ($existing) {
                     $ceklisObj = CeklisObservasiAktivitasPraktik::find($existing->id);
                     if ($ceklisObj && (empty($ceklisObj->ttd_asesor_nama) || empty($ceklisObj->ttd_asesor_file))) {
-                        return redirect()->route('asesor.ceklis-observasi.edit', $existing->id);
+                        $editUrl = route('asesor.ceklis-observasi.edit', $existing->id);
+                        if ($backTo) {
+                            $editUrl .= '?back_to=' . urlencode($backTo);
+                        }
+                        return redirect($editUrl);
                     }
-                    return redirect()->route('asesor.ceklis-observasi.show', $existing->id);
+                    $showUrl = route('asesor.ceklis-observasi.show', $existing->id);
+                    if ($backTo) {
+                        $showUrl .= '?back_to=' . urlencode($backTo);
+                    }
+                    return redirect($showUrl);
                 }
 
                 $defaults['asesi_nik']    = $asesi->NIK;
@@ -317,7 +326,7 @@ class CeklisObservasiController extends Controller
 
         $savedSignature = $this->formatSignatureToUrl($asesor?->saved_tanda_tangan);
 
-        return view('asesor.ceklis-observasi.create', compact('account', 'asesor', 'activeSkema', 'skemas', 'defaults', 'savedSignature'));
+        return view('asesor.ceklis-observasi.create', compact('account', 'asesor', 'activeSkema', 'skemas', 'defaults', 'savedSignature', 'backTo'));
     }
 
     public function store(Request $request)
@@ -367,6 +376,16 @@ class CeklisObservasiController extends Controller
             $item = CeklisObservasiAktivitasPraktik::create($data);
             $item->details()->createMany($details);
         });
+
+        // Redirect kembali ke halaman detail asesi jika asesor datang dari sana
+        $backTo = trim((string) $request->input('back_to'));
+        if ($backTo && str_starts_with($backTo, 'asesi:')) {
+            $asesiNik = substr($backTo, strlen('asesi:'));
+            if ($asesiNik) {
+                return redirect()->route('asesor.asesi.show', $asesiNik)
+                    ->with('success', 'Ceklis observasi berhasil disimpan.');
+            }
+        }
 
         return redirect()->route('asesor.ceklis-observasi.index')
             ->with('success', 'Ceklis observasi berhasil disimpan.');
@@ -553,6 +572,16 @@ class CeklisObservasiController extends Controller
             $item->details()->delete();
             $item->details()->createMany($details);
         });
+
+        // Redirect kembali ke halaman detail asesi jika asesor datang dari sana
+        $backTo = trim((string) $request->input('back_to'));
+        if ($backTo && str_starts_with($backTo, 'asesi:')) {
+            $asesiNik = substr($backTo, strlen('asesi:'));
+            if ($asesiNik) {
+                return redirect()->route('asesor.asesi.show', $asesiNik)
+                    ->with('success', 'Ceklis observasi berhasil diperbarui.');
+            }
+        }
 
         return redirect()->route('asesor.ceklis-observasi.index')
             ->with('success', 'Ceklis observasi berhasil diperbarui.');
