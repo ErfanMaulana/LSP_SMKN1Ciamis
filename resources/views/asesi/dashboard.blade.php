@@ -923,10 +923,16 @@
                                 
                                 {{-- Provide direct links/buttons for pending actions --}}
                                 @if($step['status'] !== 'completed')
-                                    @if($index === 1) {{-- Asesmen Mandiri --}}
-                                        <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="btn-action btn-outline-primary">
-                                            <i class="bi bi-pencil-square"></i> Isi Asesmen Mandiri
-                                        </a>
+                                    @if($index === 2) {{-- Asesmen Mandiri --}}
+                                        @if(!empty($step['is_scheduled']))
+                                            <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="btn-action btn-outline-primary">
+                                                <i class="bi bi-pencil-square"></i> Isi Asesmen Mandiri
+                                            </a>
+                                        @else
+                                            <span class="btn-action disabled" style="opacity: 0.65; cursor: not-allowed; background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                                                <i class="bi bi-clock-history"></i> Menunggu Jadwal Ujikom
+                                            </span>
+                                        @endif
                                     @elseif($index === 3) {{-- Persetujuan Asesmen --}}
                                         @if(!empty($step['is_ready']))
                                             <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="btn-action btn-outline-primary">

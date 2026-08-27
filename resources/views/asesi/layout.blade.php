@@ -699,15 +699,36 @@
                 $hasSignedPersetujuanAsesmen = $asesi && method_exists($asesi, 'hasSignedPersetujuanAsesmen') ? $asesi->hasSignedPersetujuanAsesmen() : false;
                 // Determine whether to show Persetujuan Asesmen menu (only when asesor has completed checklist and signed)
                     // Show persetujuan/jadwal only when persetujuan asesmen data is already available.
-                    $showPersetujuan = false;
-                    $showJadwal = false;
-                    $showCeklis = false;
-                    $ceklisRecord = null;
-                    $showRekaman = false;
-                    $rekamanRecord = null;
+                $showPersetujuan = false;
+                $showJadwal = false;
+                $showCeklis = false;
+                $ceklisRecord = null;
+                $showRekaman = false;
+                $rekamanRecord = null;
+                $hasAnySchedule = false;
                 if ($asesi) {
                     try {
                         $currentAttempt = $asesi->currentAttempt();
+
+                        // Check if asesi has any active schedule (direct or via kelompok)
+                        $hasDirectSchedule = \Illuminate\Support\Facades\DB::table('jadwal_peserta')
+                            ->where('asesi_nik', $asesi->NIK)
+                            ->exists();
+
+                        $hasGroupSchedule = false;
+                        if (!empty($asesi->kelompok_id)) {
+                            $hasGroupSchedule = \Illuminate\Support\Facades\DB::table('jadwal_ujikom')
+                                ->where(function ($q) use ($asesi) {
+                                    $q->where('kelompok_id', $asesi->kelompok_id)
+                                      ->orWhereIn('id', function ($sq) use ($asesi) {
+                                          $sq->select('jadwal_id')->from('jadwal_kelompok')->where('kelompok_id', $asesi->kelompok_id);
+                                      });
+                                })
+                                ->exists();
+                        }
+
+                        $hasAnySchedule = $hasDirectSchedule || $hasGroupSchedule;
+
                         $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
                         $pq = \App\Models\PersetujuanAsesmen::query()
                             ->where('attempt', $currentAttempt)
@@ -767,6 +788,7 @@
                         $showJadwal = false;
                         $showCeklis = false;
                         $showRekaman = false;
+                        $hasAnySchedule = false;
                     }
                 }
             @endphp
@@ -818,11 +840,9 @@
                 </a>
                 @endif
 
-                @if($isApproved)
+                @if($isApproved && $hasAnySchedule)
                     <!-- ASESMEN Section -->
                     <div class="menu-section-title">ASESMEN</div>
-
-
 
                     <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="menu-item {{ request()->routeIs('asesi.asesmen-mandiri.*') ? 'active' : '' }}">
                         <i class="bi bi-clipboard-check"></i>
@@ -966,10 +986,12 @@
                         <span>Dashboard</span>
                     </a>
 
+                    @if($hasAnySchedule)
                     <a href="{{ route('asesi.asesmen-mandiri.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.asesmen-mandiri.*') ? 'active' : '' }}">
                         <i class="bi bi-clipboard-check"></i>
                         <span>Asesmen</span>
                     </a>
+                    @endif
 
                     @if(!empty($showPersetujuan))
                     <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="bottom-nav-item {{ request()->routeIs('asesi.persetujuan-asesmen.*') ? 'active' : '' }}">

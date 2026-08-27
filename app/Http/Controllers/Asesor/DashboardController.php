@@ -31,6 +31,101 @@ class DashboardController extends Controller
     }
 
     /**
+     * Dapatkan daftar ID kelompok yang terjadwal untuk asesor login.
+     */
+    private function getScheduledKelompokIdsForAsesor($asesor): array
+    {
+        if (!$asesor) {
+            return [];
+        }
+
+        // 1. Jadwal Ujikom yang ditugaskan ke asesor ini
+        $jadwalIds = DB::table('jadwal_ujikom')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->pluck('id')
+            ->toArray();
+
+        // 2. Kelompok dari jadwal_kelompok untuk jadwal asesor ini
+        $kelompokIdsFromJadwal = !empty($jadwalIds)
+            ? DB::table('jadwal_kelompok')
+                ->whereIn('jadwal_id', $jadwalIds)
+                ->pluck('kelompok_id')
+                ->toArray()
+            : [];
+
+        // 3. Kelompok direct dari jadwal_ujikom.kelompok_id untuk jadwal asesor ini
+        $directKelompokIds = DB::table('jadwal_ujikom')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->whereNotNull('kelompok_id')
+            ->pluck('kelompok_id')
+            ->toArray();
+
+        // 4. Kelompok yang di-assign via kelompok_asesor dan memiliki jadwal aktif
+        $kelompokIdsFromKelompokAsesor = DB::table('kelompok_asesor')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->where(function ($q) {
+                $q->whereIn('kelompok_id', function ($sq) {
+                    $sq->select('kelompok_id')->from('jadwal_kelompok');
+                })->orWhereIn('kelompok_id', function ($sq) {
+                    $sq->select('kelompok_id')->from('jadwal_ujikom')->whereNotNull('kelompok_id');
+                });
+            })
+            ->pluck('kelompok_id')
+            ->toArray();
+
+        return array_values(array_unique(array_filter(array_merge(
+            $kelompokIdsFromJadwal,
+            $directKelompokIds,
+            $kelompokIdsFromKelompokAsesor
+        ))));
+    }
+
+    /**
+     * Dapatkan daftar NIK asesi yang terjadwal untuk asesor login.
+     */
+    private function getScheduledAsesiNiksForAsesor($asesor): array
+    {
+        if (!$asesor) {
+            return [];
+        }
+
+        $kelompokIds = $this->getScheduledKelompokIdsForAsesor($asesor);
+
+        // Asesi dari kelompok yang terjadwal
+        $asesiFromKelompok = !empty($kelompokIds)
+            ? DB::table('asesi')
+                ->whereIn('kelompok_id', $kelompokIds)
+                ->pluck('NIK')
+                ->toArray()
+            : [];
+
+        // Asesi langsung dari jadwal_peserta untuk jadwal asesor ini
+        $jadwalIds = DB::table('jadwal_ujikom')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->pluck('id')
+            ->toArray();
+
+        $asesiFromJadwalPeserta = !empty($jadwalIds)
+            ? DB::table('jadwal_peserta')
+                ->whereIn('jadwal_id', $jadwalIds)
+                ->pluck('asesi_nik')
+                ->toArray()
+            : [];
+
+        // Asesi dengan ID_asesor langsung
+        $asesiDirect = DB::table('asesi')
+            ->where('ID_asesor', $asesor->ID_asesor)
+            ->pluck('NIK')
+            ->toArray();
+
+        return array_values(array_unique(array_filter(array_merge(
+            $asesiFromKelompok,
+            $asesiFromJadwalPeserta,
+            $asesiDirect
+        ))));
+    }
+
+    /**
      * Dashboard asesor
      */
     public function dashboard()
@@ -39,11 +134,13 @@ class DashboardController extends Controller
         $asesor  = $this->getAsesor();
 
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+        $scheduledAsesiNiks = $this->getScheduledAsesiNiksForAsesor($asesor);
 
-        // Asesi yang terdaftar di skema asesor ini
-        $totalAsesi = count($skemaIds)
+        // Asesi yang terdaftar di skema dan terjadwal untuk asesor ini
+        $totalAsesi = (count($skemaIds) && count($scheduledAsesiNiks))
             ? DB::table('asesi_skema')
                 ->whereIn('skema_id', $skemaIds)
+                ->whereIn('asesi_nik', $scheduledAsesiNiks)
                 ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
                 ->count()
             : 0;
@@ -52,9 +149,10 @@ class DashboardController extends Controller
         $sedang = 0;
         $belum = 0;
 
-        if (count($skemaIds)) {
+        if (count($skemaIds) && count($scheduledAsesiNiks)) {
             $rows = DB::table('asesi_skema')
                 ->whereIn('skema_id', $skemaIds)
+                ->whereIn('asesi_nik', $scheduledAsesiNiks)
                 ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
                 ->get();
             $niks = $rows->pluck('asesi_nik')->unique()->values();
@@ -163,9 +261,10 @@ class DashboardController extends Controller
 
         // 5 asesi terakhir yang selesai
         $recentCompleted = [];
-        if (count($skemaIds)) {
+        if (count($skemaIds) && count($scheduledAsesiNiks)) {
             $recentCompleted = DB::table('asesi_skema')
                 ->whereIn('skema_id', $skemaIds)
+                ->whereIn('asesi_nik', $scheduledAsesiNiks)
                 ->where('status', 'selesai')
                 ->orderByDesc('tanggal_selesai')
                 ->limit(5)
@@ -1040,8 +1139,11 @@ class DashboardController extends Controller
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+        $scheduledAsesiNiks = $this->getScheduledAsesiNiksForAsesor($asesor);
 
         $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+
+        abort_unless(in_array($asesiNik, $scheduledAsesiNiks), 403, 'Asesi ini tidak berada dalam kelompok/jadwal Anda.');
 
         // Cari pivot di semua skema asesor (attempt terbaru)
         $pivot = DB::table('asesi_skema')
@@ -1070,13 +1172,20 @@ class DashboardController extends Controller
         
         $status = $request->input('status') ?? '';
         $rekomendasi = $request->input('rekomendasi') ?? '';
+        $selectedKelompok = $request->input('kelompok') ?? '';
+
+        $scheduledAsesiNiks = $this->getScheduledAsesiNiksForAsesor($asesor);
+        $scheduledKelompokIds = $this->getScheduledKelompokIdsForAsesor($asesor);
+        $kelompokList = !empty($scheduledKelompokIds)
+            ? Kelompok::whereIn('id', $scheduledKelompokIds)->orderBy('nama_kelompok')->get()
+            : collect();
 
         // If status is not specified and it's not an AJAX request, default to 'menunggu_review' to show the priority tab first
         if ($status === '' && !$request->ajax() && !$request->has('rekomendasi')) {
             $status = 'menunggu_review';
         }
 
-        if (!$asesor || !count($skemaIds)) {
+        if (!$asesor || !count($skemaIds) || empty($scheduledAsesiNiks)) {
             $data = collect();
             $summary = [
                 'total' => 0,
@@ -1090,12 +1199,22 @@ class DashboardController extends Controller
                 return view('asesor.asesmen-mandiri.partials.table-rows', compact('data'))->render();
             }
 
-            return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi'));
+            return view('asesor.asesmen-mandiri.index', compact(
+                'account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi',
+                'kelompokList', 'selectedKelompok'
+            ));
         }
 
         $query = DB::table('asesi_skema')
-            ->whereIn('skema_id', $skemaIds)
-            ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)');
+            ->whereIn('asesi_skema.skema_id', $skemaIds)
+            ->whereIn('asesi_skema.asesi_nik', $scheduledAsesiNiks)
+            ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)');
+
+        if ($selectedKelompok !== '') {
+            $query->whereIn('asesi_skema.asesi_nik', function ($sq) use ($selectedKelompok) {
+                $sq->select('NIK')->from('asesi')->where('kelompok_id', $selectedKelompok);
+            });
+        }
 
         if ($search !== '') {
             $query
@@ -1110,9 +1229,9 @@ class DashboardController extends Controller
                 ->select('asesi_skema.*');
         }
 
-        $rows = $query->orderByDesc('updated_at')->get();
+        $rows = $query->orderByDesc('asesi_skema.updated_at')->get();
 
-        $asesiMap = Asesi::query()
+        $asesiMap = Asesi::with(['kelompok', 'jurusan'])
             ->whereIn('NIK', $rows->pluck('asesi_nik')->unique()->values())
             ->get()
             ->keyBy('NIK');
@@ -1208,7 +1327,10 @@ class DashboardController extends Controller
             return view('asesor.asesmen-mandiri.partials.table-rows', compact('data'))->render();
         }
 
-        return view('asesor.asesmen-mandiri.index', compact('account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi', 'viewMode', 'pendingCount', 'completedCount'));
+        return view('asesor.asesmen-mandiri.index', compact(
+            'account', 'asesor', 'data', 'summary', 'search', 'status', 'rekomendasi',
+            'viewMode', 'pendingCount', 'completedCount', 'kelompokList', 'selectedKelompok'
+        ));
     }
 
     /**
@@ -1219,8 +1341,11 @@ class DashboardController extends Controller
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+        $scheduledAsesiNiks = $this->getScheduledAsesiNiksForAsesor($asesor);
 
-        $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+        $asesi = Asesi::with(['jurusan', 'kelompok'])->where('NIK', $asesiNik)->firstOrFail();
+
+        abort_unless(in_array($asesiNik, $scheduledAsesiNiks), 403, 'Asesi ini tidak berada dalam kelompok/jadwal Anda.');
 
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
@@ -1260,8 +1385,11 @@ class DashboardController extends Controller
     {
         $asesor = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+        $scheduledAsesiNiks = $this->getScheduledAsesiNiksForAsesor($asesor);
 
         $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
+
+        abort_unless(in_array($asesiNik, $scheduledAsesiNiks), 403, 'Asesi ini tidak berada dalam kelompok/jadwal Anda.');
 
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
@@ -1317,6 +1445,7 @@ class DashboardController extends Controller
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+        $scheduledAsesiNiks = $this->getScheduledAsesiNiksForAsesor($asesor);
 
         $request->validate([
             'rekomendasi'          => 'required|in:lanjut,tidak_lanjut',
@@ -1331,6 +1460,8 @@ class DashboardController extends Controller
         if (!preg_match('/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/', $request->tanda_tangan_asesor)) {
             return back()->withErrors(['tanda_tangan_asesor' => 'Format tanda tangan tidak valid.'])->withInput();
         }
+
+        abort_unless(in_array($asesiNik, $scheduledAsesiNiks), 403, 'Asesi ini tidak berada dalam kelompok/jadwal Anda.');
 
         // Pastikan asesi ini memang di skema asesor (attempt terbaru)
         $pivotQuery = DB::table('asesi_skema')
@@ -1425,20 +1556,8 @@ class DashboardController extends Controller
                     : 'Berkas pendaftaran sedang dalam proses verifikasi oleh admin.'
             ];
 
-            // 2. Asesmen Mandiri (FR.APL.02)
-            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
-            $isStep2Completed = $isMandiriSelesai;
-            $stepMandiri = [
-                'name' => 'Asesmen Mandiri (FR.APL.02)',
-                'status' => $isStep2Completed ? 'completed' : 'pending',
-                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
-                'description' => $isMandiriSelesai
-                    ? 'Asesi telah menyelesaikan pengisian form asesmen mandiri.'
-                    : 'Asesi belum mengisi form asesmen mandiri.'
-            ];
-
-            // 3. Jadwal Uji Kompetensi
-            $jadwal = DB::table('jadwal_peserta')
+            // 2. Jadwal Uji Kompetensi
+            $jadwalDirect = DB::table('jadwal_peserta')
                 ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
                 ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
                 ->where('jadwal_ujikom.skema_id', $skema->id)
@@ -1446,8 +1565,22 @@ class DashboardController extends Controller
                 ->select('jadwal_ujikom.*')
                 ->first();
 
+            $jadwalKelompok = null;
+            if (!$jadwalDirect && !empty($asesi->kelompok_id)) {
+                $jadwalKelompok = DB::table('jadwal_ujikom')
+                    ->where('skema_id', $skema->id)
+                    ->where(function ($q) use ($asesi) {
+                        $q->where('kelompok_id', $asesi->kelompok_id)
+                          ->orWhereIn('id', function ($sq) use ($asesi) {
+                              $sq->select('jadwal_id')->from('jadwal_kelompok')->where('kelompok_id', $asesi->kelompok_id);
+                          });
+                    })
+                    ->first();
+            }
+
+            $jadwal = $jadwalDirect ?? $jadwalKelompok;
             $isJadwalSelesai = (bool)$jadwal;
-            $isStep3Completed = $isJadwalSelesai && $isStep2Completed;
+            $isStep2Completed = $isJadwalSelesai && $isStep1Completed;
             
             $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
             if ($isJadwalSelesai) {
@@ -1458,9 +1591,21 @@ class DashboardController extends Controller
 
             $stepJadwal = [
                 'name' => 'Jadwal Uji Kompetensi',
-                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'status' => $isStep2Completed ? 'completed' : 'pending',
                 'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
                 'description' => $jadwalDesc
+            ];
+
+            // 3. Asesmen Mandiri (FR.APL.02)
+            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
+            $isStep3Completed = $isMandiriSelesai && $isStep2Completed;
+            $stepMandiri = [
+                'name' => 'Asesmen Mandiri (FR.APL.02)',
+                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
+                'description' => $isMandiriSelesai
+                    ? 'Asesi telah menyelesaikan pengisian form asesmen mandiri.'
+                    : 'Asesi belum mengisi form asesmen mandiri.'
             ];
 
             // 4. Persetujuan Asesmen (FR.APL.03)
@@ -1568,7 +1713,7 @@ class DashboardController extends Controller
                 'skema_id' => $skema->id,
                 'nama_skema' => $skema->nama_skema,
                 'nomor_skema' => $skema->nomor_skema,
-                'steps' => [$stepPendaftaran, $stepMandiri, $stepJadwal, $stepPersetujuan, $stepPenilaian, $stepRekaman, $stepNilai],
+                'steps' => [$stepPendaftaran, $stepJadwal, $stepMandiri, $stepPersetujuan, $stepPenilaian, $stepRekaman, $stepNilai],
                 'all_completed' => $allCompleted,
                 'ceklis' => $ceklis,
                 'rekaman' => $rekaman,

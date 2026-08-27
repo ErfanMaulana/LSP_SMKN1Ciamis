@@ -145,20 +145,8 @@ class AuthController extends Controller
             ];
             $isStep1Completed = true;
 
-            // 2. Asesmen Mandiri
-            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
-            $isStep2Completed = $isMandiriSelesai;
-            $stepMandiri = [
-                'name' => 'Asesmen Mandiri (FR.APL.02)',
-                'status' => $isStep2Completed ? 'completed' : 'pending',
-                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
-                'description' => $isMandiriSelesai 
-                    ? 'Anda telah menyelesaikan pengisian form asesmen mandiri.'
-                    : 'Silakan isi form asesmen mandiri terlebih dahulu.'
-            ];
-
-            // 3. Jadwal Ujikom (Evaluated before Persetujuan for sequential calculation)
-            $jadwal = \DB::table('jadwal_peserta')
+            // Jadwal Ujikom (Check both direct and via kelompok)
+            $jadwalDirect = \DB::table('jadwal_peserta')
                 ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
                 ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
                 ->where('jadwal_ujikom.skema_id', $skema->id)
@@ -166,8 +154,24 @@ class AuthController extends Controller
                 ->select('jadwal_ujikom.*')
                 ->first();
 
+            $jadwalKelompok = null;
+            if (!$jadwalDirect && !empty($asesi->kelompok_id)) {
+                $jadwalKelompok = \DB::table('jadwal_ujikom')
+                    ->where('skema_id', $skema->id)
+                    ->where(function ($q) use ($asesi) {
+                        $q->where('kelompok_id', $asesi->kelompok_id)
+                          ->orWhereIn('id', function ($sq) use ($asesi) {
+                              $sq->select('jadwal_id')->from('jadwal_kelompok')->where('kelompok_id', $asesi->kelompok_id);
+                          });
+                    })
+                    ->first();
+            }
+
+            $jadwal = $jadwalDirect ?? $jadwalKelompok;
             $isJadwalSelesai = (bool)$jadwal;
-            $isStep3Completed = $isJadwalSelesai && $isStep2Completed;
+
+            // 2. Jadwal Ujikom (Penjadwalan)
+            $isStep2Completed = $isJadwalSelesai && $isStep1Completed;
             
             $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
             if ($isJadwalSelesai) {
@@ -178,12 +182,25 @@ class AuthController extends Controller
 
             $stepJadwal = [
                 'name' => 'Jadwal Uji Kompetensi',
-                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'status' => $isStep2Completed ? 'completed' : 'pending',
                 'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
                 'description' => $jadwalDesc
             ];
 
-            // 4. Persetujuan Asesmen (Evaluated after Jadwal)
+            // 3. Asesmen Mandiri (FR.APL.02) - diisi setelah ada jadwal
+            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
+            $isStep3Completed = $isMandiriSelesai && $isStep2Completed;
+            $stepMandiri = [
+                'name' => 'Asesmen Mandiri (FR.APL.02)',
+                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'label' => $isMandiriSelesai ? 'Selesai' : ($isJadwalSelesai ? 'Belum Selesai' : 'Menunggu Jadwal'),
+                'description' => $isMandiriSelesai 
+                    ? 'Anda telah menyelesaikan pengisian form asesmen mandiri.'
+                    : ($isJadwalSelesai ? 'Silakan isi form asesmen mandiri Anda.' : 'Asesmen mandiri dapat diisi setelah jadwal uji kompetensi ditentukan oleh Admin.'),
+                'is_scheduled' => $isJadwalSelesai,
+            ];
+
+            // 4. Persetujuan Asesmen (Evaluated after Mandiri)
             $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
             $persetujuan = \DB::table('persetujuan_asesmen')
                 ->where('nomor_skema', $skema->nomor_skema)
@@ -288,7 +305,7 @@ class AuthController extends Controller
                 'skema_id' => $skema->id,
                 'nama_skema' => $skema->nama_skema,
                 'nomor_skema' => $skema->nomor_skema,
-                'steps' => [$stepPendaftaran, $stepMandiri, $stepJadwal, $stepPersetujuan, $stepPenilaian, $stepRekaman],
+                'steps' => [$stepPendaftaran, $stepJadwal, $stepMandiri, $stepPersetujuan, $stepPenilaian, $stepRekaman],
                 'all_completed' => $allCompleted,
                 'ceklis' => $ceklis,
                 'rekaman' => $rekaman,

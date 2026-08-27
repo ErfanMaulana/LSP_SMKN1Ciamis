@@ -93,7 +93,19 @@
     }
 
     .filter-row-top {
-        grid-template-columns: minmax(0, 1fr) minmax(200px, 240px) minmax(200px, 240px) auto;
+        grid-template-columns: minmax(0, 1.4fr) minmax(140px, 190px) minmax(140px, 180px) minmax(140px, 180px) auto;
+    }
+
+    @media (max-width: 1024px) {
+        .filter-row-top {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .filter-row-top {
+            grid-template-columns: 1fr;
+        }
     }
 
     .filter-field {
@@ -366,6 +378,19 @@
             >
         </div>
         <div class="filter-field">
+            <label class="filter-label">Kelompok</label>
+            <select name="kelompok" id="asesmenMandiriKelompokFilter" class="filter-select">
+                <option value="">Semua Kelompok</option>
+                @if(isset($kelompokList))
+                    @foreach($kelompokList as $klp)
+                        <option value="{{ $klp->id }}" {{ (string)($selectedKelompok ?? '') === (string)$klp->id ? 'selected' : '' }}>
+                            {{ $klp->nama_kelompok }}
+                        </option>
+                    @endforeach
+                @endif
+            </select>
+        </div>
+        <div class="filter-field">
             <label class="filter-label">Status</label>
             <select name="status" id="asesmenMandiriStatusFilter" class="filter-select">
                 <option value="">Semua Status</option>
@@ -481,6 +506,7 @@
 
     function serializeFilterForm(viewMode) {
         const searchInput = document.getElementById('asesmenMandiriSearchInput');
+        const kelompokFilter = document.getElementById('asesmenMandiriKelompokFilter');
         const statusFilter = document.getElementById('asesmenMandiriStatusFilter');
         const rekomendasiFilter = document.getElementById('asesmenMandiriRekomendasiFilter');
         const url = new URL('{{ route('asesor.asesmen-mandiri.index') }}', window.location.origin);
@@ -489,6 +515,10 @@
 
         if (searchInput && searchInput.value.trim() !== '') {
             url.searchParams.set('search', searchInput.value.trim());
+        }
+
+        if (kelompokFilter && kelompokFilter.value.trim() !== '') {
+            url.searchParams.set('kelompok', kelompokFilter.value.trim());
         }
 
         if (statusFilter && statusFilter.value.trim() !== '') {
@@ -504,6 +534,7 @@
 
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('asesmenMandiriSearchInput');
+        const kelompokFilter = document.getElementById('asesmenMandiriKelompokFilter');
         const statusFilter = document.getElementById('asesmenMandiriStatusFilter');
         const rekomendasiFilter = document.getElementById('asesmenMandiriRekomendasiFilter');
         const tableContainer = document.getElementById('asesmenMandiriTableContainer');
@@ -528,6 +559,10 @@
                 clearTimeout(asesmenMandiriSearchTimer);
                 asesmenMandiriSearchTimer = setTimeout(handleFilterChange, 400);
             });
+        }
+
+        if (kelompokFilter) {
+            kelompokFilter.addEventListener('change', handleFilterChange);
         }
 
         if (statusFilter) {

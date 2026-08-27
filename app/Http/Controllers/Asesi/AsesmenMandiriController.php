@@ -33,6 +33,47 @@ class AsesmenMandiriController extends Controller
     }
 
     /**
+     * Check whether asesi has a scheduled ujikom for the given skema
+     */
+    private function isAsesiScheduledForSkema($asesi, $skemaId, $attempt = 1): bool
+    {
+        if (!$asesi) {
+            return false;
+        }
+
+        // 1. Direct scheduling in jadwal_peserta
+        $directScheduled = DB::table('jadwal_peserta')
+            ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
+            ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
+            ->where('jadwal_ujikom.skema_id', $skemaId)
+            ->where('jadwal_peserta.attempt', $attempt)
+            ->exists();
+
+        if ($directScheduled) {
+            return true;
+        }
+
+        // 2. Group scheduling via kelompok_id
+        if (!empty($asesi->kelompok_id)) {
+            $groupScheduled = DB::table('jadwal_ujikom')
+                ->where('skema_id', $skemaId)
+                ->where(function ($q) use ($asesi) {
+                    $q->where('kelompok_id', $asesi->kelompok_id)
+                      ->orWhereIn('id', function ($sq) use ($asesi) {
+                          $sq->select('jadwal_id')->from('jadwal_kelompok')->where('kelompok_id', $asesi->kelompok_id);
+                      });
+                })
+                ->exists();
+
+            if ($groupScheduled) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Display list of available schemas filtered by asesi's jurusan
      */
     public function index()
@@ -50,11 +91,30 @@ class AsesmenMandiriController extends Controller
             ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->withCount('units')
             ->get();
-        $skemas      = $asesiSkemas;
 
-        // If there is exactly one schema, go straight to the form
+        $hasAnyScheduledSkema = false;
+        foreach ($asesiSkemas as $s) {
+            $attempt = $asesi->currentAttempt($s->id);
+            $s->is_scheduled = $this->isAsesiScheduledForSkema($asesi, $s->id, $attempt);
+            if ($s->is_scheduled) {
+                $hasAnyScheduledSkema = true;
+            }
+        }
+
+        // If asesi does not have any scheduled skema, redirect back to dashboard
+        if (!$hasAnyScheduledSkema) {
+            return redirect()->route('asesi.dashboard')
+                ->with('error', 'Halaman Asesmen Mandiri belum dapat diakses. Jadwal uji kompetensi Anda belum ditentukan oleh Admin.');
+        }
+
+        $skemas = $asesiSkemas;
+
+        // If there is exactly one schema AND it is already scheduled, go straight to the form
         if ($skemas->count() === 1) {
-            return redirect()->route('asesi.asesmen-mandiri.show', $skemas->first()->id);
+            $singleSkema = $skemas->first();
+            if ($singleSkema->is_scheduled) {
+                return redirect()->route('asesi.asesmen-mandiri.show', $singleSkema->id);
+            }
         }
 
         $asesiSkemas = $asesiSkemas->keyBy('id');
@@ -71,7 +131,7 @@ class AsesmenMandiriController extends Controller
         $asesi = $this->getAsesi();
         
         if (!$asesi) {
-            return redirect()->route('asesi.asesmen-mandiri.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
         
@@ -87,8 +147,19 @@ class AsesmenMandiriController extends Controller
             ->first();
 
         if (!$pivot) {
-            return redirect()->route('asesi.asesmen-mandiri.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Skema ini tidak terdaftar untuk akun Anda.');
+        }
+
+        // If already completed, redirect to result
+        if ($pivot->status === 'selesai') {
+            return redirect()->route('asesi.asesmen-mandiri.result', $skemaId);
+        }
+
+        // Check if asesi has been scheduled
+        if (!$this->isAsesiScheduledForSkema($asesi, $skemaId, $attempt)) {
+            return redirect()->route('asesi.dashboard')
+                ->with('error', 'Halaman Asesmen Mandiri belum dapat diakses. Jadwal uji kompetensi Anda belum ditentukan oleh Admin.');
         }
 
         // Update status to sedang_mengerjakan if still belum_mulai
@@ -153,13 +224,19 @@ class AsesmenMandiriController extends Controller
             ->first();
 
         if (!$pivot) {
-            return redirect()->route('asesi.asesmen-mandiri.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Skema ini tidak terdaftar untuk akun Anda.');
+        }
+
+        // Check if asesi has been scheduled
+        if ($pivot->status !== 'selesai' && !$this->isAsesiScheduledForSkema($asesi, $skemaId, $attempt)) {
+            return redirect()->route('asesi.dashboard')
+                ->with('error', 'Halaman Asesmen Mandiri belum dapat diakses. Jadwal uji kompetensi Anda belum ditentukan oleh Admin.');
         }
 
         // Make sure this schema belongs to asesi's jurusan
         if ($skema->jurusan_id !== null && $skema->jurusan_id != $asesi->ID_jurusan) {
-            return redirect()->route('asesi.asesmen-mandiri.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Skema ini tidak sesuai dengan jurusan Anda.');
         }
 

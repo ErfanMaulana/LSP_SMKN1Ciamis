@@ -396,7 +396,15 @@
                                                             <i class="bi bi-download"></i> Export FR.APL.01
                                                         </a>
                                                     @endif
-                                                @elseif($index === 1) {{-- Asesmen Mandiri (FR.APL.02) --}}
+                                                @elseif($index === 1) {{-- Jadwal Uji Kompetensi --}}
+                                                    @if(!empty($row->is_jadwal_selesai) && !empty($row->jadwal->id))
+                                                        @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view') && Route::has('admin.jadwal-ujikom.show'))
+                                                            <a href="{{ route('admin.jadwal-ujikom.show', $row->jadwal->id) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
+                                                                <i class="bi bi-eye"></i> Lihat
+                                                            </a>
+                                                        @endif
+                                                    @endif
+                                                @elseif($index === 2) {{-- Asesmen Mandiri (FR.APL.02) --}}
                                                     @if(Auth::guard('admin')->user()->hasPermission('asesmen-mandiri.view') && Route::has('admin.asesmen-mandiri.show'))
                                                         <a href="{{ route('admin.asesmen-mandiri.show', [$asesi->NIK, $row->skema_id]) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
                                                             <i class="bi bi-eye"></i> Lihat
@@ -406,14 +414,6 @@
                                                         <a href="{{ route('admin.asesmen-mandiri.export', [$asesi->NIK, $row->skema_id]) }}" class="btn-action btn-export" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #10b981; color: #10b981; background: transparent;">
                                                             <i class="bi bi-download"></i> Export FR.APL.02
                                                         </a>
-                                                    @endif
-                                                @elseif($index === 2) {{-- Jadwal Uji Kompetensi --}}
-                                                    @if(!empty($row->is_jadwal_selesai) && !empty($row->jadwal->id))
-                                                        @if(Auth::guard('admin')->user()->hasPermission('jadwal-ujikom.view') && Route::has('admin.jadwal-ujikom.show'))
-                                                            <a href="{{ route('admin.jadwal-ujikom.show', $row->jadwal->id) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
-                                                                <i class="bi bi-eye"></i> Lihat
-                                                            </a>
-                                                        @endif
                                                     @endif
                                                 @elseif($index === 3) {{-- Persetujuan Asesmen (FR.APL.03) --}}
                                                     @if(!empty($row->is_persetujuan_selesai) && !empty($row->persetujuan->id))

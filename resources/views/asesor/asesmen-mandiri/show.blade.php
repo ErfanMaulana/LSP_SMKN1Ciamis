@@ -596,7 +596,7 @@
     <i class="bi bi-person-badge"></i>
     <div class="text">
         <h3>{{ $asesi->nama }} ({{ $asesi->NIK }})</h3>
-        <p>Jurusan: {{ $asesi->jurusan?->nama_jurusan ?? '-' }} • Periode: {{ $periode }}</p>
+        <p>Jurusan: {{ $asesi->jurusan?->nama_jurusan ?? '-' }} @if($asesi->kelompok) • Kelompok: {{ $asesi->kelompok->nama_kelompok }} @endif • Periode: {{ $periode }}</p>
         <p>Status: @include('components.asesi-status', ['pivot' => $pivot]) • Rekomendasi: {{ $rekomLabel }}</p>
     </div>
 </div>

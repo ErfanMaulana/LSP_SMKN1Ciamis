@@ -382,7 +382,7 @@
                                             
                                             {{-- Action & Export links for Asesor --}}
                                             <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
-                                                @if($index === 1) {{-- Asesmen Mandiri (FR.APL.02) --}}
+                                                @if($index === 2) {{-- Asesmen Mandiri (FR.APL.02) --}}
                                                     <a href="{{ route('asesor.asesmen-mandiri.show', ['asesiNik' => $asesi->NIK, 'skemaId' => $row->skema_id]) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
                                                         <i class="bi bi-eye"></i> Review / Detail FR.APL.02
                                                     </a>

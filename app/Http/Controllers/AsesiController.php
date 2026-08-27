@@ -271,20 +271,8 @@ class AsesiController extends Controller
                     : 'Berkas pendaftaran sedang dalam proses verifikasi oleh admin.'
             ];
 
-            // 2. Asesmen Mandiri
-            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
-            $isStep2Completed = $isMandiriSelesai;
-            $stepMandiri = [
-                'name' => 'Asesmen Mandiri (FR.APL.02)',
-                'status' => $isStep2Completed ? 'completed' : 'pending',
-                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
-                'description' => $isMandiriSelesai
-                    ? 'Asesi telah menyelesaikan pengisian form asesmen mandiri.'
-                    : 'Asesi belum mengisi form asesmen mandiri.'
-            ];
-
-            // 3. Jadwal Ujikom
-            $jadwal = \DB::table('jadwal_peserta')
+            // 2. Jadwal Ujikom
+            $jadwalDirect = \DB::table('jadwal_peserta')
                 ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
                 ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
                 ->where('jadwal_ujikom.skema_id', $skema->id)
@@ -292,8 +280,22 @@ class AsesiController extends Controller
                 ->select('jadwal_ujikom.*')
                 ->first();
 
+            $jadwalKelompok = null;
+            if (!$jadwalDirect && !empty($asesi->kelompok_id)) {
+                $jadwalKelompok = \DB::table('jadwal_ujikom')
+                    ->where('skema_id', $skema->id)
+                    ->where(function ($q) use ($asesi) {
+                        $q->where('kelompok_id', $asesi->kelompok_id)
+                          ->orWhereIn('id', function ($sq) use ($asesi) {
+                              $sq->select('jadwal_id')->from('jadwal_kelompok')->where('kelompok_id', $asesi->kelompok_id);
+                          });
+                    })
+                    ->first();
+            }
+
+            $jadwal = $jadwalDirect ?? $jadwalKelompok;
             $isJadwalSelesai = (bool)$jadwal;
-            $isStep3Completed = $isJadwalSelesai && $isStep2Completed;
+            $isStep2Completed = $isJadwalSelesai && $isStep1Completed;
             
             $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
             if ($isJadwalSelesai) {
@@ -304,9 +306,21 @@ class AsesiController extends Controller
 
             $stepJadwal = [
                 'name' => 'Jadwal Uji Kompetensi',
-                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'status' => $isStep2Completed ? 'completed' : 'pending',
                 'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
                 'description' => $jadwalDesc
+            ];
+
+            // 3. Asesmen Mandiri
+            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
+            $isStep3Completed = $isMandiriSelesai && $isStep2Completed;
+            $stepMandiri = [
+                'name' => 'Asesmen Mandiri (FR.APL.02)',
+                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
+                'description' => $isMandiriSelesai
+                    ? 'Asesi telah menyelesaikan pengisian form asesmen mandiri.'
+                    : 'Asesi belum mengisi form asesmen mandiri.'
             ];
 
             // 4. Persetujuan Asesmen
@@ -414,7 +428,7 @@ class AsesiController extends Controller
                 'skema_id' => $skema->id,
                 'nama_skema' => $skema->nama_skema,
                 'nomor_skema' => $skema->nomor_skema,
-                'steps' => [$stepPendaftaran, $stepMandiri, $stepJadwal, $stepPersetujuan, $stepPenilaian, $stepRekaman, $stepNilai],
+                'steps' => [$stepPendaftaran, $stepJadwal, $stepMandiri, $stepPersetujuan, $stepPenilaian, $stepRekaman, $stepNilai],
                 'all_completed' => $allCompleted,
                 'ceklis' => $ceklis,
                 'rekaman' => $rekaman,
@@ -1781,20 +1795,8 @@ class AsesiController extends Controller
                     : 'Berkas pendaftaran sedang dalam proses verifikasi oleh admin.'
             ];
 
-            // 2. Asesmen Mandiri
-            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
-            $isStep2Completed = $isMandiriSelesai;
-            $stepMandiri = [
-                'name' => 'Asesmen Mandiri (FR.APL.02)',
-                'status' => $isStep2Completed ? 'completed' : 'pending',
-                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
-                'description' => $isMandiriSelesai 
-                    ? 'Asesi telah menyelesaikan pengisian form asesmen mandiri.'
-                    : 'Asesi belum mengisi form asesmen mandiri.'
-            ];
-
-            // 3. Jadwal Ujikom
-            $jadwal = \DB::table('jadwal_peserta')
+            // 2. Jadwal Ujikom
+            $jadwalDirect = \DB::table('jadwal_peserta')
                 ->join('jadwal_ujikom', 'jadwal_ujikom.id', '=', 'jadwal_peserta.jadwal_id')
                 ->where('jadwal_peserta.asesi_nik', $asesi->NIK)
                 ->where('jadwal_ujikom.skema_id', $skema->id)
@@ -1802,8 +1804,22 @@ class AsesiController extends Controller
                 ->select('jadwal_ujikom.*')
                 ->first();
 
+            $jadwalKelompok = null;
+            if (!$jadwalDirect && !empty($asesi->kelompok_id)) {
+                $jadwalKelompok = \DB::table('jadwal_ujikom')
+                    ->where('skema_id', $skema->id)
+                    ->where(function ($q) use ($asesi) {
+                        $q->where('kelompok_id', $asesi->kelompok_id)
+                          ->orWhereIn('id', function ($sq) use ($asesi) {
+                              $sq->select('jadwal_id')->from('jadwal_kelompok')->where('kelompok_id', $asesi->kelompok_id);
+                          });
+                    })
+                    ->first();
+            }
+
+            $jadwal = $jadwalDirect ?? $jadwalKelompok;
             $isJadwalSelesai = (bool)$jadwal;
-            $isStep3Completed = $isJadwalSelesai && $isStep2Completed;
+            $isStep2Completed = $isJadwalSelesai && $isStep1Completed;
             
             $jadwalDesc = 'Menunggu penjadwalan uji kompetensi dari admin/asesor.';
             if ($isJadwalSelesai) {
@@ -1814,9 +1830,21 @@ class AsesiController extends Controller
 
             $stepJadwal = [
                 'name' => 'Jadwal Uji Kompetensi',
-                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'status' => $isStep2Completed ? 'completed' : 'pending',
                 'label' => $isJadwalSelesai ? 'Sudah Dijadwalkan' : 'Belum Dijadwalkan',
                 'description' => $jadwalDesc
+            ];
+
+            // 3. Asesmen Mandiri
+            $isMandiriSelesai = ($skema->status_mandiri === 'selesai');
+            $isStep3Completed = $isMandiriSelesai && $isStep2Completed;
+            $stepMandiri = [
+                'name' => 'Asesmen Mandiri (FR.APL.02)',
+                'status' => $isStep3Completed ? 'completed' : 'pending',
+                'label' => $isMandiriSelesai ? 'Selesai' : 'Belum Selesai',
+                'description' => $isMandiriSelesai 
+                    ? 'Asesi telah menyelesaikan pengisian form asesmen mandiri.'
+                    : 'Asesi belum mengisi form asesmen mandiri.'
             ];
 
             // 4. Persetujuan Asesmen
@@ -1924,7 +1952,7 @@ class AsesiController extends Controller
                 'skema_id' => $skema->id,
                 'nama_skema' => $skema->nama_skema,
                 'nomor_skema' => $skema->nomor_skema,
-                'steps' => [$stepPendaftaran, $stepMandiri, $stepJadwal, $stepPersetujuan, $stepPenilaian, $stepRekaman, $stepNilai],
+                'steps' => [$stepPendaftaran, $stepJadwal, $stepMandiri, $stepPersetujuan, $stepPenilaian, $stepRekaman, $stepNilai],
                 'all_completed' => $allCompleted,
                 'ceklis' => $ceklis,
                 'rekaman' => $rekaman,

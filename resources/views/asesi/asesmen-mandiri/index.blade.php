@@ -243,12 +243,33 @@
     <p>Pilih skema sertifikasi yang akan Anda ikuti, lalu isi form asesmen mandiri untuk menilai kompetensi diri Anda.</p>
 </div>
 
+@if(session('error'))
+    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:14px 18px; margin-bottom:20px; color:#991b1b; font-size:13.5px; display:flex; align-items:center; gap:10px;">
+        <i class="bi bi-exclamation-triangle-fill" style="font-size:20px; color:#ef4444;"></i>
+        <div>{{ session('error') }}</div>
+    </div>
+@endif
+
 @if($skemas->count() > 0)
+    @php
+        $anyUnscheduled = $skemas->contains(fn($s) => empty($s->is_scheduled));
+    @endphp
+
+    @if($anyUnscheduled)
+        <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:14px 18px; margin-bottom:20px; color:#92400e; font-size:13.5px; display:flex; align-items:center; gap:10px;">
+            <i class="bi bi-info-circle-fill" style="font-size:20px; color:#f59e0b;"></i>
+            <div>
+                <strong>Informasi Penjadwalan:</strong> Pengisian Asesmen Mandiri hanya dapat dilakukan setelah Anda memiliki jadwal uji kompetensi resmi dari admin.
+            </div>
+        </div>
+    @endif
+
     <div class="skema-grid">
         @foreach($skemas as $skema)
             @php
                 $asesiSkema = $asesiSkemas->get($skema->id);
                 $status = $asesiSkema ? $asesiSkema->pivot->status : 'belum_mulai';
+                $isScheduled = !empty($skema->is_scheduled);
             @endphp
             <div class="skema-card">
                 <span class="skema-badge {{ $status === 'selesai' ? 'selesai' : ($status === 'sedang_mengerjakan' ? 'sedang' : 'belum') }}">
@@ -280,14 +301,23 @@
                     <a href="{{ route('asesi.asesmen-mandiri.result', $skema->id) }}" class="btn-action btn-view">
                         <i class="bi bi-eye"></i> Lihat Hasil
                     </a>
-                @elseif($status === 'sedang_mengerjakan')
-                    <a href="{{ route('asesi.asesmen-mandiri.show', $skema->id) }}" class="btn-action btn-continue">
-                        <i class="bi bi-pencil-square"></i> Lanjutkan
-                    </a>
+                @elseif($isScheduled)
+                    @if($status === 'sedang_mengerjakan')
+                        <a href="{{ route('asesi.asesmen-mandiri.show', $skema->id) }}" class="btn-action btn-continue">
+                            <i class="bi bi-pencil-square"></i> Lanjutkan
+                        </a>
+                    @else
+                        <a href="{{ route('asesi.asesmen-mandiri.show', $skema->id) }}" class="btn-action btn-start">
+                            <i class="bi bi-play-fill"></i> Mulai Asesmen
+                        </a>
+                    @endif
                 @else
-                    <a href="{{ route('asesi.asesmen-mandiri.show', $skema->id) }}" class="btn-action btn-start">
-                        <i class="bi bi-play-fill"></i> Mulai Asesmen
-                    </a>
+                    <button type="button" class="btn-action" style="background:#f1f5f9; color:#94a3b8; cursor:not-allowed; border:1px solid #e2e8f0;" disabled>
+                        <i class="bi bi-clock-history"></i> Menunggu Jadwal Ujikom
+                    </button>
+                    <div style="margin-top:8px; font-size:12px; color:#e11d48; display:flex; align-items:center; gap:4px; justify-content:center;">
+                        <i class="bi bi-exclamation-circle"></i> Jadwal ujikom belum ditentukan admin
+                    </div>
                 @endif
             </div>
         @endforeach
