@@ -202,7 +202,7 @@
             <td style="width:50%; padding:4px 8px; border-left:none; vertical-align:middle;">
                 Tanggal &nbsp;:
                 @if($item->ttd_asesor_tanggal)
-                    {{ $item->ttd_asesor_tanggal->format('d-m-Y') }}
+                    <span style="text-decoration: underline dotted; text-underline-offset: 4px;">{{ \Carbon\Carbon::parse($item->ttd_asesor_tanggal)->locale('id')->isoFormat('D MMMM YYYY') }}</span>
                 @else
                     ......................................
                 @endif
@@ -227,7 +227,7 @@
             <td style="padding:4px 8px; border-left:none; vertical-align:middle;">
                 Tanggal &nbsp;:
                 @if($item->ttd_asesi_tanggal)
-                    {{ $item->ttd_asesi_tanggal->format('d-m-Y') }}
+                    <span style="text-decoration: underline dotted; text-underline-offset: 4px;">{{ \Carbon\Carbon::parse($item->ttd_asesi_tanggal)->locale('id')->isoFormat('D MMMM YYYY') }}</span>
                 @else
                     ......................................
                 @endif

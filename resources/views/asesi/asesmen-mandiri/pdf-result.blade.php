@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>FR.APL.03 - Hasil Asesmen Mandiri</title>
+    <title>FR.AK.01 - Hasil Asesmen Mandiri</title>
     <style>
         body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 11.5px; color: #111827; }
         .header { display: table; width: 100%; margin-bottom: 14px; }
@@ -37,7 +37,7 @@
             @endif
         </div>
         <div class="header-cell header-right">
-            <p class="title">FR.APL.03 - HASIL ASESMEN MANDIRI</p>
+            <p class="title">FR.AK.01 - HASIL ASESMEN MANDIRI</p>
             <div class="subtitle">Rekap hasil jawaban asesmen mandiri yang telah diselesaikan</div>
         </div>
     </div>

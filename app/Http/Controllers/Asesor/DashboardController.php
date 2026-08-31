@@ -1608,7 +1608,7 @@ class DashboardController extends Controller
                     : 'Asesi belum mengisi form asesmen mandiri.'
             ];
 
-            // 4. Persetujuan Asesmen (FR.APL.03)
+            // 4. Persetujuan Asesmen (FR.AK.01)
             $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
             $persetujuan = DB::table('persetujuan_asesmen')
                 ->where('nomor_skema', $skema->nomor_skema)
@@ -1625,7 +1625,7 @@ class DashboardController extends Controller
             $isStep4Completed = $isPersetujuanSelesai && $isStep3Completed;
             
             $stepPersetujuan = [
-                'name' => 'Persetujuan Asesmen (FR.APL.03)',
+                'name' => 'Persetujuan Asesmen (FR.AK.01)',
                 'status' => $isStep4Completed ? 'completed' : 'pending',
                 'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
                 'description' => $isPersetujuanSelesai

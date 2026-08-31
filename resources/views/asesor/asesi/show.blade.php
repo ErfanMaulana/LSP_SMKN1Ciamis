@@ -391,7 +391,7 @@
                                                             <i class="bi bi-download"></i> Export FR.APL.02
                                                         </a>
                                                     @endif
-                                                @elseif($index === 3) {{-- Persetujuan Asesmen (FR.APL.03) --}}
+                                                @elseif($index === 3) {{-- Persetujuan Asesmen (FR.AK.01) --}}
                                                     @if(Route::has('asesor.persetujuan.front.asesor.show'))
                                                         <a href="{{ route('asesor.persetujuan.front.asesor.show', ['asesiNik' => $asesi->NIK, 'skemaId' => $row->skema_id]) }}?back_to=asesi:{{ $asesi->NIK }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
                                                             <i class="bi bi-file-check"></i> Persetujuan Asesmen
@@ -399,7 +399,7 @@
                                                     @endif
                                                     @if(Route::has('asesor.persetujuan.front.asesor.export'))
                                                         <a href="{{ route('asesor.persetujuan.front.asesor.export', ['asesiNik' => $asesi->NIK, 'skemaId' => $row->skema_id]) }}" class="btn-action btn-export" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #10b981; color: #10b981; background: transparent;">
-                                                            <i class="bi bi-download"></i> Export FR.APL.03
+                                                            <i class="bi bi-download"></i> Export FR.AK.01
                                                         </a>
                                                     @endif
                                                 @elseif($index === 4) {{-- Penilaian & Ceklis Observasi (FR.IA.01) --}}

@@ -340,7 +340,7 @@ class AsesiController extends Controller
             $isStep4Completed = $isPersetujuanSelesai && $isStep3Completed;
             
             $stepPersetujuan = [
-                'name' => 'Persetujuan Asesmen (FR.APL.03)',
+                'name' => 'Persetujuan Asesmen (FR.AK.01)',
                 'status' => $isStep4Completed ? 'completed' : 'pending',
                 'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
                 'description' => $isPersetujuanSelesai
@@ -598,6 +598,7 @@ class AsesiController extends Controller
 
     /**
      * Generate FR.APL.01 PDF for approved asesi only.
+     * If the fr_apl_01.docx template is available, uses TemplateProcessor (same pattern as FR.AK.01).
      */
     public function generatePdf($nik)
     {
@@ -605,6 +606,18 @@ class AsesiController extends Controller
 
         if (($asesi->status ?? null) !== 'approved') {
             abort(403, 'PDF APL 1 hanya tersedia untuk asesi yang sudah disetujui.');
+        }
+
+        // Check if template exists — if so, use TemplateProcessor approach
+        $templatePath = storage_path('app/template/fr_apl_01_fixed.docx');
+        if (!file_exists($templatePath)) {
+            $templatePath = storage_path('app/template/fr_apl_01.docx');
+        }
+        if (!file_exists($templatePath)) {
+            $templatePath = base_path('storage/template/fr_apl_01.docx');
+        }
+        if (file_exists($templatePath)) {
+            return $this->exportWordTemplate($nik, $asesi, $templatePath);
         }
 
         $logoPath = public_path('images/lsp.png');
@@ -1280,6 +1293,364 @@ class AsesiController extends Controller
     }
 
     /**
+     * Export FR.APL.01 using PHPWord TemplateProcessor with .docx template.
+     * Same pattern as PersetujuanAsesmenController::exportWord() for FR.AK.01.
+     */
+    private function exportWordTemplate(string $nik, Asesi $asesi, string $templatePath)
+    {
+        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
+
+        $skema = $asesi->skemas->first();
+        $unitList = $skema ? ($skema->units ?? collect()) : collect();
+
+        // --- Bagian 1a: Data Pribadi ---
+        $templateProcessor->setValue('nama_lengkap', e($asesi->nama ?? '-'));
+        $templateProcessor->setValue('nik', e($asesi->NIK ?? '-'));
+
+        $ttl = trim(($asesi->tempat_lahir ?? '') . ' / ' . ($asesi->tanggal_lahir ? \Carbon\Carbon::parse($asesi->tanggal_lahir)->format('d-m-Y') : '-'));
+        $templateProcessor->setValue('tempat_tgl_lahir', e($ttl));
+
+        // Jenis kelamin with strikethrough using ComplexValue
+        $templateProcessor->setComplexValue('jenis_kelamin', $this->buildGenderTextRun($asesi->jenis_kelamin));
+
+        $templateProcessor->setValue('kebangsaan', e($asesi->kewarganegaraan ?? $asesi->kebangsaan ?? '-'));
+        $templateProcessor->setValue('alamat_rumah', e($asesi->alamat ?? '-'));
+        $templateProcessor->setValue('kode_pos', e($asesi->kode_pos ?? '-'));
+        $templateProcessor->setValue('telepon_rumah', e($asesi->telepon_rumah ?? '-'));
+        $templateProcessor->setValue('telepon_kantor', e($asesi->no_fax_lembaga ?? '-'));
+        $templateProcessor->setValue('hp', e($asesi->telepon_hp ?? '-'));
+        $templateProcessor->setValue('email', e($asesi->email ?? '-'));
+        $templateProcessor->setValue('pendidikan', e($asesi->pendidikan_terakhir ?? '-'));
+
+        // --- Bagian 1b: Data Pekerjaan ---
+        $templateProcessor->setValue('nama_institusi', e($asesi->nama_lembaga ?? '-'));
+        $templateProcessor->setValue('jabatan', e($asesi->jabatan ?? '-'));
+        $templateProcessor->setValue('alamat_kantor', e($asesi->alamat_lembaga ?? '-'));
+        $templateProcessor->setValue('kode_pos_kantor', e($asesi->unit_lembaga ?? '-'));
+        $templateProcessor->setValue('telp_kantor', e($asesi->telepon_rumah ?? '-'));
+        $templateProcessor->setValue('fax_kantor', e($asesi->no_fax_lembaga ?? '-'));
+        $templateProcessor->setValue('email_kantor', e($asesi->email_lembaga ?? '-'));
+
+        // --- Bagian 2: Data Sertifikasi ---
+        $selectedSkemaType = strtolower(trim((string) ($skema->jenis_skema ?? '')));
+        $templateProcessor->setComplexValue('type_skema', $this->buildSkemaTypeTextRunApl($selectedSkemaType, $skema));
+
+        $templateProcessor->setValue('judul_skema', e($skema->nama_skema ?? '-'));
+        $templateProcessor->setValue('nomor_skema', e($skema->nomor_skema ?? '-'));
+
+        // Checkboxes tujuan asesmen
+        $check = '☑';
+        $uncheck = '☐';
+        $templateProcessor->setValue('check_sertifikasi', $check);  // Default: sertifikasi checked
+        $templateProcessor->setValue('check_pkt', $uncheck);
+        $templateProcessor->setValue('check_rpl', $uncheck);
+        $templateProcessor->setValue('check_lainnya', $uncheck);
+
+        // --- Unit Kompetensi table (cloneRow) ---
+        if ($unitList instanceof \Illuminate\Support\Collection && $unitList->isNotEmpty()) {
+            $templateProcessor->cloneRow('no_unit', $unitList->count());
+            foreach ($unitList as $index => $unit) {
+                $rowNum = $index + 1;
+                $templateProcessor->setValue('no_unit#' . $rowNum, (string) $rowNum . '.');
+                $templateProcessor->setValue('kode_unit#' . $rowNum, e($unit->kode_unit ?? $unit->kode ?? '-'));
+                $templateProcessor->setValue('judul_unit#' . $rowNum, e($unit->judul_unit ?? $unit->nama_unit ?? $unit->judul ?? '-'));
+                $templateProcessor->setValue('standar_kompetensi#' . $rowNum, e($unit->standar_kompetensi ?? 'SKKNI'));
+            }
+        } else {
+            $templateProcessor->setValue('no_unit', '1.');
+            $templateProcessor->setValue('kode_unit', '-');
+            $templateProcessor->setValue('judul_unit', '-');
+            $templateProcessor->setValue('standar_kompetensi', '-');
+        }
+
+        // --- Bagian 3: Bukti Kelengkapan ---
+        $dokumenList = $asesi->verifikasi_bukti_persyaratan_dasar ?? [];
+        if (!is_array($dokumenList)) $dokumenList = [];
+
+        $defaultDokumen = [
+            'Fotocopy Rapor pada kesesuaian/hasil nilai yang relevan',
+            'Fotocopy Sertifikat/Surat Keterangan telah melaksanakan PKL',
+            'Portofolio / Bukti pendukung kompetensi lain',
+        ];
+        $docRows = !empty($dokumenList) ? $dokumenList : $defaultDokumen;
+
+        if (is_array($docRows) && count($docRows) > 0) {
+            $templateProcessor->cloneRow('no_persyaratan', count($docRows));
+            foreach ($docRows as $index => $row) {
+                $rowNum = $index + 1;
+                $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '');
+                $state = is_array($row) ? ($row['status'] ?? '') : '';
+                $templateProcessor->setValue('no_persyaratan#' . $rowNum, (string) $rowNum . '.');
+                $templateProcessor->setValue('bukti_persyaratan#' . $rowNum, e($label));
+                $templateProcessor->setValue('ada_persyaratan#' . $rowNum, ($state === 'memenuhi' || $state === 'ada') ? $check : $uncheck);
+                $templateProcessor->setValue('tidak_ada_persyaratan#' . $rowNum, ($state === 'tidak_ada' || $state === 'tidak_memenuhi') ? $check : $uncheck);
+            }
+        } else {
+            $templateProcessor->setValue('no_persyaratan', '1.');
+            $templateProcessor->setValue('bukti_persyaratan', '-');
+            $templateProcessor->setValue('ada_persyaratan', $uncheck);
+            $templateProcessor->setValue('tidak_ada_persyaratan', $uncheck);
+        }
+
+        // Bukti Administratif
+        $administratifList = $asesi->verifikasi_bukti_administratif ?? [];
+        if (!is_array($administratifList)) $administratifList = [];
+
+        $defaultAdmin = [
+            'Fotocopy Kartu Pelajar',
+            'Fotocopy Kartu Keluarga/KTP',
+            'Pas foto 3 x 4 berwarna sebanyak 2 lembar',
+        ];
+        $adminRows = !empty($administratifList) ? $administratifList : $defaultAdmin;
+
+        if (is_array($adminRows) && count($adminRows) > 0) {
+            $templateProcessor->cloneRow('no_admin', count($adminRows));
+            foreach ($adminRows as $index => $row) {
+                $rowNum = $index + 1;
+                $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '');
+                $state = is_array($row) ? ($row['status'] ?? '') : '';
+                $templateProcessor->setValue('no_admin#' . $rowNum, (string) $rowNum . '.');
+                $templateProcessor->setValue('bukti_admin#' . $rowNum, e($label));
+                $templateProcessor->setValue('ada_admin#' . $rowNum, ($state === 'memenuhi' || $state === 'ada') ? $check : $uncheck);
+                $templateProcessor->setValue('tidak_ada_admin#' . $rowNum, ($state === 'tidak_ada' || $state === 'tidak_memenuhi') ? $check : $uncheck);
+            }
+        } else {
+            $templateProcessor->setValue('no_admin', '1.');
+            $templateProcessor->setValue('bukti_admin', '-');
+            $templateProcessor->setValue('ada_admin', $uncheck);
+            $templateProcessor->setValue('tidak_ada_admin', $uncheck);
+        }
+
+        // --- Tanda tangan ---
+        $rekomendasiText = strtolower(trim((string) ($asesi->rekomendasi ?? 'Diterima')));
+        $templateProcessor->setValue('rekomendasi', $rekomendasiText === 'diterima' || empty($rekomendasiText) ? 'Diterima' : 'Tidak diterima');
+
+        $templateProcessor->setValue('nama_pemohon', e($asesi->nama ?? '-'));
+        $templateProcessor->setValue('nama_admin', e(optional($asesi->verifiedBy)->name ?? optional($asesi->verifiedBy)->username ?? '-'));
+
+        // Tanda tangan pemohon (image)
+        $ttdPemohonImage = $this->resolveSignatureImageApl($asesi->tanda_tangan_pendaftar);
+        if ($ttdPemohonImage) {
+            $templateProcessor->setImageValue('ttd_pemohon', [
+                'path' => $ttdPemohonImage,
+                'width' => 150,
+                'height' => 60,
+                'ratio' => false,
+            ]);
+        } else {
+            $templateProcessor->setValue('ttd_pemohon', '');
+        }
+
+        // Tanggal ttd pemohon
+        $pendaftarDate = optional($asesi->tanggal_tanda_tangan_pendaftar);
+        $templateProcessor->setValue('tanggal_ttd_pemohon', $pendaftarDate ? $pendaftarDate->format('d-m-Y') : '-');
+
+        // Tanda tangan admin (image)
+        $ttdAdminImage = $this->resolveSignatureImageApl($asesi->tanda_tangan_admin);
+        if ($ttdAdminImage) {
+            try {
+                $templateProcessor->setImageValue('ttd_admin', [
+                    'path' => $ttdAdminImage,
+                    'width' => 150,
+                    'height' => 60,
+                    'ratio' => false,
+                ]);
+            } catch (\Throwable $e) {
+                $templateProcessor->setValue('ttd_admin', '');
+            }
+        } else {
+            $templateProcessor->setValue('ttd_admin', '');
+        }
+
+        // Tanggal ttd admin
+        $adminDate = optional($asesi->tanggal_tanda_tangan_admin);
+        $templateProcessor->setValue('tanggal_ttd_admin', $adminDate ? $adminDate->format('d-m-Y') : '-');
+
+        // --- Generate output file ---
+        $fileName = 'FR_APL_01_' . ($asesi->NIK ?? 'asesi') . '.docx';
+        $tempFile = storage_path('app/temp/' . uniqid('fr_apl_01_') . '.docx');
+        if (!is_dir(dirname($tempFile))) {
+            mkdir(dirname($tempFile), 0755, true);
+        }
+
+        try {
+            $templateProcessor->saveAs($tempFile);
+        } catch (\Throwable $e) {
+            \Log::error('TemplateProcessor save failed for APL.01: ' . $e->getMessage());
+            // Fallback to old method
+            $data = $this->buildApl01Data($asesi);
+            $pdf = Pdf::loadView('admin.asesi.pdf.formulir', $data)->setPaper('a4', 'portrait');
+            return $pdf->stream('FR_APL_01_' . ($asesi->NIK ?? 'asesi') . '.pdf');
+        }
+
+        // Cleanup temp signature images
+        foreach ([$ttdPemohonImage, $ttdAdminImage] as $img) {
+            if ($img && file_exists($img) && strpos($img, sys_get_temp_dir()) !== false) {
+                @unlink($img);
+            }
+        }
+
+        return response()->download($tempFile, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Build strikethrough TextRun for gender (Laki-laki / Wanita) in APL.01 template.
+     */
+    private function buildGenderTextRun(?string $gender): \PhpOffice\PhpWord\Element\TextRun
+    {
+        $genderStr = strtolower(trim((string)$gender));
+        $isLaki = str_contains($genderStr, 'laki');
+        $isPerempuan = str_contains($genderStr, 'perempuan') || $genderStr === 'p' || str_contains($genderStr, 'wanita');
+
+        $tr = new \PhpOffice\PhpWord\Element\TextRun();
+        $tr->addText('Laki-laki', [
+            'name' => 'Calibri',
+            'size' => 11,
+            'strikethrough' => $isPerempuan,
+            'bold' => $isLaki,
+            'underline' => $isLaki ? 'single' : 'none',
+        ]);
+        $tr->addText(' / ', ['name' => 'Calibri', 'size' => 11]);
+        $tr->addText('Wanita *)', [
+            'name' => 'Calibri',
+            'size' => 11,
+            'strikethrough' => $isLaki,
+            'bold' => $isPerempuan,
+            'underline' => $isPerempuan ? 'single' : 'none',
+        ]);
+
+        return $tr;
+    }
+
+    /**
+     * Build strikethrough TextRun for Skema Sertifikasi type (KKNI/Okupasi/Klaster) in APL.01 template.
+     */
+    private function buildSkemaTypeTextRunApl(?string $type, ?object $skema = null): \PhpOffice\PhpWord\Element\TextRun
+    {
+        $typeStr = strtolower(trim((string)$type));
+
+        if ($typeStr === 'kkni/okupasi/klaster' || empty($typeStr)) {
+            if ($skema && !empty($skema->jenis_skema)) {
+                $typeStr = strtolower(trim((string)$skema->jenis_skema));
+            }
+        }
+
+        $isKKNI = str_contains($typeStr, 'kkni');
+        $isOkupasi = str_contains($typeStr, 'okupasi');
+        $isKlaster = str_contains($typeStr, 'klaster') || str_contains($typeStr, 'cluster');
+
+        $matchedCount = ($isKKNI ? 1 : 0) + ($isOkupasi ? 1 : 0) + ($isKlaster ? 1 : 0);
+        $hasSelection = ($matchedCount >= 1);
+
+        $tr = new \PhpOffice\PhpWord\Element\TextRun();
+        $tr->addText('(', ['name' => 'Calibri', 'size' => 11]);
+        $tr->addText('KKNI', [
+            'name' => 'Calibri',
+            'size' => 11,
+            'strikethrough' => $hasSelection ? !$isKKNI : false
+        ]);
+        $tr->addText('/', ['name' => 'Calibri', 'size' => 11]);
+        $tr->addText('Okupasi', [
+            'name' => 'Calibri',
+            'size' => 11,
+            'strikethrough' => $hasSelection ? !$isOkupasi : false
+        ]);
+        $tr->addText('/', ['name' => 'Calibri', 'size' => 11]);
+        $tr->addText('Klaster', [
+            'name' => 'Calibri',
+            'size' => 11,
+            'strikethrough' => $hasSelection ? !$isKlaster : false
+        ]);
+        $tr->addText(')', ['name' => 'Calibri', 'size' => 11]);
+
+        return $tr;
+    }
+
+    /**
+     * Resolve signature to absolute image path for TemplateProcessor.
+     * Supports base64 data URIs and stored file paths.
+     */
+    private function resolveSignatureImageApl(?string $signatureValue): ?string
+    {
+        if (empty($signatureValue)) {
+            return null;
+        }
+
+        // Base64 data URI
+        if (str_starts_with($signatureValue, 'data:image')) {
+            $parts = explode('base64,', $signatureValue);
+            $binary = base64_decode(str_replace(["\r", "\n"], ['', ''], end($parts)), true);
+            if ($binary && strlen($binary) > 50) {
+                $tempPath = storage_path('app/temp/sig_apl_' . uniqid() . '.png');
+                if (!is_dir(dirname($tempPath))) {
+                    mkdir(dirname($tempPath), 0755, true);
+                }
+                file_put_contents($tempPath, $binary);
+                if (@getimagesize($tempPath) !== false) {
+                    return $tempPath;
+                }
+                @unlink($tempPath);
+            }
+            return null;
+        }
+
+        // Stored file path
+        $filePath = storage_path('app/public/' . ltrim($signatureValue, '/'));
+        if (file_exists($filePath)) {
+            return $filePath;
+        }
+
+        return null;
+    }
+
+    /**
+     * Build APL.01 data array for PDF fallback (legacy method).
+     */
+    private function buildApl01Data(Asesi $asesi): array
+    {
+        $logoPath = public_path('images/lsp.png');
+        $logoUrl = file_exists($logoPath) ? 'file://' . $logoPath : null;
+
+        $isValidDataUri = function ($value) {
+            return is_string($value)
+                && preg_match('/^data:image\/(png|jpe?g);base64,[A-Za-z0-9+\/=\r\n]+$/i', $value);
+        };
+
+        $signatureRenderStyle = function (?string $dataUri, int $preferredHeight = 48, int $maxWidth = 180, int $maxHeight = 72): array {
+            if (!$dataUri) {
+                return ['src' => null, 'style' => null];
+            }
+            return ['src' => $dataUri, 'style' => 'max-width: ' . $maxWidth . 'px; max-height: ' . $maxHeight . 'px;'];
+        };
+
+        $pendaftarSignature = $isValidDataUri($asesi->tanda_tangan_pendaftar ?? null)
+            ? $signatureRenderStyle($asesi->tanda_tangan_pendaftar)
+            : ['src' => null, 'style' => null];
+
+        $verifikatorSignature = $isValidDataUri($asesi->tanda_tangan_admin ?? null)
+            ? $signatureRenderStyle($asesi->tanda_tangan_admin)
+            : ['src' => null, 'style' => null];
+
+        return [
+            'asesi' => $asesi,
+            'skema' => $asesi->skemas->first(),
+            'bukti_persyaratan' => $asesi->verifikasi_bukti_persyaratan_dasar ?? [],
+            'bukti_administratif' => $asesi->verifikasi_bukti_administratif ?? [],
+            'logoUrl' => $logoUrl,
+            'pendaftarSignature' => $pendaftarSignature,
+            'verifikatorSignature' => $verifikatorSignature,
+            'adminSignerName' => optional($asesi->verifiedBy)->name ?? optional($asesi->verifiedBy)->username,
+            'pendaftarSignedAt' => optional($asesi->tanggal_tanda_tangan_pendaftar)->format('d-m-Y'),
+            'adminSignedAt' => optional($asesi->tanggal_tanda_tangan_admin)->format('d-m-Y'),
+            'rekomendasiText' => 'Diterima',
+            'catatanAdmin' => $asesi->catatan_admin,
+        ];
+    }
+
+
+    /**
      * Export data asesi aktivasi dengan filter jurusan, skema, status, dan tanggal daftar (bisa ditumpuk).
      */
     public function exportActivated(Request $request)
@@ -1864,7 +2235,7 @@ class AsesiController extends Controller
             $isStep4Completed = $isPersetujuanSelesai && $isStep3Completed;
             
             $stepPersetujuan = [
-                'name' => 'Persetujuan Asesmen (FR.APL.03)',
+                'name' => 'Persetujuan Asesmen (FR.AK.01)',
                 'status' => $isStep4Completed ? 'completed' : 'pending',
                 'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
                 'description' => $isPersetujuanSelesai 

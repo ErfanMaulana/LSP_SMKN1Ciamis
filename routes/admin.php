@@ -323,6 +323,7 @@ Route::prefix('admin')->group(function () {
             Route::post('/persetujuan-asesmen', [PersetujuanAsesmenController::class, 'store'])->name('admin.persetujuan-asesmen.store')->middleware('permission:persetujuan-asesmen.create');
             Route::get('/persetujuan-asesmen/{id}', [PersetujuanAsesmenController::class, 'show'])->name('admin.persetujuan-asesmen.show');
             Route::get('/persetujuan-asesmen/{id}/export', [PersetujuanAsesmenController::class, 'export'])->name('admin.persetujuan-asesmen.export');
+            Route::get('/persetujuan-asesmen/{id}/export-word', [PersetujuanAsesmenController::class, 'exportWord'])->name('admin.persetujuan-asesmen.export-word');
             Route::get('/persetujuan-asesmen/{id}/edit', [PersetujuanAsesmenController::class, 'edit'])->name('admin.persetujuan-asesmen.edit')->middleware('permission:persetujuan-asesmen.edit');
             Route::put('/persetujuan-asesmen/{id}', [PersetujuanAsesmenController::class, 'update'])->name('admin.persetujuan-asesmen.update')->middleware('permission:persetujuan-asesmen.edit');
             Route::delete('/persetujuan-asesmen/{id}', [PersetujuanAsesmenController::class, 'destroy'])->name('admin.persetujuan-asesmen.destroy')->middleware('permission:persetujuan-asesmen.delete');

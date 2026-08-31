@@ -74,6 +74,7 @@ Route::prefix('asesor')->name('asesor.')->group(function () {
         // Persetujuan Asesmen (front) - allow asesor to sign
         Route::get('/persetujuan-asesmen/{asesiNik}/{skemaId}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorShow'])->name('persetujuan.front.asesor.show');
         Route::get('/persetujuan-asesmen/{asesiNik}/{skemaId}/export', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorExport'])->name('persetujuan.front.asesor.export');
+        Route::get('/persetujuan-asesmen/{asesiNik}/{skemaId}/export-word', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorExportWord'])->name('persetujuan.front.asesor.export-word');
         Route::post('/persetujuan-asesmen/{id}/sign', [\App\Http\Controllers\PersetujuanAsesmenFrontController::class, 'asesorSign'])->name('persetujuan.front.asesor.sign');
         Route::get('/banding-asesmen/{asesiNik}/{skemaId}', [BandingAsesmenController::class, 'form'])->name('banding.form');
         Route::get('/banding-asesmen/{asesiNik}/{skemaId}/export', [BandingAsesmenController::class, 'export'])->name('banding.export');

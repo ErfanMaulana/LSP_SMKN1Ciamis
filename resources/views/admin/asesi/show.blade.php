@@ -415,7 +415,7 @@
                                                             <i class="bi bi-download"></i> Export FR.APL.02
                                                         </a>
                                                     @endif
-                                                @elseif($index === 3) {{-- Persetujuan Asesmen (FR.APL.03) --}}
+                                                @elseif($index === 3) {{-- Persetujuan Asesmen (FR.AK.01) --}}
                                                     @if(!empty($row->is_persetujuan_selesai) && !empty($row->persetujuan->id))
                                                         @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.view') && Route::has('admin.persetujuan-asesmen.show'))
                                                             <a href="{{ route('admin.persetujuan-asesmen.show', $row->persetujuan->id) }}" class="btn-action btn-outline-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #0073bd; color: #0073bd; background: transparent;">
@@ -424,7 +424,7 @@
                                                         @endif
                                                         @if(Auth::guard('admin')->user()->hasPermission('persetujuan-asesmen.view') && Route::has('admin.persetujuan-asesmen.export'))
                                                             <a href="{{ route('admin.persetujuan-asesmen.export', $row->persetujuan->id) }}" class="btn-action btn-export" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid #10b981; color: #10b981; background: transparent;">
-                                                                <i class="bi bi-download"></i> Export FR.APL.03
+                                                                <i class="bi bi-download"></i> Export FR.AK.01
                                                             </a>
                                                         @endif
                                                     @endif
