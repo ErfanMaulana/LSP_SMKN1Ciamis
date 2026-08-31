@@ -528,8 +528,9 @@ class DashboardController extends Controller
         $asesor  = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
         $skemaNames = $asesor ? $asesor->skemas->pluck('nama_skema')->filter()->values() : collect();
+        $scheduledAsesiNiks = $this->getScheduledAsesiNiksForAsesor($asesor);
 
-        if (!count($skemaIds)) {
+        if (!count($skemaIds) || empty($scheduledAsesiNiks)) {
             $data  = collect();
             $skema = null;
             $summary = [
@@ -539,13 +540,22 @@ class DashboardController extends Controller
                 'belum'   => 0,
             ];
 
-            return view('asesor.asesi.index', compact('account', 'asesor', 'data', 'skema', 'summary', 'skemaNames'));
+            $jurusans = collect();
+            $skemaList = collect();
+            $kelasList = collect();
+            $selectedJurusan = '';
+
+            return view('asesor.asesi.index', compact(
+                'account', 'asesor', 'data', 'skema', 'summary', 'skemaNames',
+                'jurusans', 'skemaList', 'kelasList', 'selectedJurusan'
+            ));
         }
 
         // Build base query with asesi join for filtering
         $query = DB::table('asesi_skema')
             ->join('asesi as a', 'asesi_skema.asesi_nik', '=', 'a.NIK')
             ->whereIn('asesi_skema.skema_id', $skemaIds)
+            ->whereIn('asesi_skema.asesi_nik', $scheduledAsesiNiks)
             ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)');
 
         // Filter by search (nama and NIK only)
@@ -1522,6 +1532,9 @@ class DashboardController extends Controller
         $account = Auth::guard('account')->user();
         $asesor  = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
+        $scheduledAsesiNiks = $this->getScheduledAsesiNiksForAsesor($asesor);
+
+        abort_unless(in_array($nik, $scheduledAsesiNiks), 403, 'Asesi ini tidak berada dalam kelompok/jadwal Anda.');
 
         $asesi = Asesi::with(['jurusan', 'buktiPendukung', 'verifiedBy', 'skemas.buktiPersyaratanDasarPemohon'])
             ->where('NIK', $nik)
