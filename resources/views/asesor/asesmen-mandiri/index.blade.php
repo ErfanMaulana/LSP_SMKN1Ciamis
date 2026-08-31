@@ -37,6 +37,18 @@
         margin-bottom: 18px;
     }
 
+    @media (max-width: 1100px) {
+        .stats-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 640px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
     .stat-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -341,10 +353,10 @@
 </div>
 
 <div class="stats-grid">
-    <!-- <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'menunggu_review', 'search' => $search]) }}" class="stat-card {{ $status === 'menunggu_review' ? 'active' : '' }}">
+    <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'belum_direview', 'search' => $search]) }}" class="stat-card {{ in_array($status, ['belum_direview', 'menunggu_review']) ? 'active' : '' }}">
         <div class="stat-value">{{ $summary['pending_review'] ?? 0 }}</div>
-        <div class="stat-label">Menunggu Review</div>
-    </a> -->
+        <div class="stat-label">Belum Direview</div>
+    </a>
     <a href="{{ route('asesor.asesmen-mandiri.index', ['status' => 'belum_dikerjakan', 'search' => $search]) }}" class="stat-card {{ $status === 'belum_dikerjakan' ? 'active' : '' }}">
         <div class="stat-value">{{ $summary['belum_dikerjakan'] ?? 0 }}</div>
         <div class="stat-label">Belum Dikerjakan</div>

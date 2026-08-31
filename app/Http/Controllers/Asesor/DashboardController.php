@@ -1286,7 +1286,7 @@ class DashboardController extends Controller
 
         $viewMode = $request->input('view') ?? '';
         if ($viewMode === '') {
-            if ($status === 'menunggu_review') {
+            if ($status === 'menunggu_review' || $status === 'belum_direview') {
                 $viewMode = 'menunggu';
             } elseif ($status === 'sudah_direkomendasikan' || $status === 'tidak_direkomendasikan') {
                 $viewMode = 'selesai';
@@ -1302,7 +1302,7 @@ class DashboardController extends Controller
         $data = $allData;
         
         if ($status !== '') {
-            if ($status === 'menunggu_review') {
+            if ($status === 'menunggu_review' || $status === 'belum_direview') {
                 $data = $data->filter(fn($row) => $row->status === 'selesai' && empty($row->rekomendasi));
             } elseif ($status === 'belum_dikerjakan') {
                 $data = $data->filter(fn($row) => $row->status !== 'selesai');
