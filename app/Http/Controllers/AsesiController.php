@@ -602,7 +602,7 @@ class AsesiController extends Controller
      */
     public function generatePdf($nik)
     {
-        $asesi = Asesi::with(['jurusan', 'skemas', 'buktiPendukung', 'verifiedBy'])->findOrFail($nik);
+        $asesi = Asesi::with(['jurusan', 'skemas.buktiPersyaratanDasarPemohon', 'skemas.units', 'buktiPendukung', 'verifiedBy'])->findOrFail($nik);
 
         if (($asesi->status ?? null) !== 'approved') {
             abort(403, 'PDF APL 1 hanya tersedia untuk asesi yang sudah disetujui.');
@@ -1367,21 +1367,54 @@ class AsesiController extends Controller
         }
 
         // --- Bagian 3: Bukti Kelengkapan ---
+        // Ambil label dari skema (master data)
+        $skemaBuktiItems = [];
+        if ($skema && $skema->buktiPersyaratanDasarPemohon) {
+            $skemaBuktiItems = $skema->buktiPersyaratanDasarPemohon->items ?? [];
+        }
+        $skemaLabelMap = []; // indexed array of labels from skema
+        foreach ($skemaBuktiItems as $idx => $sItem) {
+            $skemaLabelMap[$idx] = is_array($sItem) ? ($sItem['nama'] ?? $sItem['label'] ?? '') : (string) $sItem;
+        }
+
         $dokumenList = $asesi->verifikasi_bukti_persyaratan_dasar ?? [];
         if (!is_array($dokumenList)) $dokumenList = [];
 
+        // Fallback default jika tidak ada data sama sekali
         $defaultDokumen = [
             'Fotocopy Rapor pada kesesuaian/hasil nilai yang relevan',
             'Fotocopy Sertifikat/Surat Keterangan telah melaksanakan PKL',
             'Portofolio / Bukti pendukung kompetensi lain',
         ];
-        $docRows = !empty($dokumenList) ? $dokumenList : $defaultDokumen;
+
+        // Merge label: jika label di stored data kosong, ambil dari skema atau default
+        if (!empty($dokumenList)) {
+            $dokumenList = array_map(function ($row, $idx) use ($skemaLabelMap, $defaultDokumen) {
+                if (is_string($row)) {
+                    return ['label' => $row ?: ($skemaLabelMap[$idx] ?? $defaultDokumen[$idx] ?? '-'), 'status' => ''];
+                }
+                $label = trim((string) ($row['label'] ?? $row['nama'] ?? ''));
+                if (empty($label)) {
+                    $label = $skemaLabelMap[$idx] ?? $defaultDokumen[$idx] ?? '-';
+                }
+                $row['label'] = $label;
+                return $row;
+            }, $dokumenList, array_keys($dokumenList));
+            $docRows = $dokumenList;
+        } else {
+            // Gunakan dari skema jika ada, jika tidak pakai default
+            if (!empty($skemaLabelMap)) {
+                $docRows = array_map(fn($label) => ['label' => $label, 'status' => ''], array_values($skemaLabelMap));
+            } else {
+                $docRows = array_map(fn($label) => ['label' => $label, 'status' => ''], $defaultDokumen);
+            }
+        }
 
         if (is_array($docRows) && count($docRows) > 0) {
             $templateProcessor->cloneRow('no_persyaratan', count($docRows));
             foreach ($docRows as $index => $row) {
                 $rowNum = $index + 1;
-                $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '');
+                $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '-');
                 $state = is_array($row) ? ($row['status'] ?? '') : '';
                 $templateProcessor->setValue('no_persyaratan#' . $rowNum, (string) $rowNum . '.');
                 $templateProcessor->setValue('bukti_persyaratan#' . $rowNum, e($label));
@@ -1404,13 +1437,30 @@ class AsesiController extends Controller
             'Fotocopy Kartu Keluarga/KTP',
             'Pas foto 3 x 4 berwarna sebanyak 2 lembar',
         ];
-        $adminRows = !empty($administratifList) ? $administratifList : $defaultAdmin;
+
+        // Merge label administratif: jika label kosong, ambil dari default
+        if (!empty($administratifList)) {
+            $administratifList = array_map(function ($row, $idx) use ($defaultAdmin) {
+                if (is_string($row)) {
+                    return ['label' => $row ?: ($defaultAdmin[$idx] ?? '-'), 'status' => ''];
+                }
+                $label = trim((string) ($row['label'] ?? $row['nama'] ?? ''));
+                if (empty($label)) {
+                    $label = $defaultAdmin[$idx] ?? '-';
+                }
+                $row['label'] = $label;
+                return $row;
+            }, $administratifList, array_keys($administratifList));
+            $adminRows = $administratifList;
+        } else {
+            $adminRows = array_map(fn($label) => ['label' => $label, 'status' => ''], $defaultAdmin);
+        }
 
         if (is_array($adminRows) && count($adminRows) > 0) {
             $templateProcessor->cloneRow('no_admin', count($adminRows));
             foreach ($adminRows as $index => $row) {
                 $rowNum = $index + 1;
-                $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '');
+                $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '-');
                 $state = is_array($row) ? ($row['status'] ?? '') : '';
                 $templateProcessor->setValue('no_admin#' . $rowNum, (string) $rowNum . '.');
                 $templateProcessor->setValue('bukti_admin#' . $rowNum, e($label));
