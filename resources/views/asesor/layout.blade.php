@@ -766,6 +766,13 @@
                                         ->from('asesi as a')
                                         ->whereRaw('a.NIK = aks.asesi_nik');
                                 })
+                                ->whereExists(function ($query) use ($asesor) {
+                                    $query->select(\Illuminate\Support\Facades\DB::raw(1))
+                                        ->from('rekaman_asesmen_kompetensi as rak')
+                                        ->whereRaw('rak.asesi_nik = aks.asesi_nik')
+                                        ->whereRaw('rak.skema_id = aks.skema_id')
+                                        ->where('rak.asesor_id', $asesor->ID_asesor);
+                                })
                                 ->whereNotExists(function ($query) use ($asesor) {
                                     $query->select(\Illuminate\Support\Facades\DB::raw(1))
                                         ->from('asesor_nilai_elemens as ane')

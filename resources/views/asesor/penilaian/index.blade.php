@@ -279,8 +279,9 @@
                 </table>
             @else
                 <div class="empty">
-                    <i class="bi bi-check-circle-fill" style="font-size:42px;color:#059669;"></i>
-                    <p style="margin-top:10px;color:#059669;"><strong>Sempurna!</strong> Semua asesi sudah dinilai.</p>
+                    <i class="bi bi-inbox" style="font-size:42px;color:#64748b;"></i>
+                    <p style="margin-top:10px;color:#475569;font-weight:600;">Belum Ada Asesi Menunggu Penilaian</p>
+                    <small style="color:#94a3b8;font-size:12px;">Asesi yang telah menyelesaikan tahap Rekaman Asesmen akan otomatis muncul di sini untuk dinilai.</small>
                 </div>
             @endif
         </div>
