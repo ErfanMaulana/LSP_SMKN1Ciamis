@@ -971,6 +971,16 @@ class PersetujuanAsesmenFrontController extends Controller
             $asesor = \App\Models\Asesor::where('no_met', (string) $item->reviewed_by)->first();
         }
 
+        // Check if PHPWord docx template is available
+        $templatePath = storage_path('app/template/fr_ak_01.docx');
+        if (!file_exists($templatePath)) {
+            $templatePath = base_path('storage/template/fr_ak_01.docx');
+        }
+
+        if (file_exists($templatePath)) {
+            return $this->exportWithPhpWord($item, $skema, $asesi, $asesiNik, $templatePath);
+        }
+
         $html = view('persetujuan-asesmen.export-docx', [
             'item' => $item,
             'skema' => $skema,
@@ -989,6 +999,260 @@ class PersetujuanAsesmenFrontController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
             'Cache-Control' => 'max-age=0',
         ]);
+    }
+
+    /**
+     * Dedicated PHPWord .docx export method for Asesor
+     */
+    public function asesorExportWord($asesiNik, $skemaId)
+    {
+        return $this->asesorExport($asesiNik, $skemaId);
+    }
+
+    /**
+     * Export FR.AK.01 using PHPWord TemplateProcessor with .docx template
+     */
+    private function exportWithPhpWord($item, $skema, $asesi, $asesiNik, string $templatePath)
+    {
+        $templateProcessor = new \PhpOffice\PhpWord\TemplateProcessor($templatePath);
+
+        // --- Basic info ---
+        $templateProcessor->setValue('judul_skema', e($item->judul_skema ?? ($skema->nama_skema ?? '-')));
+        $templateProcessor->setValue('nomor_skema', e($item->nomor_skema ?? ($skema->nomor_skema ?? '-')));
+        $templateProcessor->setValue('nama_asesor', e($item->nama_asesor ?? '-'));
+        $templateProcessor->setValue('nama_asesi', e($item->nama_asesi ?? ($asesi?->nama ?? '-')));
+
+        // --- Skema Type & TUK with strikethrough on non-selected options ---
+        $skemaType = $item->kategori_skema ?? ($skema?->jenis_skema ?? null);
+        $templateProcessor->setComplexValue('type_skema', $this->buildSkemaTypeTextRun($skemaType, $skema));
+
+        $tukVal = $item->tuk ?? ($item->tuk_pelaksanaan ?? null);
+        $templateProcessor->setComplexValue('tuk_sewaktu/tempatkerja/mandiri', $this->buildTukTextRun($tukVal, $item->tuk_pelaksanaan));
+
+        // --- Bukti yang dikumpulkan (checkboxes) ---
+        $check = '☑';
+        $uncheck = '☐';
+
+        $templateProcessor->setValue('portfolio', $item->bukti_verifikasi_portofolio ? $check : $uncheck);
+        $templateProcessor->setValue('review_produk', $item->bukti_reviu_produk ? $check : $uncheck);
+        $templateProcessor->setValue('observasi', $item->bukti_observasi_langsung ? $check : $uncheck);
+        $templateProcessor->setValue('kegiatan_terstruktur', $item->bukti_kegiatan_terstruktur ? $check : $uncheck);
+        $templateProcessor->setValue('pertanyaan_lisan', $item->bukti_pertanyaan_lisan ? $check : $uncheck);
+        $templateProcessor->setValue('pertanyaan_tertulis', $item->bukti_pertanyaan_tertulis ? $check : $uncheck);
+        $templateProcessor->setValue('lainnya', $item->bukti_lainnya ? $check : $uncheck);
+        $templateProcessor->setValue('wawancara', $item->bukti_pertanyaan_wawancara ? $check : $uncheck);
+
+        // --- Jadwal pelaksanaan ---
+        $templateProcessor->setValue('hari/tanggal_jadwal', e($item->hari_tanggal ?? '-'));
+        $templateProcessor->setValue('hari_tanggal_jadwal', e($item->hari_tanggal ?? '-'));
+        $templateProcessor->setValue('waktu_jadwal', e($item->waktu ?? '-'));
+        $templateProcessor->setValue('tuk', e($item->tuk_pelaksanaan ?? ($item->tuk ?? '-')));
+
+        // --- Tanda tangan Asesor ---
+        $ttdAsesorImage = $this->resolveSignatureImage($item->ttd_asesor_file);
+        if ($ttdAsesorImage) {
+            $templateProcessor->setImageValue('ttd_asesor', [
+                'path' => $ttdAsesorImage,
+                'width' => 150,
+                'height' => 60,
+                'ratio' => false,
+            ]);
+        } else {
+            $templateProcessor->setValue('ttd_asesor', '');
+        }
+        $templateProcessor->setComplexValue('tanggal_ttd_asesor', $this->buildDateTextRun($item->ttd_asesor_tanggal));
+
+        // --- Tanda tangan Asesi ---
+        $ttdAsesiImage = $this->resolveSignatureImage($item->ttd_asesi_file);
+        if ($ttdAsesiImage) {
+            $templateProcessor->setImageValue('ttd_asesi', [
+                'path' => $ttdAsesiImage,
+                'width' => 150,
+                'height' => 60,
+                'ratio' => false,
+            ]);
+        } else {
+            $templateProcessor->setValue('ttd_asesi', '');
+        }
+        $templateProcessor->setComplexValue('tanggal_ttd_asesi', $this->buildDateTextRun($item->ttd_asesi_tanggal));
+
+        // --- Generate output file ---
+        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema?->nomor_skema ?? $skema->id));
+        $fileName = 'FR.AK.01-' . $asesiNik . '-' . trim($fileSkema, '-') . '.docx';
+
+        $tempFile = storage_path('app/temp/' . uniqid('fr_ak_01_') . '.docx');
+        if (!is_dir(dirname($tempFile))) {
+            mkdir(dirname($tempFile), 0755, true);
+        }
+        $templateProcessor->saveAs($tempFile);
+
+        return response()->download($tempFile, $fileName, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        ])->deleteFileAfterSend(true);
+    }
+
+    /**
+     * Build strikethrough TextRun for Skema Sertifikasi type (KKNI/Okupasi/Klaster)
+     */
+    private function buildSkemaTypeTextRun(?string $type, ?Skema $skema = null): \PhpOffice\PhpWord\Element\TextRun
+    {
+        $typeStr = strtolower(trim((string)$type));
+
+        if ($typeStr === 'kkni/okupasi/klaster' || empty($typeStr)) {
+            if ($skema && !empty($skema->jenis_skema)) {
+                $typeStr = strtolower(trim((string)$skema->jenis_skema));
+            }
+        }
+
+        $isKKNI = str_contains($typeStr, 'kkni');
+        $isOkupasi = str_contains($typeStr, 'okupasi');
+        $isKlaster = str_contains($typeStr, 'klaster') || str_contains($typeStr, 'cluster');
+
+        $matchedCount = ($isKKNI ? 1 : 0) + ($isOkupasi ? 1 : 0) + ($isKlaster ? 1 : 0);
+        $hasSelection = ($matchedCount === 1 || $matchedCount === 2);
+
+        $tr = new \PhpOffice\PhpWord\Element\TextRun();
+        $tr->addText('(', ['name' => 'Times New Roman', 'size' => 10]);
+        $tr->addText('KKNI', [
+            'name' => 'Times New Roman',
+            'size' => 10,
+            'strikethrough' => $hasSelection ? !$isKKNI : false
+        ]);
+        $tr->addText('/', ['name' => 'Times New Roman', 'size' => 10]);
+        $tr->addText('Okupasi', [
+            'name' => 'Times New Roman',
+            'size' => 10,
+            'strikethrough' => $hasSelection ? !$isOkupasi : false
+        ]);
+        $tr->addText('/', ['name' => 'Times New Roman', 'size' => 10]);
+        $tr->addText('Klaster', [
+            'name' => 'Times New Roman',
+            'size' => 10,
+            'strikethrough' => $hasSelection ? !$isKlaster : false
+        ]);
+        $tr->addText(')', ['name' => 'Times New Roman', 'size' => 10]);
+
+        return $tr;
+    }
+
+    /**
+     * Build strikethrough TextRun for TUK (Sewaktu/Tempat Kerja/Mandiri*)
+     */
+    private function buildTukTextRun(?string $tuk, ?string $tukPelaksanaan = null): \PhpOffice\PhpWord\Element\TextRun
+    {
+        $tukStr = strtolower(trim((string)$tuk));
+
+        $isSewaktu = str_contains($tukStr, 'sewaktu');
+        $isTempatKerja = str_contains($tukStr, 'tempat kerja') || str_contains($tukStr, 'tempat_kerja') || str_contains($tukStr, 'tempatkerja');
+        $isMandiri = str_contains($tukStr, 'mandiri');
+
+        if (!$isSewaktu && !$isTempatKerja && !$isMandiri) {
+            $tukModel = Tuk::where('nama_tuk', $tuk)->orWhere('nama_tuk', $tukPelaksanaan)->first();
+            if ($tukModel && !empty($tukModel->tipe_tuk)) {
+                $tipe = strtolower(trim((string)$tukModel->tipe_tuk));
+                $isSewaktu = str_contains($tipe, 'sewaktu');
+                $isTempatKerja = str_contains($tipe, 'tempat kerja') || str_contains($tipe, 'tempat_kerja') || str_contains($tipe, 'tempatkerja');
+                $isMandiri = str_contains($tipe, 'mandiri');
+            }
+        }
+
+        $matchedCount = ($isSewaktu ? 1 : 0) + ($isTempatKerja ? 1 : 0) + ($isMandiri ? 1 : 0);
+        $hasSelection = ($matchedCount === 1 || $matchedCount === 2);
+
+        $tr = new \PhpOffice\PhpWord\Element\TextRun();
+        $tr->addText('Sewaktu', [
+            'name' => 'Times New Roman',
+            'size' => 10,
+            'strikethrough' => $hasSelection ? !$isSewaktu : false
+        ]);
+        $tr->addText('/', ['name' => 'Times New Roman', 'size' => 10]);
+        $tr->addText('Tempat Kerja', [
+            'name' => 'Times New Roman',
+            'size' => 10,
+            'strikethrough' => $hasSelection ? !$isTempatKerja : false
+        ]);
+        $tr->addText('/', ['name' => 'Times New Roman', 'size' => 10]);
+        $tr->addText('Mandiri', [
+            'name' => 'Times New Roman',
+            'size' => 10,
+            'strikethrough' => $hasSelection ? !$isMandiri : false
+        ]);
+        $tr->addText('*', ['name' => 'Times New Roman', 'size' => 10]);
+
+        return $tr;
+    }
+
+    /**
+     * Resolve signature file to an absolute image path for PHPWord setImageValue.
+     * Supports base64 data URIs and stored file paths.
+     */
+    private function resolveSignatureImage(?string $signatureValue): ?string
+    {
+        if (empty($signatureValue)) {
+            return null;
+        }
+
+        if (str_starts_with($signatureValue, 'data:image')) {
+            $parts = explode('base64,', $signatureValue);
+            $binary = base64_decode(end($parts), true);
+            if ($binary && strlen($binary) > 50) {
+                $tempPath = storage_path('app/temp/sig_' . uniqid() . '.png');
+                if (!is_dir(dirname($tempPath))) {
+                    mkdir(dirname($tempPath), 0755, true);
+                }
+                file_put_contents($tempPath, $binary);
+                return $tempPath;
+            }
+            return null;
+        }
+
+        $filePath = storage_path('app/public/' . ltrim($signatureValue, '/'));
+        if (file_exists($filePath)) {
+            return $filePath;
+        }
+
+        return null;
+    }
+
+    /**
+     * Build TextRun for signature date with dotted underline padding for Word export.
+     */
+    private function buildDateTextRun(?string $date, int $targetLength = 23): \PhpOffice\PhpWord\Element\TextRun
+    {
+        $tr = new \PhpOffice\PhpWord\Element\TextRun();
+
+        if (empty($date)) {
+            $tr->addText(str_repeat('.', $targetLength), [
+                'name' => 'Times New Roman',
+                'size' => 10,
+            ]);
+            return $tr;
+        }
+
+        try {
+            $formatted = \Carbon\Carbon::parse($date)->locale('id')->isoFormat('D MMMM YYYY');
+            $tr->addText($formatted, [
+                'name' => 'Times New Roman',
+                'size' => 10,
+                'underline' => 'dotted',
+            ]);
+
+            $spacesNeeded = max(0, $targetLength - mb_strlen($formatted));
+            if ($spacesNeeded > 0) {
+                $tr->addText(str_repeat("\u{00A0}", $spacesNeeded), [
+                    'name' => 'Times New Roman',
+                    'size' => 10,
+                    'underline' => 'dotted',
+                ]);
+            }
+        } catch (\Exception $e) {
+            $tr->addText(str_repeat('.', $targetLength), [
+                'name' => 'Times New Roman',
+                'size' => 10,
+            ]);
+        }
+
+        return $tr;
     }
 
     public function asesiShow(Request $request, $skemaId)

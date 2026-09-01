@@ -231,7 +231,7 @@ class AuthController extends Controller
                 )
             );
             $stepPersetujuan = [
-                'name' => 'Persetujuan Asesmen (FR.APL.03)',
+                'name' => 'Persetujuan Asesmen (FR.AK.01)',
                 'status' => $isStep4Completed ? 'completed' : 'pending',
                 'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
                 'description' => $isPersetujuanSelesai 
