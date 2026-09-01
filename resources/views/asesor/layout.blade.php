@@ -515,10 +515,73 @@
                         $skemaIds = $asesor->skemas->pluck('id')->toArray();
                         $nomorSkemas = $asesor->skemas->pluck('nomor_skema')->filter()->toArray();
 
-                        if (count($skemaIds)) {
+                        // Resolve scheduled asesi NIKs for this asesor
+                        $jadwalIds = \Illuminate\Support\Facades\DB::table('jadwal_ujikom')
+                            ->where('asesor_id', $asesor->ID_asesor)
+                            ->pluck('id')
+                            ->toArray();
+
+                        $kelompokIdsFromJadwal = !empty($jadwalIds)
+                            ? \Illuminate\Support\Facades\DB::table('jadwal_kelompok')
+                                ->whereIn('jadwal_id', $jadwalIds)
+                                ->pluck('kelompok_id')
+                                ->toArray()
+                            : [];
+
+                        $directKelompokIds = \Illuminate\Support\Facades\DB::table('jadwal_ujikom')
+                            ->where('asesor_id', $asesor->ID_asesor)
+                            ->whereNotNull('kelompok_id')
+                            ->pluck('kelompok_id')
+                            ->toArray();
+
+                        $kelompokIdsFromKelompokAsesor = \Illuminate\Support\Facades\DB::table('kelompok_asesor')
+                            ->where('asesor_id', $asesor->ID_asesor)
+                            ->where(function ($q) {
+                                $q->whereIn('kelompok_id', function ($sq) {
+                                    $sq->select('kelompok_id')->from('jadwal_kelompok');
+                                })->orWhereIn('kelompok_id', function ($sq) {
+                                    $sq->select('kelompok_id')->from('jadwal_ujikom')->whereNotNull('kelompok_id');
+                                });
+                            })
+                            ->pluck('kelompok_id')
+                            ->toArray();
+
+                        $allKelompokIds = array_values(array_unique(array_filter(array_merge(
+                            $kelompokIdsFromJadwal,
+                            $directKelompokIds,
+                            $kelompokIdsFromKelompokAsesor
+                        ))));
+
+                        $asesiFromKelompok = !empty($allKelompokIds)
+                            ? \Illuminate\Support\Facades\DB::table('asesi')
+                                ->whereIn('kelompok_id', $allKelompokIds)
+                                ->pluck('NIK')
+                                ->toArray()
+                            : [];
+
+                        $asesiFromJadwalPeserta = !empty($jadwalIds)
+                            ? \Illuminate\Support\Facades\DB::table('jadwal_peserta')
+                                ->whereIn('jadwal_id', $jadwalIds)
+                                ->pluck('asesi_nik')
+                                ->toArray()
+                            : [];
+
+                        $asesiDirect = \Illuminate\Support\Facades\DB::table('asesi')
+                            ->where('ID_asesor', $asesor->ID_asesor)
+                            ->pluck('NIK')
+                            ->toArray();
+
+                        $sidebarScheduledAsesiNiks = array_values(array_unique(array_filter(array_merge(
+                            $asesiFromKelompok,
+                            $asesiFromJadwalPeserta,
+                            $asesiDirect
+                        ))));
+
+                        if (count($skemaIds) && count($sidebarScheduledAsesiNiks)) {
                             // 1. Asesmen Mandiri
                             $sidebarCounts['asesmen_mandiri'] = \Illuminate\Support\Facades\DB::table('asesi_skema')
                                 ->whereIn('skema_id', $skemaIds)
+                                ->whereIn('asesi_nik', $sidebarScheduledAsesiNiks)
                                 ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
                                 ->where('status', 'selesai')
                                 ->where(fn($q) => $q->whereNull('rekomendasi')->orWhere('rekomendasi', ''))
@@ -539,7 +602,7 @@
                                 if (!$skema) continue;
 
                                 $asesiNik = $record->asesi_nik ?: \Illuminate\Support\Facades\DB::table('asesi')->where('nama', $record->nama_asesi)->orderBy('NIK')->value('NIK');
-                                if (!$asesiNik) continue;
+                                if (!$asesiNik || !in_array($asesiNik, $sidebarScheduledAsesiNiks)) continue;
 
                                 $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
                                     ->where('asesi_nik', $asesiNik)
@@ -598,6 +661,7 @@
                             // Get completed ceklis records for this asesor (latest attempt)
                             $completedCeklis = \App\Models\CeklisObservasiAktivitasPraktik::where('asesor_id', $asesor->ID_asesor)
                                 ->whereIn('skema_id', $skemaIds)
+                                ->whereIn('asesi_nik', $sidebarScheduledAsesiNiks)
                                 ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM ceklis_observasi_aktivitas_praktiks b WHERE b.asesi_nik = ceklis_observasi_aktivitas_praktiks.asesi_nik AND b.skema_id = ceklis_observasi_aktivitas_praktiks.skema_id)')
                                 ->whereNotNull('ttd_asesor_file')
                                 ->where('ttd_asesor_file', '!=', '')
@@ -625,6 +689,7 @@
                             // Get registered asesis for these skemas (only the latest attempt)
                             $asesiSkemasForCeklis = \Illuminate\Support\Facades\DB::table('asesi_skema')
                                 ->whereIn('skema_id', $skemaIds)
+                                ->whereIn('asesi_nik', $sidebarScheduledAsesiNiks)
                                 ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
                                 ->get(['asesi_nik', 'skema_id']);
 
@@ -656,6 +721,7 @@
                             // 4. Rekaman Asesmen
                             $completedRekaman = \App\Models\RekamanAsesmenKompetensi::where('asesor_id', $asesor->ID_asesor)
                                 ->whereIn('skema_id', $skemaIds)
+                                ->whereIn('asesi_nik', $sidebarScheduledAsesiNiks)
                                 ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM rekaman_asesmen_kompetensi b WHERE b.asesi_nik = rekaman_asesmen_kompetensi.asesi_nik AND b.skema_id = rekaman_asesmen_kompetensi.skema_id)')
                                 ->whereNotNull('ttd_asesor_file')
                                 ->where('ttd_asesor_file', '!=', '')
@@ -666,6 +732,7 @@
                             $ceklisPairsForRekaman = \Illuminate\Support\Facades\DB::table('ceklis_observasi_aktivitas_praktiks')
                                 ->where('asesor_id', $asesor->ID_asesor)
                                 ->whereIn('skema_id', $skemaIds)
+                                ->whereIn('asesi_nik', $sidebarScheduledAsesiNiks)
                                 ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM ceklis_observasi_aktivitas_praktiks b WHERE b.asesi_nik = ceklis_observasi_aktivitas_praktiks.asesi_nik AND b.skema_id = ceklis_observasi_aktivitas_praktiks.skema_id)')
                                 ->get(['asesi_nik', 'skema_id']);
 
@@ -692,6 +759,7 @@
                             // 5. Entry Penilaian
                             $sidebarCounts['entry_penilaian'] = \Illuminate\Support\Facades\DB::table('asesi_skema as aks')
                                 ->whereIn('aks.skema_id', $skemaIds)
+                                ->whereIn('aks.asesi_nik', $sidebarScheduledAsesiNiks)
                                 ->where('aks.status', 'selesai')
                                 ->whereExists(function ($query) {
                                     $query->select(\Illuminate\Support\Facades\DB::raw(1))
@@ -713,8 +781,9 @@
                                 ->join('banding_asesmen as b', function ($join) {
                                     $join->on('b.asesi_nik', '=', 'aks.asesi_nik')
                                         ->on('b.skema_id', '=', 'aks.skema_id');
-                                })
+                                    })
                                 ->whereIn('aks.skema_id', $skemaIds)
+                                ->whereIn('aks.asesi_nik', $sidebarScheduledAsesiNiks)
                                 ->whereNotNull('aks.rekomendasi')
                                 ->where('b.status', 'diajukan')
                                 ->count();
