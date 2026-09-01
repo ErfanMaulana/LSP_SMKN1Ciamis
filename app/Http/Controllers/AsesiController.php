@@ -611,6 +611,9 @@ class AsesiController extends Controller
         // Check if template exists — if so, use TemplateProcessor approach
         $templatePath = storage_path('app/template/fr_apl_01_fixed.docx');
         if (!file_exists($templatePath)) {
+            $templatePath = base_path('storage/template/fr_apl_01_fixed.docx');
+        }
+        if (!file_exists($templatePath)) {
             $templatePath = storage_path('app/template/fr_apl_01.docx');
         }
         if (!file_exists($templatePath)) {
