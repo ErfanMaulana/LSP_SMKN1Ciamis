@@ -24,16 +24,13 @@ jobs:
         ssh -p 21032 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             eval \$(ssh-agent -s)
             ssh-add ~/.ssh/wisnu
-            ssh -T git@github.com
             cd web
             git fetch --all
             git reset --hard origin/main
+            composer install --no-dev --optimize-autoloader
             npm install
             npm run build
-            composer install --no-dev --optimize-autoloader
             php artisan optimize:clear
             php artisan migrate --force
-            php artisan route:list | grep admin/asesi/bulk-delete
-            php artisan config:cache
+            php artisan optimize
         "
-#trig
