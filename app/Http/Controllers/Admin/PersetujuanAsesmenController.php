@@ -223,10 +223,6 @@ class PersetujuanAsesmenController extends Controller
     public function export($id)
     {
         $templatePath = storage_path('app/template/fr_ak_01.docx');
-        if (!file_exists($templatePath)) {
-            $templatePath = base_path('storage/template/fr_ak_01.docx');
-        }
-
         if (file_exists($templatePath)) {
             return $this->exportWord($id);
         }
@@ -302,9 +298,6 @@ class PersetujuanAsesmenController extends Controller
         $skema = Skema::where('nomor_skema', $item->nomor_skema)->first();
 
         $templatePath = storage_path('app/template/fr_ak_01.docx');
-        if (!file_exists($templatePath)) {
-            $templatePath = base_path('storage/template/fr_ak_01.docx');
-        }
         if (!file_exists($templatePath)) {
             abort(404, 'Template fr_ak_01.docx tidak ditemukan.');
         }

@@ -608,17 +608,8 @@ class AsesiController extends Controller
             abort(403, 'PDF APL 1 hanya tersedia untuk asesi yang sudah disetujui.');
         }
 
-        // Check if template exists — if so, use TemplateProcessor approach
-        $templatePath = storage_path('app/template/fr_apl_01_fixed.docx');
-        if (!file_exists($templatePath)) {
-            $templatePath = base_path('storage/template/fr_apl_01_fixed.docx');
-        }
-        if (!file_exists($templatePath)) {
-            $templatePath = storage_path('app/template/fr_apl_01.docx');
-        }
-        if (!file_exists($templatePath)) {
-            $templatePath = base_path('storage/template/fr_apl_01.docx');
-        }
+        // Check if template exists in storage/app/template/fr_apl_01.docx
+        $templatePath = storage_path('app/template/fr_apl_01.docx');
         if (file_exists($templatePath)) {
             return $this->exportWordTemplate($nik, $asesi, $templatePath);
         }
@@ -1416,16 +1407,24 @@ class AsesiController extends Controller
                 $rowNum = $index + 1;
                 $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '-');
                 $state = is_array($row) ? ($row['status'] ?? '') : '';
+                $isMemenuhi = ($state === 'memenuhi' || $state === 'ada');
+                $isTidakMemenuhi = ($state === 'tidak_memenuhi');
+                $isTidakAda = ($state === 'tidak_ada');
+
                 $templateProcessor->setValue('no_persyaratan#' . $rowNum, (string) $rowNum . '.');
                 $templateProcessor->setValue('bukti_persyaratan#' . $rowNum, e($label));
-                $templateProcessor->setValue('ada_persyaratan#' . $rowNum, ($state === 'memenuhi' || $state === 'ada') ? $check : $uncheck);
-                $templateProcessor->setValue('tidak_ada_persyaratan#' . $rowNum, ($state === 'tidak_ada' || $state === 'tidak_memenuhi') ? $check : $uncheck);
+                $templateProcessor->setValue('memenuhi_persyaratan#' . $rowNum, $isMemenuhi ? $check : $uncheck);
+                $templateProcessor->setValue('tidak_memenuhi_persyaratan#' . $rowNum, $isTidakMemenuhi ? $check : $uncheck);
+                $templateProcessor->setValue('tidak_ada_persyaratan#' . $rowNum, $isTidakAda ? $check : $uncheck);
+                $templateProcessor->setValue('ada_persyaratan#' . $rowNum, $isMemenuhi ? $check : $uncheck);
             }
         } else {
             $templateProcessor->setValue('no_persyaratan', '1.');
             $templateProcessor->setValue('bukti_persyaratan', '-');
-            $templateProcessor->setValue('ada_persyaratan', $uncheck);
+            $templateProcessor->setValue('memenuhi_persyaratan', $uncheck);
+            $templateProcessor->setValue('tidak_memenuhi_persyaratan', $uncheck);
             $templateProcessor->setValue('tidak_ada_persyaratan', $uncheck);
+            $templateProcessor->setValue('ada_persyaratan', $uncheck);
         }
 
         // Bukti Administratif
@@ -1462,16 +1461,24 @@ class AsesiController extends Controller
                 $rowNum = $index + 1;
                 $label = is_string($row) ? $row : ($row['label'] ?? $row['nama'] ?? '-');
                 $state = is_array($row) ? ($row['status'] ?? '') : '';
+                $isMemenuhi = ($state === 'memenuhi' || $state === 'ada');
+                $isTidakMemenuhi = ($state === 'tidak_memenuhi');
+                $isTidakAda = ($state === 'tidak_ada');
+
                 $templateProcessor->setValue('no_admin#' . $rowNum, (string) $rowNum . '.');
                 $templateProcessor->setValue('bukti_admin#' . $rowNum, e($label));
-                $templateProcessor->setValue('ada_admin#' . $rowNum, ($state === 'memenuhi' || $state === 'ada') ? $check : $uncheck);
-                $templateProcessor->setValue('tidak_ada_admin#' . $rowNum, ($state === 'tidak_ada' || $state === 'tidak_memenuhi') ? $check : $uncheck);
+                $templateProcessor->setValue('memenuhi_admin#' . $rowNum, $isMemenuhi ? $check : $uncheck);
+                $templateProcessor->setValue('tidak_memenuhi_admin#' . $rowNum, $isTidakMemenuhi ? $check : $uncheck);
+                $templateProcessor->setValue('tidak_ada_admin#' . $rowNum, $isTidakAda ? $check : $uncheck);
+                $templateProcessor->setValue('ada_admin#' . $rowNum, $isMemenuhi ? $check : $uncheck);
             }
         } else {
             $templateProcessor->setValue('no_admin', '1.');
             $templateProcessor->setValue('bukti_admin', '-');
-            $templateProcessor->setValue('ada_admin', $uncheck);
+            $templateProcessor->setValue('memenuhi_admin', $uncheck);
+            $templateProcessor->setValue('tidak_memenuhi_admin', $uncheck);
             $templateProcessor->setValue('tidak_ada_admin', $uncheck);
+            $templateProcessor->setValue('ada_admin', $uncheck);
         }
 
         // --- Tanda tangan ---

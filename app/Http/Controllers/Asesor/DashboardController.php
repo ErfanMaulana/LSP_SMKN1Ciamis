@@ -898,6 +898,9 @@ class DashboardController extends Controller
                 return $row;
             });
 
+        // Filter: hanya tampilkan asesi yang sudah menyelesaikan tahap Rekaman Asesmen
+        $asesiData = $asesiData->filter(fn($item) => $item->has_rekaman);
+
         // Pisahkan data yang sudah dinilai dan belum dinilai
         $sudahDinilai = $asesiData->filter(fn($item) => $item->sudah_dinilai);
         $belumDinilai = $asesiData->filter(fn($item) => !$item->sudah_dinilai);

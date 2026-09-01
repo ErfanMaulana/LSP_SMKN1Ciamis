@@ -15,8 +15,8 @@
 
         body {
             font-family: Calibri, sans-serif;
-            font-size: 11pt;
-            line-height: 1.15;
+            font-size: 14.5pt;
+            line-height: 0;
             color: #000;
         }
 
@@ -46,19 +46,19 @@
 
         .section-title {
             font-family: Calibri, sans-serif;
-            font-size: 11pt;
+            font-size: 13pt;
             font-weight: bold;
             margin-top: 3mm;
             margin-bottom: 1.5mm;
         }
 
         .section-subtitle {
-            font-size: 11pt;
+            font-size: 13pt;
             margin-bottom: 2mm;
         }
 
         .small {
-            font-size: 11pt;
+            font-size: 13pt;
         }
 
         .label {
@@ -94,7 +94,7 @@
         .grid-table th,
         .grid-table td {
             border: 0.7pt solid #000;
-            font-size: 11pt;
+            font-size: 13pt;
         }
 
         .grid-table th {
@@ -189,7 +189,7 @@
 
         .closing-table td {
             border: 1px solid #000;
-            font-size: 11pt;
+            font-size: 13pt;
             padding: 2mm;
             vertical-align: top;
         }
@@ -234,7 +234,7 @@
         .sig-table td {
             border: 1px solid #000;
             padding: 1.5mm;
-            font-size: 11pt;
+            font-size: 13pt;
             vertical-align: top;
         }
 
