@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Asesi;
 use App\Models\Skema;
 use App\Models\JawabanElemen;
+use App\Services\FrApl02ExportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -152,7 +153,7 @@ class AsesmenMandiriController extends Controller
         }
     }
 
-    public function export($asesiNik, $skemaId)
+    public function export($asesiNik, $skemaId, FrApl02ExportService $exportService)
     {
         $asesi = Asesi::where('NIK', $asesiNik)->firstOrFail();
         $skema = Skema::with([
@@ -164,6 +165,7 @@ class AsesmenMandiriController extends Controller
         $pivot = DB::table('asesi_skema')
             ->where('asesi_nik', $asesiNik)
             ->where('skema_id', $skemaId)
+            ->orderByDesc('attempt')
             ->first();
 
         if (!$pivot) {
@@ -180,28 +182,6 @@ class AsesmenMandiriController extends Controller
             $asesor = \App\Models\Asesor::where('no_met', $pivot->reviewed_by)->first();
         }
 
-        $logoPath = public_path('images/lsp.png');
-        $logoDataUri = file_exists($logoPath)
-            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
-            : null;
-
-        $html = view('asesor.asesmen-mandiri.export-fr-apl-02', [
-            'asesi' => $asesi,
-            'asesor' => $asesor,
-            'skema' => $skema,
-            'answers' => $answers,
-            'pivot' => $pivot,
-            'logoPath' => $logoPath,
-            'logoDataUri' => $logoDataUri,
-        ])->render();
-
-        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
-        $fileName = 'FR.APL.02-' . $asesi->NIK . '-' . trim($fileSkema, '-') . '.doc';
-
-        return response($html, 200, [
-            'Content-Type' => 'application/msword; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-            'Cache-Control' => 'max-age=0',
-        ]);
+        return $exportService->export($asesi, $skema, $answers, $pivot, $asesor);
     }
 }

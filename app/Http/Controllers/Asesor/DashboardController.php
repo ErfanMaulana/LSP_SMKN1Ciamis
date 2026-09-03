@@ -12,6 +12,7 @@ use App\Models\JadwalUjikom;
 use App\Models\JawabanElemen;
 use App\Models\AsesorNilaiElemen;
 use App\Models\PersetujuanAsesmen;
+use App\Services\FrApl02ExportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -1394,7 +1395,7 @@ class DashboardController extends Controller
     /**
      * Export asesmen mandiri (FR.APL.02) untuk asesor.
      */
-    public function asesmenMandiriExport($asesiNik, $skemaId)
+    public function asesmenMandiriExport($asesiNik, $skemaId, FrApl02ExportService $exportService)
     {
         $asesor = $this->getAsesor();
         $skemaIds = $asesor ? $asesor->skemas->pluck('id')->toArray() : [];
@@ -1425,29 +1426,7 @@ class DashboardController extends Controller
             ->get()
             ->keyBy('elemen_id');
 
-        $logoPath = public_path('images/lsp.png');
-        $logoDataUri = file_exists($logoPath)
-            ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath))
-            : null;
-
-        $html = view('asesor.asesmen-mandiri.export-fr-apl-02', [
-            'asesi' => $asesi,
-            'asesor' => $asesor,
-            'skema' => $skema,
-            'answers' => $answers,
-            'pivot' => $pivot,
-            'logoPath' => $logoPath,
-            'logoDataUri' => $logoDataUri,
-        ])->render();
-
-        $fileSkema = preg_replace('/[^A-Za-z0-9\-]+/', '-', (string) ($skema->nomor_skema ?? $skema->id));
-        $fileName = 'FR.APL.02-' . $asesi->NIK . '-' . trim($fileSkema, '-') . '.doc';
-
-        return response($html, 200, [
-            'Content-Type' => 'application/msword; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-            'Cache-Control' => 'max-age=0',
-        ]);
+        return $exportService->export($asesi, $skema, $answers, $pivot, $asesor);
     }
 
     /**
