@@ -103,16 +103,48 @@ class AsesiController extends Controller
         
         // If AJAX request, return only table rows
         if ($request->ajax()) {
+            if ($request->has('tab') && $request->tab === 'akun') {
+                $perPageAkun = (int) $request->query('per_page_akun', 10);
+                $perPageAkun = max(5, min(100, $perPageAkun));
+
+                $queryAkun = Account::where('role', 'asesi')
+                    ->whereNotIn('NIK', Asesi::pluck('NIK')->filter());
+
+                if ($request->has('search_akun') && $request->search_akun != '') {
+                    $searchAkun = $request->search_akun;
+                    $queryAkun->where(function($q) use ($searchAkun) {
+                        $q->where('nama', 'LIKE', "%{$searchAkun}%")
+                          ->orWhere('NIK', 'LIKE', "%{$searchAkun}%")
+                          ->orWhere('id', 'LIKE', "%{$searchAkun}%");
+                    });
+                }
+
+                $akunTanpaAsesi = $queryAkun->orderBy('nama')
+                    ->paginate($perPageAkun, ['*'], 'page_akun')
+                    ->appends($request->except('page_akun'));
+
+                return view('admin.asesi.partials.table-rows-akun', compact('akunTanpaAsesi'))->render();
+            }
             return view('admin.asesi.partials.table-rows', compact('asesi'))->render();
         }
 
         $perPageAkun = (int) $request->query('per_page_akun', 10);
         $perPageAkun = max(5, min(100, $perPageAkun));
 
-        // Akun role=asesi yang tidak punya data di tabel asesi
-        $akunTanpaAsesi = Account::where('role', 'asesi')
-            ->whereNotIn('NIK', Asesi::pluck('NIK')->filter())
-            ->orderBy('nama')
+        $queryAkun = Account::where('role', 'asesi')
+            ->whereNotIn('NIK', Asesi::pluck('NIK')->filter());
+
+        // Search filter for akun
+        if ($request->has('search_akun') && $request->search_akun != '') {
+            $searchAkun = $request->search_akun;
+            $queryAkun->where(function($q) use ($searchAkun) {
+                $q->where('nama', 'LIKE', "%{$searchAkun}%")
+                  ->orWhere('NIK', 'LIKE', "%{$searchAkun}%")
+                  ->orWhere('id', 'LIKE', "%{$searchAkun}%");
+            });
+        }
+
+        $akunTanpaAsesi = $queryAkun->orderBy('nama')
             ->paginate($perPageAkun, ['*'], 'page_akun')
             ->appends($request->except('page_akun'));
         
