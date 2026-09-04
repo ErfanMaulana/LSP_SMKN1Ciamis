@@ -334,8 +334,19 @@
     <div class="card">
         <div class="card-body">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-                <p style="font-size:14px;color:#64748b;margin:0;">Akun berikut memiliki role <strong>asesi</strong> namun tidak memiliki data profil asesi yang terdaftar.</p>
-                <div style="display:flex;gap:10px;">
+                <p style="font-size:14px;color:#64748b;margin:0;flex-shrink:0;">Akun berikut memiliki role <strong>asesi</strong> namun tidak memiliki data profil asesi yang terdaftar.</p>
+                
+                <form method="GET" action="{{ route('admin.asesi.index') }}" id="filterFormAkun" style="flex:1;min-width:200px;max-width:300px;">
+                    <input type="hidden" name="tab" value="akun">
+                    <input type="hidden" name="per_page_akun" value="{{ request('per_page_akun', 10) }}">
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="search_akun" id="searchInputAkun" placeholder="Cari NIK atau Nama..."
+                               value="{{ request('search_akun') }}" autocomplete="off">
+                    </div>
+                </form>
+
+                <div style="display:flex;gap:10px;flex-shrink:0;">
                     <button class="btn btn-outline" onclick="openAsesiCreateModal()" style="white-space:nowrap;">
                         <i class="bi bi-plus-circle"></i> Tambah Akun
                     </button>
@@ -355,51 +366,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($akunTanpaAsesi as $akun)
-                        <tr>
-                            <td>
-                                <div class="user-info">
-                                    <div class="user-avatar-initials" style="background:#fce7f3;color:#9d174d;">
-                                        {{ strtoupper(substr($akun->nama ?? '?', 0, 2)) }}
-                                    </div>
-                                    <div class="user-details">
-                                        <div class="user-name">{{ $akun->nama }}</div>
-                                        <div class="user-id">ID: {{ $akun->id }}</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="font-size:13px;font-weight:600;color:#1e293b;font-family:monospace;">{{ $akun->NIK ?? $akun->id }}</div>
-                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Password awal: NIK</div>
-                            </td>
-                            <td>
-                                <span class="date-text">{{ $akun->created_at ? \Carbon\Carbon::parse($akun->created_at)->locale('id')->translatedFormat('d M Y') : 'N/A' }}</span>
-                            </td>
-                            <td>
-                                <div class="action-menu">
-                                    <button class="action-btn" onclick="toggleMenu(event, this)">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </button>
-                                    <div class="action-dropdown">
-                                        <a href="{{ route('admin.asesi.create') }}?nik={{ urlencode($akun->NIK ?? $akun->id) }}&nama={{ urlencode($akun->nama) }}">
-                                            <i class="bi bi-person-plus"></i> Buat Data Asesi
-                                        </a>
-                                        <form action="{{ route('admin.akun-asesi.destroy', $akun->id) }}" method="POST" style="margin:0;" onsubmit="return openSingleDeleteModal(event, this, @js('Hapus akun ' . $akun->nama . '?'))">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit">
-                                                <i class="bi bi-trash"></i> Hapus Akun
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="text-center">Semua akun sudah memiliki data asesi</td>
-                        </tr>
-                        @endforelse
+                        @include('admin.asesi.partials.table-rows-akun')
                     </tbody>
                 </table>
             </div>
@@ -1544,6 +1511,44 @@
         // Add real-time search on input
         searchInput.addEventListener('input', function(e) {
             performAjaxSearch();
+        });
+    }
+
+    // Perform AJAX search for Akun tab
+    const searchInputAkun = document.getElementById('searchInputAkun');
+    let debounceTimerAkun;
+
+    function performAjaxSearchAkun() {
+        const formData = new FormData(document.getElementById('filterFormAkun'));
+        const params = new URLSearchParams(formData);
+        
+        fetch('{{ route("admin.asesi.index") }}?' + params.toString(), {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'text/html'
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const tableBody = document.querySelector('#tab-akun-orphan .data-table tbody');
+            if (tableBody) {
+                tableBody.innerHTML = html;
+            }
+            attachActionMenuListeners();
+        })
+        .catch(error => console.error('Search akun error:', error));
+    }
+
+    if (searchInputAkun) {
+        searchInputAkun.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                performAjaxSearchAkun();
+            }
+        });
+        searchInputAkun.addEventListener('input', function(e) {
+            clearTimeout(debounceTimerAkun);
+            debounceTimerAkun = setTimeout(performAjaxSearchAkun, 500);
         });
     }
 
