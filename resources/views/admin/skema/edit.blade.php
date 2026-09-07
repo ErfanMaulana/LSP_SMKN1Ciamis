@@ -431,6 +431,20 @@
 
     .add-btn.add-elemen { margin-left: 16px; }
 
+    /* Standar Industri */
+    .standar-industri-section { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px; margin-bottom: 16px; }
+    .standar-industri-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .standar-industri-header .section-icon { width: 22px; height: 22px; background: #16a34a; color: white; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+    .standar-industri-header span { font-size: 13px; font-weight: 600; color: #15803d; }
+    .standar-industri-header small { font-size: 11px; color: #6ee7b7; margin-left: 4px; }
+    .standar-item { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px; }
+    .standar-number { min-width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: #dcfce7; color: #15803d; border-radius: 4px; font-size: 10px; font-weight: 700; flex-shrink: 0; margin-top: 8px; }
+    .standar-item-inputs { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .standar-item-inputs .form-control { background: white; }
+    .standar-item-inputs textarea.form-control { min-height: 44px; resize: vertical; }
+    .add-btn.add-standar { border-color: #86efac; color: #15803d; }
+    .add-btn.add-standar:hover { border-color: #16a34a; color: #16a34a; background: #f0fdf4; }
+
     .alert {
         padding: 12px 16px;
         border-radius: 8px;
@@ -577,7 +591,17 @@
 
                 <div id="units-container">
                     @php
-                        $units = old('units', $skema->units->toArray());
+                        // Build units array with standar_industri
+                        $rawUnits = $skema->units;
+                        $unitsArray = $rawUnits->map(function($u) {
+                            $arr = $u->toArray();
+                            $arr['standar_industri'] = $u->standarIndustri->map(fn($s) => [
+                                'nama_standar' => $s->nama_standar,
+                                'deskripsi_standar' => $s->deskripsi_standar,
+                            ])->toArray();
+                            return $arr;
+                        })->toArray();
+                        $units = old('units', $unitsArray);
                         $groupedUnits = collect($units)->groupBy(function ($unit) {
                             $groupName = trim((string) ($unit['kelompok_pekerjaan'] ?? ''));
                             return $groupName !== '' ? $groupName : '__single__';
@@ -645,6 +669,46 @@
                                             <div class="form-group">
                                                 <label>Pertanyaan Unit</label>
                                                 <textarea name="units[{{ $renderedUnitIndex }}][pertanyaan_unit]" class="form-control" rows="2" placeholder="Contoh: Dapatkah Saya menggunakan Struktur Data?">{{ $unit['pertanyaan_unit'] ?? '' }}</textarea>
+                                            </div>
+
+                                            {{-- Standar Industri / Tempat Kerja --}}
+                                            <div class="standar-industri-section">
+                                                <div class="standar-industri-header">
+                                                    <div class="section-icon"><i class="bi bi-building"></i></div>
+                                                    <span>Standar Industri / Tempat Kerja</span>
+                                                    <small>(opsional)</small>
+                                                </div>
+                                                <div class="standar-container">
+                                                    @php $standarList = $unit['standar_industri'] ?? []; @endphp
+                                                    @if(count($standarList) > 0)
+                                                        @foreach($standarList as $sIdx => $standar)
+                                                        <div class="standar-item" data-standar-index="{{ $sIdx }}">
+                                                            <span class="standar-number">{{ $sIdx + 1 }}</span>
+                                                            <div class="standar-item-inputs">
+                                                                <input type="text" name="units[{{ $renderedUnitIndex }}][standar_industri][{{ $sIdx }}][nama_standar]" class="form-control" value="{{ $standar['nama_standar'] ?? '' }}" placeholder="Contoh: SOP Produksi Multimedia, Tempat Kerja, dll.">
+                                                                <textarea name="units[{{ $renderedUnitIndex }}][standar_industri][{{ $sIdx }}][deskripsi_standar]" class="form-control" rows="1" placeholder="Deskripsi singkat (opsional)">{{ $standar['deskripsi_standar'] ?? '' }}</textarea>
+                                                            </div>
+                                                            <button type="button" class="remove-btn remove-standar-btn" title="Hapus standar" style="{{ count($standarList) <= 1 ? 'display:none;' : '' }}">
+                                                                <i class="bi bi-x"></i>
+                                                            </button>
+                                                        </div>
+                                                        @endforeach
+                                                    @else
+                                                        <div class="standar-item" data-standar-index="0">
+                                                            <span class="standar-number">1</span>
+                                                            <div class="standar-item-inputs">
+                                                                <input type="text" name="units[{{ $renderedUnitIndex }}][standar_industri][0][nama_standar]" class="form-control" placeholder="Contoh: SOP Produksi Multimedia, Tempat Kerja, dll.">
+                                                                <textarea name="units[{{ $renderedUnitIndex }}][standar_industri][0][deskripsi_standar]" class="form-control" rows="1" placeholder="Deskripsi singkat (opsional)"></textarea>
+                                                            </div>
+                                                            <button type="button" class="remove-btn remove-standar-btn" title="Hapus standar" style="display:none;">
+                                                                <i class="bi bi-x"></i>
+                                                            </button>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <button type="button" class="add-btn add-standar">
+                                                    <i class="bi bi-plus"></i> Tambah Standar
+                                                </button>
                                             </div>
 
                                             <div class="divider"></div>
@@ -963,6 +1027,27 @@
                 scheduleKodeUnitValidation();
             }
         }
+
+        // Add Standar Industri
+        if (e.target.closest('.add-standar')) {
+            const unitCard = e.target.closest('.unit-card');
+            const uIdx = getUnitIndex(unitCard);
+            const standarContainer = unitCard.querySelector('.standar-container');
+            const sIdx = standarContainer.querySelectorAll('.standar-item').length;
+            standarContainer.insertAdjacentHTML('beforeend', createStandarHtml(uIdx, sIdx));
+            updateNumbers();
+            updateRemoveButtons();
+        }
+
+        // Remove Standar Industri
+        if (e.target.closest('.remove-standar-btn')) {
+            const standarItem = e.target.closest('.standar-item');
+            const unitCard = standarItem.closest('.unit-card');
+            standarItem.remove();
+            reindexStandar(unitCard);
+            updateNumbers();
+            updateRemoveButtons();
+        }
     });
 
     document.addEventListener('input', function(e) {
@@ -1037,6 +1122,19 @@
                 <label>Pertanyaan Unit</label>
                 <textarea name="units[${uIdx}][pertanyaan_unit]" class="form-control" rows="2" placeholder="Contoh: Dapatkah Saya menggunakan Struktur Data?"></textarea>
             </div>
+            <div class="standar-industri-section">
+                <div class="standar-industri-header">
+                    <div class="section-icon"><i class="bi bi-building"></i></div>
+                    <span>Standar Industri / Tempat Kerja</span>
+                    <small>(opsional)</small>
+                </div>
+                <div class="standar-container">
+                    ${createStandarHtml(uIdx, 0)}
+                </div>
+                <button type="button" class="add-btn add-standar">
+                    <i class="bi bi-plus"></i> Tambah Standar
+                </button>
+            </div>
             <div class="divider"></div>
             <div class="elemens-container">
                 ${createElemenHtml(uIdx, 0)}
@@ -1090,6 +1188,20 @@
         </div>`;
     }
 
+    function createStandarHtml(uIdx, sIdx) {
+        return `
+        <div class="standar-item" data-standar-index="${sIdx}">
+            <span class="standar-number">${sIdx + 1}</span>
+            <div class="standar-item-inputs">
+                <input type="text" name="units[${uIdx}][standar_industri][${sIdx}][nama_standar]" class="form-control" placeholder="Contoh: SOP Produksi Multimedia, Tempat Kerja, dll.">
+                <textarea name="units[${uIdx}][standar_industri][${sIdx}][deskripsi_standar]" class="form-control" rows="1" placeholder="Deskripsi singkat (opsional)"></textarea>
+            </div>
+            <button type="button" class="remove-btn remove-standar-btn" title="Hapus standar" style="display:none;">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>`;
+    }
+
     // ===== REINDEX =====
     function getUnitIndex(unitCard) {
         const allUnits = document.querySelectorAll('#units-container .unit-card');
@@ -1127,11 +1239,27 @@
         if (judulInput) judulInput.name = `units[${uIdx}][judul_unit]`;
         if (pertanyaanArea) pertanyaanArea.name = `units[${uIdx}][pertanyaan_unit]`;
 
+        // Reindex standar industri
+        reindexStandar(unitCard);
+
         const elemens = unitCard.querySelectorAll('.elemen-card');
         elemens.forEach((elemen, eIdx) => {
             elemen.setAttribute('data-elemen-index', eIdx);
             elemen.querySelector('input[name*="[nama_elemen]"]').name = `units[${uIdx}][elemens][${eIdx}][nama_elemen]`;
             reindexElemen(elemen, unitCard);
+        });
+    }
+
+    function reindexStandar(unitCard) {
+        const uIdx = getUnitIndex(unitCard);
+        if (uIdx < 0) return;
+        const standars = unitCard.querySelectorAll('.standar-container .standar-item');
+        standars.forEach((standar, sIdx) => {
+            standar.setAttribute('data-standar-index', sIdx);
+            const namaInput = standar.querySelector('input[name*="[nama_standar]"]');
+            const deskripsiArea = standar.querySelector('textarea[name*="[deskripsi_standar]"]');
+            if (namaInput) namaInput.name = `units[${uIdx}][standar_industri][${sIdx}][nama_standar]`;
+            if (deskripsiArea) deskripsiArea.name = `units[${uIdx}][standar_industri][${sIdx}][deskripsi_standar]`;
         });
     }
 
@@ -1157,6 +1285,10 @@
             const toggleIcon = titleDiv.querySelector('.toggle-icon');
             const iconHtml = toggleIcon ? '<i class="bi bi-chevron-down toggle-icon"></i>' : '';
             titleDiv.innerHTML = `<span class="unit-number">${uIdx + 1}</span> Unit Kompetensi #${uIdx + 1} ${iconHtml}`;
+
+            // Update standar numbers
+            const standars = unit.querySelectorAll('.standar-container .standar-number');
+            standars.forEach((num, sIdx) => { num.textContent = sIdx + 1; });
 
             const elemens = unit.querySelectorAll('.elemen-card');
             elemens.forEach((elemen, eIdx) => {
@@ -1184,6 +1316,13 @@
             unitsInGroup.forEach(unit => {
                 const removeBtn = unit.querySelector(':scope > .unit-header .remove-unit-btn');
                 if (removeBtn) removeBtn.style.display = unitsInGroup.length > 1 ? 'flex' : 'none';
+
+                // Standar remove buttons
+                const standars = unit.querySelectorAll('.standar-container .standar-item');
+                standars.forEach(standar => {
+                    const removeStBtn = standar.querySelector('.remove-standar-btn');
+                    if (removeStBtn) removeStBtn.style.display = standars.length > 1 ? 'flex' : 'none';
+                });
 
                 const elemens = unit.querySelectorAll('.elemen-card');
                 elemens.forEach(elemen => {

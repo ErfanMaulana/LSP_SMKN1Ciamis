@@ -23,6 +23,7 @@ class CeklisObservasiController extends Controller
             'asesi',
             'skema:id,nama_skema,nomor_skema',
             'details.unit:id,kode_unit,judul_unit',
+            'details.unit.standarIndustri',
             'details.elemen:id,nama_elemen',
             'details.kriteria:id,deskripsi_kriteria',
         ])->findOrFail($id);

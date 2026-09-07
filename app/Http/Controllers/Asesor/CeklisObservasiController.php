@@ -28,6 +28,92 @@ class CeklisObservasiController extends Controller
         return Asesor::with('skemas')->where('no_met', $account->id)->first();
     }
 
+    private function getScheduledKelompokIdsForAsesor($asesor): array
+    {
+        if (!$asesor) {
+            return [];
+        }
+
+        // 1. Jadwal di mana asesor ini ditugaskan langsung
+        $jadwalIds = DB::table('jadwal_ujikom')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->pluck('id')
+            ->toArray();
+
+        // 2. Kelompok dari jadwal_kelompok untuk jadwal asesor ini
+        $kelompokIdsFromJadwal = !empty($jadwalIds)
+            ? DB::table('jadwal_kelompok')
+                ->whereIn('jadwal_id', $jadwalIds)
+                ->pluck('kelompok_id')
+                ->toArray()
+            : [];
+
+        // 3. Kelompok direct dari jadwal_ujikom.kelompok_id untuk jadwal asesor ini
+        $directKelompokIds = DB::table('jadwal_ujikom')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->whereNotNull('kelompok_id')
+            ->pluck('kelompok_id')
+            ->toArray();
+
+        // 4. Kelompok yang di-assign via kelompok_asesor dan memiliki jadwal aktif
+        $kelompokIdsFromKelompokAsesor = DB::table('kelompok_asesor')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->where(function ($q) {
+                $q->whereIn('kelompok_id', function ($sq) {
+                    $sq->select('kelompok_id')->from('jadwal_kelompok');
+                })->orWhereIn('kelompok_id', function ($sq) {
+                    $sq->select('kelompok_id')->from('jadwal_ujikom')->whereNotNull('kelompok_id');
+                });
+            })
+            ->pluck('kelompok_id')
+            ->toArray();
+
+        return array_values(array_unique(array_filter(array_merge(
+            $kelompokIdsFromJadwal,
+            $directKelompokIds,
+            $kelompokIdsFromKelompokAsesor
+        ))));
+    }
+
+    private function getScheduledAsesiNiksForAsesor($asesor): array
+    {
+        if (!$asesor) {
+            return [];
+        }
+
+        $kelompokIds = $this->getScheduledKelompokIdsForAsesor($asesor);
+
+        $asesiFromKelompok = !empty($kelompokIds)
+            ? DB::table('asesi')
+                ->whereIn('kelompok_id', $kelompokIds)
+                ->pluck('NIK')
+                ->toArray()
+            : [];
+
+        $jadwalIds = DB::table('jadwal_ujikom')
+            ->where('asesor_id', $asesor->ID_asesor)
+            ->pluck('id')
+            ->toArray();
+
+        $asesiFromJadwalPeserta = !empty($jadwalIds)
+            ? DB::table('jadwal_peserta')
+                ->whereIn('jadwal_id', $jadwalIds)
+                ->pluck('asesi_nik')
+                ->toArray()
+            : [];
+
+        $asesiDirect = DB::table('asesi')
+            ->where('ID_asesor', $asesor->ID_asesor)
+            ->pluck('NIK')
+            ->toArray();
+
+        return array_values(array_unique(array_filter(array_merge(
+            $asesiFromKelompok,
+            $asesiFromJadwalPeserta,
+            $asesiDirect
+        ))));
+    }
+
     public function index(Request $request)
     {
         $account = Auth::guard('account')->user();
@@ -49,6 +135,8 @@ class CeklisObservasiController extends Controller
         $rekomendasi = (string) $request->get('rekomendasi');
         $viewMode = (string) $request->get('view', 'menunggu');
 
+        $scheduledAsesiNiks = $this->getScheduledAsesiNiksForAsesor($asesor);
+
         // Fetch completed ceklis records for this asesor (only the latest attempt)
         $completedRows = CeklisObservasiAktivitasPraktik::query()
             ->with([
@@ -56,6 +144,7 @@ class CeklisObservasiController extends Controller
                 'asesi:NIK,nama',
             ])
             ->where('asesor_id', $asesor->ID_asesor)
+            ->whereIn('asesi_nik', $scheduledAsesiNiks)
             ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM ceklis_observasi_aktivitas_praktiks b WHERE b.asesi_nik = ceklis_observasi_aktivitas_praktiks.asesi_nik AND b.skema_id = ceklis_observasi_aktivitas_praktiks.skema_id)')
             ->get();
 
@@ -78,19 +167,21 @@ class CeklisObservasiController extends Controller
             ->whereNotNull('ttd_asesi_nama')->where('ttd_asesi_nama', '!=', '')
             ->get(['nomor_skema', 'asesi_nik', 'nama_asesi']);
 
-        $persetujuanKeys = [];
+        $persetujuanNikKeys = [];
+        $persetujuanNameKeys = [];
         foreach ($fullySignedPersetujuans as $p) {
             if (!empty($p->asesi_nik)) {
-                $persetujuanKeys["{$p->nomor_skema}|{$p->asesi_nik}"] = true;
-            }
-            if (!empty($p->nama_asesi)) {
-                $persetujuanKeys["{$p->nomor_skema}|" . strtolower($p->nama_asesi)] = true;
+                $persetujuanNikKeys["{$p->nomor_skema}|{$p->asesi_nik}"] = true;
+            } else if (!empty($p->nama_asesi)) {
+                $persetujuanNameKeys["{$p->nomor_skema}|" . strtolower($p->nama_asesi)] = true;
             }
         }
 
-        // 2. Get registered asesis for these skemas (only the latest attempt)
+        // 2. Get registered asesis for these skemas (only scheduled, recommended lanjut, latest attempt)
         $asesiSkemasForCeklis = DB::table('asesi_skema')
             ->whereIn('skema_id', $skemaIds)
+            ->whereIn('asesi_nik', $scheduledAsesiNiks)
+            ->where('rekomendasi', 'lanjut')
             ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
             ->get(['asesi_nik', 'skema_id']);
 
@@ -114,8 +205,12 @@ class CeklisObservasiController extends Controller
             if (isset($ceklisKeys[$key])) continue;
 
             $asesiObj = $asesisLookup->get($as->asesi_nik);
-            $hasPersetujuan = isset($persetujuanKeys["{$sk->nomor_skema}|{$as->asesi_nik}"]) ||
-                ($asesiObj && isset($persetujuanKeys["{$sk->nomor_skema}|" . strtolower($asesiObj->nama)]));
+            $hasPersetujuan = false;
+            if (!empty($as->asesi_nik) && isset($persetujuanNikKeys["{$sk->nomor_skema}|{$as->asesi_nik}"])) {
+                $hasPersetujuan = true;
+            } elseif ($asesiObj && isset($persetujuanNameKeys["{$sk->nomor_skema}|" . strtolower($asesiObj->nama)])) {
+                $hasPersetujuan = true;
+            }
 
             if ($hasPersetujuan && $asesiObj) {
                 $obj = new CeklisObservasiAktivitasPraktik();
@@ -431,6 +526,7 @@ class CeklisObservasiController extends Controller
                 'skema:id,nama_skema,nomor_skema,jenis_skema',
                 'asesi:NIK,nama',
                 'details.unit:id,kode_unit,judul_unit',
+                'details.unit.standarIndustri',
                 'details.elemen:id,unit_id,nama_elemen',
                 'details.kriteria:id,elemen_id,deskripsi_kriteria,urutan',
             ])
@@ -459,6 +555,7 @@ class CeklisObservasiController extends Controller
                 'skema:id,nama_skema,nomor_skema,jenis_skema',
                 'asesi:NIK,nama',
                 'details.unit:id,kode_unit,judul_unit',
+                'details.unit.standarIndustri',
                 'details.elemen:id,unit_id,nama_elemen',
                 'details.kriteria:id,elemen_id,deskripsi_kriteria,urutan',
             ])
@@ -748,6 +845,7 @@ class CeklisObservasiController extends Controller
         $skema = Skema::query()
             ->with([
                 'units' => fn ($query) => $query->orderBy('id'),
+                'units.standarIndustri',
                 'units.elemens' => fn ($query) => $query->orderBy('id'),
                 'units.elemens.kriteria' => fn ($query) => $query->orderBy('urutan')->orderBy('id'),
             ])
@@ -759,6 +857,10 @@ class CeklisObservasiController extends Controller
                 'kelompok_pekerjaan' => $unit->kelompok_pekerjaan,
                 'kode_unit' => $unit->kode_unit,
                 'judul_unit' => $unit->judul_unit,
+                'standar_industri' => $unit->standarIndustri->map(fn($s) => [
+                    'nama_standar' => $s->nama_standar,
+                    'deskripsi_standar' => $s->deskripsi_standar,
+                ])->values(),
                 'elemens' => $unit->elemens->map(function ($elemen) {
                     return [
                         'id' => $elemen->id,

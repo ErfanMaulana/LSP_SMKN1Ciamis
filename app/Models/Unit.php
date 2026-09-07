@@ -23,4 +23,9 @@ class Unit extends Model
     {
         return $this->hasMany(Elemen::class);
     }
+
+    public function standarIndustri()
+    {
+        return $this->hasMany(StandarIndustriUnit::class)->orderBy('urutan');
+    }
 }

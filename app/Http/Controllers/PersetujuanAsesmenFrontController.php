@@ -254,9 +254,10 @@ class PersetujuanAsesmenFrontController extends Controller
         $record = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
             ->where('attempt', $attempt)
             ->where(function ($q) use ($asesi, $useNik) {
-                $q->where('nama_asesi', $asesi->nama);
-                if ($useNik) {
-                    $q->orWhere('asesi_nik', $asesi->NIK);
+                if ($useNik && !empty($asesi->NIK)) {
+                    $q->where('asesi_nik', $asesi->NIK);
+                } else {
+                    $q->where('nama_asesi', $asesi->nama);
                 }
             })
             ->latest()
@@ -673,9 +674,10 @@ class PersetujuanAsesmenFrontController extends Controller
         if ($asesi) {
             // find latest persetujuan record where asesor already signed and checked checklist
             $record = PersetujuanAsesmen::where(function ($q) use ($asesi, $useNik) {
-                $q->where('nama_asesi', $asesi->nama);
-                if ($useNik) {
-                    $q->orWhere('asesi_nik', $asesi->NIK);
+                if ($useNik && !empty($asesi->NIK)) {
+                    $q->where('asesi_nik', $asesi->NIK);
+                } else {
+                    $q->where('nama_asesi', $asesi->nama);
                 }
             })
             ->whereNotNull('ttd_asesor_nama')
@@ -751,11 +753,10 @@ class PersetujuanAsesmenFrontController extends Controller
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
             ->where('attempt', $currentAttempt)
             ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
-                if ($namaAsesi) {
+                if ($useNik && !empty($asesiNik)) {
+                    $q->where('asesi_nik', $asesiNik);
+                } else {
                     $q->where('nama_asesi', $namaAsesi);
-                }
-                if ($useNik) {
-                    $q->orWhere('asesi_nik', $asesiNik);
                 }
             })->latest()->first();
 
@@ -822,6 +823,7 @@ class PersetujuanAsesmenFrontController extends Controller
             $pivot = \Illuminate\Support\Facades\DB::table('asesi_skema')
                 ->where('asesi_nik', $asesiForCheck->NIK)
                 ->where('skema_id', $skemaForCheck->id)
+                ->where('attempt', $itemAttempt)
                 ->first();
 
             if (!$pivot || $pivot->rekomendasi !== 'lanjut') {
@@ -910,11 +912,10 @@ class PersetujuanAsesmenFrontController extends Controller
         $item = PersetujuanAsesmen::where('nomor_skema', $skema->nomor_skema)
             ->where('attempt', $currentAttempt)
             ->where(function ($q) use ($namaAsesi, $asesiNik, $useNik) {
-                if ($namaAsesi) {
+                if ($useNik && !empty($asesiNik)) {
+                    $q->where('asesi_nik', $asesiNik);
+                } else {
                     $q->where('nama_asesi', $namaAsesi);
-                }
-                if ($useNik) {
-                    $q->orWhere('asesi_nik', $asesiNik);
                 }
             })
             ->latest()

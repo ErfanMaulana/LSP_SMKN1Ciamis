@@ -208,29 +208,90 @@
 </div>
 
 @forelse($detailsByUnit as $unitDetails)
-    @php $unit = $unitDetails->first()?->unit; @endphp
+    @php
+        $unit = $unitDetails->first()?->unit;
+        $elemenGroups = $unitDetails->groupBy('elemen_id');
+        $totalKukInUnit = $unitDetails->count();
+        $unitStandards = $unit?->standarIndustri ?? collect();
+        $isFirstRowOfUnit = true;
+    @endphp
     <div class="detail-card">
         <h3 class="unit-title">{{ $unit?->kode_unit }} - {{ $unit?->judul_unit }}</h3>
         <div class="table-wrap">
             <table>
                 <thead>
                     <tr>
-                        <th style="width:50px;">No.</th>
-                        <th style="width:220px;">Elemen</th>
-                        <th>Kriteria Unjuk Kerja</th>
-                        <th style="width:110px;">Pencapaian</th>
-                        <th style="width:220px;">Penilaian Lanjut</th>
+                        <th rowspan="2" style="width:45px; text-align:center;">No.</th>
+                        <th rowspan="2" style="width:200px;">Elemen</th>
+                        <th rowspan="2">Kriteria Unjuk Kerja</th>
+                        <th rowspan="2" style="width:180px;">Standar Industri / Tempat Kerja</th>
+                        <th colspan="2" style="width:100px; text-align:center;">Pencapaian</th>
+                        <th rowspan="2" style="width:180px;">Penilaian Lanjut</th>
+                    </tr>
+                    <tr>
+                        <th style="width:50px; text-align:center;">Ya</th>
+                        <th style="width:50px; text-align:center;">Tidak</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($unitDetails as $idx => $detail)
-                        <tr>
-                            <td style="text-align:center;">{{ $idx + 1 }}</td>
-                            <td>{{ $detail->elemen?->nama_elemen ?? '-' }}</td>
-                            <td>{{ $detail->kriteria?->deskripsi_kriteria ?? '-' }}</td>
-                            <td style="text-align:center;">{{ strtoupper($detail->pencapaian ?? '-') }}</td>
-                            <td>{{ $detail->penilaian_lanjut ?: '-' }}</td>
-                        </tr>
+                    @foreach($elemenGroups as $elId => $elemenDetails)
+                        @php
+                            $elCount = $elemenDetails->count();
+                            $firstDetail = $elemenDetails->first();
+                            $elemenNum = $loop->iteration;
+                        @endphp
+                        @foreach($elemenDetails as $kIdx => $detail)
+                            @php
+                                $pencapaian = strtolower(trim((string) ($detail->pencapaian ?? '')));
+                                $isYa = in_array($pencapaian, ['ya', 'y', '1', 'true', 'benar', 'kompeten'], true);
+                                $isTidak = in_array($pencapaian, ['tidak', 't', '0', 'false', 'salah', 'belum kompeten'], true);
+                                $kukNum = $elemenNum . '.' . ($kIdx + 1);
+                            @endphp
+                            <tr>
+                                @if($kIdx === 0)
+                                    <td style="text-align:center; vertical-align:middle; font-weight:600;" rowspan="{{ $elCount }}">{{ $elemenNum }}</td>
+                                    <td style="vertical-align:middle; font-weight:500;" rowspan="{{ $elCount }}">{{ $firstDetail->elemen?->nama_elemen ?? '-' }}</td>
+                                @endif
+
+                                <td><strong>{{ $kukNum }}</strong> {{ $detail->kriteria?->deskripsi_kriteria ?? '-' }}</td>
+
+                                @if($isFirstRowOfUnit)
+                                    <td rowspan="{{ $totalKukInUnit }}" style="vertical-align:middle; background:#fafafa;">
+                                        @if($unitStandards->isNotEmpty())
+                                            <ul style="margin:0; padding-left:16px; font-size:13px;">
+                                                @foreach($unitStandards as $st)
+                                                    <li style="margin-bottom:4px;">
+                                                        <strong>{{ $st->nama_standar }}</strong>
+                                                        @if($st->deskripsi_standar)
+                                                            <div style="font-size:11px; color:#64748b;">{{ $st->deskripsi_standar }}</div>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <span style="color:#94a3b8; font-size:13px;">-</span>
+                                        @endif
+                                    </td>
+                                    @php $isFirstRowOfUnit = false; @endphp
+                                @endif
+
+                                <td style="text-align:center; vertical-align:middle;">
+                                    @if($isYa)
+                                        <span style="display:inline-block; width:22px; height:22px; line-height:22px; border-radius:4px; background:#dcfce7; color:#15803d; font-weight:700;">✓</span>
+                                    @else
+                                        <span style="color:#cbd5e1;">-</span>
+                                    @endif
+                                </td>
+                                <td style="text-align:center; vertical-align:middle;">
+                                    @if($isTidak)
+                                        <span style="display:inline-block; width:22px; height:22px; line-height:22px; border-radius:4px; background:#fee2e2; color:#b91c1c; font-weight:700;">✗</span>
+                                    @else
+                                        <span style="color:#cbd5e1;">-</span>
+                                    @endif
+                                </td>
+                                <td style="font-size:13px;">{{ $detail->penilaian_lanjut ?: '-' }}</td>
+                            </tr>
+                        @endforeach
                     @endforeach
                 </tbody>
             </table>

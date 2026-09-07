@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Skema;
 use App\Models\Jurusan;
+use App\Models\StandarIndustriUnit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -155,6 +156,9 @@ class SkemaController extends Controller
             'units.*.kode_unit' => 'required|string|max:255|distinct',
             'units.*.judul_unit' => 'required|string|max:255',
             'units.*.pertanyaan_unit' => 'nullable|string',
+            'units.*.standar_industri' => 'nullable|array',
+            'units.*.standar_industri.*.nama_standar' => 'required|string|max:255',
+            'units.*.standar_industri.*.deskripsi_standar' => 'nullable|string',
             'units.*.elemens' => 'required|array|min:1',
             'units.*.elemens.*.nama_elemen' => 'required|string',
             'units.*.elemens.*.kriteria' => 'required|array|min:1',
@@ -173,6 +177,7 @@ class SkemaController extends Controller
             'units.*.elemens.*.nama_elemen.required' => 'Nama elemen wajib diisi.',
             'units.*.elemens.*.kriteria.required' => 'Minimal satu kriteria unjuk kerja harus ditambahkan per elemen.',
             'units.*.elemens.*.kriteria.*.deskripsi_kriteria.required' => 'Deskripsi kriteria wajib diisi.',
+            'units.*.standar_industri.*.nama_standar.required' => 'Nama standar industri wajib diisi.',
         ]);
 
         $validator->after(function ($validator) use ($request) {
@@ -197,6 +202,17 @@ class SkemaController extends Controller
                     'judul_unit' => $unitData['judul_unit'],
                     'pertanyaan_unit' => $unitData['pertanyaan_unit'] ?? null,
                 ]);
+
+                // Simpan standar industri / tempat kerja
+                foreach ($unitData['standar_industri'] ?? [] as $idx => $standarData) {
+                    if (!empty($standarData['nama_standar'])) {
+                        $unit->standarIndustri()->create([
+                            'nama_standar' => $standarData['nama_standar'],
+                            'deskripsi_standar' => $standarData['deskripsi_standar'] ?? null,
+                            'urutan' => $idx + 1,
+                        ]);
+                    }
+                }
 
                 foreach ($unitData['elemens'] as $elemenData) {
                     $elemen = $unit->elemens()->create([
@@ -225,7 +241,7 @@ class SkemaController extends Controller
      */
     public function show($id)
     {
-        $skema = Skema::with(['jurusan', 'units.elemens.kriteria'])
+        $skema = Skema::with(['jurusan', 'units.standarIndustri', 'units.elemens.kriteria'])
             ->withCount('units')
             ->findOrFail($id);
         
@@ -248,7 +264,7 @@ class SkemaController extends Controller
      */
     public function edit($id)
     {
-        $skema = Skema::with('units.elemens.kriteria')->findOrFail($id);
+        $skema = Skema::with(['units.standarIndustri', 'units.elemens.kriteria'])->findOrFail($id);
         $jurusans = Jurusan::orderBy('nama_jurusan')->get();
         return view('admin.skema.edit', compact('skema', 'jurusans'));
     }
@@ -270,6 +286,9 @@ class SkemaController extends Controller
             'units.*.kode_unit' => 'required|string|max:255|distinct',
             'units.*.judul_unit' => 'required|string|max:255',
             'units.*.pertanyaan_unit' => 'nullable|string',
+            'units.*.standar_industri' => 'nullable|array',
+            'units.*.standar_industri.*.nama_standar' => 'required|string|max:255',
+            'units.*.standar_industri.*.deskripsi_standar' => 'nullable|string',
             'units.*.elemens' => 'required|array|min:1',
             'units.*.elemens.*.nama_elemen' => 'required|string',
             'units.*.elemens.*.kriteria' => 'required|array|min:1',
@@ -282,6 +301,7 @@ class SkemaController extends Controller
             'jenis_skema.in' => 'Jenis skema tidak valid.',
             'units.required' => 'Minimal satu unit kompetensi harus ditambahkan.',
             'units.*.kode_unit.distinct' => 'Kode unit tidak boleh duplikat antar unit.',
+            'units.*.standar_industri.*.nama_standar.required' => 'Nama standar industri wajib diisi.',
         ]);
 
         $validator->after(function ($validator) use ($request) {
@@ -311,6 +331,17 @@ class SkemaController extends Controller
                     'judul_unit' => $unitData['judul_unit'],
                     'pertanyaan_unit' => $unitData['pertanyaan_unit'] ?? null,
                 ]);
+
+                // Simpan standar industri / tempat kerja
+                foreach ($unitData['standar_industri'] ?? [] as $idx => $standarData) {
+                    if (!empty($standarData['nama_standar'])) {
+                        $unit->standarIndustri()->create([
+                            'nama_standar' => $standarData['nama_standar'],
+                            'deskripsi_standar' => $standarData['deskripsi_standar'] ?? null,
+                            'urutan' => $idx + 1,
+                        ]);
+                    }
+                }
 
                 foreach ($unitData['elemens'] as $elemenData) {
                     $elemen = $unit->elemens()->create([

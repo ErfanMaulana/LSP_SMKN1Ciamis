@@ -675,7 +675,11 @@
                         </td>
 
                         <td>
-                            {{ $unit->standar_kompetensi ?? 'SKKNI' }}
+                            @if($unit->standarIndustri && $unit->standarIndustri->count() > 0)
+                                {{ $unit->standarIndustri->pluck('nama_standar')->join(', ') }}
+                            @else
+                                {{ $unit->standar_kompetensi ?? 'SKKNI' }}
+                            @endif
                         </td>
 
                     </tr>

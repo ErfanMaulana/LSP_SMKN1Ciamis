@@ -307,14 +307,14 @@
                             <span style="font-size:13px;font-weight:600;color:#0073bd;">Semua Skema</span>
                         </label>
                         <div style="height:1px;background:#e2e8f0;margin:4px 0;"></div>
-                        <div id="asesor-export-skema-options" style="max-height:160px;overflow-y:auto;">
+                        <div id="asesor-export-skema-options" style="max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;">
                             @foreach($skemaList as $skema)
                                 <label class="asesor-export-skema-item"
                                        data-label="{{ strtolower($skema->nama_skema) }}"
-                                       style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;width:100%;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                       style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;width:100%;box-sizing:border-box;">
                                     <input type="checkbox" name="skema[]" class="asesor-export-skema-option"
-                                           value="{{ $skema->id }}" data-label="{{ $skema->nama_skema }}" style="flex-shrink:0;">
-                                    <span style="font-size:13px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;">{{ $skema->nama_skema }}</span>
+                                           value="{{ $skema->id }}" data-label="{{ $skema->nama_skema }}" style="flex-shrink:0;width:16px;height:16px;accent-color:#0073bd;">
+                                    <span style="font-size:13px;color:#1e293b;line-height:1.4;">{{ $skema->nama_skema }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -981,6 +981,10 @@
             grid-template-columns: 1fr;
         }
     }
+
+    .asesor-export-skema-item:hover {
+        background: #f1f5f9;
+    }
 </style>
 
 <script>
@@ -1183,7 +1187,7 @@
         var q = (document.getElementById('asesor-export-skema-search')?.value || '').toLowerCase();
         document.querySelectorAll('.asesor-export-skema-item').forEach(function(item) {
             var lbl = item.getAttribute('data-label') || '';
-            item.style.display = lbl.includes(q) ? '' : 'none';
+            item.style.display = lbl.includes(q) ? 'flex' : 'none';
         });
     }
 

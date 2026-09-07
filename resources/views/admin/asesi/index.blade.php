@@ -509,11 +509,11 @@
                             <span style="font-size:13px;font-weight:600;color:#0073bd;">Semua Jurusan</span>
                         </label>
                         <div style="height:1px;background:#e2e8f0;margin:4px 0;"></div>
-                        <div id="export-jurusan-options" style="max-height:145px;overflow-y:auto;">
+                        <div id="export-jurusan-options" style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;">
                             @foreach($jurusanList as $jur)
-                                <label class="export-jurusan-item" data-label="{{ strtolower($jur->nama_jurusan) }}" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;width:100%;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                                    <input type="checkbox" class="export-jurusan-option" value="{{ $jur->ID_jurusan }}" data-label="{{ $jur->nama_jurusan }}" style="flex-shrink:0;">
-                                    <span style="font-size:13px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;">{{ $jur->nama_jurusan }}</span>
+                                <label class="export-jurusan-item" data-label="{{ strtolower($jur->nama_jurusan) }}" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;width:100%;box-sizing:border-box;">
+                                    <input type="checkbox" class="export-jurusan-option" value="{{ $jur->ID_jurusan }}" data-label="{{ $jur->nama_jurusan }}" style="flex-shrink:0;width:16px;height:16px;accent-color:#0073bd;">
+                                    <span style="font-size:13px;color:#1e293b;line-height:1.4;">{{ $jur->nama_jurusan }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -540,11 +540,11 @@
                             <span style="font-size:13px;font-weight:600;color:#0073bd;">Semua Skema</span>
                         </label>
                         <div style="height:1px;background:#e2e8f0;margin:4px 0;"></div>
-                        <div id="export-skema-options" style="max-height:150px;overflow-y:auto;">
+                        <div id="export-skema-options" style="max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;">
                             @foreach($skemaList as $skema)
-                                <label class="export-skema-item" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;width:100%;box-sizing:border-box;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" data-jurusan="{{ $skema->jurusan_id ?? '' }}" data-label="{{ strtolower($skema->nama_skema) }}">
-                                    <input type="checkbox" class="export-skema-option" value="{{ $skema->id }}" data-label="{{ $skema->nama_skema }}" data-jurusan="{{ $skema->jurusan_id ?? '' }}" style="flex-shrink:0;">
-                                    <span style="font-size:13px;color:#1e293b;overflow:hidden;text-overflow:ellipsis;">{{ $skema->nama_skema }}</span>
+                                <label class="export-skema-item" style="display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;width:100%;box-sizing:border-box;" data-jurusan="{{ $skema->jurusan_id ?? '' }}" data-label="{{ strtolower($skema->nama_skema) }}">
+                                    <input type="checkbox" class="export-skema-option" value="{{ $skema->id }}" data-label="{{ $skema->nama_skema }}" data-jurusan="{{ $skema->jurusan_id ?? '' }}" style="flex-shrink:0;width:16px;height:16px;accent-color:#0073bd;">
+                                    <span style="font-size:13px;color:#1e293b;line-height:1.4;">{{ $skema->nama_skema }}</span>
                                 </label>
                             @endforeach
                         </div>
@@ -1398,6 +1398,11 @@
             grid-template-columns: 1fr;
         }
     }
+
+    .export-jurusan-item:hover,
+    .export-skema-item:hover {
+        background: #f1f5f9;
+    }
 </style>
 
 <script>
@@ -1855,7 +1860,7 @@
         Array.from(document.querySelectorAll('.export-jurusan-item')).forEach(function(item) {
             var label = (item.getAttribute('data-label') || '').toLowerCase();
             var visible = !keyword || label.indexOf(keyword) !== -1;
-            item.style.display = visible ? '' : 'none';
+            item.style.display = visible ? 'flex' : 'none';
         });
     }
 
@@ -1879,7 +1884,7 @@
             var allowedBySearch = !keyword || label.indexOf(keyword) !== -1;
             var visible = allowedByJurusan && allowedBySearch;
 
-            item.style.display = visible ? '' : 'none';
+            item.style.display = visible ? 'flex' : 'none';
 
             // If hidden because selected jurusan doesn't match, uncheck to keep filter valid.
             if (!allowedByJurusan) checkbox.checked = false;

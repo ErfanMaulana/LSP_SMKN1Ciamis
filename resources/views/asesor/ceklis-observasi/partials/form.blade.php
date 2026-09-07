@@ -320,9 +320,17 @@
         font-size: 13px;
     }
     .checklist-wrapper { margin-top:16px; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; }
-    .checklist-head { background:#f8fafc; border-bottom:1px solid #e2e8f0; padding:10px 12px; display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+    .checklist-head { background:#f8fafc; border-bottom:1px solid #e2e8f0; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; }
     .checklist-tools { display:flex; gap:8px; flex-wrap:wrap; }
-    .btn-outline { border:1px solid #cbd5e1; border-radius:8px; background:#fff; color:#0f172a; padding:7px 10px; font-size:12px; cursor:pointer; }
+    .btn-outline { border:1px solid #cbd5e1; border-radius:8px; background:#fff; color:#0f172a; padding:7px 10px; font-size:12px; cursor:pointer; transition:all 0.15s ease; }
+    .btn-outline:hover { background:#f1f5f9; border-color:#94a3b8; }
+    .unit-head-wrapper { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 14px; background:#f8fafc; border:1px solid #e2e8f0; border-bottom:none; }
+    .unit-head-title { font-size:14px; font-weight:700; color:#1e293b; }
+    .unit-head-tools { display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .btn-unit-action { border:1px solid #cbd5e1; border-radius:6px; background:#fff; color:#334155; padding:4px 9px; font-size:11.5px; font-weight:500; cursor:pointer; transition:all 0.15s ease; display:inline-flex; align-items:center; gap:4px; }
+    .btn-unit-action:hover { background:#f1f5f9; border-color:#94a3b8; }
+    .btn-unit-action.btn-unit-ya:hover { background:#eff6ff; border-color:#3b82f6; color:#1d4ed8; }
+    .btn-unit-action.btn-unit-tidak:hover { background:#fef2f2; border-color:#ef4444; color:#b91c1c; }
 
     .table-wrap { overflow-x:auto; }
     table { width:100%; min-width:900px; border-collapse:collapse; }
@@ -1275,18 +1283,61 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        let noGlobal = 1;
-
-        units.forEach((unit) => {
+        units.forEach((unit, unitIndex) => {
             const section = document.createElement('div');
+            section.className = 'unit-section';
             section.style.borderTop = '1px solid #e2e8f0';
+            section.style.marginBottom = '20px';
 
             const head = document.createElement('div');
-            head.style.padding = '9px 12px';
-            head.style.background = '#f8fafc';
-            head.style.fontSize = '13px';
-            head.style.fontWeight = '700';
-            head.textContent = `${unit.kode_unit} - ${unit.judul_unit}`;
+            head.className = 'unit-head-wrapper';
+
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'unit-head-title';
+            titleDiv.textContent = `Unit Kompetensi ${unitIndex + 1}: ${unit.kode_unit} - ${unit.judul_unit}`;
+            head.appendChild(titleDiv);
+
+            const toolsDiv = document.createElement('div');
+            toolsDiv.className = 'unit-head-tools';
+
+            const btnUnitYa = document.createElement('button');
+            btnUnitYa.type = 'button';
+            btnUnitYa.className = 'btn-unit-action btn-unit-ya';
+            btnUnitYa.innerHTML = '<i class="bi bi-check-circle" style="color:#0073bd;"></i> Set Ya';
+            btnUnitYa.title = `Set semua KUK pada Unit ${unitIndex + 1} menjadi Ya`;
+            btnUnitYa.addEventListener('click', () => {
+                section.querySelectorAll('input[type="radio"][name$="[pencapaian]"][value="ya"]').forEach((r) => {
+                    r.checked = true;
+                });
+            });
+
+            const btnUnitTidak = document.createElement('button');
+            btnUnitTidak.type = 'button';
+            btnUnitTidak.className = 'btn-unit-action btn-unit-tidak';
+            btnUnitTidak.innerHTML = '<i class="bi bi-x-circle" style="color:#dc2626;"></i> Set Tidak';
+            btnUnitTidak.title = `Set semua KUK pada Unit ${unitIndex + 1} menjadi Tidak`;
+            btnUnitTidak.addEventListener('click', () => {
+                section.querySelectorAll('input[type="radio"][name$="[pencapaian]"][value="tidak"]').forEach((r) => {
+                    r.checked = true;
+                });
+            });
+
+            const btnUnitClear = document.createElement('button');
+            btnUnitClear.type = 'button';
+            btnUnitClear.className = 'btn-unit-action';
+            btnUnitClear.innerHTML = '<i class="bi bi-arrow-counterclockwise" style="color:#64748b;"></i> Kosongkan';
+            btnUnitClear.title = `Kosongkan pilihan pada Unit ${unitIndex + 1}`;
+            btnUnitClear.addEventListener('click', () => {
+                section.querySelectorAll('input[type="radio"][name$="[pencapaian]"]').forEach((r) => {
+                    r.checked = false;
+                });
+            });
+
+            toolsDiv.appendChild(btnUnitYa);
+            toolsDiv.appendChild(btnUnitTidak);
+            toolsDiv.appendChild(btnUnitClear);
+            head.appendChild(toolsDiv);
+
             section.appendChild(head);
 
             const wrap = document.createElement('div');
@@ -1296,11 +1347,16 @@ document.addEventListener('DOMContentLoaded', function () {
             table.innerHTML = `
                 <thead>
                     <tr>
-                        <th style="width:50px;">No.</th>
-                        <th style="width:220px;">Elemen</th>
-                        <th>Kriteria Unjuk Kerja</th>
-                        <th style="width:170px;">Pencapaian</th>
-                        <th style="width:220px;">Penilaian Lanjut</th>
+                        <th rowspan="2" style="width:45px; text-align:center;">No.</th>
+                        <th rowspan="2" style="width:180px;">Elemen</th>
+                        <th rowspan="2">Kriteria Unjuk Kerja</th>
+                        <th rowspan="2" style="width:180px;">Standar Industri / Tempat Kerja</th>
+                        <th colspan="2" style="width:100px; text-align:center;">Pencapaian</th>
+                        <th rowspan="2" style="width:180px;">Penilaian Lanjut</th>
+                    </tr>
+                    <tr>
+                        <th style="width:50px; text-align:center;">Ya</th>
+                        <th style="width:50px; text-align:center;">Tidak</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -1308,25 +1364,99 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const tbody = table.querySelector('tbody');
 
-            unit.elemens.forEach((elemen) => {
-                elemen.kriteria.forEach((kriteria) => {
+            let totalKukInUnit = 0;
+            (unit.elemens || []).forEach((el) => {
+                totalKukInUnit += (el.kriteria || []).length;
+            });
+
+            let isFirstRowOfUnit = true;
+
+            (unit.elemens || []).forEach((elemen, elIdx) => {
+                const kriteriaList = elemen.kriteria || [];
+                const elCount = kriteriaList.length;
+                const elemenNum = elIdx + 1;
+
+                kriteriaList.forEach((kriteria, kIdx) => {
                     const key = String(kriteria.id);
                     const pre = initialDetailMap[key] || {};
-
                     const tr = document.createElement('tr');
 
-                    const tdNo = document.createElement('td');
-                    tdNo.style.textAlign = 'center';
-                    tdNo.textContent = String(noGlobal++);
+                    if (kIdx === 0) {
+                        const tdNo = document.createElement('td');
+                        tdNo.style.textAlign = 'center';
+                        tdNo.style.verticalAlign = 'middle';
+                        tdNo.style.fontWeight = '600';
+                        tdNo.rowSpan = elCount;
+                        tdNo.textContent = String(elemenNum);
+                        tr.appendChild(tdNo);
 
-                    const tdElemen = document.createElement('td');
-                    tdElemen.textContent = elemen.nama_elemen;
+                        const tdElemen = document.createElement('td');
+                        tdElemen.style.verticalAlign = 'middle';
+                        tdElemen.style.fontWeight = '500';
+                        tdElemen.rowSpan = elCount;
+                        tdElemen.textContent = elemen.nama_elemen;
+                        tr.appendChild(tdElemen);
+                    }
 
                     const tdKriteria = document.createElement('td');
-                    tdKriteria.textContent = kriteria.deskripsi_kriteria;
+                    tdKriteria.innerHTML = `<strong>${elemenNum}.${kIdx + 1}</strong> ${kriteria.deskripsi_kriteria}`;
+                    tr.appendChild(tdKriteria);
 
-                    const tdPencapaian = document.createElement('td');
-                    tdPencapaian.appendChild(createPencapaianCell(key, pre.pencapaian || ''));
+                    if (isFirstRowOfUnit) {
+                        const tdStandar = document.createElement('td');
+                        tdStandar.rowSpan = totalKukInUnit;
+                        tdStandar.style.verticalAlign = 'middle';
+                        tdStandar.style.background = '#fafafa';
+
+                        const standards = unit.standar_industri || [];
+                        if (standards.length > 0) {
+                            const ul = document.createElement('ul');
+                            ul.style.margin = '0';
+                            ul.style.paddingLeft = '16px';
+                            ul.style.fontSize = '13px';
+                            standards.forEach((st) => {
+                                const li = document.createElement('li');
+                                li.style.marginBottom = '4px';
+                                li.innerHTML = `<strong>${st.nama_standar}</strong>` + (st.deskripsi_standar ? `<div style="font-size:11px;color:#64748b;">${st.deskripsi_standar}</div>` : '');
+                                ul.appendChild(li);
+                            });
+                            tdStandar.appendChild(ul);
+                        } else {
+                            tdStandar.innerHTML = '<span style="color:#94a3b8;font-size:13px;">-</span>';
+                        }
+                        tr.appendChild(tdStandar);
+                        isFirstRowOfUnit = false;
+                    }
+
+                    const tdYa = document.createElement('td');
+                    tdYa.style.textAlign = 'center';
+                    tdYa.style.verticalAlign = 'middle';
+                    const yaRadio = document.createElement('input');
+                    yaRadio.type = 'radio';
+                    yaRadio.name = `detail[${key}][pencapaian]`;
+                    yaRadio.value = 'ya';
+                    yaRadio.style.cursor = 'pointer';
+                    yaRadio.style.accentColor = '#0073bd';
+                    yaRadio.style.width = '16px';
+                    yaRadio.style.height = '16px';
+                    if (pre.pencapaian === 'ya') yaRadio.checked = true;
+                    tdYa.appendChild(yaRadio);
+                    tr.appendChild(tdYa);
+
+                    const tdTidak = document.createElement('td');
+                    tdTidak.style.textAlign = 'center';
+                    tdTidak.style.verticalAlign = 'middle';
+                    const tidakRadio = document.createElement('input');
+                    tidakRadio.type = 'radio';
+                    tidakRadio.name = `detail[${key}][pencapaian]`;
+                    tidakRadio.value = 'tidak';
+                    tidakRadio.style.cursor = 'pointer';
+                    tidakRadio.style.accentColor = '#dc2626';
+                    tidakRadio.style.width = '16px';
+                    tidakRadio.style.height = '16px';
+                    if (pre.pencapaian === 'tidak') tidakRadio.checked = true;
+                    tdTidak.appendChild(tidakRadio);
+                    tr.appendChild(tdTidak);
 
                     const tdLanjut = document.createElement('td');
                     tdLanjut.className = 'penilaian-lanjut-cell';
@@ -1345,12 +1475,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     tdLanjut.appendChild(createHiddenInput(`detail[${key}][unit_id]`, String(unit.id)));
                     tdLanjut.appendChild(createHiddenInput(`detail[${key}][elemen_id]`, String(elemen.id)));
                     tdLanjut.appendChild(createHiddenInput(`detail[${key}][kriteria_id]`, String(kriteria.id)));
-
-                    tr.appendChild(tdNo);
-                    tr.appendChild(tdElemen);
-                    tr.appendChild(tdKriteria);
-                    tr.appendChild(tdPencapaian);
                     tr.appendChild(tdLanjut);
+
                     tbody.appendChild(tr);
                 });
             });

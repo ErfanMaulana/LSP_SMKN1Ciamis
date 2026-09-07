@@ -135,6 +135,28 @@
                             </div>
                             @endif
 
+                            @if($unit->standarIndustri->count() > 0)
+                            <div class="standar-industri-display" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px 16px; margin-bottom:16px;">
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px;">
+                                    <span style="width:20px; height:20px; background:#16a34a; color:white; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:10px;"><i class="bi bi-building"></i></span>
+                                    <strong style="font-size:13px; color:#15803d;">Standar Industri / Tempat Kerja</strong>
+                                </div>
+                                <ul style="margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px;">
+                                    @foreach($unit->standarIndustri as $sIdx => $standar)
+                                    <li style="display:flex; gap:8px; align-items:flex-start;">
+                                        <span style="min-width:20px; height:20px; background:#dcfce7; color:#15803d; border-radius:3px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px;">{{ $sIdx + 1 }}</span>
+                                        <div>
+                                            <span style="font-size:13px; color:#166534; font-weight:500;">{{ $standar->nama_standar }}</span>
+                                            @if($standar->deskripsi_standar)
+                                            <div style="font-size:12px; color:#4ade80; margin-top:2px;">{{ $standar->deskripsi_standar }}</div>
+                                            @endif
+                                        </div>
+                                    </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            @endif
+
                             @if($unit->elemens->count() > 0)
                             <div class="elemens-container">
                                 <div class="section-title">

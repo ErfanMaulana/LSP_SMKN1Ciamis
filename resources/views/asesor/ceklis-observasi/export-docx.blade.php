@@ -181,7 +181,13 @@
     </table>
 
     @forelse($detailsByUnit as $unitDetails)
-        @php $unit = $unitDetails->first()?->unit; @endphp
+        @php
+            $unit = $unitDetails->first()?->unit;
+            $elemenGroups = $unitDetails->groupBy('elemen_id');
+            $totalKukInUnit = $unitDetails->count();
+            $unitStandards = $unit?->standarIndustri ?? collect();
+            $isFirstRowOfUnit = true;
+        @endphp
         <table class="section-gap unit-header-table">
             <tr>
                 <td class="unit-header-name" rowspan="2">Unit Kompetensi {{ $loop->iteration }}</td>
@@ -199,29 +205,55 @@
         <table class="section-gap detail-table">
             <tr>
                 <th rowspan="2" style="width:35px;">No.</th>
-                <th rowspan="2" style="width:170px;">Elemen</th>
-                <th rowspan="2" style="width:315px;">Kriteria Unjuk Kerja</th>
-                <th colspan="2" style="width:120px;">Pencapaian</th>
-                <th rowspan="2" style="width:120px;">Penilaian Lanjut</th>
+                <th rowspan="2" style="width:140px;">Elemen</th>
+                <th rowspan="2" style="width:230px;">Kriteria Unjuk Kerja</th>
+                <th rowspan="2" style="width:150px;">Standar Industri atau Tempat Kerja</th>
+                <th colspan="2" style="width:80px;">Pencapaian</th>
+                <th rowspan="2" style="width:85px;">Penilaian Lanjut</th>
             </tr>
             <tr>
-                <th style="width:60px;">Ya</th>
-                <th style="width:60px;">Tidak</th>
+                <th style="width:40px;">Ya</th>
+                <th style="width:40px;">Tidak</th>
             </tr>
-            @foreach($unitDetails as $idx => $detail)
+            @foreach($elemenGroups as $elId => $elemenDetails)
                 @php
-                    $pencapaian = strtolower(trim((string) ($detail->pencapaian ?? '')));
-                    $isYa = in_array($pencapaian, ['ya', 'y', '1', 'true', 'benar', 'kompeten'], true);
-                    $isTidak = in_array($pencapaian, ['tidak', 't', '0', 'false', 'salah', 'belum kompeten'], true);
+                    $elCount = $elemenDetails->count();
+                    $firstDetail = $elemenDetails->first();
+                    $elemenNum = $loop->iteration;
                 @endphp
-                <tr>
-                    <td class="center">{{ $idx + 1 }}</td>
-                    <td>{{ $detail->elemen?->nama_elemen ?? '-' }}</td>
-                    <td>{{ $detail->kriteria?->deskripsi_kriteria ?? '-' }}</td>
-                    <td class="center">{!! $isYa ? '☑' : '☐' !!}</td>
-                    <td class="center">{!! $isTidak ? '☑' : '☐' !!}</span></td>
-                    <td>{{ $detail->penilaian_lanjut ?: '-' }}</td>
-                </tr>
+                @foreach($elemenDetails as $kIdx => $detail)
+                    @php
+                        $pencapaian = strtolower(trim((string) ($detail->pencapaian ?? '')));
+                        $isYa = in_array($pencapaian, ['ya', 'y', '1', 'true', 'benar', 'kompeten'], true);
+                        $isTidak = in_array($pencapaian, ['tidak', 't', '0', 'false', 'salah', 'belum kompeten'], true);
+                        $kukNum = $elemenNum . '.' . ($kIdx + 1);
+                    @endphp
+                    <tr>
+                        @if($kIdx === 0)
+                            <td class="center" rowspan="{{ $elCount }}" style="vertical-align:middle;">{{ $elemenNum }}</td>
+                            <td rowspan="{{ $elCount }}" style="vertical-align:middle;">{{ $firstDetail->elemen?->nama_elemen ?? '-' }}</td>
+                        @endif
+
+                        <td>{{ $kukNum }} {{ $detail->kriteria?->deskripsi_kriteria ?? '-' }}</td>
+
+                        @if($isFirstRowOfUnit)
+                            <td rowspan="{{ $totalKukInUnit }}" style="vertical-align:middle;">
+                                @if($unitStandards->isNotEmpty())
+                                    @foreach($unitStandards as $st)
+                                        <div style="margin-bottom:4px;">{{ $st->nama_standar }}</div>
+                                    @endforeach
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            @php $isFirstRowOfUnit = false; @endphp
+                        @endif
+
+                        <td class="center" style="vertical-align:middle;">{!! $isYa ? '☑' : '☐' !!}</td>
+                        <td class="center" style="vertical-align:middle;">{!! $isTidak ? '☑' : '☐' !!}</td>
+                        <td>{{ $detail->penilaian_lanjut ?: '' }}</td>
+                    </tr>
+                @endforeach
             @endforeach
         </table>
     @empty

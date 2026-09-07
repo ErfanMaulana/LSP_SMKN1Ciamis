@@ -13,6 +13,7 @@ use Database\Seeders\Catalog\SkemaKLNSeeder;
 use Database\Seeders\Catalog\SkemaMPLBSeeder;
 use Database\Seeders\Catalog\SkemaPMSeeder;
 use Database\Seeders\Catalog\SkemaSeederRPL;
+use Database\Seeders\Catalog\StandarIndustriUnitSeeder;
 use Database\Seeders\Reference\SocialMediaSeeder;
 use Illuminate\Database\Seeder;
 
@@ -35,6 +36,7 @@ class CoreReferenceSeeder extends Seeder
             SkemaPMSeeder::class,
             SkemaAKLSeeder::class,
             SkemaHTLSeeder::class,
+            StandarIndustriUnitSeeder::class,
             ProfileContentSeeder::class,
             ProfileVisionMissionSeeder::class,
             SocialMediaSeeder::class,

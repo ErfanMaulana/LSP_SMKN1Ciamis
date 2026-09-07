@@ -116,6 +116,7 @@ class CeklisObservasiAktivitasPraktikController extends Controller
                 'asesi:NIK,nama',
                 'asesor:ID_asesor,nama,no_met',
                 'details.unit:id,kode_unit,judul_unit',
+                'details.unit.standarIndustri',
                 'details.elemen:id,unit_id,nama_elemen',
                 'details.kriteria:id,elemen_id,deskripsi_kriteria,urutan',
             ])
@@ -224,6 +225,7 @@ class CeklisObservasiAktivitasPraktikController extends Controller
         $skema = Skema::query()
             ->with([
                 'units' => fn ($query) => $query->orderBy('id'),
+                'units.standarIndustri',
                 'units.elemens' => fn ($query) => $query->orderBy('id'),
                 'units.elemens.kriteria' => fn ($query) => $query->orderBy('urutan')->orderBy('id'),
             ])
@@ -234,6 +236,10 @@ class CeklisObservasiAktivitasPraktikController extends Controller
                 'id' => $unit->id,
                 'kode_unit' => $unit->kode_unit,
                 'judul_unit' => $unit->judul_unit,
+                'standar_industri' => $unit->standarIndustri->map(fn($s) => [
+                    'nama_standar' => $s->nama_standar,
+                    'deskripsi_standar' => $s->deskripsi_standar,
+                ])->values(),
                 'elemens' => $unit->elemens->map(function ($elemen) {
                     return [
                         'id' => $elemen->id,

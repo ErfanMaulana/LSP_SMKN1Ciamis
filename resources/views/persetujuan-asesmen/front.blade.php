@@ -13,253 +13,459 @@
         ($item->bukti_pertanyaan_wawancara ?? false) ||
         ($item->bukti_lainnya ?? false)
     );
+
+    $typeStr = strtolower(trim((string)($item->kategori_skema ?? $skema?->jenis_skema ?? 'Okupasi')));
+    $isKKNI = str_contains($typeStr, 'kkni');
+    $isOkupasi = str_contains($typeStr, 'okupasi');
+    $isKlaster = str_contains($typeStr, 'klaster');
+    $jenisSkemaBadge = $isKKNI ? 'KKNI' : ($isKlaster ? 'Klaster' : 'Okupasi');
+
+    $isAsesorSigned = !empty($item->ttd_asesor_file);
+    $isAsesiSigned = !empty($item->ttd_asesi_file);
+    $isBothSigned = $isAsesorSigned && $isAsesiSigned;
 @endphp
 
 @extends($layout)
 
-@section('title', 'Detail Persetujuan Asesmen')
-@section('page-title', 'Detail Persetujuan Asesmen')
+@section('title', 'Persetujuan Asesmen - ' . ($item->judul_skema ?: ($skema->nama_skema ?? 'FR.AK.01')))
+@section('page-title', 'Persetujuan Asesmen dan Kerahasiaan')
 
 @section('styles')
 <style>
-    .form-control-custom {
-        width: 100%;
-        max-width: 320px;
-        padding: 6px 10px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        font-size: 13px;
-        color: #0f172a;
-        background: #ffffff;
-        outline: none;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-    }
-    .form-control-custom:focus {
-        border-color: #0073bd;
-        box-shadow: 0 0 0 3px rgba(0, 115, 189, 0.1);
+    .ak-container {
+        max-width: 1080px;
+        margin: 0 auto 40px;
     }
 
     .top-actions {
         display: flex;
-        gap: 10px;
-        margin-bottom: 16px;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px;
         flex-wrap: wrap;
     }
 
-    .btn {
-        border: none;
-        border-radius: 8px;
-        padding: 9px 14px;
-        font-size: 13px;
+    .btn-custom {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        font-size: 13.5px;
+        font-weight: 600;
+        border-radius: 10px;
         text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-custom-secondary {
+        background: #ffffff;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .btn-custom-secondary:hover {
+        background: #f8fafc;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+
+    .btn-custom-primary {
+        background: #0073bd;
+        color: #ffffff;
+        box-shadow: 0 2px 6px rgba(0, 115, 189, 0.25);
+    }
+    .btn-custom-primary:hover {
+        background: #005f9a;
+        color: #ffffff;
+    }
+
+    /* Main Card */
+    .ak-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .ak-card-header {
+        padding: 24px 28px;
+        background: #ffffff;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    .ak-card-title-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .ak-icon-badge {
+        width: 52px;
+        height: 52px;
+        background: linear-gradient(135deg, #0073bd, #0284c7);
+        color: #ffffff;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 4px 12px rgba(0, 115, 189, 0.2);
+        flex-shrink: 0;
+    }
+
+    .ak-card-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 4px;
+    }
+
+    .ak-badge-code {
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        cursor: pointer;
-    }
-
-    .btn-primary { background: #0073bd; color: #fff; }
-    .btn-secondary { background: #64748b; color: #fff; }
-
-    .notice {
-        border-radius: 10px;
-        padding: 12px 14px;
-        margin-bottom: 14px;
-        font-size: 13px;
-        border: 1px solid transparent;
-    }
-
-    .notice.success {
-        background: #ecfdf5;
+        background: #f0fdf4;
         color: #166534;
+        border: 1px solid #bbf7d0;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
+    .ak-card-body {
+        padding: 28px;
+    }
+
+    /* Status Banner */
+    .status-banner {
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 28px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .status-banner-info {
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        color: #1e40af;
+    }
+
+    .status-banner-success {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        color: #166534;
+    }
+
+    .status-banner i {
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .info-tile {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        transition: all 0.2s;
+    }
+    .info-tile:hover {
+        background: #ffffff;
+        border-color: #cbd5e1;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .info-tile-label {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .info-tile-value {
+        font-size: 14.5px;
+        font-weight: 600;
+        color: #0f172a;
+        word-break: break-word;
+    }
+
+    .info-tile-sub {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+
+    /* Section Headers */
+    .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .section-title i {
+        color: #0073bd;
+        font-size: 18px;
+    }
+
+    /* Checklist Cards */
+    .evidence-grid-modern {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+        margin-bottom: 28px;
+    }
+
+    .evidence-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        transition: all 0.2s;
+    }
+
+    .evidence-card.active {
+        background: #f0f9ff;
+        border-color: #bae6fd;
+    }
+
+    .evidence-card input[type="checkbox"] {
+        margin-top: 2px;
+        width: 18px;
+        height: 18px;
+        accent-color: #0073bd;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .evidence-card-label {
+        font-size: 13.5px;
+        font-weight: 500;
+        color: #1e293b;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .evidence-card-readonly {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .evidence-card-readonly.checked {
+        background: #f0fdf4;
         border-color: #bbf7d0;
     }
 
-    .notice.warning {
-        background: #fffbeb;
-        color: #92400e;
-        border-color: #fde68a;
-    }
-
-    .hero-card {
-        background: #0073bd;
-        color: #ffffff;
-        border-radius: 16px;
-        padding: 22px 24px;
-        margin-bottom: 18px;
-    }
-
-    .hero-card-top {
+    .evidence-status-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
         display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 16px;
-        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
     }
 
-    .hero-card h2 {
-        margin: 0 0 6px;
-        font-size: 20px;
-        font-weight: 800;
+    .evidence-status-icon.checked {
+        background: #dcfce7;
+        color: #16a34a;
     }
 
-    .hero-card p {
-        margin: 0;
-        font-size: 13px;
-        line-height: 1.6;
-        opacity: 0.92;
+    .evidence-status-icon.unchecked {
+        background: #e2e8f0;
+        color: #94a3b8;
     }
 
-    .hero-meta {
+    /* Agreements & Clauses Cards */
+    .clauses-container {
         display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 16px;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 28px;
     }
 
-    .hero-chip {
-        display: inline-flex;
+    .clause-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 4px solid #0073bd;
+        border-radius: 10px;
+        padding: 16px 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .clause-card.asesor-clause {
+        border-left-color: #6366f1;
+    }
+
+    .clause-role {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+        display: flex;
         align-items: center;
         gap: 6px;
-        border-radius: 999px;
-        padding: 7px 12px;
-        background: rgba(255, 255, 255, 0.14);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        font-size: 12px;
-        font-weight: 700;
     }
 
-    .card,
-    .panel-card,
-    .signature-spot,
-    .signature-info-card,
-    .statement-card,
-    .doc-wrap {
+    .clause-role.asesi { color: #0073bd; }
+    .clause-role.asesor { color: #4f46e5; }
+
+    .clause-text {
+        font-size: 13.5px;
+        color: #334155;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    /* Signature Section (2-Column Cards) */
+    .sig-section-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 20px;
+        margin-top: 10px;
+    }
+
+    .sig-card {
         background: #ffffff;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e2e8f0;
         border-radius: 14px;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        position: relative;
     }
 
-    .card-header,
-    .panel-title {
-        padding: 14px 16px;
-        border-bottom: 1px solid #eef2f7;
-        background: #f8fafc;
-        font-size: 14px;
+    .sig-card.signed {
+        border-color: #bbf7d0;
+        background: #fcfdfd;
+    }
+
+    .sig-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .sig-card-title {
+        font-size: 14.5px;
         font-weight: 700;
         color: #0f172a;
         display: flex;
         align-items: center;
         gap: 8px;
-        margin: 0;
     }
 
-    .card-body,
-    .panel-body {
-        padding: 16px;
-    }
-
-    .stack {
-        display: grid;
-        gap: 16px;
-    }
-
-    .work-grid {
-        display: grid;
-        grid-template-columns: 1fr 0.82fr;
-        gap: 16px;
-        align-items: start;
-    }
-
-    .checklist-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px 14px;
-    }
-
-    .checklist-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        padding: 10px 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        background: #ffffff;
-        color: #0f172a;
-        font-size: 13px;
-        line-height: 1.45;
-    }
-
-    .checklist-item input {
-        margin-top: 2px;
-        flex: 0 0 auto;
-    }
-
-    .checklist-note {
-        margin-top: 12px;
-        font-size: 12px;
-        color: #64748b;
-        line-height: 1.5;
-    }
-
-    .statement-list {
-        display: grid;
-        gap: 10px;
-    }
-
-    .statement-item {
-        padding: 12px 14px;
-        border: 1px solid #e2e8f0;
-        border-radius: 10px;
-        background: #f8fafc;
-        color: #334155;
-        font-size: 13px;
-        line-height: 1.6;
-    }
-
-    .statement-role {
-        display: block;
-        margin-bottom: 4px;
+    .sig-badge-status {
+        font-size: 11px;
         font-weight: 700;
-        color: #0f172a;
+        padding: 3px 8px;
+        border-radius: 20px;
     }
 
-    .statement-card {
-        margin-top: 16px;
-        padding: 18px;
+    .sig-badge-status.signed {
+        background: #dcfce7;
+        color: #166534;
     }
 
-    .signature-form-layout {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 16px;
-        align-items: stretch;
+    .sig-badge-status.waiting {
+        background: #fef3c7;
+        color: #92400e;
     }
 
-    .signature-spot,
-    .signature-info-card {
-        padding: 18px;
+    .sig-badge-status.ready {
+        background: #e0f2fe;
+        color: #0369a1;
     }
 
-    .signature-title {
-        margin: 0 0 12px;
+    .sig-preview-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 120px;
+        margin-bottom: 14px;
+    }
+
+    .sig-preview-img {
+        max-width: 220px;
+        max-height: 80px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .sig-signer-name {
         font-size: 14px;
         font-weight: 700;
         color: #0f172a;
+        margin-top: 8px;
         text-align: center;
     }
 
+    .sig-date-info {
+        font-size: 12px;
+        color: #64748b;
+        text-align: center;
+        margin-top: 2px;
+    }
+
+    /* Signature Canvas Pad */
     .signature-canvas-wrapper {
         position: relative;
         border: 2px dashed #cbd5e1;
         border-radius: 10px;
-        background: #f8fafc;
+        background: #ffffff;
         overflow: hidden;
         width: 100%;
-        max-width: 260px;
-        margin: 0 auto 12px auto;
-        aspect-ratio: 1 / 1;
+        margin: 10px 0 8px;
+        aspect-ratio: 16 / 8;
     }
 
     .signature-canvas {
@@ -277,938 +483,607 @@
     .signature-placeholder {
         position: absolute;
         inset: 0;
-        display: grid;
-        place-items: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
         text-align: center;
         pointer-events: none;
-        color: #cbd5e1;
+        color: #94a3b8;
+        font-size: 12px;
         z-index: 1;
     }
 
     .signature-placeholder i {
-        font-size: 38px;
-        display: block;
-        margin-bottom: 6px;
+        font-size: 24px;
+        margin-bottom: 4px;
     }
 
-    .signature-actions {
+    .sig-pad-actions {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-top: 12px;
+        margin-bottom: 12px;
     }
 
-    .signature-date {
-        font-size: 13px;
-        color: #64748b;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .field {
-        margin-top: 12px;
-    }
-
-    .field label {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 13px;
-        font-weight: 600;
-        color: #334155;
-    }
-
-    .field input {
-        width: 100%;
-        height: 42px;
-        border: 1px solid #cbd5e1;
-        border-radius: 8px;
-        padding: 10px 12px;
-        font-size: 14px;
-        color: #0f172a;
-        background: #ffffff;
-    }
-
-    .btn-submit,
-    .btn-clear-signature {
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .btn-submit {
-        border: none;
-        background: #0073bd;
-        color: #ffffff;
-        height: 42px;
-        padding: 0 16px;
-        font-size: 14px;
-        margin-top: 12px;
-    }
-
-    .btn-clear-signature {
-        border: 1px solid #cbd5e1;
+    .btn-clear-sig {
+        border: 1px solid #e2e8f0;
         background: #ffffff;
         color: #64748b;
         cursor: pointer;
-    }
-
-    .signature-info-list {
-        display: grid;
-        gap: 10px;
-    }
-
-    .summary-panel-top {
-        margin-bottom: 16px;
-    }
-
-    .signature-info-row {
-        display: grid;
-        grid-template-columns: 140px 12px 1fr;
-        gap: 8px;
-        align-items: start;
-        font-size: 13px;
-        color: #334155;
-    }
-
-    .signature-info-row .label {
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 11.5px;
         font-weight: 600;
-        color: #0f172a;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s;
     }
 
-    .doc-wrap {
-        padding: 18px;
-        overflow-x: auto;
-        margin-bottom: 16px;
+    .btn-clear-sig:hover {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fca5a5;
     }
 
-    .doc {
-        min-width: 760px;
-        border: 1px solid #111827;
-        font-size: 13px;
-        color: #111827;
-        border-collapse: collapse;
+    .btn-save-signature {
         width: 100%;
-    }
-
-    .doc td {
-        border: 1px solid #111827;
-        padding: 6px;
-        vertical-align: top;
-    }
-
-    .doc .title {
+        padding: 10px;
+        background: #0073bd;
+        color: #ffffff;
         border: none;
-        padding: 0 0 10px;
+        border-radius: 10px;
+        font-size: 13.5px;
         font-weight: 700;
-        font-size: 14px;
-    }
-
-    .doc .no-border { border: none; }
-
-    .check {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-        border: 1px solid #111827;
-        text-align: center;
-        line-height: 10px;
-        margin-right: 6px;
-        font-size: 10px;
-        font-weight: 700;
-    }
-
-    .notes {
-        margin-top: 8px;
-        font-size: 12px;
-        color: #334155;
-    }
-
-    .panel-card {
-        margin-top: 16px;
-        overflow: hidden;
-    }
-
-    .signature-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-    }
-
-    .signature-box {
-        text-align: center;
-    }
-
-    .signature-box img {
-        width: 220px;
-        height: 220px;
-        object-fit: contain;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        background: #fff;
-        display: block;
-        margin: 0 auto 8px auto;
-    }
-
-    .signature-box .no-img-placeholder {
-        width: 220px;
-        height: 220px;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        background: #f8fafc;
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 8px auto;
-        font-size: 12px;
-        color: #94a3b8;
-    }
-
-    .signature-box .meta {
-        margin: 0;
-        font-size: 13px;
-        color: #64748b;
-        line-height: 1.35;
-    }
-
-    .signature-preview {
-        display: grid;
-        gap: 12px;
-    }
-
-    .signature-spot {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .signature-spot > * {
-        width: min(100%, 440px);
-    }
-
-    .signature-summary-card {
-        display: flex;
-        flex-direction: column;
-        gap: 14px;
-    }
-
-    .summary-card-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .summary-card-title {
-        margin: 0;
-        font-size: 15px;
-        font-weight: 800;
-        color: #0f172a;
-    }
-
-    .summary-card-subtitle {
-        margin: 4px 0 0;
-        font-size: 12px;
-        color: #64748b;
-        line-height: 1.5;
-    }
-
-    .summary-card-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-        color: #334155;
-    }
-
-    .summary-card-table td {
-        padding: 8px 0;
-        vertical-align: top;
-        border-bottom: 1px solid #eef2f7;
-    }
-
-    .summary-card-table td:first-child {
-        width: 44%;
-        font-weight: 700;
-        color: #0f172a;
-        padding-right: 10px;
-    }
-
-    .summary-card-table tr:last-child td {
-        border-bottom: none;
-    }
-
-    .summary-badges {
-        display: flex;
-        flex-wrap: wrap;
         gap: 8px;
+        box-shadow: 0 2px 6px rgba(0, 115, 189, 0.25);
+        transition: background 0.2s;
     }
 
-    .summary-badge {
-        display: inline-flex;
+    .btn-save-signature:hover {
+        background: #005f9a;
+    }
+
+    .sig-option-pill {
+        display: flex;
         align-items: center;
-        gap: 6px;
-        padding: 7px 10px;
-        border-radius: 999px;
-        background: #eff6ff;
-        color: #0073bd;
-        font-size: 12px;
-        font-weight: 700;
+        gap: 8px;
+        cursor: pointer;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        margin-bottom: 6px;
+        font-size: 12.5px;
+        font-weight: 600;
+        transition: all 0.2s;
     }
 
-    .small-note {
-        font-size: 12px;
-        color: #64748b;
-        line-height: 1.5;
-    }
-
-    @media (max-width: 960px) {
-        .work-grid,
-        .signature-form-layout,
-        .signature-grid {
+    @media (max-width: 768px) {
+        .ak-card-header {
+            padding: 18px 20px;
+        }
+        .ak-card-body {
+            padding: 20px;
+        }
+        .info-grid {
             grid-template-columns: 1fr;
         }
-    }
-
-    @media (max-width: 720px) {
-        .checklist-grid {
+        .sig-section-grid {
             grid-template-columns: 1fr;
-        }
-
-        .signature-info-row {
-            grid-template-columns: 1fr;
-            gap: 4px;
-        }
-
-        .hero-card {
-            padding: 18px;
         }
     }
 </style>
 @endsection
 
 @section('content')
-<div class="top-actions">
-    @if($role === 'asesor')
-        @php
-            $backToVal = $backTo ?? request()->get('back_to', '');
-            $backUrl = ($backToVal && str_starts_with($backToVal, 'asesi:'))
-                ? route('asesor.asesi.show', substr($backToVal, 6))
-                : route('asesor.persetujuan-asesmen.index');
-            $backLabel = ($backToVal && str_starts_with($backToVal, 'asesi:')) ? 'Kembali ke Detail Asesi' : 'Kembali';
-        @endphp
-        <a href="{{ $backUrl }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> {{ $backLabel }}</a>
-        @if(!empty($item->ttd_asesi_file) && !empty($item->ttd_asesor_file))
-            <a href="{{ route('asesor.persetujuan.front.asesor.export', ['asesiNik' => $asesiNik, 'skemaId' => $skema->id]) }}" class="btn btn-primary" target="_blank">
-                <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
-            </a>
-        @endif
-    @else
-        <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
-    @endif
-</div>
-
-@if(session('success'))
-    <div class="notice success">{{ session('success') }}</div>
-@endif
-
-@if(session('error'))
-    <div class="notice warning">{{ session('error') }}</div>
-@endif
-
-@if($role === 'asesor')
-    <div class="hero-card">
-        <div class="hero-card-top">
-            <div>
-                <h2>Detail Persetujuan Asesmen</h2>
-                <p>Lengkapi ceklis bukti, pastikan jadwal sudah benar, lalu simpan tanda tangan asesor.</p>
-            </div>
-            <!-- @if(!empty($item->ttd_asesi_file))
-                <a href="{{ route('asesor.persetujuan.front.asesor.export', ['asesiNik' => $asesiNik, 'skemaId' => $skema->id]) }}" class="btn btn-primary" target="_blank">
-                     <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
+<div class="ak-container">
+    {{-- Top Action Navigation --}}
+    <div class="top-actions">
+        @if($role === 'asesor')
+            @php
+                $backToVal = $backTo ?? request()->get('back_to', '');
+            @endphp
+            @if($backToVal === 'detail_asesi' && !empty($asesiNik))
+                <a href="{{ route('asesor.asesi.show', $asesiNik) }}" class="btn-custom btn-custom-secondary">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Detail Asesi
                 </a>
             @else
-                <button class="btn btn-primary" disabled title="Asesi belum menandatangani, tidak dapat mengekspor">
-                    <i class="bi bi-download"></i> Export FR.AK.01 (.doc)
-                </button>
-            @endif -->
-        </div>
-        <div class="hero-meta">
-            <span class="hero-chip"><i class="bi bi-person-badge"></i> {{ $item->nama_asesi }}</span>
-            <span class="hero-chip"><i class="bi bi-collection"></i> {{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</span>
-            <span class="hero-chip"><i class="bi bi-clock"></i> {{ $item->hari_tanggal ?: '-' }}</span>
-        </div>
-    </div>
+                <a href="{{ route('asesor.persetujuan-asesmen.index') }}" class="btn-custom btn-custom-secondary">
+                    <i class="bi bi-arrow-left"></i> Kembali ke Daftar Persetujuan
+                </a>
+            @endif
 
-    <div class="signature-info-card signature-summary-card summary-panel-top">
-        <div class="summary-card-head">
-            <div>
-                <h3 class="summary-card-title">Informasi Persetujuan</h3>
-                <p class="summary-card-subtitle">Data utama untuk pengecekan sebelum tanda tangan.</p>
-            </div>
-            <span class="summary-badge"><i class="bi bi-eye"></i> Preview Asesor</span>
-        </div>
-
-        <div class="summary-badges">
-            <span class="summary-badge"><i class="bi bi-person-badge"></i> {{ $item->nama_asesi }}</span>
-            <span class="summary-badge"><i class="bi bi-collection"></i> {{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</span>
-        </div>
-
-        <table class="summary-card-table">
-            <tr>
-                <td>Skema</td>
-                <td>{{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</td>
-            </tr>
-            <tr>
-                <td>TUK</td>
-                <td>{{ $item->tuk }}</td>
-            </tr>
-            <tr>
-                <td>Asesor</td>
-                <td>{{ $item->nama_asesor }}</td>
-            </tr>
-            <tr>
-                <td>Asesi</td>
-                <td>{{ $item->nama_asesi }}</td>
-            </tr>
-            <tr>
-                <td>Hari / Tanggal</td>
-                <td>{{ $item->hari_tanggal ?: '-' }}</td>
-            </tr>
-            <tr>
-                <td>Waktu</td>
-                <td>{{ $item->waktu ?: '-' }}</td>
-            </tr>
-            <tr>
-                <td>TUK Pelaksanaan</td>
-                <td>{{ $item->tuk_pelaksanaan ?: '-' }}</td>
-            </tr>
-        </table>
-    </div>
-
-    @if(empty($item->ttd_asesi_file))
-    <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" id="formTandaTanganAsesor">
-        @csrf
-        @if(!empty($backTo))
-            <input type="hidden" name="back_to" value="{{ $backTo }}">
+            @if($isBothSigned)
+                <a href="{{ route('asesor.persetujuan.front.asesor.export-word', ['asesiNik' => $asesiNik, 'skemaId' => $skema->id]) }}" class="btn-custom btn-custom-primary" target="_blank">
+                    <i class="bi bi-file-earmark-word"></i> Unduh Dokumen (FR.AK.01.docx)
+                </a>
+            @endif
+        @else
+            <a href="{{ route('asesi.persetujuan-asesmen.index') }}" class="btn-custom btn-custom-secondary">
+                <i class="bi bi-arrow-left"></i> Kembali ke Persetujuan Asesmen
+            </a>
         @endif
-    @endif
-    <div class="card" style="margin-bottom:16px;">
-        <div class="card-header"><i class="bi bi-clipboard-check"></i> Ceklis Bukti yang Sudah Dikumpulkan</div>
-        <div class="card-body">
-            <div class="checklist-grid" style="margin-top:12px;">
-                <label class="checklist-item"><input type="checkbox" name="bukti_verifikasi_portofolio" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_verifikasi_portofolio ? 'checked' : '' }}><span>Hasil Verifikasi Portofolio</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_reviu_produk" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_reviu_produk ? 'checked' : '' }}><span>Hasil Reviu Produk</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_observasi_langsung" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_observasi_langsung ? 'checked' : '' }}><span>Hasil Observasi Langsung</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_kegiatan_terstruktur" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_kegiatan_terstruktur ? 'checked' : '' }}><span>Hasil Kegiatan Terstruktur</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_lisan" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_lisan ? 'checked' : '' }}><span>Hasil Pertanyaan Lisan</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_tertulis" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_tertulis ? 'checked' : '' }}><span>Hasil Pertanyaan Tertulis</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_pertanyaan_wawancara" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_pertanyaan_wawancara ? 'checked' : '' }}><span>Hasil Pertanyaan Wawancara</span></label>
-                <label class="checklist-item"><input type="checkbox" name="bukti_lainnya" value="1" {{ !empty($item->ttd_asesi_file) ? 'disabled' : '' }} {{ $item->bukti_lainnya ? 'checked' : '' }} id="buktiLainnyaCheckbox"><span>Lainnya {{ $item->bukti_lainnya_keterangan ? ': ' . $item->bukti_lainnya_keterangan : '' }}</span></label>
+    </div>
+
+    {{-- Main Web Card --}}
+    <div class="ak-card">
+        {{-- Card Header --}}
+        <div class="ak-card-header">
+            <div class="ak-card-title-group">
+                <div class="ak-icon-badge">
+                    <i class="bi bi-file-earmark-check-fill"></i>
+                </div>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
+                        <span class="ak-badge-code">{{ $item->kode_form ?: 'FR.AK.01' }}</span>
+                        <span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700; border-radius:20px; padding:3px 10px; font-size:12px;">Skema {{ $jenisSkemaBadge }}</span>
+                    </div>
+                    <h2 class="ak-card-title">{{ $item->judul_skema ?: ($skema->nama_skema ?? 'Persetujuan Asesmen dan Kerahasiaan') }}</h2>
+                    <div style="font-size: 13px; color: #64748b; font-family: monospace;">
+                        Nomor Skema: {{ $item->nomor_skema ?: ($skema->nomor_skema ?? '-') }}
+                    </div>
+                </div>
             </div>
-            @if(empty($item->ttd_asesi_file))
-                <div id="buktiLainnyaKeteranganDiv" style="margin-top:12px; display:{{ $item->bukti_lainnya ? 'block' : 'none' }};">
-                    <label style="display:block; margin-bottom:6px; font-size:13px; color:#475569; font-weight:600;">Keterangan Lainnya</label>
-                    <input type="text" name="bukti_lainnya_keterangan" placeholder="Jelaskan bukti lainnya" value="{{ $item->bukti_lainnya_keterangan }}" style="width:100%; padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; background:#fff;">
+            <div>
+                @if($isBothSigned)
+                    <span class="badge" style="background: #dcfce7; color: #15803d; padding: 8px 14px; border-radius: 30px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-check-all" style="font-size: 16px;"></i> Selesai Ditandatangani
+                    </span>
+                @elseif($isAsesorSigned)
+                    <span class="badge" style="background: #fef3c7; color: #b45309; padding: 8px 14px; border-radius: 30px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-hourglass-split"></i> Menunggu Tanda Tangan Asesi
+                    </span>
+                @else
+                    <span class="badge" style="background: #f1f5f9; color: #475569; padding: 8px 14px; border-radius: 30px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-pen"></i> Menunggu Tanda Tangan Asesor
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="ak-card-body">
+            {{-- Status Banner Arahan --}}
+            <div class="status-banner {{ $isBothSigned ? 'status-banner-success' : 'status-banner-info' }}">
+                <i class="bi {{ $isBothSigned ? 'bi-check-circle-fill' : 'bi-info-circle-fill' }}"></i>
+                <div style="font-size: 13.5px; line-height: 1.45;">
+                    <strong>Petunjuk &amp; Arahan:</strong>
+                    {{ $item->pengantar ?: 'Persetujuan Asesmen ini untuk menjamin bahwa Asesi telah diberi arahan secara rinci tentang perencanaan dan proses asesmen.' }}
+                </div>
+            </div>
+
+            {{-- Info Grid (Participants & Schedule) --}}
+            <div class="info-grid">
+                <div class="info-tile">
+                    <div class="info-tile-label"><i class="bi bi-person-fill"></i> Nama Asesi</div>
+                    <div class="info-tile-value">{{ $item->nama_asesi }}</div>
+                    @if(!empty($item->asesi_nik))
+                        <div class="info-tile-sub">NIK: {{ $item->asesi_nik }}</div>
+                    @endif
+                </div>
+                <div class="info-tile">
+                    <div class="info-tile-label"><i class="bi bi-person-badge-fill"></i> Nama Asesor</div>
+                    <div class="info-tile-value">{{ $item->nama_asesor }}</div>
+                    <div class="info-tile-sub">Asesor Kompetensi</div>
+                </div>
+                <div class="info-tile">
+                    <div class="info-tile-label"><i class="bi bi-calendar-event"></i> Waktu Asesmen</div>
+                    <div class="info-tile-value">{{ $item->hari_tanggal ?: '-' }}</div>
+                    <div class="info-tile-sub">Pukul: {{ $item->waktu ?: '-' }}</div>
+                </div>
+                <div class="info-tile">
+                    <div class="info-tile-label"><i class="bi bi-geo-alt-fill"></i> Tempat Uji (TUK)</div>
+                    <div class="info-tile-value">{{ $item->tuk_pelaksanaan ?: ($item->tuk ?: '-') }}</div>
+                    <div class="info-tile-sub">Tipe: {{ $item->tuk ?: 'Sewaktu' }}</div>
+                </div>
+            </div>
+
+            {{-- Form Wrapper if Asesor is filling evidence --}}
+            @if($role === 'asesor' && empty($item->ttd_asesi_file))
+            <form method="POST" action="{{ route('asesor.persetujuan.front.asesor.sign', $item->id) }}" id="formTandaTanganAsesor">
+                @csrf
+                @if(!empty($backTo))
+                    <input type="hidden" name="back_to" value="{{ $backTo }}">
+                @endif
+            @endif
+
+            {{-- Evidence Checklist Section --}}
+            <div class="section-title">
+                <i class="bi bi-check2-square"></i> Bukti yang Akan Dikumpulkan
+            </div>
+
+            @if($role === 'asesor' && empty($item->ttd_asesi_file))
+                {{-- Editable evidence checklist for Asesor --}}
+                <div class="evidence-grid-modern">
+                    <label class="evidence-card {{ $item->bukti_verifikasi_portofolio ? 'active' : '' }}">
+                        <input type="checkbox" name="bukti_verifikasi_portofolio" value="1" {{ $item->bukti_verifikasi_portofolio ? 'checked' : '' }}>
+                        <span class="evidence-card-label">Hasil Verifikasi Portofolio</span>
+                    </label>
+                    <label class="evidence-card {{ $item->bukti_reviu_produk ? 'active' : '' }}">
+                        <input type="checkbox" name="bukti_reviu_produk" value="1" {{ $item->bukti_reviu_produk ? 'checked' : '' }}>
+                        <span class="evidence-card-label">Hasil Reviu Produk</span>
+                    </label>
+                    <label class="evidence-card {{ $item->bukti_observasi_langsung ? 'active' : '' }}">
+                        <input type="checkbox" name="bukti_observasi_langsung" value="1" {{ $item->bukti_observasi_langsung ? 'checked' : '' }}>
+                        <span class="evidence-card-label">Hasil Observasi Langsung</span>
+                    </label>
+                    <label class="evidence-card {{ $item->bukti_kegiatan_terstruktur ? 'active' : '' }}">
+                        <input type="checkbox" name="bukti_kegiatan_terstruktur" value="1" {{ $item->bukti_kegiatan_terstruktur ? 'checked' : '' }}>
+                        <span class="evidence-card-label">Hasil Kegiatan Terstruktur</span>
+                    </label>
+                    <label class="evidence-card {{ $item->bukti_pertanyaan_lisan ? 'active' : '' }}">
+                        <input type="checkbox" name="bukti_pertanyaan_lisan" value="1" {{ $item->bukti_pertanyaan_lisan ? 'checked' : '' }}>
+                        <span class="evidence-card-label">Hasil Pertanyaan Lisan</span>
+                    </label>
+                    <label class="evidence-card {{ $item->bukti_pertanyaan_tertulis ? 'active' : '' }}">
+                        <input type="checkbox" name="bukti_pertanyaan_tertulis" value="1" {{ $item->bukti_pertanyaan_tertulis ? 'checked' : '' }}>
+                        <span class="evidence-card-label">Hasil Pertanyaan Tertulis</span>
+                    </label>
+                    <label class="evidence-card {{ $item->bukti_pertanyaan_wawancara ? 'active' : '' }}">
+                        <input type="checkbox" name="bukti_pertanyaan_wawancara" value="1" {{ $item->bukti_pertanyaan_wawancara ? 'checked' : '' }}>
+                        <span class="evidence-card-label">Hasil Pertanyaan Wawancara</span>
+                    </label>
+                    <label class="evidence-card {{ $item->bukti_lainnya ? 'active' : '' }}">
+                        <input type="checkbox" name="bukti_lainnya" value="1" {{ $item->bukti_lainnya ? 'checked' : '' }} id="buktiLainnyaCheckbox">
+                        <span class="evidence-card-label">Lainnya...</span>
+                    </label>
+                </div>
+                <div id="buktiLainnyaKeteranganDiv" style="margin-top: -16px; margin-bottom: 24px; display: {{ $item->bukti_lainnya ? 'block' : 'none' }};">
+                    <input type="text" name="bukti_lainnya_keterangan" placeholder="Ketik rincian bukti lainnya..." value="{{ $item->bukti_lainnya_keterangan }}" style="width:100%; padding:9px 14px; border:1px solid #cbd5e1; border-radius:10px; font-size:13px;">
+                </div>
+            @else
+                {{-- Modern Readonly Checklist Badges --}}
+                <div class="evidence-grid-modern">
+                    <div class="evidence-card-readonly {{ $item->bukti_verifikasi_portofolio ? 'checked' : '' }}">
+                        <div class="evidence-status-icon {{ $item->bukti_verifikasi_portofolio ? 'checked' : 'unchecked' }}">
+                            <i class="bi {{ $item->bukti_verifikasi_portofolio ? 'bi-check-lg' : 'bi-dash' }}"></i>
+                        </div>
+                        <span class="evidence-card-label">Hasil Verifikasi Portofolio</span>
+                    </div>
+                    <div class="evidence-card-readonly {{ $item->bukti_reviu_produk ? 'checked' : '' }}">
+                        <div class="evidence-status-icon {{ $item->bukti_reviu_produk ? 'checked' : 'unchecked' }}">
+                            <i class="bi {{ $item->bukti_reviu_produk ? 'bi-check-lg' : 'bi-dash' }}"></i>
+                        </div>
+                        <span class="evidence-card-label">Hasil Reviu Produk</span>
+                    </div>
+                    <div class="evidence-card-readonly {{ $item->bukti_observasi_langsung ? 'checked' : '' }}">
+                        <div class="evidence-status-icon {{ $item->bukti_observasi_langsung ? 'checked' : 'unchecked' }}">
+                            <i class="bi {{ $item->bukti_observasi_langsung ? 'bi-check-lg' : 'bi-dash' }}"></i>
+                        </div>
+                        <span class="evidence-card-label">Hasil Observasi Langsung</span>
+                    </div>
+                    <div class="evidence-card-readonly {{ $item->bukti_kegiatan_terstruktur ? 'checked' : '' }}">
+                        <div class="evidence-status-icon {{ $item->bukti_kegiatan_terstruktur ? 'checked' : 'unchecked' }}">
+                            <i class="bi {{ $item->bukti_kegiatan_terstruktur ? 'bi-check-lg' : 'bi-dash' }}"></i>
+                        </div>
+                        <span class="evidence-card-label">Hasil Kegiatan Terstruktur</span>
+                    </div>
+                    <div class="evidence-card-readonly {{ $item->bukti_pertanyaan_lisan ? 'checked' : '' }}">
+                        <div class="evidence-status-icon {{ $item->bukti_pertanyaan_lisan ? 'checked' : 'unchecked' }}">
+                            <i class="bi {{ $item->bukti_pertanyaan_lisan ? 'bi-check-lg' : 'bi-dash' }}"></i>
+                        </div>
+                        <span class="evidence-card-label">Hasil Pertanyaan Lisan</span>
+                    </div>
+                    <div class="evidence-card-readonly {{ $item->bukti_pertanyaan_tertulis ? 'checked' : '' }}">
+                        <div class="evidence-status-icon {{ $item->bukti_pertanyaan_tertulis ? 'checked' : 'unchecked' }}">
+                            <i class="bi {{ $item->bukti_pertanyaan_tertulis ? 'bi-check-lg' : 'bi-dash' }}"></i>
+                        </div>
+                        <span class="evidence-card-label">Hasil Pertanyaan Tertulis</span>
+                    </div>
+                    <div class="evidence-card-readonly {{ $item->bukti_pertanyaan_wawancara ? 'checked' : '' }}">
+                        <div class="evidence-status-icon {{ $item->bukti_pertanyaan_wawancara ? 'checked' : 'unchecked' }}">
+                            <i class="bi {{ $item->bukti_pertanyaan_wawancara ? 'bi-check-lg' : 'bi-dash' }}"></i>
+                        </div>
+                        <span class="evidence-card-label">Hasil Pertanyaan Wawancara</span>
+                    </div>
+                    <div class="evidence-card-readonly {{ $item->bukti_lainnya ? 'checked' : '' }}">
+                        <div class="evidence-status-icon {{ $item->bukti_lainnya ? 'checked' : 'unchecked' }}">
+                            <i class="bi {{ $item->bukti_lainnya ? 'bi-check-lg' : 'bi-dash' }}"></i>
+                        </div>
+                        <span class="evidence-card-label">Lainnya {{ $item->bukti_lainnya_keterangan ? '('.$item->bukti_lainnya_keterangan.')' : '' }}</span>
+                    </div>
                 </div>
             @endif
-        </div>
-    </div>
 
-    <div class="statement-card">
-        <div class="statement-list">
-            <div class="statement-item"><span class="statement-role">Asesi</span>{{ $item->pernyataan_asesi_1 }}</div>
-            <div class="statement-item"><span class="statement-role">Asesor</span>{{ $item->pernyataan_asesor }}</div>
-            <div class="statement-item"><span class="statement-role">Asesi</span>{{ $item->pernyataan_asesi_2 }}</div>
-        </div>
-    </div>
+            {{-- Klausul Persetujuan & Kerahasiaan --}}
+            <div class="section-title">
+                <i class="bi bi-shield-lock-fill"></i> Pernyataan Persetujuan &amp; Kerahasiaan
+            </div>
 
-    <div class="panel-card" style="margin-top:16px;">
-        <div class="panel-title"><i class="bi bi-pen"></i> Tanda Tangan</div>
-        <div class="panel-body">
-            @if($item->ttd_asesor_file)
-                @if(!empty($item->ttd_asesi_file))
-                    {{-- Kedua pihak sudah menandatangani --}}
-                    <div class="notice success" style="margin-bottom:20px;">
-                        <i class="bi bi-check-circle-fill"></i>
-                        Persetujuan asesmen telah ditandatangani oleh asesor dan asesi.
-                    </div>
-                    <div class="signature-grid">
-                        {{-- TTD Asesor --}}
-                        <div class="signature-box">
-                            <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesor</p>
-                            <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Tanda Tangan Asesor">
-                            <p class="meta">
-                                <strong>{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}</strong><br>
-                                {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
-                            </p>
-                        </div>
-                        {{-- TTD Asesi --}}
-                        <div class="signature-box">
-                            <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesi</p>
-                            <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="Tanda Tangan Asesi">
-                            <p class="meta">
-                                <strong>{{ $item->ttd_asesi_nama }}</strong><br>
-                                {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
-                            </p>
-                        </div>
-                    </div>
-                @else
-                    {{-- Hanya asesor yang sudah TTD, menunggu asesi --}}
-                    <div class="notice warning" style="margin-bottom:20px;">
-                        <i class="bi bi-hourglass-split"></i>
-                        Tanda tangan asesor sudah tersimpan. Menunggu tanda tangan dari asesi.
-                    </div>
-                    <div class="signature-grid">
-                        <div class="signature-box">
-                            <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesor</p>
-                            <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="Tanda Tangan Asesor">
-                            <p class="meta">
-                                <strong>{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}</strong><br>
-                                {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
-                            </p>
-                        </div>
-                        <div class="signature-box">
-                            <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesi</p>
-                            <div class="no-img-placeholder" style="color:#94a3b8;flex-direction:column;gap:8px;">
-                                <i class="bi bi-hourglass-split" style="font-size:28px;"></i>
-                                <span>Menunggu tanda tangan asesi</span>
+            <div class="clauses-container">
+                <div class="clause-card">
+                    <div class="clause-role asesi"><i class="bi bi-chat-quote-fill"></i> Pernyataan Asesi (Hak &amp; Prosedur Banding)</div>
+                    <p class="clause-text">{{ $item->pernyataan_asesi_1 ?: 'Bahwa saya telah mendapatkan penjelasan terkait hak dan prosedur banding asesmen dari asesor.' }}</p>
+                </div>
+                <div class="clause-card asesor-clause">
+                    <div class="clause-role asesor"><i class="bi bi-shield-check"></i> Komitmen Kerahasiaan Asesor</div>
+                    <p class="clause-text">{{ $item->pernyataan_asesor ?: 'Menyatakan tidak akan membuka hasil pekerjaan yang saya peroleh karena penugasan saya sebagai Asesor dalam pekerjaan Asesmen kepada siapapun atau organisasi apapun selain kepada pihak yang berwenang sehubungan dengan kewajiban saya sebagai Asesor yang ditugaskan oleh LSP.' }}</p>
+                </div>
+                <div class="clause-card">
+                    <div class="clause-role asesi"><i class="bi bi-person-check-fill"></i> Kesepakatan Asesi (Pengembangan Profesional)</div>
+                    <p class="clause-text">{{ $item->pernyataan_asesi_2 ?: 'Saya setuju mengikuti asesmen dengan pemahaman bahwa informasi yang dikumpulkan hanya digunakan untuk pengembangan profesional dan hanya dapat diakses oleh orang tertentu saja.' }}</p>
+                </div>
+            </div>
+
+            {{-- Signature Digital Grid --}}
+            <div class="section-title">
+                <i class="bi bi-pen-fill"></i> Tanda Tangan Digital
+            </div>
+
+            <div class="sig-section-grid">
+                {{-- Card Asesor --}}
+                <div class="sig-card {{ $isAsesorSigned ? 'signed' : '' }}">
+                    <div>
+                        <div class="sig-card-header">
+                            <div class="sig-card-title">
+                                <i class="bi bi-person-badge text-primary"></i> Asesor Kompetensi
                             </div>
-                            <p class="meta" style="color:#94a3b8;">Belum ditandatangani</p>
+                            @if($isAsesorSigned)
+                                <span class="sig-badge-status signed"><i class="bi bi-check-circle-fill"></i> Terverifikasi</span>
+                            @else
+                                <span class="sig-badge-status waiting"><i class="bi bi-clock"></i> Belum Tanda Tangan</span>
+                            @endif
                         </div>
-                    </div>
 
-                    <input type="hidden" name="ttd_asesor_nama" value="{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}">
-                    <input type="hidden" name="ttd_asesor_tanggal" value="{{ $item->ttd_asesor_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
-                    <div style="margin-top:20px; text-align:right;">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check2-circle"></i> Simpan Perubahan
-                        </button>
-                    </div>
-                @endif
-            @else
-                {{-- Asesor belum TTD, tampilkan form canvas atau pilihan TTD tersimpan --}}
-                <div class="signature-form-layout">
-                    <div class="signature-spot">
-                        @if(isset($savedSignature) && $savedSignature)
-                            {{-- Ada TTD tersimpan di profil: tampilkan pilihan --}}
-                            <div id="sigChoiceWrapAsesor" style="margin-bottom:14px; text-align: left;">
-                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="optSavedAsesorLabel">
-                                    <input type="radio" name="sig_choice_asesor" value="saved" checked id="optSavedAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#10b981;">
-                                    <div>
-                                        <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
-                                        <div style="font-size:12px;color:#64748b;">Menggunakan TTD yang sudah disimpan di profil Anda</div>
-                                    </div>
-                                </label>
-                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="optNewAsesorLabel">
-                                    <input type="radio" name="sig_choice_asesor" value="new" id="optNewAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#0073bd;">
-                                    <div>
-                                        <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda tangan baru</div>
-                                        <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk persetujuan ini</div>
-                                    </div>
-                                </label>
+                        @if($isAsesorSigned)
+                            <div class="sig-preview-box">
+                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesor_file, '/')) }}" alt="TTD Asesor" class="sig-preview-img">
+                                <div class="sig-signer-name">{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}</div>
+                                <div class="sig-date-info">Ditandatangani pada: {{ \Carbon\Carbon::parse($item->ttd_asesor_tanggal)->locale('id')->isoFormat('D MMMM YYYY') }}</div>
                             </div>
-
-                            {{-- Preview TTD tersimpan --}}
-                            <div id="savedAsesorSigPreview" style="margin-bottom: 12px; text-align: center;">
-                                <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
-                                    <img src="{{ $savedSignature }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
-                                    <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;">{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}, {{ $item->ttd_asesor_tanggal ? $item->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
+                        @elseif($role === 'asesor')
+                            {{-- Interactive signing pad for Asesor --}}
+                            @if(isset($savedSignature) && $savedSignature)
+                                <div id="sigChoiceWrapAsesor" style="margin-bottom: 8px;">
+                                    <label class="sig-option-pill" id="optSavedAsesorLabel" style="border-color:#bbf7d0; background:#f0fdf4;">
+                                        <input type="radio" name="sig_choice_asesor" value="saved" checked id="optSavedAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#16a34a;">
+                                        <span style="color:#166534;"><i class="bi bi-check-circle-fill"></i> Gunakan Tanda Tangan Profil</span>
+                                    </label>
+                                    <label class="sig-option-pill" id="optNewAsesorLabel">
+                                        <input type="radio" name="sig_choice_asesor" value="new" id="optNewAsesor" onchange="toggleAsesorSigChoice()" style="accent-color:#0073bd;">
+                                        <span><i class="bi bi-pen"></i> Buat Tanda Tangan Baru</span>
+                                    </label>
                                 </div>
-                                <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
-                            </div>
-
-                            {{-- Canvas tanda tangan baru (tersembunyi) --}}
-                            <div id="newAsesorSigDraw" style="display:none;">
+                                <div id="savedAsesorSigPreview" class="sig-preview-box">
+                                    <img src="{{ $savedSignature }}" alt="TTD Profil" class="sig-preview-img">
+                                    <div class="sig-signer-name">{{ $item->nama_asesor }}</div>
+                                </div>
+                                <div id="newAsesorSigDraw" style="display:none;">
+                                    <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
+                                        <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
+                                        <div class="signature-placeholder">
+                                            <i class="bi bi-pen"></i>
+                                            <span>Goreskan tanda tangan di sini</span>
+                                        </div>
+                                    </div>
+                                    <div class="sig-pad-actions">
+                                        <button type="button" class="btn-clear-sig" id="clearSignatureAsesor">
+                                            <i class="bi bi-eraser"></i> Hapus
+                                        </button>
+                                        <span style="font-size:11.5px; color:#64748b;">Tanggal: {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</span>
+                                    </div>
+                                </div>
+                            @else
                                 <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
                                     <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
                                     <div class="signature-placeholder">
                                         <i class="bi bi-pen"></i>
-                                        <span>Tanda tangan di sini</span>
+                                        <span>Goreskan tanda tangan di sini</span>
                                     </div>
                                 </div>
-                                <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}, {{ $item->ttd_asesor_tanggal ? $item->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-                                <div class="signature-actions">
-                                    <div style="display:flex;align-items:center;gap:8px;">
-                                        <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesorSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
-                                        <label for="saveAsesorSigCheck" style="font-size:12px;color:#475569;cursor:pointer;margin:0;">Simpan sebagai tanda tangan saya</label>
-                                    </div>
-                                    <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
-                                        <i class="bi bi-eraser"></i> Hapus Tanda Tangan
+                                <div class="sig-pad-actions">
+                                    <button type="button" class="btn-clear-sig" id="clearSignatureAsesor">
+                                        <i class="bi bi-eraser"></i> Hapus
                                     </button>
+                                    <span style="font-size:11.5px; color:#64748b;">Tanggal: {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</span>
                                 </div>
-                            </div>
+                            @endif
+
+                            <input type="hidden" name="ttd_asesor_nama" value="{{ $item->nama_asesor }}">
+                            <input type="hidden" name="ttd_asesor_tanggal" value="{{ now()->format('Y-m-d') }}">
+                            <input type="hidden" name="ttd_asesor_file" id="ttdAsesorFileInput">
+                            <button type="submit" class="btn-save-signature">
+                                <i class="bi bi-check-circle-fill"></i> Simpan &amp; Tanda Tangani Sebagai Asesor
+                            </button>
                         @else
-                            {{-- Langsung canvas --}}
-                            <div class="signature-title">Gambar tanda tangan di bawah</div>
-                            <div class="signature-canvas-wrapper" id="signatureWrapperAsesor">
-                                <canvas class="signature-canvas" id="signatureCanvasAsesor"></canvas>
-                                <div class="signature-placeholder">
-                                    <i class="bi bi-pen"></i>
-                                    <span>Tanda tangan di sini</span>
-                                </div>
-                            </div>
-                            <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}, {{ $item->ttd_asesor_tanggal ? $item->ttd_asesor_tanggal->locale('id')->isoFormat('D MMMM YYYY') : now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-                            <div class="signature-actions">
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesorSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
-                                    <label for="saveAsesorSigCheck" style="font-size:12px;color:#475569;cursor:pointer;margin:0;">Simpan sebagai tanda tangan saya</label>
-                                </div>
-                                <button type="button" class="btn-clear-signature" id="clearSignatureAsesor">
-                                    <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-                                </button>
+                            <div class="sig-preview-box">
+                                <i class="bi bi-hourglass-split" style="font-size: 32px; color: #94a3b8; margin-bottom: 6px;"></i>
+                                <div style="font-size: 13px; color: #64748b;">Menunggu tanda tangan Asesor</div>
+                                <div class="sig-signer-name">{{ $item->nama_asesor }}</div>
                             </div>
                         @endif
-
-                        <input type="hidden" name="ttd_asesor_nama" value="{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}">
-                        <input type="hidden" name="ttd_asesor_tanggal" value="{{ $item->ttd_asesor_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d') }}">
-                        <input type="hidden" name="ttd_asesor_file" id="ttdAsesorFileInput">
-                        <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesor</button>
                     </div>
                 </div>
-            @endif
-        </div>
-    </div>
-    @if(empty($item->ttd_asesi_file))
-    </form>
-    @endif
 
-@else
-    <div class="doc-wrap">
-        <table class="doc">
-            <tr>
-                <td class="title no-border" colspan="4">{{ $item->kode_form }} &nbsp;&nbsp; {{ $item->judul_form }}</td>
-            </tr>
-            <tr>
-                <td colspan="4">{{ $item->pengantar }}</td>
-            </tr>
-            <tr>
-                <td style="width:30%; vertical-align:middle; text-align:left;" rowspan="2">Skema Sertifikasi<br>{{ $item->kategori_skema }}</td>
-                <td style="width:12%; border-right:none;">Judul</td>
-                <td style="width:2%; border-left:none;">:</td>
-                <td>{{ $item->judul_skema ?: ($skema->nama_skema ?? '-') }}</td>
-            </tr>
-            <tr>
-                <td style="border-right:none;">Nomor</td>
-                <td style="border-left:none;">:</td>
-                <td>{{ $item->nomor_skema ?: ($skema->nomor_skema ?? '-') }}</td>
-            </tr>
-            <tr>
-                <td style="border-right:none;">TUK</td>
-                <td colspan="2" style="text-align:right; border-left:none;">:</td>
-                <td>{{ $item->tuk }}</td>
-            </tr>
-            <tr>
-                <td style="border-right:none;">Nama Asesor</td>
-                <td colspan="2" style="text-align:right; border-left:none;">:</td>
-                <td>{{ $item->nama_asesor }}</td>
-            </tr>
-            <tr>
-                <td style="border-right:none;">Nama Asesi</td>
-                <td colspan="2" style="text-align:right; border-left:none;">:</td>
-                <td>{{ $item->nama_asesi }}</td>
-            </tr>
-            <tr>
-                <td style="vertical-align:middle;">Bukti yang akan dikumpulkan :</td>
-                <td colspan="3" style="padding:8px 10px;">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;">
-                        <div><span class="check">{{ $item->bukti_verifikasi_portofolio ? 'V' : '' }}</span>Hasil Verifikasi Portofolio</div>
-                        <div><span class="check">{{ $item->bukti_reviu_produk ? 'V' : '' }}</span>Hasil Reviu Produk</div>
-                        <div><span class="check">{{ $item->bukti_observasi_langsung ? 'V' : '' }}</span>Hasil Observasi Langsung</div>
-                        <div><span class="check">{{ $item->bukti_kegiatan_terstruktur ? 'V' : '' }}</span>Hasil Kegiatan Terstruktur</div>
-                        <div><span class="check">{{ $item->bukti_pertanyaan_lisan ? 'V' : '' }}</span>Hasil Pertanyaan Lisan</div>
-                        <div><span class="check">{{ $item->bukti_pertanyaan_tertulis ? 'V' : '' }}</span>Hasil Pertanyaan Tertulis</div>
-                        <div><span class="check">{{ $item->bukti_lainnya ? 'V' : '' }}</span>Lainnya {{ $item->bukti_lainnya_keterangan ?: '......' }}</div>
-                        <div><span class="check">{{ $item->bukti_pertanyaan_wawancara ? 'V' : '' }}</span>Hasil Pertanyaan Wawancara</div>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <td rowspan="3">Pelaksanaan asesmen disepakati pada:</td>
-                <td style="border-right:none;">Hari / Tanggal</td>
-                <td style="border-left:none;">:</td>
-                <td>{{ $item->hari_tanggal }}</td>
-            </tr>
-            <tr>
-                <td style="border-right:none;">Waktu</td>
-                <td style="border-left:none;">:</td>
-                <td>{{ $item->waktu }}</td>
-            </tr>
-            <tr>
-                <td style="border-right:none;">TUK</td>
-                <td style="border-left:none;">:</td>
-                <td>{{ $item->tuk_pelaksanaan }}</td>
-            </tr>
-            <tr>
-                <td colspan="4"><strong>Asesi:</strong><br>{{ $item->pernyataan_asesi_1 }}</td>
-            </tr>
-            <tr>
-                <td colspan="4"><strong>Asesor:</strong><br>{{ $item->pernyataan_asesor }}</td>
-            </tr>
-            <tr>
-                <td colspan="4"><strong>Asesi:</strong><br>{{ $item->pernyataan_asesi_2 }}</td>
-            </tr>
-            <tr>
-                <td colspan="2">Tanda tangan Asesor : {{ $item->ttd_asesor_nama ?: '............................' }}</td>
-                <td colspan="2">Tanggal : {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '............................' }}</td>
-            </tr>
-            <tr>
-                <td colspan="2">Tanda tangan Asesi : {{ $item->ttd_asesi_nama ?: '............................' }}</td>
-                <td colspan="2">Tanggal : {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: '............................' }}</td>
-            </tr>
-        </table>
-
-        @if($item->catatan_footer)
-            <div class="notes"><em>{{ $item->catatan_footer }}</em></div>
-        @endif
-    </div>
-
-    <div class="panel-card">
-        <div class="panel-title"><i class="bi bi-pen"></i> Tanda Tangan</div>
-        <div class="panel-body">
-            @if(!empty($item->ttd_asesi_file))
-                {{-- Kedua pihak sudah menandatangani – tampilkan hasil tanda tangan --}}
-                <div class="notice success" style="margin-bottom:20px;">
-                    <i class="bi bi-check-circle-fill"></i>
-                    Persetujuan asesmen telah ditandatangani oleh asesor dan asesi.
-                </div>
-                <div class="signature-grid">
-                    @php
-                        $ttdAsesorSrc = null;
-                        if (!empty($item->ttd_asesor_file)) {
-                            $f = $item->ttd_asesor_file;
-                            if (str_contains($f, '/storage/')) {
-                                $f = ltrim(explode('/storage/', $f)[1], '/');
-                            }
-                            if (str_starts_with($f, 'http://') || str_starts_with($f, 'https://') || str_starts_with($f, 'data:image')) {
-                                $ttdAsesorSrc = $f;
-                            } else {
-                                $ttdAsesorSrc = asset('storage/' . ltrim($f, '/'));
-                            }
-                        }
-
-                        $ttdAsesiSrc = null;
-                        if (!empty($item->ttd_asesi_file)) {
-                            $f = $item->ttd_asesi_file;
-                            if (str_contains($f, '/storage/')) {
-                                $f = ltrim(explode('/storage/', $f)[1], '/');
-                            }
-                            if (str_starts_with($f, 'http://') || str_starts_with($f, 'https://') || str_starts_with($f, 'data:image')) {
-                                $ttdAsesiSrc = $f;
-                            } else {
-                                $ttdAsesiSrc = asset('storage/' . ltrim($f, '/'));
-                            }
-                        }
-                    @endphp
-                    {{-- Tanda Tangan Asesor --}}
-                    <div class="signature-box">
-                        <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesor</p>
-                        @if($ttdAsesorSrc)
-                            <img src="{{ $ttdAsesorSrc }}" alt="Tanda Tangan Asesor">
-                        @else
-                            <div class="no-img-placeholder">Tidak ada gambar</div>
-                        @endif
-                        <p class="meta">
-                            <strong>{{ $item->ttd_asesor_nama ?: $item->nama_asesor }}</strong><br>
-                            {{ $item->ttd_asesor_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
-                        </p>
-                    </div>
-                    {{-- Tanda Tangan Asesi --}}
-                    <div class="signature-box">
-                        <p style="font-weight:700;font-size:13px;color:#0f172a;margin:0 0 10px;">Tanda Tangan Asesi</p>
-                        @if($ttdAsesiSrc)
-                            <img src="{{ $ttdAsesiSrc }}" alt="Tanda Tangan Asesi">
-                        @else
-                            <div class="no-img-placeholder">Tidak ada gambar</div>
-                        @endif
-                        <p class="meta">
-                            <strong>{{ $item->ttd_asesi_nama }}</strong><br>
-                            {{ $item->ttd_asesi_tanggal?->locale('id')->translatedFormat('d F Y') ?: '-' }}
-                        </p>
-                    </div>
-                </div>
-            @elseif(empty($item->ttd_asesor_file) && (empty($item->ttd_asesor_nama) || empty($item->ttd_asesor_tanggal)))
-                {{-- Asesor belum tanda tangan --}}
-                <div class="notice warning">Asesor belum menandatangani form ini. Tanda tangan asesi belum dapat dilakukan.</div>
-            @else
-                {{-- Asesor sudah tanda tangan, tampilkan form tanda tangan asesi --}}
-                <form method="POST" action="{{ route('asesi.persetujuan.front.asesi.sign', $item->id) }}" id="formTandaTanganAsesi">
-                    @csrf
-                    <div class="signature-spot" style="max-width:560px; margin:0 auto;">
-                        <div class="signature-title">Tanda Tangan Asesi</div>
-
-                        @if(isset($savedSignature) && $savedSignature)
-                            {{-- Ada TTD tersimpan di profil: tampilkan pilihan --}}
-                            <div id="sigChoiceWrapAsesi" style="margin-bottom:14px; text-align: left;">
-                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="optSavedAsesiLabel">
-                                    <input type="radio" name="sig_choice_asesi" value="saved" checked id="optSavedAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#10b981;">
-                                    <div>
-                                        <div style="font-size:13px;font-weight:600;color:#166534;"><i class="bi bi-check-circle-fill" style="color:#10b981;"></i> Gunakan tanda tangan tersimpan</div>
-                                        <div style="font-size:12px;color:#64748b;">Menggunakan TTD yang sudah disimpan di profil Anda</div>
-                                    </div>
-                                </label>
-                                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;" id="optNewAsesiLabel">
-                                    <input type="radio" name="sig_choice_asesi" value="new" id="optNewAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#0073bd;">
-                                    <div>
-                                        <div style="font-size:13px;font-weight:600;color:#0f172a;"><i class="bi bi-pen" style="color:#0073bd;"></i> Tanda tangan baru</div>
-                                        <div style="font-size:12px;color:#64748b;">Gambar tanda tangan baru untuk persetujuan ini</div>
-                                    </div>
-                                </label>
+                {{-- Card Asesi --}}
+                <div class="sig-card {{ $isAsesiSigned ? 'signed' : '' }}">
+                    <div>
+                        <div class="sig-card-header">
+                            <div class="sig-card-title">
+                                <i class="bi bi-person text-primary"></i> Asesi (Peserta)
                             </div>
-
-                            {{-- Preview TTD tersimpan --}}
-                            <div id="savedAsesiSigPreview" style="margin-bottom: 12px; text-align: center;">
-                                <div style="display:inline-block;border:1px solid #e5e7eb;border-radius:10px;background:#fff;padding:8px;margin-bottom:8px;">
-                                    <img src="{{ $savedSignature }}" alt="TTD Tersimpan" style="max-width:260px;height:auto;display:block;">
-                                    <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;">{{ $item->nama_asesi }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-                                </div>
-                                <div style="font-size:11px;color:#94a3b8;">Tanda tangan tersimpan dari profil Anda</div>
-                            </div>
-
-                            {{-- Canvas tanda tangan baru (tersembunyi) --}}
-                            <div id="newAsesiSigDraw" style="display:none;">
-                                <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
-                                    <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
-                                    <div class="signature-placeholder">
-                                        <i class="bi bi-pen"></i>
-                                        <span>Tanda tangan di sini</span>
-                                    </div>
-                                </div>
-                                <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $item->nama_asesi }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-                                <div class="signature-actions" style="margin-top:8px;">
-                                    <button type="button" class="btn-clear-signature" id="clearSignatureAsesi">
-                                        <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-                                    </button>
-                                </div>
-                            </div>
-                        @else
-                            {{-- Belum ada TTD tersimpan: Tampilkan canvas gambar langsung --}}
-                            <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
-                                <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
-                                <div class="signature-placeholder">
-                                    <i class="bi bi-pen"></i>
-                                    <span>Tanda tangan di sini</span>
-                                </div>
-                            </div>
-                            <div style="font-size:12px;color:#475569;margin-top:6px;font-weight:600;text-align:center;width:100%;max-width:280px;margin-left:auto;margin-right:auto;">{{ $item->nama_asesi }}, {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</div>
-                            <div class="signature-actions">
-                                <div style="display:flex;align-items:center;gap:8px;">
-                                    <input type="checkbox" name="simpan_tanda_tangan" value="1" id="saveAsesiSigCheck" style="accent-color:#0073bd;width:15px;height:15px;cursor:pointer;">
-                                    <label for="saveAsesiSigCheck" style="font-size:12px;color:#475569;cursor:pointer;margin:0;">Simpan sebagai tanda tangan saya</label>
-                                </div>
-                                <button type="button" class="btn-clear-signature" id="clearSignatureAsesi">
-                                    <i class="bi bi-eraser"></i> Hapus Tanda Tangan
-                                </button>
-                            </div>
-                        @endif
-
-                        <div class="field" style="margin-top:14px;">
-                            <label>Tanggal Tanda Tangan</label>
-                            <input type="date" name="ttd_asesi_tanggal" id="ttdAsesiTanggalInput" value="{{ old('ttd_asesi_tanggal', $item->ttd_asesi_tanggal?->format('Y-m-d') ?? now()->format('Y-m-d')) }}" required>
-                            @error('ttd_asesi_tanggal')<div class="error-text">{{ $message }}</div>@enderror
+                            @if($isAsesiSigned)
+                                <span class="sig-badge-status signed"><i class="bi bi-check-circle-fill"></i> Terverifikasi</span>
+                            @elseif(!$isAsesorSigned)
+                                <span class="sig-badge-status waiting"><i class="bi bi-hourglass"></i> Menunggu Asesor</span>
+                            @else
+                                <span class="sig-badge-status ready"><i class="bi bi-pen"></i> Siap Ditandatangani</span>
+                            @endif
                         </div>
-                        <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput">
-                        <button class="btn-submit" type="submit"><i class="bi bi-check2-circle"></i> Simpan Tanda Tangan Asesi</button>
+
+                        @if($isAsesiSigned)
+                            <div class="sig-preview-box">
+                                <img src="{{ asset('storage/' . ltrim($item->ttd_asesi_file, '/')) }}" alt="TTD Asesi" class="sig-preview-img">
+                                <div class="sig-signer-name">{{ $item->ttd_asesi_nama ?: $item->nama_asesi }}</div>
+                                <div class="sig-date-info">Ditandatangani pada: {{ \Carbon\Carbon::parse($item->ttd_asesi_tanggal)->locale('id')->isoFormat('D MMMM YYYY') }}</div>
+                            </div>
+                        @elseif($role === 'asesi' && !empty($item->ttd_asesor_file))
+                            {{-- Interactive signing pad for Asesi --}}
+                            <form method="POST" action="{{ route('asesi.persetujuan.front.asesi.sign', $item->id) }}" id="formTandaTanganAsesi">
+                                @csrf
+                                @if(isset($savedSignature) && $savedSignature)
+                                    <div id="sigChoiceWrapAsesi" style="margin-bottom: 8px;">
+                                        <label class="sig-option-pill" id="optSavedAsesiLabel" style="border-color:#bbf7d0; background:#f0fdf4;">
+                                            <input type="radio" name="sig_choice_asesi" value="saved" checked id="optSavedAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#16a34a;">
+                                            <span style="color:#166534;"><i class="bi bi-check-circle-fill"></i> Gunakan Tanda Tangan Profil</span>
+                                        </label>
+                                        <label class="sig-option-pill" id="optNewAsesiLabel">
+                                            <input type="radio" name="sig_choice_asesi" value="new" id="optNewAsesi" onchange="toggleAsesiSigChoice()" style="accent-color:#0073bd;">
+                                            <span><i class="bi bi-pen"></i> Buat Tanda Tangan Baru</span>
+                                        </label>
+                                    </div>
+                                    <div id="savedAsesiSigPreview" class="sig-preview-box">
+                                        <img src="{{ $savedSignature }}" alt="TTD Profil" class="sig-preview-img">
+                                        <div class="sig-signer-name">{{ $item->nama_asesi }}</div>
+                                    </div>
+                                    <div id="newAsesiSigDraw" style="display:none;">
+                                        <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
+                                            <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
+                                            <div class="signature-placeholder">
+                                                <i class="bi bi-pen"></i>
+                                                <span>Goreskan tanda tangan di sini</span>
+                                            </div>
+                                        </div>
+                                        <div class="sig-pad-actions">
+                                            <button type="button" class="btn-clear-sig" id="clearSignatureAsesi">
+                                                <i class="bi bi-eraser"></i> Hapus
+                                            </button>
+                                            <span style="font-size:11.5px; color:#64748b;">Tanggal: {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</span>
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="signature-canvas-wrapper" id="signatureWrapperAsesi">
+                                        <canvas class="signature-canvas" id="signatureCanvasAsesi"></canvas>
+                                        <div class="signature-placeholder">
+                                            <i class="bi bi-pen"></i>
+                                            <span>Goreskan tanda tangan di sini</span>
+                                        </div>
+                                    </div>
+                                    <div class="sig-pad-actions">
+                                        <button type="button" class="btn-clear-sig" id="clearSignatureAsesi">
+                                            <i class="bi bi-eraser"></i> Hapus
+                                        </button>
+                                        <span style="font-size:11.5px; color:#64748b;">Tanggal: {{ now()->locale('id')->isoFormat('D MMMM YYYY') }}</span>
+                                    </div>
+                                @endif
+
+                                <input type="hidden" name="ttd_asesi_nama" value="{{ $item->nama_asesi }}">
+                                <input type="hidden" name="ttd_asesi_tanggal" value="{{ now()->format('Y-m-d') }}">
+                                <input type="hidden" name="ttd_asesi_file" id="ttdAsesiFileInput">
+                                <button type="submit" class="btn-save-signature">
+                                    <i class="bi bi-check-circle-fill"></i> Simpan &amp; Tanda Tangani Sebagai Asesi
+                                </button>
+                            </form>
+                        @else
+                            <div class="sig-preview-box">
+                                <i class="bi bi-hourglass-split" style="font-size: 32px; color: #94a3b8; margin-bottom: 6px;"></i>
+                                <div style="font-size: 13px; color: #64748b;">
+                                    @if(empty($item->ttd_asesor_file))
+                                        Menunggu persetujuan Asesor terlebih dahulu
+                                    @else
+                                        Belum ditandatangani oleh Asesi
+                                    @endif
+                                </div>
+                                <div class="sig-signer-name">{{ $item->nama_asesi }}</div>
+                            </div>
+                        @endif
                     </div>
-                </form>
+                </div>
+            </div>
+
+            @if($role === 'asesor' && empty($item->ttd_asesi_file))
+            </form>
             @endif
         </div>
     </div>
-@endif
-
+</div>
 @endsection
 
 @section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     function initSignatureCanvas(config) {
         const canvas = document.getElementById(config.canvasId);
-        if (!canvas) return;
-
         const clearBtn = document.getElementById(config.clearBtnId);
         const hiddenInput = document.getElementById(config.hiddenInputId);
-        const dateInput = config.dateInputId ? document.getElementById(config.dateInputId) : null;
+        const wrapper = document.getElementById(config.wrapperId);
         const form = document.getElementById(config.formId);
+
+        if (!canvas) return;
+
         const ctx = canvas.getContext('2d');
         let drawing = false;
-        let lastX = 0;
-        let lastY = 0;
-        const wrapper = config.wrapperId ? document.getElementById(config.wrapperId) : canvas.parentElement;
-        const placeholder = wrapper ? wrapper.querySelector('.signature-placeholder') : null;
         let hasSignature = false;
+        const placeholder = wrapper ? wrapper.querySelector('.signature-placeholder') : null;
 
-        const resize = () => {
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        function resize() {
             const rect = canvas.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) return;
+            const ratio = window.devicePixelRatio || 1;
             canvas.width = rect.width * ratio;
             canvas.height = rect.height * ratio;
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.scale(ratio, ratio);
+            ctx.lineWidth = 2.5;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             ctx.strokeStyle = '#0f172a';
-            ctx.lineWidth = 2;
-        };
+        }
 
-        const pos = (event) => {
+        function getPos(e) {
             const rect = canvas.getBoundingClientRect();
-            const point = event.touches && event.touches[0] ? event.touches[0] : event;
-            return { x: point.clientX - rect.left, y: point.clientY - rect.top };
-        };
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
 
-        const start = (event) => { event.preventDefault(); drawing = true; const p = pos(event); lastX = p.x; lastY = p.y; };
-        const move = (event) => {
-            event.preventDefault();
-            if (!drawing) return;
-            const p = pos(event);
+        function start(e) {
+            e.preventDefault();
+            drawing = true;
+            const pos = getPos(e);
             ctx.beginPath();
-            ctx.moveTo(lastX, lastY);
-            ctx.lineTo(p.x, p.y);
-            ctx.stroke();
-            lastX = p.x;
-            lastY = p.y;
+            ctx.moveTo(pos.x, pos.y);
+            if (placeholder) placeholder.style.display = 'none';
+        }
 
-            if (!hasSignature) {
-                hasSignature = true;
-                if (wrapper) wrapper.classList.add('has-signature');
-                if (placeholder) placeholder.style.display = 'none';
+        function move(e) {
+            if (!drawing) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            hasSignature = true;
+        }
+
+        function stop(e) {
+            if (!drawing) return;
+            e.preventDefault();
+            drawing = false;
+            if (hasSignature && hiddenInput) {
+                hiddenInput.value = canvas.toDataURL('image/png');
             }
-        };
-        const stop = () => { drawing = false; };
+        }
 
         if (clearBtn) {
-            clearBtn.addEventListener('click', () => {
+            clearBtn.addEventListener('click', function (e) {
+                e.preventDefault();
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 hasSignature = false;
+                if (placeholder) placeholder.style.display = 'flex';
                 if (hiddenInput) hiddenInput.value = '';
-                if (dateInput) dateInput.value = '';
-                if (wrapper) wrapper.classList.remove('has-signature');
-                if (placeholder) placeholder.style.display = '';
             });
         }
 
         if (form) {
-            form.addEventListener('submit', function(e) {
-                if (config.canvasId === 'signatureCanvasAsesor') {
-                    const optSaved = document.getElementById('optSavedAsesor');
-                    if (optSaved && optSaved.checked) {
-                        return;
-                    }
-                }
-                if (config.canvasId === 'signatureCanvasAsesi') {
-                    const optSaved = document.getElementById('optSavedAsesi');
-                    if (optSaved && optSaved.checked) {
-                        return;
-                    }
-                }
-
-                if (hiddenInput) {
+            form.addEventListener('submit', function (e) {
+                if (hasSignature && hiddenInput) {
                     hiddenInput.value = canvas.toDataURL('image/png');
                 }
             });
@@ -1223,13 +1098,6 @@ document.addEventListener('DOMContentLoaded', function() {
         canvas.addEventListener('touchend', stop);
         window.addEventListener('resize', resize);
         resize();
-
-        // If hidden input already has a signature (e.g., re-render), show/hide placeholder
-        if (hiddenInput && hiddenInput.value) {
-            hasSignature = true;
-            if (wrapper) wrapper.classList.add('has-signature');
-            if (placeholder) placeholder.style.display = 'none';
-        }
     }
 
     initSignatureCanvas({
@@ -1237,7 +1105,6 @@ document.addEventListener('DOMContentLoaded', function() {
         clearBtnId: 'clearSignatureAsesor',
         hiddenInputId: 'ttdAsesorFileInput',
         wrapperId: 'signatureWrapperAsesor',
-        dateInputId: null,
         formId: 'formTandaTanganAsesor',
     });
 
@@ -1246,7 +1113,6 @@ document.addEventListener('DOMContentLoaded', function() {
         clearBtnId: 'clearSignatureAsesi',
         hiddenInputId: 'ttdAsesiFileInput',
         wrapperId: 'signatureWrapperAsesi',
-        dateInputId: 'ttdAsesiTanggalInput',
         formId: 'formTandaTanganAsesi',
     });
 
@@ -1273,7 +1139,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (savedPreview) savedPreview.style.display = '';
             if (newDraw) newDraw.style.display = 'none';
             if (optSavedLabel) {
-                optSavedLabel.style.borderColor = '#d1fae5'; optSavedLabel.style.background = '#f0fdf4';
+                optSavedLabel.style.borderColor = '#bbf7d0'; optSavedLabel.style.background = '#f0fdf4';
             }
             if (optNewLabel) {
                 optNewLabel.style.borderColor = '#e2e8f0'; optNewLabel.style.background = '#f8fafc';
@@ -1309,7 +1175,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (savedPreview) savedPreview.style.display = '';
             if (newDraw) newDraw.style.display = 'none';
             if (optSavedLabel) {
-                optSavedLabel.style.borderColor = '#d1fae5'; optSavedLabel.style.background = '#f0fdf4';
+                optSavedLabel.style.borderColor = '#bbf7d0'; optSavedLabel.style.background = '#f0fdf4';
             }
             if (optNewLabel) {
                 optNewLabel.style.borderColor = '#e2e8f0'; optNewLabel.style.background = '#f8fafc';

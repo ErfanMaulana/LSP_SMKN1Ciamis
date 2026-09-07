@@ -394,8 +394,16 @@ class AsesmenMandiriController extends Controller
             ->where('skema_id', $skemaId)
             ->where('attempt', $attempt)
             ->first();
+
+        // Load asesor reviewer if recommendation exists
+        $asesorReviewer = null;
+        if ($pivot && $pivot->reviewed_by) {
+            $asesorReviewer = Asesor::where('no_met', $pivot->reviewed_by)->first();
+        }
         
-        return view('asesi.asesmen-mandiri.result', compact('account', 'asesi', 'skema', 'answers', 'pivot'));
+        $existingAnswers = $answers;
+        
+        return view('asesi.asesmen-mandiri.result', compact('account', 'asesi', 'skema', 'answers', 'existingAnswers', 'pivot', 'asesorReviewer'));
     }
 
             /**

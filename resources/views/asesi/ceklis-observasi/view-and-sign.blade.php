@@ -306,37 +306,94 @@
         <div class="table-wrap">
             <table>
                 @foreach ($detailsByUnit as $unitGroup)
+                    @php
+                        $unit = $unitGroup['unit'];
+                        $items = collect($unitGroup['items']);
+                        $itemsByElemen = $items->groupBy(function($it) {
+                            return $it['elemen']?->id ?? 0;
+                        });
+                        $totalKuk = $items->count();
+                        $unitStandards = $unit?->standarIndustri ?? collect();
+                        $isFirstRowOfUnit = true;
+                    @endphp
                     <thead>
                         <tr>
-                            <td colspan="5" class="unit-title">
-                                {{ $unitGroup['unit']->kode_unit }} - {{ $unitGroup['unit']->judul_unit }}
+                            <td colspan="7" class="unit-title" style="background:#f1f5f9; padding:10px 14px; font-weight:700; font-size:14px; border-bottom:2px solid #cbd5e1;">
+                                {{ $unit->kode_unit }} - {{ $unit->judul_unit }}
                             </td>
                         </tr>
                         <tr>
-                            <th style="width: 50px;">No.</th>
-                            <th style="width: 200px;">Elemen</th>
-                            <th>Kriteria Unjuk Kerja</th>
-                            <th style="width: 100px;">Pencapaian</th>
-                            <th style="width: 150px;">Penilaian Lanjut</th>
+                            <th rowspan="2" style="width: 45px; text-align:center;">No.</th>
+                            <th rowspan="2" style="width: 180px;">Elemen</th>
+                            <th rowspan="2">Kriteria Unjuk Kerja</th>
+                            <th rowspan="2" style="width: 180px;">Standar Industri / Tempat Kerja</th>
+                            <th colspan="2" style="width: 100px; text-align:center;">Pencapaian</th>
+                            <th rowspan="2" style="width: 160px;">Penilaian Lanjut</th>
+                        </tr>
+                        <tr>
+                            <th style="width: 50px; text-align:center;">Ya</th>
+                            <th style="width: 50px; text-align:center;">Tidak</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($unitGroup['items'] as $index => $item)
-                            <tr>
-                                <td style="text-align: center;">{{ $index + 1 }}</td>
-                                <td>{{ $item['elemen']->nama_elemen }}</td>
-                                <td>{{ $item['kriteria']->deskripsi_kriteria }}</td>
-                                <td style="text-align: center;">
-                                    @if ($item['pencapaian'] === 'ya')
-                                        <span style="color: #059669; font-weight: 600;">Ya</span>
-                                    @elseif ($item['pencapaian'] === 'tidak')
-                                        <span style="color: #dc2626; font-weight: 600;">Tidak</span>
-                                    @else
-                                        <span style="color: #94a3b8;">-</span>
+                        @foreach ($itemsByElemen as $elId => $elemenItems)
+                            @php
+                                $elCount = $elemenItems->count();
+                                $firstItem = $elemenItems->first();
+                                $elemenNum = $loop->iteration;
+                            @endphp
+                            @foreach ($elemenItems as $kIdx => $item)
+                                @php
+                                    $kukNum = $elemenNum . '.' . ($kIdx + 1);
+                                    $pencapaian = strtolower(trim((string) ($item['pencapaian'] ?? '')));
+                                    $isYa = in_array($pencapaian, ['ya', 'y', '1', 'true', 'benar', 'kompeten'], true);
+                                    $isTidak = in_array($pencapaian, ['tidak', 't', '0', 'false', 'salah', 'belum kompeten'], true);
+                                @endphp
+                                <tr>
+                                    @if($kIdx === 0)
+                                        <td style="text-align: center; vertical-align:middle; font-weight:600;" rowspan="{{ $elCount }}">{{ $elemenNum }}</td>
+                                        <td style="vertical-align:middle; font-weight:500;" rowspan="{{ $elCount }}">{{ $firstItem['elemen']->nama_elemen ?? '-' }}</td>
                                     @endif
-                                </td>
-                                <td>{{ $item['penilaian_lanjut'] ?? '-' }}</td>
-                            </tr>
+
+                                    <td><strong>{{ $kukNum }}</strong> {{ $item['kriteria']->deskripsi_kriteria ?? '-' }}</td>
+
+                                    @if($isFirstRowOfUnit)
+                                        <td rowspan="{{ $totalKuk }}" style="vertical-align:middle; background:#fafafa;">
+                                            @if($unitStandards->isNotEmpty())
+                                                <ul style="margin:0; padding-left:16px; font-size:13px;">
+                                                    @foreach($unitStandards as $st)
+                                                        <li style="margin-bottom:4px;">
+                                                            <strong>{{ $st->nama_standar }}</strong>
+                                                            @if($st->deskripsi_standar)
+                                                                <div style="font-size:11px; color:#64748b;">{{ $st->deskripsi_standar }}</div>
+                                                            @endif
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @else
+                                                <span style="color:#94a3b8; font-size:13px;">-</span>
+                                            @endif
+                                        </td>
+                                        @php $isFirstRowOfUnit = false; @endphp
+                                    @endif
+
+                                    <td style="text-align: center; vertical-align:middle;">
+                                        @if ($isYa)
+                                            <span style="display:inline-block; width:22px; height:22px; line-height:22px; border-radius:4px; background:#dcfce7; color:#15803d; font-weight:700;">✓</span>
+                                        @else
+                                            <span style="color:#cbd5e1;">-</span>
+                                        @endif
+                                    </td>
+                                    <td style="text-align: center; vertical-align:middle;">
+                                        @if ($isTidak)
+                                            <span style="display:inline-block; width:22px; height:22px; line-height:22px; border-radius:4px; background:#fee2e2; color:#b91c1c; font-weight:700;">✗</span>
+                                        @else
+                                            <span style="color:#cbd5e1;">-</span>
+                                        @endif
+                                    </td>
+                                    <td style="font-size:13px;">{{ $item['penilaian_lanjut'] ?? '-' }}</td>
+                                </tr>
+                            @endforeach
                         @endforeach
                     </tbody>
                 @endforeach

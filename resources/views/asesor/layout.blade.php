@@ -676,20 +676,21 @@
                                 ->whereNotNull('ttd_asesi_nama')->where('ttd_asesi_nama', '!=', '')
                                 ->get(['nomor_skema', 'asesi_nik', 'nama_asesi']);
 
-                            $persetujuanKeys = [];
+                            $persetujuanNikKeys = [];
+                            $persetujuanNameKeys = [];
                             foreach ($fullySignedPersetujuans as $p) {
                                 if (!empty($p->asesi_nik)) {
-                                    $persetujuanKeys["{$p->nomor_skema}|{$p->asesi_nik}"] = true;
-                                }
-                                if (!empty($p->nama_asesi)) {
-                                    $persetujuanKeys["{$p->nomor_skema}|" . strtolower($p->nama_asesi)] = true;
+                                    $persetujuanNikKeys["{$p->nomor_skema}|{$p->asesi_nik}"] = true;
+                                } else if (!empty($p->nama_asesi)) {
+                                    $persetujuanNameKeys["{$p->nomor_skema}|" . strtolower($p->nama_asesi)] = true;
                                 }
                             }
 
-                            // Get registered asesis for these skemas (only the latest attempt)
+                            // Get registered asesis for these skemas (only scheduled, recommended lanjut, latest attempt)
                             $asesiSkemasForCeklis = \Illuminate\Support\Facades\DB::table('asesi_skema')
                                 ->whereIn('skema_id', $skemaIds)
                                 ->whereIn('asesi_nik', $sidebarScheduledAsesiNiks)
+                                ->where('rekomendasi', 'lanjut')
                                 ->whereRaw('attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
                                 ->get(['asesi_nik', 'skema_id']);
 
@@ -709,8 +710,12 @@
                                 if (in_array($key, $completedCeklisKeys)) continue;
 
                                 $asesiObj = $asesisLookup->get($as->asesi_nik);
-                                $hasPersetujuan = isset($persetujuanKeys["{$sk->nomor_skema}|{$as->asesi_nik}"]) ||
-                                    ($asesiObj && isset($persetujuanKeys["{$sk->nomor_skema}|" . strtolower($asesiObj->nama)]));
+                                $hasPersetujuan = false;
+                                if (!empty($as->asesi_nik) && isset($persetujuanNikKeys["{$sk->nomor_skema}|{$as->asesi_nik}"])) {
+                                    $hasPersetujuan = true;
+                                } elseif ($asesiObj && isset($persetujuanNameKeys["{$sk->nomor_skema}|" . strtolower($asesiObj->nama)])) {
+                                    $hasPersetujuan = true;
+                                }
 
                                 if ($hasPersetujuan && $asesiObj) {
                                     $pendingCeklisCount++;
