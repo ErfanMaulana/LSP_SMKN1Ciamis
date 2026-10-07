@@ -20,6 +20,7 @@ class CombinedSkemaSeeder extends Seeder
             SkemaKLNSeeder::class,
             SkemaMPLBSeeder::class,
             SkemaPMSeeder::class,
+            SkemaJuniorContentMarketingSeeder::class,
             SkemaSeederRPL::class,
         ]);
     }

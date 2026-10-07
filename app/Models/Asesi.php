@@ -196,12 +196,127 @@ class Asesi extends Model
         return $this->hasMany(PersetujuanAsesmen::class, 'asesi_nik', 'NIK');
     }
 
-    public function hasSignedPersetujuanAsesmen(): bool
+    public function hasSignedPersetujuanAsesmen(?int $skemaId = null): bool
     {
-        return $this->persetujuanAsesmens()
-            ->where('attempt', $this->currentAttempt())
+        $query = $this->persetujuanAsesmens()
+            ->where('attempt', $this->currentAttempt($skemaId))
             ->whereNotNull('ttd_asesi_nama')
-            ->whereNotNull('ttd_asesi_tanggal')
+            ->where('ttd_asesi_nama', '!=', '')
+            ->whereNotNull('ttd_asesi_tanggal');
+
+        if ($skemaId) {
+            $skema = Skema::find($skemaId);
+            if ($skema) {
+                $query->where('nomor_skema', $skema->nomor_skema);
+            }
+        }
+
+        return $query->exists();
+    }
+
+    /**
+     * Check if Persetujuan Asesmen (FR.AK.01) is ready to be used / accessed by asesi.
+     * Ready means:
+     * - Asesor has already filled evidence checklist AND signed,
+     * OR asesi has already signed it.
+     */
+    public function isPersetujuanAsesmenReady(?int $skemaId = null): bool
+    {
+        $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
+
+        $isReadyQuery = function ($nomorSkema, $attempt) use ($useNik) {
+            return PersetujuanAsesmen::where('nomor_skema', $nomorSkema)
+                ->where('attempt', $attempt)
+                ->where(function ($q) use ($useNik) {
+                    if ($useNik && !empty($this->NIK)) {
+                        $q->where('asesi_nik', $this->NIK);
+                    } else {
+                        $q->where('nama_asesi', $this->nama);
+                    }
+                })
+                ->where(function ($q) {
+                    // Already signed by asesi
+                    $q->where(function ($sub) {
+                        $sub->whereNotNull('ttd_asesi_nama')
+                            ->where('ttd_asesi_nama', '!=', '')
+                            ->whereNotNull('ttd_asesi_tanggal');
+                    })
+                    // Or asesor has completed checklist and signed
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('ttd_asesor_nama')
+                            ->where('ttd_asesor_nama', '!=', '')
+                            ->whereNotNull('ttd_asesor_tanggal')
+                            ->where(function ($bukti) {
+                                $bukti->where('bukti_verifikasi_portofolio', 1)
+                                      ->orWhere('bukti_reviu_produk', 1)
+                                      ->orWhere('bukti_observasi_langsung', 1)
+                                      ->orWhere('bukti_kegiatan_terstruktur', 1)
+                                      ->orWhere('bukti_pertanyaan_lisan', 1)
+                                      ->orWhere('bukti_pertanyaan_tertulis', 1)
+                                      ->orWhere('bukti_pertanyaan_wawancara', 1)
+                                      ->orWhere('bukti_lainnya', 1);
+                            });
+                    });
+                })
+                ->exists();
+        };
+
+        if ($skemaId) {
+            $skema = Skema::find($skemaId);
+            if (!$skema) {
+                return false;
+            }
+            return $isReadyQuery($skema->nomor_skema, $this->currentAttempt($skemaId));
+        }
+
+        // Check registered skemas for this candidate
+        $registeredSkemas = \Illuminate\Support\Facades\DB::table('asesi_skema')
+            ->join('skemas', 'asesi_skema.skema_id', '=', 'skemas.id')
+            ->where('asesi_skema.asesi_nik', $this->NIK)
+            ->whereRaw('asesi_skema.attempt = (SELECT MAX(b.attempt) FROM asesi_skema b WHERE b.asesi_nik = asesi_skema.asesi_nik AND b.skema_id = asesi_skema.skema_id)')
+            ->select('skemas.id', 'skemas.nomor_skema', 'asesi_skema.attempt')
+            ->get();
+
+        if ($registeredSkemas->isNotEmpty()) {
+            foreach ($registeredSkemas as $rs) {
+                if ($isReadyQuery($rs->nomor_skema, $rs->attempt)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Fallback if no pivot records yet
+        return PersetujuanAsesmen::where('attempt', $this->currentAttempt())
+            ->where(function ($q) use ($useNik) {
+                if ($useNik && !empty($this->NIK)) {
+                    $q->where('asesi_nik', $this->NIK);
+                } else {
+                    $q->where('nama_asesi', $this->nama);
+                }
+            })
+            ->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('ttd_asesi_nama')
+                        ->where('ttd_asesi_nama', '!=', '')
+                        ->whereNotNull('ttd_asesi_tanggal');
+                })
+                ->orWhere(function ($sub) {
+                    $sub->whereNotNull('ttd_asesor_nama')
+                        ->where('ttd_asesor_nama', '!=', '')
+                        ->whereNotNull('ttd_asesor_tanggal')
+                        ->where(function ($bukti) {
+                            $bukti->where('bukti_verifikasi_portofolio', 1)
+                                  ->orWhere('bukti_reviu_produk', 1)
+                                  ->orWhere('bukti_observasi_langsung', 1)
+                                  ->orWhere('bukti_kegiatan_terstruktur', 1)
+                                  ->orWhere('bukti_pertanyaan_lisan', 1)
+                                  ->orWhere('bukti_pertanyaan_tertulis', 1)
+                                  ->orWhere('bukti_pertanyaan_wawancara', 1)
+                                  ->orWhere('bukti_lainnya', 1);
+                        });
+                });
+            })
             ->exists();
     }
 

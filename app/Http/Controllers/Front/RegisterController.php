@@ -85,20 +85,62 @@ class RegisterController extends Controller
                 ->with('error', 'Data asesi tidak ditemukan.');
         }
 
+        // Filter out empty/null entries from file arrays before validation
+        $sanitizeFiles = function ($key) use ($request) {
+            $files = $request->file($key);
+            if (!is_array($files)) {
+                return ($files instanceof \Illuminate\Http\UploadedFile && $files->isValid()) ? [$files] : [];
+            }
+            return array_values(array_filter($files, function ($f) {
+                return $f instanceof \Illuminate\Http\UploadedFile && $f->isValid();
+            }));
+        };
+
+        $cleanTranskrip = $sanitizeFiles('transkrip_nilai');
+        $cleanIdentitas = $sanitizeFiles('identitas_pribadi');
+        $cleanKompetensi = $sanitizeFiles('bukti_kompetensi');
+
+        $request->files->set('transkrip_nilai', $cleanTranskrip);
+        $request->files->set('identitas_pribadi', $cleanIdentitas);
+        $request->files->set('bukti_kompetensi', $cleanKompetensi);
+
+        $hasPasFotoInput = $request->hasFile('pas_foto') || ($request->filled('pas_foto_base64') && str_starts_with($request->input('pas_foto_base64'), 'data:image'));
+
         $validator = Validator::make($request->all(), [
-            'pas_foto' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'pas_foto' => $hasPasFotoInput ? 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120' : 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
             'transkrip_nilai' => 'required|array|min:1',
-            'transkrip_nilai.*' => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
+            'transkrip_nilai.*' => 'file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
             'identitas_pribadi' => 'required|array|min:1',
-            'identitas_pribadi.*' => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-            'bukti_kompetensi' => 'required|array|min:1',
-            'bukti_kompetensi.*' => 'file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-            'tanda_tangan_pendaftar' => ['required', 'string', 'regex:/^data:image\/png;base64,[A-Za-z0-9+\/=]+$/'],
+            'identitas_pribadi.*' => 'file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'bukti_kompetensi' => 'nullable|array',
+            'bukti_kompetensi.*' => 'file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
+            'tanda_tangan_pendaftar' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $isBase64 = (bool) preg_match('/^data:image\/(png|jpeg|jpg);base64,[A-Za-z0-9+\/=\s]+$/', $value);
+                    $isUrlOrPath = str_starts_with($value, 'http://') || str_starts_with($value, 'https://') || str_starts_with($value, 'storage/') || str_starts_with($value, '/storage/');
+                    if (!$isBase64 && !$isUrlOrPath) {
+                        $fail('Format tanda tangan tidak valid.');
+                    }
+                }
+            ],
         ], [
             'pas_foto.required' => 'Pas foto wajib diupload.',
+            'pas_foto.image' => 'Pas foto harus berupa file gambar.',
+            'pas_foto.mimes' => 'Format pas foto harus JPG, JPEG, PNG, atau WEBP.',
+            'pas_foto.max' => 'Ukuran pas foto maksimal 5MB.',
             'transkrip_nilai.required' => 'Minimal 1 file transkrip nilai wajib diupload.',
+            'transkrip_nilai.*.file' => 'File transkrip nilai tidak valid.',
+            'transkrip_nilai.*.mimes' => 'Format file transkrip nilai harus JPG, JPEG, PNG, WEBP, atau PDF.',
+            'transkrip_nilai.*.max' => 'Ukuran file transkrip nilai maksimal 5MB per file.',
             'identitas_pribadi.required' => 'Minimal 1 file identitas pribadi wajib diupload.',
-            'bukti_kompetensi.required' => 'Minimal 1 file bukti kompetensi wajib diupload.',
+            'identitas_pribadi.*.file' => 'File identitas pribadi tidak valid.',
+            'identitas_pribadi.*.mimes' => 'Format file identitas pribadi harus JPG, JPEG, PNG, WEBP, atau PDF.',
+            'identitas_pribadi.*.max' => 'Ukuran file identitas pribadi maksimal 5MB per file.',
+            'bukti_kompetensi.*.file' => 'File bukti kompetensi tidak valid.',
+            'bukti_kompetensi.*.mimes' => 'Format file bukti kompetensi harus JPG, JPEG, PNG, WEBP, atau PDF.',
+            'bukti_kompetensi.*.max' => 'Ukuran file bukti kompetensi maksimal 5MB per file.',
             'tanda_tangan_pendaftar.required' => 'Tanda tangan wajib diisi sebelum pendaftaran dikirim.',
         ]);
 
@@ -112,14 +154,29 @@ class RegisterController extends Controller
 
         // Upload pas foto (tetap di tabel asesi, single file)
         if ($request->hasFile('pas_foto')) {
+            if ($asesi->pas_foto) {
+                Storage::disk('public')->delete($asesi->pas_foto);
+            }
             $pasFotoPath = $request->file('pas_foto')->store($folder, 'public');
             $asesi->pas_foto = $pasFotoPath;
+            $asesi->save();
+        } elseif ($request->filled('pas_foto_base64') && str_starts_with($request->input('pas_foto_base64'), 'data:image')) {
+            if ($asesi->pas_foto) {
+                Storage::disk('public')->delete($asesi->pas_foto);
+            }
+            $dataUri = $request->input('pas_foto_base64');
+            $imageParts = explode(';base64,', $dataUri);
+            $imageBase64 = end($imageParts);
+            $imageContent = base64_decode($imageBase64);
+            $filename = $folder . '/pas_foto_' . time() . '.jpg';
+            Storage::disk('public')->put($filename, $imageContent);
+            $asesi->pas_foto = $filename;
             $asesi->save();
         }
 
         // Upload transkrip nilai (multiple) ke tabel bukti_pendukung
-        if ($request->hasFile('transkrip_nilai')) {
-            foreach ($request->file('transkrip_nilai') as $file) {
+        if (!empty($cleanTranskrip)) {
+            foreach ($cleanTranskrip as $file) {
                 $path = $file->store($folder . '/transkrip', 'public');
                 BuktiPendukung::create([
                     'NIK' => $nik,
@@ -131,8 +188,8 @@ class RegisterController extends Controller
         }
 
         // Upload identitas pribadi (multiple) ke tabel bukti_pendukung
-        if ($request->hasFile('identitas_pribadi')) {
-            foreach ($request->file('identitas_pribadi') as $file) {
+        if (!empty($cleanIdentitas)) {
+            foreach ($cleanIdentitas as $file) {
                 $path = $file->store($folder . '/identitas', 'public');
                 BuktiPendukung::create([
                     'NIK' => $nik,
@@ -144,8 +201,8 @@ class RegisterController extends Controller
         }
 
         // Upload bukti kompetensi (multiple) ke tabel bukti_pendukung
-        if ($request->hasFile('bukti_kompetensi')) {
-            foreach ($request->file('bukti_kompetensi') as $file) {
+        if (!empty($cleanKompetensi)) {
+            foreach ($cleanKompetensi as $file) {
                 $path = $file->store($folder . '/kompetensi', 'public');
                 BuktiPendukung::create([
                     'NIK' => $nik,

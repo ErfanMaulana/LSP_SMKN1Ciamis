@@ -254,9 +254,9 @@
                         <p style="font-size:13px;font-weight:600;color:#374151;margin-bottom:8px;">Gambar tanda tangan baru:</p>
                         <div class="signature-canvas-wrapper" id="asesorSigWrapper" style="border: 2px dashed #cbd5e1; border-radius: 10px; background: #f8fafc; overflow: hidden; width: 100%; max-width: 260px; aspect-ratio: 1 / 1; position: relative;">
                             <canvas class="signature-canvas" id="asesorSigCanvas" style="position: absolute; inset:0; width:100%; height:100%; cursor:crosshair;"></canvas>
-                            <div class="signature-placeholder" style="position: absolute; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; color:#cbd5e1; z-index:1;">
-                                <i class="bi bi-pen" style="font-size:24px; display:block; margin-bottom:4px;"></i>
-                                <span style="font-size:12px;">Tanda tangan di sini</span>
+                            <div class="signature-placeholder" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; color: #94a3b8; z-index: 1; gap: 8px;">
+                                <i class="bi bi-pen" style="font-size: 28px; line-height: 1;"></i>
+                                <span style="font-size: 13px; font-weight: 500;">Tanda tangan di sini</span>
                             </div>
                         </div>
                         <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
@@ -276,9 +276,9 @@
                     <p style="font-size:13px;color:#64748b;margin-bottom:14px;">Belum ada tanda tangan tersimpan. Gambar tanda tangan Anda di bawah untuk menyimpannya.</p>
                     <div class="signature-canvas-wrapper" id="asesorSigWrapper" style="border: 2px dashed #cbd5e1; border-radius: 10px; background: #f8fafc; overflow: hidden; width: 100%; max-width: 260px; aspect-ratio: 1 / 1; position: relative;">
                         <canvas class="signature-canvas" id="asesorSigCanvas" style="position: absolute; inset:0; width:100%; height:100%; cursor:crosshair;"></canvas>
-                        <div class="signature-placeholder" style="position: absolute; inset:0; display:grid; place-items:center; text-align:center; pointer-events:none; color:#cbd5e1; z-index:1;">
-                            <i class="bi bi-pen" style="font-size:24px; display:block; margin-bottom:4px;"></i>
-                            <span style="font-size:12px;">Tanda tangan di sini</span>
+                        <div class="signature-placeholder" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; color: #94a3b8; z-index: 1; gap: 8px;">
+                            <i class="bi bi-pen" style="font-size: 28px; line-height: 1;"></i>
+                            <span style="font-size: 13px; font-weight: 500;">Tanda tangan di sini</span>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">

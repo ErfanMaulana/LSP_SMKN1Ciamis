@@ -206,9 +206,10 @@ class AuthController extends Controller
                 ->where('nomor_skema', $skema->nomor_skema)
                 ->where('attempt', $skema->attempt)
                 ->where(function($q) use ($asesi, $useNik) {
-                    $q->where('nama_asesi', $asesi->nama);
-                    if ($useNik) {
-                        $q->orWhere('asesi_nik', $asesi->NIK);
+                    if ($useNik && !empty($asesi->NIK)) {
+                        $q->where('asesi_nik', $asesi->NIK);
+                    } else {
+                        $q->where('nama_asesi', $asesi->nama);
                     }
                 })
                 ->first();
@@ -230,14 +231,23 @@ class AuthController extends Controller
                     $persetujuan->bukti_lainnya
                 )
             );
+
+            $persetujuanLabel = 'Belum Tersedia';
+            $persetujuanDesc = 'Form belum tersedia. Asesor belum menyelesaikan ceklis bukti dan/atau belum menandatangani form.';
+            if ($isPersetujuanSelesai) {
+                $persetujuanLabel = 'Selesai & Ditandatangani';
+                $persetujuanDesc = 'Persetujuan asesmen telah disepakati dan ditandatangani oleh Anda dan Asesor.';
+            } elseif ($isPersetujuanReady && $isStep3Completed) {
+                $persetujuanLabel = 'Menunggu Tanda Tangan Anda';
+                $persetujuanDesc = 'Asesor telah mengisi ceklis dan menandatangani form. Harap periksa dan tandatangani dokumen persetujuan asesmen.';
+            }
+
             $stepPersetujuan = [
                 'name' => 'Persetujuan Asesmen (FR.AK.01)',
                 'status' => $isStep4Completed ? 'completed' : 'pending',
-                'label' => $isPersetujuanSelesai ? 'Selesai & Ditandatangani' : 'Belum Ditandatangani',
-                'description' => $isPersetujuanSelesai 
-                    ? 'Persetujuan asesmen telah disepakati dan ditandatangani oleh Anda dan Asesor.'
-                    : 'Harap periksa dan tandatangani dokumen persetujuan asesmen.',
-                'is_ready' => $isPersetujuanReady && $isStep3Completed
+                'label' => $persetujuanLabel,
+                'description' => $persetujuanDesc,
+                'is_ready' => ($isPersetujuanReady && $isStep3Completed) || $isPersetujuanSelesai
             ];
 
             // 5. Penilaian / Ceklis Observasi

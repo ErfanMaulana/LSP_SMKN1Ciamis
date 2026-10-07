@@ -263,12 +263,12 @@
 <div class="reg-card" style="max-width:640px;margin:0 auto;text-align:center;padding:56px 40px;">
     <div style="
         width:88px;height:88px;border-radius:50%;
-        background:linear-gradient(135deg,#fef9c3,#fde047);
+        background:linear-gradient(135deg,#dbeafe,#bae6fd);
         display:flex;align-items:center;justify-content:center;
         margin:0 auto 28px;
-        box-shadow:0 4px 16px rgba(234,179,8,.25);
+        box-shadow:0 4px 16px rgba(0,115,189,.22);
     ">
-        <i class="bi bi-hourglass-split" style="font-size:38px;color:#854d0e;"></i>
+        <i class="bi bi-hourglass-split" style="font-size:38px;color:#0073bd;"></i>
     </div>
     <h3 style="font-size:22px;font-weight:700;color:#1e293b;margin-bottom:12px;">Menunggu Verifikasi Admin</h3>
     <p style="color:#64748b;margin-bottom:28px;line-height:1.7;font-size:14.5px;">

@@ -115,10 +115,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            color: #92400e;
+            background: linear-gradient(135deg, #dbeafe, #bae6fd);
+            color: #0073bd;
             font-size: 38px;
-            box-shadow: 0 18px 30px rgba(245, 158, 11, 0.18);
+            box-shadow: 0 18px 30px rgba(0, 115, 189, 0.18);
         }
 
         h1 {

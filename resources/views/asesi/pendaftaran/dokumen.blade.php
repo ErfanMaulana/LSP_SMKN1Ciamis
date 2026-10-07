@@ -530,6 +530,7 @@
             {{-- raw input triggers cropper, hidden cropped input is submitted --}}
             <input type="file" id="pas_foto_raw" accept="image/*" style="display:none;" onchange="openCropper(this)">
             <input type="file" name="pas_foto" id="pas_foto" style="display:none;">
+            <input type="hidden" name="pas_foto_base64" id="pas_foto_base64" value="">
             <span class="photo-name" id="pas_foto_name" style="{{ !empty($asesi->pas_foto) ? 'color:#1e293b;' : '' }}">{{ !empty($asesi->pas_foto) ? 'Foto tersimpan' : 'Belum ada foto dipilih' }}</span>
         </div>
 
@@ -693,6 +694,7 @@
                 @endphp
 
                 @if($regSavedTTD)
+                <script>window.savedSignatureValue = @json($regSavedTTD);</script>
                 {{-- Ada TTD tersimpan di profil --}}
                 <div id="regSigChoiceWrap" style="margin-bottom:14px;">
                     <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;border:1.5px solid #d1fae5;border-radius:10px;background:#f0fdf4;margin-bottom:8px;" id="regOptSavedLabel">
@@ -900,6 +902,22 @@ function restorePhotoDraft() {
         photoName.style.color = '#1e293b';
     }
 
+    const base64Input = document.getElementById('pas_foto_base64');
+    if (base64Input) base64Input.value = draft.photoDataUrl;
+
+    try {
+        fetch(draft.photoDataUrl)
+            .then(res => res.blob())
+            .then(blob => {
+                const file = new File([blob], 'pas_foto.jpg', { type: 'image/jpeg' });
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                const pasFotoEl = document.getElementById('pas_foto');
+                if (pasFotoEl) pasFotoEl.files = dt.files;
+            })
+            .catch(() => {});
+    } catch (e) {}
+
     const photoBtn = document.getElementById('photo-btn-pick');
     const photoActions = document.getElementById('photo-actions');
     const photoOverlay = document.getElementById('photo-edit-overlay');
@@ -997,10 +1015,14 @@ function applyCrop() {
     const canvas = cropperInstance.getCroppedCanvas({ width: 300, height: 400 });
     canvas.toBlob(function(blob) {
         // Assign cropped blob to the actual file input
-        const file = new File([blob], 'pas_foto.jpg', { type: 'image/jpeg' });
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        document.getElementById('pas_foto').files = dt.files;
+        try {
+            const file = new File([blob], 'pas_foto.jpg', { type: 'image/jpeg' });
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            document.getElementById('pas_foto').files = dt.files;
+        } catch (e) {
+            console.warn('DataTransfer not supported:', e);
+        }
 
         // Update preview
         document.getElementById('photo-placeholder').style.display = 'none';
@@ -1011,6 +1033,9 @@ function applyCrop() {
         preview.style.display = 'block';
         document.getElementById('pas_foto_name').textContent = 'pas_foto.jpg';
         document.getElementById('pas_foto_name').style.color = '#1e293b';
+
+        const base64Input = document.getElementById('pas_foto_base64');
+        if (base64Input) base64Input.value = photoDataUrl;
 
         saveDokumenDraft({
             photoDataUrl: photoDataUrl,
@@ -1042,7 +1067,7 @@ function addFileInput(type) {
         <input type="file" name="${type}[]" id="${id}" accept="image/*,.pdf" style="display:none;"
             onchange="onFileSelected(this, '${id}')">
         <span class="file-name" id="name_${id}">Belum ada file dipilih</span>
-        ${index > 0 ? `<button type="button" class="file-remove" onclick="removeFileInput('${id}')" title="Hapus">
+        ${(index > 0 || type === 'bukti_kompetensi') ? `<button type="button" class="file-remove" onclick="removeFileInput('${id}')" title="Hapus">
             <i class="bi bi-x-lg"></i>
         </button>` : ''}
     `;
@@ -1069,11 +1094,59 @@ function onFileSelected(input, id) {
     saveFileRowsDraft();
 }
 
+function toggleRegSigChoice() {
+    const isSaved = document.getElementById('regOptSaved')?.checked;
+    const savedWrap = document.getElementById('regSavedSigPreview');
+    const newWrap = document.getElementById('regNewSigDraw');
+    const sigInput = document.getElementById('signatureInputDokumen');
+    const savedLabel = document.getElementById('regOptSavedLabel');
+    const newLabel = document.getElementById('regOptNewLabel');
+
+    if (isSaved) {
+        if (savedWrap) savedWrap.style.display = 'block';
+        if (newWrap) newWrap.style.display = 'none';
+        if (savedLabel) {
+            savedLabel.style.borderColor = '#d1fae5';
+            savedLabel.style.background = '#f0fdf4';
+        }
+        if (newLabel) {
+            newLabel.style.borderColor = '#e2e8f0';
+            newLabel.style.background = '#f8fafc';
+        }
+        if (sigInput && window.savedSignatureValue) {
+            sigInput.value = window.savedSignatureValue;
+        }
+    } else {
+        if (savedWrap) savedWrap.style.display = 'none';
+        if (newWrap) newWrap.style.display = 'block';
+        if (savedLabel) {
+            savedLabel.style.borderColor = '#e2e8f0';
+            savedLabel.style.background = '#f8fafc';
+        }
+        if (newLabel) {
+            newLabel.style.borderColor = '#0073bd';
+            newLabel.style.background = '#f0f9ff';
+        }
+        const canvas = document.getElementById('signatureCanvasDokumen');
+        if (window.dokumenSignatureResize) {
+            window.dokumenSignatureResize();
+        }
+        const hasDrawn = canvas && canvas.getAttribute('data-has-signature') === 'true';
+        if (sigInput) {
+            sigInput.value = hasDrawn ? canvas.toDataURL('image/png') : '';
+        }
+    }
+}
+
 function openSignatureModal() {
     const modal = document.getElementById('signatureModalDokumen');
     const errorBox = document.getElementById('signatureErrorDokumen');
     errorBox.style.display = 'none';
     modal.classList.add('show');
+
+    if (typeof toggleRegSigChoice === 'function') {
+        toggleRegSigChoice();
+    }
 
     window.requestAnimationFrame(() => {
         window.requestAnimationFrame(() => {
@@ -1144,6 +1217,7 @@ const initSignaturePadDokumen = () => {
         if (drawing) {
             const data = canvas.toDataURL('image/png');
             signatureInput.value = data;
+            canvas.setAttribute('data-has-signature', 'true');
             saveDokumenDraft({ signatureDataUrl: data });
         }
         drawing = false;
@@ -1161,6 +1235,7 @@ function clearSignatureDokumen() {
     const placeholder = document.getElementById('signatureBoxDokumen').querySelector('.signature-placeholder');
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (canvas) canvas.removeAttribute('data-has-signature');
     signatureInput.value = '';
     placeholder.style.display = 'block';
     saveDokumenDraft({ signatureDataUrl: '' });
@@ -1190,10 +1265,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (openButton) {
         openButton.addEventListener('click', function(event) {
             event.preventDefault();
-            // Validate photo first (check new file or existing saved photo)
+            // Validate photo first (check new file, base64, or existing saved photo)
             const pasFotoInput = document.getElementById('pas_foto');
+            const pasFotoBase64 = document.getElementById('pas_foto_base64')?.value;
             const hasExistingPhoto = Boolean(document.getElementById('photo-preview')?.src && !document.getElementById('photo-preview').src.endsWith('#'));
-            if ((!pasFotoInput.files || pasFotoInput.files.length === 0) && !hasExistingPhoto) {
+            if ((!pasFotoInput.files || pasFotoInput.files.length === 0) && !pasFotoBase64 && !hasExistingPhoto) {
                 alert('Pas foto wajib diunggah dan dikrop terlebih dahulu.');
                 const photoBox = document.getElementById('photo-box');
                 if (photoBox) {
@@ -1211,15 +1287,21 @@ document.addEventListener('DOMContentLoaded', function() {
             const isDraft = submitter && submitter.name === 'action' && submitter.value === 'draft';
 
             if (isDraft) {
-                // Bypass signature modal and photo requirements when saving draft
+                // Disable empty file inputs on draft
+                form.querySelectorAll('input[type="file"]').forEach(inp => {
+                    if (inp.name !== 'pas_foto' && (!inp.files || inp.files.length === 0)) {
+                        inp.disabled = true;
+                    }
+                });
                 clearDokumenDraft();
                 return;
             }
 
             // Check if photo is uploaded or already saved
             const pasFotoInput = document.getElementById('pas_foto');
+            const pasFotoBase64 = document.getElementById('pas_foto_base64')?.value;
             const hasExistingPhoto = Boolean(document.getElementById('photo-preview')?.src && !document.getElementById('photo-preview').src.endsWith('#'));
-            if ((!pasFotoInput.files || pasFotoInput.files.length === 0) && !hasExistingPhoto) {
+            if ((!pasFotoInput.files || pasFotoInput.files.length === 0) && !pasFotoBase64 && !hasExistingPhoto) {
                 event.preventDefault();
                 alert('Pas foto wajib diunggah dan dikrop terlebih dahulu.');
                 closeSignatureModal();
@@ -1239,6 +1321,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (canvas) canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
+
+            // Disable empty file inputs so they aren't submitted as null items in array
+            form.querySelectorAll('input[type="file"]').forEach(inp => {
+                if (inp.name !== 'pas_foto' && (!inp.files || inp.files.length === 0)) {
+                    inp.disabled = true;
+                }
+            });
 
             // On successful submit attempt, clear saved draft.
             clearDokumenDraft();

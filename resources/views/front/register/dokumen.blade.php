@@ -329,6 +329,8 @@
                                 Pilih File
                             </label>
                             <input type="file" name="pas_foto" id="pas_foto" accept="image/*" class="hidden" onchange="previewPhoto(this)">
+                            <input type="hidden" name="pas_foto_base64" id="pas_foto_base64" value="">
+                            <input type="hidden" name="tanda_tangan_pendaftar" id="signatureInputDokumenInForm" value="">
                             <span id="pas_foto_name" class="text-xs text-gray-400 mt-1"></span>
                         </div>
 
@@ -439,7 +441,7 @@
                                     Hapus
                                 </button>
                             </div>
-                            <input type="hidden" name="tanda_tangan_pendaftar" id="signatureInputDokumen" value="">
+                            <input type="hidden" name="tanda_tangan_pendaftar" id="signatureInputDokumen" value="" form="dokumenForm">
                         </div>
                         <div class="signature-modal-footer">
                             <button type="button" onclick="closeSignatureModal()" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-200 rounded-full cursor-pointer hover:bg-gray-200 transition">Batal</button>
@@ -487,6 +489,8 @@
                     img.src = e.target.result;
                     img.style.display = 'block';
                     circle.style.border = '4px solid #e5e7eb';
+                    const base64Input = document.getElementById('pas_foto_base64');
+                    if (base64Input) base64Input.value = e.target.result;
                 };
                 reader.readAsDataURL(input.files[0]);
                 document.getElementById('pas_foto_name').textContent = input.files[0].name;
@@ -520,7 +524,7 @@
                 <input type="file" name="${type}[]" id="${id}" accept="image/*,.pdf" class="hidden"
                     onchange="onFileSelected(this, '${id}')">
                 <span id="name_${id}" class="text-xs text-gray-400 truncate max-w-xs">Belum ada file dipilih</span>
-                ${index > 0 ? `<button type="button" onclick="removeFileInput('${id}')"
+                ${(index > 0 || type === 'bukti_kompetensi') ? `<button type="button" onclick="removeFileInput('${id}')"
                     class="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded transition flex-shrink-0" title="Hapus">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -630,7 +634,10 @@
             const stopDrawing = () => {
                 if (drawing && points.length > 0) {
                     hasSignature = true;
-                    signatureInput.value = canvas.toDataURL('image/png');
+                    const dataUrl = canvas.toDataURL('image/png');
+                    signatureInput.value = dataUrl;
+                    const inForm = document.getElementById('signatureInputDokumenInForm');
+                    if (inForm) inForm.value = dataUrl;
                 }
                 drawing = false;
             };
@@ -648,6 +655,8 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             signatureInput.value = '';
+            const inForm = document.getElementById('signatureInputDokumenInForm');
+            if (inForm) inForm.value = '';
             placeholder.style.display = 'block';
         };
 
@@ -662,9 +671,10 @@
             if (openButton) {
                 openButton.addEventListener('click', function(event) {
                     event.preventDefault();
-                    // Validate photo first
+                    // Validate photo first (check file or base64)
                     const pasFotoInput = document.getElementById('pas_foto');
-                    if (!pasFotoInput.files || pasFotoInput.files.length === 0) {
+                    const pasFotoBase64 = document.getElementById('pas_foto_base64')?.value;
+                    if ((!pasFotoInput.files || pasFotoInput.files.length === 0) && !pasFotoBase64) {
                         alert('Pas foto wajib diunggah terlebih dahulu.');
                         const photoCircle = document.getElementById('photo-circle');
                         if (photoCircle) {
@@ -684,7 +694,8 @@
 
             form.addEventListener('submit', (event) => {
                 const pasFotoInput = document.getElementById('pas_foto');
-                if (!pasFotoInput.files || pasFotoInput.files.length === 0) {
+                const pasFotoBase64 = document.getElementById('pas_foto_base64')?.value;
+                if ((!pasFotoInput.files || pasFotoInput.files.length === 0) && !pasFotoBase64) {
                     event.preventDefault();
                     alert('Pas foto wajib diunggah terlebih dahulu.');
                     closeSignatureModal();
@@ -705,7 +716,19 @@
                         }
                     });
                     canvas.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
                 }
+
+                // Sync signature into in-form input
+                const inForm = document.getElementById('signatureInputDokumenInForm');
+                if (inForm) inForm.value = signatureInput.value;
+
+                // Disable empty file inputs so they aren't submitted as empty items in array
+                form.querySelectorAll('input[type="file"]').forEach(inp => {
+                    if (inp.name !== 'pas_foto' && (!inp.files || inp.files.length === 0)) {
+                        inp.disabled = true;
+                    }
+                });
             });
 
             const modal = document.getElementById('signatureModalDokumen');

@@ -729,29 +729,9 @@
 
                         $hasAnySchedule = $hasDirectSchedule || $hasGroupSchedule;
 
-                        $useNik = \Illuminate\Support\Facades\Schema::hasColumn('persetujuan_asesmen', 'asesi_nik');
-                        $pq = \App\Models\PersetujuanAsesmen::query()
-                            ->where('attempt', $currentAttempt)
-                            ->where(function($q) use ($asesi, $useNik) {
-                                $q->where('nama_asesi', $asesi->nama);
-                                if ($useNik) {
-                                    $q->orWhere('asesi_nik', $asesi->NIK);
-                                }
-                            })
-                            ->whereNotNull('ttd_asesor_nama')
-                            ->whereNotNull('ttd_asesor_tanggal')
-                            ->where(function($q) {
-                                $q->where('bukti_verifikasi_portofolio', 1)
-                                  ->orWhere('bukti_reviu_produk', 1)
-                                  ->orWhere('bukti_observasi_langsung', 1)
-                                  ->orWhere('bukti_kegiatan_terstruktur', 1)
-                                  ->orWhere('bukti_pertanyaan_lisan', 1)
-                                  ->orWhere('bukti_pertanyaan_tertulis', 1)
-                                  ->orWhere('bukti_pertanyaan_wawancara', 1)
-                                  ->orWhere('bukti_lainnya', 1);
-                            });
-
-                        $showPersetujuan = $pq->exists();
+                        $showPersetujuan = method_exists($asesi, 'isPersetujuanAsesmenReady') 
+                            ? $asesi->isPersetujuanAsesmenReady() 
+                            : false;
                         $showJadwal = $showPersetujuan && $hasSignedPersetujuanAsesmen;
 
                         $ceklisRecord = \App\Models\CeklisObservasiAktivitasPraktik::query()

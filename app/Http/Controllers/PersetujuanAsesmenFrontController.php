@@ -669,10 +669,9 @@ class PersetujuanAsesmenFrontController extends Controller
     public function asesiIndex(Request $request)
     {
         $asesi = $this->resolveAsesiFromUser($request->user());
-        $useNik = $this->hasAsesiNikColumn();
-
         if ($asesi) {
-            // find latest persetujuan record where asesor already signed and checked checklist
+            $useNik = $this->hasAsesiNikColumn();
+            // find latest persetujuan record where asesor already signed and checked checklist, or already signed by asesi
             $record = PersetujuanAsesmen::where(function ($q) use ($asesi, $useNik) {
                 if ($useNik && !empty($asesi->NIK)) {
                     $q->where('asesi_nik', $asesi->NIK);
@@ -680,17 +679,29 @@ class PersetujuanAsesmenFrontController extends Controller
                     $q->where('nama_asesi', $asesi->nama);
                 }
             })
-            ->whereNotNull('ttd_asesor_nama')
-            ->whereNotNull('ttd_asesor_tanggal')
             ->where(function ($q) {
-                $q->where('bukti_verifikasi_portofolio', 1)
-                  ->orWhere('bukti_reviu_produk', 1)
-                  ->orWhere('bukti_observasi_langsung', 1)
-                  ->orWhere('bukti_kegiatan_terstruktur', 1)
-                  ->orWhere('bukti_pertanyaan_lisan', 1)
-                  ->orWhere('bukti_pertanyaan_tertulis', 1)
-                  ->orWhere('bukti_pertanyaan_wawancara', 1)
-                  ->orWhere('bukti_lainnya', 1);
+                // Either asesi already signed
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('ttd_asesi_nama')
+                        ->where('ttd_asesi_nama', '!=', '')
+                        ->whereNotNull('ttd_asesi_tanggal');
+                })
+                // Or asesor already signed and filled checklist
+                ->orWhere(function ($sub) {
+                    $sub->whereNotNull('ttd_asesor_nama')
+                        ->where('ttd_asesor_nama', '!=', '')
+                        ->whereNotNull('ttd_asesor_tanggal')
+                        ->where(function ($bukti) {
+                            $bukti->where('bukti_verifikasi_portofolio', 1)
+                                  ->orWhere('bukti_reviu_produk', 1)
+                                  ->orWhere('bukti_observasi_langsung', 1)
+                                  ->orWhere('bukti_kegiatan_terstruktur', 1)
+                                  ->orWhere('bukti_pertanyaan_lisan', 1)
+                                  ->orWhere('bukti_pertanyaan_tertulis', 1)
+                                  ->orWhere('bukti_pertanyaan_wawancara', 1)
+                                  ->orWhere('bukti_lainnya', 1);
+                        });
+                });
             })
             ->latest()
             ->first();
@@ -1264,8 +1275,26 @@ class PersetujuanAsesmenFrontController extends Controller
         $item = $this->createPlaceholderForAsesiSkema($asesi, $skema);
 
         if (!$item) {
-            return redirect()->route('asesi.persetujuan-asesmen.index')
+            return redirect()->route('asesi.dashboard')
                 ->with('error', 'Form belum tersedia. Jadwal untuk skema ini belum dibuat oleh admin.');
+        }
+
+        $hasChecklist = (bool) (
+            $item->bukti_verifikasi_portofolio ||
+            $item->bukti_reviu_produk ||
+            $item->bukti_observasi_langsung ||
+            $item->bukti_kegiatan_terstruktur ||
+            $item->bukti_pertanyaan_lisan ||
+            $item->bukti_pertanyaan_tertulis ||
+            $item->bukti_pertanyaan_wawancara ||
+            $item->bukti_lainnya
+        );
+        $isAsesorSigned = !empty($item->ttd_asesor_nama) && !empty($item->ttd_asesor_tanggal);
+        $isAsesiSigned = !empty($item->ttd_asesi_nama) && !empty($item->ttd_asesi_tanggal);
+
+        if (!$isAsesiSigned && (!$hasChecklist || !$isAsesorSigned)) {
+            return redirect()->route('asesi.dashboard')
+                ->with('error', 'Form belum tersedia. Asesor belum menyelesaikan ceklis bukti dan/atau belum menandatangani form.');
         }
 
         $rawTtd = $asesi->tanda_tangan_pendaftar ?? $asesi->tanda_tangan;
