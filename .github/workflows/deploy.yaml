@@ -31,10 +31,9 @@ jobs:
             npm install
             npm run build
             composer install --no-dev --optimize-autoloader
-            php artisan db:seed --class="Database\Seeders\Catalog\SkemaJuniorContentMarketingSeeder"
             php artisan optimize:clear
             php artisan migrate --force
+            php artisan db:seed --class='Database\\Seeders\\Catalog\\SkemaJuniorContentMarketingSeeder' --force
             php artisan route:list | grep admin/asesi/bulk-delete
             php artisan config:cache
         "
-  #trigge
